@@ -1,0 +1,26 @@
+# Build
+build/
+.gradle/
+.kotlin/
+.cxx/
+.externalNativeBuild
+captures/
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+
+# Secrets — never commit
+local.properties
+*.jks
+*.keystore
+google-services.json
+
+# Claude Code
+.claude/
+
+# Prebuilt native AARs — downloaded by Gradle, never committed
+/libs/

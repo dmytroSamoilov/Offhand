@@ -1,0 +1,62 @@
+name: Bug report
+description: Something is broken or behaving unexpectedly
+labels: [bug]
+body:
+  - type: input
+    id: device
+    attributes:
+      label: Device model
+      placeholder: e.g. Pixel 8, Galaxy S23, Xiaomi 13T
+    validations:
+      required: true
+  - type: input
+    id: ram
+    attributes:
+      label: Total RAM
+      placeholder: e.g. 8 GB
+    validations:
+      required: true
+  - type: input
+    id: android
+    attributes:
+      label: Android version
+      placeholder: e.g. Android 15
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: App version
+      placeholder: e.g. 0.9.0
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Recording
+        - Transcription (speech-to-text)
+        - Note generation (title/overview)
+        - Model download / onboarding
+        - Notes list / editing
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: 1. … 2. … 3. …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs. actual behavior
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        **Please never attach recordings, transcripts, or notes containing sensitive or personal data.**

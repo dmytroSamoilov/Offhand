@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notes_title">Notes</string>
+    <string name="notes_empty_state">No notes yet. Tap the microphone button to record your first one.</string>
+    <string name="notes_day_today">Today</string>
+    <string name="notes_day_yesterday">Yesterday</string>
+    <string name="notes_created_at">%1$s, %2$s</string>
+    <string name="notes_metadata_separator">·</string>
+    <plurals name="notes_word_count">
+        <item quantity="one">%1$s word</item>
+        <item quantity="other">%1$s words</item>
+    </plurals>
+    <string name="notes_record_fab_description">Start a new recording</string>
+    <string name="notes_select_prompt">Select a note to read it</string>
+    <string name="notes_back_description">Back to notes</string>
+    <string name="notes_play_description">Play recording</string>
+    <string name="notes_pause_description">Pause playback</string>
+    <string name="notes_playback_position">%1$s / %2$s</string>
+    <string name="notes_processing_title">Processing…</string>
+    <string name="notes_processing_preview">Transcribing and summarizing on this device. You can play the recording already.</string>
+    <string name="notes_processing_detail">We\'re turning your recording into a note. It will appear here automatically.</string>
+    <string name="notes_failed_title">Note could not be finished</string>
+    <string name="notes_failed_preview">Processing failed, but the recording is safe.</string>
+    <string name="notes_failed_detail">Processing failed. Your recording is safe — you can play it above.</string>
+    <string name="notes_transcribe_button">Transcribe</string>
+    <string name="notes_overview_heading">Overview</string>
+    <string name="notes_transcript_heading">Transcript</string>
+    <string name="notes_edit_description">Edit note</string>
+    <string name="notes_share_description">Share note</string>
+    <string name="notes_delete_description">Delete note</string>
+    <string name="notes_metrics">Transcription %1$s · Structuring %2$s · %3$s</string>
+    <string name="notes_edit_title_label">Title</string>
+    <string name="notes_edit_save_description">Save changes</string>
+    <string name="notes_edit_cancel_description">Discard changes</string>
+    <string name="notes_delete_dialog_title">Delete this note?</string>
+    <string name="notes_delete_dialog_body">The note will be permanently removed from this device. This cannot be undone.</string>
+    <string name="notes_delete_dialog_confirm">Delete</string>
+    <string name="notes_delete_dialog_cancel">Cancel</string>
+    <string name="notes_retranscribe_description">Re-transcribe</string>
+    <string name="notes_retranscribe_dialog_title">Re-transcribe this note?</string>
+    <string name="notes_retranscribe_dialog_body">The recording will be transcribed and summarized again, replacing the current title, overview and transcript. The audio recording itself is kept.</string>
+    <string name="notes_processing_percent">%1$d%%</string>
+    <string name="notes_badge_offline">Offline</string>
+    <string name="notes_badge_encrypted">Encrypted</string>
+    <string name="notes_more_actions_description">More actions</string>
+</resources>

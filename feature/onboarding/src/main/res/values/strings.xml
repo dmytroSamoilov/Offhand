@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_incompatible_title">Device not supported</string>
+    <string name="onboarding_incompatible_body">Offhand runs a large AI model directly on your phone, so nothing you record ever leaves the device. This device does not meet the minimum requirements.</string>
+    <string name="onboarding_incompatible_ram_label">Memory (RAM):</string>
+    <string name="onboarding_incompatible_ram_value">%1$s GB — needs %2$s GB</string>
+    <string name="onboarding_incompatible_cores_label">CPU cores:</string>
+    <string name="onboarding_incompatible_cores_value">%1$d — needs %2$d</string>
+
+    <string name="onboarding_download_title">Set up your private AI</string>
+    <string name="onboarding_download_body">Offhand transcribes and summarizes voice notes with AI that runs entirely on your phone. To get started, it needs a one-time download of its AI models.</string>
+    <string name="onboarding_download_size">One-time download · about %1$s GB</string>
+    <string name="onboarding_download_background_hint">The download continues in the background — you can start recording right away. We\'ll notify you when everything is ready.</string>
+    <string name="onboarding_download_wifi_hint">Tip: connect to Wi‑Fi to save mobile data.</string>
+    <string name="onboarding_download_continue">Continue</string>
+    <string name="onboarding_notification_download_channel_name">Model downloads</string>
+    <string name="onboarding_notification_status_channel_name">Model status</string>
+    <string name="onboarding_notification_downloading_title">Downloading AI models</string>
+    <string name="onboarding_notification_downloading_text">Offhand is setting up on-device AI</string>
+    <string name="onboarding_notification_ready_title">Your AI models are ready</string>
+    <string name="onboarding_notification_ready_text">Transcription and summaries now run fully on this device.</string>
+    <string name="onboarding_notification_failed_title">Model download didn\'t finish</string>
+    <string name="onboarding_notification_failed_text">Check your connection. Offhand will resume the download when you record your next note.</string>
+
+    <string name="onboarding_consent_title">Help improve stability?</string>
+    <string name="onboarding_consent_body">Share anonymous crash and performance reports so we can keep the app reliable. This never includes your notes, recordings, transcripts, or any personal data — everything you record stays on this device. You can change this anytime in Settings.</string>
+    <string name="onboarding_consent_allow">Share anonymous reports</string>
+    <string name="onboarding_consent_decline">No thanks</string>
+</resources>

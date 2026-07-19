@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="recording_idle_hint">Tap to record. Everything is transcribed and structured right on this device.</string>
+    <string name="recording_start_description">Start recording</string>
+    <string name="recording_stop_description">Stop recording</string>
+    <string name="recording_pause_description">Pause recording</string>
+    <string name="recording_resume_description">Resume recording</string>
+    <string name="recording_paused_label">Paused</string>
+    <string name="recording_active_label">Recording…</string>
+    <string name="recording_save_note_button">Save note</string>
+    <string name="recording_discard_button">Discard recording</string>
+    <string name="recording_discard_dialog_title">Discard this recording?</string>
+    <string name="recording_discard_dialog_body">The recording and everything transcribed so far will be deleted. This cannot be undone.</string>
+    <string name="recording_discard_dialog_confirm">Discard</string>
+    <string name="recording_discard_dialog_cancel">Cancel</string>
+    <string name="recording_chunk_label">#%1$d</string>
+    <string name="recording_stage_finishing">Saving your recording…</string>
+    <string name="recording_processing_hint">You can close this — the note will appear in your list once it is ready.</string>
+    <string name="recording_external_mic_generic">External microphone</string>
+    <string name="recording_saved_title">Recording saved</string>
+    <string name="recording_saved_body">Your note is being processed. You can close this — we\'ll notify you once the transcription is ready.</string>
+    <string name="recording_saved_done_button">Done</string>
+    <string name="recording_failed_title">Something went wrong</string>
+    <string name="recording_try_again_button">Try again</string>
+    <string name="recording_notification_channel_name">Recording</string>
+    <string name="recording_notification_recording_title">Recording in progress</string>
+    <string name="recording_notification_paused_title">Recording paused</string>
+    <string name="recording_notification_recording_text">Audio is processed only on this device</string>
+    <string name="recording_notification_paused_text">Recorded so far: %1$s</string>
+    <string name="recording_notification_action_pause">Pause</string>
+    <string name="recording_notification_action_resume">Resume</string>
+    <string name="recording_notification_action_stop">Stop</string>
+    <string name="recording_notification_chip">REC</string>
+    <string name="recording_notification_processing_title">Creating your note</string>
+    <string name="recording_notification_processing_text">Transcribing and structuring on device</string>
+    <string name="recording_notification_notes_channel_name">Finished notes</string>
+    <string name="recording_notification_ready_title">Your note is ready</string>
+    <string name="recording_notification_ready_text">Tap to open the finished note.</string>
+    <string name="recording_notification_note_failed_title">Note could not be finished</string>
+    <string name="recording_notification_note_failed_text">The recording is saved. Tap to open it.</string>
+</resources>

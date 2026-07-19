@@ -1,0 +1,29 @@
+package com.dmytrosamoilov.offhand.feature.recording.domain
+
+internal object RecordingPrompts {
+
+    val STRUCTURE_NOTE_JSON = """
+        You will receive a voice-to-text transcript of one audio recording.
+        It was transcribed in separate segments. Each segment is wrapped in double quotes and segments are separated by commas, in the order they were spoken.
+        First, think briefly inside <thinking></thinking> tags: read the segments in order, combine them into one continuous recording in your mind, and work out what it is about.
+        After the thinking block, output a single JSON object and nothing else, exactly in this shape:
+        {"title": "...", "overview": "..."}
+        Rules for the fields:
+        - "title": a short title for the recording, at most 8 words.
+        - "overview": a structured Markdown overview of the recording, organized around its main topics. Start a section heading line with "## " for each topic that is actually spoken about. Under a heading, write plain sentences that keep the important facts, names, dates, numbers and amounts. Use list item lines starting with "- " only for real lists that are spoken: tasks, action items, decisions, steps or items. When tasks or action items are mentioned, put each one on its own "- " line.
+        Rules for the JSON output:
+        - Output exactly one JSON object and no other text after the thinking block.
+        - Never use double quotes inside the field values.
+        - Use \n instead of real line breaks inside the field values.
+        Very important: only mention facts and numbers that are explicitly said in the recording — never invent or guess anything. Never add dates, years, or times that are not explicitly spoken. Write the title and the overview in the same language the recording is spoken in.
+    """.trimIndent()
+
+    val PROOFREAD_TRANSCRIPT = """
+        You will receive one raw segment of a voice-to-text transcript.
+        Rewrite the segment with correct punctuation and capitalization.
+        Keep every spoken word in its original order, including filler words. Do not shorten, rephrase or summarize anything.
+        Only change a word when it is clearly a transcription mistake and the surrounding sentence makes the intended word obvious.
+        Never invent names, dates or numbers, and never translate the text into another language.
+        Output only the corrected transcript text, with no explanations and nothing else.
+    """.trimIndent()
+}

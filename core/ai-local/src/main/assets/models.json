@@ -1,0 +1,22 @@
+{
+  "defaultModelId": "qwen3-1.7b",
+  "models": [
+    {
+      "id": "qwen3-1.7b",
+      "displayName": "Qwen3 1.7B",
+      "description": "Qwen3 1.7B LiteRT-LM build. Text only, 119 languages. Requires ~3 GB RAM.",
+      "modelId": "litert-community/Qwen3-1.7B",
+      "modelFile": "Qwen3_1.7B.litertlm",
+      "commitHash": "5d8fd1f27c771dbbbb185c9f05c3547760dd3cbd",
+      "sizeInBytes": 2056729520,
+      "minTotalRamMb": 0,
+
+      "hardwareBackend": "CPU",
+      "maxTokens": 4096,
+
+      "topK": 20,
+      "topP": 0.95,
+      "temperature": 0.6
+    }
+  ]
+}

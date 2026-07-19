@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Offhand</string>
+    <string name="destination_notes">Notes</string>
+    <string name="destination_settings">Settings</string>
+    <string name="lock_title">Notes locked</string>
+    <string name="lock_body">Your notes are encrypted on this device. Unlock to continue.</string>
+    <string name="lock_unlock_button">Unlock</string>
+    <string name="lock_prompt_title">Unlock Offhand</string>
+    <string name="lock_prompt_subtitle">Use your screen lock or fingerprint</string>
+</resources>
