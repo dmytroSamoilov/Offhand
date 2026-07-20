@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -92,6 +93,7 @@ fun SettingsScreen(
                         onSelected = viewModel::onBackendSelected,
                     )
                 }
+                AboutSection()
             }
         }
     }
@@ -355,10 +357,40 @@ private fun totalRam(context: Context): String {
 
 private fun appVersion(context: Context): String = runCatching {
     val info = context.packageManager.getPackageInfo(context.packageName, 0)
-    "${info.versionName} (${info.longVersionCode})"
+    "${info.versionName}"
 }.getOrDefault("unknown")
 
 private const val FEEDBACK_EMAIL = "dmytro@dmytrosamoilov.com"
+private const val TERMS_URL = "https://dmytrosamoilov.com/offhand/terms-and-conditions"
+private const val PRIVACY_POLICY_URL = "https://dmytrosamoilov.com/offhand/privacy-policy"
+
+@Composable
+private fun AboutSection() {
+    val context = LocalContext.current
+    SettingsCard(title = stringResource(R.string.settings_about_title)) {
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(R.string.settings_about_version, appVersion(context)),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        TextButton(onClick = { openLink(context, TERMS_URL) }) {
+            Text(text = stringResource(R.string.settings_about_terms))
+        }
+        TextButton(onClick = { openLink(context, PRIVACY_POLICY_URL) }) {
+            Text(text = stringResource(R.string.settings_about_privacy))
+        }
+    }
+}
+
+private fun openLink(context: Context, url: String) {
+    try {
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    } catch (notFound: ActivityNotFoundException) {
+        Toast.makeText(context, R.string.settings_about_no_browser, Toast.LENGTH_SHORT).show()
+    }
+}
 
 @Composable
 private fun DeveloperSection(
@@ -411,4 +443,10 @@ private fun SettingsCard(
             content()
         }
     }
+}
+
+@Preview
+@Composable
+private fun PreviewAboutSection() {
+    AboutSection()
 }

@@ -9,7 +9,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import kotlin.random.Random
 
 private val DATE_FORMATTER = DateTimeFormatter.ofPattern("MMM d, yyyy · HH:mm", Locale.US)
 private val DAY_FORMATTER = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.US)
