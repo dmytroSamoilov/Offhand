@@ -7,24 +7,6 @@ internal sealed class ModelPromptSet {
     abstract val structureNote: String
     abstract val proofreadTranscript: String
 
-    data object Qwen3 : ModelPromptSet() {
-
-        override val structureNote = """
-            You will receive a voice-to-text transcript of one audio recording.
-            It was transcribed in separate segments. Each segment is wrapped in double quotes and segments are separated by commas, in the order they were spoken.
-            First, think briefly inside <thinking></thinking> tags: read the segments in order, combine them into one continuous recording in your mind, and work out what it is about.
-            After the thinking block, output a single JSON object and nothing else, exactly in this shape:
-            $NOTE_JSON_SHAPE
-            $NOTE_FIELD_RULES
-            Rules for the JSON output:
-            - Output exactly one JSON object and no other text after the thinking block.
-            $NOTE_JSON_RULES
-            $NOTE_FACTUALITY_RULES
-        """.trimIndent()
-
-        override val proofreadTranscript = PROOFREAD_TRANSCRIPT
-    }
-
     data object Gemma4 : ModelPromptSet() {
 
         override val structureNote = """
@@ -46,7 +28,6 @@ internal sealed class ModelPromptSet {
     companion object {
 
         fun forFamily(family: ModelFamily): ModelPromptSet = when (family) {
-            ModelFamily.QWEN3 -> Qwen3
             ModelFamily.GEMMA4 -> Gemma4
         }
     }

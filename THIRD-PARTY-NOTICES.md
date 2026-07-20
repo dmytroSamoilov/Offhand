@@ -7,8 +7,6 @@ Offhand bundles or downloads the following third-party components. Each remains 
 | Component | License | Source |
 |---|---|---|
 | Whisper small (int8, ONNX) | MIT (OpenAI Whisper) | [csukuangfj/sherpa-onnx-whisper-small](https://huggingface.co/csukuangfj/sherpa-onnx-whisper-small) |
-| Qwen3 1.7B (LiteRT) | Apache-2.0 | [litert-community/Qwen3-1.7B](https://huggingface.co/litert-community/Qwen3-1.7B) |
-| Qwen3 0.6B (LiteRT) | Apache-2.0 | [litert-community/Qwen3-0.6B](https://huggingface.co/litert-community/Qwen3-0.6B) |
 | Gemma 4 E2B (LiteRT) | Apache-2.0 | [litert-community/gemma-4-E2B-it-litert-lm](https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm) |
 
 ## Runtime libraries

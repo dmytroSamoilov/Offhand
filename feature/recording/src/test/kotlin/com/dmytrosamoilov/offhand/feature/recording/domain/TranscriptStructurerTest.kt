@@ -27,7 +27,7 @@ class TranscriptStructurerTest {
 
     @Test
     fun `single call produces title and overview, transcript stays verbatim`() = runTest {
-        coEvery { aiBackend.processText(ModelPromptSet.Qwen3.structureNote, any()) } returns
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote, any()) } returns
             result(
                 "<thinking>Two segments about a weekly sync.</thinking>\n" +
                     """{"title": "Weekly sync notes", "overview": "## Decisions\n- Ship Friday"}""",
@@ -42,7 +42,7 @@ class TranscriptStructurerTest {
         assertEquals(250, note.structuringTimeMs)
         coVerify(exactly = 1) {
             aiBackend.processText(
-                ModelPromptSet.Qwen3.structureNote,
+                ModelPromptSet.Gemma4.structureNote,
                 "\"uh so like weekly sync\",\n\n\"um we ship friday\"",
             )
         }
@@ -57,7 +57,7 @@ class TranscriptStructurerTest {
 
         coVerify {
             aiBackend.processText(
-                ModelPromptSet.Qwen3.structureNote,
+                ModelPromptSet.Gemma4.structureNote,
                 "\"he said 'ship it' today\"",
             )
         }
@@ -133,7 +133,7 @@ class TranscriptStructurerTest {
     fun `over-budget transcript is structured in segments with one call each`() = runTest {
         val paragraph = "word ".repeat(2_000).trim()
         val longChunks = List(8) { paragraph }
-        coEvery { aiBackend.processText(ModelPromptSet.Qwen3.structureNote, any()) } returns
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote, any()) } returns
             result("""{"title": "Long meeting recap", "overview": "## Section\n- point"}""")
 
         val note = structurer.structure(longChunks)
@@ -145,7 +145,7 @@ class TranscriptStructurerTest {
         ).size
         assertTrue(segmentCount > 1)
         coVerify(exactly = segmentCount) {
-            aiBackend.processText(ModelPromptSet.Qwen3.structureNote, any())
+            aiBackend.processText(ModelPromptSet.Gemma4.structureNote, any())
         }
         assertEquals(
             List(segmentCount) { "## Section\n- point" }.joinToString("\n\n"),

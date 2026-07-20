@@ -22,7 +22,7 @@ Thanks for your interest in Offhand!
 ## Setup
 
 See [README.md](README.md#building) — no accounts or tokens needed; the app downloads
-its models (Whisper + Qwen3, both ungated) on first run.
+its models (Whisper + Gemma, both ungated) on first run.
 
 ## Reporting issues
 

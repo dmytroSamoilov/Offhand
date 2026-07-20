@@ -1,53 +1,15 @@
 {
-  "defaultModelId": "qwen3-1.7b",
+  "defaultModelId": "gemma-4-e2b",
   "models": [
-    {
-      "id": "qwen3-1.7b",
-      "displayName": "Qwen3 1.7B",
-      "description": "Qwen3 1.7B LiteRT-LM build. Text only, 119 languages. Requires ~3 GB RAM.",
-      "modelId": "litert-community/Qwen3-1.7B",
-      "modelFile": "Qwen3_1.7B.litertlm",
-      "commitHash": "5d8fd1f27c771dbbbb185c9f05c3547760dd3cbd",
-      "sizeInBytes": 2056729520,
-      "minTotalRamMb": 0,
-
-      "family": "QWEN3",
-      "hardwareBackend": "CPU",
-      "maxTokens": 4096,
-
-      "topK": 20,
-      "topP": 0.95,
-      "temperature": 0.6
-    },
-    {
-      "id": "qwen3-0.6b",
-      "displayName": "Qwen3 0.6B",
-      "description": "Smaller and faster Qwen3 build with lower output quality. Useful when the 1.7B model is slow or unstable on your device. Text only, 119 languages.",
-      "modelId": "litert-community/Qwen3-0.6B",
-      "modelFile": "Qwen3-0.6B.litertlm",
-      "commitHash": "dd97997951bb15a2a71f539ba17f604707c0b11a",
-      "sizeInBytes": 614236160,
-      "minTotalRamMb": 0,
-      "autoSelectable": false,
-
-      "family": "QWEN3",
-      "hardwareBackend": "CPU",
-      "maxTokens": 4096,
-
-      "topK": 20,
-      "topP": 0.95,
-      "temperature": 0.6
-    },
     {
       "id": "gemma-4-e2b",
       "displayName": "Gemma 4 E2B",
-      "description": "Google Gemma 4 E2B LiteRT-LM build with 2B effective parameters. Strong multilingual quality, alternative to Qwen3 when it struggles on your device.",
+      "description": "Google Gemma 4 E2B LiteRT-LM build with 2B effective parameters. Strong multilingual quality. Requires ~3 GB RAM.",
       "modelId": "litert-community/gemma-4-E2B-it-litert-lm",
       "modelFile": "gemma-4-E2B-it.litertlm",
       "commitHash": "9262660a1676eed6d0c477ab1a86344430854664",
       "sizeInBytes": 2588147712,
       "minTotalRamMb": 0,
-      "autoSelectable": false,
 
       "family": "GEMMA4",
       "hardwareBackend": "CPU",

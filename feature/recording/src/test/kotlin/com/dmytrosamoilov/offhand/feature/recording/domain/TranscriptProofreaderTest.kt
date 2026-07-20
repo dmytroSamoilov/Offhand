@@ -28,7 +28,7 @@ class TranscriptProofreaderTest {
 
     @Test
     fun `punctuation and casing fixes are accepted`() = runTest {
-        coEvery { aiBackend.processText(ModelPromptSet.Qwen3.proofreadTranscript, any()) } returns
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.proofreadTranscript, any()) } returns
             result("So, um, we need to buy regular milk today for the recipe.")
 
         val proofread = proofreader.proofread(

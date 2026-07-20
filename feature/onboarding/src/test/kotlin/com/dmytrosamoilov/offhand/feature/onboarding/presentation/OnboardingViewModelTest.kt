@@ -34,19 +34,19 @@ class OnboardingViewModelTest {
         DeviceCapability(totalRamMb = 4 * 1024, availableRamMb = 2 * 1024, cpuCores = 4)
 
     private val testModel = AvailableModel(
-        id = "qwen3-1.7b",
-        displayName = "Qwen3 1.7B",
+        id = "gemma-4-e2b",
+        displayName = "Gemma 4 E2B",
         description = "test",
-        modelId = "litert-community/Qwen3-1.7B",
-        modelFile = "Qwen3_1.7B.litertlm",
+        modelId = "litert-community/gemma-4-E2B-it-litert-lm",
+        modelFile = "gemma-4-E2B-it.litertlm",
         commitHash = "abc",
         sizeInBytes = 2_056_729_520,
-        family = ModelFamily.QWEN3,
+        family = ModelFamily.GEMMA4,
         hardwareBackend = HardwareBackend.CPU,
         maxTokens = 4096,
-        topK = 20,
+        topK = 64,
         topP = 0.95f,
-        temperature = 0.6f,
+        temperature = 1.0f,
     )
 
     private val deviceCapabilityChecker: DeviceCapabilityChecker = mockk()

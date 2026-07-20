@@ -10,13 +10,7 @@ class ModelPromptSetTest {
 
     @Test
     fun `every model family maps to its own prompt set`() {
-        assertEquals(ModelPromptSet.Qwen3, ModelPromptSet.forFamily(ModelFamily.QWEN3))
         assertEquals(ModelPromptSet.Gemma4, ModelPromptSet.forFamily(ModelFamily.GEMMA4))
-    }
-
-    @Test
-    fun `qwen structure prompt requests a thinking block`() {
-        assertTrue(ModelPromptSet.Qwen3.structureNote.contains("<thinking>"))
     }
 
     @Test
@@ -26,7 +20,7 @@ class ModelPromptSetTest {
 
     @Test
     fun `all structure prompts share the json shape and factuality rules`() {
-        listOf(ModelPromptSet.Qwen3, ModelPromptSet.Gemma4).forEach { promptSet ->
+        listOf(ModelPromptSet.Gemma4).forEach { promptSet ->
             assertTrue(promptSet.structureNote.contains("""{"title": "...", "overview": "..."}"""))
             assertTrue(promptSet.structureNote.contains("never invent or guess anything"))
         }
@@ -34,7 +28,7 @@ class ModelPromptSetTest {
 
     @Test
     fun `all proofread prompts forbid rephrasing and invention`() {
-        listOf(ModelPromptSet.Qwen3, ModelPromptSet.Gemma4).forEach { promptSet ->
+        listOf(ModelPromptSet.Gemma4).forEach { promptSet ->
             assertTrue(promptSet.proofreadTranscript.contains("Do not shorten, rephrase or summarize"))
             assertTrue(promptSet.proofreadTranscript.contains("Never invent names, dates or numbers"))
         }

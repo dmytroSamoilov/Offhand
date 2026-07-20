@@ -16,9 +16,10 @@ confidentiality obligations — or just your own ideas on a walk.
 - **Speech-to-text**: [Whisper small (int8)](https://huggingface.co/csukuangfj/sherpa-onnx-whisper-small)
   running locally via [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx). Audio is
   transcribed in chunks *while the recording continues*.
-- **Note structuring**: [Qwen3 1.7B](https://huggingface.co/litert-community/Qwen3-1.7B)
-  (119 languages) running on device via
-  [LiteRT-LM](https://github.com/google-ai-edge/LiteRT-LM).
+- **Note structuring**: [Gemma 4 E2B](https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm)
+  (2B effective parameters, Apache-2.0) running on device via
+  [LiteRT-LM](https://github.com/google-ai-edge/LiteRT-LM), with a Tensor
+  G5-optimized build selectable on Pixel 10 devices.
 - **Recording**: 16 kHz PCM16 with RMS-based voice-activity detection, chunked at natural
   silence boundaries inside a `microphone` foreground service.
 - **Structuring**: the merged transcript is rewritten into detail-preserving Markdown
@@ -51,7 +52,7 @@ That is the point of this repo being public:
 ## Requirements
 
 - Android 12+ (minSdk 31), **5+ GB RAM and 4+ CPU cores** (checked at first launch)
-- ~2.5 GB free storage for the one-time model downloads (Whisper + Qwen3)
+- ~3 GB free storage for the one-time model downloads (Whisper + Gemma)
 
 ## Building
 
@@ -59,7 +60,7 @@ Two product flavors: `production` (`com.dmytrosamoilov.offhand`) and `dev`
 (`com.dmytrosamoilov.offhand.dev`, "Offhand Dev" label) — they install side by side.
 
 1. Clone and open in Android Studio (or use `./gradlew assembleDevDebug`). The models
-   (Whisper + Qwen3) are ungated on Hugging Face — no account or token needed; the app
+   (Whisper + Gemma) are ungated on Hugging Face — no account or token needed; the app
    downloads them on first run.
 2. Optional — Crashlytics (opt-in telemetry) needs your own Firebase project's
    `google-services.json` in `app/`. The app builds and runs fine without it.
