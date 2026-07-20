@@ -20,6 +20,7 @@ class AvailableModelTest {
               "modelFile": "Qwen3_1.7B.litertlm",
               "commitHash": "5d8fd1f27c771dbbbb185c9f05c3547760dd3cbd",
               "sizeInBytes": 2056729520,
+              "family": "QWEN3",
               "hardwareBackend": "CPU",
               "maxTokens": 4096,
               "topK": 20,
@@ -39,6 +40,8 @@ class AvailableModelTest {
         assertEquals(1, catalog.models.size)
         val model = catalog.models.first()
         assertEquals(HardwareBackend.CPU, model.hardwareBackend)
+        assertEquals(ModelFamily.QWEN3, model.family)
+        assertEquals(false, model.requiresAuthToken)
         assertEquals(4096, model.maxTokens)
         assertEquals(2_056_729_520L, model.sizeInBytes)
     }
@@ -81,6 +84,7 @@ class AvailableModelTest {
         commitHash = "abc",
         sizeInBytes = 1,
         minTotalRamMb = minTotalRamMb,
+        family = ModelFamily.QWEN3,
         hardwareBackend = HardwareBackend.CPU,
         maxTokens = 4096,
         topK = 20,

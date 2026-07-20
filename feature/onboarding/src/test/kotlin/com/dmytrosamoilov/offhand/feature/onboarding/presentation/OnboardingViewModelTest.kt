@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.onboarding.presentation
 
 import com.dmytrosamoilov.offhand.core.ai.api.AvailableModel
 import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
+import com.dmytrosamoilov.offhand.core.ai.api.ModelFamily
 import android.content.Context
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.device.DeviceCapability
@@ -40,6 +41,7 @@ class OnboardingViewModelTest {
         modelFile = "Qwen3_1.7B.litertlm",
         commitHash = "abc",
         sizeInBytes = 2_056_729_520,
+        family = ModelFamily.QWEN3,
         hardwareBackend = HardwareBackend.CPU,
         maxTokens = 4096,
         topK = 20,

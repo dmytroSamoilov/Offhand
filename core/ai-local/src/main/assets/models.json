@@ -11,12 +11,52 @@
       "sizeInBytes": 2056729520,
       "minTotalRamMb": 0,
 
+      "family": "QWEN3",
       "hardwareBackend": "CPU",
       "maxTokens": 4096,
 
       "topK": 20,
       "topP": 0.95,
       "temperature": 0.6
+    },
+    {
+      "id": "qwen3-0.6b",
+      "displayName": "Qwen3 0.6B",
+      "description": "Smaller and faster Qwen3 build with lower output quality. Useful when the 1.7B model is slow or unstable on your device. Text only, 119 languages.",
+      "modelId": "litert-community/Qwen3-0.6B",
+      "modelFile": "Qwen3-0.6B.litertlm",
+      "commitHash": "dd97997951bb15a2a71f539ba17f604707c0b11a",
+      "sizeInBytes": 614236160,
+      "minTotalRamMb": 0,
+      "autoSelectable": false,
+
+      "family": "QWEN3",
+      "hardwareBackend": "CPU",
+      "maxTokens": 4096,
+
+      "topK": 20,
+      "topP": 0.95,
+      "temperature": 0.6
+    },
+    {
+      "id": "gemma-3n-e2b",
+      "displayName": "Gemma 3n E2B",
+      "description": "Google Gemma 3n E2B LiteRT-LM build, 140 languages. Download needs a Hugging Face token with Gemma access, so it is available in developer builds only.",
+      "modelId": "google/gemma-3n-E2B-it-litert-lm",
+      "modelFile": "gemma-3n-E2B-it-int4.litertlm",
+      "commitHash": "c03b6f60b8da6c5400b6838a2cf26420f80c0a01",
+      "sizeInBytes": 3655827456,
+      "minTotalRamMb": 0,
+      "autoSelectable": false,
+      "requiresAuthToken": true,
+
+      "family": "GEMMA3N",
+      "hardwareBackend": "CPU",
+      "maxTokens": 4096,
+
+      "topK": 64,
+      "topP": 0.95,
+      "temperature": 1.0
     }
   ]
 }

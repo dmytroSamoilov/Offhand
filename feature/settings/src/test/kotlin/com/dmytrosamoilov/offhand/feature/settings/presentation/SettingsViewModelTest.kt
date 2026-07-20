@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.settings.presentation
 
 import com.dmytrosamoilov.offhand.core.ai.api.AvailableModel
 import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
+import com.dmytrosamoilov.offhand.core.ai.api.ModelFamily
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.ModelState
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
@@ -43,6 +44,7 @@ class SettingsViewModelTest {
         modelFile = "Qwen3_1.7B.litertlm",
         commitHash = "abc",
         sizeInBytes = 2_056_729_520,
+        family = ModelFamily.QWEN3,
         hardwareBackend = HardwareBackend.CPU,
         maxTokens = 4096,
         topK = 20,

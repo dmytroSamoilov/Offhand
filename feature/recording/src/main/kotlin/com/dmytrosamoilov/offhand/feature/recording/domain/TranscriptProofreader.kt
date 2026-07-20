@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.recording.domain
 
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackend
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackendException
+import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.TokenEstimator
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -15,6 +16,7 @@ data class ProofreadTranscript(
 @Singleton
 class TranscriptProofreader @Inject constructor(
     private val aiBackend: AiBackend,
+    private val modelManager: ModelManager,
 ) {
 
     suspend fun proofread(
@@ -33,8 +35,9 @@ class TranscriptProofreader @Inject constructor(
 
     private suspend fun proofreadChunk(chunk: String): CleanedChunk {
         if (TokenEstimator.approxText(chunk) > CHUNK_TOKEN_BUDGET) return CleanedChunk(chunk, 0)
+        val prompt = ModelPromptSet.forFamily(modelManager.model.family).proofreadTranscript
         val result = try {
-            aiBackend.processText(RecordingPrompts.PROOFREAD_TRANSCRIPT, chunk)
+            aiBackend.processText(prompt, chunk)
         } catch (backendFailure: AiBackendException) {
             Timber.tag(LOG_TAG).w(backendFailure, "Proofreading call failed, keeping raw chunk")
             return CleanedChunk(chunk, 0)

@@ -54,10 +54,18 @@ class ModelDownloader @Inject constructor() {
     fun download(
         url: String,
         destination: File,
+        authToken: String? = null,
     ): Flow<DownloadProgress> = flow {
         val tempFile = File(destination.parentFile, destination.name + ".part")
         try {
-            val request = Request.Builder().url(url).build()
+            // OkHttp strips the Authorization header on cross-host redirects,
+            // so the token is only ever sent to the original model host.
+            val request = Request.Builder()
+                .url(url)
+                .apply {
+                    if (!authToken.isNullOrBlank()) header("Authorization", "Bearer $authToken")
+                }
+                .build()
             GenAiLog.logHttp("download → $url")
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {

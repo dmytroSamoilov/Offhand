@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.recording.domain
 
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackend
 import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
+import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.TokenEstimator
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -19,6 +20,7 @@ data class StructuredNote(
 @Singleton
 class TranscriptStructurer @Inject constructor(
     private val aiBackend: AiBackend,
+    private val modelManager: ModelManager,
 ) {
 
     suspend fun structure(
@@ -33,9 +35,10 @@ class TranscriptStructurer @Inject constructor(
         }
         var totalTimeMs = 0L
         var backend = HardwareBackend.CPU
+        val prompt = ModelPromptSet.forFamily(modelManager.model.family).structureNote
         val segments = splitIntoSegments(quoted)
         val parts = segments.mapIndexed { index, segment ->
-            val result = aiBackend.processText(RecordingPrompts.STRUCTURE_NOTE_JSON, segment)
+            val result = aiBackend.processText(prompt, segment)
             totalTimeMs += result.processingTimeMs
             backend = result.hardwareBackend
             onProgress((index + 1) / segments.size.toFloat())

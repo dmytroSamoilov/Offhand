@@ -71,7 +71,7 @@ class RecordingSessionManagerTest {
     )
 
     private fun stubProofreadEcho() {
-        coEvery { aiBackend.processText(RecordingPrompts.PROOFREAD_TRANSCRIPT, any()) } answers {
+        coEvery { aiBackend.processText(ModelPromptSet.Qwen3.proofreadTranscript, any()) } answers {
             AiResult(
                 text = secondArg(),
                 processingTimeMs = 50,
@@ -85,8 +85,8 @@ class RecordingSessionManagerTest {
     private fun CoroutineScope.manager() = RecordingSessionManager(
         recorder = recorder,
         speechToText = speechToText,
-        transcriptProofreader = TranscriptProofreader(aiBackend),
-        transcriptStructurer = TranscriptStructurer(aiBackend),
+        transcriptProofreader = TranscriptProofreader(aiBackend, testModelManager()),
+        transcriptStructurer = TranscriptStructurer(aiBackend, testModelManager()),
         createProcessingNote = createProcessingNote,
         completeNote = completeNote,
         failNote = failNote,
@@ -106,7 +106,7 @@ class RecordingSessionManagerTest {
         )
         coEvery { createProcessingNote("note-1.pcm.enc", any()) } returns 42L
         stubProofreadEcho()
-        coEvery { aiBackend.processText(RecordingPrompts.STRUCTURE_NOTE_JSON, any()) } returns AiResult(
+        coEvery { aiBackend.processText(ModelPromptSet.Qwen3.structureNote, any()) } returns AiResult(
             text = """{"title": "Meeting notes", "overview": "- first\n- second"}""",
             processingTimeMs = 300,
             inputTokens = 20,
@@ -149,7 +149,7 @@ class RecordingSessionManagerTest {
             sttResult("only good chunk") andThenThrows IllegalStateException("engine hiccup")
         coEvery { createProcessingNote(any(), any()) } returns 7L
         stubProofreadEcho()
-        coEvery { aiBackend.processText(RecordingPrompts.STRUCTURE_NOTE_JSON, any()) } returns AiResult(
+        coEvery { aiBackend.processText(ModelPromptSet.Qwen3.structureNote, any()) } returns AiResult(
             text = """{"title": "Partial notes", "overview": "- good chunk content"}""",
             processingTimeMs = 100,
             inputTokens = 5,
@@ -209,7 +209,7 @@ class RecordingSessionManagerTest {
             ByteArrayInputStream(ByteArray(64_000))
         coEvery { speechToText.transcribe(any()) } returns sttResult("recovered transcript")
         stubProofreadEcho()
-        coEvery { aiBackend.processText(RecordingPrompts.STRUCTURE_NOTE_JSON, any()) } returns AiResult(
+        coEvery { aiBackend.processText(ModelPromptSet.Qwen3.structureNote, any()) } returns AiResult(
             text = """{"title": "Recovered", "overview": "- body"}""",
             processingTimeMs = 100,
             inputTokens = 5,
