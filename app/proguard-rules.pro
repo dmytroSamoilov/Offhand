@@ -21,6 +21,8 @@
 #-renamesourcefileattribute SourceFile
 -keep class net.zetetic.database.** { *; }
 -keep class com.google.ai.edge.litertlm.** { *; }
+# Annotation referenced by play-review-ktx but not shipped in any GMS runtime artifact
+-dontwarn com.google.android.gms.common.annotation.NoNullnessRewrite
 -assumenosideeffects class android.util.Log {
     public static int v(...);
     public static int d(...);
