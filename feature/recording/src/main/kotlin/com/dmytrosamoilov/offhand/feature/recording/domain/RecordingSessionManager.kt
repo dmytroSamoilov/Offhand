@@ -11,6 +11,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteU
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateProcessingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
 import java.io.BufferedOutputStream
 import java.io.IOException
 import java.io.OutputStream
@@ -39,6 +40,7 @@ class RecordingSessionManager @Inject constructor(
     private val completeNote: CompleteNoteUseCase,
     private val failNote: FailNoteUseCase,
     private val markNoteProcessing: MarkNoteProcessingUseCase,
+    private val registerSavedRecording: RegisterSavedRecordingUseCase,
     private val audioStore: EncryptedAudioStore,
     @RecordingSessionScope private val scope: CoroutineScope,
 ) {
@@ -54,6 +56,9 @@ class RecordingSessionManager @Inject constructor(
 
     private val mutableEvents = MutableSharedFlow<NoteProcessingEvent>(extraBufferCapacity = 8)
     val events: SharedFlow<NoteProcessingEvent> = mutableEvents.asSharedFlow()
+
+    private val mutableRecordingSaved = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val recordingSaved: SharedFlow<Unit> = mutableRecordingSaved.asSharedFlow()
 
     val vad: StateFlow<VadSnapshot> = recorder.vad
 
@@ -241,6 +246,8 @@ class RecordingSessionManager @Inject constructor(
     private suspend fun createPlaceholderNote() {
         val noteId = createProcessingNote(audioFileName, recorder.vad.value.totalElapsedMs)
         mutableSession.update { it.copy(noteId = noteId) }
+        registerSavedRecording()
+        mutableRecordingSaved.emit(Unit)
     }
 
     private fun deleteAudioBackup() {
