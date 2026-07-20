@@ -7,6 +7,8 @@ data class UserPreferences(
     val telemetryConsent: Boolean,
     val dynamicColor: Boolean,
     val developerOptions: Boolean,
+    val savedRecordingsCount: Int,
+    val lastReviewRequestAtMs: Long,
 )
 
 interface UserPreferencesRepository {
@@ -20,4 +22,8 @@ interface UserPreferencesRepository {
     suspend fun setDynamicColor(enabled: Boolean)
 
     suspend fun setDeveloperOptions(enabled: Boolean)
+
+    suspend fun incrementSavedRecordingsCount()
+
+    suspend fun setLastReviewRequestAt(timestampMs: Long)
 }

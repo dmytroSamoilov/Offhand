@@ -14,6 +14,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteU
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateProcessingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
@@ -53,6 +54,9 @@ class RecordingSessionManagerTest {
     private val completeNote: CompleteNoteUseCase = mockk()
     private val failNote: FailNoteUseCase = mockk()
     private val markNoteProcessing: MarkNoteProcessingUseCase = mockk()
+    private val registerSavedRecording: RegisterSavedRecordingUseCase = mockk {
+        coJustRun { this@mockk.invoke() }
+    }
     private val audioStore: EncryptedAudioStore = mockk {
         every { newRecordingFileName() } returns "note-1.pcm.enc"
         every { openForWrite("note-1.pcm.enc") } returns ByteArrayOutputStream()
@@ -91,6 +95,7 @@ class RecordingSessionManagerTest {
         completeNote = completeNote,
         failNote = failNote,
         markNoteProcessing = markNoteProcessing,
+        registerSavedRecording = registerSavedRecording,
         audioStore = audioStore,
         scope = this,
     )
@@ -126,6 +131,7 @@ class RecordingSessionManagerTest {
         assertTrue(manager.processingNoteIds.value.isEmpty())
         assertEquals(listOf<NoteProcessingEvent>(NoteProcessingEvent.Completed(42L)), events)
         verify { speechToText.release() }
+        coVerify(exactly = 1) { registerSavedRecording.invoke() }
         coVerify {
             completeNote(
                 noteId = 42L,

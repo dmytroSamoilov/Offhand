@@ -24,6 +24,7 @@ timber = "5.0.1"
 tink = "1.15.0"
 room = "2.7.2"
 datastore = "1.1.1"
+playReview = "2.0.2"
 sqlcipher = "4.6.1"
 biometric = "1.1.0"
 fragmentKtx = "1.8.5"
@@ -85,6 +86,7 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+play-review-ktx = { group = "com.google.android.play", name = "review-ktx", version.ref = "playReview" }
 sqlcipher-android = { group = "net.zetetic", name = "sqlcipher-android", version.ref = "sqlcipher" }
 
 # Security

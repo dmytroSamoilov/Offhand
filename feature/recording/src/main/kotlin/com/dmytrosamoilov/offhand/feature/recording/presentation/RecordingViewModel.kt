@@ -5,14 +5,19 @@ import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.SessionPhase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkReviewRequestedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveDeveloperOptionsUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.recording.service.RecordingService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -23,9 +28,14 @@ class RecordingViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val sessionManager: RecordingSessionManager,
     observeDeveloperOptions: ObserveDeveloperOptionsUseCase,
+    private val shouldRequestReview: ShouldRequestReviewUseCase,
+    private val markReviewRequested: MarkReviewRequestedUseCase,
 ) : BaseViewModel() {
 
     private val waveform = MutableStateFlow<List<Float>>(emptyList())
+
+    private val mutableReviewRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val reviewRequests: SharedFlow<Unit> = mutableReviewRequests.asSharedFlow()
 
     val uiState: StateFlow<RecordingUiState> = combine(
         sessionManager.session,
@@ -42,6 +52,7 @@ class RecordingViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { collectWaveform() }
+        viewModelScope.launch { collectSavedRecordings() }
     }
 
     fun onStartRecording() {
@@ -71,6 +82,20 @@ class RecordingViewModel @Inject constructor(
 
     fun onSheetClosed() {
         sessionManager.resetToIdle()
+    }
+
+    fun onReviewFlowCompleted() {
+        launchSafely(showLoading = false) {
+            markReviewRequested()
+        }
+    }
+
+    private suspend fun collectSavedRecordings() {
+        sessionManager.recordingSaved.collect {
+            if (shouldRequestReview()) {
+                mutableReviewRequests.emit(Unit)
+            }
+        }
     }
 
     private suspend fun collectWaveform() {
