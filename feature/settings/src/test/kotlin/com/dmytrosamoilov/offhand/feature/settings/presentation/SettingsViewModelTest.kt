@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.settings.presentation
 
 import com.dmytrosamoilov.offhand.core.ai.api.AvailableModel
 import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
+import com.dmytrosamoilov.offhand.core.ai.api.ModelFamily
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.ModelState
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
@@ -36,18 +37,19 @@ class SettingsViewModelTest {
     private val dispatcher = StandardTestDispatcher()
 
     private val testModel = AvailableModel(
-        id = "qwen3-1.7b",
-        displayName = "Qwen3 1.7B",
+        id = "gemma-4-e2b",
+        displayName = "Gemma 4 E2B",
         description = "test",
-        modelId = "litert-community/Qwen3-1.7B",
-        modelFile = "Qwen3_1.7B.litertlm",
+        modelId = "litert-community/gemma-4-E2B-it-litert-lm",
+        modelFile = "gemma-4-E2B-it.litertlm",
         commitHash = "abc",
-        sizeInBytes = 2_056_729_520,
+        sizeInBytes = 2_588_147_712,
+        family = ModelFamily.GEMMA4,
         hardwareBackend = HardwareBackend.CPU,
         maxTokens = 4096,
-        topK = 20,
+        topK = 64,
         topP = 0.95f,
-        temperature = 0.6f,
+        temperature = 1.0f,
     )
 
     private val modelStateFlow = MutableStateFlow<ModelState>(ModelState.Ready)
@@ -99,8 +101,8 @@ class SettingsViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         val state = viewModel.uiState.value
-        assertEquals("Qwen3 1.7B", state.model.displayName)
-        assertEquals("1.9", state.model.sizeGb)
+        assertEquals("Gemma 4 E2B", state.model.displayName)
+        assertEquals("2.4", state.model.sizeGb)
         assertEquals(ModelStatusUi.READY, state.model.status)
         assertEquals(BackendOptionUi.CPU, state.selectedBackend)
         assertTrue(state.isTelemetryEnabled)
@@ -112,7 +114,7 @@ class SettingsViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         val state = viewModel.uiState.value
-        assertEquals(listOf("qwen3-1.7b"), state.modelOptions.map { it.id })
+        assertEquals(listOf("gemma-4-e2b"), state.modelOptions.map { it.id })
         assertEquals(null, state.selectedModelId)
     }
 
@@ -121,10 +123,10 @@ class SettingsViewModelTest {
         val viewModel = viewModel()
         dispatcher.scheduler.advanceUntilIdle()
 
-        viewModel.onModelSelected("qwen3-1.7b")
+        viewModel.onModelSelected("gemma-4-e2b")
         dispatcher.scheduler.advanceUntilIdle()
 
-        coVerify { modelManager.setModelOverride("qwen3-1.7b") }
+        coVerify { modelManager.setModelOverride("gemma-4-e2b") }
     }
 
     @Test

@@ -58,7 +58,7 @@ class LiteRtLmManager @Inject constructor(
 
     override val model: AvailableModel
         get() = mutableModelOverrideId.value
-            ?.let { overrideId -> catalog.all.firstOrNull { it.id == overrideId } }
+            ?.let { overrideId -> availableModels.firstOrNull { it.id == overrideId } }
             ?: catalog.modelForDevice
 
     override val availableModels: List<AvailableModel>

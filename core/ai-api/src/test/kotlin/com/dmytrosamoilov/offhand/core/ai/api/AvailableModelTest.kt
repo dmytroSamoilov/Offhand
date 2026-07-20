@@ -10,21 +10,22 @@ class AvailableModelTest {
 
     private val catalogJson = """
         {
-          "defaultModelId": "qwen3-1.7b",
+          "defaultModelId": "gemma-4-e2b",
           "models": [
             {
-              "id": "qwen3-1.7b",
-              "displayName": "Qwen3 1.7B",
-              "description": "Qwen3 1.7B LiteRT-LM build.",
-              "modelId": "litert-community/Qwen3-1.7B",
-              "modelFile": "Qwen3_1.7B.litertlm",
-              "commitHash": "5d8fd1f27c771dbbbb185c9f05c3547760dd3cbd",
-              "sizeInBytes": 2056729520,
+              "id": "gemma-4-e2b",
+              "displayName": "Gemma 4 E2B",
+              "description": "Gemma 4 E2B LiteRT-LM build.",
+              "modelId": "litert-community/gemma-4-E2B-it-litert-lm",
+              "modelFile": "gemma-4-E2B-it.litertlm",
+              "commitHash": "9262660a1676eed6d0c477ab1a86344430854664",
+              "sizeInBytes": 2588147712,
+              "family": "GEMMA4",
               "hardwareBackend": "CPU",
               "maxTokens": 4096,
-              "topK": 20,
+              "topK": 64,
               "topP": 0.95,
-              "temperature": 0.6,
+              "temperature": 1.0,
               "futureUnknownField": "ignored"
             }
           ]
@@ -35,12 +36,13 @@ class AvailableModelTest {
     fun `catalog json parses with unknown keys ignored`() {
         val catalog = json.decodeFromString(ModelCatalogFile.serializer(), catalogJson)
 
-        assertEquals("qwen3-1.7b", catalog.defaultModelId)
+        assertEquals("gemma-4-e2b", catalog.defaultModelId)
         assertEquals(1, catalog.models.size)
         val model = catalog.models.first()
         assertEquals(HardwareBackend.CPU, model.hardwareBackend)
+        assertEquals(ModelFamily.GEMMA4, model.family)
         assertEquals(4096, model.maxTokens)
-        assertEquals(2_056_729_520L, model.sizeInBytes)
+        assertEquals(2_588_147_712L, model.sizeInBytes)
     }
 
     @Test
@@ -48,8 +50,8 @@ class AvailableModelTest {
         val model = json.decodeFromString(ModelCatalogFile.serializer(), catalogJson).models.first()
 
         assertEquals(
-            "https://huggingface.co/litert-community/Qwen3-1.7B/resolve/" +
-                "5d8fd1f27c771dbbbb185c9f05c3547760dd3cbd/Qwen3_1.7B.litertlm?download=true",
+            "https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/" +
+                "9262660a1676eed6d0c477ab1a86344430854664/gemma-4-E2B-it.litertlm?download=true",
             model.downloadUrl,
         )
     }
@@ -81,10 +83,11 @@ class AvailableModelTest {
         commitHash = "abc",
         sizeInBytes = 1,
         minTotalRamMb = minTotalRamMb,
+        family = ModelFamily.GEMMA4,
         hardwareBackend = HardwareBackend.CPU,
         maxTokens = 4096,
-        topK = 20,
+        topK = 64,
         topP = 0.95f,
-        temperature = 0.6f,
+        temperature = 1.0f,
     )
 }

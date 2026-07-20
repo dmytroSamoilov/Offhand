@@ -16,7 +16,7 @@ import org.junit.Test
 class TranscriptProofreaderTest {
 
     private val aiBackend: AiBackend = mockk()
-    private val proofreader = TranscriptProofreader(aiBackend)
+    private val proofreader = TranscriptProofreader(aiBackend, testModelManager())
 
     private fun result(text: String, timeMs: Long = 100) = AiResult(
         text = text,
@@ -28,7 +28,7 @@ class TranscriptProofreaderTest {
 
     @Test
     fun `punctuation and casing fixes are accepted`() = runTest {
-        coEvery { aiBackend.processText(RecordingPrompts.PROOFREAD_TRANSCRIPT, any()) } returns
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.proofreadTranscript, any()) } returns
             result("So, um, we need to buy regular milk today for the recipe.")
 
         val proofread = proofreader.proofread(

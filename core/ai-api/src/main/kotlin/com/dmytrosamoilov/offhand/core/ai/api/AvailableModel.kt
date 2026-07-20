@@ -13,6 +13,7 @@ data class AvailableModel(
     val sizeInBytes: Long,
     val minTotalRamMb: Long = 0,
     val autoSelectable: Boolean = true,
+    val family: ModelFamily,
     val hardwareBackend: HardwareBackend,
     val maxTokens: Int,
     val topK: Int,
