@@ -29,7 +29,6 @@ data class NoteCardUi(
     val time: String,
     val preview: String,
     val durationText: String?,
-    val wordCount: Int,
     val status: NoteStatusUi,
 )
 
@@ -39,6 +38,7 @@ data class NoteDetailUi(
     val body: String,
     val transcript: String,
     val createdAt: String,
+    val wordCount: Int,
     val hasAudio: Boolean,
     val metrics: NoteMetricsUi?,
     val status: NoteStatusUi,

@@ -71,14 +71,6 @@ fun SettingsScreen(
                     isTelemetryEnabled = state.isTelemetryEnabled,
                     onTelemetryChanged = viewModel::onTelemetryChanged,
                 )
-                ModelSection(
-                    model = state.model,
-                    modelOptions = state.modelOptions,
-                    selectedModelId = state.selectedModelId,
-                    onModelSelected = viewModel::onModelSelected,
-                    onDownload = viewModel::onDownloadModel,
-                    onDeleteRequested = viewModel::onDeleteModelRequested,
-                )
                 FeedbackSection()
                 if (state.isDeveloperSectionVisible) {
                     DeveloperSection(
@@ -87,6 +79,14 @@ fun SettingsScreen(
                     )
                 }
                 if (state.isDeveloperOptionsEnabled) {
+                    ModelSection(
+                        model = state.model,
+                        modelOptions = state.modelOptions,
+                        selectedModelId = state.selectedModelId,
+                        onModelSelected = viewModel::onModelSelected,
+                        onDownload = viewModel::onDownloadModel,
+                        onDeleteRequested = viewModel::onDeleteModelRequested,
+                    )
                     AccelerationSection(
                         selected = state.selectedBackend,
                         onSelected = viewModel::onBackendSelected,
@@ -385,6 +385,7 @@ private fun SwitchRow(
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(text = label, style = MaterialTheme.typography.bodyLarge)
