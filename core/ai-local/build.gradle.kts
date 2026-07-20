@@ -1,6 +1,5 @@
 import java.net.URI
 import java.security.MessageDigest
-import java.util.Properties
 
 plugins {
     alias(libs.plugins.offhand.android.library)
@@ -36,27 +35,11 @@ val downloadSherpaOnnx = tasks.register("downloadSherpaOnnx") {
     }
 }
 
-val hfApiKey: String = Properties().apply {
-    val localProperties = rootProject.file("local.properties")
-    if (localProperties.exists()) localProperties.inputStream().use(::load)
-}.getProperty("hf.apiKey").orEmpty()
-
 android {
     namespace = "com.dmytrosamoilov.offhand.core.ai.local"
 
     buildFeatures {
         buildConfig = true
-    }
-
-    buildTypes {
-        // The token unlocks gated model downloads (Gemma) for local testing
-        // and must never ship: release builds always get an empty value.
-        debug {
-            buildConfigField("String", "HF_API_KEY", "\"$hfApiKey\"")
-        }
-        release {
-            buildConfigField("String", "HF_API_KEY", "\"\"")
-        }
     }
 }
 

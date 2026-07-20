@@ -39,19 +39,37 @@
       "temperature": 0.6
     },
     {
-      "id": "gemma-3n-e2b",
-      "displayName": "Gemma 3n E2B",
-      "description": "Google Gemma 3n E2B LiteRT-LM build, 140 languages. Download needs a Hugging Face token with Gemma access, so it is available in developer builds only.",
-      "modelId": "google/gemma-3n-E2B-it-litert-lm",
-      "modelFile": "gemma-3n-E2B-it-int4.litertlm",
-      "commitHash": "c03b6f60b8da6c5400b6838a2cf26420f80c0a01",
-      "sizeInBytes": 3655827456,
+      "id": "gemma-4-e2b",
+      "displayName": "Gemma 4 E2B",
+      "description": "Google Gemma 4 E2B LiteRT-LM build with 2B effective parameters. Strong multilingual quality, alternative to Qwen3 when it struggles on your device.",
+      "modelId": "litert-community/gemma-4-E2B-it-litert-lm",
+      "modelFile": "gemma-4-E2B-it.litertlm",
+      "commitHash": "9262660a1676eed6d0c477ab1a86344430854664",
+      "sizeInBytes": 2588147712,
       "minTotalRamMb": 0,
       "autoSelectable": false,
-      "requiresAuthToken": true,
 
-      "family": "GEMMA3N",
+      "family": "GEMMA4",
       "hardwareBackend": "CPU",
+      "maxTokens": 4096,
+
+      "topK": 64,
+      "topP": 0.95,
+      "temperature": 1.0
+    },
+    {
+      "id": "gemma-4-e2b-tensor-g5",
+      "displayName": "Gemma 4 E2B (Tensor G5)",
+      "description": "Gemma 4 E2B build optimized for Google Tensor G5 devices (Pixel 10 series). Pick this on a Pixel 10 for hardware-accelerated inference.",
+      "modelId": "litert-community/gemma-4-E2B-it-litert-lm",
+      "modelFile": "gemma-4-E2B-it_Google_Tensor_G5.litertlm",
+      "commitHash": "9262660a1676eed6d0c477ab1a86344430854664",
+      "sizeInBytes": 3113545589,
+      "minTotalRamMb": 0,
+      "autoSelectable": false,
+
+      "family": "GEMMA4",
+      "hardwareBackend": "NPU",
       "maxTokens": 4096,
 
       "topK": 64,

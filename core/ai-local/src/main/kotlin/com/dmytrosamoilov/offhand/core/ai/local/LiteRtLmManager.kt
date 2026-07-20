@@ -62,7 +62,7 @@ class LiteRtLmManager @Inject constructor(
             ?: catalog.modelForDevice
 
     override val availableModels: List<AvailableModel>
-        get() = catalog.all.filter { !it.requiresAuthToken || hasAuthToken }
+        get() = catalog.all
 
     override val speechModelSizeInBytes: Long =
         WhisperModels.SMALL.files.sumOf { it.sizeInBytes }
@@ -157,8 +157,7 @@ class LiteRtLmManager @Inject constructor(
     }
 
     private suspend fun downloadModel(file: File) {
-        val authToken = BuildConfig.HF_API_KEY.takeIf { model.requiresAuthToken }
-        downloader.download(model.downloadUrl, file, authToken).collect { progress ->
+        downloader.download(model.downloadUrl, file).collect { progress ->
             mutableModelState.value = when (progress) {
                 is DownloadProgress.InProgress -> ModelState.Downloading(
                     progress = progress.progress,
@@ -287,6 +286,5 @@ class LiteRtLmManager @Inject constructor(
     private companion object {
         const val MODEL_FILE_EXTENSION = ".litertlm"
         const val MAX_RESPONSE_CHARS = 12_000
-        val hasAuthToken = BuildConfig.HF_API_KEY.isNotBlank()
     }
 }

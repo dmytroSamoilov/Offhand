@@ -41,7 +41,6 @@ class AvailableModelTest {
         val model = catalog.models.first()
         assertEquals(HardwareBackend.CPU, model.hardwareBackend)
         assertEquals(ModelFamily.QWEN3, model.family)
-        assertEquals(false, model.requiresAuthToken)
         assertEquals(4096, model.maxTokens)
         assertEquals(2_056_729_520L, model.sizeInBytes)
     }

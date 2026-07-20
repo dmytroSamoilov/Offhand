@@ -25,7 +25,7 @@ internal sealed class ModelPromptSet {
         override val proofreadTranscript = PROOFREAD_TRANSCRIPT
     }
 
-    data object Gemma3n : ModelPromptSet() {
+    data object Gemma4 : ModelPromptSet() {
 
         override val structureNote = """
             You will receive a voice-to-text transcript of one audio recording.
@@ -47,7 +47,7 @@ internal sealed class ModelPromptSet {
 
         fun forFamily(family: ModelFamily): ModelPromptSet = when (family) {
             ModelFamily.QWEN3 -> Qwen3
-            ModelFamily.GEMMA3N -> Gemma3n
+            ModelFamily.GEMMA4 -> Gemma4
         }
     }
 }
