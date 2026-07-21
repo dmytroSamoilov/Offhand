@@ -1,6 +1,8 @@
 # Build
 build/
 .gradle/
+/app/production/
+/app/dev/
 .kotlin/
 .cxx/
 .externalNativeBuild
