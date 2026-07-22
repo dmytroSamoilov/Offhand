@@ -17,6 +17,8 @@
 -renamesourcefileattribute SourceFile
 -keep class net.zetetic.database.** { *; }
 -keep class com.google.ai.edge.litertlm.** { *; }
+# sherpa-onnx JNI resolves config fields by name at runtime (GetFieldID).
+-keep class com.k2fsa.sherpa.onnx.** { *; }
 # Annotation referenced by play-review-ktx but not shipped in any GMS runtime artifact
 -dontwarn com.google.android.gms.common.annotation.NoNullnessRewrite
 -assumenosideeffects class android.util.Log {

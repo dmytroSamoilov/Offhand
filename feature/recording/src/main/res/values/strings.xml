@@ -36,6 +36,7 @@
     <string name="recording_notification_notes_channel_name">Finished notes</string>
     <string name="recording_notification_ready_title">Your note is ready</string>
     <string name="recording_notification_ready_text">Tap to open the finished note.</string>
-    <string name="recording_notification_note_failed_title">Note could not be finished</string>
+    <string name="recording_default_note_title">Recording %1$d</string>
+    <string name="recording_notification_note_failed_title">AI transcription failed</string>
     <string name="recording_notification_note_failed_text">The recording is saved. Tap to open it.</string>
 </resources>

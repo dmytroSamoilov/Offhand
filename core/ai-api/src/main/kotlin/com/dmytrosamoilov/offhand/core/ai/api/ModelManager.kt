@@ -16,6 +16,8 @@ interface ModelManager {
 
     val activeBackend: StateFlow<HardwareBackend>
 
+    suspend fun isModelDownloaded(): Boolean
+
     suspend fun ensureModelAvailable()
 
     suspend fun setHardwareBackend(backend: HardwareBackend)

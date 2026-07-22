@@ -7,6 +7,15 @@
     <string name="onboarding_incompatible_cores_label">CPU cores:</string>
     <string name="onboarding_incompatible_cores_value">%1$d — needs %2$d</string>
 
+    <string name="onboarding_privacy_title">Private by design</string>
+    <string name="onboarding_privacy_body">Everything you record stays on this phone. Recordings, transcripts, and notes are encrypted on this device, and the AI that processes them runs right here — nothing is ever uploaded.</string>
+    <string name="onboarding_privacy_continue">Continue</string>
+
+    <string name="onboarding_lock_title">Protect your notes</string>
+    <string name="onboarding_lock_body">Your notes are encrypted with a key stored in this phone\'s secure hardware. This phone has no screen lock, so anyone who picks it up can open Offhand. Set up a PIN, pattern, or fingerprint to keep your notes private.</string>
+    <string name="onboarding_lock_setup">Set up screen lock</string>
+    <string name="onboarding_lock_skip">Continue without a lock</string>
+
     <string name="onboarding_download_title">Set up your private AI</string>
     <string name="onboarding_download_body">Offhand transcribes and summarizes voice notes with AI that runs entirely on your phone. To get started, it needs a one-time download of its AI models.</string>
     <string name="onboarding_download_size">One-time download · about %1$s GB</string>

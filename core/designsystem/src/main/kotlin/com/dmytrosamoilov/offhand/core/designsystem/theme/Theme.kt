@@ -7,7 +7,32 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+
+@Immutable
+data class ExtendedColors(
+    val warningContainer: Color,
+    val onWarningContainer: Color,
+)
+
+private val LightExtendedColors = ExtendedColors(
+    warningContainer = Yellow90,
+    onWarningContainer = Yellow10,
+)
+
+private val DarkExtendedColors = ExtendedColors(
+    warningContainer = Yellow30,
+    onWarningContainer = Yellow90,
+)
+
+private val LocalExtendedColors = staticCompositionLocalOf { LightExtendedColors }
+
+val MaterialTheme.extendedColors: ExtendedColors
+    @Composable get() = LocalExtendedColors.current
 
 private val LightColorScheme = lightColorScheme(
     primary = Blue40,
@@ -82,10 +107,14 @@ fun OffhandTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = OffhandTypography,
-        shapes = OffhandShapes,
-        content = content,
-    )
+    CompositionLocalProvider(
+        LocalExtendedColors provides if (darkTheme) DarkExtendedColors else LightExtendedColors,
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = OffhandTypography,
+            shapes = OffhandShapes,
+            content = content,
+        )
+    }
 }

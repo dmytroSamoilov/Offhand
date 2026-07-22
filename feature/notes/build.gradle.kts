@@ -7,6 +7,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:ai-api"))
     implementation(project(":core:audio"))
     implementation(project(":core:data"))
     implementation(project(":core:security"))

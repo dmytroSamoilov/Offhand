@@ -16,6 +16,10 @@ internal val BlueGrey80 = Color(0xFFBFC6DC)
 internal val BlueGrey90 = Color(0xFFDBE2F9)
 internal val BlueGreyOn80 = Color(0xFF293041)
 
+internal val Yellow10 = Color(0xFF261A00)
+internal val Yellow30 = Color(0xFF5C4300)
+internal val Yellow90 = Color(0xFFFFDF9E)
+
 internal val Teal10 = Color(0xFF00201C)
 internal val Teal30 = Color(0xFF005048)
 internal val Teal40 = Color(0xFF006A60)

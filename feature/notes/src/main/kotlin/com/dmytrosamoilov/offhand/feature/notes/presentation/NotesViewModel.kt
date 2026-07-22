@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
+import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.audio.PcmAudioPlayer
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.Note
@@ -33,6 +34,7 @@ class NotesViewModel @Inject constructor(
     private val audioPlayer: PcmAudioPlayer,
     private val audioStore: EncryptedAudioStore,
     sessionManager: RecordingSessionManager,
+    aiCoreDownloadStatus: AiCoreDownloadStatus,
 ) : BaseViewModel() {
 
     private val mutableUiState = MutableStateFlow(NotesUiState())
@@ -60,6 +62,11 @@ class NotesViewModel @Inject constructor(
         viewModelScope.launch {
             sessionManager.noteProgress.collect { progress ->
                 mutableUiState.update { it.copy(noteProgress = progress) }
+            }
+        }
+        viewModelScope.launch {
+            aiCoreDownloadStatus.state.collect { downloadState ->
+                mutableUiState.update { it.copy(modelPreparation = downloadState.toPreparationUi()) }
             }
         }
     }

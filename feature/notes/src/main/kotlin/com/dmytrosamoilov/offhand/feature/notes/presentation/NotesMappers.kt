@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
+import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
 import com.dmytrosamoilov.offhand.core.audio.PcmPlaybackState
 import com.dmytrosamoilov.offhand.core.common.DurationFormatter
 import com.dmytrosamoilov.offhand.core.data.domain.Note
@@ -71,6 +72,11 @@ private fun NoteStatus.toUi(): NoteStatusUi = when (this) {
     NoteStatus.PROCESSING -> NoteStatusUi.PROCESSING
     NoteStatus.READY -> NoteStatusUi.READY
     NoteStatus.FAILED -> NoteStatusUi.FAILED
+}
+
+internal fun AiCoreDownloadState.toPreparationUi(): ModelPreparationUi? = when (this) {
+    is AiCoreDownloadState.Downloading -> ModelPreparationUi(progressPercent = progressPercent)
+    is AiCoreDownloadState.Idle -> null
 }
 
 internal fun PcmPlaybackState.toUi(): AudioPlaybackUi = AudioPlaybackUi(

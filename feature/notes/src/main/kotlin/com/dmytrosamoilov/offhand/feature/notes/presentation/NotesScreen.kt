@@ -1,6 +1,12 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
 import android.content.Intent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,7 +34,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MoreVert
@@ -36,6 +41,7 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -45,6 +51,7 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -81,6 +88,7 @@ import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCard
 import com.dmytrosamoilov.offhand.core.designsystem.component.MarkdownText
 import com.dmytrosamoilov.offhand.core.designsystem.component.MorphingLoadingIndicator
+import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.feature.notes.R
 import java.util.Locale
@@ -124,6 +132,7 @@ fun NotesScreen(
                 AnimatedPane {
                     NotesListPane(
                         sections = state.sections,
+                        modelPreparation = state.modelPreparation,
                         onNoteClick = { id ->
                             viewModel.onNoteSelected(id)
                             paneScope.launch {
@@ -185,6 +194,7 @@ private fun RetranscribeConfirmationDialog(
 @Composable
 private fun NotesListPane(
     sections: List<NotesSectionUi>,
+    modelPreparation: ModelPreparationUi?,
     onNoteClick: (Long) -> Unit,
     onNewRecording: () -> Unit,
 ) {
@@ -215,38 +225,102 @@ private fun NotesListPane(
         },
         contentWindowInsets = WindowInsets(0.dp),
     ) { innerPadding ->
-        if (sections.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(R.string.notes_empty_state),
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(32.dp),
-                )
-            }
-            return@Scaffold
-        }
-        LazyColumn(
-            state = listState,
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            sections.forEach { section ->
-                item(key = section.dayLabel.headerKey(), contentType = "header") {
-                    SectionHeader(dayLabel = section.dayLabel)
+            ModelPreparationBanner(preparation = modelPreparation)
+            if (sections.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(R.string.notes_empty_state),
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(32.dp),
+                    )
                 }
-                items(section.notes, key = { it.id }) { note ->
-                    NoteCard(note = note, onClick = { onNoteClick(note.id) })
+            } else {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 12.dp,
+                        bottom = 16.dp,
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    sections.forEach { section ->
+                        item(key = section.dayLabel.headerKey(), contentType = "header") {
+                            SectionHeader(dayLabel = section.dayLabel)
+                        }
+                        items(section.notes, key = { it.id }) { note ->
+                            NoteCard(note = note, onClick = { onNoteClick(note.id) })
+                        }
+                    }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModelPreparationBanner(preparation: ModelPreparationUi?) {
+    var lastVisible by remember { mutableStateOf(ModelPreparationUi(progressPercent = 0)) }
+    if (preparation != null) {
+        lastVisible = preparation
+    }
+    AnimatedVisibility(
+        visible = preparation != null,
+        enter = expandVertically() + fadeIn(),
+        exit = shrinkVertically() + fadeOut(),
+    ) {
+        val progress by animateFloatAsState(
+            targetValue = lastVisible.progressPercent / 100f,
+            label = "modelPreparationProgress",
+        )
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp),
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    MorphingLoadingIndicator(modifier = Modifier.size(28.dp))
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.notes_model_banner_title),
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                        Text(
+                            text = stringResource(R.string.notes_model_banner_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = stringResource(
+                            R.string.notes_model_banner_percent,
+                            lastVisible.progressPercent,
+                        ),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }
@@ -348,7 +422,7 @@ private fun MetadataText(text: String) {
 @Composable
 private fun NoteCardIcon(status: NoteStatusUi) {
     val containerColor = when (status) {
-        NoteStatusUi.FAILED -> MaterialTheme.colorScheme.errorContainer
+        NoteStatusUi.FAILED -> MaterialTheme.extendedColors.warningContainer
         else -> MaterialTheme.colorScheme.tertiaryContainer
     }
     Box(
@@ -368,9 +442,9 @@ private fun NoteCardIcon(status: NoteStatusUi) {
                 tint = MaterialTheme.colorScheme.onTertiaryContainer,
             )
             NoteStatusUi.FAILED -> Icon(
-                imageVector = Icons.Filled.ErrorOutline,
+                imageVector = Icons.Filled.WarningAmber,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onErrorContainer,
+                tint = MaterialTheme.extendedColors.onWarningContainer,
             )
         }
     }
@@ -378,15 +452,15 @@ private fun NoteCardIcon(status: NoteStatusUi) {
 
 @Composable
 private fun NoteCardUi.cardTitle(): String = when (status) {
-    NoteStatusUi.PROCESSING -> stringResource(R.string.notes_processing_title)
-    NoteStatusUi.FAILED -> stringResource(R.string.notes_failed_title)
+    NoteStatusUi.PROCESSING -> title.ifBlank { stringResource(R.string.notes_processing_title) }
+    NoteStatusUi.FAILED -> title.ifBlank { stringResource(R.string.notes_recording_fallback_title) }
     NoteStatusUi.READY -> title
 }
 
 @Composable
 private fun NoteCardUi.cardPreview(): String = when (status) {
     NoteStatusUi.PROCESSING -> stringResource(R.string.notes_processing_preview)
-    NoteStatusUi.FAILED -> stringResource(R.string.notes_failed_preview)
+    NoteStatusUi.FAILED -> stringResource(R.string.notes_failed_description)
     NoteStatusUi.READY -> preview
 }
 
@@ -734,8 +808,8 @@ private fun TrustBadge(icon: ImageVector, label: String) {
 
 @Composable
 private fun NoteDetailUi.detailTitle(): String = when (status) {
-    NoteStatusUi.PROCESSING -> stringResource(R.string.notes_processing_title)
-    NoteStatusUi.FAILED -> stringResource(R.string.notes_failed_title)
+    NoteStatusUi.PROCESSING -> title.ifBlank { stringResource(R.string.notes_processing_title) }
+    NoteStatusUi.FAILED -> title.ifBlank { stringResource(R.string.notes_recording_fallback_title) }
     NoteStatusUi.READY -> title
 }
 
@@ -752,7 +826,7 @@ private fun FailedDetailCard(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = stringResource(R.string.notes_failed_detail),
+                text = stringResource(R.string.notes_failed_description),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -760,7 +834,7 @@ private fun FailedDetailCard(
             if (hasAudio) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = onRetryTranscription) {
-                    Text(text = stringResource(R.string.notes_transcribe_button))
+                    Text(text = stringResource(R.string.notes_try_again_button))
                 }
             }
         }
