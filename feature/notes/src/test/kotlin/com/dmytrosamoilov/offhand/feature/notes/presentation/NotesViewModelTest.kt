@@ -1,5 +1,11 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
+import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
+import com.dmytrosamoilov.offhand.core.ai.api.AvailableModel
+import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
+import com.dmytrosamoilov.offhand.core.ai.api.ModelState
+import com.dmytrosamoilov.offhand.core.ai.api.SpeechModelState
+import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
 import com.dmytrosamoilov.offhand.core.audio.PcmAudioPlayer
 import com.dmytrosamoilov.offhand.core.audio.PcmPlaybackState
 import com.dmytrosamoilov.offhand.core.data.domain.Note
@@ -60,6 +66,19 @@ class NotesViewModelTest {
     private val sessionManager: RecordingSessionManager = mockk {
         every { noteProgress } returns MutableStateFlow(emptyMap())
     }
+    private val modelState = MutableStateFlow<ModelState>(ModelState.Ready)
+    private val modelManager: ModelManager = mockk {
+        every { this@mockk.modelState } returns this@NotesViewModelTest.modelState
+        every { model } returns mockk<AvailableModel> {
+            every { sizeInBytes } returns 3_000L
+        }
+        every { speechModelSizeInBytes } returns 1_000L
+    }
+    private val speechDownloadState =
+        MutableStateFlow<SpeechModelState>(SpeechModelState.Downloaded)
+    private val speechToText: SpeechToText = mockk {
+        every { downloadState } returns speechDownloadState
+    }
 
     @Before
     fun setUp() {
@@ -83,6 +102,7 @@ class NotesViewModelTest {
         audioPlayer = audioPlayer,
         audioStore = audioStore,
         sessionManager = sessionManager,
+        aiCoreDownloadStatus = AiCoreDownloadStatus(modelManager, speechToText),
     )
 
     @Test
@@ -150,6 +170,35 @@ class NotesViewModelTest {
         coVerify(exactly = 0) { updateNote(any()) }
         assertNull(viewModel.uiState.value.editor)
         assertEquals("Board meeting", viewModel.uiState.value.selected?.title)
+    }
+
+    @Test
+    fun `banner shows total progress across whisper and main model`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.modelPreparation)
+
+        speechDownloadState.value = SpeechModelState.Downloading(
+            bytesDownloaded = 500,
+            bytesTotal = 1_000,
+        )
+        modelState.value = ModelState.NotDownloaded
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(12, viewModel.uiState.value.modelPreparation?.progressPercent)
+
+        speechDownloadState.value = SpeechModelState.Downloaded
+        modelState.value = ModelState.Downloading(
+            progress = 0.5f,
+            bytesDownloaded = 1_500,
+            bytesTotal = 3_000,
+        )
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(62, viewModel.uiState.value.modelPreparation?.progressPercent)
+
+        modelState.value = ModelState.Ready
+        dispatcher.scheduler.advanceUntilIdle()
+        assertNull(viewModel.uiState.value.modelPreparation)
     }
 
     @Test

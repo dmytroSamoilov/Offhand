@@ -9,6 +9,11 @@ data class NotesUiState(
     val isRetranscribeConfirmationVisible: Boolean = false,
     val isDeveloperMode: Boolean = false,
     val noteProgress: Map<Long, Int> = emptyMap(),
+    val modelPreparation: ModelPreparationUi? = null,
+)
+
+data class ModelPreparationUi(
+    val progressPercent: Int,
 )
 
 data class NotesSectionUi(

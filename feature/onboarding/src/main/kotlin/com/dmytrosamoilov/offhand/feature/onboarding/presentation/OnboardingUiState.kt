@@ -9,8 +9,10 @@ data class OnboardingUiState(
 enum class OnboardingStep {
     DEVICE_CHECK,
     DEVICE_INCOMPATIBLE,
-    MODEL_DOWNLOAD,
+    PRIVACY,
+    DEVICE_LOCK,
     TELEMETRY_CONSENT,
+    MODEL_DOWNLOAD,
 }
 
 data class DeviceSpecsUi(
@@ -21,4 +23,3 @@ data class DeviceSpecsUi(
     val requiredCpuCores: Int,
     val isCoresSatisfied: Boolean,
 )
-

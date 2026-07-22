@@ -11,8 +11,9 @@ import android.content.pm.ServiceInfo
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
+import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
-import com.dmytrosamoilov.offhand.core.ai.api.ModelState
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
 import com.dmytrosamoilov.offhand.core.designsystem.R as DesignR
 import com.dmytrosamoilov.offhand.feature.onboarding.R
@@ -39,6 +40,9 @@ class ModelDownloadService : Service() {
 
     @Inject
     lateinit var speechToText: SpeechToText
+
+    @Inject
+    lateinit var aiCoreDownloadStatus: AiCoreDownloadStatus
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var downloadJob: Job? = null
@@ -92,8 +96,8 @@ class ModelDownloadService : Service() {
     }
 
     private fun observeProgress() {
-        modelManager.modelState
-            .map { state -> (state as? ModelState.Downloading)?.toPercent() }
+        aiCoreDownloadStatus.state
+            .map { state -> (state as? AiCoreDownloadState.Downloading)?.progressPercent }
             .distinctUntilChanged()
             .onEach { percent ->
                 getSystemService(NotificationManager::class.java)
@@ -101,9 +105,6 @@ class ModelDownloadService : Service() {
             }
             .launchIn(serviceScope)
     }
-
-    private fun ModelState.Downloading.toPercent(): Int =
-        (progress * 100).toInt().coerceIn(0, 100)
 
     private fun progressNotification(percent: Int?): Notification {
         val builder = NotificationCompat.Builder(this, DOWNLOAD_CHANNEL_ID)

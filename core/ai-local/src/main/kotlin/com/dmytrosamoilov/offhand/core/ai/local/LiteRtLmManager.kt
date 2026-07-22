@@ -130,6 +130,12 @@ class LiteRtLmManager @Inject constructor(
         mutableModelState.value = ModelState.NotDownloaded
     }
 
+    // The mutex makes this wait for the init block, so the model override is applied
+    // before the disk check.
+    override suspend fun isModelDownloaded(): Boolean = loadMutex.withLock {
+        File(context.filesDir, model.modelFile).exists()
+    }
+
     override suspend fun ensureModelAvailable() = loadMutex.withLock {
         if (engine != null && mutableModelState.value is ModelState.Ready) return@withLock
 

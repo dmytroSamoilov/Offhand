@@ -1,6 +1,12 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
 import android.content.Intent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,6 +51,7 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -124,6 +131,7 @@ fun NotesScreen(
                 AnimatedPane {
                     NotesListPane(
                         sections = state.sections,
+                        modelPreparation = state.modelPreparation,
                         onNoteClick = { id ->
                             viewModel.onNoteSelected(id)
                             paneScope.launch {
@@ -185,6 +193,7 @@ private fun RetranscribeConfirmationDialog(
 @Composable
 private fun NotesListPane(
     sections: List<NotesSectionUi>,
+    modelPreparation: ModelPreparationUi?,
     onNoteClick: (Long) -> Unit,
     onNewRecording: () -> Unit,
 ) {
@@ -215,38 +224,102 @@ private fun NotesListPane(
         },
         contentWindowInsets = WindowInsets(0.dp),
     ) { innerPadding ->
-        if (sections.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(R.string.notes_empty_state),
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(32.dp),
-                )
-            }
-            return@Scaffold
-        }
-        LazyColumn(
-            state = listState,
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            sections.forEach { section ->
-                item(key = section.dayLabel.headerKey(), contentType = "header") {
-                    SectionHeader(dayLabel = section.dayLabel)
+            ModelPreparationBanner(preparation = modelPreparation)
+            if (sections.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(R.string.notes_empty_state),
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(32.dp),
+                    )
                 }
-                items(section.notes, key = { it.id }) { note ->
-                    NoteCard(note = note, onClick = { onNoteClick(note.id) })
+            } else {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 12.dp,
+                        bottom = 16.dp,
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    sections.forEach { section ->
+                        item(key = section.dayLabel.headerKey(), contentType = "header") {
+                            SectionHeader(dayLabel = section.dayLabel)
+                        }
+                        items(section.notes, key = { it.id }) { note ->
+                            NoteCard(note = note, onClick = { onNoteClick(note.id) })
+                        }
+                    }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModelPreparationBanner(preparation: ModelPreparationUi?) {
+    var lastVisible by remember { mutableStateOf(ModelPreparationUi(progressPercent = 0)) }
+    if (preparation != null) {
+        lastVisible = preparation
+    }
+    AnimatedVisibility(
+        visible = preparation != null,
+        enter = expandVertically() + fadeIn(),
+        exit = shrinkVertically() + fadeOut(),
+    ) {
+        val progress by animateFloatAsState(
+            targetValue = lastVisible.progressPercent / 100f,
+            label = "modelPreparationProgress",
+        )
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp),
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    MorphingLoadingIndicator(modifier = Modifier.size(28.dp))
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.notes_model_banner_title),
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                        Text(
+                            text = stringResource(R.string.notes_model_banner_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = stringResource(
+                            R.string.notes_model_banner_percent,
+                            lastVisible.progressPercent,
+                        ),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }

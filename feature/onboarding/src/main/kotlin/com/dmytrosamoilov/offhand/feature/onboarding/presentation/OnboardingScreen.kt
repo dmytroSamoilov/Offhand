@@ -1,10 +1,13 @@
 package com.dmytrosamoilov.offhand.feature.onboarding.presentation
 
 import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -21,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.R as DesignR
 import com.dmytrosamoilov.offhand.core.designsystem.component.MorphingLoadingIndicator
@@ -57,9 +62,18 @@ fun OnboardingScreen(
         ActivityResultContracts.RequestPermission(),
     ) { viewModel.onDownloadContinue() }
 
+    LifecycleResumeEffect(Unit) {
+        viewModel.onDeviceLockRecheck()
+        onPauseOrDispose { }
+    }
+
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
         OnboardingContent(
             state = state,
+            onPrivacyContinue = viewModel::onPrivacyContinue,
+            onDeviceLockSetup = { openSecuritySettings(context) },
+            onDeviceLockSkipped = viewModel::onDeviceLockSkipped,
+            onConsentChosen = viewModel::onConsentChosen,
             onDownloadContinue = {
                 if (needsNotificationPermission(context)) {
                     permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -67,7 +81,6 @@ fun OnboardingScreen(
                     viewModel.onDownloadContinue()
                 }
             },
-            onConsentChosen = viewModel::onConsentChosen,
         )
     }
 }
@@ -75,8 +88,11 @@ fun OnboardingScreen(
 @Composable
 private fun OnboardingContent(
     state: OnboardingUiState,
-    onDownloadContinue: () -> Unit,
+    onPrivacyContinue: () -> Unit,
+    onDeviceLockSetup: () -> Unit,
+    onDeviceLockSkipped: () -> Unit,
     onConsentChosen: (Boolean) -> Unit,
+    onDownloadContinue: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -88,14 +104,66 @@ private fun OnboardingContent(
         when (state.step) {
             OnboardingStep.DEVICE_CHECK -> MorphingLoadingIndicator()
             OnboardingStep.DEVICE_INCOMPATIBLE -> DeviceIncompatibleStep(state.deviceSpecs)
-            OnboardingStep.MODEL_DOWNLOAD -> ModelDownloadStep(
-                downloadSizeGb = state.downloadSizeGb,
-                onContinue = onDownloadContinue,
+            OnboardingStep.PRIVACY -> PrivacyStep(onContinue = onPrivacyContinue)
+            OnboardingStep.DEVICE_LOCK -> DeviceLockStep(
+                onSetup = onDeviceLockSetup,
+                onSkip = onDeviceLockSkipped,
             )
             OnboardingStep.TELEMETRY_CONSENT -> TelemetryConsentStep(
                 onConsentChosen = onConsentChosen,
             )
+            OnboardingStep.MODEL_DOWNLOAD -> ModelDownloadStep(
+                downloadSizeGb = state.downloadSizeGb,
+                onContinue = onDownloadContinue,
+            )
         }
+    }
+}
+
+@Composable
+private fun PrivacyStep(onContinue: () -> Unit) {
+    Image(
+        painter = painterResource(DesignR.drawable.ic_offhand_logo),
+        contentDescription = null,
+        modifier = Modifier.size(96.dp),
+    )
+    Spacer(modifier = Modifier.height(28.dp))
+    StepTitle(text = stringResource(R.string.onboarding_privacy_title))
+    StepBody(text = stringResource(R.string.onboarding_privacy_body))
+    Spacer(modifier = Modifier.height(32.dp))
+    PrimaryStepButton(
+        text = stringResource(R.string.onboarding_privacy_continue),
+        onClick = onContinue,
+    )
+}
+
+@Composable
+private fun DeviceLockStep(onSetup: () -> Unit, onSkip: () -> Unit) {
+    Icon(
+        imageVector = Icons.Filled.Lock,
+        contentDescription = null,
+        modifier = Modifier.size(64.dp),
+        tint = MaterialTheme.colorScheme.primary,
+    )
+    Spacer(modifier = Modifier.height(28.dp))
+    StepTitle(text = stringResource(R.string.onboarding_lock_title))
+    StepBody(text = stringResource(R.string.onboarding_lock_body))
+    Spacer(modifier = Modifier.height(32.dp))
+    PrimaryStepButton(
+        text = stringResource(R.string.onboarding_lock_setup),
+        onClick = onSetup,
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    TextButton(onClick = onSkip) {
+        Text(text = stringResource(R.string.onboarding_lock_skip))
+    }
+}
+
+private fun openSecuritySettings(context: Context) {
+    try {
+        context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+    } catch (notFound: ActivityNotFoundException) {
+        context.startActivity(Intent(Settings.ACTION_SETTINGS))
     }
 }
 
@@ -156,15 +224,23 @@ private fun ModelDownloadStep(
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     Spacer(modifier = Modifier.height(32.dp))
-    Button(
+    PrimaryStepButton(
+        text = stringResource(R.string.onboarding_download_continue),
         onClick = onContinue,
+    )
+}
+
+@Composable
+private fun PrimaryStepButton(text: String, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
         shape = CircleShape,
     ) {
         Text(
-            text = stringResource(R.string.onboarding_download_continue),
+            text = text,
             style = MaterialTheme.typography.titleMedium,
         )
     }
@@ -261,8 +337,11 @@ private fun OnboardingStatePreview(state: OnboardingUiState) {
         ) {
             OnboardingContent(
                 state = state,
-                onDownloadContinue = {},
+                onPrivacyContinue = {},
+                onDeviceLockSetup = {},
+                onDeviceLockSkipped = {},
                 onConsentChosen = {},
+                onDownloadContinue = {},
             )
         }
     }
@@ -272,6 +351,18 @@ private fun OnboardingStatePreview(state: OnboardingUiState) {
 @Composable
 private fun DeviceCheckPreview() {
     OnboardingStatePreview(OnboardingUiState(step = OnboardingStep.DEVICE_CHECK))
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PrivacyPreview() {
+    OnboardingStatePreview(OnboardingUiState(step = OnboardingStep.PRIVACY))
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DeviceLockPreview() {
+    OnboardingStatePreview(OnboardingUiState(step = OnboardingStep.DEVICE_LOCK))
 }
 
 @Preview(showBackground = true)
