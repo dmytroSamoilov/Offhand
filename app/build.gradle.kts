@@ -58,7 +58,7 @@ androidComponents {
         val versionName = variant.outputs.single().versionName
         val exportMapping = tasks.register<Copy>("export${variantName}Mapping") {
             from(variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE))
-            into(layout.projectDirectory.dir("${variant.flavorName}/${variant.buildType}"))
+            into(layout.projectDirectory.dir("${variant.flavorName}/${variant.buildType}-mapping"))
             rename { "mapping-${versionName.get()}.txt" }
         }
         listOf("assemble$variantName", "bundle$variantName").forEach { taskName ->
