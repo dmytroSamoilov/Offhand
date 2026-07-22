@@ -15,6 +15,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import io.mockk.verifyOrder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -30,12 +31,14 @@ class ResumeInterruptedNotesUseCaseTest {
         every { processingNoteIds } returns MutableStateFlow(emptySet())
     }
     private val failNote: FailNoteUseCase = mockk()
+    private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase = mockk()
 
     private val useCase = ResumeInterruptedNotesUseCase(
         context = context,
         notesRepository = notesRepository,
         sessionManager = sessionManager,
         failNote = failNote,
+        isAiCoreDownloaded = isAiCoreDownloaded,
     )
 
     @Before
@@ -43,6 +46,7 @@ class ResumeInterruptedNotesUseCaseTest {
         mockkObject(RecordingService.Companion)
         every { RecordingService.retryNote(any(), any(), any()) } just Runs
         coEvery { failNote(any()) } returns true
+        coEvery { isAiCoreDownloaded() } returns true
     }
 
     @After
@@ -54,12 +58,13 @@ class ResumeInterruptedNotesUseCaseTest {
         id: Long,
         status: NoteStatus,
         audioFileName: String? = "note-$id.pcm.enc",
+        createdAtEpochMs: Long = 0,
     ) = Note(
         id = id,
         title = "Note $id",
         body = "",
         transcript = "",
-        createdAtEpochMs = 0,
+        createdAtEpochMs = createdAtEpochMs,
         transcriptionTimeMs = null,
         structuringTimeMs = null,
         hardwareBackend = null,
@@ -105,14 +110,32 @@ class ResumeInterruptedNotesUseCaseTest {
     }
 
     @Test
-    fun `runs only once per process`() = runTest {
+    fun `does nothing while the ai core is not downloaded`() = runTest {
+        coEvery { isAiCoreDownloaded() } returns false
         every { notesRepository.observeNotes() } returns flowOf(
             listOf(note(1, NoteStatus.PROCESSING)),
         )
 
         useCase()
+
+        verify(exactly = 0) { RecordingService.retryNote(any(), any(), any()) }
+        coVerify(exactly = 0) { failNote(any()) }
+    }
+
+    @Test
+    fun `pending notes are queued oldest first`() = runTest {
+        every { notesRepository.observeNotes() } returns flowOf(
+            listOf(
+                note(2, NoteStatus.PROCESSING, createdAtEpochMs = 2_000),
+                note(1, NoteStatus.PROCESSING, createdAtEpochMs = 1_000),
+            ),
+        )
+
         useCase()
 
-        verify(exactly = 1) { RecordingService.retryNote(any(), any(), any()) }
+        verifyOrder {
+            RecordingService.retryNote(context, 1, "note-1.pcm.enc")
+            RecordingService.retryNote(context, 2, "note-2.pcm.enc")
+        }
     }
 }

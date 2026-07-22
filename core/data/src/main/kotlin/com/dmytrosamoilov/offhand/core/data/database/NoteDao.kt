@@ -16,6 +16,9 @@ internal interface NoteDao {
     @Query("SELECT * FROM notes WHERE id = :id")
     suspend fun getById(id: Long): NoteEntity?
 
+    @Query("SELECT COUNT(*) FROM notes")
+    suspend fun count(): Int
+
     @Insert
     suspend fun insert(note: NoteEntity): Long
 

@@ -22,6 +22,8 @@ internal class RoomNotesRepository @Inject constructor(
 
     override suspend fun getNote(id: Long): Note? = noteDao.getById(id)?.toDomain()
 
+    override suspend fun countNotes(): Int = noteDao.count()
+
     override suspend fun createNote(note: Note): Long = noteDao.insert(note.toEntity())
 
     override suspend fun updateNote(note: Note) = noteDao.update(note.toEntity())

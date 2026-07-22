@@ -80,6 +80,7 @@ litertlm = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", v
 # Networking (model download only)
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 
 # Storage
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }

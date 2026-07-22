@@ -13,6 +13,7 @@ import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateProcessingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
 import io.mockk.coEvery
@@ -57,6 +58,9 @@ class RecordingSessionManagerTest {
     private val registerSavedRecording: RegisterSavedRecordingUseCase = mockk {
         coJustRun { this@mockk.invoke() }
     }
+    private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase = mockk {
+        coEvery { this@mockk.invoke() } returns true
+    }
     private val audioStore: EncryptedAudioStore = mockk {
         every { newRecordingFileName() } returns "note-1.pcm.enc"
         every { openForWrite("note-1.pcm.enc") } returns ByteArrayOutputStream()
@@ -96,6 +100,7 @@ class RecordingSessionManagerTest {
         failNote = failNote,
         markNoteProcessing = markNoteProcessing,
         registerSavedRecording = registerSavedRecording,
+        isAiCoreDownloaded = isAiCoreDownloaded,
         audioStore = audioStore,
         scope = this,
     )

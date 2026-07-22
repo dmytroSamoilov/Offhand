@@ -127,6 +127,7 @@ class LiteRtLmManager @Inject constructor(
         runCatching { engine?.close() }
         engine = null
         File(context.filesDir, model.modelFile).delete()
+        File(context.filesDir, model.modelFile + PART_FILE_SUFFIX).delete()
         mutableModelState.value = ModelState.NotDownloaded
     }
 
@@ -149,12 +150,15 @@ class LiteRtLmManager @Inject constructor(
         loadEngine(file)
     }
 
-    // Only orphans (files no longer in the catalog) are removed — files of
-    // other catalog models stay on disk so switching models is not a re-download.
+    // Only orphans (files no longer in the catalog) are removed — files and resumable
+    // .part files of catalog models stay on disk so switching models is not a re-download.
     private fun deleteStaleModelFiles() {
         val knownFiles = catalog.all.map { it.modelFile }.toSet()
         context.filesDir.listFiles()
-            ?.filter { it.name.endsWith(MODEL_FILE_EXTENSION) && it.name !in knownFiles }
+            ?.filter { file ->
+                val baseName = file.name.removeSuffix(PART_FILE_SUFFIX)
+                baseName.endsWith(MODEL_FILE_EXTENSION) && baseName !in knownFiles
+            }
             ?.forEach { orphan ->
                 if (orphan.delete()) {
                     GenAiLog.logModelOutput("stale-model-deleted", orphan.name)

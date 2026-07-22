@@ -34,7 +34,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MoreVert
@@ -42,6 +41,7 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -88,6 +88,7 @@ import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCard
 import com.dmytrosamoilov.offhand.core.designsystem.component.MarkdownText
 import com.dmytrosamoilov.offhand.core.designsystem.component.MorphingLoadingIndicator
+import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.feature.notes.R
 import java.util.Locale
@@ -421,7 +422,7 @@ private fun MetadataText(text: String) {
 @Composable
 private fun NoteCardIcon(status: NoteStatusUi) {
     val containerColor = when (status) {
-        NoteStatusUi.FAILED -> MaterialTheme.colorScheme.errorContainer
+        NoteStatusUi.FAILED -> MaterialTheme.extendedColors.warningContainer
         else -> MaterialTheme.colorScheme.tertiaryContainer
     }
     Box(
@@ -441,9 +442,9 @@ private fun NoteCardIcon(status: NoteStatusUi) {
                 tint = MaterialTheme.colorScheme.onTertiaryContainer,
             )
             NoteStatusUi.FAILED -> Icon(
-                imageVector = Icons.Filled.ErrorOutline,
+                imageVector = Icons.Filled.WarningAmber,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onErrorContainer,
+                tint = MaterialTheme.extendedColors.onWarningContainer,
             )
         }
     }
@@ -451,15 +452,15 @@ private fun NoteCardIcon(status: NoteStatusUi) {
 
 @Composable
 private fun NoteCardUi.cardTitle(): String = when (status) {
-    NoteStatusUi.PROCESSING -> stringResource(R.string.notes_processing_title)
-    NoteStatusUi.FAILED -> stringResource(R.string.notes_failed_title)
+    NoteStatusUi.PROCESSING -> title.ifBlank { stringResource(R.string.notes_processing_title) }
+    NoteStatusUi.FAILED -> title.ifBlank { stringResource(R.string.notes_recording_fallback_title) }
     NoteStatusUi.READY -> title
 }
 
 @Composable
 private fun NoteCardUi.cardPreview(): String = when (status) {
     NoteStatusUi.PROCESSING -> stringResource(R.string.notes_processing_preview)
-    NoteStatusUi.FAILED -> stringResource(R.string.notes_failed_preview)
+    NoteStatusUi.FAILED -> stringResource(R.string.notes_failed_description)
     NoteStatusUi.READY -> preview
 }
 
@@ -807,8 +808,8 @@ private fun TrustBadge(icon: ImageVector, label: String) {
 
 @Composable
 private fun NoteDetailUi.detailTitle(): String = when (status) {
-    NoteStatusUi.PROCESSING -> stringResource(R.string.notes_processing_title)
-    NoteStatusUi.FAILED -> stringResource(R.string.notes_failed_title)
+    NoteStatusUi.PROCESSING -> title.ifBlank { stringResource(R.string.notes_processing_title) }
+    NoteStatusUi.FAILED -> title.ifBlank { stringResource(R.string.notes_recording_fallback_title) }
     NoteStatusUi.READY -> title
 }
 
@@ -825,7 +826,7 @@ private fun FailedDetailCard(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = stringResource(R.string.notes_failed_detail),
+                text = stringResource(R.string.notes_failed_description),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -833,7 +834,7 @@ private fun FailedDetailCard(
             if (hasAudio) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = onRetryTranscription) {
-                    Text(text = stringResource(R.string.notes_transcribe_button))
+                    Text(text = stringResource(R.string.notes_try_again_button))
                 }
             }
         }

@@ -10,6 +10,7 @@ import com.dmytrosamoilov.offhand.feature.recording.di.RecordingSessionScope
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateProcessingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
 import java.io.BufferedOutputStream
@@ -28,6 +29,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
 
 @Singleton
@@ -41,9 +44,13 @@ class RecordingSessionManager @Inject constructor(
     private val failNote: FailNoteUseCase,
     private val markNoteProcessing: MarkNoteProcessingUseCase,
     private val registerSavedRecording: RegisterSavedRecordingUseCase,
+    private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
     private val audioStore: EncryptedAudioStore,
     @RecordingSessionScope private val scope: CoroutineScope,
 ) {
+
+    // Fair mutex: queued notes are processed one at a time, in arrival order.
+    private val processingMutex = Mutex()
 
     private val mutableSession = MutableStateFlow(RecordingSession())
     val session: StateFlow<RecordingSession> = mutableSession.asStateFlow()
@@ -122,15 +129,17 @@ class RecordingSessionManager @Inject constructor(
         if (noteId in mutableProcessingNoteIds.value) return
         mutableProcessingNoteIds.update { it + noteId }
         scope.launch {
-            if (!markNoteProcessing(noteId)) {
-                mutableProcessingNoteIds.update { it - noteId }
-                return@launch
+            processingMutex.withLock {
+                if (!markNoteProcessing(noteId)) {
+                    mutableProcessingNoteIds.update { it - noteId }
+                    return@withLock
+                }
+                updateProgress(noteId, 0f)
+                val stored = transcribeStoredAudio(audioFileName) { fraction ->
+                    updateProgress(noteId, fraction * RETRY_WHISPER_SHARE)
+                }
+                processNote(noteId, stored.texts, stored.transcriptionTimeMs, RETRY_WHISPER_SHARE)
             }
-            updateProgress(noteId, 0f)
-            val stored = transcribeStoredAudio(audioFileName) { fraction ->
-                updateProgress(noteId, fraction * RETRY_WHISPER_SHARE)
-            }
-            processNote(noteId, stored.texts, stored.transcriptionTimeMs, RETRY_WHISPER_SHARE)
         }
     }
 
@@ -315,7 +324,14 @@ class RecordingSessionManager @Inject constructor(
         mutableProcessingNoteIds.update { it + noteId }
         mutableSession.value = RecordingSession()
         scope.launch {
-            processNote(noteId, chunkTranscripts, recordedTranscriptionMs, progressOffset = 0f)
+            if (!isAiCoreDownloaded()) {
+                Timber.tag(LOG_TAG).w("AI core not downloaded yet, note %d stays queued", noteId)
+                mutableProcessingNoteIds.update { it - noteId }
+                return@launch
+            }
+            processingMutex.withLock {
+                processNote(noteId, chunkTranscripts, recordedTranscriptionMs, progressOffset = 0f)
+            }
         }
     }
 

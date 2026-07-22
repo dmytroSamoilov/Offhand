@@ -8,6 +8,8 @@ interface NotesRepository {
 
     suspend fun getNote(id: Long): Note?
 
+    suspend fun countNotes(): Int
+
     suspend fun createNote(note: Note): Long
 
     suspend fun updateNote(note: Note)

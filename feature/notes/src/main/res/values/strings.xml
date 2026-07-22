@@ -22,10 +22,9 @@
     <string name="notes_processing_title">Processing…</string>
     <string name="notes_processing_preview">Transcribing and summarizing on this device. You can play the recording already.</string>
     <string name="notes_processing_detail">We\'re turning your recording into a note. It will appear here automatically.</string>
-    <string name="notes_failed_title">Note could not be finished</string>
-    <string name="notes_failed_preview">Processing failed, but the recording is safe.</string>
-    <string name="notes_failed_detail">Processing failed. Your recording is safe — you can play it above.</string>
-    <string name="notes_transcribe_button">Transcribe</string>
+    <string name="notes_recording_fallback_title">Recording</string>
+    <string name="notes_failed_description">We were unable to create an overview and transcript for this note.</string>
+    <string name="notes_try_again_button">Try again</string>
     <string name="notes_overview_heading">Overview</string>
     <string name="notes_transcript_heading">Transcript</string>
     <string name="notes_edit_description">Edit note</string>
