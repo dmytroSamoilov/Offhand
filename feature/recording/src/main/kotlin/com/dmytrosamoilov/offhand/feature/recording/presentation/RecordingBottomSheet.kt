@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.recording.presentation
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -194,14 +195,34 @@ private fun SavedContent(onDone: () -> Unit) {
 @Composable
 private fun IdleContent(onRecordClick: () -> Unit) {
     val context = LocalContext.current
+    var isPermissionDenied by remember { mutableStateOf(false) }
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
     ) { results ->
         if (results[Manifest.permission.RECORD_AUDIO] == true) {
             onRecordClick()
+        } else {
+            isPermissionDenied = true
         }
     }
 
+    LaunchedEffect(Unit) {
+        if (hasMicPermission(context)) {
+            onRecordClick()
+        } else {
+            permissionLauncher.launch(requiredPermissions())
+        }
+    }
+
+    if (isPermissionDenied) {
+        MicPermissionFallback(onRetry = { permissionLauncher.launch(requiredPermissions()) })
+    } else {
+        MorphingLoadingIndicator()
+    }
+}
+
+@Composable
+private fun MicPermissionFallback(onRetry: () -> Unit) {
     Text(
         text = stringResource(R.string.recording_idle_hint),
         style = MaterialTheme.typography.bodyLarge,
@@ -209,17 +230,7 @@ private fun IdleContent(onRecordClick: () -> Unit) {
     )
     Spacer(modifier = Modifier.height(32.dp))
     FilledIconButton(
-        onClick = {
-            val hasMic = ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.RECORD_AUDIO,
-            ) == PackageManager.PERMISSION_GRANTED
-            if (hasMic) {
-                onRecordClick()
-            } else {
-                permissionLauncher.launch(requiredPermissions())
-            }
-        },
+        onClick = onRetry,
         modifier = Modifier.size(96.dp),
         shape = CookieShape,
         colors = IconButtonDefaults.filledIconButtonColors(
@@ -234,6 +245,10 @@ private fun IdleContent(onRecordClick: () -> Unit) {
         )
     }
 }
+
+private fun hasMicPermission(context: Context): Boolean =
+    ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
+        PackageManager.PERMISSION_GRANTED
 
 private fun requiredPermissions(): Array<String> =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
