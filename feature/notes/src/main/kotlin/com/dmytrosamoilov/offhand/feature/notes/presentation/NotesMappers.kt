@@ -5,6 +5,7 @@ import com.dmytrosamoilov.offhand.core.audio.PcmPlaybackState
 import com.dmytrosamoilov.offhand.core.common.DurationFormatter
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareBundle
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -78,6 +79,11 @@ internal fun AiCoreDownloadState.toPreparationUi(): ModelPreparationUi? = when (
     is AiCoreDownloadState.Downloading -> ModelPreparationUi(progressPercent = progressPercent)
     is AiCoreDownloadState.Idle -> null
 }
+
+internal fun NoteShareBundle.toUi(): NoteShareUi = NoteShareUi(
+    uris = uris,
+    mimeType = mimeType,
+)
 
 internal fun PcmPlaybackState.toUi(): AudioPlaybackUi = AudioPlaybackUi(
     isAvailable = isLoaded,

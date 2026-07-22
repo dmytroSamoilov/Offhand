@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,6 +26,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -47,18 +49,21 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
@@ -79,6 +84,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -88,6 +94,7 @@ import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCard
 import com.dmytrosamoilov.offhand.core.designsystem.component.MarkdownText
 import com.dmytrosamoilov.offhand.core.designsystem.component.MorphingLoadingIndicator
+import com.dmytrosamoilov.offhand.core.designsystem.component.RoundedCheckbox
 import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.feature.notes.R
@@ -106,6 +113,13 @@ fun NotesScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val navigator = rememberListDetailPaneScaffoldNavigator<Long>()
     val paneScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    LaunchedEffect(state.pendingShare) {
+        val share = state.pendingShare ?: return@LaunchedEffect
+        context.startActivity(createShareChooser(share))
+        viewModel.onShareLaunched()
+    }
 
     LaunchedEffect(requestedNoteId) {
         if (requestedNoteId != null) {
@@ -166,6 +180,124 @@ fun NotesScreen(
             onConfirm = viewModel::onRetranscribeConfirmed,
             onDismiss = viewModel::onRetranscribeDismissed,
         )
+    }
+
+    if (state.isShareDialogVisible) {
+        ShareNoteSheet(
+            hasAudio = state.selected?.hasAudio == true,
+            onConfirm = viewModel::onShareConfirmed,
+            onDismiss = viewModel::onShareDismissed,
+        )
+    }
+}
+
+private fun createShareChooser(share: NoteShareUi): Intent {
+    val sendIntent = if (share.uris.size == 1) {
+        Intent(Intent.ACTION_SEND).putExtra(Intent.EXTRA_STREAM, share.uris.first())
+    } else {
+        Intent(Intent.ACTION_SEND_MULTIPLE)
+            .putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(share.uris))
+    }
+    sendIntent.type = share.mimeType
+    sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    return Intent.createChooser(sendIntent, null)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ShareNoteSheet(
+    hasAudio: Boolean,
+    onConfirm: (Boolean, Boolean) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var includeNote by remember { mutableStateOf(true) }
+    var includeAudio by remember { mutableStateOf(hasAudio) }
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+        ShareNoteSheetContent(
+            includeNote = includeNote,
+            includeAudio = includeAudio,
+            hasAudio = hasAudio,
+            onIncludeNoteChanged = { includeNote = it },
+            onIncludeAudioChanged = { includeAudio = it },
+            onShare = { onConfirm(includeNote, includeAudio) },
+        )
+    }
+}
+
+@Composable
+private fun ShareNoteSheetContent(
+    includeNote: Boolean,
+    includeAudio: Boolean,
+    hasAudio: Boolean,
+    onIncludeNoteChanged: (Boolean) -> Unit,
+    onIncludeAudioChanged: (Boolean) -> Unit,
+    onShare: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.notes_share_dialog_title),
+            style = MaterialTheme.typography.titleLarge,
+        )
+        Text(
+            text = stringResource(R.string.notes_share_dialog_body),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 12.dp),
+        )
+        ShareOptionCard(
+            label = stringResource(R.string.notes_share_option_note),
+            checked = includeNote,
+            onCheckedChange = onIncludeNoteChanged,
+        )
+        if (hasAudio) {
+            ShareOptionCard(
+                label = stringResource(R.string.notes_share_option_audio),
+                checked = includeAudio,
+                onCheckedChange = onIncludeAudioChanged,
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Button(
+            onClick = onShare,
+            enabled = includeNote || includeAudio,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(text = stringResource(R.string.notes_share_dialog_confirm))
+        }
+    }
+}
+
+@Composable
+private fun ShareOptionCard(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(value = checked, role = Role.Checkbox, onValueChange = onCheckedChange),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f),
+            )
+            RoundedCheckbox(checked = checked)
+        }
     }
 }
 
@@ -487,6 +619,7 @@ private fun NoteDetailPane(
             progressPercent = state.noteProgress[selected.id],
             onBack = viewModel::onDetailClosed,
             onEdit = viewModel::onEditStarted,
+            onShareRequested = viewModel::onShareRequested,
             onDeleteRequested = viewModel::onDeleteRequested,
             onPlayPause = viewModel::onPlayPauseClicked,
             onSeek = viewModel::onSeekRequested,
@@ -520,6 +653,7 @@ private fun NoteDetail(
     progressPercent: Int?,
     onBack: () -> Unit,
     onEdit: () -> Unit,
+    onShareRequested: () -> Unit,
     onDeleteRequested: () -> Unit,
     onPlayPause: () -> Unit,
     onSeek: (Float) -> Unit,
@@ -533,6 +667,7 @@ private fun NoteDetail(
                 note = note,
                 onBack = onBack,
                 onEdit = onEdit,
+                onShareRequested = onShareRequested,
                 onDeleteRequested = onDeleteRequested,
                 onRetranscribeRequested = onRetranscribeRequested,
             )
@@ -558,6 +693,7 @@ private fun NoteDetailTopBar(
     note: NoteDetailUi,
     onBack: () -> Unit,
     onEdit: () -> Unit,
+    onShareRequested: () -> Unit,
     onDeleteRequested: () -> Unit,
     onRetranscribeRequested: () -> Unit,
 ) {
@@ -579,7 +715,7 @@ private fun NoteDetailTopBar(
                         contentDescription = stringResource(R.string.notes_edit_description),
                     )
                 }
-                ShareNoteButton(note = note)
+                ShareNoteButton(onClick = onShareRequested)
                 NoteOverflowMenu(
                     showRetranscribe = note.hasAudio,
                     onRetranscribeRequested = onRetranscribeRequested,
@@ -598,16 +734,8 @@ private fun NoteDetailTopBar(
 }
 
 @Composable
-private fun ShareNoteButton(note: NoteDetailUi) {
-    val context = LocalContext.current
-    IconButton(
-        onClick = {
-            val shareIntent = Intent(Intent.ACTION_SEND)
-                .setType("text/plain")
-                .putExtra(Intent.EXTRA_TEXT, buildShareText(note))
-            context.startActivity(Intent.createChooser(shareIntent, null))
-        },
-    ) {
+private fun ShareNoteButton(onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
         Icon(
             imageVector = Icons.Filled.Share,
             contentDescription = stringResource(R.string.notes_share_description),
@@ -921,17 +1049,6 @@ private fun AudioPlayerCard(
                 style = MaterialTheme.typography.labelMedium,
             )
         }
-    }
-}
-
-private fun buildShareText(note: NoteDetailUi): String = buildString {
-    appendLine(note.title)
-    appendLine()
-    append(note.body)
-    if (note.transcript.isNotBlank()) {
-        appendLine()
-        appendLine()
-        append(note.transcript)
     }
 }
 

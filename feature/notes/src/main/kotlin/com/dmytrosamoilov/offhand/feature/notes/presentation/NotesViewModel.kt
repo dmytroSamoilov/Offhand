@@ -11,6 +11,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.service.RecordingService
@@ -31,6 +32,7 @@ class NotesViewModel @Inject constructor(
     private val getNote: GetNoteUseCase,
     private val updateNote: UpdateNoteUseCase,
     private val deleteNote: DeleteNoteUseCase,
+    private val prepareNoteShare: PrepareNoteShareUseCase,
     private val audioPlayer: PcmAudioPlayer,
     private val audioStore: EncryptedAudioStore,
     sessionManager: RecordingSessionManager,
@@ -100,8 +102,36 @@ class NotesViewModel @Inject constructor(
         selectedNote = null
         audioPlayer.reset()
         mutableUiState.update {
-            it.copy(selected = null, editor = null, isDeleteConfirmationVisible = false)
+            it.copy(
+                selected = null,
+                editor = null,
+                isDeleteConfirmationVisible = false,
+                isShareDialogVisible = false,
+                pendingShare = null,
+            )
         }
+    }
+
+    fun onShareRequested() {
+        mutableUiState.update { it.copy(isShareDialogVisible = true) }
+    }
+
+    fun onShareDismissed() {
+        mutableUiState.update { it.copy(isShareDialogVisible = false) }
+    }
+
+    fun onShareConfirmed(includeNote: Boolean, includeAudio: Boolean) {
+        val note = selectedNote ?: return
+        if (!includeNote && !includeAudio) return
+        mutableUiState.update { it.copy(isShareDialogVisible = false) }
+        launchSafely {
+            val share = prepareNoteShare(note, includeNote, includeAudio)
+            mutableUiState.update { it.copy(pendingShare = share.toUi()) }
+        }
+    }
+
+    fun onShareLaunched() {
+        mutableUiState.update { it.copy(pendingShare = null) }
     }
 
     fun onPlayPauseClicked() {

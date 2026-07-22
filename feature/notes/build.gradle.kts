@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":core:security"))
     implementation(project(":feature:recording"))
 
+    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.material3.adaptive)
     implementation(libs.androidx.material3.adaptive.layout)
