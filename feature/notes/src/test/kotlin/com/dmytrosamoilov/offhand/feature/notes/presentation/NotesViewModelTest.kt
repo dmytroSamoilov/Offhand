@@ -98,7 +98,6 @@ class NotesViewModelTest {
         assertFalse(card.preview.contains("**"))
         assertTrue(card.preview.contains("Budget approved"))
         assertTrue(card.time.isNotBlank())
-        assertEquals(9, card.wordCount)
     }
 
     @Test
@@ -109,6 +108,7 @@ class NotesViewModelTest {
 
         val detail = viewModel.uiState.value.selected
         assertEquals("Board meeting", detail?.title)
+        assertEquals(9, detail?.wordCount)
         assertEquals("12.4 s", detail?.metrics?.transcriptionTime)
         assertEquals("4.2 s", detail?.metrics?.structuringTime)
         assertEquals("CPU", detail?.metrics?.hardwareBackend)

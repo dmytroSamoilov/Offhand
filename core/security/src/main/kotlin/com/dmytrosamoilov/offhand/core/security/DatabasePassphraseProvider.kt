@@ -1,8 +1,8 @@
 package com.dmytrosamoilov.offhand.core.security
 
-import android.app.KeyguardManager
 import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyInfo
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -12,6 +12,7 @@ import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
+import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,15 +31,16 @@ class DatabasePassphraseProvider @Inject constructor(
     @Volatile
     private var cached: ByteArray? = null
 
-    private val keyguardManager: KeyguardManager
-        get() = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-
     @Synchronized
     fun passphrase(): ByteArray {
         cached?.let { return it }
         val wrappedFile = File(context.filesDir, WRAPPED_PASSPHRASE_FILE)
         val key = getOrCreateKey()
-        val plain = if (wrappedFile.exists()) unwrap(wrappedFile, key) else createAndWrap(wrappedFile, key)
+        val plain = if (wrappedFile.exists()) {
+            unwrap(wrappedFile, key).also { migrateAuthBoundKey(key, it, wrappedFile) }
+        } else {
+            createAndWrap(wrappedFile, key)
+        }
         cached = plain
         return plain
     }
@@ -59,28 +61,40 @@ class DatabasePassphraseProvider @Inject constructor(
         val keyStore = loadKeyStore()
         (keyStore.getKey(KEY_ALIAS, null) as? SecretKey)?.let { return it }
 
-        val builder = KeyGenParameterSpec.Builder(
+        val spec = KeyGenParameterSpec.Builder(
             KEY_ALIAS,
             KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
         )
             .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
             .setKeySize(KEY_SIZE_BITS)
-        if (keyguardManager.isDeviceSecure) {
-            builder
-                .setUserAuthenticationRequired(true)
-                .setUserAuthenticationParameters(
-                    AUTH_VALIDITY_SECONDS,
-                    KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL,
-                )
-        }
+            .build()
         return KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
-            .apply { init(builder.build()) }
+            .apply { init(spec) }
             .generateKey()
     }
 
+    // Keys created before 0.9.1 were auth-bound with a 60 s validity window, which crashes
+    // any database access happening outside that window (onboarding, background services).
+    private fun migrateAuthBoundKey(key: SecretKey, plain: ByteArray, wrappedFile: File) {
+        if (!isAuthBound(key)) return
+        loadKeyStore().deleteEntry(KEY_ALIAS)
+        wrap(plain, getOrCreateKey(), wrappedFile)
+        Timber.tag(LOG_TAG).i("Re-wrapped database passphrase with a non-auth-bound key")
+    }
+
+    private fun isAuthBound(key: SecretKey): Boolean = runCatching {
+        val factory = SecretKeyFactory.getInstance(key.algorithm, ANDROID_KEYSTORE)
+        (factory.getKeySpec(key, KeyInfo::class.java) as KeyInfo).isUserAuthenticationRequired
+    }.getOrDefault(false)
+
     private fun createAndWrap(wrappedFile: File, key: SecretKey): ByteArray {
         val plain = ByteArray(PASSPHRASE_BYTES).also(SecureRandom()::nextBytes)
+        wrap(plain, key, wrappedFile)
+        return plain
+    }
+
+    private fun wrap(plain: ByteArray, key: SecretKey, wrappedFile: File) {
         val cipher = Cipher.getInstance(CIPHER_TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, key)
         val encrypted = cipher.doFinal(plain)
@@ -89,7 +103,6 @@ class DatabasePassphraseProvider @Inject constructor(
             output.write(cipher.iv)
             output.write(encrypted)
         }
-        return plain
     }
 
     private fun unwrap(wrappedFile: File, key: SecretKey): ByteArray {
@@ -117,7 +130,6 @@ class DatabasePassphraseProvider @Inject constructor(
         const val KEY_SIZE_BITS = 256
         const val PASSPHRASE_BYTES = 32
         const val GCM_TAG_BITS = 128
-        const val AUTH_VALIDITY_SECONDS = 60
         const val LOG_TAG = "Security"
     }
 }

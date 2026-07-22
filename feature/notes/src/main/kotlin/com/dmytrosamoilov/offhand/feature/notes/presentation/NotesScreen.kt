@@ -312,18 +312,17 @@ private fun NoteCard(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-            if (note.status == NoteStatusUi.READY) {
+            if (note.status == NoteStatusUi.READY && note.durationText != null) {
                 Spacer(modifier = Modifier.height(12.dp))
-                NoteCardMetadata(note = note)
+                NoteCardMetadata(durationText = note.durationText)
             }
         }
     }
 }
 
 @Composable
-private fun NoteCardMetadata(note: NoteCardUi) {
+private fun NoteCardMetadata(durationText: String) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
@@ -333,34 +332,7 @@ private fun NoteCardMetadata(note: NoteCardUi) {
             modifier = Modifier.size(14.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        if (note.durationText != null) {
-            MetadataText(text = note.durationText)
-        }
-        if (note.durationText != null && note.wordCount > 0) {
-            MetadataText(text = stringResource(R.string.notes_metadata_separator))
-        }
-        if (note.wordCount > 0) {
-            MetadataText(
-                text = pluralStringResource(
-                    R.plurals.notes_word_count,
-                    note.wordCount,
-                    String.format(Locale.getDefault(), "%,d", note.wordCount),
-                ),
-            )
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        Icon(
-            imageVector = Icons.Filled.CloudOff,
-            contentDescription = stringResource(R.string.notes_badge_offline),
-            modifier = Modifier.size(14.dp),
-            tint = MaterialTheme.colorScheme.outline,
-        )
-        Icon(
-            imageVector = Icons.Filled.Lock,
-            contentDescription = stringResource(R.string.notes_badge_encrypted),
-            modifier = Modifier.size(14.dp),
-            tint = MaterialTheme.colorScheme.outline,
-        )
+        MetadataText(text = durationText)
     }
 }
 
@@ -660,11 +632,19 @@ private fun NoteDetailContent(
         }
         Text(text = note.detailTitle(), style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = note.createdAt,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            MetadataText(text = note.createdAt)
+            if (note.wordCount > 0) {
+                MetadataText(text = stringResource(R.string.notes_metadata_separator))
+                MetadataText(
+                    text = pluralStringResource(
+                        R.plurals.notes_word_count,
+                        note.wordCount,
+                        String.format(Locale.getDefault(), "%,d", note.wordCount),
+                    ),
+                )
+            }
+        }
         Spacer(modifier = Modifier.height(10.dp))
         TrustBadges()
         if (showMetrics && note.metrics != null) {

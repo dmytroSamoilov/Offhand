@@ -12,15 +12,13 @@
 #   public *;
 #}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep line numbers so Crashlytics and Play Console can show exact crash locations.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 -keep class net.zetetic.database.** { *; }
 -keep class com.google.ai.edge.litertlm.** { *; }
+# Annotation referenced by play-review-ktx but not shipped in any GMS runtime artifact
+-dontwarn com.google.android.gms.common.annotation.NoNullnessRewrite
 -assumenosideeffects class android.util.Log {
     public static int v(...);
     public static int d(...);

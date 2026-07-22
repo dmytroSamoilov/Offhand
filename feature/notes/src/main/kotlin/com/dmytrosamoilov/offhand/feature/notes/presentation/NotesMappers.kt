@@ -42,7 +42,6 @@ private fun Note.toCardUi(zone: ZoneId, today: LocalDate): NoteCardUi {
             .trim()
             .take(PREVIEW_MAX_CHARS),
         durationText = durationMs?.let(::formatClock),
-        wordCount = countWords(transcript),
         status = status.toUi(),
     )
 }
@@ -62,6 +61,7 @@ internal fun Note.toDetailUi(): NoteDetailUi = NoteDetailUi(
     body = body,
     transcript = transcript,
     createdAt = formatDate(createdAtEpochMs),
+    wordCount = countWords(transcript),
     hasAudio = audioFileName != null,
     metrics = toMetricsUi(),
     status = status.toUi(),

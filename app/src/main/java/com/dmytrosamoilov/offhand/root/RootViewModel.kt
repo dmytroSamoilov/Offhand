@@ -58,9 +58,10 @@ class RootViewModel @Inject constructor(
         }
     }
 
-    // Lazy because the use case transitively opens the encrypted database —
-    // unwrapping its Keystore passphrase before the user authenticates throws
-    // UserNotAuthenticatedException. Only touch it once the app is READY.
+    // Lazy because the use case transitively opens the encrypted database — pre-0.9.1
+    // installs still hold an auth-bound Keystore key that throws
+    // UserNotAuthenticatedException until their first unlock migrates it.
+    // Only touch it once the app is READY.
     private fun resumeInterruptedNotesWhenReady() {
         launchSafely(showLoading = false) {
             uiState.first { it.phase == RootPhase.READY }

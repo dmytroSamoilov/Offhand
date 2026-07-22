@@ -41,6 +41,12 @@
     <string name="settings_feature_request_body">Hi! I\'d like to suggest a feature:\n\n\n\n—\nThe details below were added automatically. They describe my device and app version, which helps the developer understand my suggestion in context. Please leave them in if you don\'t mind sharing them.\nDevice: %1$s %2$s (%3$s)\nRAM: %4$s\nApp version: %5$s\nAndroid: %6$s (API %7$d)</string>
     <string name="settings_feature_request_no_email_app">No email app found on this device</string>
 
+    <string name="settings_about_title">About</string>
+    <string name="settings_about_version">Version %1$s</string>
+    <string name="settings_about_terms">Terms &amp; Conditions</string>
+    <string name="settings_about_privacy">Privacy Policy</string>
+    <string name="settings_about_no_browser">No app found to open this link</string>
+
     <string name="settings_developer_title">Developer</string>
     <string name="settings_developer_label">Developer options</string>
     <string name="settings_developer_description">Show model management, acceleration and processing diagnostics.</string>

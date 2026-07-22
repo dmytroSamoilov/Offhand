@@ -1,3 +1,4 @@
+import com.android.build.api.artifact.SingleArtifact
 import com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesStrategy
 
 plugins {
@@ -16,8 +17,8 @@ android {
 
     defaultConfig {
         applicationId = "com.dmytrosamoilov.offhand"
-        versionCode = 2
-        versionName = "0.9.0"
+        versionCode = 5
+        versionName = "0.9.0-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -43,12 +44,28 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 }
 
 googleServices {
     missingGoogleServicesStrategy = MissingGoogleServicesStrategy.WARN
+}
+
+androidComponents {
+    onVariants(selector().withBuildType("release")) { variant ->
+        val variantName = variant.name.replaceFirstChar(Char::uppercase)
+        val versionName = variant.outputs.single().versionName
+        val exportMapping = tasks.register<Copy>("export${variantName}Mapping") {
+            from(variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE))
+            into(layout.projectDirectory.dir("${variant.flavorName}/${variant.buildType}-mapping"))
+            rename { "mapping-${versionName.get()}.txt" }
+        }
+        listOf("assemble$variantName", "bundle$variantName").forEach { taskName ->
+            tasks.matching { it.name == taskName }.configureEach { finalizedBy(exportMapping) }
+        }
+    }
 }
 
 tasks.named("preBuild") {
