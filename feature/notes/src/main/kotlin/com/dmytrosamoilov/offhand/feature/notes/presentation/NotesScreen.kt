@@ -33,7 +33,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
@@ -905,10 +904,6 @@ private fun NoteDetailContent(
 @Composable
 private fun TrustBadges() {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        TrustBadge(
-            icon = Icons.Filled.CloudOff,
-            label = stringResource(R.string.notes_badge_offline),
-        )
         TrustBadge(
             icon = Icons.Filled.Lock,
             label = stringResource(R.string.notes_badge_encrypted),
