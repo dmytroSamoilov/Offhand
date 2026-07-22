@@ -1,5 +1,11 @@
 # Offhand
 
+[![Release](https://img.shields.io/github/v/release/dmytroSamoilov/Offhand?include_prereleases&label=release)](https://github.com/dmytroSamoilov/Offhand/releases)
+![Status](https://img.shields.io/badge/status-beta-orange)
+
+> **Beta** — Offhand is in active development. Core features work, but expect rough
+> edges and breaking changes before the first stable release.
+
 Private voice notes with on-device AI. Offhand records voice memos, meetings, and
 dictations and turns them into structured, readable notes — **entirely on device**. No
 audio, transcript, or note ever leaves your phone.
