@@ -1,5 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
+import android.net.Uri
+
 data class NotesUiState(
     val sections: List<NotesSectionUi> = emptyList(),
     val selected: NoteDetailUi? = null,
@@ -7,9 +9,16 @@ data class NotesUiState(
     val playback: AudioPlaybackUi = AudioPlaybackUi(),
     val isDeleteConfirmationVisible: Boolean = false,
     val isRetranscribeConfirmationVisible: Boolean = false,
+    val isShareDialogVisible: Boolean = false,
+    val pendingShare: NoteShareUi? = null,
     val isDeveloperMode: Boolean = false,
     val noteProgress: Map<Long, Int> = emptyMap(),
     val modelPreparation: ModelPreparationUi? = null,
+)
+
+data class NoteShareUi(
+    val uris: List<Uri>,
+    val mimeType: String,
 )
 
 data class ModelPreparationUi(

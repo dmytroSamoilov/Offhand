@@ -42,7 +42,12 @@
     <string name="notes_retranscribe_dialog_title">Re-transcribe this note?</string>
     <string name="notes_retranscribe_dialog_body">The recording will be transcribed and summarized again, replacing the current title, overview and transcript. The audio recording itself is kept.</string>
     <string name="notes_processing_percent">%1$d%%</string>
-    <string name="notes_badge_offline">Offline</string>
     <string name="notes_badge_encrypted">Encrypted</string>
     <string name="notes_more_actions_description">More actions</string>
+    <string name="notes_share_dialog_title">What would you like to share?</string>
+    <string name="notes_share_dialog_body">Please keep in mind that shared copies are no longer encrypted once they leave this device.</string>
+    <string name="notes_share_option_note">Include note</string>
+    <string name="notes_share_option_audio">Include audio</string>
+    <string name="notes_share_dialog_confirm">Share</string>
+    <string name="notes_share_date_label">Date</string>
 </resources>

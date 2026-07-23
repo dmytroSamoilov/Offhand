@@ -14,6 +14,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import io.mockk.coEvery
@@ -59,6 +60,7 @@ class NotesViewModelTest {
     private val getNote: GetNoteUseCase = mockk()
     private val updateNote: UpdateNoteUseCase = mockk(relaxed = true)
     private val deleteNote: DeleteNoteUseCase = mockk(relaxed = true)
+    private val prepareNoteShare: PrepareNoteShareUseCase = mockk()
     private val audioPlayer: PcmAudioPlayer = mockk(relaxed = true) {
         every { state } returns MutableStateFlow(PcmPlaybackState())
     }
@@ -99,6 +101,7 @@ class NotesViewModelTest {
         getNote = getNote,
         updateNote = updateNote,
         deleteNote = deleteNote,
+        prepareNoteShare = prepareNoteShare,
         audioPlayer = audioPlayer,
         audioStore = audioStore,
         sessionManager = sessionManager,

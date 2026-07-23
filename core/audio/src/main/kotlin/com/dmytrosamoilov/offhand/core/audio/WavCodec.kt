@@ -7,16 +7,15 @@ object WavCodec {
 
     const val HEADER_BYTES = 44
 
-    fun wrap(
-        pcm: ByteArray,
+    fun header(
+        dataSize: Int,
         sampleRate: Int,
         channels: Int,
         bitsPerSample: Int,
     ): ByteArray {
         val byteRate = sampleRate * channels * bitsPerSample / 8
         val blockAlign = channels * bitsPerSample / 8
-        val dataSize = pcm.size
-        val buffer = ByteBuffer.allocate(HEADER_BYTES + dataSize).order(ByteOrder.LITTLE_ENDIAN)
+        val buffer = ByteBuffer.allocate(HEADER_BYTES).order(ByteOrder.LITTLE_ENDIAN)
         buffer.put("RIFF".toByteArray(Charsets.US_ASCII))
         buffer.putInt(36 + dataSize)
         buffer.put("WAVE".toByteArray(Charsets.US_ASCII))
@@ -30,6 +29,17 @@ object WavCodec {
         buffer.putShort(bitsPerSample.toShort())
         buffer.put("data".toByteArray(Charsets.US_ASCII))
         buffer.putInt(dataSize)
+        return buffer.array()
+    }
+
+    fun wrap(
+        pcm: ByteArray,
+        sampleRate: Int,
+        channels: Int,
+        bitsPerSample: Int,
+    ): ByteArray {
+        val buffer = ByteBuffer.allocate(HEADER_BYTES + pcm.size)
+        buffer.put(header(pcm.size, sampleRate, channels, bitsPerSample))
         buffer.put(pcm)
         return buffer.array()
     }
