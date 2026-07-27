@@ -49,6 +49,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -117,12 +118,25 @@ private fun RecordingBottomSheet(
         skipPartiallyExpanded = true,
         confirmValueChange = { target -> target != SheetValue.Hidden || !isCapturing },
     )
-    var isNoteSaved by remember { mutableStateOf(false) }
+    var isNoteSaved by rememberSaveable { mutableStateOf(false) }
+    var wasSessionActive by rememberSaveable { mutableStateOf(false) }
+    val isSessionFinished = wasSessionActive && !isNoteSaved &&
+        state.phase == RecordingPhaseUi.IDLE
 
     LaunchedEffect(Unit) { viewModel.onSheetOpened() }
     LaunchedEffect(state.savedNoteId) {
         if (state.savedNoteId != null) {
             isNoteSaved = true
+        }
+    }
+    LaunchedEffect(state.phase) {
+        if (state.phase.isSessionActive()) {
+            wasSessionActive = true
+        }
+    }
+    LaunchedEffect(isSessionFinished) {
+        if (isSessionFinished) {
+            onDismiss()
         }
     }
 
@@ -139,6 +153,7 @@ private fun RecordingBottomSheet(
         ) {
             when {
                 isNoteSaved -> SavedContent(onDone = onDismiss)
+                isSessionFinished -> Unit
                 state.phase == RecordingPhaseUi.IDLE -> IdleContent(
                     onRecordClick = viewModel::onStartRecording,
                 )
@@ -164,6 +179,9 @@ private fun RecordingBottomSheet(
         }
     }
 }
+
+private fun RecordingPhaseUi.isSessionActive(): Boolean =
+    this == RecordingPhaseUi.RECORDING || this == RecordingPhaseUi.FINISHING_TRANSCRIPTION
 
 @Composable
 private fun SavedContent(onDone: () -> Unit) {
