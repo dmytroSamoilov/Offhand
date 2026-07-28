@@ -12,7 +12,13 @@ import kotlinx.serialization.Serializable
 data object NotesRoute
 
 @Serializable
+data object SettingsGraphRoute
+
+@Serializable
 data object SettingsRoute
+
+@Serializable
+data object AboutSupportRoute
 
 enum class TopLevelDestination(
     @param:StringRes val labelRes: Int,
@@ -20,5 +26,5 @@ enum class TopLevelDestination(
     val route: Any,
 ) {
     NOTES(R.string.destination_notes, Icons.AutoMirrored.Filled.Notes, NotesRoute),
-    SETTINGS(R.string.destination_settings, Icons.Filled.Settings, SettingsRoute),
+    SETTINGS(R.string.destination_settings, Icons.Filled.Settings, SettingsGraphRoute),
 }

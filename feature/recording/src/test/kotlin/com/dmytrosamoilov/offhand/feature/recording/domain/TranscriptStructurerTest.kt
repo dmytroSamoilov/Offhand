@@ -4,6 +4,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.AiBackend
 import com.dmytrosamoilov.offhand.core.ai.api.AiResult
 import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
 import com.dmytrosamoilov.offhand.core.ai.api.TokenEstimator
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -27,14 +28,17 @@ class TranscriptStructurerTest {
 
     @Test
     fun `single call produces title and overview, transcript stays verbatim`() = runTest {
-        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote, any()) } returns
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.MEETING), any()) } returns
             result(
                 "<thinking>Two segments about a weekly sync.</thinking>\n" +
                     """{"title": "Weekly sync notes", "overview": "## Decisions\n- Ship Friday"}""",
                 timeMs = 250,
             )
 
-        val note = structurer.structure(listOf("uh so like weekly sync", "um we ship friday"))
+        val note = structurer.structure(
+            preset = NotePreset.MEETING,
+            chunkTranscripts = listOf("uh so like weekly sync", "um we ship friday"),
+        )
 
         assertEquals("Weekly sync notes", note.title)
         assertEquals("## Decisions\n- Ship Friday", note.overview)
@@ -42,7 +46,7 @@ class TranscriptStructurerTest {
         assertEquals(250, note.structuringTimeMs)
         coVerify(exactly = 1) {
             aiBackend.processText(
-                ModelPromptSet.Gemma4.structureNote,
+                ModelPromptSet.Gemma4.structureNote(NotePreset.MEETING),
                 "\"uh so like weekly sync\",\n\n\"um we ship friday\"",
             )
         }
@@ -53,11 +57,14 @@ class TranscriptStructurerTest {
         coEvery { aiBackend.processText(any(), any()) } returns
             result("""{"title": "Quotes", "overview": "- noted"}""")
 
-        structurer.structure(listOf("""he said "ship it" today"""))
+        structurer.structure(
+            preset = NotePreset.MEETING,
+            chunkTranscripts = listOf("""he said "ship it" today"""),
+        )
 
         coVerify {
             aiBackend.processText(
-                ModelPromptSet.Gemma4.structureNote,
+                ModelPromptSet.Gemma4.structureNote(NotePreset.MEETING),
                 "\"he said 'ship it' today\"",
             )
         }
@@ -68,7 +75,7 @@ class TranscriptStructurerTest {
         coEvery { aiBackend.processText(any(), any()) } returns
             result("```json\n{\"title\": \"Fenced\", \"overview\": \"- body\"}\n```")
 
-        val note = structurer.structure(listOf("short transcript"))
+        val note = structurer.structure(listOf("short transcript"), NotePreset.MEETING)
 
         assertEquals("Fenced", note.title)
         assertEquals("- body", note.overview)
@@ -79,7 +86,7 @@ class TranscriptStructurerTest {
         coEvery { aiBackend.processText(any(), any()) } returns
             result("{\"title\": \"Планування релізу\", \"overview\": \"## Рішення\n- Реліз у п'ятницю\n- Тестуємо у четвер\"}")
 
-        val note = structurer.structure(listOf("коротка розмова"))
+        val note = structurer.structure(listOf("коротка розмова"), NotePreset.MEETING)
 
         assertEquals("Планування релізу", note.title)
         assertEquals("## Рішення\n- Реліз у п'ятницю\n- Тестуємо у четвер", note.overview)
@@ -90,7 +97,7 @@ class TranscriptStructurerTest {
         coEvery { aiBackend.processText(any(), any()) } returns
             result("{\"title\": \"Team sync\", \"overview\": \"- point one\\n- point two\", }")
 
-        val note = structurer.structure(listOf("short"))
+        val note = structurer.structure(listOf("short"), NotePreset.MEETING)
 
         assertEquals("Team sync", note.title)
         assertEquals("- point one\n- point two", note.overview)
@@ -102,7 +109,7 @@ class TranscriptStructurerTest {
         coEvery { aiBackend.processText(any(), any()) } returns
             result("```json\n{\"headline\": broken, no fields here}\n```")
 
-        val note = structurer.structure(listOf("short"))
+        val note = structurer.structure(listOf("short"), NotePreset.SUMMARY)
 
         assertTrue(!note.overview.contains("{") && !note.overview.contains("```"))
         assertTrue(!note.title.contains("{") && !note.title.contains("json"))
@@ -113,7 +120,7 @@ class TranscriptStructurerTest {
         coEvery { aiBackend.processText(any(), any()) } returns
             result("Budget approved for the next quarter of work")
 
-        val note = structurer.structure(listOf("short transcript"))
+        val note = structurer.structure(listOf("short transcript"), NotePreset.SUMMARY)
 
         assertEquals("Budget approved for the next quarter of work", note.overview)
         assertEquals("Budget approved for the next quarter of work", note.title)
@@ -123,7 +130,7 @@ class TranscriptStructurerTest {
     fun `blank model output falls back to the transcript`() = runTest {
         coEvery { aiBackend.processText(any(), any()) } returns result("   ")
 
-        val note = structurer.structure(listOf("part one"))
+        val note = structurer.structure(listOf("part one"), NotePreset.SUMMARY)
 
         assertEquals("part one", note.overview)
         assertEquals("part one", note.title)
@@ -133,10 +140,10 @@ class TranscriptStructurerTest {
     fun `over-budget transcript is structured in segments with one call each`() = runTest {
         val paragraph = "word ".repeat(2_000).trim()
         val longChunks = List(8) { paragraph }
-        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote, any()) } returns
-            result("""{"title": "Long meeting recap", "overview": "## Section\n- point"}""")
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.MEETING), any()) } returns
+            result("""{"title": "Long meeting recap", "overview": "## Decisions\n- point"}""")
 
-        val note = structurer.structure(longChunks)
+        val note = structurer.structure(longChunks, NotePreset.MEETING)
 
         assertEquals("Long meeting recap", note.title)
         assertTrue(note.transcript.startsWith(paragraph))
@@ -145,12 +152,19 @@ class TranscriptStructurerTest {
         ).size
         assertTrue(segmentCount > 1)
         coVerify(exactly = segmentCount) {
-            aiBackend.processText(ModelPromptSet.Gemma4.structureNote, any())
+            aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.MEETING), any())
         }
-        assertEquals(
-            List(segmentCount) { "## Section\n- point" }.joinToString("\n\n"),
-            note.overview,
-        )
+        assertEquals("## Decisions\n- point", note.overview)
+    }
+
+    @Test
+    fun `summary preset strips headings and bullets the model still emits`() = runTest {
+        coEvery { aiBackend.processText(any(), any()) } returns
+            result("""{"title": "My day", "overview": "## Today\n- I am tired\n- I ship on Friday"}""")
+
+        val note = structurer.structure(listOf("short transcript"), NotePreset.SUMMARY)
+
+        assertEquals("Today\nI am tired\nI ship on Friday", note.overview)
     }
 
     @Test

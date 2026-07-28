@@ -42,6 +42,7 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -96,6 +97,8 @@ import com.dmytrosamoilov.offhand.core.designsystem.component.MorphingLoadingInd
 import com.dmytrosamoilov.offhand.core.designsystem.component.RoundedCheckbox
 import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
+import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
+import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOptionCard
 import com.dmytrosamoilov.offhand.feature.notes.R
 import java.util.Locale
 import kotlinx.coroutines.launch
@@ -187,6 +190,52 @@ fun NotesScreen(
             onConfirm = viewModel::onShareConfirmed,
             onDismiss = viewModel::onShareDismissed,
         )
+    }
+
+    val selectedPreset = state.selected?.preset
+    if (state.isPresetSheetVisible && selectedPreset != null) {
+        NotePresetSheet(
+            selected = selectedPreset,
+            onSelected = viewModel::onPresetSelected,
+            onDismiss = viewModel::onPresetSheetDismissed,
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NotePresetSheet(
+    selected: NotePresetOption,
+    onSelected: (NotePresetOption) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.notes_preset_sheet_title),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                text = stringResource(R.string.notes_preset_sheet_body),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+            NotePresetOption.entries.forEach { option ->
+                NotePresetOptionCard(
+                    option = option,
+                    isSelected = option == selected,
+                    onClick = { onSelected(option) },
+                )
+            }
+        }
     }
 }
 
@@ -624,6 +673,7 @@ private fun NoteDetailPane(
             onSeek = viewModel::onSeekRequested,
             onRetryTranscription = viewModel::onRetryTranscriptionRequested,
             onRetranscribeRequested = viewModel::onRetranscribeRequested,
+            onPresetRequested = viewModel::onPresetSheetRequested,
         )
     }
 }
@@ -658,6 +708,7 @@ private fun NoteDetail(
     onSeek: (Float) -> Unit,
     onRetryTranscription: () -> Unit,
     onRetranscribeRequested: () -> Unit,
+    onPresetRequested: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -669,6 +720,7 @@ private fun NoteDetail(
                 onShareRequested = onShareRequested,
                 onDeleteRequested = onDeleteRequested,
                 onRetranscribeRequested = onRetranscribeRequested,
+                onPresetRequested = onPresetRequested,
             )
         },
         contentWindowInsets = WindowInsets(0.dp),
@@ -695,6 +747,7 @@ private fun NoteDetailTopBar(
     onShareRequested: () -> Unit,
     onDeleteRequested: () -> Unit,
     onRetranscribeRequested: () -> Unit,
+    onPresetRequested: () -> Unit,
 ) {
     AppTopBar(
         title = "",
@@ -717,7 +770,9 @@ private fun NoteDetailTopBar(
                 ShareNoteButton(onClick = onShareRequested)
                 NoteOverflowMenu(
                     showRetranscribe = note.hasAudio,
+                    showPreset = note.transcript.isNotBlank(),
                     onRetranscribeRequested = onRetranscribeRequested,
+                    onPresetRequested = onPresetRequested,
                     onDeleteRequested = onDeleteRequested,
                 )
             } else {
@@ -745,7 +800,9 @@ private fun ShareNoteButton(onClick: () -> Unit) {
 @Composable
 private fun NoteOverflowMenu(
     showRetranscribe: Boolean,
+    showPreset: Boolean,
     onRetranscribeRequested: () -> Unit,
+    onPresetRequested: () -> Unit,
     onDeleteRequested: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -757,6 +814,14 @@ private fun NoteOverflowMenu(
             )
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            if (showPreset) {
+                PresetMenuItem(
+                    onClick = {
+                        expanded = false
+                        onPresetRequested()
+                    },
+                )
+            }
             if (showRetranscribe) {
                 RetranscribeMenuItem(
                     onClick = {
@@ -773,6 +838,17 @@ private fun NoteOverflowMenu(
             )
         }
     }
+}
+
+@Composable
+private fun PresetMenuItem(onClick: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text(text = stringResource(R.string.notes_preset_description)) },
+        leadingIcon = {
+            Icon(imageVector = Icons.Filled.Tune, contentDescription = null)
+        },
+        onClick = onClick,
+    )
 }
 
 @Composable

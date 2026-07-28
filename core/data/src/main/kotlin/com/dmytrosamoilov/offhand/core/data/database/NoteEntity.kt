@@ -16,4 +16,5 @@ internal data class NoteEntity(
     val audioFileName: String?,
     val durationMs: Long?,
     val status: String,
+    val preset: String,
 )

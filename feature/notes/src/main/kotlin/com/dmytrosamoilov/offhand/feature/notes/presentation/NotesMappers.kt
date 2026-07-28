@@ -4,7 +4,9 @@ import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
 import com.dmytrosamoilov.offhand.core.audio.PcmPlaybackState
 import com.dmytrosamoilov.offhand.core.common.DurationFormatter
 import com.dmytrosamoilov.offhand.core.data.domain.Note
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareBundle
 import java.time.Instant
 import java.time.LocalDate
@@ -67,12 +69,27 @@ internal fun Note.toDetailUi(): NoteDetailUi = NoteDetailUi(
     hasAudio = audioFileName != null,
     metrics = toMetricsUi(),
     status = status.toUi(),
+    preset = preset.toUi(),
 )
 
 private fun NoteStatus.toUi(): NoteStatusUi = when (this) {
     NoteStatus.PROCESSING -> NoteStatusUi.PROCESSING
     NoteStatus.READY -> NoteStatusUi.READY
     NoteStatus.FAILED -> NoteStatusUi.FAILED
+}
+
+private fun NotePreset.toUi(): NotePresetOption = when (this) {
+    NotePreset.SUMMARY -> NotePresetOption.SUMMARY
+    NotePreset.MEETING -> NotePresetOption.MEETING
+    NotePreset.VISIT -> NotePresetOption.VISIT
+    NotePreset.LEGAL -> NotePresetOption.LEGAL
+}
+
+internal fun NotePresetOption.toDomain(): NotePreset = when (this) {
+    NotePresetOption.SUMMARY -> NotePreset.SUMMARY
+    NotePresetOption.MEETING -> NotePreset.MEETING
+    NotePresetOption.VISIT -> NotePreset.VISIT
+    NotePresetOption.LEGAL -> NotePreset.LEGAL
 }
 
 internal fun AiCoreDownloadState.toPreparationUi(): ModelPreparationUi? = when (this) {

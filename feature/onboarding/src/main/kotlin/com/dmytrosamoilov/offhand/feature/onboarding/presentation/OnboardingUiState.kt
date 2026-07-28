@@ -1,15 +1,19 @@
 package com.dmytrosamoilov.offhand.feature.onboarding.presentation
 
+import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
+
 data class OnboardingUiState(
     val step: OnboardingStep = OnboardingStep.DEVICE_CHECK,
     val deviceSpecs: DeviceSpecsUi? = null,
     val downloadSizeGb: String = "",
+    val notePreset: NotePresetOption = NotePresetOption.SUMMARY,
 )
 
 enum class OnboardingStep {
     DEVICE_CHECK,
     DEVICE_INCOMPATIBLE,
     PRIVACY,
+    NOTE_STYLE,
     DEVICE_LOCK,
     TELEMETRY_CONSENT,
     MODEL_DOWNLOAD,

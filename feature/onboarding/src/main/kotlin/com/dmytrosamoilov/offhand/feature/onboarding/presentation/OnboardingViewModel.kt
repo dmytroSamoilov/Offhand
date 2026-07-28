@@ -6,7 +6,9 @@ import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.device.DeviceCapabilityChecker
 import com.dmytrosamoilov.offhand.core.device.isLocalLlmCapable
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
+import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.CompleteOnboardingUseCase
+import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetNotePresetUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.service.ModelDownloadService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,6 +26,7 @@ class OnboardingViewModel @Inject constructor(
     private val modelManager: ModelManager,
     private val appLockManager: AppLockManager,
     private val setTelemetryConsent: SetTelemetryConsentUseCase,
+    private val setNotePreset: SetNotePresetUseCase,
     private val completeOnboarding: CompleteOnboardingUseCase,
 ) : BaseViewModel() {
 
@@ -35,7 +38,18 @@ class OnboardingViewModel @Inject constructor(
     }
 
     fun onPrivacyContinue() {
-        mutableUiState.update { it.copy(step = nextStepAfterPrivacy()) }
+        mutableUiState.update { it.copy(step = OnboardingStep.NOTE_STYLE) }
+    }
+
+    fun onNoteStyleSelected(option: NotePresetOption) {
+        mutableUiState.update { it.copy(notePreset = option) }
+    }
+
+    fun onNoteStyleContinue() {
+        launchSafely {
+            setNotePreset(uiState.value.notePreset.toDomain())
+            mutableUiState.update { it.copy(step = nextStepAfterNoteStyle()) }
+        }
     }
 
     fun onDeviceLockSkipped() {
@@ -62,7 +76,7 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
-    private fun nextStepAfterPrivacy(): OnboardingStep =
+    private fun nextStepAfterNoteStyle(): OnboardingStep =
         if (appLockManager.isDeviceSecure) {
             OnboardingStep.TELEMETRY_CONSENT
         } else {

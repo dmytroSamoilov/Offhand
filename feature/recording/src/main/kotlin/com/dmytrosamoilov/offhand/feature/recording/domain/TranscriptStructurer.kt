@@ -4,6 +4,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.AiBackend
 import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.TokenEstimator
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.serialization.Serializable
@@ -25,6 +26,7 @@ class TranscriptStructurer @Inject constructor(
 
     suspend fun structure(
         chunkTranscripts: List<String>,
+        preset: NotePreset,
         onProgress: (Float) -> Unit = {},
     ): StructuredNote {
         // Chunks arrive already proofread and are stored as-is — only title
@@ -35,7 +37,7 @@ class TranscriptStructurer @Inject constructor(
         }
         var totalTimeMs = 0L
         var backend = HardwareBackend.CPU
-        val prompt = ModelPromptSet.forFamily(modelManager.model.family).structureNote
+        val prompt = ModelPromptSet.forFamily(modelManager.model.family).structureNote(preset)
         val segments = splitIntoSegments(quoted)
         val parts = segments.mapIndexed { index, segment ->
             val result = aiBackend.processText(prompt, segment)
@@ -44,7 +46,7 @@ class TranscriptStructurer @Inject constructor(
             onProgress((index + 1) / segments.size.toFloat())
             parseNoteJson(result.text)
         }
-        val overview = combinedOverview(parts, transcript)
+        val overview = combinedOverview(parts, transcript, preset)
         return StructuredNote(
             title = combinedTitle(parts, overview),
             overview = overview,
@@ -54,13 +56,26 @@ class TranscriptStructurer @Inject constructor(
         )
     }
 
+    fun splitStoredTranscript(transcript: String): List<String> =
+        transcript.split(PARAGRAPH_SEPARATOR).filter { it.isNotBlank() }
+
     private fun combinedTitle(parts: List<ParsedNote>, overview: String): String =
         parts.firstNotNullOfOrNull { it.title.ifBlank { null } } ?: fallbackTitle(overview)
 
-    private fun combinedOverview(parts: List<ParsedNote>, transcript: String): String =
-        parts.mapNotNull { it.overview.ifBlank { null } }
-            .joinToString(PARAGRAPH_SEPARATOR)
-            .ifBlank { transcript }
+    private fun combinedOverview(
+        parts: List<ParsedNote>,
+        transcript: String,
+        preset: NotePreset,
+    ): String {
+        val overviews = parts.mapNotNull { it.overview.ifBlank { null } }
+        val sections = NotePresetPrompt.sections(preset)
+        val combined = if (sections.isEmpty()) {
+            NoteProseFormatter.format(overviews)
+        } else {
+            NoteSectionMerger.merge(overviews, sections)
+        }
+        return combined.ifBlank { transcript }
+    }
 
     private fun parseNoteJson(raw: String): ParsedNote {
         val cleaned = ModelResponseCleaner.stripThinking(raw)

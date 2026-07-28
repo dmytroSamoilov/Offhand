@@ -7,8 +7,11 @@ import com.dmytrosamoilov.offhand.core.ai.api.ModelFamily
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.device.DeviceCapability
 import com.dmytrosamoilov.offhand.core.device.DeviceCapabilityChecker
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
+import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.CompleteOnboardingUseCase
+import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetNotePresetUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.service.ModelDownloadService
 import io.mockk.coVerify
@@ -59,6 +62,7 @@ class OnboardingViewModelTest {
     private val modelManager: ModelManager = mockk()
     private val appLockManager: AppLockManager = mockk()
     private val setTelemetryConsent: SetTelemetryConsentUseCase = mockk(relaxed = true)
+    private val setNotePreset: SetNotePresetUseCase = mockk(relaxed = true)
     private val completeOnboarding: CompleteOnboardingUseCase = mockk(relaxed = true)
 
     @Before
@@ -83,6 +87,7 @@ class OnboardingViewModelTest {
         modelManager = modelManager,
         appLockManager = appLockManager,
         setTelemetryConsent = setTelemetryConsent,
+        setNotePreset = setNotePreset,
         completeOnboarding = completeOnboarding,
     )
 
@@ -115,21 +120,38 @@ class OnboardingViewModelTest {
     }
 
     @Test
-    fun `privacy continue skips lock step on secure device`() = runTest(dispatcher) {
+    fun `privacy continue moves to note style step`() = runTest(dispatcher) {
         val viewModel = capableViewModel()
 
         viewModel.onPrivacyContinue()
 
+        assertEquals(OnboardingStep.NOTE_STYLE, viewModel.uiState.value.step)
+        assertEquals(NotePresetOption.SUMMARY, viewModel.uiState.value.notePreset)
+    }
+
+    @Test
+    fun `note style continue persists choice and skips lock on secure device`() = runTest(dispatcher) {
+        val viewModel = capableViewModel()
+        viewModel.onPrivacyContinue()
+
+        viewModel.onNoteStyleSelected(NotePresetOption.VISIT)
+        viewModel.onNoteStyleContinue()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { setNotePreset(NotePreset.VISIT) }
         assertEquals(OnboardingStep.TELEMETRY_CONSENT, viewModel.uiState.value.step)
     }
 
     @Test
-    fun `privacy continue shows lock step on unsecured device`() = runTest(dispatcher) {
+    fun `note style continue shows lock step on unsecured device`() = runTest(dispatcher) {
         every { appLockManager.isDeviceSecure } returns false
         val viewModel = capableViewModel()
-
         viewModel.onPrivacyContinue()
 
+        viewModel.onNoteStyleContinue()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { setNotePreset(NotePreset.SUMMARY) }
         assertEquals(OnboardingStep.DEVICE_LOCK, viewModel.uiState.value.step)
     }
 
@@ -138,6 +160,8 @@ class OnboardingViewModelTest {
         every { appLockManager.isDeviceSecure } returns false
         val viewModel = capableViewModel()
         viewModel.onPrivacyContinue()
+        viewModel.onNoteStyleContinue()
+        dispatcher.scheduler.advanceUntilIdle()
 
         viewModel.onDeviceLockSkipped()
 
@@ -149,6 +173,8 @@ class OnboardingViewModelTest {
         every { appLockManager.isDeviceSecure } returns false
         val viewModel = capableViewModel()
         viewModel.onPrivacyContinue()
+        viewModel.onNoteStyleContinue()
+        dispatcher.scheduler.advanceUntilIdle()
 
         every { appLockManager.isDeviceSecure } returns true
         viewModel.onDeviceLockRecheck()
@@ -161,6 +187,8 @@ class OnboardingViewModelTest {
         every { appLockManager.isDeviceSecure } returns false
         val viewModel = capableViewModel()
         viewModel.onPrivacyContinue()
+        viewModel.onNoteStyleContinue()
+        dispatcher.scheduler.advanceUntilIdle()
 
         viewModel.onDeviceLockRecheck()
 
@@ -180,6 +208,8 @@ class OnboardingViewModelTest {
     fun `consent choice persists preference and moves to download step`() = runTest(dispatcher) {
         val viewModel = capableViewModel()
         viewModel.onPrivacyContinue()
+        viewModel.onNoteStyleContinue()
+        dispatcher.scheduler.advanceUntilIdle()
 
         viewModel.onConsentChosen(true)
         dispatcher.scheduler.advanceUntilIdle()
@@ -193,6 +223,7 @@ class OnboardingViewModelTest {
     fun `download continue starts download and completes onboarding`() = runTest(dispatcher) {
         val viewModel = capableViewModel()
         viewModel.onPrivacyContinue()
+        viewModel.onNoteStyleContinue()
         viewModel.onConsentChosen(false)
         dispatcher.scheduler.advanceUntilIdle()
 

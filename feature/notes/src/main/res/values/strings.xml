@@ -50,4 +50,7 @@
     <string name="notes_share_option_audio">Include audio</string>
     <string name="notes_share_dialog_confirm">Share</string>
     <string name="notes_share_date_label">Date</string>
+    <string name="notes_preset_description">Change note style</string>
+    <string name="notes_preset_sheet_title">Rewrite this note as</string>
+    <string name="notes_preset_sheet_body">The recording is kept. The title and overview are written again from the transcript in the style you pick.</string>
 </resources>

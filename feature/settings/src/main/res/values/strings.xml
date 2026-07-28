@@ -27,6 +27,9 @@
     <string name="settings_delete_model_dialog_confirm">Delete</string>
     <string name="settings_delete_model_dialog_cancel">Cancel</string>
 
+    <string name="settings_note_style_title">Note style</string>
+    <string name="settings_note_style_note">Applies to new recordings. You can restyle an existing note from the note screen.</string>
+
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_dynamic_color_label">Wallpaper colors</string>
     <string name="settings_dynamic_color_description">Color the app from your wallpaper (Material You) instead of the built-in palette.</string>
@@ -40,6 +43,10 @@
     <string name="settings_feature_request_subject">[%1$s] feature request</string>
     <string name="settings_feature_request_body">Hi! I\'d like to suggest a feature:\n\n\n\n—\nThe details below were added automatically. They describe my device and app version, which helps the developer understand my suggestion in context. Please leave them in if you don\'t mind sharing them.\nDevice: %1$s %2$s (%3$s)\nRAM: %4$s\nApp version: %5$s\nAndroid: %6$s (API %7$d)</string>
     <string name="settings_feature_request_no_email_app">No email app found on this device</string>
+
+    <string name="settings_about_support_title">About &amp; support</string>
+    <string name="settings_about_support_subtitle">Version %1$s · feedback, privacy and legal</string>
+    <string name="settings_about_support_back">Back to settings</string>
 
     <string name="settings_about_title">About</string>
     <string name="settings_about_version">Version %1$s</string>

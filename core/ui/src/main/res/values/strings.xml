@@ -2,4 +2,12 @@
 <resources>
     <string name="core_ui_error_title">Something went wrong</string>
     <string name="core_ui_error_confirm">OK</string>
+    <string name="core_ui_note_preset_summary">Summary</string>
+    <string name="core_ui_note_preset_summary_description">A clean write-up of what was said, without repetition or filler.</string>
+    <string name="core_ui_note_preset_meeting">Meeting notes</string>
+    <string name="core_ui_note_preset_meeting_description">Discussion, decisions, action items and open questions.</string>
+    <string name="core_ui_note_preset_visit">Visit report</string>
+    <string name="core_ui_note_preset_visit_description">Who the visit was about, observations, what was done and follow-ups.</string>
+    <string name="core_ui_note_preset_legal">Legal note</string>
+    <string name="core_ui_note_preset_legal_description">Matter, facts stated, instructions, advice given and next steps.</string>
 </resources>

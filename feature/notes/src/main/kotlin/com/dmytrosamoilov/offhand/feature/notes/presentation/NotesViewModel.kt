@@ -7,6 +7,7 @@ import com.dmytrosamoilov.offhand.core.audio.PcmAudioPlayer
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
+import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
@@ -107,9 +108,24 @@ class NotesViewModel @Inject constructor(
                 editor = null,
                 isDeleteConfirmationVisible = false,
                 isShareDialogVisible = false,
+                isPresetSheetVisible = false,
                 pendingShare = null,
             )
         }
+    }
+
+    fun onPresetSheetRequested() {
+        mutableUiState.update { it.copy(isPresetSheetVisible = true) }
+    }
+
+    fun onPresetSheetDismissed() {
+        mutableUiState.update { it.copy(isPresetSheetVisible = false) }
+    }
+
+    fun onPresetSelected(preset: NotePresetOption) {
+        val note = selectedNote ?: return
+        mutableUiState.update { it.copy(isPresetSheetVisible = false) }
+        RecordingService.restructureNote(context, note.id, preset.toDomain())
     }
 
     fun onShareRequested() {

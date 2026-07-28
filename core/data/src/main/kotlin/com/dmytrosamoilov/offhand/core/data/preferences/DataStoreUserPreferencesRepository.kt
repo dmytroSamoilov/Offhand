@@ -5,8 +5,10 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -33,6 +35,7 @@ internal class DataStoreUserPreferencesRepository @Inject constructor(
                     (preferences[KEY_DEVELOPER_OPTIONS] ?: false),
                 savedRecordingsCount = preferences[KEY_SAVED_RECORDINGS_COUNT] ?: 0,
                 lastReviewRequestAtMs = preferences[KEY_LAST_REVIEW_REQUEST_AT_MS] ?: 0L,
+                notePreset = NotePreset.fromName(preferences[KEY_NOTE_PRESET]),
             )
         }
 
@@ -50,6 +53,10 @@ internal class DataStoreUserPreferencesRepository @Inject constructor(
 
     override suspend fun setDeveloperOptions(enabled: Boolean) {
         context.userPreferencesDataStore.edit { it[KEY_DEVELOPER_OPTIONS] = enabled }
+    }
+
+    override suspend fun setNotePreset(preset: NotePreset) {
+        context.userPreferencesDataStore.edit { it[KEY_NOTE_PRESET] = preset.name }
     }
 
     override suspend fun incrementSavedRecordingsCount() {
@@ -70,5 +77,6 @@ internal class DataStoreUserPreferencesRepository @Inject constructor(
         val KEY_DEVELOPER_OPTIONS = booleanPreferencesKey("developer_options")
         val KEY_SAVED_RECORDINGS_COUNT = intPreferencesKey("saved_recordings_count")
         val KEY_LAST_REVIEW_REQUEST_AT_MS = longPreferencesKey("last_review_request_at_ms")
+        val KEY_NOTE_PRESET = stringPreferencesKey("note_preset")
     }
 }

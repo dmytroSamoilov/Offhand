@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
 import android.net.Uri
+import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 
 data class NotesUiState(
     val sections: List<NotesSectionUi> = emptyList(),
@@ -10,6 +11,7 @@ data class NotesUiState(
     val isDeleteConfirmationVisible: Boolean = false,
     val isRetranscribeConfirmationVisible: Boolean = false,
     val isShareDialogVisible: Boolean = false,
+    val isPresetSheetVisible: Boolean = false,
     val pendingShare: NoteShareUi? = null,
     val isDeveloperMode: Boolean = false,
     val noteProgress: Map<Long, Int> = emptyMap(),
@@ -56,6 +58,7 @@ data class NoteDetailUi(
     val hasAudio: Boolean,
     val metrics: NoteMetricsUi?,
     val status: NoteStatusUi,
+    val preset: NotePresetOption,
 )
 
 enum class NoteStatusUi {

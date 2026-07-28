@@ -9,10 +9,15 @@ import com.dmytrosamoilov.offhand.core.audio.AudioChunk
 import com.dmytrosamoilov.offhand.core.audio.ChunkBoundaryReason
 import com.dmytrosamoilov.offhand.core.audio.StreamingAudioRecorder
 import com.dmytrosamoilov.offhand.core.audio.VadSnapshot
+import com.dmytrosamoilov.offhand.core.data.domain.Note
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateProcessingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNotePresetUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
@@ -61,6 +66,10 @@ class RecordingSessionManagerTest {
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase = mockk {
         coEvery { this@mockk.invoke() } returns true
     }
+    private val getNotePreset: GetNotePresetUseCase = mockk {
+        coEvery { this@mockk.invoke() } returns NotePreset.SUMMARY
+    }
+    private val getNote: GetNoteUseCase = mockk()
     private val audioStore: EncryptedAudioStore = mockk {
         every { newRecordingFileName() } returns "note-1.pcm.enc"
         every { openForWrite("note-1.pcm.enc") } returns ByteArrayOutputStream()
@@ -71,6 +80,19 @@ class RecordingSessionManagerTest {
         wav = ByteArray(44 + 320) { id.toByte() },
         durationMs = 10L,
         reason = ChunkBoundaryReason.SILENCE_GAP,
+    )
+
+    private fun storedNote(id: Long, transcript: String = "recovered transcript") = Note(
+        id = id,
+        title = "Recording",
+        body = "",
+        transcript = transcript,
+        createdAtEpochMs = 0,
+        transcriptionTimeMs = null,
+        structuringTimeMs = null,
+        hardwareBackend = null,
+        status = NoteStatus.PROCESSING,
+        preset = NotePreset.SUMMARY,
     )
 
     private fun sttResult(text: String) = TranscriptionResult(
@@ -101,6 +123,8 @@ class RecordingSessionManagerTest {
         markNoteProcessing = markNoteProcessing,
         registerSavedRecording = registerSavedRecording,
         isAiCoreDownloaded = isAiCoreDownloaded,
+        getNotePreset = getNotePreset,
+        getNote = getNote,
         audioStore = audioStore,
         scope = this,
     )
@@ -114,16 +138,16 @@ class RecordingSessionManagerTest {
             sttResult("first part of the meeting"),
             sttResult("second part of the meeting"),
         )
-        coEvery { createProcessingNote("note-1.pcm.enc", any()) } returns 42L
+        coEvery { createProcessingNote("note-1.pcm.enc", any(), NotePreset.SUMMARY) } returns 42L
         stubProofreadEcho()
-        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote, any()) } returns AiResult(
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns AiResult(
             text = """{"title": "Meeting notes", "overview": "- first\n- second"}""",
             processingTimeMs = 300,
             inputTokens = 20,
             outputTokens = 20,
             hardwareBackend = HardwareBackend.CPU,
         )
-        coEvery { completeNote(any(), any(), any(), any(), any(), any(), any()) } returns true
+        coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
         val events = mutableListOf<NoteProcessingEvent>()
 
         val manager = manager()
@@ -141,11 +165,12 @@ class RecordingSessionManagerTest {
             completeNote(
                 noteId = 42L,
                 title = "Meeting notes",
-                body = "- first\n- second",
+                body = "first\nsecond",
                 transcript = "first part of the meeting\n\nsecond part of the meeting",
                 transcriptionTimeMs = 400,
                 structuringTimeMs = 400,
                 hardwareBackend = "CPU",
+                preset = NotePreset.SUMMARY,
             )
         }
         coroutineContext.cancelChildren()
@@ -158,16 +183,16 @@ class RecordingSessionManagerTest {
         justRun { recorder.resetVad() }
         coEvery { speechToText.transcribe(any()) } returns
             sttResult("only good chunk") andThenThrows IllegalStateException("engine hiccup")
-        coEvery { createProcessingNote(any(), any()) } returns 7L
+        coEvery { createProcessingNote(any(), any(), any()) } returns 7L
         stubProofreadEcho()
-        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote, any()) } returns AiResult(
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns AiResult(
             text = """{"title": "Partial notes", "overview": "- good chunk content"}""",
             processingTimeMs = 100,
             inputTokens = 5,
             outputTokens = 5,
             hardwareBackend = HardwareBackend.CPU,
         )
-        coEvery { completeNote(any(), any(), any(), any(), any(), any(), any()) } returns true
+        coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
 
         val manager = manager()
         manager.start()
@@ -178,11 +203,12 @@ class RecordingSessionManagerTest {
             completeNote(
                 noteId = 7L,
                 title = "Partial notes",
-                body = "- good chunk content",
+                body = "good chunk content",
                 transcript = "only good chunk",
                 transcriptionTimeMs = 200,
                 structuringTimeMs = 150,
                 hardwareBackend = "CPU",
+                preset = NotePreset.SUMMARY,
             )
         }
     }
@@ -215,19 +241,19 @@ class RecordingSessionManagerTest {
     @Test
     fun `retry re-transcribes stored audio and completes the note`() = runTest {
         every { recorder.vad } returns MutableStateFlow(VadSnapshot())
-        coEvery { markNoteProcessing(7L) } returns true
+        coEvery { markNoteProcessing(7L) } returns storedNote(7L)
         every { audioStore.openForRead("note-7.pcm.enc") } returns
             ByteArrayInputStream(ByteArray(64_000))
         coEvery { speechToText.transcribe(any()) } returns sttResult("recovered transcript")
         stubProofreadEcho()
-        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote, any()) } returns AiResult(
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns AiResult(
             text = """{"title": "Recovered", "overview": "- body"}""",
             processingTimeMs = 100,
             inputTokens = 5,
             outputTokens = 5,
             hardwareBackend = HardwareBackend.CPU,
         )
-        coEvery { completeNote(any(), any(), any(), any(), any(), any(), any()) } returns true
+        coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
 
         val manager = manager()
         manager.retryNote(7L, "note-7.pcm.enc")
@@ -238,11 +264,12 @@ class RecordingSessionManagerTest {
             completeNote(
                 noteId = 7L,
                 title = "Recovered",
-                body = "- body",
+                body = "body",
                 transcript = "recovered transcript",
                 transcriptionTimeMs = 200,
                 structuringTimeMs = 150,
                 hardwareBackend = "CPU",
+                preset = NotePreset.SUMMARY,
             )
         }
         verify { speechToText.release() }
@@ -269,7 +296,7 @@ class RecordingSessionManagerTest {
         assertEquals(SessionPhase.IDLE, manager.session.value.phase)
         verify { recorder.stop() }
         verify { audioStore.delete("note-1.pcm.enc") }
-        coVerify(exactly = 0) { createProcessingNote(any(), any()) }
+        coVerify(exactly = 0) { createProcessingNote(any(), any(), any()) }
         coroutineContext.cancelChildren()
     }
 
@@ -279,7 +306,7 @@ class RecordingSessionManagerTest {
         every { recorder.recordStream(pcmSink = any()) } returns flowOf(chunk(1))
         justRun { recorder.resetVad() }
         coEvery { speechToText.transcribe(any()) } returns sttResult("   ")
-        coEvery { createProcessingNote(any(), any()) } returns 9L
+        coEvery { createProcessingNote(any(), any(), any()) } returns 9L
         coEvery { failNote(9L) } returns true
         val events = mutableListOf<NoteProcessingEvent>()
 

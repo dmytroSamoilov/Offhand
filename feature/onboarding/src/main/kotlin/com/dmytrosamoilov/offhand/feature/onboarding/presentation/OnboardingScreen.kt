@@ -21,7 +21,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Lock
@@ -49,6 +51,8 @@ import com.dmytrosamoilov.offhand.core.designsystem.R as DesignR
 import com.dmytrosamoilov.offhand.core.designsystem.component.MorphingLoadingIndicator
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
+import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
+import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOptionCard
 import com.dmytrosamoilov.offhand.feature.onboarding.R
 
 @Composable
@@ -71,6 +75,8 @@ fun OnboardingScreen(
         OnboardingContent(
             state = state,
             onPrivacyContinue = viewModel::onPrivacyContinue,
+            onNoteStyleSelected = viewModel::onNoteStyleSelected,
+            onNoteStyleContinue = viewModel::onNoteStyleContinue,
             onDeviceLockSetup = { openSecuritySettings(context) },
             onDeviceLockSkipped = viewModel::onDeviceLockSkipped,
             onConsentChosen = viewModel::onConsentChosen,
@@ -89,6 +95,8 @@ fun OnboardingScreen(
 private fun OnboardingContent(
     state: OnboardingUiState,
     onPrivacyContinue: () -> Unit,
+    onNoteStyleSelected: (NotePresetOption) -> Unit,
+    onNoteStyleContinue: () -> Unit,
     onDeviceLockSetup: () -> Unit,
     onDeviceLockSkipped: () -> Unit,
     onConsentChosen: (Boolean) -> Unit,
@@ -97,6 +105,7 @@ private fun OnboardingContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -105,6 +114,11 @@ private fun OnboardingContent(
             OnboardingStep.DEVICE_CHECK -> MorphingLoadingIndicator()
             OnboardingStep.DEVICE_INCOMPATIBLE -> DeviceIncompatibleStep(state.deviceSpecs)
             OnboardingStep.PRIVACY -> PrivacyStep(onContinue = onPrivacyContinue)
+            OnboardingStep.NOTE_STYLE -> NoteStyleStep(
+                selected = state.notePreset,
+                onSelected = onNoteStyleSelected,
+                onContinue = onNoteStyleContinue,
+            )
             OnboardingStep.DEVICE_LOCK -> DeviceLockStep(
                 onSetup = onDeviceLockSetup,
                 onSkip = onDeviceLockSkipped,
@@ -118,6 +132,41 @@ private fun OnboardingContent(
             )
         }
     }
+}
+
+@Composable
+private fun NoteStyleStep(
+    selected: NotePresetOption,
+    onSelected: (NotePresetOption) -> Unit,
+    onContinue: () -> Unit,
+) {
+    StepTitle(text = stringResource(R.string.onboarding_note_style_title))
+    StepBody(text = stringResource(R.string.onboarding_note_style_body))
+    Spacer(modifier = Modifier.height(24.dp))
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        NotePresetOption.entries.forEach { option ->
+            NotePresetOptionCard(
+                option = option,
+                isSelected = option == selected,
+                onClick = { onSelected(option) },
+            )
+        }
+    }
+    Spacer(modifier = Modifier.height(24.dp))
+    PrimaryStepButton(
+        text = stringResource(R.string.onboarding_note_style_continue),
+        onClick = onContinue,
+    )
+    Spacer(modifier = Modifier.height(12.dp))
+    Text(
+        text = stringResource(R.string.onboarding_note_style_hint),
+        style = MaterialTheme.typography.bodySmall,
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 @Composable
@@ -338,6 +387,8 @@ private fun OnboardingStatePreview(state: OnboardingUiState) {
             OnboardingContent(
                 state = state,
                 onPrivacyContinue = {},
+                onNoteStyleSelected = {},
+                onNoteStyleContinue = {},
                 onDeviceLockSetup = {},
                 onDeviceLockSkipped = {},
                 onConsentChosen = {},
@@ -357,6 +408,12 @@ private fun DeviceCheckPreview() {
 @Composable
 private fun PrivacyPreview() {
     OnboardingStatePreview(OnboardingUiState(step = OnboardingStep.PRIVACY))
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NoteStylePreview() {
+    OnboardingStatePreview(OnboardingUiState(step = OnboardingStep.NOTE_STYLE))
 }
 
 @Preview(showBackground = true)

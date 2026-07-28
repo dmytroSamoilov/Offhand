@@ -9,6 +9,7 @@ data class UserPreferences(
     val developerOptions: Boolean,
     val savedRecordingsCount: Int,
     val lastReviewRequestAtMs: Long,
+    val notePreset: NotePreset,
 )
 
 interface UserPreferencesRepository {
@@ -22,6 +23,8 @@ interface UserPreferencesRepository {
     suspend fun setDynamicColor(enabled: Boolean)
 
     suspend fun setDeveloperOptions(enabled: Boolean)
+
+    suspend fun setNotePreset(preset: NotePreset)
 
     suspend fun incrementSavedRecordingsCount()
 
