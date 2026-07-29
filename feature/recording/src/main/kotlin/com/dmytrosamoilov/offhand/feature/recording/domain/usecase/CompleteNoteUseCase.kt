@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import javax.inject.Inject
@@ -15,6 +16,7 @@ class CompleteNoteUseCase @Inject constructor(
         transcriptionTimeMs: Long,
         structuringTimeMs: Long,
         hardwareBackend: String,
+        preset: NotePreset,
     ): Boolean {
         val note = notesRepository.getNote(noteId) ?: return false
         notesRepository.updateNote(
@@ -26,6 +28,7 @@ class CompleteNoteUseCase @Inject constructor(
                 structuringTimeMs = structuringTimeMs,
                 hardwareBackend = hardwareBackend,
                 status = NoteStatus.READY,
+                preset = preset,
             ),
         )
         return true

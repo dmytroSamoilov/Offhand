@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
 import android.content.Context
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.feature.recording.R
@@ -26,7 +27,7 @@ class CreateProcessingNoteUseCaseTest {
         } returns "Recording 4"
         coEvery { notesRepository.createNote(any()) } returns 42L
 
-        val noteId = useCase("audio.pcm.enc", 12_000L)
+        val noteId = useCase("audio.pcm.enc", 12_000L, NotePreset.MEETING)
 
         assertEquals(42L, noteId)
         coVerify {
@@ -36,6 +37,7 @@ class CreateProcessingNoteUseCaseTest {
                     assertEquals(NoteStatus.PROCESSING, note.status)
                     assertEquals("audio.pcm.enc", note.audioFileName)
                     assertEquals(12_000L, note.durationMs)
+                    assertEquals(NotePreset.MEETING, note.preset)
                 },
             )
         }
@@ -49,7 +51,7 @@ class CreateProcessingNoteUseCaseTest {
         } returns "Recording 1"
         coEvery { notesRepository.createNote(any()) } returns 1L
 
-        useCase(null, null)
+        useCase(null, null, NotePreset.SUMMARY)
 
         coVerify {
             notesRepository.createNote(withArg { note -> assertEquals("Recording 1", note.title) })

@@ -17,9 +17,11 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesScreen
 import com.dmytrosamoilov.offhand.feature.recording.presentation.RecordingSheetHost
+import com.dmytrosamoilov.offhand.feature.settings.presentation.AboutSupportScreen
 import com.dmytrosamoilov.offhand.feature.settings.presentation.SettingsScreen
 
 @Composable
@@ -68,7 +70,16 @@ fun OffhandApp(
                     onNewRecording = { isRecordingSheetVisible = true },
                 )
             }
-            composable<SettingsRoute> { SettingsScreen() }
+            navigation<SettingsGraphRoute>(startDestination = SettingsRoute) {
+                composable<SettingsRoute> {
+                    SettingsScreen(
+                        onAboutSupportClick = { navController.navigate(AboutSupportRoute) },
+                    )
+                }
+                composable<AboutSupportRoute> {
+                    AboutSupportScreen(onBack = { navController.navigateUp() })
+                }
+            }
         }
     }
 

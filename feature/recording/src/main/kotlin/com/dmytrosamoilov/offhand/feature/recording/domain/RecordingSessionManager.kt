@@ -5,11 +5,14 @@ import com.dmytrosamoilov.offhand.core.audio.AudioChunk
 import com.dmytrosamoilov.offhand.core.audio.StreamingAudioRecorder
 import com.dmytrosamoilov.offhand.core.audio.VadSnapshot
 import com.dmytrosamoilov.offhand.core.audio.WavCodec
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.recording.di.RecordingSessionScope
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateProcessingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNotePresetUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
@@ -45,6 +48,8 @@ class RecordingSessionManager @Inject constructor(
     private val markNoteProcessing: MarkNoteProcessingUseCase,
     private val registerSavedRecording: RegisterSavedRecordingUseCase,
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
+    private val getNotePreset: GetNotePresetUseCase,
+    private val getNote: GetNoteUseCase,
     private val audioStore: EncryptedAudioStore,
     @RecordingSessionScope private val scope: CoroutineScope,
 ) {
@@ -82,6 +87,9 @@ class RecordingSessionManager @Inject constructor(
 
     @Volatile
     private var isDiscardRequested = false
+
+    @Volatile
+    private var sessionPreset = NotePreset.DEFAULT
 
     fun start() {
         if (mutableSession.value.phase.isActive()) return
@@ -130,7 +138,8 @@ class RecordingSessionManager @Inject constructor(
         mutableProcessingNoteIds.update { it + noteId }
         scope.launch {
             processingMutex.withLock {
-                if (!markNoteProcessing(noteId)) {
+                val note = markNoteProcessing(noteId)
+                if (note == null) {
                     mutableProcessingNoteIds.update { it - noteId }
                     return@withLock
                 }
@@ -138,7 +147,35 @@ class RecordingSessionManager @Inject constructor(
                 val stored = transcribeStoredAudio(audioFileName) { fraction ->
                     updateProgress(noteId, fraction * RETRY_WHISPER_SHARE)
                 }
-                processNote(noteId, stored.texts, stored.transcriptionTimeMs, RETRY_WHISPER_SHARE)
+                processNote(
+                    noteId = noteId,
+                    transcripts = stored.texts,
+                    transcriptionMs = stored.transcriptionTimeMs,
+                    progressOffset = RETRY_WHISPER_SHARE,
+                    preset = note.preset,
+                )
+            }
+        }
+    }
+
+    fun restructureNote(noteId: Long, preset: NotePreset) {
+        if (noteId in mutableProcessingNoteIds.value) return
+        mutableProcessingNoteIds.update { it + noteId }
+        scope.launch {
+            processingMutex.withLock {
+                val note = getNote(noteId)?.takeIf { it.transcript.isNotBlank() }
+                if (note == null || markNoteProcessing(noteId) == null) {
+                    mutableProcessingNoteIds.update { it - noteId }
+                    return@withLock
+                }
+                updateProgress(noteId, 0f)
+                processNote(
+                    noteId = noteId,
+                    transcripts = transcriptStructurer.splitStoredTranscript(note.transcript),
+                    transcriptionMs = note.transcriptionTimeMs ?: 0,
+                    progressOffset = 0f,
+                    preset = preset,
+                )
             }
         }
     }
@@ -195,6 +232,7 @@ class RecordingSessionManager @Inject constructor(
     )
 
     private suspend fun runSession() {
+        sessionPreset = getNotePreset()
         openAudioBackup()
         val queue = Channel<AudioChunk>(Channel.UNLIMITED)
         scope.launch { prepareTranscriber() }
@@ -253,7 +291,11 @@ class RecordingSessionManager @Inject constructor(
     }
 
     private suspend fun createPlaceholderNote() {
-        val noteId = createProcessingNote(audioFileName, recorder.vad.value.totalElapsedMs)
+        val noteId = createProcessingNote(
+            audioFileName = audioFileName,
+            durationMs = recorder.vad.value.totalElapsedMs,
+            preset = sessionPreset,
+        )
         mutableSession.update { it.copy(noteId = noteId) }
         registerSavedRecording()
         mutableRecordingSaved.emit(Unit)
@@ -321,6 +363,7 @@ class RecordingSessionManager @Inject constructor(
         }
         val chunkTranscripts = transcripts.toSortedMap().values.filter { it.isNotBlank() }
         val recordedTranscriptionMs = transcriptionTimeMs
+        val preset = sessionPreset
         mutableProcessingNoteIds.update { it + noteId }
         mutableSession.value = RecordingSession()
         scope.launch {
@@ -330,7 +373,7 @@ class RecordingSessionManager @Inject constructor(
                 return@launch
             }
             processingMutex.withLock {
-                processNote(noteId, chunkTranscripts, recordedTranscriptionMs, progressOffset = 0f)
+                processNote(noteId, chunkTranscripts, recordedTranscriptionMs, 0f, preset)
             }
         }
     }
@@ -340,6 +383,7 @@ class RecordingSessionManager @Inject constructor(
         transcripts: List<String>,
         transcriptionMs: Long,
         progressOffset: Float,
+        preset: NotePreset,
     ) {
         try {
             if (transcripts.isEmpty()) {
@@ -352,7 +396,7 @@ class RecordingSessionManager @Inject constructor(
                 updateProgress(noteId, progressOffset + share * (1f - progressOffset))
             }
             val structuringOffset = progressOffset + PROOFREAD_PROGRESS_SHARE * (1f - progressOffset)
-            val structured = transcriptStructurer.structure(proofread.chunks) { fraction ->
+            val structured = transcriptStructurer.structure(proofread.chunks, preset) { fraction ->
                 updateProgress(noteId, structuringOffset + fraction * (1f - structuringOffset))
             }
             val stillExists = completeNote(
@@ -363,6 +407,7 @@ class RecordingSessionManager @Inject constructor(
                 transcriptionTimeMs = transcriptionMs,
                 structuringTimeMs = proofread.processingTimeMs + structured.structuringTimeMs,
                 hardwareBackend = structured.hardwareBackend.name,
+                preset = preset,
             )
             if (stillExists) {
                 mutableEvents.emit(NoteProcessingEvent.Completed(noteId))

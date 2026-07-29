@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.designsystem.R as DesignR
 import com.dmytrosamoilov.offhand.feature.recording.R
 import com.dmytrosamoilov.offhand.feature.recording.domain.NoteProcessingEvent
@@ -58,6 +59,7 @@ class RecordingService : Service() {
             ACTION_RESUME -> sessionManager.resume()
             ACTION_STOP -> sessionManager.stop()
             ACTION_RETRY_NOTE -> startNoteRetry(intent)
+            ACTION_RESTRUCTURE_NOTE -> startNoteRestructure(intent)
         }
         return START_NOT_STICKY
     }
@@ -68,6 +70,15 @@ class RecordingService : Service() {
         if (noteId <= 0 || audioFileName.isNullOrBlank()) return
         startForeground(processingNotification(), processingForegroundType())
         sessionManager.retryNote(noteId, audioFileName)
+        observeSession()
+    }
+
+    private fun startNoteRestructure(intent: Intent) {
+        val noteId = intent.getLongExtra(EXTRA_RETRY_NOTE_ID, -1L)
+        if (noteId <= 0) return
+        val preset = NotePreset.fromName(intent.getStringExtra(EXTRA_PRESET))
+        startForeground(processingNotification(), processingForegroundType())
+        sessionManager.restructureNote(noteId, preset)
         observeSession()
     }
 
@@ -291,10 +302,14 @@ class RecordingService : Service() {
             "com.dmytrosamoilov.offhand.action.RESUME_RECORDING"
         private const val ACTION_RETRY_NOTE =
             "com.dmytrosamoilov.offhand.action.RETRY_NOTE"
+        private const val ACTION_RESTRUCTURE_NOTE =
+            "com.dmytrosamoilov.offhand.action.RESTRUCTURE_NOTE"
         private const val EXTRA_RETRY_NOTE_ID =
             "com.dmytrosamoilov.offhand.extra.RETRY_NOTE_ID"
         private const val EXTRA_RETRY_AUDIO_FILE =
             "com.dmytrosamoilov.offhand.extra.RETRY_AUDIO_FILE"
+        private const val EXTRA_PRESET =
+            "com.dmytrosamoilov.offhand.extra.NOTE_PRESET"
 
         fun start(context: Context) {
             context.startForegroundService(serviceIntent(context, ACTION_START))
@@ -309,6 +324,14 @@ class RecordingService : Service() {
                 serviceIntent(context, ACTION_RETRY_NOTE)
                     .putExtra(EXTRA_RETRY_NOTE_ID, noteId)
                     .putExtra(EXTRA_RETRY_AUDIO_FILE, audioFileName),
+            )
+        }
+
+        fun restructureNote(context: Context, noteId: Long, preset: NotePreset) {
+            context.startForegroundService(
+                serviceIntent(context, ACTION_RESTRUCTURE_NOTE)
+                    .putExtra(EXTRA_RETRY_NOTE_ID, noteId)
+                    .putExtra(EXTRA_PRESET, preset.name),
             )
         }
 

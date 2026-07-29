@@ -12,4 +12,5 @@ dependencies {
     implementation(project(":core:designsystem"))
 
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.material.icons.extended)
 }
