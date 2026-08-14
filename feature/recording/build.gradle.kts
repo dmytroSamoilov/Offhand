@@ -16,6 +16,5 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.play.review.ktx)
     implementation(libs.timber)
 }

@@ -1,4 +1,4 @@
-package com.dmytrosamoilov.offhand.feature.recording.domain.review
+package com.dmytrosamoilov.offhand.feature.notes.domain.review
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext

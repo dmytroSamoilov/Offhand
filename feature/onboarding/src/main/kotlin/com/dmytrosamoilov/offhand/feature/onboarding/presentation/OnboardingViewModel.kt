@@ -33,12 +33,14 @@ class OnboardingViewModel @Inject constructor(
     private val mutableUiState = MutableStateFlow(OnboardingUiState())
     val uiState: StateFlow<OnboardingUiState> = mutableUiState.asStateFlow()
 
+    private var pages: List<OnboardingStep> = emptyList()
+
     init {
         evaluateDevice()
     }
 
     fun onPrivacyContinue() {
-        mutableUiState.update { it.copy(step = OnboardingStep.NOTE_STYLE) }
+        moveToNextPage()
     }
 
     fun onNoteStyleSelected(option: NotePresetOption) {
@@ -48,24 +50,28 @@ class OnboardingViewModel @Inject constructor(
     fun onNoteStyleContinue() {
         launchSafely {
             setNotePreset(uiState.value.notePreset.toDomain())
-            mutableUiState.update { it.copy(step = nextStepAfterNoteStyle()) }
+            moveToNextPage()
         }
     }
 
     fun onDeviceLockSkipped() {
-        mutableUiState.update { it.copy(step = OnboardingStep.TELEMETRY_CONSENT) }
+        moveToNextPage()
     }
 
     fun onDeviceLockRecheck() {
         if (uiState.value.step != OnboardingStep.DEVICE_LOCK) return
         if (!appLockManager.isDeviceSecure) return
-        mutableUiState.update { it.copy(step = OnboardingStep.TELEMETRY_CONSENT) }
+        moveToNextPage()
     }
 
-    fun onConsentChosen(granted: Boolean) {
+    fun onTelemetryToggled(granted: Boolean) {
+        mutableUiState.update { it.copy(isTelemetryEnabled = granted) }
+    }
+
+    fun onConsentContinue() {
         launchSafely {
-            setTelemetryConsent(granted)
-            mutableUiState.update { it.copy(step = OnboardingStep.MODEL_DOWNLOAD) }
+            setTelemetryConsent(uiState.value.isTelemetryEnabled)
+            moveToNextPage()
         }
     }
 
@@ -76,19 +82,29 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
-    private fun nextStepAfterNoteStyle(): OnboardingStep =
-        if (appLockManager.isDeviceSecure) {
-            OnboardingStep.TELEMETRY_CONSENT
-        } else {
-            OnboardingStep.DEVICE_LOCK
-        }
+    private fun moveToNextPage() {
+        val nextIndex = pages.indexOf(uiState.value.step) + 1
+        val next = pages.getOrNull(nextIndex) ?: return
+        mutableUiState.update { it.copy(step = next, currentPage = nextIndex) }
+    }
+
+    private fun buildPages(): List<OnboardingStep> = buildList {
+        add(OnboardingStep.PRIVACY)
+        add(OnboardingStep.NOTE_STYLE)
+        if (!appLockManager.isDeviceSecure) add(OnboardingStep.DEVICE_LOCK)
+        add(OnboardingStep.TELEMETRY_CONSENT)
+        add(OnboardingStep.MODEL_DOWNLOAD)
+    }
 
     private fun evaluateDevice() {
         val capability = deviceCapabilityChecker.snapshot()
         mutableUiState.update { current ->
             if (capability.isLocalLlmCapable()) {
+                pages = buildPages()
                 current.copy(
                     step = OnboardingStep.PRIVACY,
+                    currentPage = 0,
+                    pageCount = pages.size,
                     downloadSizeGb = formatDownloadSizeGb(
                         modelManager.model.sizeInBytes + modelManager.speechModelSizeInBytes,
                     ),

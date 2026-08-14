@@ -9,5 +9,5 @@ android {
 
 dependencies {
     api(libs.androidx.graphics.shapes)
-    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.material.icons.core)
 }

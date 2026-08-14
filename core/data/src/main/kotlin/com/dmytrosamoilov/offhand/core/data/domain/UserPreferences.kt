@@ -8,8 +8,14 @@ data class UserPreferences(
     val dynamicColor: Boolean,
     val developerOptions: Boolean,
     val savedRecordingsCount: Int,
-    val lastReviewRequestAtMs: Long,
+    val reviewPrompt: ReviewPromptState,
     val notePreset: NotePreset,
+)
+
+data class ReviewPromptState(
+    val burstStartedAtMs: Long = 0L,
+    val attemptCount: Int = 0,
+    val lastAttemptAtMs: Long = 0L,
 )
 
 interface UserPreferencesRepository {
@@ -28,5 +34,5 @@ interface UserPreferencesRepository {
 
     suspend fun incrementSavedRecordingsCount()
 
-    suspend fun setLastReviewRequestAt(timestampMs: Long)
+    suspend fun setReviewPromptState(state: ReviewPromptState)
 }

@@ -117,6 +117,34 @@ class OnboardingViewModelTest {
 
         assertEquals(OnboardingStep.PRIVACY, viewModel.uiState.value.step)
         assertEquals("2.3", viewModel.uiState.value.downloadSizeGb)
+        assertEquals(0, viewModel.uiState.value.currentPage)
+        assertEquals(4, viewModel.uiState.value.pageCount)
+    }
+
+    @Test
+    fun `unsecured device adds the lock page to the flow`() = runTest(dispatcher) {
+        every { appLockManager.isDeviceSecure } returns false
+
+        val viewModel = capableViewModel()
+
+        assertEquals(5, viewModel.uiState.value.pageCount)
+    }
+
+    @Test
+    fun `page position advances with each step`() = runTest(dispatcher) {
+        val viewModel = capableViewModel()
+
+        viewModel.onPrivacyContinue()
+        assertEquals(1, viewModel.uiState.value.currentPage)
+
+        viewModel.onNoteStyleContinue()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(2, viewModel.uiState.value.currentPage)
+
+        viewModel.onConsentContinue()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(3, viewModel.uiState.value.currentPage)
+        assertEquals(OnboardingStep.MODEL_DOWNLOAD, viewModel.uiState.value.step)
     }
 
     @Test
@@ -205,13 +233,14 @@ class OnboardingViewModelTest {
     }
 
     @Test
-    fun `consent choice persists preference and moves to download step`() = runTest(dispatcher) {
+    fun `telemetry is enabled by default and consent continue persists it`() = runTest(dispatcher) {
         val viewModel = capableViewModel()
         viewModel.onPrivacyContinue()
         viewModel.onNoteStyleContinue()
         dispatcher.scheduler.advanceUntilIdle()
 
-        viewModel.onConsentChosen(true)
+        assertEquals(true, viewModel.uiState.value.isTelemetryEnabled)
+        viewModel.onConsentContinue()
         dispatcher.scheduler.advanceUntilIdle()
 
         coVerify { setTelemetryConsent(true) }
@@ -220,11 +249,26 @@ class OnboardingViewModelTest {
     }
 
     @Test
+    fun `toggling telemetry off persists the refusal on continue`() = runTest(dispatcher) {
+        val viewModel = capableViewModel()
+        viewModel.onPrivacyContinue()
+        viewModel.onNoteStyleContinue()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onTelemetryToggled(false)
+        viewModel.onConsentContinue()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { setTelemetryConsent(false) }
+        assertEquals(OnboardingStep.MODEL_DOWNLOAD, viewModel.uiState.value.step)
+    }
+
+    @Test
     fun `download continue starts download and completes onboarding`() = runTest(dispatcher) {
         val viewModel = capableViewModel()
         viewModel.onPrivacyContinue()
         viewModel.onNoteStyleContinue()
-        viewModel.onConsentChosen(false)
+        viewModel.onConsentContinue()
         dispatcher.scheduler.advanceUntilIdle()
 
         viewModel.onDownloadContinue()

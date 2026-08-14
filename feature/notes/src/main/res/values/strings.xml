@@ -51,6 +51,10 @@
     <string name="notes_share_dialog_confirm">Share</string>
     <string name="notes_share_date_label">Date</string>
     <string name="notes_preset_description">Change note style</string>
+    <string name="notes_fake_review_title">In-app review · dev build</string>
+    <string name="notes_fake_review_body">Google Play would show its rating dialog here. Rules: %1$d recording(s) · install age %2$d min · attempt gap %3$d min · burst window %4$d min · cooldown %5$d min. Tapping outside counts the attempt, like the real dialog.</string>
+    <string name="notes_fake_review_success">Count attempt</string>
+    <string name="notes_fake_review_failure">Simulate failure</string>
     <string name="notes_preset_sheet_title">Rewrite this note as</string>
     <string name="notes_preset_sheet_body">The recording is kept. The title and overview are written again from the transcript in the style you pick.</string>
 </resources>
