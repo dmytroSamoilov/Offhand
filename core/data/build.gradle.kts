@@ -13,11 +13,8 @@ dependencies {
 
     api(libs.coroutines.android)
     implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
     ksp(libs.room.compiler)
     implementation(libs.sqlcipher.android)
     implementation(libs.datastore.preferences)
     implementation(libs.timber)
-
-    testImplementation(libs.junit)
 }
