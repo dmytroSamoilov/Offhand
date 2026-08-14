@@ -6,21 +6,27 @@ import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.audio.PcmAudioPlayer
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.Note
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.service.RecordingService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -34,6 +40,9 @@ class NotesViewModel @Inject constructor(
     private val updateNote: UpdateNoteUseCase,
     private val deleteNote: DeleteNoteUseCase,
     private val prepareNoteShare: PrepareNoteShareUseCase,
+    private val shouldRequestReview: ShouldRequestReviewUseCase,
+    private val markReviewAttempt: MarkReviewAttemptUseCase,
+    val reviewLauncher: InAppReviewLauncher,
     private val audioPlayer: PcmAudioPlayer,
     private val audioStore: EncryptedAudioStore,
     sessionManager: RecordingSessionManager,
@@ -42,6 +51,9 @@ class NotesViewModel @Inject constructor(
 
     private val mutableUiState = MutableStateFlow(NotesUiState())
     val uiState: StateFlow<NotesUiState> = mutableUiState.asStateFlow()
+
+    private val mutableReviewRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val reviewRequests: SharedFlow<Unit> = mutableReviewRequests.asSharedFlow()
 
     private var selectedNote: Note? = null
 
@@ -86,6 +98,19 @@ class NotesViewModel @Inject constructor(
                     isDeleteConfirmationVisible = false,
                 )
             }
+            maybeRequestReview(note)
+        }
+    }
+
+    private suspend fun maybeRequestReview(note: Note) {
+        if (note.status == NoteStatus.READY && shouldRequestReview()) {
+            mutableReviewRequests.emit(Unit)
+        }
+    }
+
+    fun onReviewAttemptSucceeded() {
+        launchSafely(showLoading = false) {
+            markReviewAttempt()
         }
     }
 

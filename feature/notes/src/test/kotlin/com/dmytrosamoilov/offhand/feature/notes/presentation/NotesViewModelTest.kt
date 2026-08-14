@@ -12,11 +12,14 @@ import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
+import app.cash.turbine.test
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -61,6 +64,11 @@ class NotesViewModelTest {
     private val updateNote: UpdateNoteUseCase = mockk(relaxed = true)
     private val deleteNote: DeleteNoteUseCase = mockk(relaxed = true)
     private val prepareNoteShare: PrepareNoteShareUseCase = mockk()
+    private val shouldRequestReview: ShouldRequestReviewUseCase = mockk {
+        coEvery { this@mockk.invoke() } returns false
+    }
+    private val markReviewAttempt: MarkReviewAttemptUseCase = mockk(relaxed = true)
+    private val reviewLauncher: InAppReviewLauncher = mockk()
     private val audioPlayer: PcmAudioPlayer = mockk(relaxed = true) {
         every { state } returns MutableStateFlow(PcmPlaybackState())
     }
@@ -102,6 +110,9 @@ class NotesViewModelTest {
         updateNote = updateNote,
         deleteNote = deleteNote,
         prepareNoteShare = prepareNoteShare,
+        shouldRequestReview = shouldRequestReview,
+        markReviewAttempt = markReviewAttempt,
+        reviewLauncher = reviewLauncher,
         audioPlayer = audioPlayer,
         audioStore = audioStore,
         sessionManager = sessionManager,
@@ -202,6 +213,40 @@ class NotesViewModelTest {
         modelState.value = ModelState.Ready
         dispatcher.scheduler.advanceUntilIdle()
         assertNull(viewModel.uiState.value.modelPreparation)
+    }
+
+    @Test
+    fun `opening a ready note emits a review request when the policy allows`() = runTest(dispatcher) {
+        coEvery { shouldRequestReview() } returns true
+        val viewModel = viewModel()
+
+        viewModel.reviewRequests.test {
+            viewModel.onNoteSelected(5)
+            dispatcher.scheduler.advanceUntilIdle()
+            awaitItem()
+        }
+    }
+
+    @Test
+    fun `no review request when the policy denies`() = runTest(dispatcher) {
+        coEvery { shouldRequestReview() } returns false
+        val viewModel = viewModel()
+
+        viewModel.reviewRequests.test {
+            viewModel.onNoteSelected(5)
+            dispatcher.scheduler.advanceUntilIdle()
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `successful review attempt is persisted`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+
+        viewModel.onReviewAttemptSucceeded()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { markReviewAttempt() }
     }
 
     @Test

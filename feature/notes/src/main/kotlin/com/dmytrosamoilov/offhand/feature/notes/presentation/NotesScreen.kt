@@ -123,6 +123,15 @@ fun NotesScreen(
         viewModel.onShareLaunched()
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.reviewRequests.collect {
+            val activity = context.findActivity() ?: return@collect
+            if (viewModel.reviewLauncher.launch(activity)) {
+                viewModel.onReviewAttemptSucceeded()
+            }
+        }
+    }
+
     LaunchedEffect(requestedNoteId) {
         if (requestedNoteId != null) {
             viewModel.onNoteSelected(requestedNoteId)

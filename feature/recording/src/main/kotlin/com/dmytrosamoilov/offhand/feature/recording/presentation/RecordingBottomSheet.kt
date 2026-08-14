@@ -77,20 +77,10 @@ fun RecordingSheetHost(
     viewModel: RecordingViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
 
     LaunchedEffect(state.phase, isVisible) {
         if (state.phase == RecordingPhaseUi.RECORDING && !isVisible) {
             onVisibilityChange(true)
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.reviewRequests.collect {
-            val activity = context.findActivity() ?: return@collect
-            if (requestInAppReview(activity)) {
-                viewModel.onReviewFlowCompleted()
-            }
         }
     }
 

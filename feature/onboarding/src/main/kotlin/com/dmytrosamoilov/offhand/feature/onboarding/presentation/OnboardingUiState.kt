@@ -7,6 +7,9 @@ data class OnboardingUiState(
     val deviceSpecs: DeviceSpecsUi? = null,
     val downloadSizeGb: String = "",
     val notePreset: NotePresetOption = NotePresetOption.SUMMARY,
+    val isTelemetryEnabled: Boolean = true,
+    val currentPage: Int = 0,
+    val pageCount: Int = 0,
 )
 
 enum class OnboardingStep {

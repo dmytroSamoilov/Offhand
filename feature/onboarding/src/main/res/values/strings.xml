@@ -9,11 +9,10 @@
 
     <string name="onboarding_privacy_title">Private by design</string>
     <string name="onboarding_privacy_body">Everything you record stays on this phone. Recordings, transcripts, and notes are encrypted on this device, and the AI that processes them runs right here — nothing is ever uploaded.</string>
-    <string name="onboarding_privacy_continue">Continue</string>
+    <string name="onboarding_continue">Continue</string>
 
     <string name="onboarding_note_style_title">How will you use Offhand?</string>
     <string name="onboarding_note_style_body">Pick the style your notes are written in. Every recording you make becomes this kind of note.</string>
-    <string name="onboarding_note_style_continue">Continue</string>
     <string name="onboarding_note_style_hint">You can change this anytime in Settings, or restyle any single note.</string>
 
     <string name="onboarding_lock_title">Protect your notes</string>
@@ -26,7 +25,6 @@
     <string name="onboarding_download_size">One-time download · about %1$s GB</string>
     <string name="onboarding_download_background_hint">The download continues in the background — you can start recording right away. We\'ll notify you when everything is ready.</string>
     <string name="onboarding_download_wifi_hint">Tip: connect to Wi‑Fi to save mobile data.</string>
-    <string name="onboarding_download_continue">Continue</string>
     <string name="onboarding_notification_download_channel_name">Model downloads</string>
     <string name="onboarding_notification_status_channel_name">Model status</string>
     <string name="onboarding_notification_downloading_title">Downloading AI models</string>
@@ -38,6 +36,5 @@
 
     <string name="onboarding_consent_title">Help improve stability?</string>
     <string name="onboarding_consent_body">Share anonymous crash and performance reports so we can keep the app reliable. This never includes your notes, recordings, transcripts, or any personal data — everything you record stays on this device. You can change this anytime in Settings.</string>
-    <string name="onboarding_consent_allow">Share anonymous reports</string>
-    <string name="onboarding_consent_decline">No thanks</string>
+    <string name="onboarding_consent_toggle_label">Share anonymous reports</string>
 </resources>

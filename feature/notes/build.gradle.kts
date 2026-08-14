@@ -14,6 +14,8 @@ dependencies {
     implementation(project(":feature:recording"))
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.play.review.ktx)
+    implementation(libs.timber)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.material3.adaptive)
     implementation(libs.androidx.material3.adaptive.layout)

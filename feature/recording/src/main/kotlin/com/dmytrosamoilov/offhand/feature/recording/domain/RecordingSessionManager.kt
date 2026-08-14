@@ -69,9 +69,6 @@ class RecordingSessionManager @Inject constructor(
     private val mutableEvents = MutableSharedFlow<NoteProcessingEvent>(extraBufferCapacity = 8)
     val events: SharedFlow<NoteProcessingEvent> = mutableEvents.asSharedFlow()
 
-    private val mutableRecordingSaved = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val recordingSaved: SharedFlow<Unit> = mutableRecordingSaved.asSharedFlow()
-
     val vad: StateFlow<VadSnapshot> = recorder.vad
 
     val externalMicName: StateFlow<String?> = recorder.externalInputName
@@ -298,7 +295,6 @@ class RecordingSessionManager @Inject constructor(
         )
         mutableSession.update { it.copy(noteId = noteId) }
         registerSavedRecording()
-        mutableRecordingSaved.emit(Unit)
     }
 
     private fun deleteAudioBackup() {

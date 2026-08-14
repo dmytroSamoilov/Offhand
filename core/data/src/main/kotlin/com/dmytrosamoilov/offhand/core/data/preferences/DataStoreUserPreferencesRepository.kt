@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -34,7 +35,12 @@ internal class DataStoreUserPreferencesRepository @Inject constructor(
                 developerOptions = buildInfo.isDebugBuild &&
                     (preferences[KEY_DEVELOPER_OPTIONS] ?: false),
                 savedRecordingsCount = preferences[KEY_SAVED_RECORDINGS_COUNT] ?: 0,
-                lastReviewRequestAtMs = preferences[KEY_LAST_REVIEW_REQUEST_AT_MS] ?: 0L,
+                reviewPrompt = ReviewPromptState(
+                    burstStartedAtMs = preferences[KEY_REVIEW_BURST_STARTED_AT_MS] ?: 0L,
+                    attemptCount = preferences[KEY_REVIEW_BURST_ATTEMPTS] ?: 0,
+                    lastAttemptAtMs = preferences[KEY_LAST_REVIEW_ATTEMPT_AT_MS]
+                        ?: preferences[KEY_LEGACY_LAST_REVIEW_REQUEST_AT_MS] ?: 0L,
+                ),
                 notePreset = NotePreset.fromName(preferences[KEY_NOTE_PRESET]),
             )
         }
@@ -66,8 +72,12 @@ internal class DataStoreUserPreferencesRepository @Inject constructor(
         }
     }
 
-    override suspend fun setLastReviewRequestAt(timestampMs: Long) {
-        context.userPreferencesDataStore.edit { it[KEY_LAST_REVIEW_REQUEST_AT_MS] = timestampMs }
+    override suspend fun setReviewPromptState(state: ReviewPromptState) {
+        context.userPreferencesDataStore.edit { preferences ->
+            preferences[KEY_REVIEW_BURST_STARTED_AT_MS] = state.burstStartedAtMs
+            preferences[KEY_REVIEW_BURST_ATTEMPTS] = state.attemptCount
+            preferences[KEY_LAST_REVIEW_ATTEMPT_AT_MS] = state.lastAttemptAtMs
+        }
     }
 
     private companion object {
@@ -76,7 +86,10 @@ internal class DataStoreUserPreferencesRepository @Inject constructor(
         val KEY_DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val KEY_DEVELOPER_OPTIONS = booleanPreferencesKey("developer_options")
         val KEY_SAVED_RECORDINGS_COUNT = intPreferencesKey("saved_recordings_count")
-        val KEY_LAST_REVIEW_REQUEST_AT_MS = longPreferencesKey("last_review_request_at_ms")
+        val KEY_REVIEW_BURST_STARTED_AT_MS = longPreferencesKey("review_burst_started_at_ms")
+        val KEY_REVIEW_BURST_ATTEMPTS = intPreferencesKey("review_burst_attempts")
+        val KEY_LAST_REVIEW_ATTEMPT_AT_MS = longPreferencesKey("last_review_attempt_at_ms")
+        val KEY_LEGACY_LAST_REVIEW_REQUEST_AT_MS = longPreferencesKey("last_review_request_at_ms")
         val KEY_NOTE_PRESET = stringPreferencesKey("note_preset")
     }
 }
