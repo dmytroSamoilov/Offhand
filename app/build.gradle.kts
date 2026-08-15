@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId = "com.dmytrosamoilov.offhand"
-        versionCode = 10
+        versionCode = 11
         versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
