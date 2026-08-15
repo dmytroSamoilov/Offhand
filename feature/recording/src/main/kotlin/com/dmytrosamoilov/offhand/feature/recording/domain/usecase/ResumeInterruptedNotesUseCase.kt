@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
 import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
+import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
@@ -25,17 +26,22 @@ class ResumeInterruptedNotesUseCase @Inject constructor(
     suspend operator fun invoke() {
         if (!isAiCoreDownloaded()) return
         val activeNoteIds = sessionManager.processingNoteIds.value
+        val liveRecordingNoteId = sessionManager.activeRecordingNoteId.value
         notesRepository.observeNotes().first()
-            .filter { it.status == NoteStatus.PROCESSING && it.id !in activeNoteIds }
+            .filter { it.status == NoteStatus.PROCESSING || it.status == NoteStatus.RECORDING }
+            .filter { it.id !in activeNoteIds && it.id != liveRecordingNoteId }
             .sortedBy { it.createdAtEpochMs }
-            .forEach { note ->
-                val audioFileName = note.audioFileName
-                when {
-                    note.transcript.isNotBlank() -> restructureViaService(note.id, note.preset)
-                    audioFileName == null -> failNote(note.id)
-                    else -> retryViaService(note.id, audioFileName)
-                }
-            }
+            .forEach { note -> resume(note) }
+    }
+
+    private suspend fun resume(note: Note) {
+        val audioFileName = note.audioFileName
+        when {
+            note.transcript.isNotBlank() -> restructureViaService(note.id, note.preset)
+            audioFileName != null -> retryViaService(note.id, audioFileName)
+            note.status == NoteStatus.RECORDING -> notesRepository.deleteNote(note.id)
+            else -> failNote(note.id)
+        }
     }
 
     private fun retryViaService(noteId: Long, audioFileName: String) {

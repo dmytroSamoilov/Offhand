@@ -11,32 +11,33 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
-class CreateProcessingNoteUseCaseTest {
+class CreateRecordingNoteUseCaseTest {
 
     private val notesRepository: NotesRepository = mockk()
     private val context: Context = mockk()
-    private val useCase = CreateProcessingNoteUseCase(context, notesRepository)
+    private val useCase = CreateRecordingNoteUseCase(context, notesRepository)
 
     @Test
-    fun `titles the note with the next recording number`() = runTest {
+    fun `creates a recording note titled with the next recording number`() = runTest {
         coEvery { notesRepository.countNotes() } returns 3
         every {
             context.getString(R.string.recording_default_note_title, 4)
         } returns "Recording 4"
         coEvery { notesRepository.createNote(any()) } returns 42L
 
-        val noteId = useCase("audio.pcm.enc", 12_000L, NotePreset.MEETING)
+        val noteId = useCase("audio.pcm.enc", NotePreset.MEETING)
 
         assertEquals(42L, noteId)
         coVerify {
             notesRepository.createNote(
                 withArg { note ->
                     assertEquals("Recording 4", note.title)
-                    assertEquals(NoteStatus.PROCESSING, note.status)
+                    assertEquals(NoteStatus.RECORDING, note.status)
                     assertEquals("audio.pcm.enc", note.audioFileName)
-                    assertEquals(12_000L, note.durationMs)
+                    assertNull(note.durationMs)
                     assertEquals(NotePreset.MEETING, note.preset)
                 },
             )
@@ -51,7 +52,7 @@ class CreateProcessingNoteUseCaseTest {
         } returns "Recording 1"
         coEvery { notesRepository.createNote(any()) } returns 1L
 
-        useCase(null, null, NotePreset.SUMMARY)
+        useCase(null, NotePreset.SUMMARY)
 
         coVerify {
             notesRepository.createNote(withArg { note -> assertEquals("Recording 1", note.title) })

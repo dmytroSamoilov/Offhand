@@ -16,6 +16,7 @@ data class Note(
 )
 
 enum class NoteStatus {
+    RECORDING,
     PROCESSING,
     READY,
     FAILED,

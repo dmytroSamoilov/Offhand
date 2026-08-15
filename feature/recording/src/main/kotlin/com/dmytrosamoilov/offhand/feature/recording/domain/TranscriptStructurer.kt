@@ -59,6 +59,17 @@ class TranscriptStructurer @Inject constructor(
     fun joinChunks(chunkTranscripts: List<String>): String =
         chunkTranscripts.joinToString(PARAGRAPH_SEPARATOR)
 
+    fun transcriptOnly(chunkTranscripts: List<String>): StructuredNote {
+        val transcript = joinChunks(chunkTranscripts)
+        return StructuredNote(
+            title = fallbackTitle(transcript),
+            overview = transcript,
+            transcript = transcript,
+            structuringTimeMs = 0,
+            hardwareBackend = HardwareBackend.CPU,
+        )
+    }
+
     fun splitStoredTranscript(transcript: String): List<String> =
         transcript.split(PARAGRAPH_SEPARATOR).filter { it.isNotBlank() }
 
@@ -103,13 +114,18 @@ class TranscriptStructurer @Inject constructor(
 
     private fun extractFieldsByRegex(json: String): ParsedNote? {
         val title = TITLE_FIELD.find(json)?.groupValues?.get(1)
-        val overview = OVERVIEW_FIELD.find(json)?.groupValues?.get(1)
+        val overview = OVERVIEW_FIELD.find(json)?.groupValues?.get(1)?.let(::trimJsonTail)
         if (title == null && overview == null) return null
         return ParsedNote(
             title = sanitizeTitle(unescapeJsonValue(title.orEmpty())),
             overview = unescapeJsonValue(overview.orEmpty()).trim(),
         )
     }
+
+    // Models regularly drop the closing quote of the last value, so the overview
+    // is read to the end of the object and its JSON tail removed here. Without
+    // this the whole overview is lost and the note falls back to the transcript.
+    private fun trimJsonTail(value: String): String = value.replace(JSON_VALUE_TAIL, "")
 
     // Models often emit raw line breaks inside JSON string values, which is
     // invalid JSON — escape them so decoding still succeeds.
@@ -223,7 +239,8 @@ class TranscriptStructurer @Inject constructor(
         val MARKDOWN_CHARS = Regex("[#*>`_\\-]")
         val WHITESPACE = Regex("\\s+")
         val TITLE_FIELD = Regex("\"title\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"")
-        val OVERVIEW_FIELD = Regex("\"overview\"\\s*:\\s*\"(.*)\"", RegexOption.DOT_MATCHES_ALL)
+        val OVERVIEW_FIELD = Regex("\"overview\"\\s*:\\s*\"(.*)", RegexOption.DOT_MATCHES_ALL)
+        val JSON_VALUE_TAIL = Regex("[\"},\\s]+$")
         val JSON_SCAFFOLDING = Regex("```(?:json)?|\"(?:title|overview)\"\\s*:|[{}]")
         val lenientJson = Json {
             ignoreUnknownKeys = true

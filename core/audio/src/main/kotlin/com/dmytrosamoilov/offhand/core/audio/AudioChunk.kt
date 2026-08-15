@@ -4,6 +4,7 @@ data class AudioChunk(
     val id: Int,
     val wav: ByteArray,
     val durationMs: Long,
+    val speechMs: Long,
     val reason: ChunkBoundaryReason,
 ) {
     override fun equals(other: Any?): Boolean {
@@ -12,6 +13,7 @@ data class AudioChunk(
         other as AudioChunk
         if (id != other.id) return false
         if (durationMs != other.durationMs) return false
+        if (speechMs != other.speechMs) return false
         if (!wav.contentEquals(other.wav)) return false
         if (reason != other.reason) return false
         return true
@@ -20,6 +22,7 @@ data class AudioChunk(
     override fun hashCode(): Int {
         var result = id
         result = 31 * result + durationMs.hashCode()
+        result = 31 * result + speechMs.hashCode()
         result = 31 * result + wav.contentHashCode()
         result = 31 * result + reason.hashCode()
         return result

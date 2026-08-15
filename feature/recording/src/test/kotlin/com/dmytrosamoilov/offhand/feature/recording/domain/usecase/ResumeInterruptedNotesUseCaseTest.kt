@@ -30,6 +30,7 @@ class ResumeInterruptedNotesUseCaseTest {
     private val notesRepository: NotesRepository = mockk()
     private val sessionManager: RecordingSessionManager = mockk {
         every { processingNoteIds } returns MutableStateFlow(emptySet())
+        every { activeRecordingNoteId } returns MutableStateFlow(null)
     }
     private val failNote: FailNoteUseCase = mockk()
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase = mockk()
@@ -49,6 +50,7 @@ class ResumeInterruptedNotesUseCaseTest {
         every { RecordingService.restructureNote(any(), any(), any()) } just Runs
         coEvery { failNote(any()) } returns true
         coEvery { isAiCoreDownloaded() } returns true
+        coEvery { notesRepository.deleteNote(any()) } just Runs
     }
 
     @After
@@ -149,6 +151,56 @@ class ResumeInterruptedNotesUseCaseTest {
 
         verify(exactly = 0) { RecordingService.retryNote(any(), any(), any()) }
         coVerify(exactly = 0) { failNote(any()) }
+    }
+
+    @Test
+    fun `stale recording note with a transcript is restructured`() = runTest {
+        every { notesRepository.observeNotes() } returns flowOf(
+            listOf(note(3, NoteStatus.RECORDING, transcript = "words from a killed session")),
+        )
+
+        useCase()
+
+        verify { RecordingService.restructureNote(context, 3, NotePreset.DEFAULT) }
+        coVerify(exactly = 0) { notesRepository.deleteNote(any()) }
+    }
+
+    @Test
+    fun `stale recording note with audio only is re-transcribed`() = runTest {
+        every { notesRepository.observeNotes() } returns flowOf(
+            listOf(note(3, NoteStatus.RECORDING)),
+        )
+
+        useCase()
+
+        verify { RecordingService.retryNote(context, 3, "note-3.pcm.enc") }
+    }
+
+    @Test
+    fun `stale empty recording note is deleted`() = runTest {
+        every { notesRepository.observeNotes() } returns flowOf(
+            listOf(note(3, NoteStatus.RECORDING, audioFileName = null)),
+        )
+
+        useCase()
+
+        coVerify { notesRepository.deleteNote(3) }
+        coVerify(exactly = 0) { failNote(any()) }
+        verify(exactly = 0) { RecordingService.retryNote(any(), any(), any()) }
+    }
+
+    @Test
+    fun `note of the live recording session is left alone`() = runTest {
+        every { sessionManager.activeRecordingNoteId } returns MutableStateFlow(3L)
+        every { notesRepository.observeNotes() } returns flowOf(
+            listOf(note(3, NoteStatus.RECORDING, transcript = "still being recorded")),
+        )
+
+        useCase()
+
+        verify(exactly = 0) { RecordingService.restructureNote(any(), any(), any()) }
+        verify(exactly = 0) { RecordingService.retryNote(any(), any(), any()) }
+        coVerify(exactly = 0) { notesRepository.deleteNote(any()) }
     }
 
     @Test

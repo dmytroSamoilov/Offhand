@@ -61,7 +61,12 @@ class RecordingService : Service() {
             ACTION_RETRY_NOTE -> startNoteRetry(intent)
             ACTION_RESTRUCTURE_NOTE -> startNoteRestructure(intent)
         }
-        return START_NOT_STICKY
+        // Note processing survives a system kill through intent redelivery;
+        // a live microphone session cannot be resumed, so it never redelivers.
+        return when (intent?.action) {
+            ACTION_RETRY_NOTE, ACTION_RESTRUCTURE_NOTE -> START_REDELIVER_INTENT
+            else -> START_NOT_STICKY
+        }
     }
 
     private fun startNoteRetry(intent: Intent) {

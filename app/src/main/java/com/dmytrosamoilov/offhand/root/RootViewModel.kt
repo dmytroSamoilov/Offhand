@@ -10,6 +10,7 @@ import com.dmytrosamoilov.offhand.core.security.DatabasePassphraseProvider
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserPreferencesUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.service.ModelDownloadService
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
 import dagger.Lazy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -30,6 +31,7 @@ class RootViewModel @Inject constructor(
     private val passphraseProvider: DatabasePassphraseProvider,
     private val modelManager: ModelManager,
     private val resumeInterruptedNotes: Lazy<ResumeInterruptedNotesUseCase>,
+    private val sweepOrphanedRecordings: Lazy<SweepOrphanedRecordingsUseCase>,
 ) : BaseViewModel() {
 
     val uiState: StateFlow<RootUiState> = combine(
@@ -73,6 +75,7 @@ class RootViewModel @Inject constructor(
         launchSafely(showLoading = false) {
             uiState.first { it.phase == RootPhase.READY }
             resumeInterruptedNotes.get().invoke()
+            sweepOrphanedRecordings.get().invoke()
         }
     }
 

@@ -73,6 +73,7 @@ internal fun Note.toDetailUi(): NoteDetailUi = NoteDetailUi(
 )
 
 private fun NoteStatus.toUi(): NoteStatusUi = when (this) {
+    NoteStatus.RECORDING -> NoteStatusUi.PROCESSING
     NoteStatus.PROCESSING -> NoteStatusUi.PROCESSING
     NoteStatus.READY -> NoteStatusUi.READY
     NoteStatus.FAILED -> NoteStatusUi.FAILED
