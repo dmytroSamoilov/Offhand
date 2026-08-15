@@ -5,6 +5,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
+import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.service.RecordingService
 import io.mockk.Runs
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
@@ -34,6 +36,9 @@ class ResumeInterruptedNotesUseCaseTest {
     }
     private val failNote: FailNoteUseCase = mockk()
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase = mockk()
+    private val audioStore: EncryptedAudioStore = mockk {
+        every { pcmSizeOf(any()) } returns 0L
+    }
 
     private val useCase = ResumeInterruptedNotesUseCase(
         context = context,
@@ -41,6 +46,7 @@ class ResumeInterruptedNotesUseCaseTest {
         sessionManager = sessionManager,
         failNote = failNote,
         isAiCoreDownloaded = isAiCoreDownloaded,
+        audioStore = audioStore,
     )
 
     @Before
@@ -64,6 +70,7 @@ class ResumeInterruptedNotesUseCaseTest {
         audioFileName: String? = "note-$id.pcm.enc",
         createdAtEpochMs: Long = 0,
         transcript: String = "",
+        durationMs: Long? = null,
     ) = Note(
         id = id,
         title = "Note $id",
@@ -74,6 +81,7 @@ class ResumeInterruptedNotesUseCaseTest {
         structuringTimeMs = null,
         hardwareBackend = null,
         audioFileName = audioFileName,
+        durationMs = durationMs,
         status = status,
     )
 
@@ -187,6 +195,36 @@ class ResumeInterruptedNotesUseCaseTest {
         coVerify { notesRepository.deleteNote(3) }
         coVerify(exactly = 0) { failNote(any()) }
         verify(exactly = 0) { RecordingService.retryNote(any(), any(), any()) }
+    }
+
+    @Test
+    fun `missing duration is backfilled from the audio size before resuming`() = runTest {
+        every { audioStore.pcmSizeOf("note-3.pcm.enc") } returns 320_000L
+        coEvery { notesRepository.updateNote(any()) } just Runs
+        every { notesRepository.observeNotes() } returns flowOf(
+            listOf(note(3, NoteStatus.RECORDING, transcript = "recovered words")),
+        )
+
+        useCase()
+
+        coVerify {
+            notesRepository.updateNote(
+                withArg { updated -> assertEquals(10_000L, updated.durationMs) },
+            )
+        }
+        verify { RecordingService.restructureNote(context, 3, NotePreset.DEFAULT) }
+    }
+
+    @Test
+    fun `existing duration is left untouched during resume`() = runTest {
+        every { notesRepository.observeNotes() } returns flowOf(
+            listOf(note(1, NoteStatus.PROCESSING, transcript = "words", durationMs = 5_000L)),
+        )
+
+        useCase()
+
+        coVerify(exactly = 0) { notesRepository.updateNote(any()) }
+        verify { RecordingService.restructureNote(context, 1, NotePreset.DEFAULT) }
     }
 
     @Test

@@ -2,10 +2,12 @@ package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
 import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
+import com.dmytrosamoilov.offhand.core.audio.StreamingAudioRecorder
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
+import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.service.RecordingService
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -21,6 +23,7 @@ class ResumeInterruptedNotesUseCase @Inject constructor(
     private val sessionManager: RecordingSessionManager,
     private val failNote: FailNoteUseCase,
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
+    private val audioStore: EncryptedAudioStore,
 ) {
 
     suspend operator fun invoke() {
@@ -36,12 +39,27 @@ class ResumeInterruptedNotesUseCase @Inject constructor(
 
     private suspend fun resume(note: Note) {
         val audioFileName = note.audioFileName
+        val resumed = backfillDurationIfMissing(note, audioFileName)
         when {
-            note.transcript.isNotBlank() -> restructureViaService(note.id, note.preset)
-            audioFileName != null -> retryViaService(note.id, audioFileName)
-            note.status == NoteStatus.RECORDING -> notesRepository.deleteNote(note.id)
-            else -> failNote(note.id)
+            resumed.transcript.isNotBlank() -> restructureViaService(resumed.id, resumed.preset)
+            audioFileName != null -> retryViaService(resumed.id, audioFileName)
+            resumed.status == NoteStatus.RECORDING -> notesRepository.deleteNote(resumed.id)
+            else -> failNote(resumed.id)
         }
+    }
+
+    // A note interrupted mid-recording never went through the drain step that
+    // stamps the duration, so it is derived from the decrypted audio size.
+    private suspend fun backfillDurationIfMissing(note: Note, audioFileName: String?): Note {
+        if (note.durationMs != null || audioFileName == null) return note
+        val pcmBytes = runCatching { audioStore.pcmSizeOf(audioFileName) }
+            .onFailure { Timber.tag(LOG_TAG).w(it, "Duration backfill failed for note %d", note.id) }
+            .getOrNull()
+            ?: return note
+        if (pcmBytes <= 0) return note
+        val updated = note.copy(durationMs = pcmBytes * 1000 / PCM_BYTES_PER_SECOND)
+        notesRepository.updateNote(updated)
+        return updated
     }
 
     private fun retryViaService(noteId: Long, audioFileName: String) {
@@ -64,5 +82,6 @@ class ResumeInterruptedNotesUseCase @Inject constructor(
 
     private companion object {
         const val LOG_TAG = "RecordingSession"
+        const val PCM_BYTES_PER_SECOND = StreamingAudioRecorder.SAMPLE_RATE * 2L
     }
 }

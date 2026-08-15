@@ -57,7 +57,7 @@ class LocalAiBackend @Inject constructor(
             processingTimeMs = elapsed,
             inputTokens = inputTokens,
             outputTokens = outputTokens,
-            hardwareBackend = manager.activeBackend.value,
+            hardwareBackend = manager.loadedBackend,
         )
     } catch (t: Throwable) {
         throw AiBackendException(t.message ?: "On-device inference failed", t)

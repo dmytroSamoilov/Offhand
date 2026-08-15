@@ -65,6 +65,9 @@ class EncryptedAudioStore @Inject constructor(
 
     fun sizeOf(fileName: String): Long = fileFor(fileName).length()
 
+    fun pcmSizeOf(fileName: String): Long =
+        openSeekableForRead(fileName).use { it.size() }
+
     fun deleteUnreferenced(referencedFileNames: Set<String>, minAgeMs: Long): Int {
         val cutoffMs = System.currentTimeMillis() - minAgeMs
         return recordingsDir.listFiles().orEmpty()
