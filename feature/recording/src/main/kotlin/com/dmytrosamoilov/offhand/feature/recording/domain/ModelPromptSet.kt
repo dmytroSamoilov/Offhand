@@ -7,8 +7,6 @@ internal sealed class ModelPromptSet {
 
     abstract fun structureNote(preset: NotePreset): String
 
-    abstract val proofreadTranscript: String
-
     data object Gemma4 : ModelPromptSet() {
 
         override fun structureNote(preset: NotePreset): String = listOf(
@@ -18,8 +16,6 @@ internal sealed class ModelPromptSet {
             NOTE_JSON_RULES,
             NOTE_FACTUALITY_RULES,
         ).joinToString(LINE_BREAK)
-
-        override val proofreadTranscript = PROOFREAD_TRANSCRIPT
     }
 
     companion object {
@@ -50,12 +46,3 @@ private val NOTE_JSON_RULES = """
 
 private const val NOTE_FACTUALITY_RULES =
     "Very important: only mention facts and numbers that are explicitly said in the recording — never invent or guess anything. Never add dates, years, or times that are not explicitly spoken. Write the title and the overview in the same language the recording is spoken in."
-
-private val PROOFREAD_TRANSCRIPT = """
-    You will receive one raw segment of a voice-to-text transcript.
-    Rewrite the segment with correct punctuation and capitalization.
-    Keep every spoken word in its original order, including filler words. Do not shorten, rephrase or summarize anything.
-    Only change a word when it is clearly a transcription mistake and the surrounding sentence makes the intended word obvious.
-    Never invent names, dates or numbers, and never translate the text into another language.
-    Output only the corrected transcript text, with no explanations and nothing else.
-""".trimIndent()

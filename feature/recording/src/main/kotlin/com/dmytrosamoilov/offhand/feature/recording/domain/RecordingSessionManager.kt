@@ -16,6 +16,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCas
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteTranscriptUseCase
 import java.io.BufferedOutputStream
 import java.io.IOException
 import java.io.OutputStream
@@ -40,13 +41,13 @@ import timber.log.Timber
 class RecordingSessionManager @Inject constructor(
     private val recorder: StreamingAudioRecorder,
     private val speechToText: SpeechToText,
-    private val transcriptProofreader: TranscriptProofreader,
     private val transcriptStructurer: TranscriptStructurer,
     private val createProcessingNote: CreateProcessingNoteUseCase,
     private val completeNote: CompleteNoteUseCase,
     private val failNote: FailNoteUseCase,
     private val markNoteProcessing: MarkNoteProcessingUseCase,
     private val registerSavedRecording: RegisterSavedRecordingUseCase,
+    private val saveNoteTranscript: SaveNoteTranscriptUseCase,
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
     private val getNotePreset: GetNotePresetUseCase,
     private val getNote: GetNoteUseCase,
@@ -365,6 +366,7 @@ class RecordingSessionManager @Inject constructor(
         scope.launch {
             if (!isAiCoreDownloaded()) {
                 Timber.tag(LOG_TAG).w("AI core not downloaded yet, note %d stays queued", noteId)
+                persistTranscript(noteId, chunkTranscripts, recordedTranscriptionMs)
                 mutableProcessingNoteIds.update { it - noteId }
                 return@launch
             }
@@ -372,6 +374,19 @@ class RecordingSessionManager @Inject constructor(
                 processNote(noteId, chunkTranscripts, recordedTranscriptionMs, 0f, preset)
             }
         }
+    }
+
+    private suspend fun persistTranscript(
+        noteId: Long,
+        transcripts: List<String>,
+        transcriptionMs: Long,
+    ) {
+        if (transcripts.isEmpty()) return
+        saveNoteTranscript(
+            noteId = noteId,
+            transcript = transcriptStructurer.joinChunks(transcripts),
+            transcriptionTimeMs = transcriptionMs,
+        )
     }
 
     private suspend fun processNote(
@@ -387,13 +402,9 @@ class RecordingSessionManager @Inject constructor(
                 mutableEvents.emit(NoteProcessingEvent.Failed(noteId))
                 return
             }
-            val proofread = transcriptProofreader.proofread(transcripts) { fraction ->
-                val share = fraction * PROOFREAD_PROGRESS_SHARE
-                updateProgress(noteId, progressOffset + share * (1f - progressOffset))
-            }
-            val structuringOffset = progressOffset + PROOFREAD_PROGRESS_SHARE * (1f - progressOffset)
-            val structured = transcriptStructurer.structure(proofread.chunks, preset) { fraction ->
-                updateProgress(noteId, structuringOffset + fraction * (1f - structuringOffset))
+            persistTranscript(noteId, transcripts, transcriptionMs)
+            val structured = transcriptStructurer.structure(transcripts, preset) { fraction ->
+                updateProgress(noteId, progressOffset + fraction * (1f - progressOffset))
             }
             val stillExists = completeNote(
                 noteId = noteId,
@@ -401,7 +412,7 @@ class RecordingSessionManager @Inject constructor(
                 body = structured.overview,
                 transcript = structured.transcript,
                 transcriptionTimeMs = transcriptionMs,
-                structuringTimeMs = proofread.processingTimeMs + structured.structuringTimeMs,
+                structuringTimeMs = structured.structuringTimeMs,
                 hardwareBackend = structured.hardwareBackend.name,
                 preset = preset,
             )
@@ -445,6 +456,5 @@ class RecordingSessionManager @Inject constructor(
         const val RETRY_CHUNK_MS = 30_000L
         const val BYTES_PER_MS = StreamingAudioRecorder.SAMPLE_RATE * 2 / 1000L
         const val RETRY_WHISPER_SHARE = 0.6f
-        const val PROOFREAD_PROGRESS_SHARE = 0.5f
     }
 }

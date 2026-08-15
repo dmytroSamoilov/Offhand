@@ -75,12 +75,4 @@ class ModelPromptSetTest {
         assertFalse(meeting.contains("## Advice given"))
         assertFalse(legal.contains("## Action items"))
     }
-
-    @Test
-    fun `all proofread prompts forbid rephrasing and invention`() {
-        promptSets.map { it.proofreadTranscript }.forEach { prompt ->
-            assertTrue(prompt.contains("Do not shorten, rephrase or summarize"))
-            assertTrue(prompt.contains("Never invent names, dates or numbers"))
-        }
-    }
 }

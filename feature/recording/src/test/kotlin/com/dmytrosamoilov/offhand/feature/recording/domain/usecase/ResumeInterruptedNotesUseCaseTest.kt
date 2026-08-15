@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
 import android.content.Context
 import com.dmytrosamoilov.offhand.core.data.domain.Note
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
@@ -45,6 +46,7 @@ class ResumeInterruptedNotesUseCaseTest {
     fun setUp() {
         mockkObject(RecordingService.Companion)
         every { RecordingService.retryNote(any(), any(), any()) } just Runs
+        every { RecordingService.restructureNote(any(), any(), any()) } just Runs
         coEvery { failNote(any()) } returns true
         coEvery { isAiCoreDownloaded() } returns true
     }
@@ -59,11 +61,12 @@ class ResumeInterruptedNotesUseCaseTest {
         status: NoteStatus,
         audioFileName: String? = "note-$id.pcm.enc",
         createdAtEpochMs: Long = 0,
+        transcript: String = "",
     ) = Note(
         id = id,
         title = "Note $id",
         body = "",
-        transcript = "",
+        transcript = transcript,
         createdAtEpochMs = createdAtEpochMs,
         transcriptionTimeMs = null,
         structuringTimeMs = null,
@@ -82,6 +85,32 @@ class ResumeInterruptedNotesUseCaseTest {
 
         verify { RecordingService.retryNote(context, 1, "note-1.pcm.enc") }
         verify(exactly = 1) { RecordingService.retryNote(any(), any(), any()) }
+    }
+
+    @Test
+    fun `stuck note with a saved transcript is restructured instead of re-transcribed`() = runTest {
+        every { notesRepository.observeNotes() } returns flowOf(
+            listOf(note(1, NoteStatus.PROCESSING, transcript = "already transcribed")),
+        )
+
+        useCase()
+
+        verify { RecordingService.restructureNote(context, 1, NotePreset.DEFAULT) }
+        verify(exactly = 0) { RecordingService.retryNote(any(), any(), any()) }
+    }
+
+    @Test
+    fun `stuck note without audio but with transcript is still restructured`() = runTest {
+        every { notesRepository.observeNotes() } returns flowOf(
+            listOf(
+                note(1, NoteStatus.PROCESSING, audioFileName = null, transcript = "saved words"),
+            ),
+        )
+
+        useCase()
+
+        verify { RecordingService.restructureNote(context, 1, NotePreset.DEFAULT) }
+        coVerify(exactly = 0) { failNote(any()) }
     }
 
     @Test

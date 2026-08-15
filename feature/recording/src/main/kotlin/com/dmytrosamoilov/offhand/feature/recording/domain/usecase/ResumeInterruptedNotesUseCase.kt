@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
 import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
@@ -29,10 +30,10 @@ class ResumeInterruptedNotesUseCase @Inject constructor(
             .sortedBy { it.createdAtEpochMs }
             .forEach { note ->
                 val audioFileName = note.audioFileName
-                if (audioFileName == null) {
-                    failNote(note.id)
-                } else {
-                    retryViaService(note.id, audioFileName)
+                when {
+                    note.transcript.isNotBlank() -> restructureViaService(note.id, note.preset)
+                    audioFileName == null -> failNote(note.id)
+                    else -> retryViaService(note.id, audioFileName)
                 }
             }
     }
@@ -43,6 +44,15 @@ class ResumeInterruptedNotesUseCase @Inject constructor(
         } catch (notAllowed: ForegroundServiceStartNotAllowedException) {
             Timber.tag(LOG_TAG).w(notAllowed, "FGS not allowed, processing note %d in-process", noteId)
             sessionManager.retryNote(noteId, audioFileName)
+        }
+    }
+
+    private fun restructureViaService(noteId: Long, preset: NotePreset) {
+        try {
+            RecordingService.restructureNote(context, noteId, preset)
+        } catch (notAllowed: ForegroundServiceStartNotAllowedException) {
+            Timber.tag(LOG_TAG).w(notAllowed, "FGS not allowed, structuring note %d in-process", noteId)
+            sessionManager.restructureNote(noteId, preset)
         }
     }
 

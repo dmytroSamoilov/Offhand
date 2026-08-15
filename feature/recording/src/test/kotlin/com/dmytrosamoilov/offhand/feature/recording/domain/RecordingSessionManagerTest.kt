@@ -21,6 +21,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCas
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteTranscriptUseCase
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
@@ -63,6 +64,9 @@ class RecordingSessionManagerTest {
     private val registerSavedRecording: RegisterSavedRecordingUseCase = mockk {
         coJustRun { this@mockk.invoke() }
     }
+    private val saveNoteTranscript: SaveNoteTranscriptUseCase = mockk {
+        coJustRun { this@mockk.invoke(any(), any(), any()) }
+    }
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase = mockk {
         coEvery { this@mockk.invoke() } returns true
     }
@@ -100,28 +104,16 @@ class RecordingSessionManagerTest {
         processingTimeMs = 200,
     )
 
-    private fun stubProofreadEcho() {
-        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.proofreadTranscript, any()) } answers {
-            AiResult(
-                text = secondArg(),
-                processingTimeMs = 50,
-                inputTokens = 5,
-                outputTokens = 5,
-                hardwareBackend = HardwareBackend.CPU,
-            )
-        }
-    }
-
     private fun CoroutineScope.manager() = RecordingSessionManager(
         recorder = recorder,
         speechToText = speechToText,
-        transcriptProofreader = TranscriptProofreader(aiBackend, testModelManager()),
         transcriptStructurer = TranscriptStructurer(aiBackend, testModelManager()),
         createProcessingNote = createProcessingNote,
         completeNote = completeNote,
         failNote = failNote,
         markNoteProcessing = markNoteProcessing,
         registerSavedRecording = registerSavedRecording,
+        saveNoteTranscript = saveNoteTranscript,
         isAiCoreDownloaded = isAiCoreDownloaded,
         getNotePreset = getNotePreset,
         getNote = getNote,
@@ -139,7 +131,6 @@ class RecordingSessionManagerTest {
             sttResult("second part of the meeting"),
         )
         coEvery { createProcessingNote("note-1.pcm.enc", any(), NotePreset.SUMMARY) } returns 42L
-        stubProofreadEcho()
         coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns AiResult(
             text = """{"title": "Meeting notes", "overview": "- first\n- second"}""",
             processingTimeMs = 300,
@@ -162,13 +153,20 @@ class RecordingSessionManagerTest {
         verify { speechToText.release() }
         coVerify(exactly = 1) { registerSavedRecording.invoke() }
         coVerify {
+            saveNoteTranscript(
+                noteId = 42L,
+                transcript = "first part of the meeting\n\nsecond part of the meeting",
+                transcriptionTimeMs = 400,
+            )
+        }
+        coVerify {
             completeNote(
                 noteId = 42L,
                 title = "Meeting notes",
                 body = "first\nsecond",
                 transcript = "first part of the meeting\n\nsecond part of the meeting",
                 transcriptionTimeMs = 400,
-                structuringTimeMs = 400,
+                structuringTimeMs = 300,
                 hardwareBackend = "CPU",
                 preset = NotePreset.SUMMARY,
             )
@@ -184,7 +182,6 @@ class RecordingSessionManagerTest {
         coEvery { speechToText.transcribe(any()) } returns
             sttResult("only good chunk") andThenThrows IllegalStateException("engine hiccup")
         coEvery { createProcessingNote(any(), any(), any()) } returns 7L
-        stubProofreadEcho()
         coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns AiResult(
             text = """{"title": "Partial notes", "overview": "- good chunk content"}""",
             processingTimeMs = 100,
@@ -206,7 +203,7 @@ class RecordingSessionManagerTest {
                 body = "good chunk content",
                 transcript = "only good chunk",
                 transcriptionTimeMs = 200,
-                structuringTimeMs = 150,
+                structuringTimeMs = 100,
                 hardwareBackend = "CPU",
                 preset = NotePreset.SUMMARY,
             )
@@ -245,7 +242,6 @@ class RecordingSessionManagerTest {
         every { audioStore.openForRead("note-7.pcm.enc") } returns
             ByteArrayInputStream(ByteArray(64_000))
         coEvery { speechToText.transcribe(any()) } returns sttResult("recovered transcript")
-        stubProofreadEcho()
         coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns AiResult(
             text = """{"title": "Recovered", "overview": "- body"}""",
             processingTimeMs = 100,
@@ -267,7 +263,7 @@ class RecordingSessionManagerTest {
                 body = "body",
                 transcript = "recovered transcript",
                 transcriptionTimeMs = 200,
-                structuringTimeMs = 150,
+                structuringTimeMs = 100,
                 hardwareBackend = "CPU",
                 preset = NotePreset.SUMMARY,
             )
