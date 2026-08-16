@@ -1,13 +1,9 @@
 package com.dmytrosamoilov.offhand.feature.notes.domain.review
 
 import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class AppInstallInfoProvider @Inject constructor(
-    @ApplicationContext private val context: Context,
+class AppInstallInfoProvider(
+    private val context: Context,
 ) {
 
     val installedAtMs: Long

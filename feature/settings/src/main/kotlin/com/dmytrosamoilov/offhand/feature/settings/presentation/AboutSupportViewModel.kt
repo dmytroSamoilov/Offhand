@@ -10,17 +10,14 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDevelop
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetTelemetryConsentUseCase
-import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Locale
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-@HiltViewModel
-class AboutSupportViewModel @Inject constructor(
+class AboutSupportViewModel(
     private val modelManager: ModelManager,
     observeTelemetryConsent: ObserveTelemetryConsentUseCase,
     private val setTelemetryConsent: SetTelemetryConsentUseCase,

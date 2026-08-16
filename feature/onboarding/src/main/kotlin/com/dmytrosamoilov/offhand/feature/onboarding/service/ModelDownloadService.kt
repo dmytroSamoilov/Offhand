@@ -17,8 +17,6 @@ import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
 import com.dmytrosamoilov.offhand.core.designsystem.R as DesignR
 import com.dmytrosamoilov.offhand.feature.onboarding.R
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,19 +28,15 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 
-@AndroidEntryPoint
-class ModelDownloadService : Service() {
+class ModelDownloadService : Service(), KoinComponent {
 
-    @Inject
-    lateinit var modelManager: ModelManager
-
-    @Inject
-    lateinit var speechToText: SpeechToText
-
-    @Inject
-    lateinit var aiCoreDownloadStatus: AiCoreDownloadStatus
+    private val modelManager: ModelManager by inject()
+    private val speechToText: SpeechToText by inject()
+    private val aiCoreDownloadStatus: AiCoreDownloadStatus by inject()
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var downloadJob: Job? = null

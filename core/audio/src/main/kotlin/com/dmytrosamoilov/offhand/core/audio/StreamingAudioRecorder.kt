@@ -13,11 +13,8 @@ import android.media.MediaRecorder
 import android.os.Handler
 import android.os.Looper
 import androidx.core.content.ContextCompat
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.math.log10
 import kotlin.math.sqrt
 import kotlinx.coroutines.Dispatchers
@@ -30,9 +27,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
 
-@Singleton
-class StreamingAudioRecorder @Inject constructor(
-    @ApplicationContext private val context: Context,
+class StreamingAudioRecorder(
+    private val context: Context,
 ) {
     private val active = AtomicBoolean(false)
     private val paused = AtomicBoolean(false)

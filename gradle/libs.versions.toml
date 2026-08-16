@@ -12,8 +12,7 @@ composeBom = "2026.03.00"
 material3Adaptive = "1.2.0"
 materialIconsExtended = "1.7.8"
 graphicsShapes = "1.1.0"
-hilt = "2.57.2"
-hiltNavigationCompose = "1.2.0"
+koinBom = "4.1.1"
 navigationCompose = "2.8.0"
 coroutines = "1.9.0"
 kotlinxDatetime = "0.7.0"
@@ -64,10 +63,11 @@ androidx-graphics-shapes = { group = "androidx.graphics", name = "graphics-shape
 # Navigation
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
-# Hilt
-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
-hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+# Koin
+koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koinBom" }
+koin-core = { group = "io.insert-koin", name = "koin-core" }
+koin-android = { group = "io.insert-koin", name = "koin-android" }
+koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
 
 # Coroutines
 coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -129,7 +129,6 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
 
@@ -138,4 +137,4 @@ offhand-android-application = { id = "offhand.android.application" }
 offhand-android-library = { id = "offhand.android.library" }
 offhand-android-library-compose = { id = "offhand.android.library.compose" }
 offhand-android-feature = { id = "offhand.android.feature" }
-offhand-hilt = { id = "offhand.hilt" }
+offhand-koin = { id = "offhand.koin" }

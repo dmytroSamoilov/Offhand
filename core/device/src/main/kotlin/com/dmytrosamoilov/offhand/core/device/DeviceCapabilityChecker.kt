@@ -2,14 +2,10 @@ package com.dmytrosamoilov.offhand.core.device
 
 import android.app.ActivityManager
 import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import timber.log.Timber
 
-@Singleton
-class DeviceCapabilityChecker @Inject constructor(
-    @ApplicationContext private val context: Context,
+class DeviceCapabilityChecker(
+    private val context: Context,
 ) {
 
     fun snapshot(): DeviceCapability {

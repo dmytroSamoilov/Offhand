@@ -19,8 +19,6 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareU
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -30,8 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-@HiltViewModel
-class NotesViewModel @Inject constructor(
+class NotesViewModel(
     private val recordingProcessController: RecordingProcessController,
     private val dateLabelFormatter: DateLabelFormatter,
     observeNotes: ObserveNotesUseCase,

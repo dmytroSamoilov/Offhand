@@ -87,7 +87,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCard
@@ -103,6 +102,7 @@ import com.dmytrosamoilov.offhand.core.ui.component.toUi
 import com.dmytrosamoilov.offhand.feature.notes.R
 import java.util.Locale
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -111,7 +111,7 @@ fun NotesScreen(
     requestedNoteId: Long?,
     onRequestedNoteConsumed: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: NotesViewModel = hiltViewModel(),
+    viewModel: NotesViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val navigator = rememberListDetailPaneScaffoldNavigator<Long>()

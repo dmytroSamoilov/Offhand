@@ -5,7 +5,6 @@ import com.google.crypto.tink.KeyTemplates
 import com.google.crypto.tink.StreamingAead
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -15,12 +14,9 @@ import java.nio.channels.FileChannel
 import java.nio.channels.SeekableByteChannel
 import java.nio.file.StandardOpenOption
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class EncryptedAudioStore @Inject constructor(
-    @ApplicationContext private val context: Context,
+class EncryptedAudioStore(
+    private val context: Context,
 ) {
 
     private val streamingAead: StreamingAead by lazy {

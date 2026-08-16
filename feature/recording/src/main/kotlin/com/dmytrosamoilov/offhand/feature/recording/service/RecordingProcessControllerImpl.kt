@@ -4,14 +4,10 @@ import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import timber.log.Timber
 
-@Singleton
-class RecordingProcessControllerImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
+class RecordingProcessControllerImpl(
+    private val context: Context,
 ) : RecordingProcessController {
 
     override fun startRecording() {

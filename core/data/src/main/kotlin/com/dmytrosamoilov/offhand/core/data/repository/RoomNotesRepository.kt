@@ -6,13 +6,10 @@ import com.dmytrosamoilov.offhand.core.data.database.toEntity
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-@Singleton
-internal class RoomNotesRepository @Inject constructor(
+internal class RoomNotesRepository(
     private val noteDao: NoteDao,
     private val audioStore: EncryptedAudioStore,
 ) : NotesRepository {

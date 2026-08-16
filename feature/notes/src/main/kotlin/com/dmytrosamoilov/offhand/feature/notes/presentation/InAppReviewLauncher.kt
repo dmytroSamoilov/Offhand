@@ -10,8 +10,6 @@ import com.google.android.play.core.ktx.launchReview
 import com.google.android.play.core.ktx.requestReview
 import com.google.android.play.core.review.ReviewManagerFactory
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -24,8 +22,7 @@ interface InAppReviewLauncher {
 
 // The Play API never reveals whether the dialog was shown — success here only
 // means Google accepted the request; callers treat failure as "retry later".
-@Singleton
-class PlayInAppReviewLauncher @Inject constructor() : InAppReviewLauncher {
+class PlayInAppReviewLauncher : InAppReviewLauncher {
 
     override suspend fun launch(activity: Activity): Boolean = try {
         val reviewManager = ReviewManagerFactory.create(activity)
@@ -43,8 +40,7 @@ class PlayInAppReviewLauncher @Inject constructor() : InAppReviewLauncher {
 // Debug stand-in: sideloaded builds never render the real Play dialog, so this
 // makes the trigger visible. Dismissing outside counts the attempt, matching
 // how the real API reports success without ever showing anything.
-@Singleton
-class FakeInAppReviewLauncher @Inject constructor(
+class FakeInAppReviewLauncher(
     private val rules: InAppReviewRules,
 ) : InAppReviewLauncher {
 

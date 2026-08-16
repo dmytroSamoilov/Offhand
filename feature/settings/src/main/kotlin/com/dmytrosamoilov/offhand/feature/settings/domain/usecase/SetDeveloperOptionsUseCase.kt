@@ -1,9 +1,8 @@
 package com.dmytrosamoilov.offhand.feature.settings.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
-import javax.inject.Inject
 
-class SetDeveloperOptionsUseCase @Inject constructor(
+class SetDeveloperOptionsUseCase(
     private val repository: UserPreferencesRepository,
 ) {
     suspend operator fun invoke(enabled: Boolean) = repository.setDeveloperOptions(enabled)

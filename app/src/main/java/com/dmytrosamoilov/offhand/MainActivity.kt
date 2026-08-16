@@ -13,15 +13,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.feature.recording.service.RecordingService
 import com.dmytrosamoilov.offhand.root.RootScreen
 import com.dmytrosamoilov.offhand.root.RootViewModel
-import dagger.hilt.android.AndroidEntryPoint
+import org.koin.androidx.compose.koinViewModel
 
-@AndroidEntryPoint
 class MainActivity : FragmentActivity() {
 
     private var requestedNoteId by mutableStateOf<Long?>(null)
@@ -37,7 +35,7 @@ class MainActivity : FragmentActivity() {
         enableEdgeToEdge()
         consumeNoteIdExtra(intent)
         setContent {
-            val viewModel: RootViewModel = hiltViewModel()
+            val viewModel: RootViewModel = koinViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             OffhandTheme(dynamicColor = state.isDynamicColorEnabled) {
                 Surface(

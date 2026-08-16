@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.offhand.android.library)
-    alias(libs.plugins.offhand.hilt)
+    alias(libs.plugins.offhand.koin)
     alias(libs.plugins.kotlin.serialization)
 }
 

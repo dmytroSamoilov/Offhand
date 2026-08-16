@@ -4,13 +4,9 @@ import android.content.Context
 import com.dmytrosamoilov.offhand.feature.notes.R
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareLabels
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareLabelsProvider
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class NoteShareLabelsProviderImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
+class NoteShareLabelsProviderImpl(
+    private val context: Context,
 ) : NoteShareLabelsProvider {
 
     override fun labels(): NoteShareLabels = NoteShareLabels(

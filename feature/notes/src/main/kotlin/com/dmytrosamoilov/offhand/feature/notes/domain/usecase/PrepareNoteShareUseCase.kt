@@ -14,7 +14,6 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.ShareCacheDirectoryProvid
 import java.io.File
 import java.io.FileOutputStream
 import java.io.RandomAccessFile
-import javax.inject.Inject
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +22,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
-class PrepareNoteShareUseCase @Inject constructor(
+class PrepareNoteShareUseCase(
     private val audioStore: EncryptedAudioStore,
     private val noteShareLabelsProvider: NoteShareLabelsProvider,
     private val shareCacheDirectoryProvider: ShareCacheDirectoryProvider,

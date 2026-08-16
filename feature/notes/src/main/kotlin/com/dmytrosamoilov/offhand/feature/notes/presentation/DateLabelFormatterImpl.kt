@@ -3,15 +3,12 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toJavaLocalDateTime
 
-@Singleton
-class DateLabelFormatterImpl @Inject constructor() : DateLabelFormatter {
+class DateLabelFormatterImpl : DateLabelFormatter {
 
     override fun dateTime(dateTime: LocalDateTime): String =
         DATE_TIME_FORMATTER.format(dateTime.toJavaLocalDateTime())

@@ -12,17 +12,13 @@ import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 private val Context.userPreferencesDataStore by preferencesDataStore(name = "user_preferences")
 
-@Singleton
-internal class DataStoreUserPreferencesRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
+internal class DataStoreUserPreferencesRepository(
+    private val context: Context,
     private val buildInfo: BuildInfo,
 ) : UserPreferencesRepository {
 

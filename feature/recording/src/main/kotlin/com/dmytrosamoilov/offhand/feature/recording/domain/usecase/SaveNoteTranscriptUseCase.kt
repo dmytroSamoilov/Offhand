@@ -1,9 +1,8 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
-import javax.inject.Inject
 
-class SaveNoteTranscriptUseCase @Inject constructor(
+class SaveNoteTranscriptUseCase(
     private val notesRepository: NotesRepository,
 ) {
     suspend operator fun invoke(

@@ -5,9 +5,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.feature.recording.domain.DefaultNoteTitleProvider
-import javax.inject.Inject
 
-class CreateRecordingNoteUseCase @Inject constructor(
+class CreateRecordingNoteUseCase(
     private val defaultNoteTitleProvider: DefaultNoteTitleProvider,
     private val notesRepository: NotesRepository,
 ) {

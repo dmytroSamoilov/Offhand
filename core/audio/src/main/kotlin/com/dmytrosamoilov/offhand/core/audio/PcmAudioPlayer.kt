@@ -6,7 +6,6 @@ import android.media.AudioManager
 import android.media.AudioTrack
 import java.nio.ByteBuffer
 import java.nio.channels.SeekableByteChannel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -29,7 +28,7 @@ data class PcmPlaybackState(
     val durationMs: Long = 0,
 )
 
-class PcmAudioPlayer @Inject constructor() {
+class PcmAudioPlayer {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 

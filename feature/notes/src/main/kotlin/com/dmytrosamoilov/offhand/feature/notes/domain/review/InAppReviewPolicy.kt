@@ -1,11 +1,8 @@
 package com.dmytrosamoilov.offhand.feature.notes.domain.review
 
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class InAppReviewPolicy @Inject constructor(
+class InAppReviewPolicy(
     private val rules: InAppReviewRules,
 ) {
 

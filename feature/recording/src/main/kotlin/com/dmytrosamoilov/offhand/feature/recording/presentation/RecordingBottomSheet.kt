@@ -64,17 +64,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.CookieShape
 import com.dmytrosamoilov.offhand.core.designsystem.component.MorphingLoadingIndicator
 import com.dmytrosamoilov.offhand.feature.recording.R
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun RecordingSheetHost(
     isVisible: Boolean,
     onVisibilityChange: (Boolean) -> Unit,
-    viewModel: RecordingViewModel = hiltViewModel(),
+    viewModel: RecordingViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 

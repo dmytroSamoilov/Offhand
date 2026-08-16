@@ -5,7 +5,6 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyInfo
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.security.KeyStore
 import java.security.SecureRandom
@@ -14,8 +13,6 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
-import javax.inject.Inject
-import javax.inject.Singleton
 import timber.log.Timber
 
 class PassphraseInvalidatedException(cause: Throwable) : Exception(
@@ -23,9 +20,8 @@ class PassphraseInvalidatedException(cause: Throwable) : Exception(
     cause,
 )
 
-@Singleton
-class DatabasePassphraseProvider @Inject constructor(
-    @ApplicationContext private val context: Context,
+class DatabasePassphraseProvider(
+    private val context: Context,
 ) {
 
     @Volatile

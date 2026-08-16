@@ -10,9 +10,6 @@ import com.dmytrosamoilov.offhand.core.security.DatabasePassphraseProvider
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserPreferencesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
-import dagger.Lazy
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,8 +18,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
-@HiltViewModel
-class RootViewModel @Inject constructor(
+class RootViewModel(
     observeUserPreferences: ObserveUserPreferencesUseCase,
     private val appLockManager: AppLockManager,
     private val passphraseProvider: DatabasePassphraseProvider,
@@ -72,8 +68,8 @@ class RootViewModel @Inject constructor(
     private fun resumeInterruptedNotesWhenReady() {
         launchSafely(showLoading = false) {
             uiState.first { it.phase == RootPhase.READY }
-            resumeInterruptedNotes.get().invoke()
-            sweepOrphanedRecordings.get().invoke()
+            resumeInterruptedNotes.value.invoke()
+            sweepOrphanedRecordings.value.invoke()
         }
     }
 

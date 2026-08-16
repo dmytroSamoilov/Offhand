@@ -9,7 +9,6 @@ import com.dmytrosamoilov.offhand.core.audio.VadSnapshot
 import com.dmytrosamoilov.offhand.core.audio.WavCodec
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
-import com.dmytrosamoilov.offhand.feature.recording.di.RecordingSessionScope
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateRecordingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardNoteUseCase
@@ -25,8 +24,6 @@ import java.io.BufferedOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -42,8 +39,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
 
-@Singleton
-class RecordingSessionManager @Inject constructor(
+class RecordingSessionManager(
     private val recorder: StreamingAudioRecorder,
     private val speechToText: SpeechToText,
     private val transcriptStructurer: TranscriptStructurer,
@@ -59,7 +55,7 @@ class RecordingSessionManager @Inject constructor(
     private val getNotePreset: GetNotePresetUseCase,
     private val getNote: GetNoteUseCase,
     private val audioStore: EncryptedAudioStore,
-    @RecordingSessionScope private val scope: CoroutineScope,
+    private val scope: CoroutineScope,
 ) {
 
     // Fair mutex: queued notes are processed one at a time, in arrival order.

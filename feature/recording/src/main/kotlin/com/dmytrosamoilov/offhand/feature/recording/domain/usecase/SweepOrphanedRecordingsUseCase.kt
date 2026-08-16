@@ -2,11 +2,10 @@ package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
-import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
-class SweepOrphanedRecordingsUseCase @Inject constructor(
+class SweepOrphanedRecordingsUseCase(
     private val notesRepository: NotesRepository,
     private val audioStore: EncryptedAudioStore,
 ) {

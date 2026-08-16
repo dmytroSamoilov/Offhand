@@ -33,18 +33,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.feature.settings.R
 import java.util.Locale
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AboutSupportScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: AboutSupportViewModel = hiltViewModel(),
+    viewModel: AboutSupportViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 

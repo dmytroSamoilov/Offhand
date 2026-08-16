@@ -7,7 +7,6 @@ group = "com.dmytrosamoilov.offhand.buildlogic"
 dependencies {
     compileOnly(libs.android.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
-    compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.compose.compiler.gradlePlugin)
 }
 
@@ -29,9 +28,9 @@ gradlePlugin {
             id = "offhand.android.feature"
             implementationClass = "AndroidFeatureConventionPlugin"
         }
-        register("hilt") {
-            id = "offhand.hilt"
-            implementationClass = "HiltConventionPlugin"
+        register("koin") {
+            id = "offhand.koin"
+            implementationClass = "KoinConventionPlugin"
         }
     }
 }

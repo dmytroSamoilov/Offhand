@@ -3,7 +3,7 @@ import com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesS
 
 plugins {
     alias(libs.plugins.offhand.android.application)
-    alias(libs.plugins.offhand.hilt)
+    alias(libs.plugins.offhand.koin)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
@@ -79,6 +79,8 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:ai-api"))
     implementation(project(":core:ai-local"))
+    implementation(project(":core:audio"))
+    implementation(project(":core:device"))
     implementation(project(":core:security"))
     implementation(project(":core:data"))
     implementation(project(":feature:onboarding"))
@@ -92,7 +94,7 @@ dependencies {
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.navigation.compose)
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.koin.androidx.compose)
     implementation(libs.androidx.material3.adaptive.navigation.suite)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.kotlinx.serialization.json)

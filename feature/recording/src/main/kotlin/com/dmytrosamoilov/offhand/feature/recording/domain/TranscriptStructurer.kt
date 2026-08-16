@@ -5,8 +5,6 @@ import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.TokenEstimator
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -18,8 +16,7 @@ data class StructuredNote(
     val hardwareBackend: HardwareBackend,
 )
 
-@Singleton
-class TranscriptStructurer @Inject constructor(
+class TranscriptStructurer(
     private val aiBackend: AiBackend,
     private val modelManager: ModelManager,
 ) {

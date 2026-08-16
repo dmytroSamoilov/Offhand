@@ -1,7 +1,5 @@
 package com.dmytrosamoilov.offhand.core.ai.api
 
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -11,8 +9,7 @@ sealed interface AiCoreDownloadState {
     data class Downloading(val progressPercent: Int) : AiCoreDownloadState
 }
 
-@Singleton
-class AiCoreDownloadStatus @Inject constructor(
+class AiCoreDownloadStatus(
     private val modelManager: ModelManager,
     speechToText: SpeechToText,
 ) {

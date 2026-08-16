@@ -19,8 +19,6 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.NoteProcessingEvent
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.SessionPhase
 import com.dmytrosamoilov.offhand.feature.recording.presentation.formatElapsed
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -30,12 +28,12 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-@AndroidEntryPoint
-class RecordingService : Service() {
+class RecordingService : Service(), KoinComponent {
 
-    @Inject
-    lateinit var sessionManager: RecordingSessionManager
+    private val sessionManager: RecordingSessionManager by inject()
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var observeJob: Job? = null

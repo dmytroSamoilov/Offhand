@@ -8,13 +8,10 @@ import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
-@Singleton
-class ResumeInterruptedNotesUseCase @Inject constructor(
+class ResumeInterruptedNotesUseCase(
     private val recordingProcessController: RecordingProcessController,
     private val notesRepository: NotesRepository,
     private val sessionManager: RecordingSessionManager,

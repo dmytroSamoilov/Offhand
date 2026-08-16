@@ -4,15 +4,12 @@ import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-@Singleton
-class PendingNotesCoordinator @Inject constructor(
+class PendingNotesCoordinator(
     private val aiCoreDownloadStatus: AiCoreDownloadStatus,
     private val resumeInterruptedNotes: ResumeInterruptedNotesUseCase,
 ) {
