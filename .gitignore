@@ -26,3 +26,6 @@ google-services.json
 
 # Prebuilt native AARs — downloaded by Gradle, never committed
 /libs/
+iosApp/Offhand.xcodeproj/
+iosApp/Frameworks/
+iosApp/DerivedData/
