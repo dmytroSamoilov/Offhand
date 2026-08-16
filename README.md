@@ -106,6 +106,9 @@ repositories, StateFlow-only ViewModels, mappers between domain and UI models.
 The source code is licensed under [GPL-3.0](LICENSE) © Dmytro Samoilov. Third-party
 components and AI models are listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
+Offhand is open source but **not open contribution** — pull requests are not accepted;
+issues and bug reports are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for why.
+
 The **Offhand** name and logo are not covered by the code license and may not be used for
 derivative apps or forks without permission.
 

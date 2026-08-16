@@ -2,29 +2,32 @@
 
 Thanks for your interest in Offhand!
 
-## Ground rules
+## Open source, not open contribution
 
-- **Privacy first.** No feature may send user content (audio, transcripts, notes) off the
-  device. PRs that add network calls beyond the model download and opt-in crash reporting
-  will not be accepted.
-- **Build must be green**: `./gradlew assembleDebug testDebugUnitTest lintDebug :app:lintDevDebug`.
-- Unit tests are required for use cases and ViewModel logic (Arrange-Act-Assert, MockK).
+Offhand's source is public under [GPL-3.0](LICENSE) so anyone can verify the privacy
+claims — nothing leaves the device — and build the app themselves. However, **outside
+code contributions (pull requests) are not accepted.**
 
-## Code style
+Keeping the codebase under a single copyright holder is what allows Offhand to be
+distributed through app stores whose terms are incompatible with GPL-3.0 (such as the
+Apple App Store) while the repository itself stays GPL-3.0. Accepting third-party code
+under GPL-3.0 would make that impossible. SQLite follows the same model.
 
-- Kotlin, Jetpack Compose, three layers per feature: domain → data → presentation.
-- ViewModels extend `BaseViewModel`, expose a single content-only `UiState` via StateFlow.
-- Features depend on `:core:ai-api` abstractions, never on `:core:ai-local`.
-- No code comments — self-documenting naming (constraint notes are the only exception).
-- User-facing strings go in `strings.xml`.
-- No wildcard imports.
+Pull requests will be closed with a pointer to this document — please don't take it
+personally. Forking is welcome within the terms of the license (note the name/logo
+restrictions in [README.md](README.md#license)).
 
-## Setup
+## What is welcome
+
+- **Bug reports and feature ideas** via GitHub issues.
+- **Security reports** — please use GitHub's private vulnerability reporting (the
+  repository's Security tab) rather than a public issue.
+
+When reporting issues, include device model, RAM, Android version, and the selected
+acceleration backend (Settings → AI acceleration). Never attach recordings or notes
+containing sensitive data.
+
+## Building it yourself
 
 See [README.md](README.md#building) — no accounts or tokens needed; the app downloads
 its models (Whisper + Gemma, both ungated) on first run.
-
-## Reporting issues
-
-Include device model, RAM, Android version, and the selected acceleration backend
-(Settings → AI acceleration). Never attach recordings or notes containing sensitive data.
