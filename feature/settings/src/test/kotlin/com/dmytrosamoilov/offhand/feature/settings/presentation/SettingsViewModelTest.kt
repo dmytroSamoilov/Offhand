@@ -1,7 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
-import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNotePresetUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
@@ -56,7 +55,7 @@ class SettingsViewModelTest {
         val viewModel = viewModel()
         dispatcher.scheduler.advanceUntilIdle()
 
-        assertEquals(NotePresetOption.MEETING, viewModel.uiState.value.notePreset)
+        assertEquals(NotePreset.MEETING, viewModel.uiState.value.notePreset)
         assertTrue(viewModel.uiState.value.isDynamicColorEnabled)
     }
 
@@ -65,7 +64,7 @@ class SettingsViewModelTest {
         val viewModel = viewModel()
         dispatcher.scheduler.advanceUntilIdle()
 
-        viewModel.onNotePresetSelected(NotePresetOption.VISIT)
+        viewModel.onNotePresetSelected(NotePreset.VISIT)
         dispatcher.scheduler.advanceUntilIdle()
 
         coVerify { setNotePreset(NotePreset.VISIT) }

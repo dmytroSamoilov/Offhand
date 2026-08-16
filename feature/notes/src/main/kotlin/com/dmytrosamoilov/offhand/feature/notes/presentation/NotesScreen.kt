@@ -1,6 +1,5 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
-import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
@@ -99,6 +98,8 @@ import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOptionCard
+import com.dmytrosamoilov.offhand.core.ui.component.toDomain
+import com.dmytrosamoilov.offhand.core.ui.component.toUi
 import com.dmytrosamoilov.offhand.feature.notes.R
 import java.util.Locale
 import kotlinx.coroutines.launch
@@ -119,7 +120,7 @@ fun NotesScreen(
 
     LaunchedEffect(state.pendingShare) {
         val share = state.pendingShare ?: return@LaunchedEffect
-        context.startActivity(createShareChooser(share))
+        context.startActivity(NoteShareIntentFactory.createChooser(context, share))
         viewModel.onShareLaunched()
     }
 
@@ -204,8 +205,8 @@ fun NotesScreen(
     val selectedPreset = state.selected?.preset
     if (state.isPresetSheetVisible && selectedPreset != null) {
         NotePresetSheet(
-            selected = selectedPreset,
-            onSelected = viewModel::onPresetSelected,
+            selected = selectedPreset.toUi(),
+            onSelected = { option -> viewModel.onPresetSelected(option.toDomain()) },
             onDismiss = viewModel::onPresetSheetDismissed,
         )
     }
@@ -246,18 +247,6 @@ private fun NotePresetSheet(
             }
         }
     }
-}
-
-private fun createShareChooser(share: NoteShareUi): Intent {
-    val sendIntent = if (share.uris.size == 1) {
-        Intent(Intent.ACTION_SEND).putExtra(Intent.EXTRA_STREAM, share.uris.first())
-    } else {
-        Intent(Intent.ACTION_SEND_MULTIPLE)
-            .putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(share.uris))
-    }
-    sendIntent.type = share.mimeType
-    sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    return Intent.createChooser(sendIntent, null)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

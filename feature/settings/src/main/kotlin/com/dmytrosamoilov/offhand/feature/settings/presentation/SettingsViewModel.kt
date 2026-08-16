@@ -3,7 +3,6 @@ package com.dmytrosamoilov.offhand.feature.settings.presentation
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
-import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNotePresetUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
@@ -35,14 +34,14 @@ class SettingsViewModel @Inject constructor(
         }
         viewModelScope.launch {
             observeNotePreset().collect { preset ->
-                mutableUiState.update { it.copy(notePreset = preset.toUi()) }
+                mutableUiState.update { it.copy(notePreset = preset) }
             }
         }
     }
 
-    fun onNotePresetSelected(preset: NotePresetOption) {
+    fun onNotePresetSelected(preset: NotePreset) {
         launchSafely(showLoading = false) {
-            setNotePreset(preset.toDomain())
+            setNotePreset(preset)
         }
     }
 
@@ -51,18 +50,4 @@ class SettingsViewModel @Inject constructor(
             setDynamicColor(enabled)
         }
     }
-}
-
-private fun NotePreset.toUi(): NotePresetOption = when (this) {
-    NotePreset.SUMMARY -> NotePresetOption.SUMMARY
-    NotePreset.MEETING -> NotePresetOption.MEETING
-    NotePreset.VISIT -> NotePresetOption.VISIT
-    NotePreset.LEGAL -> NotePresetOption.LEGAL
-}
-
-private fun NotePresetOption.toDomain(): NotePreset = when (this) {
-    NotePresetOption.SUMMARY -> NotePreset.SUMMARY
-    NotePresetOption.MEETING -> NotePreset.MEETING
-    NotePresetOption.VISIT -> NotePreset.VISIT
-    NotePresetOption.LEGAL -> NotePreset.LEGAL
 }

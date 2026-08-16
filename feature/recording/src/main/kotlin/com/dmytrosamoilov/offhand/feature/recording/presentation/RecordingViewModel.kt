@@ -1,14 +1,12 @@
 package com.dmytrosamoilov.offhand.feature.recording.presentation
 
-import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
+import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.SessionPhase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveDeveloperOptionsUseCase
-import com.dmytrosamoilov.offhand.feature.recording.service.RecordingService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,7 +18,7 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class RecordingViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    private val recordingProcessController: RecordingProcessController,
     private val sessionManager: RecordingSessionManager,
     observeDeveloperOptions: ObserveDeveloperOptionsUseCase,
 ) : BaseViewModel() {
@@ -46,7 +44,7 @@ class RecordingViewModel @Inject constructor(
 
     fun onStartRecording() {
         waveform.value = emptyList()
-        RecordingService.start(context)
+        recordingProcessController.startRecording()
     }
 
     fun onPauseRecording() {

@@ -1,45 +1,52 @@
+@file:OptIn(ExperimentalTime::class)
+
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
 import com.dmytrosamoilov.offhand.core.audio.PcmPlaybackState
 import com.dmytrosamoilov.offhand.core.common.DurationFormatter
 import com.dmytrosamoilov.offhand.core.data.domain.Note
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
-import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
+import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareBundle
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.toLocalDateTime
 
-private val DATE_FORMATTER = DateTimeFormatter.ofPattern("MMM d, yyyy · HH:mm", Locale.US)
-private val DAY_FORMATTER = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.US)
-private val TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm", Locale.US)
 private val MARKDOWN_TOKENS = Regex("[#*>`_\\[\\]]")
 private val WHITESPACE_RUNS = Regex("\\s+")
 private const val PREVIEW_MAX_CHARS = 220
 
-internal fun List<Note>.toSectionsUi(): List<NotesSectionUi> {
-    val zone = ZoneId.systemDefault()
-    val today = LocalDate.now(zone)
-    return groupBy { Instant.ofEpochMilli(it.createdAtEpochMs).atZone(zone).toLocalDate() }
+internal fun List<Note>.toSectionsUi(dateLabelFormatter: DateLabelFormatter): List<NotesSectionUi> {
+    val zone = TimeZone.currentSystemDefault()
+    val today = Clock.System.now().toLocalDateTime(zone).date
+    return groupBy { Instant.fromEpochMilliseconds(it.createdAtEpochMs).toLocalDateTime(zone).date }
         .map { (date, notes) ->
             NotesSectionUi(
-                dayLabel = date.toDayLabel(today),
-                notes = notes.map { it.toCardUi(zone, today) },
+                dayLabel = date.toDayLabel(today, dateLabelFormatter),
+                notes = notes.map { it.toCardUi(zone, today, dateLabelFormatter) },
             )
         }
 }
 
-private fun Note.toCardUi(zone: ZoneId, today: LocalDate): NoteCardUi {
-    val createdAt = Instant.ofEpochMilli(createdAtEpochMs).atZone(zone)
+private fun Note.toCardUi(
+    zone: TimeZone,
+    today: LocalDate,
+    dateLabelFormatter: DateLabelFormatter,
+): NoteCardUi {
+    val createdAt = Instant.fromEpochMilliseconds(createdAtEpochMs).toLocalDateTime(zone)
     return NoteCardUi(
         id = id,
         title = title,
-        dayLabel = createdAt.toLocalDate().toDayLabel(today),
-        time = TIME_FORMATTER.format(createdAt),
+        dayLabel = createdAt.date.toDayLabel(today, dateLabelFormatter),
+        time = dateLabelFormatter.time(createdAt),
         preview = body
             .replace(MARKDOWN_TOKENS, " ")
             .replace(WHITESPACE_RUNS, " ")
@@ -50,27 +57,33 @@ private fun Note.toCardUi(zone: ZoneId, today: LocalDate): NoteCardUi {
     )
 }
 
-private fun LocalDate.toDayLabel(today: LocalDate): NoteDayLabelUi = when (this) {
+private fun LocalDate.toDayLabel(
+    today: LocalDate,
+    dateLabelFormatter: DateLabelFormatter,
+): NoteDayLabelUi = when (this) {
     today -> NoteDayLabelUi.Today
-    today.minusDays(1) -> NoteDayLabelUi.Yesterday
-    else -> NoteDayLabelUi.Date(DAY_FORMATTER.format(this))
+    today.minus(1, DateTimeUnit.DAY) -> NoteDayLabelUi.Yesterday
+    else -> NoteDayLabelUi.Date(dateLabelFormatter.day(this))
 }
 
 private fun countWords(text: String): Int =
     text.split(WHITESPACE_RUNS).count { it.isNotBlank() }
 
-internal fun Note.toDetailUi(): NoteDetailUi = NoteDetailUi(
+internal fun Note.toDetailUi(dateLabelFormatter: DateLabelFormatter): NoteDetailUi = NoteDetailUi(
     id = id,
     title = title,
     body = body,
     transcript = transcript,
-    createdAt = formatDate(createdAtEpochMs),
+    createdAt = dateLabelFormatter.dateTime(createdAtLocalDateTime()),
     wordCount = countWords(transcript),
     hasAudio = audioFileName != null,
     metrics = toMetricsUi(),
     status = status.toUi(),
-    preset = preset.toUi(),
+    preset = preset,
 )
+
+private fun Note.createdAtLocalDateTime(): LocalDateTime =
+    Instant.fromEpochMilliseconds(createdAtEpochMs).toLocalDateTime(TimeZone.currentSystemDefault())
 
 private fun NoteStatus.toUi(): NoteStatusUi = when (this) {
     NoteStatus.RECORDING -> NoteStatusUi.PROCESSING
@@ -79,27 +92,13 @@ private fun NoteStatus.toUi(): NoteStatusUi = when (this) {
     NoteStatus.FAILED -> NoteStatusUi.FAILED
 }
 
-private fun NotePreset.toUi(): NotePresetOption = when (this) {
-    NotePreset.SUMMARY -> NotePresetOption.SUMMARY
-    NotePreset.MEETING -> NotePresetOption.MEETING
-    NotePreset.VISIT -> NotePresetOption.VISIT
-    NotePreset.LEGAL -> NotePresetOption.LEGAL
-}
-
-internal fun NotePresetOption.toDomain(): NotePreset = when (this) {
-    NotePresetOption.SUMMARY -> NotePreset.SUMMARY
-    NotePresetOption.MEETING -> NotePreset.MEETING
-    NotePresetOption.VISIT -> NotePreset.VISIT
-    NotePresetOption.LEGAL -> NotePreset.LEGAL
-}
-
 internal fun AiCoreDownloadState.toPreparationUi(): ModelPreparationUi? = when (this) {
     is AiCoreDownloadState.Downloading -> ModelPreparationUi(progressPercent = progressPercent)
     is AiCoreDownloadState.Idle -> null
 }
 
 internal fun NoteShareBundle.toUi(): NoteShareUi = NoteShareUi(
-    uris = uris,
+    filePaths = filePaths,
     mimeType = mimeType,
 )
 
@@ -137,6 +136,3 @@ private fun Note.toMetricsUi(): NoteMetricsUi? {
         hardwareBackend = backend,
     )
 }
-
-private fun formatDate(epochMs: Long): String =
-    DATE_FORMATTER.format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()))

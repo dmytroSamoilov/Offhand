@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.designsystem.component.RoundedCheckbox
 import com.dmytrosamoilov.offhand.core.ui.R
 
@@ -57,6 +58,20 @@ enum class NotePresetOption(
         descriptionRes = R.string.core_ui_note_preset_legal_description,
         icon = Icons.Filled.Gavel,
     ),
+}
+
+fun NotePreset.toUi(): NotePresetOption = when (this) {
+    NotePreset.SUMMARY -> NotePresetOption.SUMMARY
+    NotePreset.MEETING -> NotePresetOption.MEETING
+    NotePreset.VISIT -> NotePresetOption.VISIT
+    NotePreset.LEGAL -> NotePresetOption.LEGAL
+}
+
+fun NotePresetOption.toDomain(): NotePreset = when (this) {
+    NotePresetOption.SUMMARY -> NotePreset.SUMMARY
+    NotePresetOption.MEETING -> NotePreset.MEETING
+    NotePresetOption.VISIT -> NotePreset.VISIT
+    NotePresetOption.LEGAL -> NotePreset.LEGAL
 }
 
 @Composable

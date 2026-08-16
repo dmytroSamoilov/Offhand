@@ -1,24 +1,20 @@
 package com.dmytrosamoilov.offhand.feature.onboarding.presentation
 
-import android.content.Context
 import com.dmytrosamoilov.offhand.core.ai.api.AvailableModel
 import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
 import com.dmytrosamoilov.offhand.core.ai.api.ModelFamily
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
+import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
 import com.dmytrosamoilov.offhand.core.device.DeviceCapability
 import com.dmytrosamoilov.offhand.core.device.DeviceCapabilityChecker
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
-import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.CompleteOnboardingUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetNotePresetUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetTelemetryConsentUseCase
-import com.dmytrosamoilov.offhand.feature.onboarding.service.ModelDownloadService
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
@@ -64,6 +60,7 @@ class OnboardingViewModelTest {
     private val setTelemetryConsent: SetTelemetryConsentUseCase = mockk(relaxed = true)
     private val setNotePreset: SetNotePresetUseCase = mockk(relaxed = true)
     private val completeOnboarding: CompleteOnboardingUseCase = mockk(relaxed = true)
+    private val modelDownloadController: ModelDownloadController = mockk(relaxed = true)
 
     @Before
     fun setUp() {
@@ -71,8 +68,6 @@ class OnboardingViewModelTest {
         every { modelManager.model } returns testModel
         every { modelManager.speechModelSizeInBytes } returns 375_485_327L
         every { appLockManager.isDeviceSecure } returns true
-        mockkObject(ModelDownloadService.Companion)
-        justRun { ModelDownloadService.start(any()) }
     }
 
     @After
@@ -82,7 +77,7 @@ class OnboardingViewModelTest {
     }
 
     private fun viewModel(): OnboardingViewModel = OnboardingViewModel(
-        context = mockk<Context>(relaxed = true),
+        modelDownloadController = modelDownloadController,
         deviceCapabilityChecker = deviceCapabilityChecker,
         modelManager = modelManager,
         appLockManager = appLockManager,
@@ -154,7 +149,7 @@ class OnboardingViewModelTest {
         viewModel.onPrivacyContinue()
 
         assertEquals(OnboardingStep.NOTE_STYLE, viewModel.uiState.value.step)
-        assertEquals(NotePresetOption.SUMMARY, viewModel.uiState.value.notePreset)
+        assertEquals(NotePreset.SUMMARY, viewModel.uiState.value.notePreset)
     }
 
     @Test
@@ -162,7 +157,7 @@ class OnboardingViewModelTest {
         val viewModel = capableViewModel()
         viewModel.onPrivacyContinue()
 
-        viewModel.onNoteStyleSelected(NotePresetOption.VISIT)
+        viewModel.onNoteStyleSelected(NotePreset.VISIT)
         viewModel.onNoteStyleContinue()
         dispatcher.scheduler.advanceUntilIdle()
 
@@ -274,7 +269,7 @@ class OnboardingViewModelTest {
         viewModel.onDownloadContinue()
         dispatcher.scheduler.advanceUntilIdle()
 
-        verify { ModelDownloadService.start(any()) }
+        verify { modelDownloadController.start() }
         coVerify { completeOnboarding() }
     }
 }

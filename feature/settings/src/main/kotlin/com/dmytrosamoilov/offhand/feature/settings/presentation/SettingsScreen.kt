@@ -28,10 +28,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOptionCard
+import com.dmytrosamoilov.offhand.core.ui.component.toDomain
 import com.dmytrosamoilov.offhand.feature.settings.R
 
 @Composable
@@ -71,16 +73,16 @@ fun SettingsScreen(
 
 @Composable
 private fun NoteStyleSection(
-    selected: NotePresetOption,
-    onSelected: (NotePresetOption) -> Unit,
+    selected: NotePreset,
+    onSelected: (NotePreset) -> Unit,
 ) {
     SettingsCard(title = stringResource(R.string.settings_note_style_title)) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             NotePresetOption.entries.forEach { option ->
                 NotePresetOptionCard(
                     option = option,
-                    isSelected = option == selected,
-                    onClick = { onSelected(option) },
+                    isSelected = option.toDomain() == selected,
+                    onClick = { onSelected(option.toDomain()) },
                 )
             }
         }

@@ -1,10 +1,9 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
-import android.content.Context
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
-import com.dmytrosamoilov.offhand.feature.recording.R
+import com.dmytrosamoilov.offhand.feature.recording.domain.DefaultNoteTitleProvider
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -17,15 +16,13 @@ import org.junit.Test
 class CreateRecordingNoteUseCaseTest {
 
     private val notesRepository: NotesRepository = mockk()
-    private val context: Context = mockk()
-    private val useCase = CreateRecordingNoteUseCase(context, notesRepository)
+    private val defaultNoteTitleProvider: DefaultNoteTitleProvider = mockk()
+    private val useCase = CreateRecordingNoteUseCase(defaultNoteTitleProvider, notesRepository)
 
     @Test
     fun `creates a recording note titled with the next recording number`() = runTest {
         coEvery { notesRepository.countNotes() } returns 3
-        every {
-            context.getString(R.string.recording_default_note_title, 4)
-        } returns "Recording 4"
+        every { defaultNoteTitleProvider.titleFor(4) } returns "Recording 4"
         coEvery { notesRepository.createNote(any()) } returns 42L
 
         val noteId = useCase("audio.pcm.enc", NotePreset.MEETING)
@@ -47,9 +44,7 @@ class CreateRecordingNoteUseCaseTest {
     @Test
     fun `first recording is titled Recording 1`() = runTest {
         coEvery { notesRepository.countNotes() } returns 0
-        every {
-            context.getString(R.string.recording_default_note_title, 1)
-        } returns "Recording 1"
+        every { defaultNoteTitleProvider.titleFor(1) } returns "Recording 1"
         coEvery { notesRepository.createNote(any()) } returns 1L
 
         useCase(null, NotePreset.SUMMARY)

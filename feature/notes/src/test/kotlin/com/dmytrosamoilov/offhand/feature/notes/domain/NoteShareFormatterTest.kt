@@ -1,6 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.notes.domain
 
-import java.time.ZoneOffset
+import kotlinx.datetime.TimeZone
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -8,7 +8,7 @@ import org.junit.Test
 
 class NoteShareFormatterTest {
 
-    private val zone = ZoneOffset.UTC
+    private val zone = TimeZone.UTC
     private val createdAtEpochMs = 1_750_000_000_000
     private val labels = NoteShareLabels(
         title = "Title",
@@ -71,10 +71,9 @@ class NoteShareFormatterTest {
         val content = NoteShareFormatter.textContent(
             labels = labels,
             title = "Board meeting",
-            createdAtEpochMs = createdAtEpochMs,
+            formattedDate = "Jun 15, 2025 · 15:06",
             overview = "Budget approved.",
             transcript = "We approved the budget.",
-            zone = zone,
         )
 
         val lines = content.lines()
@@ -93,10 +92,9 @@ class NoteShareFormatterTest {
         val content = NoteShareFormatter.textContent(
             labels = labels,
             title = "Note",
-            createdAtEpochMs = createdAtEpochMs,
+            formattedDate = "Jun 15, 2025 · 15:06",
             overview = "\n  Overview body  \n",
             transcript = "  Transcript body  ",
-            zone = zone,
         )
 
         assertTrue(content.contains("Overview:\nOverview body\n"))

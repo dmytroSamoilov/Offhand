@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":feature:recording"))
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.kotlinx.datetime)
     implementation(libs.play.review.ktx)
     implementation(libs.timber)
     implementation(libs.androidx.material.icons.extended)

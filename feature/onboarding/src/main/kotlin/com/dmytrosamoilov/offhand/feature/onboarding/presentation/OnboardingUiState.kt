@@ -1,12 +1,12 @@
 package com.dmytrosamoilov.offhand.feature.onboarding.presentation
 
-import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 
 data class OnboardingUiState(
     val step: OnboardingStep = OnboardingStep.DEVICE_CHECK,
     val deviceSpecs: DeviceSpecsUi? = null,
     val downloadSizeGb: String = "",
-    val notePreset: NotePresetOption = NotePresetOption.SUMMARY,
+    val notePreset: NotePreset = NotePreset.DEFAULT,
     val isTelemetryEnabled: Boolean = true,
     val currentPage: Int = 0,
     val pageCount: Int = 0,

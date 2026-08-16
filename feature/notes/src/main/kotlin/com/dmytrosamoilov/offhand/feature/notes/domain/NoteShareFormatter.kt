@@ -1,9 +1,13 @@
+@file:OptIn(ExperimentalTime::class)
+
 package com.dmytrosamoilov.offhand.feature.notes.domain
 
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
+import kotlinx.datetime.toLocalDateTime
 
 data class NoteShareLabels(
     val title: String,
@@ -14,9 +18,6 @@ data class NoteShareLabels(
 
 object NoteShareFormatter {
 
-    private val FILE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm", Locale.US)
-    private val CONTENT_DATE_FORMATTER =
-        DateTimeFormatter.ofPattern("MMM d, yyyy · HH:mm", Locale.US)
     private val ILLEGAL_FILENAME_CHARS = Regex("[\\\\/:*?\"<>|\\p{Cntrl}]")
     private val WHITESPACE_RUNS = Regex("\\s+")
     private const val MAX_TITLE_CHARS = 60
@@ -25,7 +26,7 @@ object NoteShareFormatter {
         title: String,
         fallbackTitle: String,
         createdAtEpochMs: Long,
-        zone: ZoneId,
+        zone: TimeZone,
     ): String {
         val sanitizedTitle = title
             .replace(ILLEGAL_FILENAME_CHARS, " ")
@@ -34,20 +35,19 @@ object NoteShareFormatter {
             .take(MAX_TITLE_CHARS)
             .trim()
             .ifEmpty { fallbackTitle }
-        val timestamp = FILE_DATE_FORMATTER.format(atZone(createdAtEpochMs, zone))
+        val timestamp = fileTimestamp(atZone(createdAtEpochMs, zone))
         return "$sanitizedTitle $timestamp"
     }
 
     fun textContent(
         labels: NoteShareLabels,
         title: String,
-        createdAtEpochMs: Long,
+        formattedDate: String,
         overview: String,
         transcript: String,
-        zone: ZoneId,
     ): String = buildString {
         appendLine("${labels.title}: $title")
-        appendLine("${labels.date}: ${CONTENT_DATE_FORMATTER.format(atZone(createdAtEpochMs, zone))}")
+        appendLine("${labels.date}: $formattedDate")
         appendLine()
         appendLine("${labels.overview}:")
         appendLine(overview.trim())
@@ -56,5 +56,18 @@ object NoteShareFormatter {
         appendLine(transcript.trim())
     }
 
-    private fun atZone(epochMs: Long, zone: ZoneId) = Instant.ofEpochMilli(epochMs).atZone(zone)
+    private fun fileTimestamp(dateTime: LocalDateTime): String {
+        val year = dateTime.year.toString().padStart(YEAR_DIGITS, '0')
+        val month = dateTime.month.number.toString().padStart(TWO_DIGITS, '0')
+        val day = dateTime.day.toString().padStart(TWO_DIGITS, '0')
+        val hour = dateTime.hour.toString().padStart(TWO_DIGITS, '0')
+        val minute = dateTime.minute.toString().padStart(TWO_DIGITS, '0')
+        return "$year-$month-$day $hour-$minute"
+    }
+
+    private fun atZone(epochMs: Long, zone: TimeZone): LocalDateTime =
+        Instant.fromEpochMilliseconds(epochMs).toLocalDateTime(zone)
+
+    private const val TWO_DIGITS = 2
+    private const val YEAR_DIGITS = 4
 }

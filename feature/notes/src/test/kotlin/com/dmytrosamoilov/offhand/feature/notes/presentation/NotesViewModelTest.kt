@@ -9,7 +9,9 @@ import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
 import com.dmytrosamoilov.offhand.core.audio.PcmAudioPlayer
 import com.dmytrosamoilov.offhand.core.audio.PcmPlaybackState
 import com.dmytrosamoilov.offhand.core.data.domain.Note
+import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
+import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
@@ -89,12 +91,17 @@ class NotesViewModelTest {
     private val speechToText: SpeechToText = mockk {
         every { downloadState } returns speechDownloadState
     }
+    private val recordingProcessController: RecordingProcessController = mockk(relaxed = true)
+    private val dateLabelFormatter: DateLabelFormatter = mockk(relaxed = true)
 
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         every { observeNotes() } returns flowOf(listOf(note))
         coEvery { getNote(5) } returns note
+        every { dateLabelFormatter.dateTime(any()) } returns "Jun 15, 2025 · 15:06"
+        every { dateLabelFormatter.day(any()) } returns "Jun 15, 2025"
+        every { dateLabelFormatter.time(any()) } returns "15:06"
     }
 
     @After
@@ -103,7 +110,8 @@ class NotesViewModelTest {
     }
 
     private fun viewModel() = NotesViewModel(
-        context = mockk(relaxed = true),
+        recordingProcessController = recordingProcessController,
+        dateLabelFormatter = dateLabelFormatter,
         observeNotes = observeNotes,
         observeDeveloperOptions = observeDeveloperOptions,
         getNote = getNote,

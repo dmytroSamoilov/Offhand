@@ -1,16 +1,13 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
-import android.app.ForegroundServiceStartNotAllowedException
-import android.content.Context
 import com.dmytrosamoilov.offhand.core.audio.StreamingAudioRecorder
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
+import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
-import com.dmytrosamoilov.offhand.feature.recording.service.RecordingService
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.first
@@ -18,7 +15,7 @@ import timber.log.Timber
 
 @Singleton
 class ResumeInterruptedNotesUseCase @Inject constructor(
-    @ApplicationContext private val context: Context,
+    private val recordingProcessController: RecordingProcessController,
     private val notesRepository: NotesRepository,
     private val sessionManager: RecordingSessionManager,
     private val failNote: FailNoteUseCase,
@@ -63,21 +60,15 @@ class ResumeInterruptedNotesUseCase @Inject constructor(
     }
 
     private fun retryViaService(noteId: Long, audioFileName: String) {
-        try {
-            RecordingService.retryNote(context, noteId, audioFileName)
-        } catch (notAllowed: ForegroundServiceStartNotAllowedException) {
-            Timber.tag(LOG_TAG).w(notAllowed, "FGS not allowed, processing note %d in-process", noteId)
-            sessionManager.retryNote(noteId, audioFileName)
-        }
+        if (recordingProcessController.retryNote(noteId, audioFileName)) return
+        Timber.tag(LOG_TAG).w("Service unavailable, processing note %d in-process", noteId)
+        sessionManager.retryNote(noteId, audioFileName)
     }
 
     private fun restructureViaService(noteId: Long, preset: NotePreset) {
-        try {
-            RecordingService.restructureNote(context, noteId, preset)
-        } catch (notAllowed: ForegroundServiceStartNotAllowedException) {
-            Timber.tag(LOG_TAG).w(notAllowed, "FGS not allowed, structuring note %d in-process", noteId)
-            sessionManager.restructureNote(noteId, preset)
-        }
+        if (recordingProcessController.restructureNote(noteId, preset)) return
+        Timber.tag(LOG_TAG).w("Service unavailable, structuring note %d in-process", noteId)
+        sessionManager.restructureNote(noteId, preset)
     }
 
     private companion object {

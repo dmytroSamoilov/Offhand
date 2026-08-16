@@ -1,28 +1,33 @@
+@file:OptIn(ExperimentalTime::class)
+
 package com.dmytrosamoilov.offhand.feature.notes.domain.usecase
 
-import android.content.Context
-import android.net.Uri
-import androidx.core.content.FileProvider
 import com.dmytrosamoilov.offhand.core.audio.StreamingAudioRecorder
 import com.dmytrosamoilov.offhand.core.audio.WavCodec
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
-import com.dmytrosamoilov.offhand.feature.notes.R
+import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareBundle
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareFormatter
-import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareLabels
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareLabelsProvider
+import com.dmytrosamoilov.offhand.feature.notes.domain.ShareCacheDirectoryProvider
 import java.io.File
 import java.io.FileOutputStream
 import java.io.RandomAccessFile
-import java.time.ZoneId
 import javax.inject.Inject
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 class PrepareNoteShareUseCase @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val audioStore: EncryptedAudioStore,
+    private val noteShareLabelsProvider: NoteShareLabelsProvider,
+    private val shareCacheDirectoryProvider: ShareCacheDirectoryProvider,
+    private val dateLabelFormatter: DateLabelFormatter,
 ) {
 
     suspend operator fun invoke(
@@ -41,13 +46,13 @@ class PrepareNoteShareUseCase @Inject constructor(
         }
         check(files.isNotEmpty())
         NoteShareBundle(
-            uris = files.map(::toContentUri),
+            filePaths = files.map { it.absolutePath },
             mimeType = mimeType(files.size, includeNote),
         )
     }
 
     private fun prepareShareDir(): File {
-        val shareDir = File(context.cacheDir, SHARE_DIR)
+        val shareDir = File(shareCacheDirectoryProvider.shareDirectoryPath())
         shareDir.deleteRecursively()
         shareDir.mkdirs()
         return shareDir
@@ -55,32 +60,27 @@ class PrepareNoteShareUseCase @Inject constructor(
 
     private fun fileBaseName(note: Note): String = NoteShareFormatter.fileBaseName(
         title = note.title,
-        fallbackTitle = context.getString(R.string.notes_recording_fallback_title),
+        fallbackTitle = noteShareLabelsProvider.fallbackTitle(),
         createdAtEpochMs = note.createdAtEpochMs,
-        zone = ZoneId.systemDefault(),
+        zone = TimeZone.currentSystemDefault(),
     )
 
     private fun writeNoteFile(shareDir: File, baseName: String, note: Note): File {
         val file = File(shareDir, "$baseName.txt")
         file.writeText(
             NoteShareFormatter.textContent(
-                labels = shareLabels(),
+                labels = noteShareLabelsProvider.labels(),
                 title = note.title,
-                createdAtEpochMs = note.createdAtEpochMs,
+                formattedDate = dateLabelFormatter.dateTime(note.createdAtLocalDateTime()),
                 overview = note.body,
                 transcript = note.transcript,
-                zone = ZoneId.systemDefault(),
             ),
         )
         return file
     }
 
-    private fun shareLabels(): NoteShareLabels = NoteShareLabels(
-        title = context.getString(R.string.notes_edit_title_label),
-        date = context.getString(R.string.notes_share_date_label),
-        overview = context.getString(R.string.notes_overview_heading),
-        transcript = context.getString(R.string.notes_transcript_heading),
-    )
+    private fun Note.createdAtLocalDateTime(): LocalDateTime =
+        Instant.fromEpochMilliseconds(createdAtEpochMs).toLocalDateTime(TimeZone.currentSystemDefault())
 
     private fun writeAudioFile(shareDir: File, baseName: String, audioFileName: String): File {
         val file = File(shareDir, "$baseName.wav")
@@ -106,9 +106,6 @@ class PrepareNoteShareUseCase @Inject constructor(
         }
     }
 
-    private fun toContentUri(file: File): Uri =
-        FileProvider.getUriForFile(context, "${context.packageName}$AUTHORITY_SUFFIX", file)
-
     private fun mimeType(fileCount: Int, includeNote: Boolean): String = when {
         fileCount > 1 -> MIME_ANY
         includeNote -> MIME_TEXT
@@ -116,8 +113,6 @@ class PrepareNoteShareUseCase @Inject constructor(
     }
 
     private companion object {
-        const val SHARE_DIR = "shared_notes"
-        const val AUTHORITY_SUFFIX = ".fileprovider"
         const val MIME_ANY = "*/*"
         const val MIME_TEXT = "text/plain"
         const val MIME_AUDIO = "audio/wav"

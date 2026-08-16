@@ -1,7 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
-import android.net.Uri
-import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 
 data class NotesUiState(
     val sections: List<NotesSectionUi> = emptyList(),
@@ -19,7 +18,7 @@ data class NotesUiState(
 )
 
 data class NoteShareUi(
-    val uris: List<Uri>,
+    val filePaths: List<String>,
     val mimeType: String,
 )
 
@@ -58,7 +57,7 @@ data class NoteDetailUi(
     val hasAudio: Boolean,
     val metrics: NoteMetricsUi?,
     val status: NoteStatusUi,
-    val preset: NotePresetOption,
+    val preset: NotePreset,
 )
 
 enum class NoteStatusUi {

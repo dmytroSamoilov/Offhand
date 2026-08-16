@@ -1,16 +1,14 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
-import android.content.Context
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
-import com.dmytrosamoilov.offhand.feature.recording.R
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.dmytrosamoilov.offhand.feature.recording.domain.DefaultNoteTitleProvider
 import javax.inject.Inject
 
 class CreateRecordingNoteUseCase @Inject constructor(
-    @ApplicationContext private val context: Context,
+    private val defaultNoteTitleProvider: DefaultNoteTitleProvider,
     private val notesRepository: NotesRepository,
 ) {
     suspend operator fun invoke(
@@ -20,10 +18,7 @@ class CreateRecordingNoteUseCase @Inject constructor(
         notesRepository.createNote(
             Note(
                 id = 0,
-                title = context.getString(
-                    R.string.recording_default_note_title,
-                    notesRepository.countNotes() + 1,
-                ),
+                title = defaultNoteTitleProvider.titleFor(notesRepository.countNotes() + 1),
                 body = "",
                 transcript = "",
                 createdAtEpochMs = System.currentTimeMillis(),

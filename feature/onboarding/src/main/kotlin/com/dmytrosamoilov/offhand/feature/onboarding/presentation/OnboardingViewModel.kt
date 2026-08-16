@@ -1,18 +1,16 @@
 package com.dmytrosamoilov.offhand.feature.onboarding.presentation
 
-import android.content.Context
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
+import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.device.DeviceCapabilityChecker
 import com.dmytrosamoilov.offhand.core.device.isLocalLlmCapable
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
-import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.CompleteOnboardingUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetNotePresetUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetTelemetryConsentUseCase
-import com.dmytrosamoilov.offhand.feature.onboarding.service.ModelDownloadService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +19,7 @@ import kotlinx.coroutines.flow.update
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    private val modelDownloadController: ModelDownloadController,
     private val deviceCapabilityChecker: DeviceCapabilityChecker,
     private val modelManager: ModelManager,
     private val appLockManager: AppLockManager,
@@ -43,13 +41,13 @@ class OnboardingViewModel @Inject constructor(
         moveToNextPage()
     }
 
-    fun onNoteStyleSelected(option: NotePresetOption) {
-        mutableUiState.update { it.copy(notePreset = option) }
+    fun onNoteStyleSelected(preset: NotePreset) {
+        mutableUiState.update { it.copy(notePreset = preset) }
     }
 
     fun onNoteStyleContinue() {
         launchSafely {
-            setNotePreset(uiState.value.notePreset.toDomain())
+            setNotePreset(uiState.value.notePreset)
             moveToNextPage()
         }
     }
@@ -77,7 +75,7 @@ class OnboardingViewModel @Inject constructor(
 
     fun onDownloadContinue() {
         launchSafely {
-            ModelDownloadService.start(context)
+            modelDownloadController.start()
             completeOnboarding()
         }
     }

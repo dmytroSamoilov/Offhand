@@ -1,34 +1,30 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
-import android.content.Context
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
+import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
-import com.dmytrosamoilov.offhand.feature.recording.service.RecordingService
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
 class ResumeInterruptedNotesUseCaseTest {
 
-    private val context: Context = mockk(relaxed = true)
+    private val recordingProcessController: RecordingProcessController = mockk()
     private val notesRepository: NotesRepository = mockk()
     private val sessionManager: RecordingSessionManager = mockk {
         every { processingNoteIds } returns MutableStateFlow(emptySet())
@@ -41,7 +37,7 @@ class ResumeInterruptedNotesUseCaseTest {
     }
 
     private val useCase = ResumeInterruptedNotesUseCase(
-        context = context,
+        recordingProcessController = recordingProcessController,
         notesRepository = notesRepository,
         sessionManager = sessionManager,
         failNote = failNote,
@@ -51,17 +47,11 @@ class ResumeInterruptedNotesUseCaseTest {
 
     @Before
     fun setUp() {
-        mockkObject(RecordingService.Companion)
-        every { RecordingService.retryNote(any(), any(), any()) } just Runs
-        every { RecordingService.restructureNote(any(), any(), any()) } just Runs
+        every { recordingProcessController.retryNote(any(), any()) } returns true
+        every { recordingProcessController.restructureNote(any(), any()) } returns true
         coEvery { failNote(any()) } returns true
         coEvery { isAiCoreDownloaded() } returns true
         coEvery { notesRepository.deleteNote(any()) } just Runs
-    }
-
-    @After
-    fun tearDown() {
-        unmockkObject(RecordingService.Companion)
     }
 
     private fun note(
@@ -93,8 +83,8 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify { RecordingService.retryNote(context, 1, "note-1.pcm.enc") }
-        verify(exactly = 1) { RecordingService.retryNote(any(), any(), any()) }
+        verify { recordingProcessController.retryNote(1, "note-1.pcm.enc") }
+        verify(exactly = 1) { recordingProcessController.retryNote(any(), any()) }
     }
 
     @Test
@@ -105,8 +95,8 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify { RecordingService.restructureNote(context, 1, NotePreset.DEFAULT) }
-        verify(exactly = 0) { RecordingService.retryNote(any(), any(), any()) }
+        verify { recordingProcessController.restructureNote(1, NotePreset.DEFAULT) }
+        verify(exactly = 0) { recordingProcessController.retryNote(any(), any()) }
     }
 
     @Test
@@ -119,7 +109,7 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify { RecordingService.restructureNote(context, 1, NotePreset.DEFAULT) }
+        verify { recordingProcessController.restructureNote(1, NotePreset.DEFAULT) }
         coVerify(exactly = 0) { failNote(any()) }
     }
 
@@ -132,7 +122,7 @@ class ResumeInterruptedNotesUseCaseTest {
         useCase()
 
         coVerify { failNote(1) }
-        verify(exactly = 0) { RecordingService.retryNote(any(), any(), any()) }
+        verify(exactly = 0) { recordingProcessController.retryNote(any(), any()) }
     }
 
     @Test
@@ -144,7 +134,7 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify(exactly = 0) { RecordingService.retryNote(any(), any(), any()) }
+        verify(exactly = 0) { recordingProcessController.retryNote(any(), any()) }
         coVerify(exactly = 0) { failNote(any()) }
     }
 
@@ -157,7 +147,7 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify(exactly = 0) { RecordingService.retryNote(any(), any(), any()) }
+        verify(exactly = 0) { recordingProcessController.retryNote(any(), any()) }
         coVerify(exactly = 0) { failNote(any()) }
     }
 
@@ -169,7 +159,7 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify { RecordingService.restructureNote(context, 3, NotePreset.DEFAULT) }
+        verify { recordingProcessController.restructureNote(3, NotePreset.DEFAULT) }
         coVerify(exactly = 0) { notesRepository.deleteNote(any()) }
     }
 
@@ -181,7 +171,7 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify { RecordingService.retryNote(context, 3, "note-3.pcm.enc") }
+        verify { recordingProcessController.retryNote(3, "note-3.pcm.enc") }
     }
 
     @Test
@@ -194,7 +184,7 @@ class ResumeInterruptedNotesUseCaseTest {
 
         coVerify { notesRepository.deleteNote(3) }
         coVerify(exactly = 0) { failNote(any()) }
-        verify(exactly = 0) { RecordingService.retryNote(any(), any(), any()) }
+        verify(exactly = 0) { recordingProcessController.retryNote(any(), any()) }
     }
 
     @Test
@@ -212,7 +202,7 @@ class ResumeInterruptedNotesUseCaseTest {
                 withArg { updated -> assertEquals(10_000L, updated.durationMs) },
             )
         }
-        verify { RecordingService.restructureNote(context, 3, NotePreset.DEFAULT) }
+        verify { recordingProcessController.restructureNote(3, NotePreset.DEFAULT) }
     }
 
     @Test
@@ -224,7 +214,7 @@ class ResumeInterruptedNotesUseCaseTest {
         useCase()
 
         coVerify(exactly = 0) { notesRepository.updateNote(any()) }
-        verify { RecordingService.restructureNote(context, 1, NotePreset.DEFAULT) }
+        verify { recordingProcessController.restructureNote(1, NotePreset.DEFAULT) }
     }
 
     @Test
@@ -236,8 +226,8 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify(exactly = 0) { RecordingService.restructureNote(any(), any(), any()) }
-        verify(exactly = 0) { RecordingService.retryNote(any(), any(), any()) }
+        verify(exactly = 0) { recordingProcessController.restructureNote(any(), any()) }
+        verify(exactly = 0) { recordingProcessController.retryNote(any(), any()) }
         coVerify(exactly = 0) { notesRepository.deleteNote(any()) }
     }
 
@@ -253,8 +243,34 @@ class ResumeInterruptedNotesUseCaseTest {
         useCase()
 
         verifyOrder {
-            RecordingService.retryNote(context, 1, "note-1.pcm.enc")
-            RecordingService.retryNote(context, 2, "note-2.pcm.enc")
+            recordingProcessController.retryNote(1, "note-1.pcm.enc")
+            recordingProcessController.retryNote(2, "note-2.pcm.enc")
         }
+    }
+
+    @Test
+    fun `falls back to in-process retry when the service refuses to start`() = runTest {
+        every { recordingProcessController.retryNote(any(), any()) } returns false
+        every { sessionManager.retryNote(any(), any()) } just Runs
+        every { notesRepository.observeNotes() } returns flowOf(
+            listOf(note(1, NoteStatus.PROCESSING)),
+        )
+
+        useCase()
+
+        verify { sessionManager.retryNote(1, "note-1.pcm.enc") }
+    }
+
+    @Test
+    fun `falls back to in-process restructure when the service refuses to start`() = runTest {
+        every { recordingProcessController.restructureNote(any(), any()) } returns false
+        every { sessionManager.restructureNote(any(), any()) } just Runs
+        every { notesRepository.observeNotes() } returns flowOf(
+            listOf(note(1, NoteStatus.PROCESSING, transcript = "already transcribed")),
+        )
+
+        useCase()
+
+        verify { sessionManager.restructureNote(1, NotePreset.DEFAULT) }
     }
 }

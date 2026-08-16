@@ -16,6 +16,7 @@ hilt = "2.57.2"
 hiltNavigationCompose = "1.2.0"
 navigationCompose = "2.8.0"
 coroutines = "1.9.0"
+kotlinxDatetime = "0.7.0"
 litertlm = "0.14.0"
 sherpaOnnx = "1.13.4"
 okhttp = "4.12.0"
@@ -74,6 +75,9 @@ coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-
 
 # Serialization
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+
+# Date/time
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 
 # AI — LiteRT-LM on-device inference
 litertlm = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", version.ref = "litertlm" }

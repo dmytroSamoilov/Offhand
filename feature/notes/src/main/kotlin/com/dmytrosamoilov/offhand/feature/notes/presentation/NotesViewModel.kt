@@ -1,14 +1,15 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
-import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.audio.PcmAudioPlayer
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.Note
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
-import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
+import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
@@ -18,9 +19,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareU
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
-import com.dmytrosamoilov.offhand.feature.recording.service.RecordingService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +32,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class NotesViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    private val recordingProcessController: RecordingProcessController,
+    private val dateLabelFormatter: DateLabelFormatter,
     observeNotes: ObserveNotesUseCase,
     observeDeveloperOptions: ObserveDeveloperOptionsUseCase,
     private val getNote: GetNoteUseCase,
@@ -60,7 +60,7 @@ class NotesViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             observeNotes().collect { notes ->
-                mutableUiState.update { it.copy(sections = notes.toSectionsUi()) }
+                mutableUiState.update { it.copy(sections = notes.toSectionsUi(dateLabelFormatter)) }
                 refreshSelected(notes)
             }
         }
@@ -93,7 +93,7 @@ class NotesViewModel @Inject constructor(
             loadAudio(note)
             mutableUiState.update {
                 it.copy(
-                    selected = note.toDetailUi(),
+                    selected = note.toDetailUi(dateLabelFormatter),
                     editor = null,
                     isDeleteConfirmationVisible = false,
                 )
@@ -120,7 +120,11 @@ class NotesViewModel @Inject constructor(
         if (refreshed == null || refreshed == current) return
         selectedNote = refreshed
         mutableUiState.update { state ->
-            if (state.editor != null) state else state.copy(selected = refreshed.toDetailUi())
+            if (state.editor != null) {
+                state
+            } else {
+                state.copy(selected = refreshed.toDetailUi(dateLabelFormatter))
+            }
         }
     }
 
@@ -147,10 +151,10 @@ class NotesViewModel @Inject constructor(
         mutableUiState.update { it.copy(isPresetSheetVisible = false) }
     }
 
-    fun onPresetSelected(preset: NotePresetOption) {
+    fun onPresetSelected(preset: NotePreset) {
         val note = selectedNote ?: return
         mutableUiState.update { it.copy(isPresetSheetVisible = false) }
-        RecordingService.restructureNote(context, note.id, preset.toDomain())
+        recordingProcessController.restructureNote(note.id, preset)
     }
 
     fun onShareRequested() {
@@ -231,7 +235,7 @@ class NotesViewModel @Inject constructor(
             updateNote(updated)
             selectedNote = updated
             mutableUiState.update {
-                it.copy(selected = updated.toDetailUi(), editor = null)
+                it.copy(selected = updated.toDetailUi(dateLabelFormatter), editor = null)
             }
         }
     }
@@ -239,7 +243,7 @@ class NotesViewModel @Inject constructor(
     fun onRetryTranscriptionRequested() {
         val note = selectedNote ?: return
         val audioFileName = note.audioFileName ?: return
-        RecordingService.retryNote(context, note.id, audioFileName)
+        recordingProcessController.retryNote(note.id, audioFileName)
     }
 
     fun onRetranscribeRequested() {

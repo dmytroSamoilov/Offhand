@@ -58,12 +58,15 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.designsystem.R as DesignR
 import com.dmytrosamoilov.offhand.core.designsystem.component.MorphingLoadingIndicator
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOptionCard
+import com.dmytrosamoilov.offhand.core.ui.component.toDomain
+import com.dmytrosamoilov.offhand.core.ui.component.toUi
 import com.dmytrosamoilov.offhand.feature.onboarding.R
 
 @Composable
@@ -110,7 +113,7 @@ fun OnboardingScreen(
 @Composable
 private fun OnboardingContent(
     state: OnboardingUiState,
-    onNoteStyleSelected: (NotePresetOption) -> Unit,
+    onNoteStyleSelected: (NotePreset) -> Unit,
     onDeviceLockSetup: () -> Unit,
     onTelemetryToggled: (Boolean) -> Unit,
     onContinue: (OnboardingStep) -> Unit,
@@ -147,7 +150,7 @@ private fun CenteredPane(content: @Composable () -> Unit) {
 @Composable
 private fun WizardPage(
     state: OnboardingUiState,
-    onNoteStyleSelected: (NotePresetOption) -> Unit,
+    onNoteStyleSelected: (NotePreset) -> Unit,
     onDeviceLockSetup: () -> Unit,
     onTelemetryToggled: (Boolean) -> Unit,
     onContinue: (OnboardingStep) -> Unit,
@@ -193,15 +196,15 @@ private fun WizardPage(
 @Composable
 private fun WizardStepContent(
     state: OnboardingUiState,
-    onNoteStyleSelected: (NotePresetOption) -> Unit,
+    onNoteStyleSelected: (NotePreset) -> Unit,
     onDeviceLockSetup: () -> Unit,
     onTelemetryToggled: (Boolean) -> Unit,
 ) {
     when (state.step) {
         OnboardingStep.PRIVACY -> PrivacyStep()
         OnboardingStep.NOTE_STYLE -> NoteStyleStep(
-            selected = state.notePreset,
-            onSelected = onNoteStyleSelected,
+            selected = state.notePreset.toUi(),
+            onSelected = { option -> onNoteStyleSelected(option.toDomain()) },
         )
         OnboardingStep.DEVICE_LOCK -> DeviceLockStep(onSetup = onDeviceLockSetup)
         OnboardingStep.TELEMETRY_CONSENT -> TelemetryConsentStep(
