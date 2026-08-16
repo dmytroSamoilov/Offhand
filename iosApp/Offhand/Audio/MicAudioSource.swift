@@ -6,12 +6,48 @@ final class MicAudioSource: NSObject, IosAudioSource {
     private let audioEngine = AVAudioEngine()
     private var pendingSamples: [Int16] = []
     private let frameSamples = 800
+    private var interruptionObserver: NSObjectProtocol?
+
+    private func observeInterruptions() {
+        interruptionObserver = NotificationCenter.default.addObserver(
+            forName: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance(),
+            queue: .main
+        ) { [weak self] notification in
+            guard let info = notification.userInfo,
+                  let rawType = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+                  let type = AVAudioSession.InterruptionType(rawValue: rawType) else { return }
+            if type == .began {
+                self?.audioEngine.pause()
+            } else if type == .ended {
+                try? self?.audioEngine.start()
+            }
+        }
+    }
+
+    private func stopObservingInterruptions() {
+        if let interruptionObserver {
+            NotificationCenter.default.removeObserver(interruptionObserver)
+        }
+        interruptionObserver = nil
+    }
 
     func hasPermission() -> Bool {
         AVAudioApplication.shared.recordPermission == .granted
     }
 
     func start(onFrame: @escaping (KotlinShortArray) -> Void) -> Bool {
+        if Thread.isMainThread {
+            return startOnMainThread(onFrame: onFrame)
+        }
+        var started = false
+        DispatchQueue.main.sync {
+            started = self.startOnMainThread(onFrame: onFrame)
+        }
+        return started
+    }
+
+    private func startOnMainThread(onFrame: @escaping (KotlinShortArray) -> Void) -> Bool {
         let session = AVAudioSession.sharedInstance()
         do {
             try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
@@ -39,10 +75,12 @@ final class MicAudioSource: NSObject, IosAudioSource {
             inputNode.removeTap(onBus: 0)
             return false
         }
+        observeInterruptions()
         return true
     }
 
     func stop() {
+        stopObservingInterruptions()
         audioEngine.inputNode.removeTap(onBus: 0)
         audioEngine.stop()
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
