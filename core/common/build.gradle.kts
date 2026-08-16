@@ -1,16 +1,27 @@
 plugins {
-    alias(libs.plugins.offhand.android.library)
+    alias(libs.plugins.offhand.kmp.library)
 }
 
 android {
     namespace = "com.dmytrosamoilov.offhand.core.common"
 }
 
-dependencies {
-    api(libs.androidx.lifecycle.viewmodel.ktx)
-    api(libs.coroutines.android)
-
-    testImplementation(libs.junit)
-    testImplementation(libs.coroutines.test)
-    testImplementation(libs.turbine)
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            api(libs.androidx.lifecycle.viewmodel)
+            api(libs.coroutines.core)
+        }
+        androidMain.dependencies {
+            api(libs.coroutines.android)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+        getByName("androidUnitTest").dependencies {
+            implementation(libs.junit)
+            implementation(libs.coroutines.test)
+            implementation(libs.turbine)
+        }
+    }
 }

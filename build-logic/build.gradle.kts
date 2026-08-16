@@ -32,5 +32,9 @@ gradlePlugin {
             id = "offhand.koin"
             implementationClass = "KoinConventionPlugin"
         }
+        register("kmpLibrary") {
+            id = "offhand.kmp.library"
+            implementationClass = "KmpLibraryConventionPlugin"
+        }
     }
 }
