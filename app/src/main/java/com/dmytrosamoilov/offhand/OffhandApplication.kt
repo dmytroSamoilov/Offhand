@@ -9,9 +9,14 @@ import com.dmytrosamoilov.offhand.core.audio.di.coreAudioModule
 import com.dmytrosamoilov.offhand.core.data.di.coreDataModule
 import com.dmytrosamoilov.offhand.core.device.di.coreDeviceModule
 import com.dmytrosamoilov.offhand.core.security.di.coreSecurityModule
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import com.dmytrosamoilov.offhand.di.appModule
+import com.dmytrosamoilov.offhand.feature.notes.di.featureNotesAndroidModule
 import com.dmytrosamoilov.offhand.feature.notes.di.featureNotesModule
+import com.dmytrosamoilov.offhand.feature.onboarding.di.featureOnboardingAndroidModule
 import com.dmytrosamoilov.offhand.feature.onboarding.di.featureOnboardingModule
+import com.dmytrosamoilov.offhand.feature.recording.di.featureRecordingAndroidModule
 import com.dmytrosamoilov.offhand.feature.recording.di.featureRecordingModule
 import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinator
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
@@ -46,8 +51,11 @@ class OffhandApplication : Application(), KoinComponent {
                 coreSecurityModule,
                 coreDataModule,
                 featureNotesModule,
+                featureNotesAndroidModule,
                 featureOnboardingModule,
+                featureOnboardingAndroidModule,
                 featureRecordingModule,
+                featureRecordingAndroidModule,
                 featureSettingsModule,
                 appModule,
             )
@@ -61,6 +69,7 @@ class OffhandApplication : Application(), KoinComponent {
         } else {
             Timber.plant(ReleaseLogTree(crashlyticsOrNull()))
         }
+        Logger.setMinSeverity(if (BuildConfig.DEBUG) Severity.Verbose else Severity.Assert)
         crashReportingController.start()
         pendingNotesCoordinator.start()
     }

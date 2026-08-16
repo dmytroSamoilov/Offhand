@@ -36,5 +36,9 @@ gradlePlugin {
             id = "offhand.kmp.library"
             implementationClass = "KmpLibraryConventionPlugin"
         }
+        register("kmpFeature") {
+            id = "offhand.kmp.feature"
+            implementationClass = "KmpFeatureConventionPlugin"
+        }
     }
 }

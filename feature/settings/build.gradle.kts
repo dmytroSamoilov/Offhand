@@ -1,14 +1,20 @@
 plugins {
-    alias(libs.plugins.offhand.android.feature)
+    alias(libs.plugins.offhand.kmp.feature)
 }
 
 android {
     namespace = "com.dmytrosamoilov.offhand.feature.settings"
 }
 
-dependencies {
-    implementation(project(":core:ai-api"))
-    implementation(project(":core:data"))
-
-    implementation(libs.androidx.material.icons.core)
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":core:ai-api"))
+            implementation(project(":core:data"))
+        }
+        androidMain.dependencies {
+            implementation(libs.androidx.core.ktx)
+            implementation(libs.androidx.material.icons.extended)
+        }
+    }
 }
