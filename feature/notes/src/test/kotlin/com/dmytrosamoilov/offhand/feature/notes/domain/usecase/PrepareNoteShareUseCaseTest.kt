@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.notes.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.data.domain.Note
+import com.dmytrosamoilov.offhand.core.security.AudioInputStream
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareLabels
@@ -77,7 +78,7 @@ class PrepareNoteShareUseCaseTest {
 
     @Test
     fun `sharing audio only writes a wav file`() = runTest {
-        every { audioStore.openForRead("note-1.pcm.enc") } returns ByteArrayInputStream(ByteArray(10))
+        every { audioStore.openForRead("note-1.pcm.enc") } returns AudioInputStream(ByteArrayInputStream(ByteArray(10)))
 
         val share = useCase(note, includeNote = false, includeAudio = true)
 
@@ -88,7 +89,7 @@ class PrepareNoteShareUseCaseTest {
 
     @Test
     fun `sharing note and audio produces two files with a generic mime type`() = runTest {
-        every { audioStore.openForRead("note-1.pcm.enc") } returns ByteArrayInputStream(ByteArray(10))
+        every { audioStore.openForRead("note-1.pcm.enc") } returns AudioInputStream(ByteArrayInputStream(ByteArray(10)))
 
         val share = useCase(note, includeNote = true, includeAudio = true)
 

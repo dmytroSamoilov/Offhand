@@ -13,6 +13,8 @@ import com.dmytrosamoilov.offhand.core.audio.VadSnapshot
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.security.AudioInputStream
+import com.dmytrosamoilov.offhand.core.security.AudioOutputStream
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateRecordingNoteUseCase
@@ -83,7 +85,7 @@ class RecordingSessionManagerTest {
     private val getNote: GetNoteUseCase = mockk()
     private val audioStore: EncryptedAudioStore = mockk {
         every { newRecordingFileName() } returns "note-1.pcm.enc"
-        every { openForWrite("note-1.pcm.enc") } returns ByteArrayOutputStream()
+        every { openForWrite("note-1.pcm.enc") } returns AudioOutputStream(ByteArrayOutputStream())
     }
 
     private fun chunk(id: Int, speechMs: Long = 2_000L) = AudioChunk(
@@ -253,7 +255,7 @@ class RecordingSessionManagerTest {
         coEvery { markNoteProcessing(7L) } returns storedNote(7L)
         every { audioStore.sizeOf("note-7.pcm.enc") } returns 64_000L
         every { audioStore.openForRead("note-7.pcm.enc") } returns
-            ByteArrayInputStream(ByteArray(64_000))
+            AudioInputStream(ByteArrayInputStream(ByteArray(64_000)))
         coEvery { speechToText.transcribe(any()) } returns sttResult("recovered transcript")
         coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns AiResult(
             text = """{"title": "Recovered", "overview": "- body"}""",
@@ -413,7 +415,7 @@ class RecordingSessionManagerTest {
         every { recorder.vad } returns MutableStateFlow(VadSnapshot())
         coEvery { markNoteProcessing(7L) } returns storedNote(7L)
         every { audioStore.sizeOf("note-7.pcm.enc") } returns 200_000L
-        every { audioStore.openForRead("note-7.pcm.enc") } returns TruncatedStream(100_000)
+        every { audioStore.openForRead("note-7.pcm.enc") } returns AudioInputStream(TruncatedStream(100_000))
         coEvery { speechToText.transcribe(any()) } returns sttResult("recovered transcript")
         coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns AiResult(
             text = """{"title": "Recovered", "overview": "- body"}""",
