@@ -96,6 +96,10 @@ class LiteRtLmManager @Inject constructor(
     @Volatile
     private var engine: Engine? = null
 
+    @Volatile
+    var loadedBackend: HardwareBackend = HardwareBackend.CPU
+        private set
+
     override suspend fun setHardwareBackend(backend: HardwareBackend) {
         context.aiSettingsDataStore.edit { it[KEY_HARDWARE_BACKEND] = backend.name }
         loadMutex.withLock {
@@ -141,13 +145,43 @@ class LiteRtLmManager @Inject constructor(
         if (engine != null && mutableModelState.value is ModelState.Ready) return@withLock
 
         deleteStaleModelFiles()
+        downloadAndLoad(activeBackend.value)
+        if (mutableModelState.value is ModelState.Error) {
+            val fallback = clearFailedOverrides() ?: return@withLock
+            downloadAndLoad(fallback.hardwareBackend)
+        }
+    }
+
+    private suspend fun downloadAndLoad(backend: HardwareBackend) {
         val file = File(context.filesDir, model.modelFile)
         if (!file.exists()) {
             downloadModel(file)
-            if (mutableModelState.value is ModelState.Error) return@withLock
+            if (mutableModelState.value is ModelState.Error) return
         }
+        loadEngine(file, backend)
+    }
 
-        loadEngine(file)
+    // A stored override can point at a model or backend this device cannot
+    // run (for example the Tensor G5 build on other hardware). Clearing it
+    // and retrying the device default keeps note structuring alive instead
+    // of failing every note from now on.
+    private suspend fun clearFailedOverrides(): AvailableModel? {
+        val hasModelOverride = mutableModelOverrideId.value != null
+        val hasBackendOverride =
+            context.aiSettingsDataStore.data.first()[KEY_HARDWARE_BACKEND] != null
+        if (!hasModelOverride && !hasBackendOverride) return null
+        val fallback = catalog.modelForDevice
+        GenAiLog.warn(
+            "engine-load-fallback",
+            message = "model=${model.id} backend=${activeBackend.value} failed to load, " +
+                "reverting to ${fallback.id} on ${fallback.hardwareBackend}",
+        )
+        context.aiSettingsDataStore.edit { preferences ->
+            preferences.remove(KEY_MODEL_OVERRIDE)
+            preferences.remove(KEY_HARDWARE_BACKEND)
+        }
+        mutableModelOverrideId.value = null
+        return fallback
     }
 
     // Only orphans (files no longer in the catalog) are removed — files and resumable
@@ -180,9 +214,8 @@ class LiteRtLmManager @Inject constructor(
         }
     }
 
-    private suspend fun loadEngine(file: File) {
+    private suspend fun loadEngine(file: File, backend: HardwareBackend) {
         mutableModelState.value = ModelState.Loading
-        val backend = activeBackend.value
         GenAiLog.logModelOutput(
             "engine-load",
             "model=${model.id} backend=$backend maxTokens=${model.maxTokens}",
@@ -203,10 +236,11 @@ class LiteRtLmManager @Inject constructor(
                 )
                 engine = Engine(config).also { it.initialize() }
             }
+            loadedBackend = backend
             mutableModelState.value = ModelState.Ready
             GenAiLog.logModelOutput("engine-loaded", "backend=$backend")
         } catch (t: Throwable) {
-            GenAiLog.error("engine-load-failed", t, "backend=$backend")
+            GenAiLog.error("engine-load-failed", t, "model=${model.id} backend=$backend")
             runCatching { engine?.close() }
             engine = null
             mutableModelState.value = ModelState.Error(t.message ?: "Engine load failed")

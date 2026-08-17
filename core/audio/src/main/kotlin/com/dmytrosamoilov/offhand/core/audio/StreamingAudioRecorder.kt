@@ -102,6 +102,7 @@ class StreamingAudioRecorder @Inject constructor(
         val chunkBuffer = ByteArrayOutputStream()
         var chunkId = 1
         var chunkRecordedMs = 0L
+        var chunkSpeechMs = 0L
         var totalRecordedMs = 0L
         var consecutiveSilentMs = 0L
 
@@ -139,7 +140,12 @@ class StreamingAudioRecorder @Inject constructor(
                 pcmSink?.invoke(frameBytes)
 
                 val frameMs = (read.toLong() * 1000L) / SAMPLE_RATE
-                if (isSilent) consecutiveSilentMs += frameMs else consecutiveSilentMs = 0L
+                if (isSilent) {
+                    consecutiveSilentMs += frameMs
+                } else {
+                    consecutiveSilentMs = 0L
+                    chunkSpeechMs += frameMs
+                }
                 chunkRecordedMs += frameMs
                 totalRecordedMs += frameMs
 
@@ -161,9 +167,10 @@ class StreamingAudioRecorder @Inject constructor(
                 if (boundary != null) {
                     val pcm = chunkBuffer.toByteArray()
                     chunkBuffer.reset()
-                    trySendChunk(chunkId, pcm, chunkRecordedMs, boundary)
+                    trySendChunk(chunkId, pcm, chunkRecordedMs, chunkSpeechMs, boundary)
                     chunkId += 1
                     chunkRecordedMs = 0L
+                    chunkSpeechMs = 0L
                     consecutiveSilentMs = 0L
                 }
             }
@@ -180,7 +187,7 @@ class StreamingAudioRecorder @Inject constructor(
         val tail = chunkBuffer.toByteArray()
         if (tail.isNotEmpty()) {
             val tailMs = (tail.size.toLong() / 2L * 1000L) / SAMPLE_RATE
-            trySendChunk(chunkId, tail, tailMs, ChunkBoundaryReason.USER_STOP)
+            trySendChunk(chunkId, tail, tailMs, chunkSpeechMs, ChunkBoundaryReason.USER_STOP)
         }
         close()
         awaitClose { active.set(false) }
@@ -190,11 +197,20 @@ class StreamingAudioRecorder @Inject constructor(
         id: Int,
         pcm: ByteArray,
         durationMs: Long,
+        speechMs: Long,
         reason: ChunkBoundaryReason,
     ) {
         if (pcm.isEmpty()) return
         val wav = WavCodec.wrap(pcm, SAMPLE_RATE, channels = 1, bitsPerSample = 16)
-        trySend(AudioChunk(id = id, wav = wav, durationMs = durationMs, reason = reason))
+        trySend(
+            AudioChunk(
+                id = id,
+                wav = wav,
+                durationMs = durationMs,
+                speechMs = speechMs,
+                reason = reason,
+            ),
+        )
     }
 
     private fun applyInputRouting(recorder: AudioRecord) {
@@ -258,8 +274,10 @@ class StreamingAudioRecorder @Inject constructor(
         const val SAMPLE_RATE = 16_000
         const val FRAME_SAMPLES = 800
         const val FRAME_BYTES = FRAME_SAMPLES * 2
-        const val DEFAULT_MIN_CHUNK_MS = 25_000L
-        const val DEFAULT_MAX_CHUNK_MS = 35_000L
+        // The offline Whisper decoder discards everything past 30 seconds per
+        // decode, so a chunk must never reach that cap.
+        const val DEFAULT_MIN_CHUNK_MS = 20_000L
+        const val DEFAULT_MAX_CHUNK_MS = 29_000L
         const val DEFAULT_SILENCE_GAP_MS = 300L
         const val DEFAULT_SILENCE_DB = -45f
         private const val CHANNEL = AudioFormat.CHANNEL_IN_MONO

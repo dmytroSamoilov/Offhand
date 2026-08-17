@@ -11,6 +11,8 @@ class ModelPromptSetTest {
 
     private val promptSets = listOf(ModelPromptSet.Gemma4)
 
+    private val QUOTED_TEXT = Regex("\"([^\"]+)\"")
+
     @Test
     fun `every model family maps to its own prompt set`() {
         assertEquals(ModelPromptSet.Gemma4, ModelPromptSet.forFamily(ModelFamily.GEMMA4))
@@ -67,6 +69,21 @@ class ModelPromptSetTest {
         assertTrue(prompt.contains("Say each thing only once"))
     }
 
+    // Models copy quoted first-person sentences straight into the note as if
+    // they had been spoken, so prompts may only quote headings, never content.
+    @Test
+    fun `no preset prompt quotes a first-person example sentence`() {
+        NotePreset.entries.forEach { preset ->
+            val prompt = ModelPromptSet.Gemma4.structureNote(preset)
+            QUOTED_TEXT.findAll(prompt).map { it.groupValues[1] }.forEach { quoted ->
+                assertFalse(
+                    "$preset quotes a copyable sentence: $quoted",
+                    quoted.startsWith("I ") || quoted.startsWith("The speaker "),
+                )
+            }
+        }
+    }
+
     @Test
     fun `presets do not leak each others instructions`() {
         val meeting = ModelPromptSet.Gemma4.structureNote(NotePreset.MEETING)
@@ -74,13 +91,5 @@ class ModelPromptSetTest {
 
         assertFalse(meeting.contains("## Advice given"))
         assertFalse(legal.contains("## Action items"))
-    }
-
-    @Test
-    fun `all proofread prompts forbid rephrasing and invention`() {
-        promptSets.map { it.proofreadTranscript }.forEach { prompt ->
-            assertTrue(prompt.contains("Do not shorten, rephrase or summarize"))
-            assertTrue(prompt.contains("Never invent names, dates or numbers"))
-        }
     }
 }

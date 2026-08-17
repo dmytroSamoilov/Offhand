@@ -105,6 +105,27 @@ class TranscriptStructurerTest {
     }
 
     @Test
+    fun `overview missing its closing quote is kept instead of falling back to the transcript`() = runTest {
+        coEvery { aiBackend.processText(any(), any()) } returns
+            result("```json\n{\n\"title\": \"Team sync\",\n\"overview\": \"## Discussion\\n- We shipped on Friday.\\n}\n```")
+
+        val note = structurer.structure(listOf("we shipped on friday"), NotePreset.MEETING)
+
+        assertEquals("Team sync", note.title)
+        assertEquals("## Discussion\n- We shipped on Friday.", note.overview)
+    }
+
+    @Test
+    fun `unterminated overview in a summary note does not become the raw transcript`() = runTest {
+        coEvery { aiBackend.processText(any(), any()) } returns
+            result("{\"title\": \"My day\", \"overview\": \"I shipped the build today.\\n}")
+
+        val note = structurer.structure(listOf("raw spoken words"), NotePreset.SUMMARY)
+
+        assertEquals("I shipped the build today.", note.overview)
+    }
+
+    @Test
     fun `unparseable json-like output never leaks braces or field names`() = runTest {
         coEvery { aiBackend.processText(any(), any()) } returns
             result("```json\n{\"headline\": broken, no fields here}\n```")
@@ -149,6 +170,7 @@ class TranscriptStructurerTest {
         assertTrue(note.transcript.startsWith(paragraph))
         val segmentCount = structurer.splitIntoSegments(
             longChunks.joinToString(",\n\n") { "\"$it\"" },
+            structurer.segmentTokenBudget(ModelPromptSet.Gemma4.structureNote(NotePreset.MEETING)),
         ).size
         assertTrue(segmentCount > 1)
         coVerify(exactly = segmentCount) {
@@ -172,7 +194,7 @@ class TranscriptStructurerTest {
         val paragraph = "word ".repeat(2_000).trim()
         val longTranscript = List(8) { paragraph }.joinToString("\n\n")
 
-        val segments = structurer.splitIntoSegments(longTranscript)
+        val segments = structurer.splitIntoSegments(longTranscript, 2_500)
 
         assertTrue(segments.size > 1)
         segments.forEach { segment ->
@@ -185,7 +207,7 @@ class TranscriptStructurerTest {
         val paragraph = "слово ".repeat(1_000).trim()
         val longTranscript = List(8) { paragraph }.joinToString("\n\n")
 
-        val segments = structurer.splitIntoSegments(longTranscript)
+        val segments = structurer.splitIntoSegments(longTranscript, 2_500)
 
         assertTrue(segments.size > 1)
         segments.forEach { segment ->
@@ -195,6 +217,32 @@ class TranscriptStructurerTest {
 
     @Test
     fun `short transcript is a single segment`() {
-        assertEquals(1, structurer.splitIntoSegments("short one").size)
+        assertEquals(1, structurer.splitIntoSegments("short one", 2_500).size)
+    }
+
+    @Test
+    fun `transcript-only fallback keeps the verbatim text and derives a title`() {
+        val note = structurer.transcriptOnly(
+            listOf("budget approved for next quarter", "second thought"),
+        )
+
+        assertEquals("budget approved for next quarter\n\nsecond thought", note.transcript)
+        assertEquals(note.transcript, note.overview)
+        assertEquals("budget approved for next quarter", note.title)
+        assertEquals(0, note.structuringTimeMs)
+    }
+
+    @Test
+    fun `segment budget leaves prompt and output headroom in every preset`() {
+        NotePreset.entries.forEach { preset ->
+            val prompt = ModelPromptSet.Gemma4.structureNote(preset)
+            val budget = structurer.segmentTokenBudget(prompt)
+
+            assertTrue("$preset budget must stay positive", budget > 0)
+            assertTrue(
+                "$preset budget must leave at least 1000 output tokens",
+                budget + TokenEstimator.approxText(prompt) + 1_000 <= testModel().maxTokens,
+            )
+        }
     }
 }

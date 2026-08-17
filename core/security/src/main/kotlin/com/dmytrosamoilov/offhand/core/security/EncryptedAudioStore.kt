@@ -63,6 +63,18 @@ class EncryptedAudioStore @Inject constructor(
         fileFor(fileName).delete()
     }
 
+    fun sizeOf(fileName: String): Long = fileFor(fileName).length()
+
+    fun pcmSizeOf(fileName: String): Long =
+        openSeekableForRead(fileName).use { it.size() }
+
+    fun deleteUnreferenced(referencedFileNames: Set<String>, minAgeMs: Long): Int {
+        val cutoffMs = System.currentTimeMillis() - minAgeMs
+        return recordingsDir.listFiles().orEmpty()
+            .filter { it.name !in referencedFileNames && it.lastModified() < cutoffMs }
+            .count { it.delete() }
+    }
+
     private fun fileFor(fileName: String): File {
         val file = File(recordingsDir, fileName)
         require(file.canonicalPath.startsWith(recordingsDir.canonicalPath + File.separator)) {

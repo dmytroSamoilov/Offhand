@@ -955,10 +955,17 @@ private fun NoteDetailContent(
         Spacer(modifier = Modifier.height(16.dp))
         when (note.status) {
             NoteStatusUi.PROCESSING -> DetailStatusCard(
-                text = stringResource(R.string.notes_processing_detail),
+                text = stringResource(
+                    if (note.transcript.isBlank()) {
+                        R.string.notes_processing_transcribing
+                    } else {
+                        R.string.notes_processing_structuring
+                    },
+                ),
                 percent = progressPercent,
             )
             NoteStatusUi.FAILED -> FailedDetailCard(
+                hasTranscript = note.transcript.isNotBlank(),
                 hasAudio = note.hasAudio,
                 onRetryTranscription = onRetryTranscription,
             )
@@ -971,15 +978,18 @@ private fun NoteDetailContent(
                 ) {
                     MarkdownText(markdown = note.body)
                 }
-                if (note.transcript.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    CollapsibleCard(
-                        title = stringResource(R.string.notes_transcript_heading),
-                        labelContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        labelContentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    ) {
-                        MarkdownText(markdown = note.transcript)
-                    }
+            }
+        }
+        if (note.transcript.isNotBlank()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            key(note.id) {
+                CollapsibleCard(
+                    title = stringResource(R.string.notes_transcript_heading),
+                    labelContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    labelContentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    initiallyExpanded = note.status != NoteStatusUi.READY,
+                ) {
+                    MarkdownText(markdown = note.transcript)
                 }
             }
         }
@@ -1023,6 +1033,7 @@ private fun NoteDetailUi.detailTitle(): String = when (status) {
 
 @Composable
 private fun FailedDetailCard(
+    hasTranscript: Boolean,
     hasAudio: Boolean,
     onRetryTranscription: () -> Unit,
 ) {
@@ -1034,7 +1045,13 @@ private fun FailedDetailCard(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = stringResource(R.string.notes_failed_description),
+                text = stringResource(
+                    if (hasTranscript) {
+                        R.string.notes_failed_overview_description
+                    } else {
+                        R.string.notes_failed_description
+                    },
+                ),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

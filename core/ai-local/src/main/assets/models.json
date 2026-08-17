@@ -15,9 +15,9 @@
       "hardwareBackend": "CPU",
       "maxTokens": 4096,
 
-      "topK": 64,
-      "topP": 0.95,
-      "temperature": 1.0
+      "topK": 40,
+      "topP": 0.9,
+      "temperature": 0.4
     },
     {
       "id": "gemma-4-e2b-tensor-g5",
@@ -34,9 +34,9 @@
       "hardwareBackend": "NPU",
       "maxTokens": 4096,
 
-      "topK": 64,
-      "topP": 0.95,
-      "temperature": 1.0
+      "topK": 40,
+      "topP": 0.9,
+      "temperature": 0.4
     }
   ]
 }

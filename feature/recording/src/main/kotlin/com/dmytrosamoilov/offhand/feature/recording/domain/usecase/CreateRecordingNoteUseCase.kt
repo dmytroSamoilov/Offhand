@@ -9,13 +9,12 @@ import com.dmytrosamoilov.offhand.feature.recording.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-class CreateProcessingNoteUseCase @Inject constructor(
+class CreateRecordingNoteUseCase @Inject constructor(
     @ApplicationContext private val context: Context,
     private val notesRepository: NotesRepository,
 ) {
     suspend operator fun invoke(
         audioFileName: String?,
-        durationMs: Long?,
         preset: NotePreset,
     ): Long =
         notesRepository.createNote(
@@ -32,8 +31,8 @@ class CreateProcessingNoteUseCase @Inject constructor(
                 structuringTimeMs = null,
                 hardwareBackend = null,
                 audioFileName = audioFileName,
-                durationMs = durationMs,
-                status = NoteStatus.PROCESSING,
+                durationMs = null,
+                status = NoteStatus.RECORDING,
                 preset = preset,
             ),
         )

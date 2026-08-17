@@ -48,8 +48,8 @@ internal object NotePresetPrompt {
 
     private const val SUMMARY_OVERVIEW =
         "the recording written down again in the speaker's own voice. " +
-            "Keep the first person the speaker uses: write \"I have been struggling with the build\", " +
-            "never \"The speaker has been struggling with the build\". " +
+            "Keep the first person the speaker uses: write what the speaker says about " +
+            "themselves with I and we, never as the speaker or they. " +
             "Say each thing only once. When a thought is repeated, restarted or said again in other " +
             "words, keep the clearest version and drop the rest. When many sentences are spent on " +
             "one point, write that point in one or two sentences that still carry the specific " +
