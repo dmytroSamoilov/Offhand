@@ -21,7 +21,7 @@ targets:
         embed: false
       - framework: Frameworks/onnxruntime.xcframework
         embed: false
-      - framework: ../shared-framework/build/bin/iosSimulatorArm64/debugFramework/OffhandShared.framework
+      - framework: ../shared-framework/build/XCFrameworks/debug/OffhandShared.xcframework
         embed: false
     settings:
       base:
@@ -30,9 +30,13 @@ targets:
         IPHONEOS_DEPLOYMENT_TARGET: "18.0"
         TARGETED_DEVICE_FAMILY: "1,2"
         OTHER_LDFLAGS: "-lc++"
-        FRAMEWORK_SEARCH_PATHS:
-          - "$(PROJECT_DIR)/../shared-framework/build/bin/iosSimulatorArm64/debugFramework"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: S5UT57PQ2J
         ENABLE_USER_SCRIPT_SANDBOXING: false
+    entitlements:
+      path: Offhand/Offhand.entitlements
+      properties:
+        com.apple.developer.kernel.increased-memory-limit: true
     info:
       path: Offhand/Info.plist
       properties:
