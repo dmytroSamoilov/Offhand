@@ -14,6 +14,7 @@ targets:
     platform: iOS
     sources:
       - Offhand
+      - Shared
     dependencies:
       - package: LiteRTLM
         product: LiteRTLM
@@ -23,6 +24,8 @@ targets:
         embed: false
       - framework: ../shared-framework/build/XCFrameworks/release/OffhandShared.xcframework
         embed: false
+      - target: OffhandWidgets
+        embed: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.dmytrosamoilov.offhand
@@ -41,6 +44,30 @@ targets:
       path: Offhand/Info.plist
       properties:
         UILaunchScreen: {}
-        UIBackgroundModes: [audio]
+        UIBackgroundModes: [audio, processing]
+        BGTaskSchedulerPermittedIdentifiers:
+          - com.dmytrosamoilov.offhand.finish.*
+        NSSupportsLiveActivities: true
         NSMicrophoneUsageDescription: "Offhand records your voice notes. Audio never leaves this device."
         ITSAppUsesNonExemptEncryption: false
+  OffhandWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Widgets
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dmytrosamoilov.offhand.widgets
+        SWIFT_VERSION: "5.9"
+        IPHONEOS_DEPLOYMENT_TARGET: "18.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: S5UT57PQ2J
+        SKIP_INSTALL: true
+    info:
+      path: Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: Offhand Widgets
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension

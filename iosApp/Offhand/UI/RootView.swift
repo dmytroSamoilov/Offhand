@@ -4,6 +4,10 @@ import UserNotifications
 
 struct RootView: View {
     private let viewModel = SharedGraph.shared.rootViewModel()
+    private let sessionManager = SharedGraph.shared.sessionManager()
+    @State private var activityController = NoteActivityController()
+    @State private var finishCoordinator = NoteFinishCoordinator()
+    @State private var activeNoteId: Int64?
     @State private var isOnboardingCompleted: Bool?
     @Environment(\.scenePhase) private var scenePhase
 
@@ -29,11 +33,21 @@ struct RootView: View {
                 }
             }
         }
+        .task { await observeSession() }
+        .task { await observeProcessingIds() }
+        .task { await observeProgress() }
+        .task { await observeProcessingEvents() }
+        .onAppear {
+            finishCoordinator.onLegacyExpired = { [activityController] in
+                activityController.suspendedWithPendingWork()
+            }
+        }
         .onChange(of: scenePhase) {
             switch scenePhase {
             case .background:
                 handleBackgrounded()
             case .active:
+                finishCoordinator.appBecameActive()
                 UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
                 viewModel.onReady()
             default:
@@ -42,25 +56,91 @@ struct RootView: View {
         }
     }
 
-    private func handleBackgrounded() {
-        let sessionManager = SharedGraph.shared.sessionManager()
-        let hasPendingWork = !sessionManager.processingNoteIds.value.isEmpty
-        if hasPendingWork {
-            scheduleReopenReminder()
-        } else if sessionManager.session.value.phase == .idle {
-            SharedGraph.shared.modelManager().release()
+    private func observeSession() async {
+        var previousPhase = SessionPhase.idle
+        var previousPaused = false
+        for await session in sessionManager.session {
+            let phase = session.phase
+            if phase == .recording {
+                if previousPhase != .recording {
+                    activityController.recordingStarted()
+                } else if session.isPaused != previousPaused {
+                    activityController.recordingPaused(session.isPaused)
+                }
+                if let noteId = session.noteId {
+                    activeNoteId = noteId.int64Value
+                }
+            } else if previousPhase == .recording {
+                if phase == .failed {
+                    activityController.cancelled()
+                    activeNoteId = nil
+                } else if let noteId = activeNoteId {
+                    finishCoordinator.processingStarted(noteId: noteId)
+                    if finishCoordinator.isManaging(noteId: noteId) {
+                        activityController.cancelled()
+                    } else {
+                        activityController.processingProgressed(percent: nil)
+                    }
+                }
+            }
+            previousPhase = phase
+            previousPaused = session.isPaused
         }
     }
 
-    private func scheduleReopenReminder() {
-        let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
-            guard granted else { return }
-            let content = UNMutableNotificationContent()
-            content.title = String(localized: "Your note isn't finished")
-            content.body = String(localized: "Open Offhand to finish preparing your note.")
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
-            center.add(UNNotificationRequest(identifier: "note-pending", content: content, trigger: trigger))
+    private func observeProcessingIds() async {
+        var previousIds: Set<Int64> = []
+        for await ids in sessionManager.processingNoteIds {
+            let current = Set(ids.map { $0.int64Value })
+            for added in current.subtracting(previousIds) {
+                finishCoordinator.processingStarted(noteId: added)
+            }
+            for removed in previousIds.subtracting(current) {
+                finishCoordinator.processingEnded(noteId: removed)
+            }
+            if current.isEmpty && !previousIds.isEmpty {
+                finishCoordinator.allProcessingFinished()
+            }
+            previousIds = current
+        }
+    }
+
+    private func observeProcessingEvents() async {
+        for await event in sessionManager.events {
+            let eventNoteId: Int64
+            switch onEnum(of: event) {
+            case .completed(let completed):
+                eventNoteId = completed.noteId
+            case .failed(let failed):
+                eventNoteId = failed.noteId
+            }
+            guard eventNoteId == activeNoteId else { continue }
+            switch onEnum(of: event) {
+            case .completed:
+                activityController.finished()
+            case .failed:
+                activityController.cancelled()
+            }
+            activeNoteId = nil
+        }
+    }
+
+    private func observeProgress() async {
+        for await progress in sessionManager.noteProgress {
+            guard let noteId = activeNoteId,
+                  sessionManager.session.value.phase != .recording,
+                  let percent = progress[KotlinLong(value: noteId)] else { continue }
+            activityController.processingProgressed(percent: percent.intValue)
+        }
+    }
+
+    private func handleBackgrounded() {
+        let session = sessionManager.session.value
+        let hasPendingWork = !sessionManager.processingNoteIds.value.isEmpty || session.phase == .draining
+        if hasPendingWork {
+            finishCoordinator.appEnteredBackgroundWhileProcessing()
+        } else if session.phase == .idle {
+            SharedGraph.shared.modelManager().release()
         }
     }
 }
