@@ -18,7 +18,7 @@ data class NoteShareLabels(
 
 object NoteShareFormatter {
 
-    private val ILLEGAL_FILENAME_CHARS = Regex("[\\\\/:*?\"<>|\\p{Cntrl}]")
+    private val ILLEGAL_FILENAME_CHARS = Regex("[\\\\/:*?\"<>|\\u0000-\\u001f\\u007f]")
     private val WHITESPACE_RUNS = Regex("\\s+")
     private const val MAX_TITLE_CHARS = 60
 

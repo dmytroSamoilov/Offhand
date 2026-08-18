@@ -21,7 +21,7 @@ targets:
         embed: false
       - framework: Frameworks/onnxruntime.xcframework
         embed: false
-      - framework: ../shared-framework/build/XCFrameworks/debug/OffhandShared.xcframework
+      - framework: ../shared-framework/build/XCFrameworks/release/OffhandShared.xcframework
         embed: false
     settings:
       base:

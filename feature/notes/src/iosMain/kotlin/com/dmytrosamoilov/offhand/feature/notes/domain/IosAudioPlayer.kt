@@ -11,14 +11,20 @@ import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import platform.AVFAudio.AVAudioPlayer
 import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSData
@@ -43,21 +49,28 @@ class IosAudioPlayer(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var player: AVAudioPlayer? = null
     private var progressJob: Job? = null
+    private var loadJob: Job? = null
 
     override fun load(audioFileName: String) {
         reset()
-        try {
-            val wavPath = writePlaybackWav(audioFileName)
-            val loaded = AVAudioPlayer(NSURL.fileURLWithPath(wavPath), error = null)
-            loaded.prepareToPlay()
-            player = loaded
-            mutableState.value = AudioPlaybackState(
-                isLoaded = true,
-                durationMs = (loaded.duration * MS_PER_SECOND).toLong(),
-            )
-        } catch (t: Throwable) {
-            Logger.withTag(LOG_TAG).w(t) { "Audio unavailable for playback" }
-            mutableState.value = AudioPlaybackState()
+        val previousLoad = loadJob
+        loadJob = scope.launch {
+            previousLoad?.cancelAndJoin()
+            try {
+                val wavPath = withContext(Dispatchers.IO) { writePlaybackWav(audioFileName) }
+                val loaded = AVAudioPlayer(NSURL.fileURLWithPath(wavPath), error = null)
+                loaded.prepareToPlay()
+                player = loaded
+                mutableState.value = AudioPlaybackState(
+                    isLoaded = true,
+                    durationMs = (loaded.duration * MS_PER_SECOND).toLong(),
+                )
+            } catch (cancellation: kotlin.coroutines.cancellation.CancellationException) {
+                throw cancellation
+            } catch (t: Throwable) {
+                Logger.withTag(LOG_TAG).w(t) { "Audio unavailable for playback" }
+                mutableState.value = AudioPlaybackState()
+            }
         }
     }
 
@@ -89,6 +102,7 @@ class IosAudioPlayer(
     }
 
     override fun reset() {
+        loadJob?.cancel()
         progressJob?.cancel()
         player?.stop()
         player = null
@@ -97,6 +111,7 @@ class IosAudioPlayer(
 
     override fun release() {
         reset()
+        scope.cancel()
     }
 
     private fun publishPosition(active: AVAudioPlayer) {
@@ -105,7 +120,7 @@ class IosAudioPlayer(
         }
     }
 
-    private fun writePlaybackWav(audioFileName: String): String {
+    private suspend fun writePlaybackWav(audioFileName: String): String {
         val caches = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, true)
             .first() as String
         val path = "$caches/$PLAYBACK_FILE"
@@ -117,6 +132,7 @@ class IosAudioPlayer(
             val input = audioStore.openForRead(audioFileName)
             try {
                 while (true) {
+                    currentCoroutineContext().ensureActive()
                     val chunk = input.read(COPY_CHUNK_BYTES) ?: break
                     handle.writeData(chunk.toNsData())
                     pcmBytes += chunk.size

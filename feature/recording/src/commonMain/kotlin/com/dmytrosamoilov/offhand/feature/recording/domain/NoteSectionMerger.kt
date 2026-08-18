@@ -30,8 +30,18 @@ internal object NoteSectionMerger {
             shared >= smaller * CONTAINMENT_THRESHOLD
     }
 
-    private fun contentWords(line: String): Set<String> =
-        line.lowercase().split(NON_WORD).filter { it.isNotBlank() }.toSet()
+    private fun contentWords(line: String): Set<String> = buildSet {
+        val word = StringBuilder()
+        for (character in line.lowercase()) {
+            if (character.isLetterOrDigit()) {
+                word.append(character)
+            } else if (word.isNotEmpty()) {
+                add(word.toString())
+                word.clear()
+            }
+        }
+        if (word.isNotEmpty()) add(word.toString())
+    }
 
     private fun collect(
         overview: String,
@@ -80,5 +90,4 @@ internal object NoteSectionMerger {
     private const val MIN_SHARED_WORDS = 4
     private const val CONTAINMENT_THRESHOLD = 0.7
     private val LIST_MARKER_RUN = Regex("^(?:[-*•]\\s+)+")
-    private val NON_WORD = Regex("[^\\p{L}\\p{N}]+")
 }

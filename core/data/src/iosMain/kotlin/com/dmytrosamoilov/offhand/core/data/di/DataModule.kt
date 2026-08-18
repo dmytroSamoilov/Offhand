@@ -19,6 +19,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import com.dmytrosamoilov.offhand.core.data.preferences.DataStoreUserPreferencesRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomNotesRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import okio.Path.Companion.toPath
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -31,6 +33,7 @@ private fun createNotesDatabase(): NotesDatabase {
     val databasePath = "${createProtectedDatabaseDirectory()}/$DATABASE_NAME"
     val database = Room.databaseBuilder<NotesDatabase>(databasePath)
         .setDriver(BundledSQLiteDriver())
+        .setQueryCoroutineContext(Dispatchers.IO)
         .addMigrations(
             MIGRATION_1_2,
             MIGRATION_2_3,
