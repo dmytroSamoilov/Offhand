@@ -46,7 +46,7 @@ struct NotesListView: View {
                     )
                 }
             }
-            .safeAreaInset(edge: .bottom) {
+            .overlay(alignment: .bottomTrailing) {
                 recordButton
             }
             .navigationDestination(isPresented: detailBinding) {
@@ -56,7 +56,7 @@ struct NotesListView: View {
             }
         }
         .sheet(isPresented: $isRecordSheetVisible) {
-            RecordSheetView()
+            RecordSheetView(autoStart: true)
         }
         .task {
             for await newState in viewModel.uiState {
@@ -73,22 +73,19 @@ struct NotesListView: View {
     }
 
     private var recordButton: some View {
-        VStack(spacing: 0) {
-            Divider()
-            Button {
-                isRecordSheetVisible = true
-            } label: {
-                Image(systemName: "mic.fill")
-                    .font(.title2)
-                    .foregroundStyle(.white)
-                    .frame(width: 58, height: 58)
-                    .background(Brand.primary, in: Circle())
-            }
-            .accessibilityLabel(String(localized: "Record a note"))
-            .padding(.vertical, 10)
+        Button {
+            isRecordSheetVisible = true
+        } label: {
+            Image(systemName: "mic.fill")
+                .font(.title2)
+                .foregroundStyle(.white)
+                .frame(width: 60, height: 60)
+                .background(Brand.primary, in: Circle())
+                .shadow(color: .black.opacity(0.25), radius: 10, y: 4)
         }
-        .frame(maxWidth: .infinity)
-        .background(.bar)
+        .accessibilityLabel(String(localized: "Record a note"))
+        .padding(.trailing, 20)
+        .padding(.bottom, 16)
     }
 
     private func dayTitle(_ label: NoteDayLabelUi) -> String {

@@ -3,6 +3,7 @@ import OffhandShared
 import SwiftUI
 
 struct RecordSheetView: View {
+    var autoStart = false
     @Environment(\.dismiss) private var dismiss
     private let viewModel = SharedGraph.shared.recordingViewModel()
     @State private var state = RecordingUiState(
@@ -37,7 +38,12 @@ struct RecordSheetView: View {
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)
         .interactiveDismissDisabled(state.phase == .recording)
-        .onAppear { viewModel.onSheetOpened() }
+        .onAppear {
+            viewModel.onSheetOpened()
+            if autoStart {
+                requestMicThenStart()
+            }
+        }
         .onDisappear { viewModel.onSheetClosed() }
         .onChange(of: state.savedNoteId) {
             if state.savedNoteId != nil { dismiss() }
