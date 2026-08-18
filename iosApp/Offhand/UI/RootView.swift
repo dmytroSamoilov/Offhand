@@ -94,6 +94,12 @@ struct RootView: View {
             let current = Set(ids.map { $0.int64Value })
             for added in current.subtracting(previousIds) {
                 finishCoordinator.processingStarted(noteId: added)
+                if finishCoordinator.isManaging(noteId: added) {
+                    activityController.cancelled()
+                } else if activeNoteId == nil {
+                    activeNoteId = added
+                    activityController.processingStartedWithoutRecording()
+                }
             }
             for removed in previousIds.subtracting(current) {
                 finishCoordinator.processingEnded(noteId: removed)

@@ -34,6 +34,25 @@ final class NoteActivityController {
         update(phase: isPaused ? .paused : .recording, progressPercent: nil)
     }
 
+    func processingStartedWithoutRecording() {
+        guard activity == nil else { return }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        recordingStartedAt = Date()
+        let state = NoteActivityAttributes.ContentState(
+            phase: .processing,
+            startedAt: recordingStartedAt,
+            progressPercent: nil
+        )
+        do {
+            activity = try Activity.request(
+                attributes: NoteActivityAttributes(),
+                content: ActivityContent(state: state, staleDate: nil)
+            )
+        } catch {
+            logger.error("Live Activity request failed: \(error.localizedDescription)")
+        }
+    }
+
     func processingProgressed(percent: Int?) {
         update(phase: .processing, progressPercent: percent)
     }

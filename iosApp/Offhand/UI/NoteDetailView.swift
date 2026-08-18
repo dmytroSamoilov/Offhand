@@ -20,10 +20,10 @@ struct NoteDetailView: View {
                     if detail.status == .failed {
                         failedCard
                     } else {
-                        contentCard(title: String(localized: "Overview"), text: detail.body, tint: Brand.primaryContainer)
+                        sectionCard(title: String(localized: "Overview"), text: detail.body)
                     }
                     if !detail.transcript.isEmpty {
-                        contentCard(title: String(localized: "Transcript"), text: detail.transcript, tint: Brand.tealContainer)
+                        sectionCard(title: String(localized: "Transcript"), text: detail.transcript)
                     }
                 }
             }
@@ -154,40 +154,51 @@ struct NoteDetailView: View {
     }
 
     private var playbackCard: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 14) {
             Button {
                 viewModel.onPlayPauseClicked()
             } label: {
-                Image(systemName: state.playback.isPlaying ? "pause.fill" : "play.fill")
-                    .frame(width: 44, height: 44)
-                    .background(Brand.primaryContainer, in: Circle())
+                Image(systemName: state.playback.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                    .font(.system(size: 40))
+                    .foregroundStyle(Brand.primary)
             }
             .buttonStyle(.plain)
-            VStack(alignment: .leading, spacing: 6) {
-                ProgressView(value: state.playback.progress)
-                    .tint(Brand.primary)
-                Text("\(state.playback.positionText) / \(state.playback.durationText)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            VStack(spacing: 4) {
+                Slider(
+                    value: Binding(
+                        get: { Double(state.playback.progress) },
+                        set: { viewModel.onSeekRequested(fraction: Float($0)) }
+                    ),
+                    in: 0...1
+                )
+                .tint(Brand.primary)
+                HStack {
+                    Text(state.playback.positionText)
+                    Spacer()
+                    Text(state.playback.durationText)
+                }
+                .font(.caption2)
+                .monospacedDigit()
+                .foregroundStyle(.secondary)
             }
         }
         .padding()
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
     }
 
-    private func contentCard(title: String, text: String, tint: Color) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
+    private func sectionCard(title: String, text: String) -> some View {
+        VStack(alignment: .leading, spacing: 7) {
             Text(title)
-                .font(.caption.weight(.semibold))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(tint, in: Capsule())
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+                .padding(.leading, 16)
             MarkdownBlocks(raw: text)
                 .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+                .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
     }
 
     private var deleteBinding: Binding<Bool> {
@@ -310,29 +321,29 @@ private struct NoteStyleSheet: View {
             List {
                 Section {
                     ForEach(options, id: \.symbol) { option in
-                        Button {
-                            viewModel.onPresetSelected(preset: option.preset)
-                        } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: option.symbol)
+                        HStack(spacing: 12) {
+                            Image(systemName: option.symbol)
+                                .foregroundStyle(Brand.primary)
+                                .frame(width: 28)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(option.label)
+                                    .font(.body)
+                                    .foregroundStyle(Color.primary)
+                                Text(option.details)
+                                    .font(.caption)
+                                    .foregroundStyle(Color.secondary)
+                            }
+                            Spacer()
+                            if option.preset == current {
+                                Image(systemName: "checkmark")
+                                    .fontWeight(.semibold)
                                     .foregroundStyle(Brand.primary)
-                                    .frame(width: 28)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(option.label)
-                                        .font(.body)
-                                        .foregroundStyle(Color.primary)
-                                    Text(option.details)
-                                        .font(.caption)
-                                        .foregroundStyle(Color.secondary)
-                                }
-                                Spacer()
-                                if option.preset == current {
-                                    Image(systemName: "checkmark")
-                                        .foregroundStyle(Brand.primary)
-                                }
                             }
                         }
-                        .buttonStyle(.plain)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            viewModel.onPresetSelected(preset: option.preset)
+                        }
                     }
                 } footer: {
                     Text(String(localized: "The recording is kept. The title and overview are written again from the transcript in the style you pick."))

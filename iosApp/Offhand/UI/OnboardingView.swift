@@ -16,27 +16,22 @@ struct OnboardingView: View {
     @State private var modelState: ModelState = ModelStateNotDownloaded.shared
 
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            stepContent
-            Spacer()
-        }
-        .padding(24)
-        .background(Color(.systemGroupedBackground))
-        .task {
-            for await newState in viewModel.uiState {
-                state = newState
-            }
-        }
-        .task {
-            for await downloadState in SharedGraph.shared.modelManager().modelState {
-                modelState = downloadState
-                if downloadState is ModelStateReady, state.step == .modelDownload {
-                    viewModel.onDownloadContinue()
-                    onFinished()
+        stepContent
+            .background(Color(.systemGroupedBackground))
+            .task {
+                for await newState in viewModel.uiState {
+                    state = newState
                 }
             }
-        }
+            .task {
+                for await downloadState in SharedGraph.shared.modelManager().modelState {
+                    modelState = downloadState
+                    if downloadState is ModelStateReady, state.step == .modelDownload {
+                        viewModel.onDownloadContinue()
+                        onFinished()
+                    }
+                }
+            }
     }
 
     @ViewBuilder
@@ -44,30 +39,66 @@ struct OnboardingView: View {
         switch state.step {
         case .deviceCheck:
             ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .deviceIncompatible:
             incompatibleStep
         case .privacy:
-            privacyStep
+            StepScaffold(
+                icon: "lock.shield.fill",
+                title: String(localized: "Private by design"),
+                message: String(localized: "Recordings are transcribed and organized entirely on this iPhone. Nothing ever leaves your device."),
+                buttonTitle: String(localized: "Continue"),
+                action: { viewModel.onPrivacyContinue() }
+            )
         case .noteStyle:
-            noteStyleStep
+            StepScaffold(
+                icon: "text.badge.checkmark",
+                title: String(localized: "How should notes be organized?"),
+                message: String(localized: "Pick a default style. You can change it for any note later."),
+                buttonTitle: String(localized: "Continue"),
+                action: { viewModel.onNoteStyleContinue() }
+            ) {
+                NotePresetPicker(selected: state.notePreset) { preset in
+                    viewModel.onNoteStyleSelected(preset: preset)
+                }
+            }
         case .deviceLock:
-            deviceLockStep
+            StepScaffold(
+                icon: "faceid",
+                title: String(localized: "Add a device lock"),
+                message: String(localized: "Your notes are protected by this device's lock. Set a passcode in Settings for the strongest protection."),
+                buttonTitle: String(localized: "Continue"),
+                action: { viewModel.onDeviceLockSkipped() }
+            )
         case .telemetryConsent:
-            telemetryStep
+            StepScaffold(
+                icon: "chart.bar.fill",
+                title: String(localized: "Share stability reports?"),
+                message: String(localized: "Anonymous crash and stability data only — never your notes, audio, or any personal data."),
+                buttonTitle: String(localized: "Continue"),
+                action: { viewModel.onConsentContinue() }
+            ) {
+                Toggle(String(localized: "Share stability reports"), isOn: Binding(
+                    get: { state.isTelemetryEnabled },
+                    set: { viewModel.onTelemetryToggled(granted: $0) }
+                ))
+                .padding()
+                .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+            }
         case .modelDownload:
             downloadStep
         }
     }
 
     private var incompatibleStep: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "iphone.slash")
-                .font(.largeTitle)
-                .foregroundStyle(.orange)
-            Text(String(localized: "This device can't run Offhand"))
-                .font(.title3.weight(.semibold))
+        StepScaffold(
+            icon: "iphone.slash",
+            iconTint: .orange,
+            title: String(localized: "This device can't run Offhand"),
+            message: String(localized: "Offhand needs more memory to run its on-device AI models.")
+        ) {
             if let specs = state.deviceSpecs {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 12) {
                     specRow(
                         label: String(localized: "Memory"),
                         value: "\(specs.totalRamGb) GB / \(specs.requiredRamGb) GB",
@@ -80,7 +111,7 @@ struct OnboardingView: View {
                     )
                 }
                 .padding()
-                .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+                .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
             }
         }
     }
@@ -95,78 +126,12 @@ struct OnboardingView: View {
         }
     }
 
-    private var privacyStep: some View {
-        onboardingCard(
-            icon: "lock.shield",
-            title: String(localized: "Private by design"),
-            body: String(localized: "Recordings are transcribed and organized entirely on this iPhone. Nothing ever leaves your device."),
-            buttonTitle: String(localized: "Continue")
-        ) {
-            viewModel.onPrivacyContinue()
-        }
-    }
-
-    private var noteStyleStep: some View {
-        VStack(spacing: 20) {
-            Text(String(localized: "How should notes be organized?"))
-                .font(.title3.weight(.semibold))
-            NotePresetPicker(selected: state.notePreset) { preset in
-                viewModel.onNoteStyleSelected(preset: preset)
-            }
-            Button(String(localized: "Continue")) {
-                viewModel.onNoteStyleContinue()
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(Brand.primary)
-        }
-    }
-
-    private var deviceLockStep: some View {
-        onboardingCard(
-            icon: "faceid",
-            title: String(localized: "Add a device lock"),
-            body: String(localized: "Your notes are protected by this device's lock. Set a passcode in Settings for the strongest protection."),
-            buttonTitle: String(localized: "Continue")
-        ) {
-            viewModel.onDeviceLockSkipped()
-        }
-    }
-
-    private var telemetryStep: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "chart.bar")
-                .font(.largeTitle)
-                .foregroundStyle(Brand.primary)
-            Text(String(localized: "Share stability reports?"))
-                .font(.title3.weight(.semibold))
-            Text(String(localized: "Anonymous crash and stability data only — never your notes, audio, or any personal data."))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            Toggle(String(localized: "Share stability reports"), isOn: Binding(
-                get: { state.isTelemetryEnabled },
-                set: { viewModel.onTelemetryToggled(granted: $0) }
-            ))
-            .padding(.horizontal)
-            Button(String(localized: "Continue")) {
-                viewModel.onConsentContinue()
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(Brand.primary)
-        }
-    }
-
     private var downloadStep: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "arrow.down.circle")
-                .font(.largeTitle)
-                .foregroundStyle(Brand.primary)
-            Text(String(localized: "Downloading the AI model"))
-                .font(.title3.weight(.semibold))
-            Text(String(format: String(localized: "One-time download of about %@ GB. Keep Offhand open on Wi-Fi."), state.downloadSizeGb))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+        StepScaffold(
+            icon: "arrow.down.circle.fill",
+            title: String(localized: "Downloading the AI model"),
+            message: String(format: String(localized: "One-time download of about %@ GB. Keep Offhand open on Wi-Fi."), state.downloadSizeGb)
+        ) {
             downloadProgress
         }
     }
@@ -180,6 +145,7 @@ struct OnboardingView: View {
                     .tint(Brand.primary)
                 Text("\(Int(downloading.progress * 100))%")
                     .font(.caption)
+                    .monospacedDigit()
                     .foregroundStyle(.secondary)
             }
         case .error(let error):
@@ -188,6 +154,7 @@ struct OnboardingView: View {
                     .foregroundStyle(.red)
                 Button(String(localized: "Try again")) { startDownload() }
                     .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
                     .tint(Brand.primary)
             }
         case .loading:
@@ -195,9 +162,7 @@ struct OnboardingView: View {
         case .ready, .downloaded:
             ProgressView()
         case .notDownloaded:
-            Button(String(localized: "Download")) { startDownload() }
-                .buttonStyle(.borderedProminent)
-                .tint(Brand.primary)
+            ProgressView()
                 .onAppear { startDownload() }
         }
     }
@@ -205,27 +170,66 @@ struct OnboardingView: View {
     private func startDownload() {
         SharedGraph.shared.startModelDownload()
     }
+}
 
-    private func onboardingCard(
+private struct StepScaffold<Content: View>: View {
+    let icon: String
+    var iconTint: Color = Brand.primary
+    let title: String
+    let message: String
+    var buttonTitle: String?
+    var action: (() -> Void)?
+    @ViewBuilder var content: () -> Content
+
+    init(
         icon: String,
+        iconTint: Color = Brand.primary,
         title: String,
-        body bodyText: String,
-        buttonTitle: String,
-        action: @escaping () -> Void
-    ) -> some View {
-        VStack(spacing: 20) {
+        message: String,
+        buttonTitle: String? = nil,
+        action: (() -> Void)? = nil,
+        @ViewBuilder content: @escaping () -> Content = { EmptyView() }
+    ) {
+        self.icon = icon
+        self.iconTint = iconTint
+        self.title = title
+        self.message = message
+        self.buttonTitle = buttonTitle
+        self.action = action
+        self.content = content
+    }
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Spacer()
             Image(systemName: icon)
-                .font(.largeTitle)
-                .foregroundStyle(Brand.primary)
+                .font(.system(size: 56))
+                .foregroundStyle(iconTint)
+                .padding(.bottom, 8)
             Text(title)
-                .font(.title3.weight(.semibold))
-            Text(bodyText)
-                .font(.subheadline)
+                .font(.title.bold())
+                .multilineTextAlignment(.center)
+            Text(message)
+                .font(.body)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-            Button(buttonTitle, action: action)
+            content()
+                .padding(.top, 8)
+            Spacer()
+        }
+        .padding(.horizontal, 24)
+        .safeAreaInset(edge: .bottom) {
+            if let buttonTitle, let action {
+                Button(action: action) {
+                    Text(buttonTitle)
+                        .frame(maxWidth: .infinity)
+                }
                 .buttonStyle(.borderedProminent)
+                .controlSize(.large)
                 .tint(Brand.primary)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 8)
+            }
         }
     }
 }
@@ -235,33 +239,40 @@ struct NotePresetPicker: View {
     let onSelect: (NotePreset) -> Void
 
     private let options: [(NotePreset, String, String)] = [
-        (.summary, String(localized: "Summary"), "doc.text"),
-        (.meeting, String(localized: "Meeting"), "person.2"),
-        (.visit, String(localized: "Visit"), "stethoscope"),
-        (.legal, String(localized: "File note"), "briefcase"),
+        (.summary, String(localized: "Summary"), "doc.plaintext"),
+        (.meeting, String(localized: "Meeting notes"), "person.3"),
+        (.visit, String(localized: "Visit report"), "list.clipboard"),
+        (.legal, String(localized: "Legal note"), "building.columns"),
     ]
 
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 2) {
             ForEach(options, id: \.1) { option in
                 Button {
                     onSelect(option.0)
                 } label: {
                     HStack {
                         Image(systemName: option.2)
+                            .foregroundStyle(Brand.primary)
                             .frame(width: 32)
                         Text(option.1)
+                            .foregroundStyle(Color.primary)
                         Spacer()
                         if selected == option.0 {
                             Image(systemName: "checkmark")
+                                .fontWeight(.semibold)
                                 .foregroundStyle(Brand.primary)
                         }
                     }
                     .padding()
-                    .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                if option.1 != options.last?.1 {
+                    Divider().padding(.leading, 60)
+                }
             }
         }
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
     }
 }
