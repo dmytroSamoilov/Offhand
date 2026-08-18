@@ -36,8 +36,6 @@ struct NotesListView: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
-            .background(Brand.surface)
             .navigationTitle(String(localized: "Notes"))
             .overlay(alignment: .center) {
                 if state.sections.isEmpty {
@@ -75,18 +73,22 @@ struct NotesListView: View {
     }
 
     private var recordButton: some View {
-        Button {
-            isRecordSheetVisible = true
-        } label: {
-            Image(systemName: "mic.fill")
-                .font(.title2)
-                .foregroundStyle(.white)
-                .frame(width: 64, height: 64)
-                .background(Brand.primary, in: RoundedRectangle(cornerRadius: 22))
+        VStack(spacing: 0) {
+            Divider()
+            Button {
+                isRecordSheetVisible = true
+            } label: {
+                Image(systemName: "mic.fill")
+                    .font(.title2)
+                    .foregroundStyle(.white)
+                    .frame(width: 58, height: 58)
+                    .background(Brand.primary, in: Circle())
+            }
+            .accessibilityLabel(String(localized: "Record a note"))
+            .padding(.vertical, 10)
         }
-        .frame(maxWidth: .infinity, alignment: .trailing)
-        .padding(.trailing, 24)
-        .padding(.bottom, 8)
+        .frame(maxWidth: .infinity)
+        .background(.bar)
     }
 
     private func dayTitle(_ label: NoteDayLabelUi) -> String {
@@ -103,39 +105,40 @@ private struct NoteCardRow: View {
     let progress: Int?
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: "mic")
-                .foregroundStyle(Brand.teal)
-                .frame(width: 40, height: 40)
-                .background(Brand.tealContainer, in: Circle())
-            VStack(alignment: .leading, spacing: 4) {
-                Text(note.title)
-                    .font(.headline)
-                    .lineLimit(1)
-                Text(note.time)
-                    .font(.caption)
-                    .foregroundStyle(Brand.onSurfaceVariant)
-                if note.status == .processing {
-                    HStack(spacing: 8) {
-                        ProgressView()
-                        Text(progressText)
-                            .font(.caption)
-                            .foregroundStyle(Brand.onSurfaceVariant)
-                    }
-                } else {
-                    Text(note.preview)
+        VStack(alignment: .leading, spacing: 4) {
+            Text(note.title)
+                .font(.headline)
+                .lineLimit(1)
+            if note.status == .processing {
+                HStack(spacing: 8) {
+                    ProgressView()
+                    Text(progressText)
                         .font(.subheadline)
-                        .foregroundStyle(Brand.onSurfaceVariant)
-                        .lineLimit(3)
+                        .foregroundStyle(.secondary)
                 }
+            } else if note.status == .failed {
+                Label(
+                    String(localized: "We were unable to create an overview and transcript for this note."),
+                    systemImage: "exclamationmark.triangle"
+                )
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            } else if !note.preview.isEmpty {
+                Text(note.preview)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+            HStack(spacing: 12) {
+                Text(note.time)
                 if let duration = note.durationText {
-                    Label(duration, systemImage: "mic")
-                        .font(.caption2)
-                        .foregroundStyle(Brand.onSurfaceVariant)
+                    Label(duration, systemImage: "waveform")
                 }
             }
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 2)
     }
 
     private var progressText: String {

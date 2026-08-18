@@ -15,10 +15,10 @@ struct SettingsView: View {
                     } label: {
                         HStack {
                             Text(String(localized: "Note style"))
-                                .foregroundStyle(Brand.onSurface)
+                                .foregroundStyle(.primary)
                             Spacer()
                             Text(presetLabel(state.notePreset))
-                                .foregroundStyle(Brand.onSurfaceVariant)
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -26,7 +26,7 @@ struct SettingsView: View {
                     LabeledContent(String(localized: "Version"), value: appVersion)
                     Text(String(localized: "Offhand keeps every recording and note on this device. Nothing is uploaded anywhere."))
                         .font(.footnote)
-                        .foregroundStyle(Brand.onSurfaceVariant)
+                        .foregroundStyle(.secondary)
                 }
             }
             .navigationTitle(String(localized: "Settings"))

@@ -17,23 +17,47 @@ struct NoteDetailView: View {
                     if detail.hasAudio {
                         playbackCard
                     }
-                    contentCard(title: String(localized: "Overview"), text: detail.body, tint: Brand.primaryContainer)
-                    contentCard(title: String(localized: "Transcript"), text: detail.transcript, tint: Brand.tealContainer)
+                    if detail.status == .failed {
+                        failedCard
+                    } else {
+                        contentCard(title: String(localized: "Overview"), text: detail.body, tint: Brand.primaryContainer)
+                    }
+                    if !detail.transcript.isEmpty {
+                        contentCard(title: String(localized: "Transcript"), text: detail.transcript, tint: Brand.tealContainer)
+                    }
                 }
             }
             .padding()
         }
-        .background(Brand.surface)
+        .background(Color(.systemGroupedBackground))
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button { viewModel.onEditStarted() } label: { Image(systemName: "pencil") }
                 Button { viewModel.onShareRequested() } label: { Image(systemName: "square.and.arrow.up") }
-                Button(role: .destructive) {
-                    viewModel.onDeleteRequested()
+                Menu {
+                    if !detail.transcript.isEmpty {
+                        Button {
+                            viewModel.onPresetSheetRequested()
+                        } label: {
+                            Label(String(localized: "Change note style"), systemImage: "slider.horizontal.3")
+                        }
+                    }
+                    if detail.hasAudio {
+                        Button {
+                            viewModel.onRetranscribeRequested()
+                        } label: {
+                            Label(String(localized: "Re-transcribe"), systemImage: "arrow.clockwise")
+                        }
+                    }
+                    Button(role: .destructive) {
+                        viewModel.onDeleteRequested()
+                    } label: {
+                        Label(String(localized: "Delete"), systemImage: "trash")
+                    }
                 } label: {
-                    Image(systemName: "trash")
+                    Image(systemName: "ellipsis.circle")
                 }
             }
         }
@@ -44,6 +68,16 @@ struct NoteDetailView: View {
         ) {
             Button(String(localized: "Delete"), role: .destructive) { viewModel.onDeleteConfirmed() }
             Button(String(localized: "Cancel"), role: .cancel) { viewModel.onDeleteDismissed() }
+        }
+        .confirmationDialog(
+            String(localized: "Re-transcribe this note?"),
+            isPresented: retranscribeBinding,
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "Re-transcribe")) { viewModel.onRetranscribeConfirmed() }
+            Button(String(localized: "Cancel"), role: .cancel) { viewModel.onRetranscribeDismissed() }
+        } message: {
+            Text(String(localized: "The recording will be transcribed and summarized again, replacing the current title, overview and transcript. The audio recording itself is kept."))
         }
         .confirmationDialog(
             String(localized: "Share note"),
@@ -62,6 +96,10 @@ struct NoteDetailView: View {
                 NoteEditorView(viewModel: viewModel, editor: editor)
             }
         }
+        .sheet(isPresented: presetBinding) {
+            NoteStyleSheet(viewModel: viewModel, current: detail.preset)
+                .presentationDetents([.medium, .large])
+        }
         .sheet(isPresented: shareItemsBinding) {
             ActivityShareSheet(items: shareItems)
         }
@@ -79,7 +117,7 @@ struct NoteDetailView: View {
                 .font(.title2.weight(.semibold))
             Text(detail.createdAt)
                 .font(.subheadline)
-                .foregroundStyle(Brand.onSurfaceVariant)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -90,7 +128,29 @@ struct NoteDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Brand.surfaceContainer, in: RoundedRectangle(cornerRadius: 20))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private var failedCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(
+                detail.transcript.isEmpty
+                    ? String(localized: "We were unable to create an overview and transcript for this note.")
+                    : String(localized: "We were unable to create an overview for this note. The transcript is saved below."),
+                systemImage: "exclamationmark.triangle"
+            )
+            .foregroundStyle(.secondary)
+            if detail.hasAudio {
+                Button(String(localized: "Re-transcribe")) {
+                    viewModel.onRetranscribeRequested()
+                }
+                .buttonStyle(.bordered)
+                .tint(Brand.primary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
     }
 
     private var playbackCard: some View {
@@ -108,11 +168,11 @@ struct NoteDetailView: View {
                     .tint(Brand.primary)
                 Text("\(state.playback.positionText) / \(state.playback.durationText)")
                     .font(.caption)
-                    .foregroundStyle(Brand.onSurfaceVariant)
+                    .foregroundStyle(.secondary)
             }
         }
         .padding()
-        .background(Brand.surfaceContainer, in: RoundedRectangle(cornerRadius: 20))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
     }
 
     private func contentCard(title: String, text: String, tint: Color) -> some View {
@@ -122,18 +182,12 @@ struct NoteDetailView: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
                 .background(tint, in: Capsule())
-            Text(markdownText(text))
-                .font(.body)
+            MarkdownBlocks(raw: text)
                 .textSelection(.enabled)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Brand.surfaceContainer, in: RoundedRectangle(cornerRadius: 20))
-    }
-
-    private func markdownText(_ raw: String) -> AttributedString {
-        let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        return (try? AttributedString(markdown: raw, options: options)) ?? AttributedString(raw)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
     }
 
     private var deleteBinding: Binding<Bool> {
@@ -150,6 +204,20 @@ struct NoteDetailView: View {
         )
     }
 
+    private var retranscribeBinding: Binding<Bool> {
+        Binding(
+            get: { state.isRetranscribeConfirmationVisible },
+            set: { isShown in if !isShown { viewModel.onRetranscribeDismissed() } }
+        )
+    }
+
+    private var presetBinding: Binding<Bool> {
+        Binding(
+            get: { state.isPresetSheetVisible },
+            set: { isShown in if !isShown { viewModel.onPresetSheetDismissed() } }
+        )
+    }
+
     private var editorBinding: Binding<Bool> {
         Binding(
             get: { state.editor != nil },
@@ -162,6 +230,122 @@ struct NoteDetailView: View {
             get: { !shareItems.isEmpty },
             set: { isShown in if !isShown { shareItems = [] } }
         )
+    }
+}
+
+private struct MarkdownBlocks: View {
+    let raw: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(Array(raw.split(separator: "\n", omittingEmptySubsequences: false).enumerated()), id: \.offset) { _, line in
+                blockView(String(line))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func blockView(_ line: String) -> some View {
+        let trimmed = line.trimmingCharacters(in: .whitespaces)
+        if trimmed.isEmpty {
+            EmptyView()
+        } else if trimmed.hasPrefix("#") {
+            Text(trimmed.drop(while: { $0 == "#" }).trimmingCharacters(in: .whitespaces))
+                .font(.headline)
+                .padding(.top, 4)
+        } else {
+            Text(inlineMarkdown(trimmed))
+                .font(.body)
+        }
+    }
+
+    private func inlineMarkdown(_ raw: String) -> AttributedString {
+        let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        return (try? AttributedString(markdown: raw, options: options)) ?? AttributedString(raw)
+    }
+}
+
+private struct NoteStyleSheet: View {
+    let viewModel: NotesViewModel
+    let current: NotePreset
+
+    private struct StyleOption {
+        let preset: NotePreset
+        let label: String
+        let details: String
+        let symbol: String
+    }
+
+    private var options: [StyleOption] {
+        [
+            StyleOption(
+                preset: .summary,
+                label: String(localized: "Summary"),
+                details: String(localized: "A clean write-up of what was said, without repetition or filler."),
+                symbol: "doc.plaintext"
+            ),
+            StyleOption(
+                preset: .meeting,
+                label: String(localized: "Meeting notes"),
+                details: String(localized: "Discussion, decisions, action items and open questions."),
+                symbol: "person.3"
+            ),
+            StyleOption(
+                preset: .visit,
+                label: String(localized: "Visit report"),
+                details: String(localized: "Who the visit was about, observations, what was done and follow-ups."),
+                symbol: "list.clipboard"
+            ),
+            StyleOption(
+                preset: .legal,
+                label: String(localized: "Legal note"),
+                details: String(localized: "Matter, facts stated, instructions, advice given and next steps."),
+                symbol: "building.columns"
+            ),
+        ]
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(options, id: \.symbol) { option in
+                        Button {
+                            viewModel.onPresetSelected(preset: option.preset)
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: option.symbol)
+                                    .foregroundStyle(Brand.primary)
+                                    .frame(width: 28)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(option.label)
+                                        .font(.body)
+                                        .foregroundStyle(Color.primary)
+                                    Text(option.details)
+                                        .font(.caption)
+                                        .foregroundStyle(Color.secondary)
+                                }
+                                Spacer()
+                                if option.preset == current {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(Brand.primary)
+                                }
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } footer: {
+                    Text(String(localized: "The recording is kept. The title and overview are written again from the transcript in the style you pick."))
+                }
+            }
+            .navigationTitle(String(localized: "Rewrite this note as"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(String(localized: "Cancel")) { viewModel.onPresetSheetDismissed() }
+                }
+            }
+        }
     }
 }
 

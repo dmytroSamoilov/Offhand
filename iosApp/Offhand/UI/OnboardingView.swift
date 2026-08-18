@@ -22,7 +22,7 @@ struct OnboardingView: View {
             Spacer()
         }
         .padding(24)
-        .background(Brand.surface)
+        .background(Color(.systemGroupedBackground))
         .task {
             for await newState in viewModel.uiState {
                 state = newState
@@ -80,7 +80,7 @@ struct OnboardingView: View {
                     )
                 }
                 .padding()
-                .background(Brand.surfaceContainer, in: RoundedRectangle(cornerRadius: 16))
+                .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
             }
         }
     }
@@ -91,7 +91,7 @@ struct OnboardingView: View {
                 .foregroundStyle(satisfied ? .green : .red)
             Text(label)
             Spacer()
-            Text(value).foregroundStyle(Brand.onSurfaceVariant)
+            Text(value).foregroundStyle(.secondary)
         }
     }
 
@@ -141,7 +141,7 @@ struct OnboardingView: View {
                 .font(.title3.weight(.semibold))
             Text(String(localized: "Anonymous crash and stability data only — never your notes, audio, or any personal data."))
                 .font(.subheadline)
-                .foregroundStyle(Brand.onSurfaceVariant)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Toggle(String(localized: "Share stability reports"), isOn: Binding(
                 get: { state.isTelemetryEnabled },
@@ -165,7 +165,7 @@ struct OnboardingView: View {
                 .font(.title3.weight(.semibold))
             Text(String(format: String(localized: "One-time download of about %@ GB. Keep Offhand open on Wi-Fi."), state.downloadSizeGb))
                 .font(.subheadline)
-                .foregroundStyle(Brand.onSurfaceVariant)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             downloadProgress
         }
@@ -180,7 +180,7 @@ struct OnboardingView: View {
                     .tint(Brand.primary)
                 Text("\(Int(downloading.progress * 100))%")
                     .font(.caption)
-                    .foregroundStyle(Brand.onSurfaceVariant)
+                    .foregroundStyle(.secondary)
             }
         case .error(let error):
             VStack(spacing: 12) {
@@ -221,7 +221,7 @@ struct OnboardingView: View {
                 .font(.title3.weight(.semibold))
             Text(bodyText)
                 .font(.subheadline)
-                .foregroundStyle(Brand.onSurfaceVariant)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Button(buttonTitle, action: action)
                 .buttonStyle(.borderedProminent)
@@ -258,7 +258,7 @@ struct NotePresetPicker: View {
                         }
                     }
                     .padding()
-                    .background(Brand.surfaceContainer, in: RoundedRectangle(cornerRadius: 14))
+                    .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
                 }
                 .buttonStyle(.plain)
             }

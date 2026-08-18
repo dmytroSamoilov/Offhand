@@ -20,10 +20,6 @@ struct RecordSheetView: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            Capsule()
-                .fill(Brand.onSurfaceVariant.opacity(0.4))
-                .frame(width: 40, height: 5)
-                .padding(.top, 10)
             Spacer()
             switch state.phase {
             case .idle:
@@ -39,7 +35,7 @@ struct RecordSheetView: View {
         }
         .padding()
         .presentationDetents([.medium])
-        .presentationBackground(Brand.surface)
+        .presentationDragIndicator(.visible)
         .interactiveDismissDisabled(state.phase == .recording)
         .onAppear { viewModel.onSheetOpened() }
         .onDisappear { viewModel.onSheetClosed() }
@@ -69,7 +65,7 @@ struct RecordSheetView: View {
             .buttonStyle(.plain)
             Text(String(localized: "Everything stays on this device."))
                 .font(.footnote)
-                .foregroundStyle(Brand.onSurfaceVariant)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -83,7 +79,7 @@ struct RecordSheetView: View {
             if let mic = state.externalMicName {
                 Label(mic, systemImage: "headphones")
                     .font(.caption)
-                    .foregroundStyle(Brand.onSurfaceVariant)
+                    .foregroundStyle(.secondary)
             }
             HStack(spacing: 32) {
                 Button {
@@ -92,7 +88,7 @@ struct RecordSheetView: View {
                     Image(systemName: state.isPaused ? "play.fill" : "pause.fill")
                         .font(.title2)
                         .frame(width: 64, height: 64)
-                        .background(Brand.surfaceContainer, in: Circle())
+                        .background(Color(.secondarySystemFill), in: Circle())
                 }
                 .buttonStyle(.plain)
                 Button {
@@ -102,7 +98,7 @@ struct RecordSheetView: View {
                         .font(.title2)
                         .foregroundStyle(.white)
                         .frame(width: 80, height: 80)
-                        .background(Brand.primary, in: RoundedRectangle(cornerRadius: 24))
+                        .background(Brand.primary, in: Circle())
                 }
                 .buttonStyle(.plain)
             }
@@ -117,7 +113,7 @@ struct RecordSheetView: View {
                 .font(.headline)
             Text(String(localized: "Please keep Offhand open while your note is prepared."))
                 .font(.footnote)
-                .foregroundStyle(Brand.onSurfaceVariant)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
     }
