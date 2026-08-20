@@ -7,7 +7,11 @@ import UserNotifications
 
 @MainActor
 final class NoteFinishCoordinator {
-    private static let logger = os.Logger(subsystem: "com.dmytrosamoilov.offhand", category: "FinishTask")
+    // Derived from the bundle id so each flavor keeps its own task namespace and
+    // stays within BGTaskSchedulerPermittedIdentifiers.
+    private static let bundleId = Bundle.main.bundleIdentifier ?? "com.dmytrosamoilov.offhand"
+    private static let finishTaskPrefix = "\(bundleId).finish"
+    private static let logger = os.Logger(subsystem: bundleId, category: "FinishTask")
 
     var onLegacyExpired: (() -> Void)?
     private var registeredIdentifiers: Set<String> = []
@@ -21,7 +25,7 @@ final class NoteFinishCoordinator {
     func processingStarted(noteId: Int64) {
         guard #available(iOS 26.0, *) else { return }
         guard !submittedNoteIds.contains(noteId) else { return }
-        let identifier = "com.dmytrosamoilov.offhand.finish.note-\(noteId)"
+        let identifier = "\(Self.finishTaskPrefix).note-\(noteId)"
         guard registerIfNeeded(identifier: identifier) else { return }
         submittedNoteIds.insert(noteId)
         let request = BGContinuedProcessingTaskRequest(

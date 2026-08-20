@@ -4,6 +4,21 @@ options:
   deploymentTarget:
     iOS: "18.0"
   createIntermediateGroups: true
+configs:
+  Debug-dev: debug
+  Release-dev: release
+  Debug-prod: debug
+  Release-prod: release
+settings:
+  configs:
+    Debug-dev: &dev
+      APP_ID_SUFFIX: .dev
+      APP_DISPLAY_NAME: Offhand Dev
+    Release-dev: *dev
+    Debug-prod: &prod
+      APP_ID_SUFFIX: ""
+      APP_DISPLAY_NAME: Offhand
+    Release-prod: *prod
 packages:
   LiteRTLM:
     url: https://github.com/google-ai-edge/LiteRT-LM
@@ -28,7 +43,9 @@ targets:
         embed: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.dmytrosamoilov.offhand
+        PRODUCT_BUNDLE_IDENTIFIER: com.dmytrosamoilov.offhand$(APP_ID_SUFFIX)
+        MARKETING_VERSION: "1.2.0"
+        CURRENT_PROJECT_VERSION: "11"
         SWIFT_VERSION: "5.9"
         IPHONEOS_DEPLOYMENT_TARGET: "18.0"
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -43,10 +60,13 @@ targets:
     info:
       path: Offhand/Info.plist
       properties:
+        CFBundleDisplayName: $(APP_DISPLAY_NAME)
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen: {}
         UIBackgroundModes: [audio, processing]
         BGTaskSchedulerPermittedIdentifiers:
-          - com.dmytrosamoilov.offhand.finish.*
+          - $(PRODUCT_BUNDLE_IDENTIFIER).finish.*
         NSSupportsLiveActivities: true
         NSMicrophoneUsageDescription: "Offhand records your voice notes. Audio never leaves this device."
         ITSAppUsesNonExemptEncryption: false
@@ -58,7 +78,9 @@ targets:
       - Shared
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.dmytrosamoilov.offhand.widgets
+        PRODUCT_BUNDLE_IDENTIFIER: com.dmytrosamoilov.offhand$(APP_ID_SUFFIX).widgets
+        MARKETING_VERSION: "1.2.0"
+        CURRENT_PROJECT_VERSION: "11"
         SWIFT_VERSION: "5.9"
         IPHONEOS_DEPLOYMENT_TARGET: "18.0"
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -68,6 +90,37 @@ targets:
     info:
       path: Widgets/Info.plist
       properties:
-        CFBundleDisplayName: Offhand Widgets
+        CFBundleDisplayName: $(APP_DISPLAY_NAME) Widgets
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
+schemes:
+  Offhand-dev:
+    build:
+      targets:
+        Offhand: all
+    run:
+      config: Debug-dev
+    test:
+      config: Debug-dev
+    profile:
+      config: Release-dev
+    analyze:
+      config: Debug-dev
+    archive:
+      config: Release-dev
+  Offhand-prod:
+    build:
+      targets:
+        Offhand: all
+    run:
+      config: Debug-prod
+    test:
+      config: Debug-prod
+    profile:
+      config: Release-prod
+    analyze:
+      config: Debug-prod
+    archive:
+      config: Release-prod

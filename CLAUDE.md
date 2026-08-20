@@ -13,11 +13,21 @@ POC decisions and roadmap: .claude/POC/ (read before implementing features).
 - When adding new files, auto `git add` them (only files related to current task).
 
 ## Build & Test
+
+### Android
 - Flavors: `production` (com.dmytrosamoilov.offhand) and `dev` (.dev applicationId suffix, "Offhand Dev" label). Day-to-day work and device installs use `dev`.
 - Build: `./gradlew assembleDevDebug` (both flavors: `assembleDebug`)
 - Unit tests: `./gradlew testDebugUnitTest`
 - Lint: `./gradlew lintDebug :app:lintDevDebug`
 - Run all: `./gradlew assembleDebug testDebugUnitTest lintDebug :app:lintDevDebug`
+
+### iOS
+- Flavors mirror Android via Xcode configurations: schemes `Offhand-dev` (com.dmytrosamoilov.offhand.dev, "Offhand Dev") and `Offhand-prod` (com.dmytrosamoilov.offhand, "Offhand"). Day-to-day work uses `Offhand-dev`.
+- Configurations: `Debug-dev`, `Release-dev`, `Debug-prod`, `Release-prod`. The flavor is driven by `APP_ID_SUFFIX` / `APP_DISPLAY_NAME` in `iosApp/project.yml`.
+- `iosApp/Offhand.xcodeproj` is generated and gitignored — edit `iosApp/project.yml`, then run `xcodegen generate` in `iosApp/`.
+- Shared framework (rebuild after any commonMain/iosMain change): `./gradlew :shared-framework:assembleOffhandSharedReleaseXCFramework`
+- Build: `cd iosApp && xcodebuild build -project Offhand.xcodeproj -scheme Offhand-dev -destination 'generic/platform=iOS Simulator' ARCHS=arm64`
+- Only arm64 slices are built for the simulator, so pass `ARCHS=arm64` (an unrestricted `generic/platform=iOS Simulator` build fails on the x86_64 slice).
 
 ## Architecture (summary)
 - Three layers: domain/ → data/ → presentation/
