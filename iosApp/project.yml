@@ -16,13 +16,16 @@ settings:
     Debug-dev:
       APP_ID_SUFFIX: .dev
       APP_DISPLAY_NAME: Offhand Dev
+      APP_ICON_NAME: AppIcon-dev
       SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG DEV_UNLOCK
     Release-dev:
       APP_ID_SUFFIX: .dev
       APP_DISPLAY_NAME: Offhand Dev
+      APP_ICON_NAME: AppIcon-dev
     Debug-prod: &prod
       APP_ID_SUFFIX: ""
       APP_DISPLAY_NAME: Offhand
+      APP_ICON_NAME: AppIcon
     Release-prod: *prod
 packages:
   LiteRTLM:
@@ -49,6 +52,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.dmytrosamoilov.offhand$(APP_ID_SUFFIX)
+        ASSETCATALOG_COMPILER_APPICON_NAME: $(APP_ICON_NAME)
         MARKETING_VERSION: "1.2.0"
         CURRENT_PROJECT_VERSION: "11"
         SWIFT_VERSION: "5.9"
