@@ -20,55 +20,10 @@ struct NotesListView: View {
         modelPreparation: nil
     )
     @State private var isRecordSheetVisible = false
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(state.sections, id: \.self) { section in
-                    Section(dayTitle(section.dayLabel)) {
-                        ForEach(section.notes, id: \.id) { note in
-                            Button {
-                                viewModel.onNoteSelected(id: note.id)
-                            } label: {
-                                NoteCardRow(note: note, progress: state.noteProgress[KotlinLong(value: note.id)]?.intValue)
-                            }
-                            .buttonStyle(.plain)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button(role: .destructive) {
-                                    viewModel.onDeleteRequested(id: note.id)
-                                } label: {
-                                    Label(String(localized: "Delete"), systemImage: "trash")
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            .listStyle(.insetGrouped)
-            .safeAreaInset(edge: .top) {
-                if let preparation = state.modelPreparation {
-                    ModelPreparationBanner(percent: Int(preparation.progressPercent))
-                }
-            }
-            .navigationTitle(String(localized: "Notes"))
-            .overlay(alignment: .center) {
-                if state.sections.isEmpty {
-                    ContentUnavailableView(
-                        String(localized: "No notes yet"),
-                        systemImage: "mic",
-                        description: Text(String(localized: "Tap the microphone to record your first note."))
-                    )
-                }
-            }
-            .overlay(alignment: .bottomTrailing) {
-                recordButton
-            }
-            .navigationDestination(isPresented: detailBinding) {
-                if let detail = state.selected {
-                    NoteDetailView(viewModel: viewModel, detail: detail, state: state)
-                }
-            }
-        }
+        layout
         .sheet(isPresented: $isRecordSheetVisible) {
             RecordSheetView(autoStart: true)
         }
@@ -90,6 +45,81 @@ struct NotesListView: View {
                 requestAppStoreReview()
                 viewModel.onReviewAttemptSucceeded()
             }
+        }
+    }
+
+    // The app ships for iPad, so give a regular width the two-pane layout Android
+    // gets from its list-detail scaffold instead of a phone-shaped push stack.
+    @ViewBuilder
+    private var layout: some View {
+        if horizontalSizeClass == .regular {
+            NavigationSplitView {
+                notesList
+            } detail: {
+                NavigationStack {
+                    if let detail = state.selected {
+                        NoteDetailView(viewModel: viewModel, detail: detail, state: state)
+                    } else {
+                        ContentUnavailableView(
+                            String(localized: "No note selected"),
+                            systemImage: "doc.text",
+                            description: Text(String(localized: "Pick a note from the list to read it."))
+                        )
+                    }
+                }
+            }
+        } else {
+            NavigationStack {
+                notesList
+                    .navigationDestination(isPresented: detailBinding) {
+                        if let detail = state.selected {
+                            NoteDetailView(viewModel: viewModel, detail: detail, state: state)
+                        }
+                    }
+            }
+        }
+    }
+
+    private var notesList: some View {
+        List {
+            ForEach(state.sections, id: \.self) { section in
+                Section(dayTitle(section.dayLabel)) {
+                    ForEach(section.notes, id: \.id) { note in
+                        Button {
+                            viewModel.onNoteSelected(id: note.id)
+                        } label: {
+                            NoteCardRow(note: note, progress: state.noteProgress[KotlinLong(value: note.id)]?.intValue)
+                        }
+                        .buttonStyle(.plain)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                viewModel.onDeleteRequested(id: note.id)
+                            } label: {
+                                Label(String(localized: "Delete"), systemImage: "trash")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .listStyle(.insetGrouped)
+        .safeAreaInset(edge: .top) {
+            if let preparation = state.modelPreparation {
+                ModelPreparationBanner(percent: Int(preparation.progressPercent))
+            }
+        }
+        .navigationTitle(String(localized: "Notes"))
+        .overlay(alignment: .center) {
+            if state.sections.isEmpty {
+                ContentUnavailableView(
+                    String(localized: "No notes yet"),
+                    systemImage: "mic",
+                    description: Text(String(localized: "Tap the microphone to record your first note."))
+                )
+            }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            recordButton
         }
     }
 

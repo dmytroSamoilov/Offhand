@@ -20,10 +20,20 @@ struct NoteDetailView: View {
                     if detail.status == .failed {
                         failedCard
                     } else {
-                        sectionCard(title: String(localized: "Overview"), text: detail.body)
+                        CollapsibleSection(
+                            title: String(localized: "Overview"),
+                            text: detail.body,
+                            initiallyExpanded: true
+                        )
+                        .id(detail.id)
                     }
                     if !detail.transcript.isEmpty {
-                        sectionCard(title: String(localized: "Transcript"), text: detail.transcript)
+                        CollapsibleSection(
+                            title: String(localized: "Transcript"),
+                            text: detail.transcript,
+                            initiallyExpanded: detail.status != .ready
+                        )
+                        .id(detail.id)
                     }
                 }
             }
@@ -213,21 +223,6 @@ struct NoteDetailView: View {
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
     }
 
-    private func sectionCard(title: String, text: String) -> some View {
-        VStack(alignment: .leading, spacing: 7) {
-            Text(title)
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-                .padding(.leading, 16)
-            MarkdownBlocks(raw: text)
-                .textSelection(.enabled)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
-                .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
-        }
-    }
-
     private var shareBinding: Binding<Bool> {
         Binding(
             get: { state.isShareDialogVisible },
@@ -264,30 +259,113 @@ struct NoteDetailView: View {
     }
 }
 
+private struct CollapsibleSection: View {
+    let title: String
+    let text: String
+    @State private var isExpanded: Bool
+
+    init(title: String, text: String, initiallyExpanded: Bool) {
+        self.title = title
+        self.text = text
+        _isExpanded = State(initialValue: initiallyExpanded)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
+            } label: {
+                HStack {
+                    Text(title)
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(isExpanded ? 0 : -90))
+                }
+                .padding(.leading, 16)
+                .padding(.trailing, 4)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(title)
+            if isExpanded {
+                MarkdownBlocks(raw: text)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(
+                        Color(.secondarySystemGroupedBackground),
+                        in: RoundedRectangle(cornerRadius: 12)
+                    )
+            }
+        }
+    }
+}
+
 private struct MarkdownBlocks: View {
     let raw: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ForEach(Array(raw.split(separator: "\n", omittingEmptySubsequences: false).enumerated()), id: \.offset) { _, line in
-                blockView(String(line))
+            ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+                blockView(line)
             }
         }
     }
 
+    private var lines: [String] {
+        raw.split(separator: "\n", omittingEmptySubsequences: false)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+    }
+
     @ViewBuilder
     private func blockView(_ line: String) -> some View {
-        let trimmed = line.trimmingCharacters(in: .whitespaces)
-        if trimmed.isEmpty {
-            EmptyView()
-        } else if trimmed.hasPrefix("#") {
-            Text(trimmed.drop(while: { $0 == "#" }).trimmingCharacters(in: .whitespaces))
-                .font(.headline)
+        if let heading = heading(line) {
+            Text(inlineMarkdown(heading.text))
+                .font(heading.font)
                 .padding(.top, 4)
+        } else if let item = listItem(line) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(item.marker)
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                Text(inlineMarkdown(item.text))
+                    .font(.body)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         } else {
-            Text(inlineMarkdown(trimmed))
+            Text(inlineMarkdown(line))
                 .font(.body)
         }
+    }
+
+    private func heading(_ line: String) -> (text: String, font: Font)? {
+        if line.hasPrefix("### ") { return (String(line.dropFirst(4)), .headline) }
+        if line.hasPrefix("## ") { return (String(line.dropFirst(3)), .title3.weight(.semibold)) }
+        if line.hasPrefix("# ") { return (String(line.dropFirst(2)), .title2.weight(.semibold)) }
+        return nil
+    }
+
+    private func listItem(_ line: String) -> (marker: String, text: String)? {
+        if line.hasPrefix("- ") || line.hasPrefix("* ") {
+            return ("•", String(line.dropFirst(2)))
+        }
+        return numberedItem(line)
+    }
+
+    // "1. Something" keeps its own number, the way the Android renderer does.
+    private func numberedItem(_ line: String) -> (marker: String, text: String)? {
+        guard let dot = line.firstIndex(of: ".") else { return nil }
+        let digits = line[line.startIndex..<dot]
+        guard !digits.isEmpty, digits.allSatisfy(\.isNumber) else { return nil }
+        let afterDot = line.index(after: dot)
+        guard afterDot < line.endIndex, line[afterDot] == " " else { return nil }
+        return ("\(digits).", String(line[line.index(after: afterDot)...]))
     }
 
     private func inlineMarkdown(_ raw: String) -> AttributedString {
