@@ -27,7 +27,11 @@ interface IosWhisperEngine {
 
 interface IosAudioSource {
 
-    fun start(onFrame: (ShortArray) -> Unit): Boolean
+    fun start(
+        onFrame: (ShortArray) -> Unit,
+        onInputChanged: (String?) -> Unit,
+        onFailure: (String) -> Unit,
+    ): Boolean
 
     fun stop()
 

@@ -56,12 +56,22 @@ class IosAudioRecorder(
         )
         paused.store(false)
         mutableVad.value = VadSnapshot()
-        val started = audioSource.start { frame ->
-            val outcome = chunker.onFrame(frame, frame.size, paused.load())
-            outcome.frameBytes?.let(pcmSink)
-            mutableVad.value = outcome.vad
-            outcome.completedChunk?.let { trySend(it.toAudioChunk()) }
-        }
+        mutableExternalInputName.value = null
+        val started = audioSource.start(
+            onFrame = { frame ->
+                val outcome = chunker.onFrame(frame, frame.size, paused.load())
+                outcome.frameBytes?.let(pcmSink)
+                mutableVad.value = outcome.vad
+                outcome.completedChunk?.let { trySend(it.toAudioChunk()) }
+            },
+            onInputChanged = { name -> mutableExternalInputName.value = name },
+            // The capture is already torn down by the time this arrives, so the
+            // buffered tail is safe to drain and is worth keeping.
+            onFailure = { message ->
+                chunker.drainTail()?.let { trySend(it.toAudioChunk()) }
+                close(IllegalStateException(message))
+            },
+        )
         if (!started) {
             close(IllegalStateException("Microphone unavailable"))
             return@callbackFlow
@@ -70,7 +80,10 @@ class IosAudioRecorder(
             chunker.drainTail()?.let { trySend(it.toAudioChunk()) }
             close()
         }
-        awaitClose { audioSource.stop() }
+        awaitClose {
+            audioSource.stop()
+            mutableExternalInputName.value = null
+        }
     }
 
     private fun AudioChunker.PcmChunk.toAudioChunk(): AudioChunk = AudioChunk(
