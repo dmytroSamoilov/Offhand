@@ -11,4 +11,5 @@ enum AppViewModels {
     static let recording = SharedGraph.shared.recordingViewModel()
     static let onboarding = SharedGraph.shared.onboardingViewModel()
     static let settings = SharedGraph.shared.settingsViewModel()
+    static let aboutSupport = SharedGraph.shared.aboutSupportViewModel()
 }

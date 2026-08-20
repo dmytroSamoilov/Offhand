@@ -22,11 +22,26 @@ struct SettingsView: View {
                         }
                     }
                 }
-                Section(String(localized: "About")) {
-                    LabeledContent(String(localized: "Version"), value: appVersion)
+                Section {
+                    NavigationLink {
+                        AboutSupportView()
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(String(localized: "About & Support"))
+                            Text(
+                                String(
+                                    format: String(localized: "Version %@ · feedback, privacy and legal"),
+                                    appVersion
+                                )
+                            )
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        }
+                    }
+                } header: {
+                    Text(String(localized: "About"))
+                } footer: {
                     Text(String(localized: "Offhand keeps every recording and note on this device. Nothing is uploaded anywhere."))
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
                 }
             }
             .navigationTitle(String(localized: "Settings"))
