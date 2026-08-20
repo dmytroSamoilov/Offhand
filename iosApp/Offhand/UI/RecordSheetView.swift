@@ -5,7 +5,7 @@ import SwiftUI
 struct RecordSheetView: View {
     var autoStart = false
     @Environment(\.dismiss) private var dismiss
-    private let viewModel = SharedGraph.shared.recordingViewModel()
+    private let viewModel = AppViewModels.recording
     @State private var state = RecordingUiState(
         phase: .idle,
         isPaused: false,

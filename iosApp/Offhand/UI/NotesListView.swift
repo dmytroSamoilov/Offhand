@@ -2,7 +2,7 @@ import OffhandShared
 import SwiftUI
 
 struct NotesListView: View {
-    private let viewModel = SharedGraph.shared.notesViewModel()
+    private let viewModel = AppViewModels.notes
     @State private var state = NotesUiState(
         sections: [],
         selected: nil,

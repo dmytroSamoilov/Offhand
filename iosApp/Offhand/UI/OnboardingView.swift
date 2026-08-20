@@ -3,7 +3,7 @@ import SwiftUI
 
 struct OnboardingView: View {
     let onFinished: () -> Void
-    private let viewModel = SharedGraph.shared.onboardingViewModel()
+    private let viewModel = AppViewModels.onboarding
     @State private var state = OnboardingUiState(
         step: .deviceCheck,
         deviceSpecs: nil,

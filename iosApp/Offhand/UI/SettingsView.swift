@@ -2,7 +2,7 @@ import OffhandShared
 import SwiftUI
 
 struct SettingsView: View {
-    private let viewModel = SharedGraph.shared.settingsViewModel()
+    private let viewModel = AppViewModels.settings
     @State private var state = SettingsUiState(notePreset: .summary, isDynamicColorEnabled: false)
     @State private var isPresetPickerVisible = false
 

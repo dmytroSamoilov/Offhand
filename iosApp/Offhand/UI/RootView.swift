@@ -3,7 +3,7 @@ import SwiftUI
 import UserNotifications
 
 struct RootView: View {
-    private let viewModel = SharedGraph.shared.rootViewModel()
+    private let viewModel = AppViewModels.root
     private let sessionManager = SharedGraph.shared.sessionManager()
     @State private var activityController = NoteActivityController()
     @State private var finishCoordinator = NoteFinishCoordinator()
