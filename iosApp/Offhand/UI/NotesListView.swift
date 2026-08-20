@@ -1,5 +1,7 @@
 import OffhandShared
+import StoreKit
 import SwiftUI
+import UIKit
 
 struct NotesListView: View {
     private let viewModel = AppViewModels.notes
@@ -83,6 +85,18 @@ struct NotesListView: View {
                 state = newState
             }
         }
+        .task {
+            for await _ in viewModel.reviewRequests {
+                requestAppStoreReview()
+                viewModel.onReviewAttemptSucceeded()
+            }
+        }
+    }
+
+    private func requestAppStoreReview() {
+        guard let scene = UIApplication.shared.connectedScenes
+            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else { return }
+        AppStore.requestReview(in: scene)
     }
 
     private var detailBinding: Binding<Bool> {

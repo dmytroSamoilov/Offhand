@@ -42,6 +42,13 @@ struct RootView: View {
                 activityController.suspendedWithPendingWork()
             }
         }
+        .onReceive(
+            NotificationCenter.default.publisher(
+                for: UIApplication.didReceiveMemoryWarningNotification
+            )
+        ) { _ in
+            releaseModelIfIdle()
+        }
         .onChange(of: scenePhase) {
             switch scenePhase {
             case .background:
@@ -145,9 +152,16 @@ struct RootView: View {
         let hasPendingWork = !sessionManager.processingNoteIds.value.isEmpty || session.phase == .draining
         if hasPendingWork {
             finishCoordinator.appEnteredBackgroundWhileProcessing()
-        } else if session.phase == .idle {
-            SharedGraph.shared.modelManager().release()
+        } else {
+            releaseModelIfIdle()
         }
+    }
+
+    // The engine holds gigabytes; give it back rather than risk the OS killing us.
+    private func releaseModelIfIdle() {
+        guard sessionManager.processingNoteIds.value.isEmpty,
+              sessionManager.session.value.phase == .idle else { return }
+        SharedGraph.shared.modelManager().release()
     }
 }
 

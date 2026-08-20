@@ -79,7 +79,7 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
             CoroutineScope(SupervisorJob() + Dispatchers.Default),
         )
     }
-    factory { IosRootViewModel(get(), get(), get(), get(), get(), get()) }
+    factory { IosRootViewModel(get(), get(), get(), get(), get(), get(), get()) }
 }
 
 class IosDefaultNoteTitleProvider(

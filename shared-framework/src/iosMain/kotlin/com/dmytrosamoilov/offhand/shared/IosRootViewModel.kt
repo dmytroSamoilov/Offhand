@@ -7,6 +7,7 @@ import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.AppLockState
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserPreferencesUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinator
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,6 +30,7 @@ class IosRootViewModel(
     private val modelDownloadController: ModelDownloadController,
     private val resumeInterruptedNotes: ResumeInterruptedNotesUseCase,
     private val sweepOrphanedRecordings: SweepOrphanedRecordingsUseCase,
+    pendingNotesCoordinator: PendingNotesCoordinator,
 ) : BaseViewModel() {
 
     val phase: StateFlow<IosRootPhase> = combine(
@@ -49,6 +51,9 @@ class IosRootViewModel(
         skipLockForFirstRun(observeUserPreferences)
         finishStartupWhenReady()
         resumeModelDownloadWhenReady()
+        // Picks notes back up the moment the model download finishes, instead of
+        // leaving them stuck until the app is backgrounded and reopened.
+        pendingNotesCoordinator.start()
     }
 
     fun onUnlockAuthenticated() {
