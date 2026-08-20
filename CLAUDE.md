@@ -20,6 +20,7 @@ POC decisions and roadmap: .claude/POC/ (read before implementing features).
 - Unit tests: `./gradlew testDebugUnitTest`
 - Lint: `./gradlew lintDebug :app:lintDevDebug`
 - Run all: `./gradlew assembleDebug testDebugUnitTest lintDebug :app:lintDevDebug`
+- Crash reporting: `FirebaseInitProvider` is removed in `AndroidManifest.xml`, so Firebase never self-initialises — `CrashReportingController` initialises it only after telemetry consent, because initialising alone contacts Google. Keep it that way, and keep `ReleaseLogTree` resolving Crashlytics per log rather than capturing it, since Firebase may not exist yet when the tree is planted. iOS holds the same line.
 
 ### iOS
 - Flavors mirror Android via Xcode configurations: schemes `Offhand-dev` (com.dmytrosamoilov.offhand.dev, "Offhand Dev") and `Offhand-prod` (com.dmytrosamoilov.offhand, "Offhand"). Day-to-day work uses `Offhand-dev`.

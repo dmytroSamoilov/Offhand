@@ -23,9 +23,8 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManag
 import com.dmytrosamoilov.offhand.feature.recording.domain.SessionPhase
 import com.dmytrosamoilov.offhand.feature.settings.di.featureSettingsModule
 import com.dmytrosamoilov.offhand.telemetry.CrashReportingController
+import com.dmytrosamoilov.offhand.telemetry.FirebaseReporting
 import com.dmytrosamoilov.offhand.telemetry.ReleaseLogTree
-import com.google.firebase.FirebaseApp
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -67,7 +66,7 @@ class OffhandApplication : Application(), KoinComponent {
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         } else {
-            Timber.plant(ReleaseLogTree(crashlyticsOrNull()))
+            Timber.plant(ReleaseLogTree { FirebaseReporting.instanceOrNull(this) })
         }
         Logger.setMinSeverity(if (BuildConfig.DEBUG) Severity.Verbose else Severity.Assert)
         crashReportingController.start()
@@ -86,7 +85,4 @@ class OffhandApplication : Application(), KoinComponent {
     private fun isPipelineIdle(): Boolean =
         sessionManager.processingNoteIds.value.isEmpty() &&
             sessionManager.session.value.phase == SessionPhase.IDLE
-
-    private fun crashlyticsOrNull(): FirebaseCrashlytics? =
-        if (FirebaseApp.getApps(this).isEmpty()) null else FirebaseCrashlytics.getInstance()
 }
