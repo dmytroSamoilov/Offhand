@@ -8,29 +8,27 @@ struct RootView: View {
     @State private var activityController = NoteActivityController()
     @State private var finishCoordinator = NoteFinishCoordinator()
     @State private var activeNoteId: Int64?
-    @State private var isOnboardingCompleted: Bool?
+    @State private var phase: IosRootPhase = .loading
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         Group {
-            switch isOnboardingCompleted {
-            case .none:
+            switch phase {
+            case .loading:
                 ProgressView()
-            case .some(false):
-                OnboardingView {
-                    isOnboardingCompleted = true
-                    viewModel.onReady()
-                }
-            case .some(true):
+            case .onboarding:
+                OnboardingView { viewModel.onReady() }
+            case .locked:
+                LockScreenView { viewModel.onUnlockAuthenticated() }
+            case .ready:
                 MainTabView()
                     .onAppear { viewModel.onReady() }
             }
         }
+        .privacyShielded()
         .task {
-            for await completed in viewModel.isOnboardingCompleted {
-                if let completed {
-                    isOnboardingCompleted = completed.boolValue
-                }
+            for await newPhase in viewModel.phase {
+                phase = newPhase
             }
         }
         .task { await observeSession() }

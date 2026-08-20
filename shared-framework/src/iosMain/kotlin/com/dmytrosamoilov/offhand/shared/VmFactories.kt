@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.shared
 
+import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
 import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesViewModel
@@ -27,6 +28,8 @@ object SharedGraph {
     fun sessionManager(): RecordingSessionManager = KoinPlatform.getKoin().get()
 
     fun modelManager(): ModelManager = KoinPlatform.getKoin().get()
+
+    fun aiCoreDownloadStatus(): AiCoreDownloadStatus = KoinPlatform.getKoin().get()
 
     fun startModelDownload() {
         KoinPlatform.getKoin().get<ModelDownloadController>().start()

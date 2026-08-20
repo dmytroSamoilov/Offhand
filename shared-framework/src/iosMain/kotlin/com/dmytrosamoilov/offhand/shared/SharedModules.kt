@@ -73,9 +73,13 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
         IosNoteShareLabelsProvider(deps.shareLabels, deps.shareFallbackTitle)
     }
     single<ModelDownloadController> {
-        IosModelDownloadController(get(), CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        IosModelDownloadController(
+            get(),
+            get(),
+            CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        )
     }
-    factory { IosRootViewModel(get(), get()) }
+    factory { IosRootViewModel(get(), get(), get(), get(), get(), get()) }
 }
 
 class IosDefaultNoteTitleProvider(
@@ -97,11 +101,16 @@ class IosNoteShareLabelsProvider(
 
 class IosModelDownloadController(
     private val modelManager: ModelManager,
+    private val speechToText: SpeechToText,
     private val scope: CoroutineScope,
 ) : ModelDownloadController {
 
+    // Speech first, matching Android: it is the smaller download and the one the
+    // very first recording needs, and finishing it before the LLM keeps
+    // ModelState.Ready a truthful signal that everything is on disk.
     override fun start() {
         scope.launch {
+            runCatching { speechToText.prepare() }
             runCatching { modelManager.ensureModelAvailable() }
         }
     }

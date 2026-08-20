@@ -3,6 +3,7 @@ import SwiftUI
 
 struct OnboardingView: View {
     let onFinished: () -> Void
+    @Environment(\.scenePhase) private var scenePhase
     private let viewModel = AppViewModels.onboarding
     @State private var state = OnboardingUiState(
         step: .deviceCheck,
@@ -14,10 +15,15 @@ struct OnboardingView: View {
         pageCount: 0
     )
     @State private var modelState: ModelState = ModelStateNotDownloaded.shared
+    @State private var downloadPercent = 0
+    @State private var hasStartedDownload = false
 
     var body: some View {
         stepContent
             .background(Color(.systemGroupedBackground))
+            .onChange(of: scenePhase) {
+                if scenePhase == .active { viewModel.onDeviceLockRecheck() }
+            }
             .task {
                 for await newState in viewModel.uiState {
                     state = newState
@@ -29,6 +35,15 @@ struct OnboardingView: View {
                     if downloadState is ModelStateReady, state.step == .modelDownload {
                         viewModel.onDownloadContinue()
                         onFinished()
+                    }
+                }
+            }
+            .task {
+                // Covers the speech model as well as the LLM, so the bar reflects
+                // the total the download step actually promises.
+                for await status in SharedGraph.shared.aiCoreDownloadStatus().state {
+                    if let downloading = status as? AiCoreDownloadStateDownloading {
+                        downloadPercent = Int(downloading.progressPercent)
                     }
                 }
             }
@@ -139,35 +154,36 @@ struct OnboardingView: View {
     @ViewBuilder
     private var downloadProgress: some View {
         switch onEnum(of: modelState) {
-        case .downloading(let downloading):
-            VStack(spacing: 8) {
-                ProgressView(value: downloading.progress)
-                    .tint(Brand.primary)
-                Text("\(Int(downloading.progress * 100))%")
-                    .font(.caption)
-                    .monospacedDigit()
-                    .foregroundStyle(.secondary)
-            }
         case .error(let error):
             VStack(spacing: 12) {
                 Text(error.message)
                     .foregroundStyle(.red)
-                Button(String(localized: "Try again")) { startDownload() }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .tint(Brand.primary)
+                Button(String(localized: "Try again")) {
+                    hasStartedDownload = false
+                    startDownload()
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .tint(Brand.primary)
             }
         case .loading:
             ProgressView(String(localized: "Loading the model"))
-        case .ready, .downloaded:
-            ProgressView()
-        case .notDownloaded:
-            ProgressView()
-                .onAppear { startDownload() }
+        case .notDownloaded, .downloading, .downloaded, .ready:
+            VStack(spacing: 8) {
+                ProgressView(value: Double(downloadPercent), total: 100)
+                    .tint(Brand.primary)
+                Text("\(downloadPercent)%")
+                    .font(.caption)
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+            }
+            .onAppear { startDownload() }
         }
     }
 
     private func startDownload() {
+        guard !hasStartedDownload else { return }
+        hasStartedDownload = true
         SharedGraph.shared.startModelDownload()
     }
 }
