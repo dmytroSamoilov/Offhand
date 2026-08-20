@@ -260,14 +260,55 @@ class NotesViewModelTest {
         viewModel.onNoteSelected(5)
         dispatcher.scheduler.advanceUntilIdle()
 
-        viewModel.onDeleteRequested()
-        assertTrue(viewModel.uiState.value.isDeleteConfirmationVisible)
+        viewModel.onDeleteRequested(5)
+        assertEquals(5L, viewModel.uiState.value.pendingDeleteNoteId)
         viewModel.onDeleteConfirmed()
         dispatcher.scheduler.advanceUntilIdle()
 
         coVerify { deleteNote(5) }
         val state = viewModel.uiState.value
         assertNull(state.selected)
-        assertFalse(state.isDeleteConfirmationVisible)
+        assertNull(state.pendingDeleteNoteId)
+    }
+
+    @Test
+    fun `confirmed delete from the list removes note without selection`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onDeleteRequested(5)
+        assertEquals(5L, viewModel.uiState.value.pendingDeleteNoteId)
+        viewModel.onDeleteConfirmed()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { deleteNote(5) }
+        assertNull(viewModel.uiState.value.pendingDeleteNoteId)
+    }
+
+    @Test
+    fun `deleting an unselected note keeps the current selection`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onDeleteRequested(7)
+        viewModel.onDeleteConfirmed()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { deleteNote(7) }
+        assertEquals(5L, viewModel.uiState.value.selected?.id)
+    }
+
+    @Test
+    fun `dismissed delete keeps the note and hides the confirmation`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onDeleteRequested(5)
+        viewModel.onDeleteDismissed()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { deleteNote(any()) }
+        assertNull(viewModel.uiState.value.pendingDeleteNoteId)
     }
 }

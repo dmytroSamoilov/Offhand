@@ -8,7 +8,7 @@ struct NotesListView: View {
         selected: nil,
         editor: nil,
         playback: AudioPlaybackUi(isAvailable: false, isPlaying: false, progress: 0, positionText: "0:00", durationText: "0:00"),
-        isDeleteConfirmationVisible: false,
+        pendingDeleteNoteId: nil,
         isRetranscribeConfirmationVisible: false,
         isShareDialogVisible: false,
         isPresetSheetVisible: false,
@@ -31,6 +31,13 @@ struct NotesListView: View {
                                 NoteCardRow(note: note, progress: state.noteProgress[KotlinLong(value: note.id)]?.intValue)
                             }
                             .buttonStyle(.plain)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    viewModel.onDeleteRequested(id: note.id)
+                                } label: {
+                                    Label(String(localized: "Delete"), systemImage: "trash")
+                                }
+                            }
                         }
                     }
                 }
@@ -58,6 +65,14 @@ struct NotesListView: View {
         .sheet(isPresented: $isRecordSheetVisible) {
             RecordSheetView(autoStart: true)
         }
+        .confirmationDialog(
+            String(localized: "Delete this note?"),
+            isPresented: deleteBinding,
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "Delete"), role: .destructive) { viewModel.onDeleteConfirmed() }
+            Button(String(localized: "Cancel"), role: .cancel) { viewModel.onDeleteDismissed() }
+        }
         .task {
             for await newState in viewModel.uiState {
                 state = newState
@@ -69,6 +84,13 @@ struct NotesListView: View {
         Binding(
             get: { state.selected != nil },
             set: { isShown in if !isShown { viewModel.onDetailClosed() } }
+        )
+    }
+
+    private var deleteBinding: Binding<Bool> {
+        Binding(
+            get: { state.pendingDeleteNoteId != nil },
+            set: { isShown in if !isShown { viewModel.onDeleteDismissed() } }
         )
     }
 

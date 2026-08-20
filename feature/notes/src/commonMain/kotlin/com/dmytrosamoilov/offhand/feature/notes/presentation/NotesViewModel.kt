@@ -90,7 +90,7 @@ class NotesViewModel(
                 it.copy(
                     selected = note.toDetailUi(dateLabelFormatter),
                     editor = null,
-                    isDeleteConfirmationVisible = false,
+                    pendingDeleteNoteId = null,
                 )
             }
             maybeRequestReview(note)
@@ -130,7 +130,7 @@ class NotesViewModel(
             it.copy(
                 selected = null,
                 editor = null,
-                isDeleteConfirmationVisible = false,
+                pendingDeleteNoteId = null,
                 isShareDialogVisible = false,
                 isPresetSheetVisible = false,
                 pendingShare = null,
@@ -254,26 +254,26 @@ class NotesViewModel(
         onRetryTranscriptionRequested()
     }
 
-    fun onDeleteRequested() {
-        mutableUiState.update { it.copy(isDeleteConfirmationVisible = true) }
+    fun onDeleteRequested(id: Long) {
+        mutableUiState.update { it.copy(pendingDeleteNoteId = id) }
     }
 
     fun onDeleteDismissed() {
-        mutableUiState.update { it.copy(isDeleteConfirmationVisible = false) }
+        mutableUiState.update { it.copy(pendingDeleteNoteId = null) }
     }
 
     fun onDeleteConfirmed() {
-        val selected = mutableUiState.value.selected ?: return
+        val noteId = mutableUiState.value.pendingDeleteNoteId ?: return
+        mutableUiState.update { it.copy(pendingDeleteNoteId = null) }
         launchSafely {
-            audioPlayer.reset()
-            deleteNote(selected.id)
-            selectedNote = null
-            mutableUiState.update {
-                it.copy(
-                    selected = null,
-                    editor = null,
-                    isDeleteConfirmationVisible = false,
-                )
+            val isSelectedNote = selectedNote?.id == noteId
+            if (isSelectedNote) {
+                audioPlayer.reset()
+                selectedNote = null
+            }
+            deleteNote(noteId)
+            if (isSelectedNote) {
+                mutableUiState.update { it.copy(selected = null, editor = null) }
             }
         }
     }

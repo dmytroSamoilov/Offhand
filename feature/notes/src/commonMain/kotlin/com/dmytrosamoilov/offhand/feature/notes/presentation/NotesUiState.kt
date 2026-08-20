@@ -7,7 +7,7 @@ data class NotesUiState(
     val selected: NoteDetailUi? = null,
     val editor: NoteEditorUi? = null,
     val playback: AudioPlaybackUi = AudioPlaybackUi(),
-    val isDeleteConfirmationVisible: Boolean = false,
+    val pendingDeleteNoteId: Long? = null,
     val isRetranscribeConfirmationVisible: Boolean = false,
     val isShareDialogVisible: Boolean = false,
     val isPresetSheetVisible: Boolean = false,

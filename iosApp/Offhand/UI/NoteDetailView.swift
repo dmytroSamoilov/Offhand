@@ -52,7 +52,7 @@ struct NoteDetailView: View {
                         }
                     }
                     Button(role: .destructive) {
-                        viewModel.onDeleteRequested()
+                        viewModel.onDeleteRequested(id: detail.id)
                     } label: {
                         Label(String(localized: "Delete"), systemImage: "trash")
                     }
@@ -60,14 +60,6 @@ struct NoteDetailView: View {
                     Image(systemName: "ellipsis.circle")
                 }
             }
-        }
-        .confirmationDialog(
-            String(localized: "Delete this note?"),
-            isPresented: deleteBinding,
-            titleVisibility: .visible
-        ) {
-            Button(String(localized: "Delete"), role: .destructive) { viewModel.onDeleteConfirmed() }
-            Button(String(localized: "Cancel"), role: .cancel) { viewModel.onDeleteDismissed() }
         }
         .confirmationDialog(
             String(localized: "Re-transcribe this note?"),
@@ -199,13 +191,6 @@ struct NoteDetailView: View {
                 .padding()
                 .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
         }
-    }
-
-    private var deleteBinding: Binding<Bool> {
-        Binding(
-            get: { state.isDeleteConfirmationVisible },
-            set: { isShown in if !isShown { viewModel.onDeleteDismissed() } }
-        )
     }
 
     private var shareBinding: Binding<Bool> {
