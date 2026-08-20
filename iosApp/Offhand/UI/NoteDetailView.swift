@@ -14,7 +14,7 @@ struct NoteDetailView: View {
                 if detail.status == .processing {
                     processingCard
                 } else {
-                    if detail.hasAudio {
+                    if detail.hasAudio && state.playback.isAvailable {
                         playbackCard
                     }
                     if detail.status == .failed {
@@ -107,20 +107,55 @@ struct NoteDetailView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(detail.title)
                 .font(.title2.weight(.semibold))
-            Text(detail.createdAt)
+            Text(metadataLine)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+            if let metrics = detail.metrics, state.isDeveloperMode {
+                Text(
+                    String(
+                        format: String(localized: "Transcribed in %@ · Structured in %@ · %@"),
+                        metrics.transcriptionTime,
+                        metrics.structuringTime,
+                        metrics.hardwareBackend
+                    )
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
         }
+    }
+
+    private var metadataLine: String {
+        guard detail.wordCount > 0 else { return detail.createdAt }
+        let words = String(
+            format: String(localized: "%d words"),
+            Int(detail.wordCount)
+        )
+        return "\(detail.createdAt) · \(words)"
     }
 
     private var processingCard: some View {
         HStack(spacing: 12) {
             ProgressView()
-            Text(String(localized: "Preparing your note"))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(processingStage)
+                if let percent = state.noteProgress[KotlinLong(value: detail.id)]?.intValue {
+                    Text("\(percent)%")
+                        .font(.caption)
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private var processingStage: String {
+        detail.transcript.isEmpty
+            ? String(localized: "Transcribing your recording")
+            : String(localized: "Writing your overview")
     }
 
     private var failedCard: some View {

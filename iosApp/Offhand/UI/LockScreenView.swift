@@ -45,15 +45,26 @@ struct LockScreenView: View {
         context.evaluatePolicy(
             .deviceOwnerAuthentication,
             localizedReason: String(localized: "Unlock Offhand to open your notes.")
-        ) { success, _ in
+        ) { success, error in
             Task { @MainActor in
                 isAuthenticating = false
-                if success {
+                if success || isUnenforceable(error) {
                     onAuthenticated()
                 } else {
                     didFail = true
                 }
             }
+        }
+    }
+
+    // Without a passcode or usable biometry there is nothing that can ever confirm
+    // the user, so holding the lock would strand them outside their own notes.
+    private func isUnenforceable(_ error: Error?) -> Bool {
+        switch (error as? LAError)?.code {
+        case .passcodeNotSet, .biometryNotAvailable, .biometryNotEnrolled:
+            return true
+        default:
+            return false
         }
     }
 }

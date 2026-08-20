@@ -43,6 +43,11 @@ struct NotesListView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .safeAreaInset(edge: .top) {
+                if let preparation = state.modelPreparation {
+                    ModelPreparationBanner(percent: Int(preparation.progressPercent))
+                }
+            }
             .navigationTitle(String(localized: "Notes"))
             .overlay(alignment: .center) {
                 if state.sections.isEmpty {
@@ -116,6 +121,31 @@ struct NotesListView: View {
         case .yesterday: return String(localized: "Yesterday")
         case .date(let date): return date.text
         }
+    }
+}
+
+private struct ModelPreparationBanner: View {
+    let percent: Int
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ProgressView()
+            VStack(alignment: .leading, spacing: 2) {
+                Text(String(localized: "Preparing on-device AI"))
+                    .font(.subheadline.weight(.semibold))
+                Text(String(localized: "New notes start processing once this finishes."))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Text("\(percent)%")
+                .font(.subheadline.weight(.medium))
+                .monospacedDigit()
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(.bar)
     }
 }
 
