@@ -21,11 +21,15 @@ struct RecordSheetView: View {
     )
     @State private var isPermissionDenied = false
     @State private var isDiscardConfirmationVisible = false
+    // savedNoteId is only briefly non-nil before the session resets, so latch it
+    // the way the Android sheet does rather than reading it live.
+    @State private var hasSavedNote = false
+    @State private var wasSessionActive = false
 
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
-            if state.savedNoteId != nil {
+            if hasSavedNote {
                 savedContent
             } else {
                 switch state.phase {
@@ -52,6 +56,19 @@ struct RecordSheetView: View {
             }
         }
         .onDisappear { viewModel.onSheetClosed() }
+        .onChange(of: state.savedNoteId) {
+            if state.savedNoteId != nil { hasSavedNote = true }
+        }
+        .onChange(of: state.phase) {
+            switch state.phase {
+            case .recording, .finishingTranscription:
+                wasSessionActive = true
+            case .idle where wasSessionActive && !hasSavedNote:
+                dismiss()
+            default:
+                break
+            }
+        }
         .confirmationDialog(
             String(localized: "Discard this recording?"),
             isPresented: $isDiscardConfirmationVisible,
