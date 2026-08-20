@@ -9,6 +9,8 @@ struct RootView: View {
     @State private var finishCoordinator = NoteFinishCoordinator()
     @State private var activeNoteId: Int64?
     @State private var phase: IosRootPhase = .loading
+    @State private var selectedTab = 0
+    @ObservedObject private var notifications = NoteNotifications.shared
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -23,7 +25,7 @@ struct RootView: View {
                     viewModel.onUnlockAuthenticated()
                 }
             case .ready:
-                MainTabView()
+                MainTabView(selectedTab: $selectedTab)
                     .onAppear { viewModel.onReady() }
             }
         }
@@ -41,6 +43,13 @@ struct RootView: View {
             finishCoordinator.onLegacyExpired = { [activityController] in
                 activityController.suspendedWithPendingWork()
             }
+            notifications.register()
+        }
+        .onChange(of: notifications.noteIdToOpen) {
+            guard let noteId = notifications.noteIdToOpen else { return }
+            notifications.noteIdToOpen = nil
+            selectedTab = 0
+            AppViewModels.notes.onNoteSelected(id: noteId)
         }
         .onReceive(
             NotificationCenter.default.publisher(
@@ -55,7 +64,10 @@ struct RootView: View {
                 handleBackgrounded()
             case .active:
                 finishCoordinator.appBecameActive()
-                UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+                // Only the come-back reminder is stale on activation; note-ready
+                // notifications must survive it.
+                UNUserNotificationCenter.current()
+                    .removePendingNotificationRequests(withIdentifiers: ["note-pending"])
                 viewModel.onReady()
             default:
                 break
@@ -124,8 +136,10 @@ struct RootView: View {
             switch onEnum(of: event) {
             case .completed(let completed):
                 eventNoteId = completed.noteId
+                notifications.noteReady(noteId: completed.noteId)
             case .failed(let failed):
                 eventNoteId = failed.noteId
+                notifications.noteFailed(noteId: failed.noteId)
             }
             guard eventNoteId == activeNoteId else { continue }
             switch onEnum(of: event) {
@@ -166,12 +180,16 @@ struct RootView: View {
 }
 
 struct MainTabView: View {
+    @Binding var selectedTab: Int
+
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             NotesListView()
                 .tabItem { Label(String(localized: "Notes"), systemImage: "list.bullet") }
+                .tag(0)
             SettingsView()
                 .tabItem { Label(String(localized: "Settings"), systemImage: "gearshape") }
+                .tag(1)
         }
         .tint(Brand.primary)
     }
