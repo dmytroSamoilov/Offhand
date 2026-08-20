@@ -11,6 +11,7 @@ struct NoteDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 header
+                trustBadges
                 if detail.status == .processing {
                     processingCard
                 } else {
@@ -133,6 +134,15 @@ struct NoteDetailView: View {
                 .foregroundStyle(.secondary)
             }
         }
+    }
+
+    private var trustBadges: some View {
+        Label(String(localized: "Encrypted"), systemImage: "lock.fill")
+            .font(.caption.weight(.medium))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(Brand.primaryContainer, in: Capsule())
+            .foregroundStyle(Brand.onPrimaryContainer)
     }
 
     private var metadataLine: String {

@@ -97,6 +97,9 @@ struct NotesListView: View {
                             } label: {
                                 Label(String(localized: "Delete"), systemImage: "trash")
                             }
+                            // The tab bar's brand tint would otherwise repaint a
+                            // destructive action in blue.
+                            .tint(.red)
                         }
                     }
                 }

@@ -84,15 +84,42 @@ private struct TrailingStatus: View {
     }
 }
 
+private struct RecordingControls: View {
+    let phase: NoteActivityAttributes.ContentState.Phase
+
+    var body: some View {
+        HStack(spacing: 10) {
+            if phase == .paused {
+                Button(intent: ResumeRecordingIntent()) {
+                    Label(String(localized: "Resume"), systemImage: "play.fill")
+                }
+            } else {
+                Button(intent: PauseRecordingIntent()) {
+                    Label(String(localized: "Pause"), systemImage: "pause.fill")
+                }
+            }
+            Button(intent: StopRecordingIntent()) {
+                Label(String(localized: "Stop"), systemImage: "stop.fill")
+            }
+        }
+        .buttonStyle(.bordered)
+        .tint(.white)
+        .font(.caption)
+    }
+}
+
 private struct ExpandedBottom: View {
     let state: NoteActivityAttributes.ContentState
 
     var body: some View {
         switch state.phase {
         case .recording, .paused:
-            Text(String(localized: "Recording a note"))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 8) {
+                Text(String(localized: "Recording a note"))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                RecordingControls(phase: state.phase)
+            }
         case .processing:
             VStack(alignment: .leading, spacing: 6) {
                 Text(String(localized: "Preparing your note"))
@@ -114,6 +141,16 @@ private struct LockScreenActivityView: View {
     let state: NoteActivityAttributes.ContentState
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            summaryRow
+            if state.phase == .recording || state.phase == .paused {
+                RecordingControls(phase: state.phase)
+            }
+        }
+        .foregroundStyle(.white)
+    }
+
+    private var summaryRow: some View {
         HStack(spacing: 12) {
             PhaseGlyph(state: state)
                 .font(.title2)

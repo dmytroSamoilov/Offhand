@@ -194,6 +194,14 @@ struct RecordSheetView: View {
                 isDiscardConfirmationVisible = true
             }
             .font(.subheadline)
+            chunkPills
+        }
+    }
+
+    @ViewBuilder
+    private var chunkPills: some View {
+        if state.isDeveloperMode && !state.chunks.isEmpty {
+            ChunkPills(chunks: state.chunks)
         }
     }
 
@@ -207,6 +215,7 @@ struct RecordSheetView: View {
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+            chunkPills
         }
     }
 
@@ -232,6 +241,44 @@ struct RecordSheetView: View {
                 guard granted else { return }
                 viewModel.onStartRecording()
             }
+        }
+    }
+}
+
+private struct ChunkPills: View {
+    let chunks: [ChunkUi]
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach(chunks, id: \.id) { chunk in
+                    Text("#\(chunk.id)")
+                        .font(.caption2.monospacedDigit())
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(background(for: chunk.state), in: Capsule())
+                        .foregroundStyle(foreground(for: chunk.state))
+                }
+            }
+            .padding(.horizontal, 2)
+        }
+    }
+
+    private func background(for state: ChunkStateUi) -> Color {
+        switch state {
+        case .done: return Brand.tealContainer
+        case .failed: return Color(.systemRed).opacity(0.18)
+        case .transcribing: return Brand.primaryContainer
+        default: return Color(.secondarySystemFill)
+        }
+    }
+
+    private func foreground(for state: ChunkStateUi) -> Color {
+        switch state {
+        case .done: return Brand.teal
+        case .failed: return Color(.systemRed)
+        case .transcribing: return Brand.onPrimaryContainer
+        default: return Color.secondary
         }
     }
 }

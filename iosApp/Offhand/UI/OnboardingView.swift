@@ -63,7 +63,9 @@ struct OnboardingView: View {
                 title: String(localized: "Private by design"),
                 message: String(localized: "Recordings are transcribed and organized entirely on this iPhone. Nothing ever leaves your device."),
                 buttonTitle: String(localized: "Continue"),
-                action: { viewModel.onPrivacyContinue() }
+                action: { viewModel.onPrivacyContinue() },
+                currentPage: Int(state.currentPage),
+                pageCount: Int(state.pageCount)
             )
         case .noteStyle:
             StepScaffold(
@@ -71,7 +73,9 @@ struct OnboardingView: View {
                 title: String(localized: "How should notes be organized?"),
                 message: String(localized: "Pick a default style. You can change it for any note later."),
                 buttonTitle: String(localized: "Continue"),
-                action: { viewModel.onNoteStyleContinue() }
+                action: { viewModel.onNoteStyleContinue() },
+                currentPage: Int(state.currentPage),
+                pageCount: Int(state.pageCount)
             ) {
                 NotePresetPicker(selected: state.notePreset) { preset in
                     viewModel.onNoteStyleSelected(preset: preset)
@@ -83,7 +87,9 @@ struct OnboardingView: View {
                 title: String(localized: "Add a device lock"),
                 message: String(localized: "Your notes are protected by this device's lock. Set a passcode in Settings for the strongest protection."),
                 buttonTitle: String(localized: "Continue"),
-                action: { viewModel.onDeviceLockSkipped() }
+                action: { viewModel.onDeviceLockSkipped() },
+                currentPage: Int(state.currentPage),
+                pageCount: Int(state.pageCount)
             )
         case .telemetryConsent:
             StepScaffold(
@@ -91,7 +97,9 @@ struct OnboardingView: View {
                 title: String(localized: "Share stability reports?"),
                 message: String(localized: "Anonymous crash and stability data only — never your notes, audio, or any personal data."),
                 buttonTitle: String(localized: "Continue"),
-                action: { viewModel.onConsentContinue() }
+                action: { viewModel.onConsentContinue() },
+                currentPage: Int(state.currentPage),
+                pageCount: Int(state.pageCount)
             ) {
                 Toggle(String(localized: "Share stability reports"), isOn: Binding(
                     get: { state.isTelemetryEnabled },
@@ -145,7 +153,9 @@ struct OnboardingView: View {
         StepScaffold(
             icon: "arrow.down.circle.fill",
             title: String(localized: "Downloading the AI model"),
-            message: String(format: String(localized: "One-time download of about %@ GB. Keep Offhand open on Wi-Fi."), state.downloadSizeGb)
+            message: String(format: String(localized: "One-time download of about %@ GB. Keep Offhand open on Wi-Fi."), state.downloadSizeGb),
+            currentPage: Int(state.currentPage),
+            pageCount: Int(state.pageCount)
         ) {
             downloadProgress
         }
@@ -195,6 +205,8 @@ private struct StepScaffold<Content: View>: View {
     let message: String
     var buttonTitle: String?
     var action: (() -> Void)?
+    var currentPage: Int = 0
+    var pageCount: Int = 0
     @ViewBuilder var content: () -> Content
 
     init(
@@ -204,6 +216,8 @@ private struct StepScaffold<Content: View>: View {
         message: String,
         buttonTitle: String? = nil,
         action: (() -> Void)? = nil,
+        currentPage: Int = 0,
+        pageCount: Int = 0,
         @ViewBuilder content: @escaping () -> Content = { EmptyView() }
     ) {
         self.icon = icon
@@ -212,6 +226,8 @@ private struct StepScaffold<Content: View>: View {
         self.message = message
         self.buttonTitle = buttonTitle
         self.action = action
+        self.currentPage = currentPage
+        self.pageCount = pageCount
         self.content = content
     }
 
@@ -235,18 +251,45 @@ private struct StepScaffold<Content: View>: View {
         }
         .padding(.horizontal, 24)
         .safeAreaInset(edge: .bottom) {
-            if let buttonTitle, let action {
-                Button(action: action) {
-                    Text(buttonTitle)
-                        .frame(maxWidth: .infinity)
+            VStack(spacing: 16) {
+                if pageCount > 1 {
+                    PageDots(currentPage: currentPage, pageCount: pageCount)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .tint(Brand.primary)
-                .padding(.horizontal, 24)
-                .padding(.bottom, 8)
+                if let buttonTitle, let action {
+                    Button(action: action) {
+                        Text(buttonTitle)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .tint(Brand.primary)
+                }
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 8)
+        }
+    }
+}
+
+private struct PageDots: View {
+    let currentPage: Int
+    let pageCount: Int
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(0..<pageCount, id: \.self) { index in
+                Circle()
+                    .fill(index == currentPage ? Brand.primary : Color(.tertiaryLabel))
+                    .frame(width: 7, height: 7)
             }
         }
+        .accessibilityLabel(
+            String(
+                format: String(localized: "Step %d of %d"),
+                currentPage + 1,
+                pageCount
+            )
+        )
     }
 }
 
