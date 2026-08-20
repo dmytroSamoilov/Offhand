@@ -2,6 +2,7 @@ import LocalAuthentication
 import SwiftUI
 
 struct LockScreenView: View {
+    var skipsAuthentication = false
     let onAuthenticated: () -> Void
 
     @State private var isAuthenticating = false
@@ -33,7 +34,14 @@ struct LockScreenView: View {
         .padding(.horizontal, 24)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemGroupedBackground))
-        .task { authenticate() }
+        .task {
+            if skipsAuthentication {
+                DevFlags.warnIfWeakened()
+                onAuthenticated()
+            } else {
+                authenticate()
+            }
+        }
     }
 
     private func authenticate() {

@@ -19,7 +19,9 @@ struct RootView: View {
             case .onboarding:
                 OnboardingView { viewModel.onReady() }
             case .locked:
-                LockScreenView { viewModel.onUnlockAuthenticated() }
+                LockScreenView(skipsAuthentication: DevFlags.skipsAppLock) {
+                    viewModel.onUnlockAuthenticated()
+                }
             case .ready:
                 MainTabView()
                     .onAppear { viewModel.onReady() }

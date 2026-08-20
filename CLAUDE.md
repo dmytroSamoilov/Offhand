@@ -28,6 +28,7 @@ POC decisions and roadmap: .claude/POC/ (read before implementing features).
 - Shared framework (rebuild after any commonMain/iosMain change): `./gradlew :shared-framework:assembleOffhandSharedReleaseXCFramework`
 - Build: `cd iosApp && xcodebuild build -project Offhand.xcodeproj -scheme Offhand-dev -destination 'generic/platform=iOS Simulator' ARCHS=arm64`
 - Only arm64 slices are built for the simulator, so pass `ARCHS=arm64` (an unrestricted `generic/platform=iOS Simulator` build fails on the x86_64 slice).
+- `DEV_UNLOCK` (temporary): set only on the `Debug-dev` configuration, it skips the app lock so the Simulator — which reports a passcode it does not have — stays testable. Read via `DevFlags.skipsAppLock`; never add it to another configuration. Remove the flag once the lock is verified on a real device.
 
 ## Architecture (summary)
 - Three layers: domain/ → data/ → presentation/

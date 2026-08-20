@@ -11,10 +11,15 @@ configs:
   Release-prod: release
 settings:
   configs:
-    Debug-dev: &dev
+    # DEV_UNLOCK is deliberately confined to this one configuration: the dev
+    # flavor built for debug. No release build and no prod build compiles it.
+    Debug-dev:
       APP_ID_SUFFIX: .dev
       APP_DISPLAY_NAME: Offhand Dev
-    Release-dev: *dev
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG DEV_UNLOCK
+    Release-dev:
+      APP_ID_SUFFIX: .dev
+      APP_DISPLAY_NAME: Offhand Dev
     Debug-prod: &prod
       APP_ID_SUFFIX: ""
       APP_DISPLAY_NAME: Offhand
