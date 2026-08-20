@@ -25,7 +25,7 @@ POC decisions and roadmap: .claude/POC/ (read before implementing features).
 ### iOS
 - Flavors mirror Android via Xcode configurations: schemes `Offhand-dev` (com.dmytrosamoilov.offhand.dev, "Offhand Dev") and `Offhand-prod` (com.dmytrosamoilov.offhand, "Offhand"). Day-to-day work uses `Offhand-dev`.
 - Configurations: `Debug-dev`, `Release-dev`, `Debug-prod`, `Release-prod`. The flavor is driven by `APP_ID_SUFFIX` / `APP_DISPLAY_NAME` in `iosApp/project.yml`.
-- `iosApp/Offhand.xcodeproj` is generated and gitignored — edit `iosApp/project.yml`, then run `xcodegen generate` in `iosApp/`.
+- `iosApp/Offhand.xcodeproj` is generated and gitignored — edit `iosApp/project.yml`, then run `xcodegen generate` in `iosApp/`. Close the project in Xcode first: regenerating under an open Xcode leaves it holding a stale project, and its saved scheme selection in `xcuserdata` can point at a scheme that no longer exists. If Xcode misbehaves after a regenerate, quit it and run `rm -rf Offhand.xcodeproj/xcuserdata Offhand.xcodeproj/project.xcworkspace/xcuserdata` — that is editor state only, and `Package.resolved` lives in `xcshareddata` so SPM pins survive.
 - Shared framework (rebuild after any commonMain/iosMain change): `./gradlew :shared-framework:assembleOffhandSharedReleaseXCFramework`
 - Build: `cd iosApp && xcodebuild build -project Offhand.xcodeproj -scheme Offhand-dev -destination 'generic/platform=iOS Simulator' ARCHS=arm64`
 - Only arm64 slices are built for the simulator, so pass `ARCHS=arm64` (an unrestricted `generic/platform=iOS Simulator` build fails on the x86_64 slice).
