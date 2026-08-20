@@ -17,20 +17,26 @@ settings:
       APP_ID_SUFFIX: .dev
       APP_DISPLAY_NAME: Offhand Dev
       APP_ICON_NAME: AppIcon-dev
+      FIREBASE_CONFIG_DIR: dev
       SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG DEV_UNLOCK
     Release-dev:
       APP_ID_SUFFIX: .dev
       APP_DISPLAY_NAME: Offhand Dev
       APP_ICON_NAME: AppIcon-dev
+      FIREBASE_CONFIG_DIR: dev
     Debug-prod: &prod
       APP_ID_SUFFIX: ""
       APP_DISPLAY_NAME: Offhand
       APP_ICON_NAME: AppIcon
+      FIREBASE_CONFIG_DIR: prod
     Release-prod: *prod
 packages:
   LiteRTLM:
     url: https://github.com/google-ai-edge/LiteRT-LM
     exactVersion: 0.16.0
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: 12.18.0
 targets:
   Offhand:
     type: application
@@ -38,9 +44,26 @@ targets:
     sources:
       - Offhand
       - Shared
+    postCompileScripts:
+      # The config is gitignored, so a fresh clone has none. Warn and carry on:
+      # CrashReporting treats an unconfigured Firebase as "reporting off",
+      # matching MissingGoogleServicesStrategy.WARN on Android.
+      - name: Copy Firebase config
+        script: |
+          set -e
+          SOURCE="${SRCROOT}/Firebase/${FIREBASE_CONFIG_DIR}/GoogleService-Info.plist"
+          if [ ! -f "$SOURCE" ]; then
+            echo "warning: no GoogleService-Info.plist for '${FIREBASE_CONFIG_DIR}' — crash reporting stays off."
+            exit 0
+          fi
+          DESTINATION="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"
+          mkdir -p "$DESTINATION"
+          cp "$SOURCE" "$DESTINATION/GoogleService-Info.plist"
     dependencies:
       - package: LiteRTLM
         product: LiteRTLM
+      - package: Firebase
+        product: FirebaseCrashlytics
       - framework: Frameworks/sherpa-onnx.xcframework
         embed: false
       - framework: Frameworks/onnxruntime.xcframework
@@ -79,6 +102,9 @@ targets:
         NSSupportsLiveActivities: true
         NSMicrophoneUsageDescription: "Offhand records your voice notes. Audio never leaves this device."
         ITSAppUsesNonExemptEncryption: false
+        # Off until the stored consent says otherwise, so nothing is collected
+        # before the user has answered.
+        FirebaseCrashlyticsCollectionEnabled: false
   OffhandWidgets:
     type: app-extension
     platform: iOS

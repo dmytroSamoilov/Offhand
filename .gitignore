@@ -29,3 +29,6 @@ google-services.json
 iosApp/Offhand.xcodeproj/
 iosApp/Frameworks/
 iosApp/DerivedData/
+
+# Firebase client configs (per-flavor, obtained from the Firebase console)
+GoogleService-Info.plist
