@@ -53,6 +53,11 @@ final class MicAudioSource: NSObject, IosAudioSource {
         onInputChanged: @escaping (String?) -> Void,
         onFailure: @escaping (String) -> Void
     ) -> Bool {
+        // stop() runs when the previous recordStream collection closes, which is
+        // asynchronous, so a stop/start in quick succession can arrive here with
+        // the old capture still live. Starting on top of it would install a
+        // second tap on bus 0 and double-register the session observers.
+        if isCapturing { stopOnMainThread() }
         frameSink = onFrame
         inputNameSink = onInputChanged
         failureSink = onFailure
@@ -102,6 +107,10 @@ final class MicAudioSource: NSObject, IosAudioSource {
     private func installTap() -> Bool {
         guard let frameSink else { return false }
         let inputNode = audioEngine.inputNode
+        // installTap raises an Objective-C exception if bus 0 already carries a
+        // tap, and Swift cannot catch that — it aborts the process. Removing
+        // first is the only way to make installing safe.
+        inputNode.removeTap(onBus: 0)
         let inputFormat = inputNode.outputFormat(forBus: 0)
         // Immediately after a route change the input node can report an unusable
         // format; building a converter from it would trap.
