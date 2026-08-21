@@ -39,7 +39,7 @@ class IosRootViewModel(
     ) { preferences, lockState ->
         when {
             !preferences.onboardingCompleted -> IosRootPhase.ONBOARDING
-            lockState == AppLockState.LOCKED -> IosRootPhase.LOCKED
+            preferences.appLockEnabled && lockState == AppLockState.LOCKED -> IosRootPhase.LOCKED
             else -> IosRootPhase.READY
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, IosRootPhase.LOADING)

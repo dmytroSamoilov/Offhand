@@ -8,6 +8,7 @@ import com.dmytrosamoilov.offhand.core.device.DeviceCapabilityChecker
 import com.dmytrosamoilov.offhand.core.device.isLocalLlmCapable
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.CompleteOnboardingUseCase
+import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetNotePresetUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetTelemetryConsentUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,7 @@ class OnboardingViewModel(
     private val deviceCapabilityChecker: DeviceCapabilityChecker,
     private val modelManager: ModelManager,
     private val appLockManager: AppLockManager,
+    private val setAppLockEnabled: SetAppLockEnabledUseCase,
     private val setTelemetryConsent: SetTelemetryConsentUseCase,
     private val setNotePreset: SetNotePresetUseCase,
     private val completeOnboarding: CompleteOnboardingUseCase,
@@ -49,14 +51,25 @@ class OnboardingViewModel(
         }
     }
 
-    fun onDeviceLockSkipped() {
-        moveToNextPage()
+    fun onAppLockToggled(enabled: Boolean) {
+        mutableUiState.update { it.copy(isAppLockEnabled = enabled) }
     }
 
+    fun onDeviceLockContinue() {
+        launchSafely {
+            // A device with no passcode has nothing to authenticate against, so
+            // the answer is no regardless of how the toggle was left.
+            val current = uiState.value
+            setAppLockEnabled(current.isDeviceSecure && current.isAppLockEnabled)
+            moveToNextPage()
+        }
+    }
+
+    // The user may leave for system settings to add a passcode; when they come
+    // back the step turns into the opt-in rather than the set-a-passcode nudge.
     fun onDeviceLockRecheck() {
         if (uiState.value.step != OnboardingStep.DEVICE_LOCK) return
-        if (!appLockManager.isDeviceSecure) return
-        moveToNextPage()
+        mutableUiState.update { it.copy(isDeviceSecure = appLockManager.isDeviceSecure) }
     }
 
     fun onTelemetryToggled(granted: Boolean) {
@@ -83,13 +96,13 @@ class OnboardingViewModel(
         mutableUiState.update { it.copy(step = next, currentPage = nextIndex) }
     }
 
-    private fun buildPages(): List<OnboardingStep> = buildList {
-        add(OnboardingStep.PRIVACY)
-        add(OnboardingStep.NOTE_STYLE)
-        if (!appLockManager.isDeviceSecure) add(OnboardingStep.DEVICE_LOCK)
-        add(OnboardingStep.TELEMETRY_CONSENT)
-        add(OnboardingStep.MODEL_DOWNLOAD)
-    }
+    private fun buildPages(): List<OnboardingStep> = listOf(
+        OnboardingStep.PRIVACY,
+        OnboardingStep.NOTE_STYLE,
+        OnboardingStep.DEVICE_LOCK,
+        OnboardingStep.TELEMETRY_CONSENT,
+        OnboardingStep.MODEL_DOWNLOAD,
+    )
 
     private fun evaluateDevice() {
         val capability = deviceCapabilityChecker.snapshot()
@@ -100,6 +113,7 @@ class OnboardingViewModel(
                     step = OnboardingStep.PRIVACY,
                     currentPage = 0,
                     pageCount = pages.size,
+                    isDeviceSecure = appLockManager.isDeviceSecure,
                     downloadSizeGb = formatDownloadSizeGb(
                         modelManager.model.sizeInBytes + modelManager.speechModelSizeInBytes,
                     ),

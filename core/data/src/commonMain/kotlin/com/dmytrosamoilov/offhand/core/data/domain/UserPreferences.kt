@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 
 data class UserPreferences(
     val onboardingCompleted: Boolean,
+    val appLockEnabled: Boolean,
     val telemetryConsent: Boolean,
     val dynamicColor: Boolean,
     val developerOptions: Boolean,
@@ -23,6 +24,8 @@ interface UserPreferencesRepository {
     val preferences: Flow<UserPreferences>
 
     suspend fun setOnboardingCompleted(completed: Boolean)
+
+    suspend fun setAppLockEnabled(enabled: Boolean)
 
     suspend fun setTelemetryConsent(granted: Boolean)
 

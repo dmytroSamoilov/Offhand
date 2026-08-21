@@ -19,6 +19,10 @@
     <string name="onboarding_lock_body">Your notes are encrypted with a key stored in this phone\'s secure hardware. This phone has no screen lock, so anyone who picks it up can open Offhand. Set up a PIN, pattern, or fingerprint to keep your notes private.</string>
     <string name="onboarding_lock_setup">Set up screen lock</string>
     <string name="onboarding_lock_skip">Continue without a lock</string>
+    <string name="onboarding_lock_enable_title">Lock Offhand?</string>
+    <string name="onboarding_lock_enable_body">Offhand can ask for your fingerprint, face, or screen lock every time it opens, so your notes stay private even if someone else is holding an unlocked phone.</string>
+    <string name="onboarding_lock_enable_label">Require unlock to open Offhand</string>
+    <string name="onboarding_lock_enable_description">You can change this any time in Settings.</string>
 
     <string name="onboarding_download_title">Set up your private AI</string>
     <string name="onboarding_download_body">Offhand transcribes and summarizes voice notes with AI that runs entirely on your phone. To get started, it needs a one-time download of its AI models.</string>

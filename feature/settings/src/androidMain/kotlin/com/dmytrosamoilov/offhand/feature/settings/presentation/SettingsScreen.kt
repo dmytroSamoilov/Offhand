@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
@@ -44,6 +45,11 @@ fun SettingsScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
+    LifecycleResumeEffect(Unit) {
+        viewModel.onScreenShown()
+        onPauseOrDispose { }
+    }
+
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
         Scaffold(
             topBar = { AppTopBar(title = stringResource(R.string.settings_title)) },
@@ -60,6 +66,11 @@ fun SettingsScreen(
                 NoteStyleSection(
                     selected = state.notePreset,
                     onSelected = viewModel::onNotePresetSelected,
+                )
+                SecuritySection(
+                    isAppLockEnabled = state.isAppLockEnabled,
+                    isDeviceSecure = state.isDeviceSecure,
+                    onAppLockChanged = viewModel::onAppLockChanged,
                 )
                 AppearanceSection(
                     isDynamicColorEnabled = state.isDynamicColorEnabled,
@@ -91,6 +102,27 @@ private fun NoteStyleSection(
             text = stringResource(R.string.settings_note_style_note),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun SecuritySection(
+    isAppLockEnabled: Boolean,
+    isDeviceSecure: Boolean,
+    onAppLockChanged: (Boolean) -> Unit,
+) {
+    SettingsCard(title = stringResource(R.string.settings_security_title)) {
+        SwitchRow(
+            label = stringResource(R.string.settings_app_lock_label),
+            description = if (isDeviceSecure) {
+                stringResource(R.string.settings_app_lock_description)
+            } else {
+                stringResource(R.string.settings_app_lock_unavailable)
+            },
+            checked = isAppLockEnabled && isDeviceSecure,
+            onCheckedChange = onAppLockChanged,
+            enabled = isDeviceSecure,
         )
     }
 }

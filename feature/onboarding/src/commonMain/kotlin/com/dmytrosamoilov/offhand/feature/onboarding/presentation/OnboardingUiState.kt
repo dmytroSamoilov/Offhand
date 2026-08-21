@@ -7,6 +7,8 @@ data class OnboardingUiState(
     val deviceSpecs: DeviceSpecsUi? = null,
     val downloadSizeGb: String = "",
     val notePreset: NotePreset = NotePreset.DEFAULT,
+    val isDeviceSecure: Boolean = false,
+    val isAppLockEnabled: Boolean = true,
     val isTelemetryEnabled: Boolean = true,
     val currentPage: Int = 0,
     val pageCount: Int = 0,

@@ -30,6 +30,10 @@
     <string name="settings_note_style_title">Note style</string>
     <string name="settings_note_style_note">Applies to new recordings. You can restyle an existing note from the note screen.</string>
 
+    <string name="settings_security_title">Security</string>
+    <string name="settings_app_lock_label">Require unlock to open Offhand</string>
+    <string name="settings_app_lock_description">Ask for your fingerprint, face, or screen lock every time Offhand opens.</string>
+    <string name="settings_app_lock_unavailable">Set up a screen lock on this phone to use this.</string>
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_dynamic_color_label">Wallpaper colors</string>
     <string name="settings_dynamic_color_description">Color the app from your wallpaper (Material You) instead of the built-in palette.</string>

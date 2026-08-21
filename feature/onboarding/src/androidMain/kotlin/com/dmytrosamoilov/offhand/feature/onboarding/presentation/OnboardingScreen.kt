@@ -90,12 +90,13 @@ fun OnboardingScreen(
             state = state,
             onNoteStyleSelected = viewModel::onNoteStyleSelected,
             onDeviceLockSetup = { openSecuritySettings(context) },
+            onAppLockToggled = viewModel::onAppLockToggled,
             onTelemetryToggled = viewModel::onTelemetryToggled,
             onContinue = { step ->
                 when (step) {
                     OnboardingStep.PRIVACY -> viewModel.onPrivacyContinue()
                     OnboardingStep.NOTE_STYLE -> viewModel.onNoteStyleContinue()
-                    OnboardingStep.DEVICE_LOCK -> viewModel.onDeviceLockSkipped()
+                    OnboardingStep.DEVICE_LOCK -> viewModel.onDeviceLockContinue()
                     OnboardingStep.TELEMETRY_CONSENT -> viewModel.onConsentContinue()
                     OnboardingStep.MODEL_DOWNLOAD ->
                         if (needsNotificationPermission(context)) {
@@ -115,6 +116,7 @@ private fun OnboardingContent(
     state: OnboardingUiState,
     onNoteStyleSelected: (NotePreset) -> Unit,
     onDeviceLockSetup: () -> Unit,
+    onAppLockToggled: (Boolean) -> Unit,
     onTelemetryToggled: (Boolean) -> Unit,
     onContinue: (OnboardingStep) -> Unit,
 ) {
@@ -127,6 +129,7 @@ private fun OnboardingContent(
             state = state,
             onNoteStyleSelected = onNoteStyleSelected,
             onDeviceLockSetup = onDeviceLockSetup,
+            onAppLockToggled = onAppLockToggled,
             onTelemetryToggled = onTelemetryToggled,
             onContinue = onContinue,
         )
@@ -152,6 +155,7 @@ private fun WizardPage(
     state: OnboardingUiState,
     onNoteStyleSelected: (NotePreset) -> Unit,
     onDeviceLockSetup: () -> Unit,
+    onAppLockToggled: (Boolean) -> Unit,
     onTelemetryToggled: (Boolean) -> Unit,
     onContinue: (OnboardingStep) -> Unit,
 ) {
@@ -179,6 +183,7 @@ private fun WizardPage(
                     state = state,
                     onNoteStyleSelected = onNoteStyleSelected,
                     onDeviceLockSetup = onDeviceLockSetup,
+                    onAppLockToggled = onAppLockToggled,
                     onTelemetryToggled = onTelemetryToggled,
                 )
             }
@@ -187,7 +192,7 @@ private fun WizardPage(
         PageIndicator(currentPage = state.currentPage, pageCount = state.pageCount)
         Spacer(modifier = Modifier.height(20.dp))
         PrimaryStepButton(
-            text = stringResource(state.step.continueLabelRes()),
+            text = stringResource(state.continueLabelRes()),
             onClick = { onContinue(state.step) },
         )
     }
@@ -198,6 +203,7 @@ private fun WizardStepContent(
     state: OnboardingUiState,
     onNoteStyleSelected: (NotePreset) -> Unit,
     onDeviceLockSetup: () -> Unit,
+    onAppLockToggled: (Boolean) -> Unit,
     onTelemetryToggled: (Boolean) -> Unit,
 ) {
     when (state.step) {
@@ -206,7 +212,14 @@ private fun WizardStepContent(
             selected = state.notePreset.toUi(),
             onSelected = { option -> onNoteStyleSelected(option.toDomain()) },
         )
-        OnboardingStep.DEVICE_LOCK -> DeviceLockStep(onSetup = onDeviceLockSetup)
+        OnboardingStep.DEVICE_LOCK -> if (state.isDeviceSecure) {
+            AppLockStep(
+                isAppLockEnabled = state.isAppLockEnabled,
+                onAppLockToggled = onAppLockToggled,
+            )
+        } else {
+            DeviceLockStep(onSetup = onDeviceLockSetup)
+        }
         OnboardingStep.TELEMETRY_CONSENT -> TelemetryConsentStep(
             isTelemetryEnabled = state.isTelemetryEnabled,
             onTelemetryToggled = onTelemetryToggled,
@@ -218,8 +231,8 @@ private fun WizardStepContent(
     }
 }
 
-private fun OnboardingStep.continueLabelRes(): Int =
-    if (this == OnboardingStep.DEVICE_LOCK) {
+private fun OnboardingUiState.continueLabelRes(): Int =
+    if (step == OnboardingStep.DEVICE_LOCK && !isDeviceSecure) {
         R.string.onboarding_lock_skip
     } else {
         R.string.onboarding_continue
@@ -312,6 +325,55 @@ private fun DeviceLockStep(onSetup: () -> Unit) {
     Button(onClick = onSetup) {
         Text(text = stringResource(R.string.onboarding_lock_setup))
     }
+}
+
+@Composable
+private fun AppLockStep(
+    isAppLockEnabled: Boolean,
+    onAppLockToggled: (Boolean) -> Unit,
+) {
+    Icon(
+        imageVector = Icons.Filled.Lock,
+        contentDescription = null,
+        modifier = Modifier.size(64.dp),
+        tint = MaterialTheme.colorScheme.primary,
+    )
+    Spacer(modifier = Modifier.height(28.dp))
+    StepTitle(text = stringResource(R.string.onboarding_lock_enable_title))
+    StepBody(text = stringResource(R.string.onboarding_lock_enable_body))
+    Spacer(modifier = Modifier.height(28.dp))
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(
+                value = isAppLockEnabled,
+                role = Role.Switch,
+                onValueChange = onAppLockToggled,
+            ),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.onboarding_lock_enable_label),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f),
+            )
+            Switch(checked = isAppLockEnabled, onCheckedChange = null)
+        }
+    }
+    Spacer(modifier = Modifier.height(16.dp))
+    Text(
+        text = stringResource(R.string.onboarding_lock_enable_description),
+        style = MaterialTheme.typography.bodyMedium,
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 @Composable
@@ -507,6 +569,7 @@ private fun OnboardingStatePreview(state: OnboardingUiState) {
                 state = state,
                 onNoteStyleSelected = {},
                 onDeviceLockSetup = {},
+                onAppLockToggled = {},
                 onTelemetryToggled = {},
                 onContinue = {},
             )

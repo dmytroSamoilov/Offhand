@@ -3,7 +3,13 @@ import SwiftUI
 
 struct SettingsView: View {
     private let viewModel = AppViewModels.settings
-    @State private var state = SettingsUiState(notePreset: .summary, isDynamicColorEnabled: false)
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var state = SettingsUiState(
+        notePreset: .summary,
+        isDynamicColorEnabled: false,
+        isAppLockEnabled: false,
+        isDeviceSecure: false
+    )
     @State private var isPresetPickerVisible = false
 
     var body: some View {
@@ -21,6 +27,21 @@ struct SettingsView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+                }
+                Section {
+                    Toggle(String(localized: "Require unlock to open Offhand"), isOn: Binding(
+                        get: { state.isAppLockEnabled && state.isDeviceSecure },
+                        set: { viewModel.onAppLockChanged(enabled: $0) }
+                    ))
+                    .disabled(!state.isDeviceSecure)
+                } header: {
+                    Text(String(localized: "Security"))
+                } footer: {
+                    Text(
+                        state.isDeviceSecure
+                            ? String(localized: "Ask for Face ID, Touch ID, or your passcode every time Offhand opens.")
+                            : String(localized: "Set a passcode on this iPhone to use this.")
+                    )
                 }
                 Section {
                     NavigationLink {
@@ -60,7 +81,12 @@ struct SettingsView: View {
             }
             .presentationDetents([.medium])
         }
+        .onChange(of: scenePhase) {
+            // A passcode can be added or removed while this screen is backgrounded.
+            if scenePhase == .active { viewModel.onScreenShown() }
+        }
         .task {
+            viewModel.onScreenShown()
             for await newState in viewModel.uiState {
                 state = newState
             }

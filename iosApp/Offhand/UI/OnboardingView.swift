@@ -10,6 +10,8 @@ struct OnboardingView: View {
         deviceSpecs: nil,
         downloadSizeGb: "",
         notePreset: .summary,
+        isDeviceSecure: false,
+        isAppLockEnabled: true,
         isTelemetryEnabled: true,
         currentPage: 0,
         pageCount: 0
@@ -82,15 +84,40 @@ struct OnboardingView: View {
                 }
             }
         case .deviceLock:
-            StepScaffold(
-                icon: "faceid",
-                title: String(localized: "Add a device lock"),
-                message: String(localized: "Your notes are protected by this device's lock. Set a passcode in Settings for the strongest protection."),
-                buttonTitle: String(localized: "Continue"),
-                action: { viewModel.onDeviceLockSkipped() },
-                currentPage: Int(state.currentPage),
-                pageCount: Int(state.pageCount)
-            )
+            if state.isDeviceSecure {
+                StepScaffold(
+                    icon: "faceid",
+                    title: String(localized: "Lock Offhand?"),
+                    message: String(localized: "Offhand can ask for Face ID, Touch ID, or your passcode every time it opens, so your notes stay private even if someone else is holding an unlocked iPhone."),
+                    buttonTitle: String(localized: "Continue"),
+                    action: { viewModel.onDeviceLockContinue() },
+                    currentPage: Int(state.currentPage),
+                    pageCount: Int(state.pageCount)
+                ) {
+                    VStack(spacing: 12) {
+                        Toggle(String(localized: "Require unlock to open Offhand"), isOn: Binding(
+                            get: { state.isAppLockEnabled },
+                            set: { viewModel.onAppLockToggled(enabled: $0) }
+                        ))
+                        .padding()
+                        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+                        Text(String(localized: "You can change this any time in Settings."))
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+            } else {
+                StepScaffold(
+                    icon: "lock.slash",
+                    title: String(localized: "Add a device passcode"),
+                    message: String(localized: "This iPhone has no passcode, so Offhand has nothing to lock your notes with. Set one in Settings to use Face ID or Touch ID here."),
+                    buttonTitle: String(localized: "Continue without a lock"),
+                    action: { viewModel.onDeviceLockContinue() },
+                    currentPage: Int(state.currentPage),
+                    pageCount: Int(state.pageCount)
+                )
+            }
         case .telemetryConsent:
             StepScaffold(
                 icon: "chart.bar.fill",

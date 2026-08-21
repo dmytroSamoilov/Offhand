@@ -24,6 +24,12 @@ internal class DataStoreUserPreferencesRepository(
         dataStore.data.map { preferences ->
             UserPreferences(
                 onboardingCompleted = preferences[KEY_ONBOARDING_COMPLETED] ?: false,
+                // Installs that predate the onboarding opt-in were locked
+                // unconditionally, so an already-onboarded user keeps their lock
+                // instead of silently losing it on upgrade. New users start off
+                // until the onboarding step writes their answer.
+                appLockEnabled = preferences[KEY_APP_LOCK_ENABLED]
+                    ?: preferences[KEY_ONBOARDING_COMPLETED] ?: false,
                 telemetryConsent = preferences[KEY_TELEMETRY_CONSENT] ?: false,
                 dynamicColor = preferences[KEY_DYNAMIC_COLOR] ?: false,
                 developerOptions = buildInfo.isDebugBuild &&
@@ -41,6 +47,10 @@ internal class DataStoreUserPreferencesRepository(
 
     override suspend fun setOnboardingCompleted(completed: Boolean) {
         dataStore.edit { it[KEY_ONBOARDING_COMPLETED] = completed }
+    }
+
+    override suspend fun setAppLockEnabled(enabled: Boolean) {
+        dataStore.edit { it[KEY_APP_LOCK_ENABLED] = enabled }
     }
 
     override suspend fun setTelemetryConsent(granted: Boolean) {
@@ -76,6 +86,7 @@ internal class DataStoreUserPreferencesRepository(
 
     private companion object {
         val KEY_ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+        val KEY_APP_LOCK_ENABLED = booleanPreferencesKey("app_lock_enabled")
         val KEY_TELEMETRY_CONSENT = booleanPreferencesKey("telemetry_consent")
         val KEY_DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val KEY_DEVELOPER_OPTIONS = booleanPreferencesKey("developer_options")

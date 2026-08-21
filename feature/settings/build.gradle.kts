@@ -11,6 +11,7 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":core:ai-api"))
             implementation(project(":core:data"))
+            implementation(project(":core:security"))
         }
         androidMain.dependencies {
             implementation(libs.androidx.core.ktx)

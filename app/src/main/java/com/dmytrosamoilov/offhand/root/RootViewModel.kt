@@ -35,7 +35,7 @@ class RootViewModel(
         RootUiState(
             phase = when {
                 !preferences.onboardingCompleted -> RootPhase.ONBOARDING
-                lockState == AppLockState.LOCKED -> RootPhase.LOCKED
+                preferences.appLockEnabled && lockState == AppLockState.LOCKED -> RootPhase.LOCKED
                 else -> RootPhase.READY
             },
             isDynamicColorEnabled = preferences.dynamicColor,
