@@ -15,6 +15,13 @@ final class NoteNotifications: NSObject, ObservableObject, UNUserNotificationCen
         UNUserNotificationCenter.current().delegate = self
     }
 
+    func requestPermission(completion: @escaping () -> Void) {
+        UNUserNotificationCenter.current()
+            .requestAuthorization(options: [.alert, .sound]) { _, _ in
+                DispatchQueue.main.async { completion() }
+            }
+    }
+
     func noteReady(noteId: Int64) {
         post(
             noteId: noteId,

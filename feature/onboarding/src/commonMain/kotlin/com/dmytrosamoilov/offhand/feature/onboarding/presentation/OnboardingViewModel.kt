@@ -25,12 +25,11 @@ class OnboardingViewModel(
     private val setTelemetryConsent: SetTelemetryConsentUseCase,
     private val setNotePreset: SetNotePresetUseCase,
     private val completeOnboarding: CompleteOnboardingUseCase,
+    private val stepPolicy: OnboardingStepPolicy,
 ) : BaseViewModel() {
 
     private val mutableUiState = MutableStateFlow(OnboardingUiState())
     val uiState: StateFlow<OnboardingUiState> = mutableUiState.asStateFlow()
-
-    private var pages: List<OnboardingStep> = emptyList()
 
     init {
         evaluateDevice()
@@ -45,10 +44,7 @@ class OnboardingViewModel(
     }
 
     fun onNoteStyleContinue() {
-        launchSafely {
-            setNotePreset(uiState.value.notePreset)
-            moveToNextPage()
-        }
+        commitAndMoveOn(OnboardingStep.NOTE_STYLE)
     }
 
     fun onAppLockToggled(enabled: Boolean) {
@@ -56,13 +52,7 @@ class OnboardingViewModel(
     }
 
     fun onDeviceLockContinue() {
-        launchSafely {
-            // A device with no passcode has nothing to authenticate against, so
-            // the answer is no regardless of how the toggle was left.
-            val current = uiState.value
-            setAppLockEnabled(current.isDeviceSecure && current.isAppLockEnabled)
-            moveToNextPage()
-        }
+        commitAndMoveOn(OnboardingStep.DEVICE_LOCK)
     }
 
     // The user may leave for system settings to add a passcode; when they come
@@ -77,10 +67,11 @@ class OnboardingViewModel(
     }
 
     fun onConsentContinue() {
-        launchSafely {
-            setTelemetryConsent(uiState.value.isTelemetryEnabled)
-            moveToNextPage()
-        }
+        commitAndMoveOn(OnboardingStep.TELEMETRY_CONSENT)
+    }
+
+    fun onNotificationsContinue() {
+        moveToNextPage()
     }
 
     fun onDownloadContinue() {
@@ -90,29 +81,71 @@ class OnboardingViewModel(
         }
     }
 
-    private fun moveToNextPage() {
-        val nextIndex = pages.indexOf(uiState.value.step) + 1
-        val next = pages.getOrNull(nextIndex) ?: return
-        mutableUiState.update { it.copy(step = next, currentPage = nextIndex) }
+    // Swiping back through the wizard is free; swiping forward only reaches
+    // pages already unlocked with Continue, and re-persists every page crossed
+    // so a choice changed on a revisited page is never silently dropped.
+    fun onPageSelected(page: Int) {
+        launchSafely {
+            val current = uiState.value
+            val target = page.coerceIn(0, current.furthestPage)
+            if (current.pages.isEmpty() || target == current.currentPage) return@launchSafely
+            (current.currentPage until target).forEach { index ->
+                commitStep(current.pages[index])
+            }
+            mutableUiState.update { it.copy(step = it.pages[target], currentPage = target) }
+        }
     }
 
-    private fun buildPages(): List<OnboardingStep> = listOf(
-        OnboardingStep.PRIVACY,
-        OnboardingStep.NOTE_STYLE,
-        OnboardingStep.DEVICE_LOCK,
-        OnboardingStep.TELEMETRY_CONSENT,
-        OnboardingStep.MODEL_DOWNLOAD,
-    )
+    private fun commitAndMoveOn(step: OnboardingStep) {
+        launchSafely {
+            commitStep(step)
+            moveToNextPage()
+        }
+    }
+
+    private suspend fun commitStep(step: OnboardingStep) {
+        val current = uiState.value
+        when (step) {
+            OnboardingStep.NOTE_STYLE -> setNotePreset(current.notePreset)
+            // A device with no passcode has nothing to authenticate against, so
+            // the answer is no regardless of how the toggle was left.
+            OnboardingStep.DEVICE_LOCK ->
+                setAppLockEnabled(current.isDeviceSecure && current.isAppLockEnabled)
+            OnboardingStep.TELEMETRY_CONSENT -> setTelemetryConsent(current.isTelemetryEnabled)
+            else -> Unit
+        }
+    }
+
+    private fun moveToNextPage() {
+        mutableUiState.update { current ->
+            val nextIndex = current.currentPage + 1
+            val next = current.pages.getOrNull(nextIndex) ?: return@update current
+            current.copy(
+                step = next,
+                currentPage = nextIndex,
+                furthestPage = maxOf(current.furthestPage, nextIndex),
+            )
+        }
+    }
+
+    private fun buildPages(): List<OnboardingStep> = buildList {
+        add(OnboardingStep.PRIVACY)
+        add(OnboardingStep.NOTE_STYLE)
+        add(OnboardingStep.DEVICE_LOCK)
+        add(OnboardingStep.TELEMETRY_CONSENT)
+        if (stepPolicy.asksNotificationPermission) add(OnboardingStep.NOTIFICATIONS)
+        add(OnboardingStep.MODEL_DOWNLOAD)
+    }
 
     private fun evaluateDevice() {
         val capability = deviceCapabilityChecker.snapshot()
         mutableUiState.update { current ->
             if (capability.isLocalLlmCapable()) {
-                pages = buildPages()
                 current.copy(
                     step = OnboardingStep.PRIVACY,
+                    pages = buildPages(),
                     currentPage = 0,
-                    pageCount = pages.size,
+                    furthestPage = 0,
                     isDeviceSecure = appLockManager.isDeviceSecure,
                     downloadSizeGb = formatDownloadSizeGb(
                         modelManager.model.sizeInBytes + modelManager.speechModelSizeInBytes,

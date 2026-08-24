@@ -78,7 +78,9 @@ class OnboardingViewModelTest {
         unmockkAll()
     }
 
-    private fun viewModel(): OnboardingViewModel = OnboardingViewModel(
+    private fun viewModel(
+        stepPolicy: OnboardingStepPolicy = OnboardingStepPolicy(asksNotificationPermission = false),
+    ): OnboardingViewModel = OnboardingViewModel(
         modelDownloadController = modelDownloadController,
         deviceCapabilityChecker = deviceCapabilityChecker,
         modelManager = modelManager,
@@ -87,6 +89,7 @@ class OnboardingViewModelTest {
         setTelemetryConsent = setTelemetryConsent,
         setNotePreset = setNotePreset,
         completeOnboarding = completeOnboarding,
+        stepPolicy = stepPolicy,
     )
 
     private fun capableViewModel(): OnboardingViewModel {
@@ -160,6 +163,30 @@ class OnboardingViewModelTest {
         assertEquals(4, viewModel.uiState.value.currentPage)
         assertEquals(OnboardingStep.MODEL_DOWNLOAD, viewModel.uiState.value.step)
     }
+
+    @Test
+    fun `notification policy inserts the notifications step before the download`() =
+        runTest(dispatcher) {
+            every { deviceCapabilityChecker.snapshot() } returns capableDevice
+            val viewModel = viewModel(OnboardingStepPolicy(asksNotificationPermission = true))
+            dispatcher.scheduler.advanceUntilIdle()
+
+            assertEquals(6, viewModel.uiState.value.pageCount)
+
+            viewModel.onPrivacyContinue()
+            viewModel.onNoteStyleContinue()
+            dispatcher.scheduler.advanceUntilIdle()
+            viewModel.onDeviceLockContinue()
+            dispatcher.scheduler.advanceUntilIdle()
+            viewModel.onConsentContinue()
+            dispatcher.scheduler.advanceUntilIdle()
+            assertEquals(OnboardingStep.NOTIFICATIONS, viewModel.uiState.value.step)
+            assertEquals(4, viewModel.uiState.value.currentPage)
+
+            viewModel.onNotificationsContinue()
+            assertEquals(OnboardingStep.MODEL_DOWNLOAD, viewModel.uiState.value.step)
+            assertEquals(5, viewModel.uiState.value.currentPage)
+        }
 
     @Test
     fun `privacy continue moves to note style step`() = runTest(dispatcher) {
@@ -291,6 +318,63 @@ class OnboardingViewModelTest {
         coVerify { setTelemetryConsent(false) }
         assertEquals(OnboardingStep.MODEL_DOWNLOAD, viewModel.uiState.value.step)
     }
+
+    @Test
+    fun `swiping back returns to an earlier page without new persistence`() = runTest(dispatcher) {
+        val viewModel = consentStepViewModel()
+
+        viewModel.onPageSelected(0)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(OnboardingStep.PRIVACY, viewModel.uiState.value.step)
+        assertEquals(0, viewModel.uiState.value.currentPage)
+        assertEquals(3, viewModel.uiState.value.furthestPage)
+        coVerify(exactly = 1) { setNotePreset(any()) }
+        coVerify(exactly = 1) { setAppLockEnabled(any()) }
+    }
+
+    @Test
+    fun `swiping forward replays the choices made on revisited pages`() = runTest(dispatcher) {
+        val viewModel = consentStepViewModel()
+        viewModel.onPageSelected(1)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onNoteStyleSelected(NotePreset.LEGAL)
+        viewModel.onPageSelected(3)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { setNotePreset(NotePreset.LEGAL) }
+        coVerify(exactly = 2) { setAppLockEnabled(true) }
+        assertEquals(OnboardingStep.TELEMETRY_CONSENT, viewModel.uiState.value.step)
+        assertEquals(3, viewModel.uiState.value.currentPage)
+    }
+
+    @Test
+    fun `page selection cannot pass the furthest visited page`() = runTest(dispatcher) {
+        val viewModel = capableViewModel()
+        viewModel.onPrivacyContinue()
+
+        viewModel.onPageSelected(4)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(OnboardingStep.NOTE_STYLE, viewModel.uiState.value.step)
+        assertEquals(1, viewModel.uiState.value.currentPage)
+        assertEquals(1, viewModel.uiState.value.furthestPage)
+    }
+
+    @Test
+    fun `continue from a revisited page walks forward without losing the frontier`() =
+        runTest(dispatcher) {
+            val viewModel = consentStepViewModel()
+            viewModel.onPageSelected(0)
+            dispatcher.scheduler.advanceUntilIdle()
+
+            viewModel.onPrivacyContinue()
+
+            assertEquals(OnboardingStep.NOTE_STYLE, viewModel.uiState.value.step)
+            assertEquals(1, viewModel.uiState.value.currentPage)
+            assertEquals(3, viewModel.uiState.value.furthestPage)
+        }
 
     @Test
     fun `download continue starts download and completes onboarding`() = runTest(dispatcher) {

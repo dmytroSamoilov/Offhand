@@ -558,6 +558,14 @@ private fun SpecRow(label: String, value: String, isSatisfied: Boolean) {
     }
 }
 
+private val previewPages = listOf(
+    OnboardingStep.PRIVACY,
+    OnboardingStep.NOTE_STYLE,
+    OnboardingStep.DEVICE_LOCK,
+    OnboardingStep.TELEMETRY_CONSENT,
+    OnboardingStep.MODEL_DOWNLOAD,
+)
+
 @Composable
 private fun OnboardingStatePreview(state: OnboardingUiState) {
     OffhandTheme {
@@ -587,7 +595,7 @@ private fun DeviceCheckPreview() {
 @Composable
 private fun PrivacyPreview() {
     OnboardingStatePreview(
-        OnboardingUiState(step = OnboardingStep.PRIVACY, currentPage = 0, pageCount = 5),
+        OnboardingUiState(step = OnboardingStep.PRIVACY, currentPage = 0, pages = previewPages),
     )
 }
 
@@ -595,7 +603,7 @@ private fun PrivacyPreview() {
 @Composable
 private fun NoteStylePreview() {
     OnboardingStatePreview(
-        OnboardingUiState(step = OnboardingStep.NOTE_STYLE, currentPage = 1, pageCount = 5),
+        OnboardingUiState(step = OnboardingStep.NOTE_STYLE, currentPage = 1, pages = previewPages),
     )
 }
 
@@ -603,7 +611,7 @@ private fun NoteStylePreview() {
 @Composable
 private fun DeviceLockPreview() {
     OnboardingStatePreview(
-        OnboardingUiState(step = OnboardingStep.DEVICE_LOCK, currentPage = 2, pageCount = 5),
+        OnboardingUiState(step = OnboardingStep.DEVICE_LOCK, currentPage = 2, pages = previewPages),
     )
 }
 
@@ -632,7 +640,7 @@ private fun TelemetryConsentPreview() {
         OnboardingUiState(
             step = OnboardingStep.TELEMETRY_CONSENT,
             currentPage = 3,
-            pageCount = 5,
+            pages = previewPages,
         ),
     )
 }
@@ -645,7 +653,7 @@ private fun ModelDownloadPreview() {
             step = OnboardingStep.MODEL_DOWNLOAD,
             downloadSizeGb = "2.3",
             currentPage = 4,
-            pageCount = 5,
+            pages = previewPages,
         ),
     )
 }
@@ -658,7 +666,7 @@ private fun ModelDownloadDarkPreview() {
             step = OnboardingStep.MODEL_DOWNLOAD,
             downloadSizeGb = "2.3",
             currentPage = 4,
-            pageCount = 5,
+            pages = previewPages,
         ),
     )
 }

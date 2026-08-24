@@ -3,6 +3,7 @@ import UIKit
 
 enum Brand {
     static let primary = dynamic(light: 0x0B57D0, dark: 0xA8C7FA)
+    static let onPrimary = dynamic(light: 0xFFFFFF, dark: 0x062E6F)
     static let onPrimaryContainer = dynamic(light: 0x041E49, dark: 0xD3E3FD)
     static let primaryContainer = dynamic(light: 0xD3E3FD, dark: 0x0842A0)
     static let teal = dynamic(light: 0x006A60, dark: 0x82D5C8)

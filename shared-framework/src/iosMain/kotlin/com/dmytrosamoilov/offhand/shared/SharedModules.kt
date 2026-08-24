@@ -15,6 +15,7 @@ import com.dmytrosamoilov.offhand.feature.notes.di.featureNotesModule
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareLabels
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareLabelsProvider
 import com.dmytrosamoilov.offhand.feature.onboarding.di.featureOnboardingModule
+import com.dmytrosamoilov.offhand.feature.onboarding.presentation.OnboardingStepPolicy
 import com.dmytrosamoilov.offhand.feature.recording.di.featureRecordingIosModule
 import com.dmytrosamoilov.offhand.feature.recording.di.featureRecordingModule
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioRecorder
@@ -79,6 +80,7 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
             CoroutineScope(SupervisorJob() + Dispatchers.Default),
         )
     }
+    single { OnboardingStepPolicy(asksNotificationPermission = true) }
     factory { IosRootViewModel(get(), get(), get(), get(), get(), get(), get()) }
 }
 
