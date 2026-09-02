@@ -108,7 +108,10 @@ struct RootView: View {
     private func observeProcessingIds() async {
         var previousIds: Set<Int64> = []
         for await ids in sessionManager.processingNoteIds {
-            let current = Set(ids.map { $0.int64Value })
+            // Iterated untyped for the same reason NoteFinishCoordinator.drive
+            // reads noteProgress through NSDictionary: element-typed iteration
+            // of a bridged Kotlin number collection force-casts and can abort.
+            let current = Set((ids as NSSet).compactMap { ($0 as? NSNumber)?.int64Value })
             for added in current.subtracting(previousIds) {
                 finishCoordinator.processingStarted(noteId: added)
                 if finishCoordinator.isManaging(noteId: added) {

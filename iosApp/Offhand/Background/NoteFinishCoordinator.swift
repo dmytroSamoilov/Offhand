@@ -82,8 +82,11 @@ final class NoteFinishCoordinator {
         for await ids in sessionManager.processingNoteIds {
             if expired.isRaised { return }
             if ids.isEmpty { break }
-            let percents = sessionManager.noteProgress.value
-                .compactMap { entry -> Int? in (entry.value as? KotlinInt)?.intValue }
+            // The bridged Kotlin Map<Long, Int> arrives with plain-NSNumber keys
+            // (NSDictionary copies keys), so iterating it as [KotlinLong: KotlinInt]
+            // force-casts each key and aborts. Only untyped access is safe.
+            let percents = (sessionManager.noteProgress.value as NSDictionary)
+                .compactMap { ($0.value as? NSNumber)?.intValue }
             let percent = percents.min() ?? 0
             task.progress.completedUnitCount = Int64(max(1, min(99, percent)))
         }
