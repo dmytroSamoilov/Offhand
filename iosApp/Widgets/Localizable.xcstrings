@@ -1,0 +1,15 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Done": {},
+    "Open Offhand to finish preparing your note": {},
+    "Pause": {},
+    "Paused": {},
+    "Preparing your note": {},
+    "Recording a note": {},
+    "Resume": {},
+    "Stop": {},
+    "Your note is ready": {}
+  },
+  "version": "1.0"
+}
