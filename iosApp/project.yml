@@ -82,6 +82,9 @@ targets:
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: S5UT57PQ2J
         ENABLE_USER_SCRIPT_SANDBOXING: false
+        # Keeps Localizable.xcstrings in sync: Xcode extracts String(localized:)
+        # keys from code into the catalog on every IDE build.
+        SWIFT_EMIT_LOC_STRINGS: true
     entitlements:
       path: Offhand/Offhand.entitlements
       properties:
@@ -130,6 +133,7 @@ targets:
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: S5UT57PQ2J
         SKIP_INSTALL: true
+        SWIFT_EMIT_LOC_STRINGS: true
     info:
       path: Widgets/Info.plist
       properties:
