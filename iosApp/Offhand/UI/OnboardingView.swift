@@ -203,7 +203,28 @@ struct OnboardingView: View {
         case .noteStyle:
             return { viewModel.onNoteStyleContinue() }
         case .deviceLock:
-            return { viewModel.onDeviceLockContinue() }
+            return {
+                guard state.isDeviceSecure && state.isAppLockEnabled else {
+                    viewModel.onDeviceLockContinue()
+                    return
+                }
+                // The first biometric check doubles as the system's Face ID
+                // permission ask; running it here keeps that prompt on the card
+                // that explains it, and proves the unlock works before the app
+                // commits to locking. A cancelled check pulls a forward swipe
+                // back to this card instead of advancing.
+                DeviceAuthenticator.confirmOwner(
+                    reason: String(localized: "Confirm it's you to turn on the app lock.")
+                ) { confirmed in
+                    if confirmed {
+                        viewModel.onDeviceLockContinue()
+                    } else {
+                        withAnimation(.easeInOut(duration: 0.28)) {
+                            visiblePage = Int(state.currentPage)
+                        }
+                    }
+                }
+            }
         case .telemetryConsent:
             return { viewModel.onConsentContinue() }
         case .notifications:

@@ -1,6 +1,32 @@
 import LocalAuthentication
 import SwiftUI
 
+// Housed here rather than its own file because the generated Xcode project
+// only picks up new files on the next `xcodegen generate`.
+enum DeviceAuthenticator {
+    // A device that can never authenticate (no passcode, no usable biometry)
+    // reports success: failing a check that cannot pass would strand the user,
+    // and a lock on such a device is unenforceable anyway.
+    static func confirmOwner(reason: String, completion: @escaping @MainActor (Bool) -> Void) {
+        let context = LAContext()
+        context.localizedFallbackTitle = ""
+        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, error in
+            Task { @MainActor in
+                completion(success || isUnenforceable(error))
+            }
+        }
+    }
+
+    private static func isUnenforceable(_ error: Error?) -> Bool {
+        switch (error as? LAError)?.code {
+        case .passcodeNotSet, .biometryNotAvailable, .biometryNotEnrolled:
+            return true
+        default:
+            return false
+        }
+    }
+}
+
 struct LockScreenView: View {
     let onAuthenticated: () -> Void
 
@@ -40,31 +66,15 @@ struct LockScreenView: View {
         guard !isAuthenticating else { return }
         isAuthenticating = true
         didFail = false
-        let context = LAContext()
-        context.localizedFallbackTitle = ""
-        context.evaluatePolicy(
-            .deviceOwnerAuthentication,
-            localizedReason: String(localized: "Unlock Offhand to open your notes.")
-        ) { success, error in
-            Task { @MainActor in
-                isAuthenticating = false
-                if success || isUnenforceable(error) {
-                    onAuthenticated()
-                } else {
-                    didFail = true
-                }
+        DeviceAuthenticator.confirmOwner(
+            reason: String(localized: "Unlock Offhand to open your notes.")
+        ) { confirmed in
+            isAuthenticating = false
+            if confirmed {
+                onAuthenticated()
+            } else {
+                didFail = true
             }
-        }
-    }
-
-    // Without a passcode or usable biometry there is nothing that can ever confirm
-    // the user, so holding the lock would strand them outside their own notes.
-    private func isUnenforceable(_ error: Error?) -> Bool {
-        switch (error as? LAError)?.code {
-        case .passcodeNotSet, .biometryNotAvailable, .biometryNotEnrolled:
-            return true
-        default:
-            return false
         }
     }
 }
