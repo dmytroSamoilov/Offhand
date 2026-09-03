@@ -125,6 +125,16 @@ class RecordingSessionManagerTest {
         processingTimeMs = 200,
     )
 
+    private fun stubPolish(json: String) {
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY), any()) } returns AiResult(
+            text = json,
+            processingTimeMs = 0,
+            inputTokens = 5,
+            outputTokens = 5,
+            hardwareBackend = HardwareBackend.CPU,
+        )
+    }
+
     private fun CoroutineScope.manager() = RecordingSessionManager(
         recorder = recorder,
         speechToText = speechToText,
@@ -163,6 +173,7 @@ class RecordingSessionManagerTest {
             outputTokens = 20,
             hardwareBackend = HardwareBackend.CPU,
         )
+        stubPolish("""{"title": "Meeting notes", "overview": "- first\n- second"}""")
         coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
         val events = mutableListOf<NoteProcessingEvent>()
 
@@ -215,6 +226,7 @@ class RecordingSessionManagerTest {
             outputTokens = 5,
             hardwareBackend = HardwareBackend.CPU,
         )
+        stubPolish("""{"title": "Partial notes", "overview": "- good chunk content"}""")
         coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
 
         val manager = manager()
@@ -275,6 +287,7 @@ class RecordingSessionManagerTest {
             outputTokens = 5,
             hardwareBackend = HardwareBackend.CPU,
         )
+        stubPolish("""{"title": "Recovered", "overview": "- body"}""")
         coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
 
         val manager = manager()
@@ -435,6 +448,7 @@ class RecordingSessionManagerTest {
             outputTokens = 5,
             hardwareBackend = HardwareBackend.CPU,
         )
+        stubPolish("""{"title": "Recovered", "overview": "- body"}""")
         coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
 
         val manager = manager()

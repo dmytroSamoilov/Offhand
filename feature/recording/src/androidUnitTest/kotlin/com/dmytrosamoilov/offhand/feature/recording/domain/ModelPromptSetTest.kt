@@ -19,9 +19,10 @@ class ModelPromptSetTest {
     }
 
     @Test
-    fun `gemma structure prompt never mentions thinking blocks`() {
+    fun `gemma prompts never mention thinking blocks`() {
         NotePreset.entries.forEach { preset ->
             assertFalse(ModelPromptSet.Gemma4.structureNote(preset).contains("thinking"))
+            assertFalse(ModelPromptSet.Gemma4.polishNote(preset).contains("thinking"))
         }
     }
 
@@ -74,14 +75,50 @@ class ModelPromptSetTest {
     @Test
     fun `no preset prompt quotes a first-person example sentence`() {
         NotePreset.entries.forEach { preset ->
-            val prompt = ModelPromptSet.Gemma4.structureNote(preset)
-            QUOTED_TEXT.findAll(prompt).map { it.groupValues[1] }.forEach { quoted ->
+            val prompts = listOf(
+                ModelPromptSet.Gemma4.structureNote(preset),
+                ModelPromptSet.Gemma4.polishNote(preset),
+            )
+            prompts.flatMap { QUOTED_TEXT.findAll(it) }.map { it.groupValues[1] }.forEach { quoted ->
                 assertFalse(
                     "$preset quotes a copyable sentence: $quoted",
                     quoted.startsWith("I ") || quoted.startsWith("The speaker "),
                 )
             }
         }
+    }
+
+    @Test
+    fun `all polish prompts share the json shape and the polish tasks`() {
+        promptSets.forEach { promptSet ->
+            NotePreset.entries.forEach { preset ->
+                val prompt = promptSet.polishNote(preset)
+                assertTrue(prompt.contains("""{"title": "...", "overview": "..."}"""))
+                assertTrue(prompt.contains("at most 8 words"))
+                assertTrue(prompt.contains("Say each thing only once"))
+                assertTrue(prompt.contains("word that was most likely spoken"))
+                assertTrue(prompt.contains("never add anything the draft does not say"))
+            }
+        }
+    }
+
+    @Test
+    fun `polish prompt explains the note kind of its preset`() {
+        NotePreset.entries.forEach { preset ->
+            val prompt = ModelPromptSet.Gemma4.polishNote(preset)
+            assertTrue(prompt.contains(NotePresetPrompt.noteKind(preset)))
+            NotePresetPrompt.sections(preset).forEach { section ->
+                assertTrue("$preset polish prompt misses $section", prompt.contains(section))
+            }
+        }
+    }
+
+    @Test
+    fun `summary polish prompt keeps prose and forbids lists`() {
+        val prompt = ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY)
+
+        assertTrue(prompt.contains("first person"))
+        assertTrue(prompt.contains("Never use headings, bullet points"))
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain
 
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackend
+import com.dmytrosamoilov.offhand.core.ai.api.AiBackendException
 import com.dmytrosamoilov.offhand.core.ai.api.AiResult
 import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
 import com.dmytrosamoilov.offhand.core.ai.api.TokenEstimator
@@ -26,6 +27,11 @@ class TranscriptStructurerTest {
         hardwareBackend = HardwareBackend.CPU,
     )
 
+    private fun stubPolish(preset: NotePreset, json: String, timeMs: Long = 100) {
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.polishNote(preset), any()) } returns
+            result(json, timeMs = timeMs)
+    }
+
     @Test
     fun `single call produces title and overview, transcript stays verbatim`() = runTest {
         coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.MEETING), any()) } returns
@@ -34,6 +40,10 @@ class TranscriptStructurerTest {
                     """{"title": "Weekly sync notes", "overview": "## Decisions\n- Ship Friday"}""",
                 timeMs = 250,
             )
+        stubPolish(
+            NotePreset.MEETING,
+            """{"title": "Weekly sync notes", "overview": "## Decisions\n- Ship Friday"}""",
+        )
 
         val note = structurer.structure(
             preset = NotePreset.MEETING,
@@ -43,11 +53,96 @@ class TranscriptStructurerTest {
         assertEquals("Weekly sync notes", note.title)
         assertEquals("## Decisions\n- Ship Friday", note.overview)
         assertEquals("uh so like weekly sync\n\num we ship friday", note.transcript)
-        assertEquals(250, note.structuringTimeMs)
+        assertEquals(350, note.structuringTimeMs)
         coVerify(exactly = 1) {
             aiBackend.processText(
                 ModelPromptSet.Gemma4.structureNote(NotePreset.MEETING),
                 "\"uh so like weekly sync\",\n\n\"um we ship friday\"",
+            )
+        }
+    }
+
+    @Test
+    fun `final polish pass rewrites the merged overview and the title`() = runTest {
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.MEETING), any()) } returns
+            result(
+                """{"title": "Sync", "overview": "## Decisions\n- Ship on Friday\n- We ship Friday"}""",
+                timeMs = 200,
+            )
+        stubPolish(
+            NotePreset.MEETING,
+            """{"title": "Weekly sync", "overview": "## Decisions\n- Ship on Friday"}""",
+            timeMs = 150,
+        )
+
+        val note = structurer.structure(listOf("we ship friday"), NotePreset.MEETING)
+
+        assertEquals("Weekly sync", note.title)
+        assertEquals("## Decisions\n- Ship on Friday", note.overview)
+        assertEquals(350, note.structuringTimeMs)
+        coVerify(exactly = 1) {
+            aiBackend.processText(
+                ModelPromptSet.Gemma4.polishNote(NotePreset.MEETING),
+                "## Decisions\n- Ship on Friday\n- We ship Friday",
+            )
+        }
+    }
+
+    @Test
+    fun `polish output that loses most of the note is discarded`() = runTest {
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns
+            result(
+                """{"title": "Budget review", "overview": "I reviewed the quarterly budget with the finance team and we agreed to move four thousand into marketing for October."}""",
+            )
+        stubPolish(NotePreset.SUMMARY, """{"title": "Budget", "overview": "Reviewed."}""")
+
+        val note = structurer.structure(listOf("budget talk"), NotePreset.SUMMARY)
+
+        assertEquals("Budget review", note.title)
+        assertTrue(note.overview.startsWith("I reviewed the quarterly budget"))
+    }
+
+    @Test
+    fun `polish backend failure keeps the merged overview`() = runTest {
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns
+            result("""{"title": "My day", "overview": "I shipped the build."}""", timeMs = 200)
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY), any()) } throws
+            AiBackendException("engine busy")
+
+        val note = structurer.structure(listOf("shipping talk"), NotePreset.SUMMARY)
+
+        assertEquals("My day", note.title)
+        assertEquals("I shipped the build.", note.overview)
+        assertEquals(200, note.structuringTimeMs)
+    }
+
+    @Test
+    fun `overview past the polish budget skips the polish pass`() = runTest {
+        val longOverview = "word ".repeat(3_000).trim()
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns
+            result("""{"title": "Long", "overview": "$longOverview"}""")
+
+        val note = structurer.structure(listOf("short"), NotePreset.SUMMARY)
+
+        assertEquals(longOverview, note.overview)
+        coVerify(exactly = 0) {
+            aiBackend.processText(ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY), any())
+        }
+    }
+
+    @Test
+    fun `double quotes in the merged overview are replaced before polishing`() = runTest {
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns
+            result("""{"title": "Quotes", "overview": "he said \"ship it\" today"}""")
+        stubPolish(NotePreset.SUMMARY, """{"title": "Quotes", "overview": "he said 'ship it' today"}""")
+
+        val note = structurer.structure(listOf("quoting"), NotePreset.SUMMARY)
+
+        assertEquals("he said 'ship it' today", note.overview)
+        coVerify(exactly = 1) {
+            aiBackend.processText(
+                ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY),
+                "he said 'ship it' today",
             )
         }
     }
@@ -163,6 +258,7 @@ class TranscriptStructurerTest {
         val longChunks = List(8) { paragraph }
         coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.MEETING), any()) } returns
             result("""{"title": "Long meeting recap", "overview": "## Decisions\n- point"}""")
+        stubPolish(NotePreset.MEETING, """{"title": "Long meeting recap", "overview": "## Decisions\n- point"}""")
 
         val note = structurer.structure(longChunks, NotePreset.MEETING)
 
@@ -242,6 +338,20 @@ class TranscriptStructurerTest {
             assertTrue(
                 "$preset budget must leave at least 1000 output tokens",
                 budget + TokenEstimator.approxText(prompt) + 1_000 <= testModel().maxTokens,
+            )
+        }
+    }
+
+    @Test
+    fun `polish budget leaves room for the note twice in every preset`() {
+        NotePreset.entries.forEach { preset ->
+            val prompt = ModelPromptSet.Gemma4.polishNote(preset)
+            val budget = structurer.polishTokenBudget(prompt)
+
+            assertTrue("$preset polish budget must stay positive", budget > 0)
+            assertTrue(
+                "$preset polish budget must fit input and output in the context window",
+                budget * 2 + TokenEstimator.approxText(prompt) <= testModel().maxTokens,
             )
         }
     }

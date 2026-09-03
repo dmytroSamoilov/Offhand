@@ -1,6 +1,9 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain
 
+import co.touchlab.kermit.Logger
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackend
+import com.dmytrosamoilov.offhand.core.ai.api.AiBackendException
+import com.dmytrosamoilov.offhand.core.ai.api.AiResult
 import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.TokenEstimator
@@ -32,24 +35,20 @@ class TranscriptStructurer(
         val quoted = chunkTranscripts.joinToString(SEGMENT_SEPARATOR) { chunk ->
             "\"${chunk.replace('"', '\'')}\""
         }
-        var totalTimeMs = 0L
-        var backend = HardwareBackend.CPU
-        val prompt = ModelPromptSet.forFamily(modelManager.model.family).structureNote(preset)
+        val promptSet = ModelPromptSet.forFamily(modelManager.model.family)
+        val prompt = promptSet.structureNote(preset)
         val segments = splitIntoSegments(quoted, segmentTokenBudget(prompt))
-        val parts = segments.mapIndexed { index, segment ->
-            val result = aiBackend.processText(prompt, segment)
-            totalTimeMs += result.processingTimeMs
-            backend = result.hardwareBackend
-            onProgress((index + 1) / segments.size.toFloat())
-            parseNoteJson(result.text)
-        }
-        val overview = combinedOverview(parts, transcript, preset)
+        val pass = structureSegments(segments, prompt, onProgress)
+        val merged = mergedOverview(pass.notes, preset)
+        val polished = polish(merged, preset, promptSet)
+        onProgress(1f)
+        val overview = (polished?.overview ?: merged).ifBlank { transcript }
         return StructuredNote(
-            title = combinedTitle(parts, overview),
+            title = noteTitle(polished, pass.notes, overview),
             overview = overview,
             transcript = transcript,
-            structuringTimeMs = totalTimeMs,
-            hardwareBackend = backend,
+            structuringTimeMs = pass.timeMs + (polished?.processingTimeMs ?: 0),
+            hardwareBackend = polished?.hardwareBackend ?: pass.backend,
         )
     }
 
@@ -75,22 +74,74 @@ class TranscriptStructurer(
     internal fun segmentTokenBudget(prompt: String): Int =
         modelManager.model.maxTokens - TokenEstimator.approxText(prompt) - OUTPUT_TOKEN_RESERVE
 
-    private fun combinedTitle(parts: List<ParsedNote>, overview: String): String =
-        parts.firstNotNullOfOrNull { it.title.ifBlank { null } } ?: fallbackTitle(overview)
+    // The polish pass counts as one more step, so per-segment progress only
+    // approaches the end instead of reaching it.
+    private suspend fun structureSegments(
+        segments: List<String>,
+        prompt: String,
+        onProgress: (Float) -> Unit,
+    ): SegmentPass {
+        var timeMs = 0L
+        var backend = HardwareBackend.CPU
+        val totalSteps = segments.size + 1
+        val notes = segments.mapIndexed { index, segment ->
+            val result = aiBackend.processText(prompt, segment)
+            timeMs += result.processingTimeMs
+            backend = result.hardwareBackend
+            onProgress((index + 1) / totalSteps.toFloat())
+            parseNoteJson(result.text)
+        }
+        return SegmentPass(notes, timeMs, backend)
+    }
 
-    private fun combinedOverview(
-        parts: List<ParsedNote>,
-        transcript: String,
+    // A failed polish keeps the merged overview — a note assembled from valid
+    // segment passes must never degrade because the extra pass misbehaved.
+    private suspend fun polish(
+        merged: String,
         preset: NotePreset,
-    ): String {
-        val overviews = parts.mapNotNull { it.overview.ifBlank { null } }
+        promptSet: ModelPromptSet,
+    ): PolishedNote? {
+        val prompt = promptSet.polishNote(preset)
+        if (merged.isBlank() || TokenEstimator.approxText(merged) > polishTokenBudget(prompt)) {
+            return null
+        }
+        val result = polishSafely(prompt, merged.replace('"', '\'')) ?: return null
+        val note = parseNoteJson(result.text)
+        val overview = normalizeOverview(listOf(note.overview), preset)
+        if (overview.length < merged.length * MIN_POLISH_RETAIN) return null
+        return PolishedNote(note.title, overview, result.processingTimeMs, result.hardwareBackend)
+    }
+
+    private suspend fun polishSafely(prompt: String, draft: String): AiResult? = try {
+        aiBackend.processText(prompt, draft)
+    } catch (backendFailure: AiBackendException) {
+        Logger.withTag(LOG_TAG).w(backendFailure) { "Polish pass failed, keeping the merged note" }
+        null
+    }
+
+    // Polishing regenerates the whole note, so the context window must hold
+    // the prompt plus the note twice — once as input and once as output.
+    internal fun polishTokenBudget(prompt: String): Int =
+        (modelManager.model.maxTokens - TokenEstimator.approxText(prompt) - POLISH_TOKEN_SLACK) / 2
+
+    private fun noteTitle(
+        polished: PolishedNote?,
+        parts: List<ParsedNote>,
+        overview: String,
+    ): String = polished?.title?.ifBlank { null }
+        ?: parts.firstNotNullOfOrNull { it.title.ifBlank { null } }
+        ?: fallbackTitle(overview)
+
+    private fun mergedOverview(parts: List<ParsedNote>, preset: NotePreset): String =
+        normalizeOverview(parts.mapNotNull { it.overview.ifBlank { null } }, preset)
+
+    private fun normalizeOverview(overviews: List<String>, preset: NotePreset): String {
         val sections = NotePresetPrompt.sections(preset)
-        val combined = if (sections.isEmpty()) {
+        return if (sections.isEmpty()) {
             NoteProseFormatter.format(overviews)
         } else {
             NoteSectionMerger.merge(overviews, sections)
         }
-        return combined.ifBlank { transcript }
     }
 
     private fun parseNoteJson(raw: String): ParsedNote {
@@ -217,6 +268,19 @@ class TranscriptStructurer(
         val overview: String,
     )
 
+    private data class SegmentPass(
+        val notes: List<ParsedNote>,
+        val timeMs: Long,
+        val backend: HardwareBackend,
+    )
+
+    private data class PolishedNote(
+        val title: String,
+        val overview: String,
+        val processingTimeMs: Long,
+        val hardwareBackend: HardwareBackend,
+    )
+
     @Serializable
     private data class NoteJson(
         val title: String = "",
@@ -224,9 +288,16 @@ class TranscriptStructurer(
     )
 
     private companion object {
+        const val LOG_TAG = "TranscriptStructurer"
         // Keeps ~1000-1500 tokens of the context window free for the title
         // and overview the model generates, with slack for estimator error.
         const val OUTPUT_TOKEN_RESERVE = 1_250
+        // Slack for the JSON scaffolding, the title and estimator error on
+        // top of the symmetric input/output split of the polish budget.
+        const val POLISH_TOKEN_SLACK = 250
+        // A polished note far shorter than the draft means the model
+        // truncated or summarised it away instead of deduplicating it.
+        const val MIN_POLISH_RETAIN = 0.3f
         const val OVERSIZED_PARAGRAPH_CHARS_PER_TOKEN = 2
         const val MAX_TITLE_CHARS = 80
         const val TITLE_MAX_WORDS = 8
