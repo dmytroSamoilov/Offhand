@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="recording_idle_hint">Toque para gravar. Tudo é transcrito e estruturado bem aqui neste aparelho.</string>
+    <string name="recording_start_description">Iniciar gravação</string>
+    <string name="recording_stop_description">Parar gravação</string>
+    <string name="recording_pause_description">Pausar gravação</string>
+    <string name="recording_resume_description">Retomar gravação</string>
+    <string name="recording_paused_label">Em pausa</string>
+    <string name="recording_active_label">Gravando…</string>
+    <string name="recording_save_note_button">Salvar nota</string>
+    <string name="recording_discard_button">Descartar gravação</string>
+    <string name="recording_discard_dialog_title">Descartar esta gravação?</string>
+    <string name="recording_discard_dialog_body">A gravação e tudo o que foi transcrito até agora serão excluídos. Isso não pode ser desfeito.</string>
+    <string name="recording_discard_dialog_confirm">Descartar</string>
+    <string name="recording_discard_dialog_cancel">Cancelar</string>
+    <string name="recording_stage_finishing">Salvando sua gravação…</string>
+    <string name="recording_processing_hint">Você pode fechar isto — a nota vai aparecer na sua lista quando estiver pronta.</string>
+    <string name="recording_external_mic_generic">Microfone externo</string>
+    <string name="recording_saved_title">Gravação salva</string>
+    <string name="recording_saved_body">Sua nota está sendo processada. Você pode fechar isto — vamos avisar quando a transcrição estiver pronta.</string>
+    <string name="recording_saved_done_button">Concluído</string>
+    <string name="recording_failed_title">Algo deu errado</string>
+    <string name="recording_try_again_button">Tentar novamente</string>
+    <string name="recording_notification_channel_name">Gravação</string>
+    <string name="recording_notification_recording_title">Gravação em andamento</string>
+    <string name="recording_notification_paused_title">Gravação pausada</string>
+    <string name="recording_notification_recording_text">O áudio é processado somente neste aparelho</string>
+    <string name="recording_notification_paused_text">Gravado até agora: %1$s</string>
+    <string name="recording_notification_action_pause">Pausar</string>
+    <string name="recording_notification_action_resume">Retomar</string>
+    <string name="recording_notification_action_stop">Parar</string>
+    <string name="recording_notification_processing_title">Criando sua nota</string>
+    <string name="recording_notification_processing_text">Transcrevendo e estruturando no aparelho</string>
+    <string name="recording_notification_notes_channel_name">Notas concluídas</string>
+    <string name="recording_notification_ready_title">Sua nota está pronta</string>
+    <string name="recording_notification_ready_text">Toque para abrir a nota concluída.</string>
+    <string name="recording_default_note_title">Gravação %1$d</string>
+    <string name="recording_untitled_note_title">Nota de voz</string>
+    <string name="recording_notification_note_failed_title">A transcrição com IA falhou</string>
+    <string name="recording_notification_note_failed_text">A gravação está salva. Toque para abri-la.</string>
+</resources>

@@ -147,8 +147,8 @@ struct NoteDetailView: View {
 
     private var metadataLine: String {
         guard detail.wordCount > 0 else { return detail.createdAt }
-        let words = String(
-            format: String(localized: "%d words"),
+        let words = String.localizedStringWithFormat(
+            String(localized: "%d words"),
             Int(detail.wordCount)
         )
         return "\(detail.createdAt) · \(words)"

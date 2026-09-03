@@ -22,7 +22,11 @@ class TranscriptStructurerTest {
     private val isThinkingEnabled: IsThinkingEnabledUseCase = mockk {
         every { this@mockk.invoke() } returns false
     }
-    private val structurer = TranscriptStructurer(aiBackend, testModelManager(), isThinkingEnabled)
+    private val defaultNoteTitleProvider: DefaultNoteTitleProvider = mockk {
+        every { untitledTitle() } returns "Voice note"
+    }
+    private val structurer =
+        TranscriptStructurer(aiBackend, testModelManager(), isThinkingEnabled, defaultNoteTitleProvider)
 
     private fun result(text: String, timeMs: Long = 100) = AiResult(
         text = text,

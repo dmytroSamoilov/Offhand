@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notes_title">Заметки</string>
+    <string name="notes_empty_state">Заметок пока нет. Нажмите кнопку микрофона, чтобы записать первую.</string>
+    <string name="notes_model_banner_title">Готовим ваше ядро ИИ</string>
+    <string name="notes_model_banner_subtitle">Модель для работы на устройстве скачивается в фоне</string>
+    <string name="notes_day_today">Сегодня</string>
+    <string name="notes_day_yesterday">Вчера</string>
+    <plurals name="notes_word_count">
+        <item quantity="one">%1$s слово</item>
+        <item quantity="few">%1$s слова</item>
+        <item quantity="many">%1$s слов</item>
+        <item quantity="other">%1$s слова</item>
+    </plurals>
+    <string name="notes_record_fab_description">Начать новую запись</string>
+    <string name="notes_select_prompt">Выберите заметку, чтобы прочитать её</string>
+    <string name="notes_back_description">Назад к заметкам</string>
+    <string name="notes_play_description">Воспроизвести запись</string>
+    <string name="notes_pause_description">Приостановить воспроизведение</string>
+    <string name="notes_processing_title">Обработка…</string>
+    <string name="notes_processing_preview">Расшифровка и составление обзора идут на этом устройстве. Запись уже можно послушать.</string>
+    <string name="notes_processing_transcribing">Идёт расшифровка… Она появится здесь автоматически.</string>
+    <string name="notes_processing_structuring">Составляем обзор… Расшифровка уже ниже.</string>
+    <string name="notes_recording_fallback_title">Запись</string>
+    <string name="notes_failed_description">Нам не удалось создать обзор и расшифровку для этой заметки.</string>
+    <string name="notes_failed_overview_description">Нам не удалось создать обзор для этой заметки. Расшифровка сохранена ниже.</string>
+    <string name="notes_try_again_button">Повторить</string>
+    <string name="notes_overview_heading">Обзор</string>
+    <string name="notes_transcript_heading">Расшифровка</string>
+    <string name="notes_edit_description">Редактировать заметку</string>
+    <string name="notes_share_description">Поделиться заметкой</string>
+    <string name="notes_delete_description">Удалить заметку</string>
+    <string name="notes_metrics">Расшифровка %1$s · Структурирование %2$s · %3$s</string>
+    <string name="notes_edit_title_label">Название</string>
+    <string name="notes_edit_save_description">Сохранить изменения</string>
+    <string name="notes_edit_cancel_description">Отменить изменения</string>
+    <string name="notes_delete_dialog_title">Удалить эту заметку?</string>
+    <string name="notes_delete_dialog_body">Заметка будет безвозвратно удалена с этого устройства. Это нельзя отменить.</string>
+    <string name="notes_delete_dialog_confirm">Удалить</string>
+    <string name="notes_delete_dialog_cancel">Отмена</string>
+    <string name="notes_retranscribe_description">Расшифровать заново</string>
+    <string name="notes_retranscribe_dialog_title">Расшифровать эту заметку заново?</string>
+    <string name="notes_retranscribe_dialog_body">Запись будет расшифрована и обработана заново; текущие название, обзор и расшифровка будут заменены. Сама аудиозапись сохранится.</string>
+    <string name="notes_badge_encrypted">Зашифрована</string>
+    <string name="notes_more_actions_description">Другие действия</string>
+    <string name="notes_share_dialog_title">Чем поделиться?</string>
+    <string name="notes_share_dialog_body">Учтите: отправленные копии больше не зашифрованы, как только покидают это устройство.</string>
+    <string name="notes_share_option_note">Добавить заметку</string>
+    <string name="notes_share_option_audio">Добавить аудио</string>
+    <string name="notes_share_dialog_confirm">Поделиться</string>
+    <string name="notes_share_date_label">Дата</string>
+    <string name="notes_preset_description">Изменить стиль заметки</string>
+    <string name="notes_preset_sheet_title">Переписать эту заметку как</string>
+    <string name="notes_preset_sheet_body">Запись сохраняется. Название и обзор будут написаны заново по расшифровке в выбранном стиле.</string>
+</resources>

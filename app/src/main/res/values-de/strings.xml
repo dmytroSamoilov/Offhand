@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="destination_notes">Notizen</string>
+    <string name="destination_settings">Einstellungen</string>
+    <string name="lock_title">Notizen gesperrt</string>
+    <string name="lock_body">Deine Notizen sind auf diesem Gerät verschlüsselt. Zum Fortfahren entsperren.</string>
+    <string name="lock_unlock_button">Entsperren</string>
+    <string name="lock_prompt_title">Offhand entsperren</string>
+    <string name="lock_prompt_subtitle">Verwende deine Displaysperre oder deinen Fingerabdruck</string>
+</resources>

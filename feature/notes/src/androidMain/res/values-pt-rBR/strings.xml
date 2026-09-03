@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notes_title">Notas</string>
+    <string name="notes_empty_state">Ainda não há notas. Toque no botão do microfone para gravar a primeira.</string>
+    <string name="notes_model_banner_title">Preparando seu núcleo de IA</string>
+    <string name="notes_model_banner_subtitle">Baixando o modelo no aparelho em segundo plano</string>
+    <string name="notes_day_today">Hoje</string>
+    <string name="notes_day_yesterday">Ontem</string>
+    <plurals name="notes_word_count">
+        <item quantity="one">%1$s palavra</item>
+        <item quantity="many">%1$s palavras</item>
+        <item quantity="other">%1$s palavras</item>
+    </plurals>
+    <string name="notes_record_fab_description">Iniciar uma nova gravação</string>
+    <string name="notes_select_prompt">Selecione uma nota para lê-la</string>
+    <string name="notes_back_description">Voltar às notas</string>
+    <string name="notes_play_description">Reproduzir gravação</string>
+    <string name="notes_pause_description">Pausar reprodução</string>
+    <string name="notes_processing_title">Processando…</string>
+    <string name="notes_processing_preview">Transcrevendo e resumindo neste aparelho. Você já pode reproduzir a gravação.</string>
+    <string name="notes_processing_transcribing">Processando a transcrição… Ela vai aparecer aqui automaticamente.</string>
+    <string name="notes_processing_structuring">Criando a visão geral… A transcrição já está abaixo.</string>
+    <string name="notes_recording_fallback_title">Gravação</string>
+    <string name="notes_failed_description">Não foi possível criar uma visão geral e uma transcrição para esta nota.</string>
+    <string name="notes_failed_overview_description">Não foi possível criar uma visão geral para esta nota. A transcrição está salva abaixo.</string>
+    <string name="notes_try_again_button">Tentar novamente</string>
+    <string name="notes_overview_heading">Visão geral</string>
+    <string name="notes_transcript_heading">Transcrição</string>
+    <string name="notes_edit_description">Editar nota</string>
+    <string name="notes_share_description">Compartilhar nota</string>
+    <string name="notes_delete_description">Excluir nota</string>
+    <string name="notes_metrics">Transcrição %1$s · Estruturação %2$s · %3$s</string>
+    <string name="notes_edit_title_label">Título</string>
+    <string name="notes_edit_save_description">Salvar alterações</string>
+    <string name="notes_edit_cancel_description">Descartar alterações</string>
+    <string name="notes_delete_dialog_title">Excluir esta nota?</string>
+    <string name="notes_delete_dialog_body">A nota será removida permanentemente deste aparelho. Isso não pode ser desfeito.</string>
+    <string name="notes_delete_dialog_confirm">Excluir</string>
+    <string name="notes_delete_dialog_cancel">Cancelar</string>
+    <string name="notes_retranscribe_description">Transcrever novamente</string>
+    <string name="notes_retranscribe_dialog_title">Transcrever esta nota novamente?</string>
+    <string name="notes_retranscribe_dialog_body">A gravação será transcrita e resumida de novo, substituindo o título, a visão geral e a transcrição atuais. A gravação de áudio é mantida.</string>
+    <string name="notes_badge_encrypted">Criptografada</string>
+    <string name="notes_more_actions_description">Mais ações</string>
+    <string name="notes_share_dialog_title">O que você quer compartilhar?</string>
+    <string name="notes_share_dialog_body">Lembre-se: as cópias compartilhadas deixam de ser criptografadas quando saem deste aparelho.</string>
+    <string name="notes_share_option_note">Incluir nota</string>
+    <string name="notes_share_option_audio">Incluir áudio</string>
+    <string name="notes_share_dialog_confirm">Compartilhar</string>
+    <string name="notes_share_date_label">Data</string>
+    <string name="notes_preset_description">Mudar estilo da nota</string>
+    <string name="notes_preset_sheet_title">Reescrever esta nota como</string>
+    <string name="notes_preset_sheet_body">A gravação é mantida. O título e a visão geral são escritos de novo a partir da transcrição, no estilo que você escolher.</string>
+</resources>

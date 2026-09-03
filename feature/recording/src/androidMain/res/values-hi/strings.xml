@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="recording_idle_hint">रिकॉर्ड करने के लिए टैप करें। सब कुछ इसी डिवाइस पर ट्रांसक्राइब और व्यवस्थित होता है।</string>
+    <string name="recording_start_description">रिकॉर्डिंग शुरू करें</string>
+    <string name="recording_stop_description">रिकॉर्डिंग बंद करें</string>
+    <string name="recording_pause_description">रिकॉर्डिंग पॉज़ करें</string>
+    <string name="recording_resume_description">रिकॉर्डिंग जारी रखें</string>
+    <string name="recording_paused_label">पॉज़ पर</string>
+    <string name="recording_active_label">रिकॉर्डिंग हो रही है…</string>
+    <string name="recording_save_note_button">नोट सहेजें</string>
+    <string name="recording_discard_button">रिकॉर्डिंग खारिज करें</string>
+    <string name="recording_discard_dialog_title">यह रिकॉर्डिंग खारिज करें?</string>
+    <string name="recording_discard_dialog_body">रिकॉर्डिंग और अब तक ट्रांसक्राइब हुआ सब कुछ हट जाएगा। इसे वापस नहीं लाया जा सकता।</string>
+    <string name="recording_discard_dialog_confirm">खारिज करें</string>
+    <string name="recording_discard_dialog_cancel">रद्द करें</string>
+    <string name="recording_stage_finishing">आपकी रिकॉर्डिंग सहेजी जा रही है…</string>
+    <string name="recording_processing_hint">आप इसे बंद कर सकते हैं — नोट तैयार होते ही आपकी सूची में दिखेगा।</string>
+    <string name="recording_external_mic_generic">बाहरी माइक्रोफ़ोन</string>
+    <string name="recording_saved_title">रिकॉर्डिंग सहेजी गई</string>
+    <string name="recording_saved_body">आपका नोट प्रोसेस हो रहा है। आप इसे बंद कर सकते हैं — ट्रांसक्रिप्शन तैयार होते ही हम आपको सूचित करेंगे।</string>
+    <string name="recording_saved_done_button">हो गया</string>
+    <string name="recording_failed_title">कुछ गड़बड़ हो गई</string>
+    <string name="recording_try_again_button">फिर से कोशिश करें</string>
+    <string name="recording_notification_channel_name">रिकॉर्डिंग</string>
+    <string name="recording_notification_recording_title">रिकॉर्डिंग चल रही है</string>
+    <string name="recording_notification_paused_title">रिकॉर्डिंग पॉज़ पर है</string>
+    <string name="recording_notification_recording_text">ऑडियो सिर्फ़ इसी डिवाइस पर प्रोसेस होता है</string>
+    <string name="recording_notification_paused_text">अब तक रिकॉर्ड हुआ: %1$s</string>
+    <string name="recording_notification_action_pause">पॉज़ करें</string>
+    <string name="recording_notification_action_resume">जारी रखें</string>
+    <string name="recording_notification_action_stop">बंद करें</string>
+    <string name="recording_notification_processing_title">आपका नोट बन रहा है</string>
+    <string name="recording_notification_processing_text">डिवाइस पर ट्रांसक्राइब और व्यवस्थित हो रहा है</string>
+    <string name="recording_notification_notes_channel_name">तैयार नोट्स</string>
+    <string name="recording_notification_ready_title">आपका नोट तैयार है</string>
+    <string name="recording_notification_ready_text">तैयार नोट खोलने के लिए टैप करें।</string>
+    <string name="recording_default_note_title">रिकॉर्डिंग %1$d</string>
+    <string name="recording_untitled_note_title">वॉयस नोट</string>
+    <string name="recording_notification_note_failed_title">AI ट्रांसक्रिप्शन विफल रहा</string>
+    <string name="recording_notification_note_failed_text">रिकॉर्डिंग सहेज ली गई है। खोलने के लिए टैप करें।</string>
+</resources>

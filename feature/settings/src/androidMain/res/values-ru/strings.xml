@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Настройки</string>
+
+    <string name="settings_acceleration_title">Ускорение ИИ</string>
+    <string name="settings_acceleration_cpu">CPU</string>
+    <string name="settings_acceleration_cpu_description">Работает на любом поддерживаемом устройстве</string>
+    <string name="settings_acceleration_gpu">GPU</string>
+    <string name="settings_acceleration_gpu_description">Заметно быстрее на устройствах со Snapdragon</string>
+    <string name="settings_acceleration_note">GPU недоступен на устройствах Pixel (Tensor). После изменения движок ИИ перезагрузится при следующем использовании.</string>
+
+    <string name="settings_model_title">Модель ИИ</string>
+    <string name="settings_model_picker_auto">Автоматически</string>
+    <string name="settings_model_picker_auto_description">Лучшая модель для памяти этого устройства</string>
+    <string name="settings_model_picker_note">После смены модели движок ИИ перезагрузится при следующем использовании. Уже скачанные модели остаются на устройстве.</string>
+    <string name="settings_model_status_not_downloaded">Не скачана</string>
+    <string name="settings_model_status_downloading">Скачивание… %1$d%%</string>
+    <string name="settings_model_status_loading">Подготовка движка…</string>
+    <string name="settings_model_status_ready">Готова · хранится на этом устройстве</string>
+    <string name="settings_model_status_error">С моделью что-то пошло не так</string>
+    <string name="settings_model_download">Скачать модель</string>
+    <string name="settings_model_retry">Повторить</string>
+    <string name="settings_model_delete">Удалить модель</string>
+    <string name="settings_delete_model_dialog_title">Удалить модель ИИ?</string>
+    <string name="settings_delete_model_dialog_body">Запись не будет работать, пока модель не будет скачана снова. Ваши заметки не пострадают.</string>
+    <string name="settings_delete_model_dialog_confirm">Удалить</string>
+    <string name="settings_delete_model_dialog_cancel">Отмена</string>
+
+    <string name="settings_note_style_title">Стиль заметок</string>
+    <string name="settings_note_style_note">Применяется к новым записям. Стиль существующей заметки можно изменить на её экране.</string>
+
+    <string name="settings_security_title">Безопасность</string>
+    <string name="settings_app_lock_label">Требовать разблокировку при открытии Offhand</string>
+    <string name="settings_app_lock_description">Запрашивает отпечаток пальца, лицо или блокировку экрана при каждом открытии Offhand.</string>
+    <string name="settings_app_lock_unavailable">Настройте блокировку экрана на этом телефоне, чтобы использовать эту функцию.</string>
+    <string name="settings_appearance_title">Оформление</string>
+    <string name="settings_dynamic_color_label">Цвета обоев</string>
+    <string name="settings_dynamic_color_description">Окрашивает приложение в цвета ваших обоев (Material You) вместо встроенной палитры.</string>
+
+    <string name="settings_privacy_title">Конфиденциальность</string>
+    <string name="settings_telemetry_label">Анонимные отчёты об использовании и стабильности</string>
+    <string name="settings_telemetry_description">Статистика использования и отчёты о сбоях — например, запуски приложения, модель устройства и версия приложения. Никогда — ваши заметки, записи или личные данные.</string>
+    <string name="settings_feedback_title">Обратная связь</string>
+    <string name="settings_feature_request_label">Предложить функцию</string>
+    <string name="settings_feature_request_description">Чего-то не хватает? Расскажите разработчику, что приложение должно уметь.</string>
+    <string name="settings_feature_request_subject">[%1$s] предложение функции</string>
+    <string name="settings_feature_request_body">Здравствуйте! Хочу предложить функцию:\n\n\n\n—\nДанные ниже добавлены автоматически. Они описывают моё устройство и версию приложения и помогают разработчику понять контекст предложения. Пожалуйста, оставьте их, если не против ими поделиться.\nУстройство: %1$s %2$s (%3$s)\nRAM: %4$s\nВерсия приложения: %5$s\nAndroid: %6$s (API %7$d)</string>
+    <string name="settings_feature_request_no_email_app">На этом устройстве не найдено почтовое приложение</string>
+
+    <string name="settings_about_support_title">О приложении и поддержка</string>
+    <string name="settings_about_support_subtitle">Версия %1$s · обратная связь, конфиденциальность и правовая информация</string>
+    <string name="settings_about_support_back">Назад к настройкам</string>
+
+    <string name="settings_about_title">О приложении</string>
+    <string name="settings_about_version">Версия %1$s</string>
+    <string name="settings_about_terms">Условия использования</string>
+    <string name="settings_about_privacy">Политика конфиденциальности</string>
+    <string name="settings_about_no_browser">Не найдено приложение, чтобы открыть эту ссылку</string>
+
+    <string name="settings_developer_title">Разработчик</string>
+    <string name="settings_developer_label">Параметры разработчика</string>
+    <string name="settings_developer_description">Показывает управление моделями, ускорение и диагностику обработки.</string>
+</resources>

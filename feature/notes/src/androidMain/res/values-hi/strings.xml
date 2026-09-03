@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notes_title">नोट्स</string>
+    <string name="notes_empty_state">अभी कोई नोट नहीं है। पहला नोट रिकॉर्ड करने के लिए माइक्रोफ़ोन बटन दबाएं।</string>
+    <string name="notes_model_banner_title">आपका AI कोर तैयार हो रहा है</string>
+    <string name="notes_model_banner_subtitle">ऑन-डिवाइस मॉडल बैकग्राउंड में डाउनलोड हो रहा है</string>
+    <string name="notes_day_today">आज</string>
+    <string name="notes_day_yesterday">कल</string>
+    <plurals name="notes_word_count">
+        <item quantity="one">%1$s शब्द</item>
+        <item quantity="other">%1$s शब्द</item>
+    </plurals>
+    <string name="notes_record_fab_description">नई रिकॉर्डिंग शुरू करें</string>
+    <string name="notes_select_prompt">पढ़ने के लिए कोई नोट चुनें</string>
+    <string name="notes_back_description">नोट्स पर वापस जाएं</string>
+    <string name="notes_play_description">रिकॉर्डिंग चलाएं</string>
+    <string name="notes_pause_description">प्लेबैक रोकें</string>
+    <string name="notes_processing_title">प्रोसेस हो रहा है…</string>
+    <string name="notes_processing_preview">इसी डिवाइस पर ट्रांसक्रिप्ट और सारांश तैयार हो रहा है। आप रिकॉर्डिंग अभी भी चला सकते हैं।</string>
+    <string name="notes_processing_transcribing">ट्रांसक्रिप्ट प्रोसेस हो रहा है… यह यहां अपने-आप दिखेगा।</string>
+    <string name="notes_processing_structuring">अवलोकन बन रहा है… ट्रांसक्रिप्ट पहले से नीचे मौजूद है।</string>
+    <string name="notes_recording_fallback_title">रिकॉर्डिंग</string>
+    <string name="notes_failed_description">हम इस नोट के लिए अवलोकन और ट्रांसक्रिप्ट नहीं बना सके।</string>
+    <string name="notes_failed_overview_description">हम इस नोट के लिए अवलोकन नहीं बना सके। ट्रांसक्रिप्ट नीचे सहेजा गया है।</string>
+    <string name="notes_try_again_button">फिर से कोशिश करें</string>
+    <string name="notes_overview_heading">अवलोकन</string>
+    <string name="notes_transcript_heading">ट्रांसक्रिप्ट</string>
+    <string name="notes_edit_description">नोट में बदलाव करें</string>
+    <string name="notes_share_description">नोट शेयर करें</string>
+    <string name="notes_delete_description">नोट हटाएं</string>
+    <string name="notes_metrics">ट्रांसक्रिप्शन %1$s · संरचना %2$s · %3$s</string>
+    <string name="notes_edit_title_label">शीर्षक</string>
+    <string name="notes_edit_save_description">बदलाव सहेजें</string>
+    <string name="notes_edit_cancel_description">बदलाव न रखें</string>
+    <string name="notes_delete_dialog_title">यह नोट हटाएं?</string>
+    <string name="notes_delete_dialog_body">नोट इस डिवाइस से हमेशा के लिए हट जाएगा। इसे वापस नहीं लाया जा सकता।</string>
+    <string name="notes_delete_dialog_confirm">हटाएं</string>
+    <string name="notes_delete_dialog_cancel">रद्द करें</string>
+    <string name="notes_retranscribe_description">दोबारा ट्रांसक्राइब करें</string>
+    <string name="notes_retranscribe_dialog_title">यह नोट दोबारा ट्रांसक्राइब करें?</string>
+    <string name="notes_retranscribe_dialog_body">रिकॉर्डिंग दोबारा ट्रांसक्राइब और सारांशित होगी; मौजूदा शीर्षक, अवलोकन और ट्रांसक्रिप्ट बदल जाएंगे। ऑडियो रिकॉर्डिंग सुरक्षित रहेगी।</string>
+    <string name="notes_badge_encrypted">एन्क्रिप्टेड</string>
+    <string name="notes_more_actions_description">और कार्रवाइयां</string>
+    <string name="notes_share_dialog_title">आप क्या शेयर करना चाहते हैं?</string>
+    <string name="notes_share_dialog_body">ध्यान रखें: शेयर की गई कॉपियां इस डिवाइस से बाहर जाते ही एन्क्रिप्टेड नहीं रहतीं।</string>
+    <string name="notes_share_option_note">नोट शामिल करें</string>
+    <string name="notes_share_option_audio">ऑडियो शामिल करें</string>
+    <string name="notes_share_dialog_confirm">शेयर करें</string>
+    <string name="notes_share_date_label">तारीख</string>
+    <string name="notes_preset_description">नोट की शैली बदलें</string>
+    <string name="notes_preset_sheet_title">इस नोट को इस रूप में फिर से लिखें</string>
+    <string name="notes_preset_sheet_body">रिकॉर्डिंग सुरक्षित रहती है। आपकी चुनी शैली में ट्रांसक्रिप्ट से शीर्षक और अवलोकन दोबारा लिखे जाते हैं।</string>
+</resources>

@@ -10,4 +10,7 @@ class DefaultNoteTitleProviderImpl(
 
     override fun titleFor(nextNumber: Int): String =
         context.getString(R.string.recording_default_note_title, nextNumber)
+
+    override fun untitledTitle(): String =
+        context.getString(R.string.recording_untitled_note_title)
 }

@@ -52,10 +52,15 @@ struct AboutSupportView: View {
                 value: String(format: String(localized: "%@ GB"), state.model.sizeGb)
             )
             modelStatusRow
-            if let message = state.model.errorMessage {
-                Text(message)
+            if state.model.status == .error {
+                Text(String(localized: "Something went wrong with the model"))
                     .font(.footnote)
                     .foregroundStyle(.red)
+            }
+            if state.isDeveloperOptionsEnabled, let message = state.model.errorMessage {
+                Text(message)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
         } header: {
             Text(String(localized: "On-device AI"))

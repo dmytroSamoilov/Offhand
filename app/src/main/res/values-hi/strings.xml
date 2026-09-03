@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="destination_notes">नोट्स</string>
+    <string name="destination_settings">सेटिंग्स</string>
+    <string name="lock_title">नोट्स लॉक हैं</string>
+    <string name="lock_body">आपके नोट्स इस डिवाइस पर एन्क्रिप्टेड हैं। जारी रखने के लिए अनलॉक करें।</string>
+    <string name="lock_unlock_button">अनलॉक करें</string>
+    <string name="lock_prompt_title">Offhand अनलॉक करें</string>
+    <string name="lock_prompt_subtitle">अपना स्क्रीन लॉक या फ़िंगरप्रिंट इस्तेमाल करें</string>
+</resources>

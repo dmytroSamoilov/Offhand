@@ -142,10 +142,15 @@ class RecordingSessionManagerTest {
         every { this@mockk.invoke() } returns false
     }
 
+    private val defaultNoteTitleProvider: DefaultNoteTitleProvider = mockk {
+        every { untitledTitle() } returns "Voice note"
+    }
+
     private fun CoroutineScope.manager() = RecordingSessionManager(
         recorder = recorder,
         speechToText = speechToText,
-        transcriptStructurer = TranscriptStructurer(aiBackend, testModelManager(), isThinkingEnabled),
+        transcriptStructurer =
+            TranscriptStructurer(aiBackend, testModelManager(), isThinkingEnabled, defaultNoteTitleProvider),
         createRecordingNote = createRecordingNote,
         markNoteRecorded = markNoteRecorded,
         discardNote = discardNote,

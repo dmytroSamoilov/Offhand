@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_ui_error_title">Etwas ist schiefgelaufen</string>
+    <string name="core_ui_error_confirm">OK</string>
+    <string name="core_ui_note_preset_summary">Zusammenfassung</string>
+    <string name="core_ui_note_preset_summary_description">Eine saubere Ausarbeitung des Gesagten – ohne Wiederholungen und Füllwörter.</string>
+    <string name="core_ui_note_preset_meeting">Meeting-Notizen</string>
+    <string name="core_ui_note_preset_meeting_description">Diskussion, Entscheidungen, Aufgaben und offene Fragen.</string>
+    <string name="core_ui_note_preset_visit">Besuchsbericht</string>
+    <string name="core_ui_note_preset_visit_description">Um wen es beim Besuch ging, Beobachtungen, was getan wurde und nächste Schritte.</string>
+    <string name="core_ui_note_preset_legal">Juristische Notiz</string>
+    <string name="core_ui_note_preset_legal_description">Sache, genannte Fakten, Weisungen, erteilter Rat und nächste Schritte.</string>
+</resources>

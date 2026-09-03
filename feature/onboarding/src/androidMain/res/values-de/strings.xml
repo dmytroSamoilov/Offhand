@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_incompatible_title">Gerät nicht unterstützt</string>
+    <string name="onboarding_incompatible_body">Offhand führt ein großes KI-Modell direkt auf deinem Smartphone aus, damit nichts von dem, was du aufnimmst, jemals das Gerät verlässt. Dieses Gerät erfüllt die Mindestanforderungen nicht.</string>
+    <string name="onboarding_incompatible_ram_label">Arbeitsspeicher (RAM):</string>
+    <string name="onboarding_incompatible_ram_value">%1$s GB — benötigt %2$s GB</string>
+    <string name="onboarding_incompatible_cores_label">CPU-Kerne:</string>
+    <string name="onboarding_incompatible_cores_value">%1$d — benötigt %2$d</string>
+
+    <string name="onboarding_privacy_title">Privat von Grund auf</string>
+    <string name="onboarding_privacy_body">Alles, was du aufnimmst, bleibt auf diesem Smartphone. Aufnahmen, Transkripte und Notizen werden auf diesem Gerät verschlüsselt, und die KI, die sie verarbeitet, läuft genau hier — nichts wird jemals hochgeladen.</string>
+    <string name="onboarding_continue">Weiter</string>
+
+    <string name="onboarding_note_style_title">Wie wirst du Offhand nutzen?</string>
+    <string name="onboarding_note_style_body">Wähle den Stil, in dem deine Notizen geschrieben werden. Jede Aufnahme wird zu dieser Art von Notiz.</string>
+    <string name="onboarding_note_style_hint">Du kannst das jederzeit in den Einstellungen ändern oder jede einzelne Notiz umformulieren lassen.</string>
+
+    <string name="onboarding_lock_title">Schütze deine Notizen</string>
+    <string name="onboarding_lock_body">Deine Notizen werden mit einem Schlüssel verschlüsselt, der in der sicheren Hardware dieses Smartphones liegt. Dieses Smartphone hat keine Displaysperre, also kann jeder, der es in die Hand nimmt, Offhand öffnen. Richte eine PIN, ein Muster oder einen Fingerabdruck ein, damit deine Notizen privat bleiben.</string>
+    <string name="onboarding_lock_setup">Displaysperre einrichten</string>
+    <string name="onboarding_lock_skip">Ohne Sperre fortfahren</string>
+    <string name="onboarding_lock_enable_title">Offhand sperren?</string>
+    <string name="onboarding_lock_enable_body">Offhand kann bei jedem Öffnen nach Fingerabdruck, Gesicht oder Displaysperre fragen, damit deine Notizen privat bleiben — selbst wenn jemand anderes das entsperrte Smartphone in der Hand hält.</string>
+    <string name="onboarding_lock_enable_label">Entsperren beim Öffnen von Offhand verlangen</string>
+    <string name="onboarding_lock_enable_description">Du kannst das jederzeit in den Einstellungen ändern.</string>
+
+    <string name="onboarding_download_title">Richte deine private KI ein</string>
+    <string name="onboarding_download_body">Offhand transkribiert und fasst Sprachnotizen mit KI zusammen, die vollständig auf deinem Smartphone läuft. Zum Start ist ein einmaliger Download der KI-Modelle nötig.</string>
+    <string name="onboarding_download_size">Einmaliger Download · etwa %1$s GB</string>
+    <string name="onboarding_download_background_hint">Der Download läuft im Hintergrund weiter — du kannst sofort mit dem Aufnehmen beginnen. Wir benachrichtigen dich, sobald alles bereit ist.</string>
+    <string name="onboarding_download_wifi_hint">Tipp: Verbinde dich mit WLAN, um mobile Daten zu sparen.</string>
+    <string name="onboarding_notification_download_channel_name">Modell-Downloads</string>
+    <string name="onboarding_notification_status_channel_name">Modellstatus</string>
+    <string name="onboarding_notification_downloading_title">KI-Modelle werden heruntergeladen</string>
+    <string name="onboarding_notification_downloading_text">Offhand richtet die On-Device-KI ein</string>
+    <string name="onboarding_notification_ready_title">Deine KI-Modelle sind bereit</string>
+    <string name="onboarding_notification_ready_text">Transkription und Zusammenfassungen laufen jetzt vollständig auf diesem Gerät.</string>
+    <string name="onboarding_notification_failed_title">Modell-Download nicht abgeschlossen</string>
+    <string name="onboarding_notification_failed_text">Prüfe deine Verbindung. Offhand setzt den Download fort, wenn du deine nächste Notiz aufnimmst.</string>
+
+    <string name="onboarding_consent_title">Hilfst du mit, Offhand zu verbessern?</string>
+    <string name="onboarding_consent_body">Teile anonyme Nutzungsstatistiken und Absturzberichte — Dinge wie App-Starts, Gerätemodell und App-Version —, damit wir die App schnell und zuverlässig halten können. Das umfasst niemals deine Notizen, Aufnahmen, Transkripte oder persönliche Daten — alles, was du aufnimmst, bleibt auf diesem Gerät. Du kannst das jederzeit in den Einstellungen ändern.</string>
+    <string name="onboarding_consent_toggle_label">Anonyme Berichte teilen</string>
+</resources>

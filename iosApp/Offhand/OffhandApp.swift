@@ -10,6 +10,7 @@ struct OffhandApp: App {
                 whisperEngine: WhisperEngineImpl(),
                 audioSource: MicAudioSource(),
                 noteTitleTemplate: String(localized: "Note %d"),
+                untitledNoteTitle: String(localized: "Voice note"),
                 shareLabels: NoteShareLabels(
                     title: String(localized: "Title"),
                     date: String(localized: "Date"),

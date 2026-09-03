@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_incompatible_title">Пристрій не підтримується</string>
+    <string name="onboarding_incompatible_body">Offhand запускає велику модель ШІ прямо на вашому телефоні, тому ніщо із записаного не залишає пристрій. Цей пристрій не відповідає мінімальним вимогам.</string>
+    <string name="onboarding_incompatible_ram_label">Памʼять (RAM):</string>
+    <string name="onboarding_incompatible_ram_value">%1$s ГБ — потрібно %2$s ГБ</string>
+    <string name="onboarding_incompatible_cores_label">Ядра процесора:</string>
+    <string name="onboarding_incompatible_cores_value">%1$d — потрібно %2$d</string>
+
+    <string name="onboarding_privacy_title">Приватність за замовчуванням</string>
+    <string name="onboarding_privacy_body">Усе, що ви записуєте, залишається на цьому телефоні. Записи, розшифровки та нотатки шифруються на цьому пристрої, а ШІ, який їх обробляє, працює просто тут — ніщо ніколи не вивантажується в мережу.</string>
+    <string name="onboarding_continue">Продовжити</string>
+
+    <string name="onboarding_note_style_title">Як ви користуватиметеся Offhand?</string>
+    <string name="onboarding_note_style_body">Виберіть стиль, у якому будуть написані ваші нотатки. Кожен запис стає нотаткою цього типу.</string>
+    <string name="onboarding_note_style_hint">Це можна будь-коли змінити в налаштуваннях або переоформити будь-яку окрему нотатку.</string>
+
+    <string name="onboarding_lock_title">Захистіть свої нотатки</string>
+    <string name="onboarding_lock_body">Ваші нотатки шифруються ключем, який зберігається в захищеному обладнанні цього телефону. На цьому телефоні немає блокування екрана, тож будь-хто, хто візьме його до рук, зможе відкрити Offhand. Налаштуйте PIN-код, графічний ключ або відбиток пальця, щоб нотатки лишалися особистими.</string>
+    <string name="onboarding_lock_setup">Налаштувати блокування екрана</string>
+    <string name="onboarding_lock_skip">Продовжити без блокування</string>
+    <string name="onboarding_lock_enable_title">Заблокувати Offhand?</string>
+    <string name="onboarding_lock_enable_body">Offhand може запитувати відбиток пальця, обличчя або блокування екрана під час кожного відкриття, щоб ваші нотатки лишалися особистими, навіть якщо розблокований телефон опиниться в чужих руках.</string>
+    <string name="onboarding_lock_enable_label">Вимагати розблокування, щоб відкрити Offhand</string>
+    <string name="onboarding_lock_enable_description">Це можна будь-коли змінити в налаштуваннях.</string>
+
+    <string name="onboarding_download_title">Налаштуйте свій особистий ШІ</string>
+    <string name="onboarding_download_body">Offhand розшифровує голосові нотатки та стисло викладає їхню суть за допомогою ШІ, який працює повністю на вашому телефоні. Щоб почати, потрібно один раз завантажити його моделі ШІ.</string>
+    <string name="onboarding_download_size">Одноразове завантаження · близько %1$s ГБ</string>
+    <string name="onboarding_download_background_hint">Завантаження триває у фоні — можна одразу починати запис. Ми повідомимо, коли все буде готово.</string>
+    <string name="onboarding_download_wifi_hint">Порада: підключіться до Wi‑Fi, щоб заощадити мобільний трафік.</string>
+    <string name="onboarding_notification_download_channel_name">Завантаження моделей</string>
+    <string name="onboarding_notification_status_channel_name">Статус моделі</string>
+    <string name="onboarding_notification_downloading_title">Завантаження моделей ШІ</string>
+    <string name="onboarding_notification_downloading_text">Offhand налаштовує ШІ на пристрої</string>
+    <string name="onboarding_notification_ready_title">Ваші моделі ШІ готові</string>
+    <string name="onboarding_notification_ready_text">Розшифровка та огляди тепер виконуються повністю на цьому пристрої.</string>
+    <string name="onboarding_notification_failed_title">Завантаження моделі не завершилося</string>
+    <string name="onboarding_notification_failed_text">Перевірте зʼєднання. Offhand відновить завантаження, коли ви запишете наступну нотатку.</string>
+
+    <string name="onboarding_consent_title">Допоможете покращити Offhand?</string>
+    <string name="onboarding_consent_body">Діліться анонімною статистикою використання та звітами про збої — наприклад, запусками застосунку, моделлю пристрою та версією застосунку, — щоб застосунок лишався швидким і надійним. Сюди ніколи не входять ваші нотатки, записи, розшифровки чи особисті дані — усе, що ви записуєте, залишається на цьому пристрої. Це можна будь-коли змінити в налаштуваннях.</string>
+    <string name="onboarding_consent_toggle_label">Ділитися анонімними звітами</string>
+</resources>

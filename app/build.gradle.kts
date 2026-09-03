@@ -23,6 +23,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    androidResources {
+        localeFilters += listOf("en", "de", "es", "hi", "pt-rBR", "ru", "uk")
+    }
+
     flavorDimensions += "environment"
 
     productFlavors {

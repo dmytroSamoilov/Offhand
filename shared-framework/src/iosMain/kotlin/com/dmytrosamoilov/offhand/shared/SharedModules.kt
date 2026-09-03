@@ -35,6 +35,7 @@ class IosPlatformDeps(
     val whisperEngine: IosWhisperEngine,
     val audioSource: IosAudioSource,
     val noteTitleTemplate: String,
+    val untitledNoteTitle: String,
     val shareLabels: NoteShareLabels,
     val shareFallbackTitle: String,
 )
@@ -69,7 +70,9 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
     single<AiBackend> { IosAiBackend(get(), get()) }
     single<SpeechToText> { IosWhisperSpeechToText(get(), get(), get()) }
     single<AudioRecorder> { IosAudioRecorder(deps.audioSource) }
-    single<DefaultNoteTitleProvider> { IosDefaultNoteTitleProvider(deps.noteTitleTemplate) }
+    single<DefaultNoteTitleProvider> {
+        IosDefaultNoteTitleProvider(deps.noteTitleTemplate, deps.untitledNoteTitle)
+    }
     single<NoteShareLabelsProvider> {
         IosNoteShareLabelsProvider(deps.shareLabels, deps.shareFallbackTitle)
     }
@@ -86,9 +89,12 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
 
 class IosDefaultNoteTitleProvider(
     private val template: String,
+    private val untitled: String,
 ) : DefaultNoteTitleProvider {
 
     override fun titleFor(nextNumber: Int): String = template.replace("%d", nextNumber.toString())
+
+    override fun untitledTitle(): String = untitled
 }
 
 class IosNoteShareLabelsProvider(

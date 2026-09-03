@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="destination_notes">Нотатки</string>
+    <string name="destination_settings">Налаштування</string>
+    <string name="lock_title">Нотатки заблоковано</string>
+    <string name="lock_body">Ваші нотатки зашифровано на цьому пристрої. Розблокуйте, щоб продовжити.</string>
+    <string name="lock_unlock_button">Розблокувати</string>
+    <string name="lock_prompt_title">Розблокувати Offhand</string>
+    <string name="lock_prompt_subtitle">Скористайтеся блокуванням екрана або відбитком пальця</string>
+</resources>

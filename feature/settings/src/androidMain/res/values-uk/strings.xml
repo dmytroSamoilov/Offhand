@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Налаштування</string>
+
+    <string name="settings_acceleration_title">Прискорення ШІ</string>
+    <string name="settings_acceleration_cpu">CPU</string>
+    <string name="settings_acceleration_cpu_description">Працює на будь-якому підтримуваному пристрої</string>
+    <string name="settings_acceleration_gpu">GPU</string>
+    <string name="settings_acceleration_gpu_description">Значно швидше на пристроях зі Snapdragon</string>
+    <string name="settings_acceleration_note">GPU недоступний на пристроях Pixel (Tensor). Після зміни рушій ШІ перезавантажиться під час наступного використання.</string>
+
+    <string name="settings_model_title">Модель ШІ</string>
+    <string name="settings_model_picker_auto">Автоматично</string>
+    <string name="settings_model_picker_auto_description">Найкраща модель для памʼяті цього пристрою</string>
+    <string name="settings_model_picker_note">Після зміни моделі рушій ШІ перезавантажиться під час наступного використання. Уже завантажені моделі залишаються на пристрої.</string>
+    <string name="settings_model_status_not_downloaded">Не завантажена</string>
+    <string name="settings_model_status_downloading">Завантаження… %1$d%%</string>
+    <string name="settings_model_status_loading">Підготовка рушія…</string>
+    <string name="settings_model_status_ready">Готова · зберігається на цьому пристрої</string>
+    <string name="settings_model_status_error">З моделлю щось пішло не так</string>
+    <string name="settings_model_download">Завантажити модель</string>
+    <string name="settings_model_retry">Повторити</string>
+    <string name="settings_model_delete">Видалити модель</string>
+    <string name="settings_delete_model_dialog_title">Видалити модель ШІ?</string>
+    <string name="settings_delete_model_dialog_body">Запис не працюватиме, доки модель не буде завантажено знову. Ваші нотатки не постраждають.</string>
+    <string name="settings_delete_model_dialog_confirm">Видалити</string>
+    <string name="settings_delete_model_dialog_cancel">Скасувати</string>
+
+    <string name="settings_note_style_title">Стиль нотаток</string>
+    <string name="settings_note_style_note">Застосовується до нових записів. Стиль наявної нотатки можна змінити на її екрані.</string>
+
+    <string name="settings_security_title">Безпека</string>
+    <string name="settings_app_lock_label">Вимагати розблокування, щоб відкрити Offhand</string>
+    <string name="settings_app_lock_description">Запитує відбиток пальця, обличчя або блокування екрана щоразу, коли відкривається Offhand.</string>
+    <string name="settings_app_lock_unavailable">Налаштуйте блокування екрана на цьому телефоні, щоб користуватися цим.</string>
+    <string name="settings_appearance_title">Оформлення</string>
+    <string name="settings_dynamic_color_label">Кольори шпалер</string>
+    <string name="settings_dynamic_color_description">Фарбує застосунок у кольори ваших шпалер (Material You) замість вбудованої палітри.</string>
+
+    <string name="settings_privacy_title">Конфіденційність</string>
+    <string name="settings_telemetry_label">Анонімні звіти про використання та стабільність</string>
+    <string name="settings_telemetry_description">Статистика використання і звіти про збої — наприклад, запуски застосунку, модель пристрою та версія застосунку. Ніколи — ваші нотатки, записи чи особисті дані.</string>
+    <string name="settings_feedback_title">Зворотний звʼязок</string>
+    <string name="settings_feature_request_label">Запропонувати функцію</string>
+    <string name="settings_feature_request_description">Чогось бракує? Розкажіть розробнику, що застосунок має вміти.</string>
+    <string name="settings_feature_request_subject">[%1$s] пропозиція функції</string>
+    <string name="settings_feature_request_body">Вітаю! Хочу запропонувати функцію:\n\n\n\n—\nДані нижче додано автоматично. Вони описують мій пристрій і версію застосунку та допомагають розробнику зрозуміти контекст пропозиції. Будь ласка, залиште їх, якщо не проти ними поділитися.\nПристрій: %1$s %2$s (%3$s)\nRAM: %4$s\nВерсія застосунку: %5$s\nAndroid: %6$s (API %7$d)</string>
+    <string name="settings_feature_request_no_email_app">На цьому пристрої не знайдено застосунок пошти</string>
+
+    <string name="settings_about_support_title">Про застосунок і підтримка</string>
+    <string name="settings_about_support_subtitle">Версія %1$s · зворотний звʼязок, конфіденційність і правова інформація</string>
+    <string name="settings_about_support_back">Назад до налаштувань</string>
+
+    <string name="settings_about_title">Про застосунок</string>
+    <string name="settings_about_version">Версія %1$s</string>
+    <string name="settings_about_terms">Умови використання</string>
+    <string name="settings_about_privacy">Політика конфіденційності</string>
+    <string name="settings_about_no_browser">Не знайдено застосунок, щоб відкрити це посилання</string>
+
+    <string name="settings_developer_title">Розробник</string>
+    <string name="settings_developer_label">Параметри розробника</string>
+    <string name="settings_developer_description">Показує керування моделями, прискорення та діагностику обробки.</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="destination_notes">Notas</string>
+    <string name="destination_settings">Ajustes</string>
+    <string name="lock_title">Notas bloqueadas</string>
+    <string name="lock_body">Tus notas están cifradas en este dispositivo. Desbloquea para continuar.</string>
+    <string name="lock_unlock_button">Desbloquear</string>
+    <string name="lock_prompt_title">Desbloquear Offhand</string>
+    <string name="lock_prompt_subtitle">Usa tu bloqueo de pantalla o tu huella digital</string>
+</resources>

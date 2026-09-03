@@ -24,6 +24,7 @@ class TranscriptStructurer(
     private val aiBackend: AiBackend,
     private val modelManager: ModelManager,
     private val isThinkingEnabled: IsThinkingEnabledUseCase,
+    private val defaultNoteTitleProvider: DefaultNoteTitleProvider,
 ) {
 
     suspend fun structure(
@@ -263,13 +264,14 @@ class TranscriptStructurer(
         .take(MAX_TITLE_CHARS)
 
     private fun fallbackTitle(body: String): String {
-        val firstLine = body.lineSequence().firstOrNull { it.isNotBlank() } ?: return DEFAULT_TITLE
+        val untitled = defaultNoteTitleProvider.untitledTitle()
+        val firstLine = body.lineSequence().firstOrNull { it.isNotBlank() } ?: return untitled
         val words = firstLine
             .replace(MARKDOWN_CHARS, " ")
             .split(WHITESPACE)
             .filter { it.isNotBlank() }
             .take(TITLE_MAX_WORDS)
-        return words.joinToString(" ").ifBlank { DEFAULT_TITLE }
+        return words.joinToString(" ").ifBlank { untitled }
     }
 
     private data class ParsedNote(
@@ -313,7 +315,6 @@ class TranscriptStructurer(
         const val OVERSIZED_PARAGRAPH_CHARS_PER_TOKEN = 2
         const val MAX_TITLE_CHARS = 80
         const val TITLE_MAX_WORDS = 8
-        const val DEFAULT_TITLE = "Voice note"
         const val PARAGRAPH_SEPARATOR = "\n\n"
         const val SEGMENT_SEPARATOR = ",\n\n"
         val MARKDOWN_CHARS = Regex("[#*>`_\\-]")

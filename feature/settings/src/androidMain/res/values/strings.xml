@@ -10,7 +10,7 @@
     <string name="settings_acceleration_note">GPU is not available on Pixel (Tensor) devices. Changing this reloads the AI engine on next use.</string>
 
     <string name="settings_model_title">AI model</string>
-    <string name="settings_model_name">%1$s · %2$s GB</string>
+    <string name="settings_model_name" translatable="false">%1$s · %2$s GB</string>
     <string name="settings_model_picker_auto">Automatic</string>
     <string name="settings_model_picker_auto_description">Best model for this device\'s memory</string>
     <string name="settings_model_picker_note">Switching models reloads the AI engine on next use. Already downloaded models stay on the device.</string>

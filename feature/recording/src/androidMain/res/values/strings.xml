@@ -13,7 +13,7 @@
     <string name="recording_discard_dialog_body">The recording and everything transcribed so far will be deleted. This cannot be undone.</string>
     <string name="recording_discard_dialog_confirm">Discard</string>
     <string name="recording_discard_dialog_cancel">Cancel</string>
-    <string name="recording_chunk_label">#%1$d</string>
+    <string name="recording_chunk_label" translatable="false">#%1$d</string>
     <string name="recording_stage_finishing">Saving your recording…</string>
     <string name="recording_processing_hint">You can close this — the note will appear in your list once it is ready.</string>
     <string name="recording_external_mic_generic">External microphone</string>
@@ -30,13 +30,14 @@
     <string name="recording_notification_action_pause">Pause</string>
     <string name="recording_notification_action_resume">Resume</string>
     <string name="recording_notification_action_stop">Stop</string>
-    <string name="recording_notification_chip">REC</string>
+    <string name="recording_notification_chip" translatable="false">REC</string>
     <string name="recording_notification_processing_title">Creating your note</string>
     <string name="recording_notification_processing_text">Transcribing and structuring on device</string>
     <string name="recording_notification_notes_channel_name">Finished notes</string>
     <string name="recording_notification_ready_title">Your note is ready</string>
     <string name="recording_notification_ready_text">Tap to open the finished note.</string>
     <string name="recording_default_note_title">Recording %1$d</string>
+    <string name="recording_untitled_note_title">Voice note</string>
     <string name="recording_notification_note_failed_title">AI transcription failed</string>
     <string name="recording_notification_note_failed_text">The recording is saved. Tap to open it.</string>
 </resources>
