@@ -2,12 +2,16 @@ package com.dmytrosamoilov.offhand
 
 import android.app.Application
 import android.content.ComponentCallbacks2
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.di.coreAiApiModule
 import com.dmytrosamoilov.offhand.core.ai.local.di.coreAiLocalModule
 import com.dmytrosamoilov.offhand.core.audio.di.coreAudioModule
 import com.dmytrosamoilov.offhand.core.data.di.coreDataModule
 import com.dmytrosamoilov.offhand.core.device.di.coreDeviceModule
+import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.di.coreSecurityModule
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
@@ -36,6 +40,7 @@ class OffhandApplication : Application(), KoinComponent {
     private lateinit var telemetryController: TelemetryController
     private lateinit var pendingNotesCoordinator: PendingNotesCoordinator
     private lateinit var sessionManager: RecordingSessionManager
+    private lateinit var appLockManager: AppLockManager
     private lateinit var modelManager: ModelManager
 
     override fun onCreate() {
@@ -62,6 +67,7 @@ class OffhandApplication : Application(), KoinComponent {
         telemetryController = get()
         pendingNotesCoordinator = get()
         sessionManager = get()
+        appLockManager = get()
         modelManager = get()
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
@@ -71,6 +77,20 @@ class OffhandApplication : Application(), KoinComponent {
         Logger.setMinSeverity(if (BuildConfig.DEBUG) Severity.Verbose else Severity.Assert)
         telemetryController.start()
         pendingNotesCoordinator.start()
+        observeForegroundForLock()
+    }
+
+    // Re-lock on the way to the background, except mid-recording: replacing the
+    // content with the lock screen tears down the record sheet and strands the
+    // live capture. The recording service keeps the audio alive regardless.
+    private fun observeForegroundForLock() {
+        ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onStop(owner: LifecycleOwner) {
+                if (sessionManager.session.value.phase != SessionPhase.RECORDING) {
+                    appLockManager.markLocked()
+                }
+            }
+        })
     }
 
     // The loaded LLM engine holds ~3 GB — keeping it resident in the background

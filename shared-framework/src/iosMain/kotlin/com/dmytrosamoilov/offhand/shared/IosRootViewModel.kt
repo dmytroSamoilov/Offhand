@@ -62,6 +62,12 @@ class IosRootViewModel(
         appLockManager.markUnlocked()
     }
 
+    // Called when the app backgrounds while no recording is in flight; the caller
+    // owns the recording check because session state lives outside this module.
+    fun lockOnBackground() {
+        appLockManager.markLocked()
+    }
+
     fun onReady() {
         launchSafely(showLoading = false) {
             if (phase.value != IosRootPhase.READY) return@launchSafely

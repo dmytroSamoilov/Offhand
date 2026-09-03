@@ -1,144 +1,445 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "%@ GB": {},
-    "%d words": {},
-    "A clean write-up of what was said, without repetition or filler.": {},
-    "About": {},
-    "About & Support": {},
-    "Add a device passcode": {},
-    "Anonymous usage statistics and crash reports — things like app opens, device model and app version. Never your notes, audio, or any personal data.": {},
-    "Ask for Face ID, Touch ID, or your passcode every time Offhand opens.": {},
-    "Audio": {},
-    "CPU cores": {},
-    "Cancel": {},
-    "Change note style": {},
-    "Confirm it's you to turn on the app lock.": {},
-    "Continue": {},
-    "Continue without a lock": {},
-    "Date": {},
-    "Delete": {},
-    "Delete model": {},
-    "Delete the AI model?": {},
-    "Delete this note?": {},
-    "Developer": {},
-    "Developer options": {},
-    "Discard": {},
-    "Discard this recording?": {},
-    "Discussion, decisions, action items and open questions.": {},
-    "Done": {},
-    "Download model": {},
-    "Downloading": {},
-    "Edit note": {},
-    "Encrypted": {},
-    "Everything stays on this device.": {},
-    "Feedback": {},
-    "File note": {},
-    "Finishing transcription": {},
-    "Hidden while the screen is being recorded.": {},
-    "How should notes be organized?": {},
-    "It will keep processing on this device. You can close this.": {},
-    "Keep recording": {},
-    "Know when notes are ready": {},
-    "Legal": {},
-    "Legal note": {},
-    "Loading": {},
-    "Lock Offhand?": {},
-    "Matter, facts stated, instructions, advice given and next steps.": {},
-    "Meeting": {},
-    "Meeting notes": {},
-    "Memory": {},
-    "Model": {},
-    "New notes start processing once this finishes.": {},
-    "No note selected": {},
-    "No notes yet": {},
-    "Note %d": {},
-    "Note and audio": {},
-    "Note saved": {},
-    "Note style": {},
-    "Note text": {},
-    "Notes": {},
-    "Notes keep preparing while Offhand is in the background. Allow notifications and Offhand will tell you the moment a note is ready to read.": {},
-    "Offhand can ask for Face ID, Touch ID, or your passcode every time it opens, so your notes stay private even if someone else is holding an unlocked iPhone.": {},
-    "Offhand feedback": {},
-    "Offhand is locked": {},
-    "Offhand keeps every recording and note on this device. Nothing is uploaded anywhere.": {},
-    "Offhand needs more memory to run its on-device AI models.": {},
-    "Offhand needs the microphone": {},
-    "Offhand transcribes and summarizes voice notes with AI that runs entirely on your iPhone. To get started, it needs a one-time download of its AI models.": {},
-    "On-device AI": {},
-    "One-time download · about %@ GB": {},
-    "Open Offhand to finish preparing your note.": {},
-    "Open Settings": {},
-    "Overview": {},
-    "Paused": {},
-    "Pick a default style. You can change it for any note later.": {},
-    "Pick a note from the list to read it.": {},
-    "Please keep Offhand open while your note is prepared.": {},
-    "Preparing on-device AI": {},
-    "Preparing your note": {},
-    "Privacy": {},
-    "Privacy Policy": {},
-    "Private by design": {},
-    "Re-transcribe": {},
-    "Re-transcribe this note?": {},
-    "Record a note": {},
-    "Recording": {},
-    "Recording failed": {},
-    "Recording stopped because another app took over the microphone.": {},
-    "Recording stopped because the audio input changed.": {},
-    "Recordings are transcribed and organized entirely on this iPhone. Nothing ever leaves your device.": {},
-    "Require unlock to open Offhand": {},
-    "Rewrite this note as": {},
-    "Save": {},
-    "Security": {},
-    "Send feedback": {},
-    "Set a passcode on this iPhone to use this.": {},
-    "Set up your private AI": {},
-    "Settings": {},
-    "Share note": {},
-    "Share usage & stability reports": {},
-    "Share usage & stability reports?": {},
-    "Size": {},
-    "Status": {},
-    "Step %d of %d": {},
-    "Summary": {},
-    "Tap the microphone to record your first note.": {},
-    "Tap to open it and re-transcribe.": {},
-    "Tap to read what Offhand wrote up.": {},
-    "Terms & Conditions": {},
-    "That note needs another try": {},
-    "The audio and everything transcribed so far will be deleted.": {},
-    "The download continues in the background — you can start recording right away.": {},
-    "The model runs entirely on this iPhone. Deleting it frees the space but pauses processing until it is downloaded again.": {},
-    "The recording is kept. The title and overview are written again from the transcript in the style you pick.": {},
-    "The recording will be transcribed and summarized again, replacing the current title, overview and transcript. The audio recording itself is kept.": {},
-    "This device can't run Offhand": {},
-    "This iPhone has no passcode, so Offhand has nothing to lock your notes with. Set one in Settings to use Face ID or Touch ID here.": {},
-    "Tip: connect to Wi‑Fi to save mobile data.": {},
-    "Title": {},
-    "Today": {},
-    "Transcribed in %@ · Structured in %@ · %@": {},
-    "Transcribing and structuring on this device": {},
-    "Transcribing your recording": {},
-    "Transcript": {},
-    "Try again": {},
-    "Turn on microphone access to record a note. Audio still never leaves this device.": {},
-    "Unlock Offhand to open your notes.": {},
-    "Version": {},
-    "Version %@ · feedback, privacy and legal": {},
-    "Visit": {},
-    "Visit report": {},
-    "We were unable to create an overview and transcript for this note.": {},
-    "We were unable to create an overview for this note. The transcript is saved below.": {},
-    "Who the visit was about, observations, what was done and follow-ups.": {},
-    "Writing your overview": {},
-    "Yesterday": {},
-    "You can change this any time in Settings.": {},
-    "Your note is ready": {},
-    "Your note isn't finished": {},
-    "Your notes are kept. Offhand will need to download the model again before it can process a new recording.": {},
-    "Your notes stay locked until this device confirms it's you.": {}
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+
+    },
+    "#%d" : {
+      "comment" : "A pill that shows the ID of a chunk.",
+      "isCommentAutoGenerated" : true
+    },
+    "%@ GB" : {
+
+    },
+    "%d words" : {
+
+    },
+    "%d%%" : {
+      "comment" : "A percentage of the download progress.",
+      "isCommentAutoGenerated" : true
+    },
+    "%lld%%" : {
+      "comment" : "A label showing the percentage of a note that has been processed.",
+      "isCommentAutoGenerated" : true
+    },
+    "A clean write-up of what was said, without repetition or filler." : {
+
+    },
+    "About" : {
+
+    },
+    "About & Support" : {
+
+    },
+    "Add a device passcode" : {
+
+    },
+    "Anonymous usage statistics and crash reports — things like app opens, device model and app version. Never your notes, audio, or any personal data." : {
+
+    },
+    "Ask for Face ID, Touch ID, or your passcode every time Offhand opens." : {
+
+    },
+    "Audio" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Change note style" : {
+
+    },
+    "Confirm it's you to turn on the app lock." : {
+
+    },
+    "Continue" : {
+
+    },
+    "Continue without a lock" : {
+
+    },
+    "CPU cores" : {
+
+    },
+    "Date" : {
+
+    },
+    "Delete" : {
+
+    },
+    "Delete model" : {
+
+    },
+    "Delete the AI model?" : {
+
+    },
+    "Delete this note?" : {
+
+    },
+    "Developer" : {
+
+    },
+    "Developer options" : {
+
+    },
+    "Discard" : {
+
+    },
+    "Discard this recording?" : {
+
+    },
+    "Discussion, decisions, action items and open questions." : {
+
+    },
+    "Done" : {
+
+    },
+    "Download model" : {
+
+    },
+    "Downloading" : {
+
+    },
+    "Edit note" : {
+
+    },
+    "Encrypted" : {
+
+    },
+    "Everything stays on this device." : {
+
+    },
+    "Feedback" : {
+
+    },
+    "File note" : {
+
+    },
+    "Finishing transcription" : {
+
+    },
+    "Hidden while the screen is being recorded." : {
+
+    },
+    "How should notes be organized?" : {
+
+    },
+    "It will keep processing on this device. You can close this." : {
+
+    },
+    "Keep recording" : {
+
+    },
+    "Know when notes are ready" : {
+
+    },
+    "Legal" : {
+
+    },
+    "Legal note" : {
+
+    },
+    "Loading" : {
+
+    },
+    "Lock Offhand?" : {
+
+    },
+    "Matter, facts stated, instructions, advice given and next steps." : {
+
+    },
+    "Meeting" : {
+
+    },
+    "Meeting notes" : {
+
+    },
+    "Memory" : {
+
+    },
+    "Model" : {
+
+    },
+    "New notes start processing once this finishes." : {
+
+    },
+    "No note selected" : {
+
+    },
+    "No notes yet" : {
+
+    },
+    "Note %d" : {
+
+    },
+    "Note and audio" : {
+
+    },
+    "Note saved" : {
+
+    },
+    "Note style" : {
+
+    },
+    "Note text" : {
+
+    },
+    "Notes" : {
+
+    },
+    "Notes keep preparing while Offhand is in the background. Allow notifications and Offhand will tell you the moment a note is ready to read." : {
+
+    },
+    "Offhand can ask for Face ID, Touch ID, or your passcode every time it opens, so your notes stay private even if someone else is holding an unlocked iPhone." : {
+
+    },
+    "Offhand feedback" : {
+
+    },
+    "Offhand is locked" : {
+
+    },
+    "Offhand keeps every recording and note on this device. Nothing is uploaded anywhere." : {
+
+    },
+    "Offhand needs more memory to run its on-device AI models." : {
+
+    },
+    "Offhand needs the microphone" : {
+
+    },
+    "Offhand transcribes and summarizes voice notes with AI that runs entirely on your iPhone. To get started, it needs a one-time download of its AI models." : {
+
+    },
+    "On-device AI" : {
+
+    },
+    "One-time download · about %@ GB" : {
+
+    },
+    "Open Offhand to finish preparing your note." : {
+
+    },
+    "Open Settings" : {
+
+    },
+    "Overview" : {
+
+    },
+    "Pause recording" : {
+
+    },
+    "Paused" : {
+
+    },
+    "Pick a default style. You can change it for any note later." : {
+
+    },
+    "Pick a note from the list to read it." : {
+
+    },
+    "Please keep Offhand open while your note is prepared." : {
+
+    },
+    "Preparing on-device AI" : {
+
+    },
+    "Preparing your note" : {
+
+    },
+    "Privacy" : {
+
+    },
+    "Privacy Policy" : {
+
+    },
+    "Private by design" : {
+
+    },
+    "Re-transcribe" : {
+
+    },
+    "Re-transcribe this note?" : {
+
+    },
+    "Record a note" : {
+
+    },
+    "Recording" : {
+
+    },
+    "Recording failed" : {
+
+    },
+    "Recording stopped because another app took over the microphone." : {
+
+    },
+    "Recording stopped because the audio input changed." : {
+
+    },
+    "Recordings are transcribed and organized entirely on this iPhone. Nothing ever leaves your device." : {
+
+    },
+    "Require unlock to open Offhand" : {
+
+    },
+    "Resume recording" : {
+
+    },
+    "Rewrite this note as" : {
+
+    },
+    "Save" : {
+
+    },
+    "Security" : {
+
+    },
+    "Send feedback" : {
+
+    },
+    "Set a passcode on this iPhone to use this." : {
+
+    },
+    "Set up your private AI" : {
+
+    },
+    "Settings" : {
+
+    },
+    "Share note" : {
+
+    },
+    "Share usage & stability reports" : {
+
+    },
+    "Share usage & stability reports?" : {
+
+    },
+    "Size" : {
+
+    },
+    "Status" : {
+
+    },
+    "Step %d of %d" : {
+
+    },
+    "Stop recording" : {
+      "comment" : "Intent to stop recording.",
+      "isCommentAutoGenerated" : true
+    },
+    "Summary" : {
+
+    },
+    "Tap the microphone to record your first note." : {
+
+    },
+    "Tap to open it and re-transcribe." : {
+
+    },
+    "Tap to read what Offhand wrote up." : {
+
+    },
+    "Terms & Conditions" : {
+
+    },
+    "That note needs another try" : {
+
+    },
+    "The audio and everything transcribed so far will be deleted." : {
+
+    },
+    "The download continues in the background — you can start recording right away." : {
+
+    },
+    "The model runs entirely on this iPhone. Deleting it frees the space but pauses processing until it is downloaded again." : {
+
+    },
+    "The recording is kept. The title and overview are written again from the transcript in the style you pick." : {
+
+    },
+    "The recording will be transcribed and summarized again, replacing the current title, overview and transcript. The audio recording itself is kept." : {
+
+    },
+    "This device can't run Offhand" : {
+
+    },
+    "This iPhone has no passcode, so Offhand has nothing to lock your notes with. Set one in Settings to use Face ID or Touch ID here." : {
+
+    },
+    "Tip: connect to Wi‑Fi to save mobile data." : {
+
+    },
+    "Title" : {
+
+    },
+    "Today" : {
+
+    },
+    "Transcribed in %@ · Structured in %@ · %@" : {
+
+    },
+    "Transcribing and structuring on this device" : {
+
+    },
+    "Transcribing your recording" : {
+
+    },
+    "Transcript" : {
+
+    },
+    "Try again" : {
+
+    },
+    "Turn on microphone access to record a note. Audio still never leaves this device." : {
+
+    },
+    "Unlock Offhand to open your notes." : {
+
+    },
+    "Version" : {
+
+    },
+    "Version %@ · feedback, privacy and legal" : {
+
+    },
+    "Visit" : {
+
+    },
+    "Visit report" : {
+
+    },
+    "We were unable to create an overview and transcript for this note." : {
+
+    },
+    "We were unable to create an overview for this note. The transcript is saved below." : {
+
+    },
+    "Who the visit was about, observations, what was done and follow-ups." : {
+
+    },
+    "Writing your overview" : {
+
+    },
+    "Yesterday" : {
+
+    },
+    "You can change this any time in Settings." : {
+
+    },
+    "Your note is ready" : {
+
+    },
+    "Your note isn't finished" : {
+
+    },
+    "Your notes are kept. Offhand will need to download the model again before it can process a new recording." : {
+
+    },
+    "Your notes stay locked until this device confirms it's you." : {
+
+    }
   },
-  "version": "1.0"
+  "version" : "1.1"
 }

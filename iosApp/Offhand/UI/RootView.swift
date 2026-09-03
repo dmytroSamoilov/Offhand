@@ -170,6 +170,11 @@ struct RootView: View {
         } else {
             releaseModelIfIdle()
         }
+        // Re-lock on the way out, except mid-recording: swapping in the lock
+        // screen tears down the record sheet and strands the live capture.
+        if session.phase != .recording {
+            viewModel.lockOnBackground()
+        }
     }
 
     // The engine holds gigabytes; give it back rather than risk the OS killing us.
