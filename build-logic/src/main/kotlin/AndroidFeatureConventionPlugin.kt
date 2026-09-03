@@ -8,7 +8,7 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
         with(target) {
             pluginManager.apply("offhand.android.library")
             pluginManager.apply("offhand.android.library.compose")
-            pluginManager.apply("offhand.hilt")
+            pluginManager.apply("offhand.koin")
 
             dependencies {
                 add("implementation", project(":core:common"))
@@ -17,7 +17,7 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
 
                 add("implementation", libs.findLibrary("androidx-lifecycle-runtime-compose").get())
                 add("implementation", libs.findLibrary("androidx-lifecycle-viewmodel-compose").get())
-                add("implementation", libs.findLibrary("hilt-navigation-compose").get())
+                add("implementation", libs.findLibrary("koin-androidx-compose").get())
                 add("implementation", libs.findLibrary("coroutines-android").get())
 
                 add("testImplementation", libs.findLibrary("junit").get())

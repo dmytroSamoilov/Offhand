@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_incompatible_title">डिवाइस समर्थित नहीं है</string>
+    <string name="onboarding_incompatible_body">Offhand एक बड़ा AI मॉडल सीधे आपके फ़ोन पर चलाता है, इसलिए आपकी रिकॉर्ड की गई कोई भी चीज़ डिवाइस से बाहर नहीं जाती। यह डिवाइस न्यूनतम ज़रूरतें पूरी नहीं करता।</string>
+    <string name="onboarding_incompatible_ram_label">मेमोरी (RAM):</string>
+    <string name="onboarding_incompatible_ram_value">%1$s GB — %2$s GB चाहिए</string>
+    <string name="onboarding_incompatible_cores_label">CPU कोर:</string>
+    <string name="onboarding_incompatible_cores_value">%1$d — %2$d चाहिए</string>
+
+    <string name="onboarding_privacy_title">शुरू से ही निजी</string>
+    <string name="onboarding_privacy_body">आप जो भी रिकॉर्ड करते हैं, वह इसी फ़ोन पर रहता है। रिकॉर्डिंग, ट्रांसक्रिप्ट और नोट्स इसी डिवाइस पर एन्क्रिप्ट होते हैं, और इन्हें प्रोसेस करने वाला AI यहीं चलता है — कुछ भी कभी अपलोड नहीं होता।</string>
+    <string name="onboarding_continue">जारी रखें</string>
+
+    <string name="onboarding_note_style_title">आप Offhand का इस्तेमाल कैसे करेंगे?</string>
+    <string name="onboarding_note_style_body">वह शैली चुनें जिसमें आपके नोट्स लिखे जाएं। आपकी हर रिकॉर्डिंग इसी तरह का नोट बनती है।</string>
+    <string name="onboarding_note_style_hint">इसे आप कभी भी सेटिंग्स में बदल सकते हैं, या किसी भी एक नोट की शैली अलग से बदल सकते हैं।</string>
+
+    <string name="onboarding_lock_title">अपने नोट्स सुरक्षित रखें</string>
+    <string name="onboarding_lock_body">आपके नोट्स इस फ़ोन के सुरक्षित हार्डवेयर में रखी एक कुंजी से एन्क्रिप्ट होते हैं। इस फ़ोन पर कोई स्क्रीन लॉक नहीं है, इसलिए जो भी इसे उठाए, वह Offhand खोल सकता है। अपने नोट्स निजी रखने के लिए PIN, पैटर्न या फ़िंगरप्रिंट सेट करें।</string>
+    <string name="onboarding_lock_setup">स्क्रीन लॉक सेट करें</string>
+    <string name="onboarding_lock_skip">बिना लॉक जारी रखें</string>
+    <string name="onboarding_lock_enable_title">Offhand लॉक करें?</string>
+    <string name="onboarding_lock_enable_body">Offhand हर बार खुलने पर फ़िंगरप्रिंट, चेहरा या स्क्रीन लॉक मांग सकता है, ताकि अनलॉक फ़ोन किसी और के हाथ में होने पर भी आपके नोट्स निजी रहें।</string>
+    <string name="onboarding_lock_enable_label">Offhand खोलने के लिए अनलॉक ज़रूरी करें</string>
+    <string name="onboarding_lock_enable_description">इसे आप कभी भी सेटिंग्स में बदल सकते हैं।</string>
+
+    <string name="onboarding_download_title">अपना निजी AI सेट करें</string>
+    <string name="onboarding_download_body">Offhand वॉयस नोट्स को ऐसे AI से ट्रांसक्राइब और सारांशित करता है जो पूरी तरह आपके फ़ोन पर चलता है। शुरू करने के लिए, इसके AI मॉडल का एक बार डाउनलोड ज़रूरी है।</string>
+    <string name="onboarding_download_size">एक बार का डाउनलोड · लगभग %1$s GB</string>
+    <string name="onboarding_download_background_hint">डाउनलोड बैकग्राउंड में चलता रहता है — आप तुरंत रिकॉर्डिंग शुरू कर सकते हैं। सब तैयार होते ही हम आपको सूचित करेंगे।</string>
+    <string name="onboarding_download_wifi_hint">सुझाव: मोबाइल डेटा बचाने के लिए Wi‑Fi से कनेक्ट करें।</string>
+    <string name="onboarding_notification_download_channel_name">मॉडल डाउनलोड</string>
+    <string name="onboarding_notification_status_channel_name">मॉडल स्थिति</string>
+    <string name="onboarding_notification_downloading_title">AI मॉडल डाउनलोड हो रहे हैं</string>
+    <string name="onboarding_notification_downloading_text">Offhand ऑन-डिवाइस AI सेट कर रहा है</string>
+    <string name="onboarding_notification_ready_title">आपके AI मॉडल तैयार हैं</string>
+    <string name="onboarding_notification_ready_text">ट्रांसक्रिप्शन और सारांश अब पूरी तरह इसी डिवाइस पर चलते हैं।</string>
+    <string name="onboarding_notification_failed_title">मॉडल डाउनलोड पूरा नहीं हुआ</string>
+    <string name="onboarding_notification_failed_text">अपना कनेक्शन जांचें। अगली बार नोट रिकॉर्ड करने पर Offhand डाउनलोड फिर शुरू कर देगा।</string>
+
+    <string name="onboarding_consent_title">Offhand को बेहतर बनाने में मदद करेंगे?</string>
+    <string name="onboarding_consent_body">गुमनाम उपयोग आंकड़े और क्रैश रिपोर्ट साझा करें — जैसे ऐप खुलने की संख्या, डिवाइस मॉडल और ऐप वर्शन — ताकि हम ऐप को तेज़ और भरोसेमंद रख सकें। इसमें आपके नोट्स, रिकॉर्डिंग, ट्रांसक्रिप्ट या कोई निजी डेटा कभी शामिल नहीं होता — आप जो भी रिकॉर्ड करते हैं, वह इसी डिवाइस पर रहता है। इसे आप कभी भी सेटिंग्स में बदल सकते हैं।</string>
+    <string name="onboarding_consent_toggle_label">गुमनाम रिपोर्ट साझा करें</string>
+</resources>

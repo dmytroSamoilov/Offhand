@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="destination_notes">Заметки</string>
+    <string name="destination_settings">Настройки</string>
+    <string name="lock_title">Заметки заблокированы</string>
+    <string name="lock_body">Ваши заметки зашифрованы на этом устройстве. Разблокируйте, чтобы продолжить.</string>
+    <string name="lock_unlock_button">Разблокировать</string>
+    <string name="lock_prompt_title">Разблокировать Offhand</string>
+    <string name="lock_prompt_subtitle">Используйте блокировку экрана или отпечаток пальца</string>
+</resources>

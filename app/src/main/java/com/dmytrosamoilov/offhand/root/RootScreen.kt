@@ -2,17 +2,17 @@ package com.dmytrosamoilov.offhand.root
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.feature.onboarding.presentation.OnboardingScreen
 import com.dmytrosamoilov.offhand.navigation.OffhandApp
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun RootScreen(
     requestedNoteId: Long?,
     onRequestedNoteConsumed: () -> Unit,
-    viewModel: RootViewModel = hiltViewModel(),
+    viewModel: RootViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 

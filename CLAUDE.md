@@ -13,11 +13,26 @@ POC decisions and roadmap: .claude/POC/ (read before implementing features).
 - When adding new files, auto `git add` them (only files related to current task).
 
 ## Build & Test
+
+### Android
 - Flavors: `production` (com.dmytrosamoilov.offhand) and `dev` (.dev applicationId suffix, "Offhand Dev" label). Day-to-day work and device installs use `dev`.
 - Build: `./gradlew assembleDevDebug` (both flavors: `assembleDebug`)
 - Unit tests: `./gradlew testDebugUnitTest`
 - Lint: `./gradlew lintDebug :app:lintDevDebug`
 - Run all: `./gradlew assembleDebug testDebugUnitTest lintDebug :app:lintDevDebug`
+- Telemetry: `FirebaseInitProvider` is removed in `AndroidManifest.xml`, so Firebase never self-initialises — `TelemetryController` initialises it (Crashlytics + Analytics) only after telemetry consent, because initialising alone contacts Google. Keep it that way, and keep `ReleaseLogTree` resolving Crashlytics per log rather than capturing it, since Firebase may not exist yet when the tree is planted. iOS holds the same line.
+
+### iOS
+- Flavors mirror Android via Xcode configurations: schemes `Offhand-dev` (com.dmytrosamoilov.offhand.dev, "Offhand Dev") and `Offhand-prod` (com.dmytrosamoilov.offhand, "Offhand"). Day-to-day work uses `Offhand-dev`.
+- Configurations: `Debug-dev`, `Release-dev`, `Debug-prod`, `Release-prod`. The flavor is driven by `APP_ID_SUFFIX` / `APP_DISPLAY_NAME` in `iosApp/project.yml`.
+- `iosApp/Offhand.xcodeproj` is generated and gitignored — edit `iosApp/project.yml`, then run `xcodegen generate` in `iosApp/`. Close the project in Xcode first: regenerating under an open Xcode leaves it holding a stale project, and its saved scheme selection in `xcuserdata` can point at a scheme that no longer exists. If Xcode misbehaves after a regenerate, quit it and run `rm -rf Offhand.xcodeproj/xcuserdata Offhand.xcodeproj/project.xcworkspace/xcuserdata` — that is editor state only, and `Package.resolved` lives in `xcshareddata` so SPM pins survive.
+- Shared framework (rebuild after any commonMain/iosMain change): `./gradlew :shared-framework:assembleOffhandSharedReleaseXCFramework`
+- Build: `cd iosApp && xcodebuild build -project Offhand.xcodeproj -scheme Offhand-dev -destination 'generic/platform=iOS Simulator' ARCHS=arm64`
+- Only arm64 slices are built for the simulator, so pass `ARCHS=arm64` (an unrestricted `generic/platform=iOS Simulator` build fails on the x86_64 slice).
+- Telemetry: put the per-flavor Firebase configs at `iosApp/Firebase/dev/GoogleService-Info.plist` and `iosApp/Firebase/prod/GoogleService-Info.plist` (gitignored, same as Android's `google-services.json`). A build phase copies the one matching `FIREBASE_CONFIG_DIR`; a missing file warns and leaves telemetry off rather than failing. Firebase (Crashlytics + Analytics, Swift `TelemetryController`) is only configured once telemetry consent is granted, so an app without consent makes no network calls at all — do not move `FirebaseApp.configure()` to launch.
+- App icons are derived from the Android launcher vectors (`app/src/main/res/drawable/ic_launcher_*.xml`). If that art changes, re-run `python3 iosApp/Tools/make-app-icon.py iosApp/Offhand/Assets.xcassets`. `AppIcon` is the prod (blue) mark, `AppIcon-dev` the teal dev variant; the flavor picks one via `APP_ICON_NAME`.
+- App lock: enforced in every configuration, dev and debug included — there is no build-time escape hatch, and the removed `DEV_UNLOCK` flag must not come back. To work without the lock, decline it in onboarding or turn it off in Settings; that is the same path a user has. `NSFaceIDUsageDescription` is mandatory: without it iOS refuses Face ID outright and `.deviceOwnerAuthentication` silently degrades to a passcode prompt, which looks like "biometrics just never fire". The lock is gated on the `app_lock_enabled` preference the onboarding step writes — `AppLockManager` only reports lock state, it does not decide whether to lock. Re-locking on background is driven by the app layer, which can see the recording session (the managers cannot, for module layering): `OffhandApplication` observes `ProcessLifecycleOwner` and `RootView.handleBackgrounded()` observes `scenePhase`, and each calls `markLocked()` — but skips it while `SessionPhase.RECORDING`, because swapping in the lock screen tears down the record sheet and strands the live capture. So an unlock lasts one foreground session, except an active recording carries across background/foreground.
+- Testing the lock on the Simulator: enroll biometrics with `xcrun simctl spawn <udid> notifyutil -s com.apple.BiometricKit.enrollmentChanged 1` then `notifyutil -p com.apple.BiometricKit.enrollmentChanged`, and satisfy a prompt with `notifyutil -p com.apple.BiometricKit_Sim.pearl.match`. Note that an instantaneous synthetic tap does not flip a SwiftUI `Toggle` — drive it with a touch path that dwells ~150 ms.
 
 ## Architecture (summary)
 - Three layers: domain/ → data/ → presentation/

@@ -19,6 +19,7 @@ Offhand bundles or downloads the following third-party components. Each remains 
 | [Tink](https://github.com/tink-crypto/tink-java) | Apache-2.0 |
 | [OkHttp](https://square.github.io/okhttp/) | Apache-2.0 |
 | [Firebase Crashlytics SDK](https://firebase.google.com/docs/crashlytics) | Apache-2.0 |
+| [Google Analytics for Firebase / GoogleAppMeasurement](https://firebase.google.com/docs/analytics) | Google Terms of Service (proprietary SDK) |
 | AndroidX / Jetpack Compose / Material 3 | Apache-2.0 |
 | [Dagger / Hilt](https://dagger.dev/) | Apache-2.0 |
 | Kotlin & kotlinx libraries | Apache-2.0 |

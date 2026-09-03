@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Ajustes</string>
+
+    <string name="settings_acceleration_title">Aceleración de IA</string>
+    <string name="settings_acceleration_cpu">CPU</string>
+    <string name="settings_acceleration_cpu_description">Funciona en todos los dispositivos compatibles</string>
+    <string name="settings_acceleration_gpu">GPU</string>
+    <string name="settings_acceleration_gpu_description">Mucho más rápido en dispositivos Snapdragon</string>
+    <string name="settings_acceleration_note">La GPU no está disponible en dispositivos Pixel (Tensor). Cambiar esto recarga el motor de IA en el próximo uso.</string>
+
+    <string name="settings_model_title">Modelo de IA</string>
+    <string name="settings_model_picker_auto">Automático</string>
+    <string name="settings_model_picker_auto_description">El mejor modelo para la memoria de este dispositivo</string>
+    <string name="settings_model_picker_note">Cambiar de modelo recarga el motor de IA en el próximo uso. Los modelos ya descargados permanecen en el dispositivo.</string>
+    <string name="settings_model_status_not_downloaded">No descargado</string>
+    <string name="settings_model_status_downloading">Descargando… %1$d%%</string>
+    <string name="settings_model_status_loading">Preparando el motor…</string>
+    <string name="settings_model_status_ready">Listo · guardado en este dispositivo</string>
+    <string name="settings_model_status_error">Algo ha salido mal con el modelo</string>
+    <string name="settings_model_download">Descargar modelo</string>
+    <string name="settings_model_retry">Reintentar</string>
+    <string name="settings_model_delete">Eliminar modelo</string>
+    <string name="settings_delete_model_dialog_title">¿Eliminar el modelo de IA?</string>
+    <string name="settings_delete_model_dialog_body">No se podrá grabar hasta que el modelo se descargue de nuevo. Tus notas no se ven afectadas.</string>
+    <string name="settings_delete_model_dialog_confirm">Eliminar</string>
+    <string name="settings_delete_model_dialog_cancel">Cancelar</string>
+
+    <string name="settings_note_style_title">Estilo de las notas</string>
+    <string name="settings_note_style_note">Se aplica a las grabaciones nuevas. Puedes cambiar el estilo de una nota existente desde la pantalla de la nota.</string>
+
+    <string name="settings_security_title">Seguridad</string>
+    <string name="settings_app_lock_label">Pedir desbloqueo al abrir Offhand</string>
+    <string name="settings_app_lock_description">Pide tu huella, tu cara o tu bloqueo de pantalla cada vez que se abre Offhand.</string>
+    <string name="settings_app_lock_unavailable">Configura un bloqueo de pantalla en este teléfono para usar esta opción.</string>
+    <string name="settings_appearance_title">Apariencia</string>
+    <string name="settings_dynamic_color_label">Colores del fondo de pantalla</string>
+    <string name="settings_dynamic_color_description">Colorea la app a partir de tu fondo de pantalla (Material You) en lugar de la paleta integrada.</string>
+
+    <string name="settings_privacy_title">Privacidad</string>
+    <string name="settings_telemetry_label">Informes anónimos de uso y estabilidad</string>
+    <string name="settings_telemetry_description">Estadísticas de uso e informes de errores: cosas como aperturas de la app, modelo del dispositivo y versión de la app. Nunca tus notas, grabaciones ni datos personales.</string>
+    <string name="settings_feedback_title">Comentarios</string>
+    <string name="settings_feature_request_label">Solicitar una función</string>
+    <string name="settings_feature_request_description">¿Echas algo en falta? Cuéntale al desarrollador qué debería hacer la app.</string>
+    <string name="settings_feature_request_subject">[%1$s] solicitud de función</string>
+    <string name="settings_feature_request_body">¡Hola! Me gustaría sugerir una función:\n\n\n\n—\nLos datos de abajo se añadieron automáticamente. Describen mi dispositivo y la versión de la app, y ayudan al desarrollador a entender mi sugerencia en contexto. Déjalos si no te importa compartirlos.\nDispositivo: %1$s %2$s (%3$s)\nRAM: %4$s\nVersión de la app: %5$s\nAndroid: %6$s (API %7$d)</string>
+    <string name="settings_feature_request_no_email_app">No se ha encontrado ninguna app de correo en este dispositivo</string>
+
+    <string name="settings_about_support_title">Acerca de y soporte</string>
+    <string name="settings_about_support_subtitle">Versión %1$s · comentarios, privacidad y avisos legales</string>
+    <string name="settings_about_support_back">Volver a ajustes</string>
+
+    <string name="settings_about_title">Acerca de</string>
+    <string name="settings_about_version">Versión %1$s</string>
+    <string name="settings_about_terms">Términos y condiciones</string>
+    <string name="settings_about_privacy">Política de privacidad</string>
+    <string name="settings_about_no_browser">No se ha encontrado ninguna app para abrir este enlace</string>
+
+    <string name="settings_developer_title">Desarrollador</string>
+    <string name="settings_developer_label">Opciones de desarrollador</string>
+    <string name="settings_developer_description">Muestra la gestión del modelo, la aceleración y los diagnósticos de procesamiento.</string>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_ui_error_title">Algo deu errado</string>
+    <string name="core_ui_error_confirm">OK</string>
+    <string name="core_ui_note_preset_summary">Resumo</string>
+    <string name="core_ui_note_preset_summary_description">Um texto limpo do que foi dito, sem repetições nem enchimento.</string>
+    <string name="core_ui_note_preset_meeting">Notas de reunião</string>
+    <string name="core_ui_note_preset_meeting_description">Discussão, decisões, tarefas e questões em aberto.</string>
+    <string name="core_ui_note_preset_visit">Relatório de visita</string>
+    <string name="core_ui_note_preset_visit_description">Sobre quem foi a visita, observações, o que foi feito e próximos passos.</string>
+    <string name="core_ui_note_preset_legal">Nota jurídica</string>
+    <string name="core_ui_note_preset_legal_description">Assunto, fatos declarados, instruções, orientações dadas e próximos passos.</string>
+</resources>

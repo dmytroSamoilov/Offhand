@@ -1,0 +1,244 @@
+import OffhandShared
+import StoreKit
+import SwiftUI
+import UIKit
+
+struct NotesListView: View {
+    private let viewModel = AppViewModels.notes
+    @State private var state = NotesUiState(
+        sections: [],
+        selected: nil,
+        editor: nil,
+        playback: AudioPlaybackUi(isAvailable: false, isPlaying: false, progress: 0, positionText: "0:00", durationText: "0:00"),
+        pendingDeleteNoteId: nil,
+        isRetranscribeConfirmationVisible: false,
+        isShareDialogVisible: false,
+        isPresetSheetVisible: false,
+        pendingShare: nil,
+        isDeveloperMode: false,
+        noteProgress: [:],
+        modelPreparation: nil
+    )
+    @State private var isRecordSheetVisible = false
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    var body: some View {
+        layout
+        .sheet(isPresented: $isRecordSheetVisible) {
+            RecordSheetView(autoStart: true)
+        }
+        .confirmationDialog(
+            String(localized: "Delete this note?"),
+            isPresented: deleteBinding,
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "Delete"), role: .destructive) { viewModel.onDeleteConfirmed() }
+            Button(String(localized: "Cancel"), role: .cancel) { viewModel.onDeleteDismissed() }
+        }
+        .task {
+            for await newState in viewModel.uiState {
+                state = newState
+            }
+        }
+        .task {
+            for await _ in viewModel.reviewRequests {
+                requestAppStoreReview()
+                viewModel.onReviewAttemptSucceeded()
+            }
+        }
+    }
+
+    // The app ships for iPad, so give a regular width the two-pane layout Android
+    // gets from its list-detail scaffold instead of a phone-shaped push stack.
+    @ViewBuilder
+    private var layout: some View {
+        if horizontalSizeClass == .regular {
+            NavigationSplitView {
+                notesList
+            } detail: {
+                NavigationStack {
+                    if let detail = state.selected {
+                        NoteDetailView(viewModel: viewModel, detail: detail, state: state)
+                    } else {
+                        ContentUnavailableView(
+                            String(localized: "No note selected"),
+                            systemImage: "doc.text",
+                            description: Text(String(localized: "Pick a note from the list to read it."))
+                        )
+                    }
+                }
+            }
+        } else {
+            NavigationStack {
+                notesList
+                    .navigationDestination(isPresented: detailBinding) {
+                        if let detail = state.selected {
+                            NoteDetailView(viewModel: viewModel, detail: detail, state: state)
+                        }
+                    }
+            }
+        }
+    }
+
+    private var notesList: some View {
+        List {
+            ForEach(state.sections, id: \.self) { section in
+                Section(dayTitle(section.dayLabel)) {
+                    ForEach(section.notes, id: \.id) { note in
+                        Button {
+                            viewModel.onNoteSelected(id: note.id)
+                        } label: {
+                            NoteCardRow(note: note, progress: state.noteProgress[KotlinLong(value: note.id)]?.intValue)
+                        }
+                        .buttonStyle(.plain)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                viewModel.onDeleteRequested(id: note.id)
+                            } label: {
+                                Label(String(localized: "Delete"), systemImage: "trash")
+                            }
+                            // The tab bar's brand tint would otherwise repaint a
+                            // destructive action in blue.
+                            .tint(.red)
+                        }
+                    }
+                }
+            }
+        }
+        .listStyle(.insetGrouped)
+        .safeAreaInset(edge: .top) {
+            if let preparation = state.modelPreparation {
+                ModelPreparationBanner(percent: Int(preparation.progressPercent))
+            }
+        }
+        .navigationTitle(String(localized: "Notes"))
+        .overlay(alignment: .center) {
+            if state.sections.isEmpty {
+                ContentUnavailableView(
+                    String(localized: "No notes yet"),
+                    systemImage: "mic",
+                    description: Text(String(localized: "Tap the microphone to record your first note."))
+                )
+            }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            recordButton
+        }
+    }
+
+    private func requestAppStoreReview() {
+        guard let scene = UIApplication.shared.connectedScenes
+            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else { return }
+        AppStore.requestReview(in: scene)
+    }
+
+    private var detailBinding: Binding<Bool> {
+        Binding(
+            get: { state.selected != nil },
+            set: { isShown in if !isShown { viewModel.onDetailClosed() } }
+        )
+    }
+
+    private var deleteBinding: Binding<Bool> {
+        Binding(
+            get: { state.pendingDeleteNoteId != nil },
+            set: { isShown in if !isShown { viewModel.onDeleteDismissed() } }
+        )
+    }
+
+    private var recordButton: some View {
+        Button {
+            isRecordSheetVisible = true
+        } label: {
+            Image(systemName: "mic.fill")
+                .font(.title2)
+                .foregroundStyle(.white)
+                .frame(width: 60, height: 60)
+                .background(Brand.primary, in: Circle())
+                .shadow(color: .black.opacity(0.25), radius: 10, y: 4)
+        }
+        .accessibilityLabel(String(localized: "Record a note"))
+        .padding(.trailing, 20)
+        .padding(.bottom, 16)
+    }
+
+    private func dayTitle(_ label: NoteDayLabelUi) -> String {
+        switch onEnum(of: label) {
+        case .today: return String(localized: "Today")
+        case .yesterday: return String(localized: "Yesterday")
+        case .date(let date): return date.text
+        }
+    }
+}
+
+private struct ModelPreparationBanner: View {
+    let percent: Int
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ProgressView()
+            VStack(alignment: .leading, spacing: 2) {
+                Text(String(localized: "Preparing on-device AI"))
+                    .font(.subheadline.weight(.semibold))
+                Text(String(localized: "New notes start processing once this finishes."))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Text("\(percent)%")
+                .font(.subheadline.weight(.medium))
+                .monospacedDigit()
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(.bar)
+    }
+}
+
+private struct NoteCardRow: View {
+    let note: NoteCardUi
+    let progress: Int?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(note.title)
+                .font(.headline)
+                .lineLimit(1)
+            if note.status == .processing {
+                HStack(spacing: 8) {
+                    ProgressView()
+                    Text(progressText)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            } else if note.status == .failed {
+                Label(
+                    String(localized: "We were unable to create an overview and transcript for this note."),
+                    systemImage: "exclamationmark.triangle"
+                )
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            } else if !note.preview.isEmpty {
+                Text(note.preview)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+            HStack(spacing: 12) {
+                Text(note.time)
+                if let duration = note.durationText {
+                    Label(duration, systemImage: "waveform")
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 2)
+    }
+
+    private var progressText: String {
+        if let progress { return "\(progress)%" }
+        return String(localized: "Preparing your note")
+    }
+}

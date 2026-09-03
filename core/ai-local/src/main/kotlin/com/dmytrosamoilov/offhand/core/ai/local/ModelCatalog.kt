@@ -5,14 +5,10 @@ import com.dmytrosamoilov.offhand.core.ai.api.AvailableModel
 import com.dmytrosamoilov.offhand.core.ai.api.ModelCatalogFile
 import com.dmytrosamoilov.offhand.core.ai.api.bestForRam
 import com.dmytrosamoilov.offhand.core.device.DeviceCapabilityChecker
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.serialization.json.Json
 
-@Singleton
-class ModelCatalog @Inject constructor(
-    @ApplicationContext private val context: Context,
+class ModelCatalog(
+    private val context: Context,
     private val deviceCapabilityChecker: DeviceCapabilityChecker,
 ) {
     private val json = Json { ignoreUnknownKeys = true }

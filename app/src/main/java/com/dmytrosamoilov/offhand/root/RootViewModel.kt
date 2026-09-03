@@ -1,20 +1,16 @@
 package com.dmytrosamoilov.offhand.root
 
-import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
+import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.AppLockState
 import com.dmytrosamoilov.offhand.core.security.DatabasePassphraseProvider
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserPreferencesUseCase
-import com.dmytrosamoilov.offhand.feature.onboarding.service.ModelDownloadService
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
-import dagger.Lazy
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -23,15 +19,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
-@HiltViewModel
-class RootViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+class RootViewModel(
     observeUserPreferences: ObserveUserPreferencesUseCase,
     private val appLockManager: AppLockManager,
     private val passphraseProvider: DatabasePassphraseProvider,
     private val modelManager: ModelManager,
+    private val modelDownloadController: ModelDownloadController,
     private val resumeInterruptedNotes: Lazy<ResumeInterruptedNotesUseCase>,
     private val sweepOrphanedRecordings: Lazy<SweepOrphanedRecordingsUseCase>,
+    private val clearShareCache: ClearShareCacheUseCase,
 ) : BaseViewModel() {
 
     val uiState: StateFlow<RootUiState> = combine(
@@ -41,7 +37,7 @@ class RootViewModel @Inject constructor(
         RootUiState(
             phase = when {
                 !preferences.onboardingCompleted -> RootPhase.ONBOARDING
-                lockState == AppLockState.LOCKED -> RootPhase.LOCKED
+                preferences.appLockEnabled && lockState == AppLockState.LOCKED -> RootPhase.LOCKED
                 else -> RootPhase.READY
             },
             isDynamicColorEnabled = preferences.dynamicColor,
@@ -74,8 +70,9 @@ class RootViewModel @Inject constructor(
     private fun resumeInterruptedNotesWhenReady() {
         launchSafely(showLoading = false) {
             uiState.first { it.phase == RootPhase.READY }
-            resumeInterruptedNotes.get().invoke()
-            sweepOrphanedRecordings.get().invoke()
+            resumeInterruptedNotes.value.invoke()
+            sweepOrphanedRecordings.value.invoke()
+            clearShareCache()
         }
     }
 
@@ -84,7 +81,7 @@ class RootViewModel @Inject constructor(
         launchSafely(showLoading = false) {
             uiState.first { it.phase == RootPhase.READY }
             if (!modelManager.isModelDownloaded()) {
-                ModelDownloadService.start(context)
+                modelDownloadController.start()
             }
         }
     }

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notes_title">Notizen</string>
+    <string name="notes_empty_state">Noch keine Notizen. Tippe auf das Mikrofon, um deine erste aufzunehmen.</string>
+    <string name="notes_model_banner_title">Dein KI-Kern wird vorbereitet</string>
+    <string name="notes_model_banner_subtitle">Das On-Device-Modell wird im Hintergrund heruntergeladen</string>
+    <string name="notes_day_today">Heute</string>
+    <string name="notes_day_yesterday">Gestern</string>
+    <plurals name="notes_word_count">
+        <item quantity="one">%1$s Wort</item>
+        <item quantity="other">%1$s Wörter</item>
+    </plurals>
+    <string name="notes_record_fab_description">Neue Aufnahme starten</string>
+    <string name="notes_select_prompt">Wähle eine Notiz aus, um sie zu lesen</string>
+    <string name="notes_back_description">Zurück zu den Notizen</string>
+    <string name="notes_play_description">Aufnahme abspielen</string>
+    <string name="notes_pause_description">Wiedergabe pausieren</string>
+    <string name="notes_processing_title">Wird verarbeitet…</string>
+    <string name="notes_processing_preview">Wird auf diesem Gerät transkribiert und zusammengefasst. Du kannst die Aufnahme schon abspielen.</string>
+    <string name="notes_processing_transcribing">Das Transkript wird verarbeitet… Es erscheint hier automatisch.</string>
+    <string name="notes_processing_structuring">Die Übersicht wird erstellt… Das Transkript steht schon unten.</string>
+    <string name="notes_recording_fallback_title">Aufnahme</string>
+    <string name="notes_failed_description">Wir konnten für diese Notiz keine Übersicht und kein Transkript erstellen.</string>
+    <string name="notes_failed_overview_description">Wir konnten für diese Notiz keine Übersicht erstellen. Das Transkript ist unten gespeichert.</string>
+    <string name="notes_try_again_button">Erneut versuchen</string>
+    <string name="notes_overview_heading">Übersicht</string>
+    <string name="notes_transcript_heading">Transkript</string>
+    <string name="notes_edit_description">Notiz bearbeiten</string>
+    <string name="notes_share_description">Notiz teilen</string>
+    <string name="notes_delete_description">Notiz löschen</string>
+    <string name="notes_metrics">Transkription %1$s · Strukturierung %2$s · %3$s</string>
+    <string name="notes_edit_title_label">Titel</string>
+    <string name="notes_edit_save_description">Änderungen speichern</string>
+    <string name="notes_edit_cancel_description">Änderungen verwerfen</string>
+    <string name="notes_delete_dialog_title">Diese Notiz löschen?</string>
+    <string name="notes_delete_dialog_body">Die Notiz wird dauerhaft von diesem Gerät entfernt. Das kann nicht rückgängig gemacht werden.</string>
+    <string name="notes_delete_dialog_confirm">Löschen</string>
+    <string name="notes_delete_dialog_cancel">Abbrechen</string>
+    <string name="notes_retranscribe_description">Neu transkribieren</string>
+    <string name="notes_retranscribe_dialog_title">Diese Notiz neu transkribieren?</string>
+    <string name="notes_retranscribe_dialog_body">Die Aufnahme wird erneut transkribiert und zusammengefasst; der aktuelle Titel, die Übersicht und das Transkript werden ersetzt. Die Audioaufnahme selbst bleibt erhalten.</string>
+    <string name="notes_badge_encrypted">Verschlüsselt</string>
+    <string name="notes_more_actions_description">Weitere Aktionen</string>
+    <string name="notes_share_dialog_title">Was möchtest du teilen?</string>
+    <string name="notes_share_dialog_body">Bedenke: Geteilte Kopien sind nicht mehr verschlüsselt, sobald sie dieses Gerät verlassen.</string>
+    <string name="notes_share_option_note">Notiz einschließen</string>
+    <string name="notes_share_option_audio">Audio einschließen</string>
+    <string name="notes_share_dialog_confirm">Teilen</string>
+    <string name="notes_share_date_label">Datum</string>
+    <string name="notes_preset_description">Notizstil ändern</string>
+    <string name="notes_preset_sheet_title">Diese Notiz neu schreiben als</string>
+    <string name="notes_preset_sheet_body">Die Aufnahme bleibt erhalten. Titel und Übersicht werden aus dem Transkript neu geschrieben — im Stil, den du wählst.</string>
+</resources>

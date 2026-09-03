@@ -6,12 +6,9 @@ import com.dmytrosamoilov.offhand.core.ai.api.AiResult
 import com.dmytrosamoilov.offhand.core.ai.api.ModelState
 import com.dmytrosamoilov.offhand.core.ai.api.TokenEstimator
 import com.google.ai.edge.litertlm.Content
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.first
 
-@Singleton
-class LocalAiBackend @Inject constructor(
+class LocalAiBackend(
     private val manager: LiteRtLmManager,
 ) : AiBackend {
 

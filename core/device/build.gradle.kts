@@ -1,14 +1,22 @@
 plugins {
-    alias(libs.plugins.offhand.android.library)
-    alias(libs.plugins.offhand.hilt)
+    alias(libs.plugins.offhand.kmp.library)
 }
 
 android {
     namespace = "com.dmytrosamoilov.offhand.core.device"
 }
 
-dependencies {
-    implementation(libs.timber)
-
-    testImplementation(libs.junit)
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project.dependencies.platform(libs.koin.bom))
+            implementation(libs.koin.core)
+        }
+        androidMain.dependencies {
+            implementation(libs.timber)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+    }
 }

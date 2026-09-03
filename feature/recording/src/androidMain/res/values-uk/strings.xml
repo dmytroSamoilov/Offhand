@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="recording_idle_hint">Торкніться, щоб записати. Усе розшифровується та структурується прямо на цьому пристрої.</string>
+    <string name="recording_start_description">Почати запис</string>
+    <string name="recording_stop_description">Зупинити запис</string>
+    <string name="recording_pause_description">Призупинити запис</string>
+    <string name="recording_resume_description">Відновити запис</string>
+    <string name="recording_paused_label">Пауза</string>
+    <string name="recording_active_label">Триває запис…</string>
+    <string name="recording_save_note_button">Зберегти нотатку</string>
+    <string name="recording_discard_button">Видалити запис</string>
+    <string name="recording_discard_dialog_title">Видалити цей запис?</string>
+    <string name="recording_discard_dialog_body">Запис і все розшифроване до цього моменту буде видалено. Це неможливо скасувати.</string>
+    <string name="recording_discard_dialog_confirm">Видалити</string>
+    <string name="recording_discard_dialog_cancel">Скасувати</string>
+    <string name="recording_stage_finishing">Зберігаємо ваш запис…</string>
+    <string name="recording_processing_hint">Це вікно можна закрити — нотатка зʼявиться у списку, коли буде готова.</string>
+    <string name="recording_external_mic_generic">Зовнішній мікрофон</string>
+    <string name="recording_saved_title">Запис збережено</string>
+    <string name="recording_saved_body">Ваша нотатка обробляється. Це вікно можна закрити — ми повідомимо, коли розшифровка буде готова.</string>
+    <string name="recording_saved_done_button">Готово</string>
+    <string name="recording_failed_title">Щось пішло не так</string>
+    <string name="recording_try_again_button">Повторити</string>
+    <string name="recording_notification_channel_name">Запис</string>
+    <string name="recording_notification_recording_title">Триває запис</string>
+    <string name="recording_notification_paused_title">Запис призупинено</string>
+    <string name="recording_notification_recording_text">Звук обробляється лише на цьому пристрої</string>
+    <string name="recording_notification_paused_text">Записано: %1$s</string>
+    <string name="recording_notification_action_pause">Пауза</string>
+    <string name="recording_notification_action_resume">Продовжити</string>
+    <string name="recording_notification_action_stop">Стоп</string>
+    <string name="recording_notification_processing_title">Створюємо вашу нотатку</string>
+    <string name="recording_notification_processing_text">Розшифровка та структурування на пристрої</string>
+    <string name="recording_notification_notes_channel_name">Готові нотатки</string>
+    <string name="recording_notification_ready_title">Ваша нотатка готова</string>
+    <string name="recording_notification_ready_text">Торкніться, щоб відкрити готову нотатку.</string>
+    <string name="recording_default_note_title">Запис %1$d</string>
+    <string name="recording_untitled_note_title">Голосова нотатка</string>
+    <string name="recording_notification_note_failed_title">Не вдалося розшифрувати за допомогою ШІ</string>
+    <string name="recording_notification_note_failed_text">Запис збережено. Торкніться, щоб відкрити його.</string>
+</resources>

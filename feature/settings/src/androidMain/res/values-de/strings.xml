@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Einstellungen</string>
+
+    <string name="settings_acceleration_title">KI-Beschleunigung</string>
+    <string name="settings_acceleration_cpu">CPU</string>
+    <string name="settings_acceleration_cpu_description">Funktioniert auf jedem unterstützten Gerät</string>
+    <string name="settings_acceleration_gpu">GPU</string>
+    <string name="settings_acceleration_gpu_description">Deutlich schneller auf Snapdragon-Geräten</string>
+    <string name="settings_acceleration_note">GPU ist auf Pixel-Geräten (Tensor) nicht verfügbar. Eine Änderung lädt die KI-Engine bei der nächsten Nutzung neu.</string>
+
+    <string name="settings_model_title">KI-Modell</string>
+    <string name="settings_model_picker_auto">Automatisch</string>
+    <string name="settings_model_picker_auto_description">Bestes Modell für den Speicher dieses Geräts</string>
+    <string name="settings_model_picker_note">Ein Modellwechsel lädt die KI-Engine bei der nächsten Nutzung neu. Bereits heruntergeladene Modelle bleiben auf dem Gerät.</string>
+    <string name="settings_model_status_not_downloaded">Nicht heruntergeladen</string>
+    <string name="settings_model_status_downloading">Wird heruntergeladen… %1$d%%</string>
+    <string name="settings_model_status_loading">Engine wird vorbereitet…</string>
+    <string name="settings_model_status_ready">Bereit · auf diesem Gerät gespeichert</string>
+    <string name="settings_model_status_error">Mit dem Modell ist etwas schiefgelaufen</string>
+    <string name="settings_model_download">Modell herunterladen</string>
+    <string name="settings_model_retry">Erneut versuchen</string>
+    <string name="settings_model_delete">Modell löschen</string>
+    <string name="settings_delete_model_dialog_title">KI-Modell löschen?</string>
+    <string name="settings_delete_model_dialog_body">Aufnehmen funktioniert erst wieder, wenn das Modell erneut heruntergeladen wurde. Deine Notizen sind nicht betroffen.</string>
+    <string name="settings_delete_model_dialog_confirm">Löschen</string>
+    <string name="settings_delete_model_dialog_cancel">Abbrechen</string>
+
+    <string name="settings_note_style_title">Notizstil</string>
+    <string name="settings_note_style_note">Gilt für neue Aufnahmen. Eine vorhandene Notiz kannst du direkt auf dem Notiz-Bildschirm umformulieren lassen.</string>
+
+    <string name="settings_security_title">Sicherheit</string>
+    <string name="settings_app_lock_label">Entsperren beim Öffnen von Offhand verlangen</string>
+    <string name="settings_app_lock_description">Fragt bei jedem Öffnen von Offhand nach Fingerabdruck, Gesicht oder Displaysperre.</string>
+    <string name="settings_app_lock_unavailable">Richte eine Displaysperre auf diesem Smartphone ein, um das zu nutzen.</string>
+    <string name="settings_appearance_title">Darstellung</string>
+    <string name="settings_dynamic_color_label">Farben vom Hintergrundbild</string>
+    <string name="settings_dynamic_color_description">Färbt die App passend zu deinem Hintergrundbild (Material You) statt mit der eingebauten Palette.</string>
+
+    <string name="settings_privacy_title">Privatsphäre</string>
+    <string name="settings_telemetry_label">Anonyme Nutzungs- &amp; Stabilitätsberichte</string>
+    <string name="settings_telemetry_description">Nutzungsstatistiken und Absturzberichte — Dinge wie App-Starts, Gerätemodell und App-Version. Niemals deine Notizen, Aufnahmen oder persönliche Daten.</string>
+    <string name="settings_feedback_title">Feedback</string>
+    <string name="settings_feature_request_label">Funktion vorschlagen</string>
+    <string name="settings_feature_request_description">Fehlt dir etwas? Sag dem Entwickler, was die App als Nächstes können soll.</string>
+    <string name="settings_feature_request_subject">[%1$s] Funktionswunsch</string>
+    <string name="settings_feature_request_body">Hallo! Ich möchte eine Funktion vorschlagen:\n\n\n\n—\nDie Angaben unten wurden automatisch hinzugefügt. Sie beschreiben mein Gerät und meine App-Version und helfen dem Entwickler, meinen Vorschlag einzuordnen. Bitte lass sie stehen, wenn du sie teilen magst.\nGerät: %1$s %2$s (%3$s)\nRAM: %4$s\nApp-Version: %5$s\nAndroid: %6$s (API %7$d)</string>
+    <string name="settings_feature_request_no_email_app">Keine E-Mail-App auf diesem Gerät gefunden</string>
+
+    <string name="settings_about_support_title">Über &amp; Support</string>
+    <string name="settings_about_support_subtitle">Version %1$s · Feedback, Datenschutz und Rechtliches</string>
+    <string name="settings_about_support_back">Zurück zu den Einstellungen</string>
+
+    <string name="settings_about_title">Über</string>
+    <string name="settings_about_version">Version %1$s</string>
+    <string name="settings_about_terms">Nutzungsbedingungen</string>
+    <string name="settings_about_privacy">Datenschutzerklärung</string>
+    <string name="settings_about_no_browser">Keine App gefunden, um diesen Link zu öffnen</string>
+
+    <string name="settings_developer_title">Entwickler</string>
+    <string name="settings_developer_label">Entwickleroptionen</string>
+    <string name="settings_developer_description">Zeigt Modellverwaltung, Beschleunigung und Verarbeitungs-Diagnosen.</string>
+</resources>

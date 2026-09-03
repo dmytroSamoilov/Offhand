@@ -3,7 +3,7 @@ import com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesS
 
 plugins {
     alias(libs.plugins.offhand.android.application)
-    alias(libs.plugins.offhand.hilt)
+    alias(libs.plugins.offhand.koin)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
@@ -17,10 +17,14 @@ android {
 
     defaultConfig {
         applicationId = "com.dmytrosamoilov.offhand"
-        versionCode = 11
-        versionName = "1.2.0"
+        versionCode = 14
+        versionName = "1.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    androidResources {
+        localeFilters += listOf("en", "de", "es", "hi", "pt-rBR", "ru", "uk")
     }
 
     flavorDimensions += "environment"
@@ -79,6 +83,8 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:ai-api"))
     implementation(project(":core:ai-local"))
+    implementation(project(":core:audio"))
+    implementation(project(":core:device"))
     implementation(project(":core:security"))
     implementation(project(":core:data"))
     implementation(project(":feature:onboarding"))
@@ -87,18 +93,21 @@ dependencies {
     implementation(project(":feature:settings"))
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.navigation.compose)
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.koin.androidx.compose)
     implementation(libs.androidx.material3.adaptive.navigation.suite)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kermit)
     implementation(libs.timber)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 
     debugImplementation(libs.leakcanary.android)
 }

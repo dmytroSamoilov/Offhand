@@ -1,0 +1,110 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "extractionState" : "extracted_with_value",
+      "shouldTranslate" : false
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "shouldTranslate" : false
+    },
+    "NSFaceIDUsageDescription" : {
+      "comment" : "Privacy - Face ID Usage Description",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand nutzt Face ID, damit nur du deine Notizen öffnen kannst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand uses Face ID so only you can open your notes."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand usa Face ID para que solo tú puedas abrir tus notas."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Face ID का इस्तेमाल करता है ताकि सिर्फ़ आप ही अपने नोट्स खोल सकें।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Offhand usa o Face ID para que só você possa abrir suas notas."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand использует Face ID, чтобы ваши заметки могли открыть только вы."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand використовує Face ID, щоб ваші нотатки могли відкрити лише ви."
+          }
+        }
+      }
+    },
+    "NSMicrophoneUsageDescription" : {
+      "comment" : "Privacy - Microphone Usage Description",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand nimmt deine Sprachnotizen auf. Audio verlässt dieses Gerät nie."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand records your voice notes. Audio never leaves this device."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand graba tus notas de voz. El audio nunca sale de este dispositivo."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand आपके वॉयस नोट्स रिकॉर्ड करता है। ऑडियो कभी इस डिवाइस से बाहर नहीं जाता।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Offhand grava suas notas de voz. O áudio nunca sai deste aparelho."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand записывает ваши голосовые заметки. Звук никогда не покидает это устройство."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand записує ваші голосові нотатки. Звук ніколи не залишає цей пристрій."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

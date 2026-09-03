@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_incompatible_title">Device not supported</string>
+    <string name="onboarding_incompatible_body">Offhand runs a large AI model directly on your phone, so nothing you record ever leaves the device. This device does not meet the minimum requirements.</string>
+    <string name="onboarding_incompatible_ram_label">Memory (RAM):</string>
+    <string name="onboarding_incompatible_ram_value">%1$s GB — needs %2$s GB</string>
+    <string name="onboarding_incompatible_cores_label">CPU cores:</string>
+    <string name="onboarding_incompatible_cores_value">%1$d — needs %2$d</string>
+
+    <string name="onboarding_privacy_title">Private by design</string>
+    <string name="onboarding_privacy_body">Everything you record stays on this phone. Recordings, transcripts, and notes are encrypted on this device, and the AI that processes them runs right here — nothing is ever uploaded.</string>
+    <string name="onboarding_continue">Continue</string>
+
+    <string name="onboarding_note_style_title">How will you use Offhand?</string>
+    <string name="onboarding_note_style_body">Pick the style your notes are written in. Every recording you make becomes this kind of note.</string>
+    <string name="onboarding_note_style_hint">You can change this anytime in Settings, or restyle any single note.</string>
+
+    <string name="onboarding_lock_title">Protect your notes</string>
+    <string name="onboarding_lock_body">Your notes are encrypted with a key stored in this phone\'s secure hardware. This phone has no screen lock, so anyone who picks it up can open Offhand. Set up a PIN, pattern, or fingerprint to keep your notes private.</string>
+    <string name="onboarding_lock_setup">Set up screen lock</string>
+    <string name="onboarding_lock_skip">Continue without a lock</string>
+    <string name="onboarding_lock_enable_title">Lock Offhand?</string>
+    <string name="onboarding_lock_enable_body">Offhand can ask for your fingerprint, face, or screen lock every time it opens, so your notes stay private even if someone else is holding an unlocked phone.</string>
+    <string name="onboarding_lock_enable_label">Require unlock to open Offhand</string>
+    <string name="onboarding_lock_enable_description">You can change this any time in Settings.</string>
+
+    <string name="onboarding_download_title">Set up your private AI</string>
+    <string name="onboarding_download_body">Offhand transcribes and summarizes voice notes with AI that runs entirely on your phone. To get started, it needs a one-time download of its AI models.</string>
+    <string name="onboarding_download_size">One-time download · about %1$s GB</string>
+    <string name="onboarding_download_background_hint">The download continues in the background — you can start recording right away. We\'ll notify you when everything is ready.</string>
+    <string name="onboarding_download_wifi_hint">Tip: connect to Wi‑Fi to save mobile data.</string>
+    <string name="onboarding_notification_download_channel_name">Model downloads</string>
+    <string name="onboarding_notification_status_channel_name">Model status</string>
+    <string name="onboarding_notification_downloading_title">Downloading AI models</string>
+    <string name="onboarding_notification_downloading_text">Offhand is setting up on-device AI</string>
+    <string name="onboarding_notification_ready_title">Your AI models are ready</string>
+    <string name="onboarding_notification_ready_text">Transcription and summaries now run fully on this device.</string>
+    <string name="onboarding_notification_failed_title">Model download didn\'t finish</string>
+    <string name="onboarding_notification_failed_text">Check your connection. Offhand will resume the download when you record your next note.</string>
+
+    <string name="onboarding_consent_title">Help improve Offhand?</string>
+    <string name="onboarding_consent_body">Share anonymous usage statistics and crash reports — things like app opens, device model and app version — so we can keep the app fast and reliable. This never includes your notes, recordings, transcripts, or any personal data — everything you record stays on this device. You can change this anytime in Settings.</string>
+    <string name="onboarding_consent_toggle_label">Share anonymous reports</string>
+</resources>

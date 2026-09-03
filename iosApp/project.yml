@@ -1,0 +1,177 @@
+name: Offhand
+options:
+  bundleIdPrefix: com.dmytrosamoilov
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+configs:
+  Debug-dev: debug
+  Release-dev: release
+  Debug-prod: debug
+  Release-prod: release
+settings:
+  configs:
+    Debug-dev:
+      APP_ID_SUFFIX: .dev
+      APP_DISPLAY_NAME: Offhand Dev
+      APP_ICON_NAME: AppIcon-dev
+      FIREBASE_CONFIG_DIR: dev
+    Release-dev:
+      APP_ID_SUFFIX: .dev
+      APP_DISPLAY_NAME: Offhand Dev
+      APP_ICON_NAME: AppIcon-dev
+      FIREBASE_CONFIG_DIR: dev
+    Debug-prod: &prod
+      APP_ID_SUFFIX: ""
+      APP_DISPLAY_NAME: Offhand
+      APP_ICON_NAME: AppIcon
+      FIREBASE_CONFIG_DIR: prod
+    Release-prod: *prod
+packages:
+  LiteRTLM:
+    url: https://github.com/google-ai-edge/LiteRT-LM
+    exactVersion: 0.16.0
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: 12.18.0
+targets:
+  Offhand:
+    type: application
+    platform: iOS
+    sources:
+      - Offhand
+      - Shared
+    postCompileScripts:
+      # The config is gitignored, so a fresh clone has none. Warn and carry on:
+      # CrashReporting treats an unconfigured Firebase as "reporting off",
+      # matching MissingGoogleServicesStrategy.WARN on Android.
+      - name: Copy Firebase config
+        script: |
+          set -e
+          SOURCE="${SRCROOT}/Firebase/${FIREBASE_CONFIG_DIR}/GoogleService-Info.plist"
+          if [ ! -f "$SOURCE" ]; then
+            echo "warning: no GoogleService-Info.plist for '${FIREBASE_CONFIG_DIR}' — crash reporting stays off."
+            exit 0
+          fi
+          DESTINATION="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"
+          mkdir -p "$DESTINATION"
+          cp "$SOURCE" "$DESTINATION/GoogleService-Info.plist"
+    dependencies:
+      - package: LiteRTLM
+        product: LiteRTLM
+      - package: Firebase
+        product: FirebaseCrashlytics
+      - package: Firebase
+        product: FirebaseAnalyticsCore
+      - framework: Frameworks/sherpa-onnx.xcframework
+        embed: false
+      - framework: Frameworks/onnxruntime.xcframework
+        embed: false
+      - framework: ../shared-framework/build/XCFrameworks/release/OffhandShared.xcframework
+        embed: false
+      - target: OffhandWidgets
+        embed: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dmytrosamoilov.offhand$(APP_ID_SUFFIX)
+        ASSETCATALOG_COMPILER_APPICON_NAME: $(APP_ICON_NAME)
+        MARKETING_VERSION: "1.2.0"
+        CURRENT_PROJECT_VERSION: "14"
+        SWIFT_VERSION: "5.9"
+        IPHONEOS_DEPLOYMENT_TARGET: "18.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        OTHER_LDFLAGS: "-lc++"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: S5UT57PQ2J
+        ENABLE_USER_SCRIPT_SANDBOXING: false
+        # Keeps Localizable.xcstrings in sync: Xcode extracts String(localized:)
+        # keys from code into the catalog on every IDE build.
+        SWIFT_EMIT_LOC_STRINGS: true
+    entitlements:
+      path: Offhand/Offhand.entitlements
+      properties:
+        com.apple.developer.kernel.increased-memory-limit: true
+    info:
+      path: Offhand/Info.plist
+      properties:
+        CFBundleDisplayName: $(APP_DISPLAY_NAME)
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        # iPad multitasking requires all four, and opting out via
+        # UIRequiresFullScreen is deprecated.
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIBackgroundModes: [audio, processing]
+        BGTaskSchedulerPermittedIdentifiers:
+          - $(PRODUCT_BUNDLE_IDENTIFIER).finish.*
+        NSSupportsLiveActivities: true
+        NSMicrophoneUsageDescription: "Offhand records your voice notes. Audio never leaves this device."
+        # Without this key iOS refuses Face ID outright and every unlock falls
+        # back to the passcode.
+        NSFaceIDUsageDescription: "Offhand uses Face ID so only you can open your notes."
+        ITSAppUsesNonExemptEncryption: false
+        # Off until the stored consent says otherwise, so nothing is collected
+        # before the user has answered.
+        FirebaseCrashlyticsCollectionEnabled: false
+        FirebaseAnalyticsCollectionEnabled: false
+        GOOGLE_ADS_ON_DEVICE_CONVERSION_EVENT_DATA_ENABLED: false
+  OffhandWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Widgets
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dmytrosamoilov.offhand$(APP_ID_SUFFIX).widgets
+        MARKETING_VERSION: "1.2.0"
+        CURRENT_PROJECT_VERSION: "14"
+        SWIFT_VERSION: "5.9"
+        IPHONEOS_DEPLOYMENT_TARGET: "18.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: S5UT57PQ2J
+        SKIP_INSTALL: true
+        SWIFT_EMIT_LOC_STRINGS: true
+    info:
+      path: Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: $(APP_DISPLAY_NAME) Widgets
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+schemes:
+  Offhand-dev:
+    build:
+      targets:
+        Offhand: all
+    run:
+      config: Debug-dev
+    test:
+      config: Debug-dev
+    profile:
+      config: Release-dev
+    analyze:
+      config: Debug-dev
+    archive:
+      config: Release-dev
+  Offhand-prod:
+    build:
+      targets:
+        Offhand: all
+    run:
+      config: Debug-prod
+    test:
+      config: Debug-prod
+    profile:
+      config: Release-prod
+    analyze:
+      config: Debug-prod
+    archive:
+      config: Release-prod

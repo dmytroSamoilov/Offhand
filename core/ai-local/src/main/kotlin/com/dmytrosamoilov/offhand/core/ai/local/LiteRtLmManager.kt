@@ -18,10 +18,7 @@ import com.google.ai.edge.litertlm.EngineConfig
 import com.google.ai.edge.litertlm.Message
 import com.google.ai.edge.litertlm.MessageCallback
 import com.google.ai.edge.litertlm.SamplerConfig
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.CoroutineScope
@@ -46,9 +43,8 @@ private val KEY_HARDWARE_BACKEND = stringPreferencesKey("hardware_backend")
 
 private val KEY_MODEL_OVERRIDE = stringPreferencesKey("model_override")
 
-@Singleton
-class LiteRtLmManager @Inject constructor(
-    @ApplicationContext private val context: Context,
+class LiteRtLmManager(
+    private val context: Context,
     private val catalog: ModelCatalog,
     private val downloader: ModelDownloader,
 ) : ModelManager {

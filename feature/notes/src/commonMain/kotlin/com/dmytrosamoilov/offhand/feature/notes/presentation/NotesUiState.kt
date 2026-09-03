@@ -1,0 +1,86 @@
+package com.dmytrosamoilov.offhand.feature.notes.presentation
+
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+
+data class NotesUiState(
+    val sections: List<NotesSectionUi> = emptyList(),
+    val selected: NoteDetailUi? = null,
+    val editor: NoteEditorUi? = null,
+    val playback: AudioPlaybackUi = AudioPlaybackUi(),
+    val pendingDeleteNoteId: Long? = null,
+    val isRetranscribeConfirmationVisible: Boolean = false,
+    val isShareDialogVisible: Boolean = false,
+    val isPresetSheetVisible: Boolean = false,
+    val pendingShare: NoteShareUi? = null,
+    val isDeveloperMode: Boolean = false,
+    val noteProgress: Map<Long, Int> = emptyMap(),
+    val modelPreparation: ModelPreparationUi? = null,
+)
+
+data class NoteShareUi(
+    val filePaths: List<String>,
+    val mimeType: String,
+)
+
+data class ModelPreparationUi(
+    val progressPercent: Int,
+)
+
+data class NotesSectionUi(
+    val dayLabel: NoteDayLabelUi,
+    val notes: List<NoteCardUi>,
+)
+
+sealed interface NoteDayLabelUi {
+    data object Today : NoteDayLabelUi
+    data object Yesterday : NoteDayLabelUi
+    data class Date(val text: String) : NoteDayLabelUi
+}
+
+data class NoteCardUi(
+    val id: Long,
+    val title: String,
+    val dayLabel: NoteDayLabelUi,
+    val time: String,
+    val preview: String,
+    val durationText: String?,
+    val status: NoteStatusUi,
+)
+
+data class NoteDetailUi(
+    val id: Long,
+    val title: String,
+    val body: String,
+    val transcript: String,
+    val createdAt: String,
+    val wordCount: Int,
+    val hasAudio: Boolean,
+    val metrics: NoteMetricsUi?,
+    val status: NoteStatusUi,
+    val preset: NotePreset,
+)
+
+enum class NoteStatusUi {
+    PROCESSING,
+    READY,
+    FAILED,
+}
+
+data class NoteMetricsUi(
+    val transcriptionTime: String,
+    val structuringTime: String,
+    val hardwareBackend: String,
+)
+
+data class AudioPlaybackUi(
+    val isAvailable: Boolean = false,
+    val isPlaying: Boolean = false,
+    val progress: Float = 0f,
+    val positionText: String = "0:00",
+    val durationText: String = "0:00",
+)
+
+data class NoteEditorUi(
+    val title: String,
+    val transcript: String,
+)

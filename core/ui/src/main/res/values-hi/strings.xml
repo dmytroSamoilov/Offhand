@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_ui_error_title">कुछ गड़बड़ हो गई</string>
+    <string name="core_ui_error_confirm">ठीक है</string>
+    <string name="core_ui_note_preset_summary">सारांश</string>
+    <string name="core_ui_note_preset_summary_description">जो कहा गया उसका साफ़-सुथरा लेख, बिना दोहराव और फ़ालतू बातों के।</string>
+    <string name="core_ui_note_preset_meeting">मीटिंग नोट्स</string>
+    <string name="core_ui_note_preset_meeting_description">चर्चा, फ़ैसले, एक्शन आइटम और खुले सवाल।</string>
+    <string name="core_ui_note_preset_visit">विज़िट रिपोर्ट</string>
+    <string name="core_ui_note_preset_visit_description">विज़िट किसके बारे में थी, टिप्पणियां, क्या किया गया और आगे के काम।</string>
+    <string name="core_ui_note_preset_legal">कानूनी नोट</string>
+    <string name="core_ui_note_preset_legal_description">मामला, बताए गए तथ्य, निर्देश, दी गई सलाह और अगले कदम।</string>
+</resources>

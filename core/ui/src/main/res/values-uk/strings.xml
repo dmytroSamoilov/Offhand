@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_ui_error_title">Щось пішло не так</string>
+    <string name="core_ui_error_confirm">ОК</string>
+    <string name="core_ui_note_preset_summary">Резюме</string>
+    <string name="core_ui_note_preset_summary_description">Акуратний виклад сказаного — без повторів і зайвих слів.</string>
+    <string name="core_ui_note_preset_meeting">Нотатки зі зустрічі</string>
+    <string name="core_ui_note_preset_meeting_description">Обговорення, рішення, завдання й відкриті питання.</string>
+    <string name="core_ui_note_preset_visit">Звіт про візит</string>
+    <string name="core_ui_note_preset_visit_description">Про кого був візит, спостереження, що зроблено та подальші кроки.</string>
+    <string name="core_ui_note_preset_legal">Юридична нотатка</string>
+    <string name="core_ui_note_preset_legal_description">Справа, викладені факти, доручення, надані поради та наступні кроки.</string>
+</resources>

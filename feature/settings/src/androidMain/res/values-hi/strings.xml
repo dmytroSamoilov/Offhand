@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">सेटिंग्स</string>
+
+    <string name="settings_acceleration_title">AI एक्सेलेरेशन</string>
+    <string name="settings_acceleration_cpu">CPU</string>
+    <string name="settings_acceleration_cpu_description">हर समर्थित डिवाइस पर काम करता है</string>
+    <string name="settings_acceleration_gpu">GPU</string>
+    <string name="settings_acceleration_gpu_description">Snapdragon डिवाइस पर काफ़ी तेज़</string>
+    <string name="settings_acceleration_note">Pixel (Tensor) डिवाइस पर GPU उपलब्ध नहीं है। इसे बदलने पर अगली बार इस्तेमाल के समय AI इंजन दोबारा लोड होगा।</string>
+
+    <string name="settings_model_title">AI मॉडल</string>
+    <string name="settings_model_picker_auto">अपने-आप</string>
+    <string name="settings_model_picker_auto_description">इस डिवाइस की मेमोरी के लिए सबसे अच्छा मॉडल</string>
+    <string name="settings_model_picker_note">मॉडल बदलने पर अगली बार इस्तेमाल के समय AI इंजन दोबारा लोड होगा। पहले से डाउनलोड किए गए मॉडल डिवाइस पर बने रहते हैं।</string>
+    <string name="settings_model_status_not_downloaded">डाउनलोड नहीं हुआ</string>
+    <string name="settings_model_status_downloading">डाउनलोड हो रहा है… %1$d%%</string>
+    <string name="settings_model_status_loading">इंजन तैयार हो रहा है…</string>
+    <string name="settings_model_status_ready">तैयार · इसी डिवाइस पर सहेजा गया</string>
+    <string name="settings_model_status_error">मॉडल में कुछ गड़बड़ हो गई</string>
+    <string name="settings_model_download">मॉडल डाउनलोड करें</string>
+    <string name="settings_model_retry">फिर से कोशिश करें</string>
+    <string name="settings_model_delete">मॉडल हटाएं</string>
+    <string name="settings_delete_model_dialog_title">AI मॉडल हटाएं?</string>
+    <string name="settings_delete_model_dialog_body">जब तक मॉडल दोबारा डाउनलोड नहीं होता, रिकॉर्डिंग काम नहीं करेगी। आपके नोट्स पर कोई असर नहीं पड़ेगा।</string>
+    <string name="settings_delete_model_dialog_confirm">हटाएं</string>
+    <string name="settings_delete_model_dialog_cancel">रद्द करें</string>
+
+    <string name="settings_note_style_title">नोट की शैली</string>
+    <string name="settings_note_style_note">नई रिकॉर्डिंग पर लागू होती है। किसी मौजूदा नोट की शैली आप नोट की स्क्रीन से बदल सकते हैं।</string>
+
+    <string name="settings_security_title">सुरक्षा</string>
+    <string name="settings_app_lock_label">Offhand खोलने के लिए अनलॉक ज़रूरी करें</string>
+    <string name="settings_app_lock_description">हर बार Offhand खुलने पर फ़िंगरप्रिंट, चेहरा या स्क्रीन लॉक मांगता है।</string>
+    <string name="settings_app_lock_unavailable">इसका इस्तेमाल करने के लिए इस फ़ोन पर स्क्रीन लॉक सेट करें।</string>
+    <string name="settings_appearance_title">दिखावट</string>
+    <string name="settings_dynamic_color_label">वॉलपेपर के रंग</string>
+    <string name="settings_dynamic_color_description">ऐप को बिल्ट-इन पैलेट के बजाय आपके वॉलपेपर (Material You) के रंगों में रंगता है।</string>
+
+    <string name="settings_privacy_title">निजता</string>
+    <string name="settings_telemetry_label">गुमनाम उपयोग और स्थिरता रिपोर्ट</string>
+    <string name="settings_telemetry_description">उपयोग के आंकड़े और क्रैश रिपोर्ट — जैसे ऐप खुलने की संख्या, डिवाइस मॉडल और ऐप वर्शन। आपके नोट्स, रिकॉर्डिंग या कोई निजी डेटा कभी नहीं।</string>
+    <string name="settings_feedback_title">फ़ीडबैक</string>
+    <string name="settings_feature_request_label">फ़ीचर का अनुरोध करें</string>
+    <string name="settings_feature_request_description">कुछ कमी लग रही है? डेवलपर को बताएं कि ऐप में आगे क्या होना चाहिए।</string>
+    <string name="settings_feature_request_subject">[%1$s] फ़ीचर अनुरोध</string>
+    <string name="settings_feature_request_body">नमस्ते! मैं एक फ़ीचर का सुझाव देना चाहता/चाहती हूं:\n\n\n\n—\nनीचे दी गई जानकारी अपने-आप जोड़ी गई है। यह मेरे डिवाइस और ऐप वर्शन के बारे में है, जिससे डेवलपर को मेरा सुझाव समझने में मदद मिलती है। अगर आपत्ति न हो तो इसे ऐसे ही रहने दें।\nडिवाइस: %1$s %2$s (%3$s)\nRAM: %4$s\nऐप वर्शन: %5$s\nAndroid: %6$s (API %7$d)</string>
+    <string name="settings_feature_request_no_email_app">इस डिवाइस पर कोई ईमेल ऐप नहीं मिला</string>
+
+    <string name="settings_about_support_title">जानकारी और सहायता</string>
+    <string name="settings_about_support_subtitle">वर्शन %1$s · फ़ीडबैक, निजता और कानूनी जानकारी</string>
+    <string name="settings_about_support_back">सेटिंग्स पर वापस जाएं</string>
+
+    <string name="settings_about_title">जानकारी</string>
+    <string name="settings_about_version">वर्शन %1$s</string>
+    <string name="settings_about_terms">नियम और शर्तें</string>
+    <string name="settings_about_privacy">निजता नीति</string>
+    <string name="settings_about_no_browser">यह लिंक खोलने के लिए कोई ऐप नहीं मिला</string>
+
+    <string name="settings_developer_title">डेवलपर</string>
+    <string name="settings_developer_label">डेवलपर विकल्प</string>
+    <string name="settings_developer_description">मॉडल प्रबंधन, एक्सेलेरेशन और प्रोसेसिंग डायग्नोस्टिक्स दिखाता है।</string>
+</resources>

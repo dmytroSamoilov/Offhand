@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_incompatible_title">Aparelho não compatível</string>
+    <string name="onboarding_incompatible_body">O Offhand executa um grande modelo de IA diretamente no seu telefone, então nada do que você grava sai do aparelho. Este aparelho não atende aos requisitos mínimos.</string>
+    <string name="onboarding_incompatible_ram_label">Memória (RAM):</string>
+    <string name="onboarding_incompatible_ram_value">%1$s GB — precisa de %2$s GB</string>
+    <string name="onboarding_incompatible_cores_label">Núcleos de CPU:</string>
+    <string name="onboarding_incompatible_cores_value">%1$d — precisa de %2$d</string>
+
+    <string name="onboarding_privacy_title">Privado por design</string>
+    <string name="onboarding_privacy_body">Tudo o que você grava fica neste telefone. Gravações, transcrições e notas são criptografadas neste aparelho, e a IA que as processa roda bem aqui — nada é enviado para lugar nenhum.</string>
+    <string name="onboarding_continue">Continuar</string>
+
+    <string name="onboarding_note_style_title">Como você vai usar o Offhand?</string>
+    <string name="onboarding_note_style_body">Escolha o estilo em que suas notas são escritas. Cada gravação que você faz vira esse tipo de nota.</string>
+    <string name="onboarding_note_style_hint">Você pode mudar isso a qualquer momento nas Configurações, ou mudar o estilo de qualquer nota.</string>
+
+    <string name="onboarding_lock_title">Proteja suas notas</string>
+    <string name="onboarding_lock_body">Suas notas são criptografadas com uma chave guardada no hardware seguro deste telefone. Este telefone não tem bloqueio de tela, então qualquer pessoa que pegá-lo pode abrir o Offhand. Configure um PIN, padrão ou impressão digital para manter suas notas privadas.</string>
+    <string name="onboarding_lock_setup">Configurar bloqueio de tela</string>
+    <string name="onboarding_lock_skip">Continuar sem bloqueio</string>
+    <string name="onboarding_lock_enable_title">Bloquear o Offhand?</string>
+    <string name="onboarding_lock_enable_body">O Offhand pode pedir sua impressão digital, seu rosto ou o bloqueio de tela sempre que abrir, para que suas notas continuem privadas mesmo se outra pessoa estiver com o telefone desbloqueado na mão.</string>
+    <string name="onboarding_lock_enable_label">Exigir desbloqueio para abrir o Offhand</string>
+    <string name="onboarding_lock_enable_description">Você pode mudar isso a qualquer momento nas Configurações.</string>
+
+    <string name="onboarding_download_title">Configure sua IA privada</string>
+    <string name="onboarding_download_body">O Offhand transcreve e resume notas de voz com IA que roda inteiramente no seu telefone. Para começar, ele precisa de um download único dos modelos de IA.</string>
+    <string name="onboarding_download_size">Download único · cerca de %1$s GB</string>
+    <string name="onboarding_download_background_hint">O download continua em segundo plano — você já pode começar a gravar. Vamos avisar quando tudo estiver pronto.</string>
+    <string name="onboarding_download_wifi_hint">Dica: conecte-se ao Wi‑Fi para economizar dados móveis.</string>
+    <string name="onboarding_notification_download_channel_name">Downloads de modelos</string>
+    <string name="onboarding_notification_status_channel_name">Status do modelo</string>
+    <string name="onboarding_notification_downloading_title">Baixando modelos de IA</string>
+    <string name="onboarding_notification_downloading_text">O Offhand está configurando a IA no aparelho</string>
+    <string name="onboarding_notification_ready_title">Seus modelos de IA estão prontos</string>
+    <string name="onboarding_notification_ready_text">Transcrição e resumos agora rodam totalmente neste aparelho.</string>
+    <string name="onboarding_notification_failed_title">O download do modelo não terminou</string>
+    <string name="onboarding_notification_failed_text">Verifique sua conexão. O Offhand vai retomar o download quando você gravar sua próxima nota.</string>
+
+    <string name="onboarding_consent_title">Quer ajudar a melhorar o Offhand?</string>
+    <string name="onboarding_consent_body">Compartilhe estatísticas de uso anônimas e relatórios de falhas — coisas como aberturas do app, modelo do aparelho e versão do app — para que o app continue rápido e confiável. Isso nunca inclui suas notas, gravações, transcrições ou dados pessoais — tudo o que você grava fica neste aparelho. Você pode mudar isso a qualquer momento nas Configurações.</string>
+    <string name="onboarding_consent_toggle_label">Compartilhar relatórios anônimos</string>
+</resources>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="recording_idle_hint">Tippe zum Aufnehmen. Alles wird direkt auf diesem Gerät transkribiert und strukturiert.</string>
+    <string name="recording_start_description">Aufnahme starten</string>
+    <string name="recording_stop_description">Aufnahme stoppen</string>
+    <string name="recording_pause_description">Aufnahme pausieren</string>
+    <string name="recording_resume_description">Aufnahme fortsetzen</string>
+    <string name="recording_paused_label">Pausiert</string>
+    <string name="recording_active_label">Aufnahme läuft…</string>
+    <string name="recording_save_note_button">Notiz speichern</string>
+    <string name="recording_discard_button">Aufnahme verwerfen</string>
+    <string name="recording_discard_dialog_title">Diese Aufnahme verwerfen?</string>
+    <string name="recording_discard_dialog_body">Die Aufnahme und alles bisher Transkribierte werden gelöscht. Das kann nicht rückgängig gemacht werden.</string>
+    <string name="recording_discard_dialog_confirm">Verwerfen</string>
+    <string name="recording_discard_dialog_cancel">Abbrechen</string>
+    <string name="recording_stage_finishing">Deine Aufnahme wird gespeichert…</string>
+    <string name="recording_processing_hint">Du kannst das hier schließen — die Notiz erscheint in deiner Liste, sobald sie fertig ist.</string>
+    <string name="recording_external_mic_generic">Externes Mikrofon</string>
+    <string name="recording_saved_title">Aufnahme gespeichert</string>
+    <string name="recording_saved_body">Deine Notiz wird verarbeitet. Du kannst das hier schließen — wir benachrichtigen dich, sobald die Transkription fertig ist.</string>
+    <string name="recording_saved_done_button">Fertig</string>
+    <string name="recording_failed_title">Etwas ist schiefgelaufen</string>
+    <string name="recording_try_again_button">Erneut versuchen</string>
+    <string name="recording_notification_channel_name">Aufnahme</string>
+    <string name="recording_notification_recording_title">Aufnahme läuft</string>
+    <string name="recording_notification_paused_title">Aufnahme pausiert</string>
+    <string name="recording_notification_recording_text">Audio wird nur auf diesem Gerät verarbeitet</string>
+    <string name="recording_notification_paused_text">Bisher aufgenommen: %1$s</string>
+    <string name="recording_notification_action_pause">Pausieren</string>
+    <string name="recording_notification_action_resume">Fortsetzen</string>
+    <string name="recording_notification_action_stop">Stoppen</string>
+    <string name="recording_notification_processing_title">Deine Notiz wird erstellt</string>
+    <string name="recording_notification_processing_text">Wird auf dem Gerät transkribiert und strukturiert</string>
+    <string name="recording_notification_notes_channel_name">Fertige Notizen</string>
+    <string name="recording_notification_ready_title">Deine Notiz ist fertig</string>
+    <string name="recording_notification_ready_text">Tippe, um die fertige Notiz zu öffnen.</string>
+    <string name="recording_default_note_title">Aufnahme %1$d</string>
+    <string name="recording_untitled_note_title">Sprachnotiz</string>
+    <string name="recording_notification_note_failed_title">KI-Transkription fehlgeschlagen</string>
+    <string name="recording_notification_note_failed_text">Die Aufnahme ist gespeichert. Tippe, um sie zu öffnen.</string>
+</resources>
