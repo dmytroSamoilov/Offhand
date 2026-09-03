@@ -10,6 +10,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCa
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNotePresetUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsThinkingEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteRecordedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveDeveloperOptionsUseCase
@@ -62,6 +63,7 @@ val featureRecordingModule = module {
     factoryOf(::GetNotePresetUseCase)
     factoryOf(::GetNoteUseCase)
     factoryOf(::IsAiCoreDownloadedUseCase)
+    factoryOf(::IsThinkingEnabledUseCase)
     factoryOf(::MarkNoteProcessingUseCase)
     factoryOf(::MarkNoteRecordedUseCase)
     factoryOf(::ObserveDeveloperOptionsUseCase)

@@ -8,6 +8,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.TokenEstimator
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsThinkingEnabledUseCase
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -22,6 +23,7 @@ data class StructuredNote(
 class TranscriptStructurer(
     private val aiBackend: AiBackend,
     private val modelManager: ModelManager,
+    private val isThinkingEnabled: IsThinkingEnabledUseCase,
 ) {
 
     suspend fun structure(
@@ -101,8 +103,11 @@ class TranscriptStructurer(
         preset: NotePreset,
         promptSet: ModelPromptSet,
     ): PolishedNote? {
-        val prompt = promptSet.polishNote(preset)
-        if (merged.isBlank() || TokenEstimator.approxText(merged) > polishTokenBudget(prompt)) {
+        val thinkingEnabled = isThinkingEnabled()
+        val prompt = promptSet.polishNote(preset, thinkingEnabled)
+        if (merged.isBlank() ||
+            TokenEstimator.approxText(merged) > polishTokenBudget(prompt, thinkingEnabled)
+        ) {
             return null
         }
         val result = polishSafely(prompt, merged.replace('"', '\'')) ?: return null
@@ -120,9 +125,13 @@ class TranscriptStructurer(
     }
 
     // Polishing regenerates the whole note, so the context window must hold
-    // the prompt plus the note twice — once as input and once as output.
-    internal fun polishTokenBudget(prompt: String): Int =
-        (modelManager.model.maxTokens - TokenEstimator.approxText(prompt) - POLISH_TOKEN_SLACK) / 2
+    // the prompt plus the note twice — once as input and once as output —
+    // and, when thinking is enabled, the reasoning the model writes first.
+    internal fun polishTokenBudget(prompt: String, thinkingEnabled: Boolean): Int {
+        val thinkingReserve = if (thinkingEnabled) POLISH_THINKING_RESERVE else 0
+        val reserved = TokenEstimator.approxText(prompt) + POLISH_TOKEN_SLACK + thinkingReserve
+        return (modelManager.model.maxTokens - reserved) / 2
+    }
 
     private fun noteTitle(
         polished: PolishedNote?,
@@ -295,6 +304,9 @@ class TranscriptStructurer(
         // Slack for the JSON scaffolding, the title and estimator error on
         // top of the symmetric input/output split of the polish budget.
         const val POLISH_TOKEN_SLACK = 250
+        // Thinking is enabled for the polish pass, so the window must also
+        // hold the reasoning the model emits before the JSON.
+        const val POLISH_THINKING_RESERVE = 500
         // A polished note far shorter than the draft means the model
         // truncated or summarised it away instead of deduplicating it.
         const val MIN_POLISH_RETAIN = 0.3f

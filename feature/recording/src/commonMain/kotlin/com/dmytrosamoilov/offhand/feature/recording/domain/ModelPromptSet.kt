@@ -7,7 +7,7 @@ internal sealed class ModelPromptSet {
 
     abstract fun structureNote(preset: NotePreset): String
 
-    abstract fun polishNote(preset: NotePreset): String
+    abstract fun polishNote(preset: NotePreset, thinkingEnabled: Boolean): String
 
     data object Gemma4 : ModelPromptSet() {
 
@@ -20,17 +20,18 @@ internal sealed class ModelPromptSet {
             NOTE_FACTUALITY_RULES,
         ).joinToString(LINE_BREAK)
 
-        override fun polishNote(preset: NotePreset): String = listOf(
+        override fun polishNote(preset: NotePreset, thinkingEnabled: Boolean): String = listOfNotNull(
             "$POLISH_INTRO_PREFIX${NotePresetPrompt.noteKind(preset)}.",
             POLISH_CONTEXT,
             POLISH_TASKS_HEADER,
             POLISH_DEDUPE_RULE,
             POLISH_PROOFREAD_RULE,
             NotePresetPrompt.polishStructureRule(preset),
-            OUTPUT_SHAPE_INTRO,
+            POLISH_THINKING_RULE.takeIf { thinkingEnabled },
+            if (thinkingEnabled) POLISH_OUTPUT_INTRO else OUTPUT_SHAPE_INTRO,
             NOTE_JSON_SHAPE,
             NotePresetPrompt.polishFieldRules(),
-            NOTE_JSON_RULES,
+            if (thinkingEnabled) POLISH_JSON_RULES else NOTE_JSON_RULES,
             POLISH_FACTUALITY_RULES,
         ).joinToString(LINE_BREAK)
     }
@@ -83,6 +84,21 @@ private const val POLISH_PROOFREAD_RULE =
     "- When a word is clearly wrong for the meaning of its sentence, replace it with the " +
         "word that was most likely spoken, and fix broken grammar the same way. Leave every " +
         "word that already makes sense unchanged."
+
+private const val POLISH_THINKING_RULE =
+    "First think the draft through inside one <thinking></thinking> block, in a few short " +
+        "sentences: what repeats, which words look mis-transcribed, and what should move " +
+        "where. Close the block before you answer."
+
+private const val POLISH_OUTPUT_INTRO =
+    "After the thinking block, output a single JSON object, exactly in this shape:"
+
+private val POLISH_JSON_RULES = """
+    Rules for the JSON output:
+    - Output exactly one JSON object and no other text after it.
+    - Never use double quotes inside the field values.
+    - Use \n instead of real line breaks inside the field values.
+""".trimIndent()
 
 private const val POLISH_FACTUALITY_RULES =
     "Very important: keep every name, number, amount, date and decision exactly as written in the draft, and never add anything the draft does not say. Write the title and the overview in the same language the draft is written in."

@@ -6,8 +6,10 @@ import com.dmytrosamoilov.offhand.core.ai.api.AiResult
 import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
 import com.dmytrosamoilov.offhand.core.ai.api.TokenEstimator
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsThinkingEnabledUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -17,7 +19,10 @@ import org.junit.Test
 class TranscriptStructurerTest {
 
     private val aiBackend: AiBackend = mockk()
-    private val structurer = TranscriptStructurer(aiBackend, testModelManager())
+    private val isThinkingEnabled: IsThinkingEnabledUseCase = mockk {
+        every { this@mockk.invoke() } returns false
+    }
+    private val structurer = TranscriptStructurer(aiBackend, testModelManager(), isThinkingEnabled)
 
     private fun result(text: String, timeMs: Long = 100) = AiResult(
         text = text,
@@ -27,8 +32,13 @@ class TranscriptStructurerTest {
         hardwareBackend = HardwareBackend.CPU,
     )
 
-    private fun stubPolish(preset: NotePreset, json: String, timeMs: Long = 100) {
-        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.polishNote(preset), any()) } returns
+    private fun stubPolish(
+        preset: NotePreset,
+        json: String,
+        timeMs: Long = 100,
+        thinking: Boolean = false,
+    ) {
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.polishNote(preset, thinking), any()) } returns
             result(json, timeMs = timeMs)
     }
 
@@ -82,8 +92,54 @@ class TranscriptStructurerTest {
         assertEquals(350, note.structuringTimeMs)
         coVerify(exactly = 1) {
             aiBackend.processText(
-                ModelPromptSet.Gemma4.polishNote(NotePreset.MEETING),
+                ModelPromptSet.Gemma4.polishNote(NotePreset.MEETING, thinkingEnabled = false),
                 "## Decisions\n- Ship on Friday\n- We ship Friday",
+            )
+        }
+    }
+
+    @Test
+    fun `polish thinking block is stripped and a newly added section is kept`() = runTest {
+        every { isThinkingEnabled.invoke() } returns true
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.MEETING), any()) } returns
+            result("""{"title": "Sync", "overview": "## Discussion\n- Alex will prepare the release notes by Friday"}""")
+        stubPolish(
+            NotePreset.MEETING,
+            "<thinking>The Friday task is an action item, not discussion.</thinking>\n" +
+                """{"title": "Sync", "overview": "## Action items\n- Alex prepares the release notes by Friday"}""",
+            thinking = true,
+        )
+
+        val note = structurer.structure(listOf("sync talk"), NotePreset.MEETING)
+
+        assertEquals("## Action items\n- Alex prepares the release notes by Friday", note.overview)
+    }
+
+    @Test
+    fun `polish response of only unclosed thinking is discarded`() = runTest {
+        every { isThinkingEnabled.invoke() } returns true
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns
+            result("""{"title": "My day", "overview": "I shipped the build today."}""")
+        stubPolish(NotePreset.SUMMARY, "<thinking>Let me look at the draft and", thinking = true)
+
+        val note = structurer.structure(listOf("shipping talk"), NotePreset.SUMMARY)
+
+        assertEquals("My day", note.title)
+        assertEquals("I shipped the build today.", note.overview)
+    }
+
+    @Test
+    fun `disabled thinking asks for the plain polish prompt`() = runTest {
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns
+            result("""{"title": "My day", "overview": "I shipped the build today."}""")
+        stubPolish(NotePreset.SUMMARY, """{"title": "My day", "overview": "I shipped the build today."}""")
+
+        structurer.structure(listOf("shipping talk"), NotePreset.SUMMARY)
+
+        coVerify(exactly = 1) {
+            aiBackend.processText(
+                ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY, thinkingEnabled = false),
+                any(),
             )
         }
     }
@@ -106,8 +162,9 @@ class TranscriptStructurerTest {
     fun `polish backend failure keeps the merged overview`() = runTest {
         coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns
             result("""{"title": "My day", "overview": "I shipped the build."}""", timeMs = 200)
-        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY), any()) } throws
-            AiBackendException("engine busy")
+        coEvery {
+            aiBackend.processText(ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY, thinkingEnabled = false), any())
+        } throws AiBackendException("engine busy")
 
         val note = structurer.structure(listOf("shipping talk"), NotePreset.SUMMARY)
 
@@ -126,7 +183,7 @@ class TranscriptStructurerTest {
 
         assertEquals(longOverview, note.overview)
         coVerify(exactly = 0) {
-            aiBackend.processText(ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY), any())
+            aiBackend.processText(ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY, thinkingEnabled = false), any())
         }
     }
 
@@ -141,7 +198,7 @@ class TranscriptStructurerTest {
         assertEquals("he said 'ship it' today", note.overview)
         coVerify(exactly = 1) {
             aiBackend.processText(
-                ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY),
+                ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY, thinkingEnabled = false),
                 "he said 'ship it' today",
             )
         }
@@ -344,15 +401,17 @@ class TranscriptStructurerTest {
 
     @Test
     fun `polish budget leaves room for the note twice in every preset`() {
-        NotePreset.entries.forEach { preset ->
-            val prompt = ModelPromptSet.Gemma4.polishNote(preset)
-            val budget = structurer.polishTokenBudget(prompt)
+        listOf(false, true).forEach { thinking ->
+            NotePreset.entries.forEach { preset ->
+                val prompt = ModelPromptSet.Gemma4.polishNote(preset, thinking)
+                val budget = structurer.polishTokenBudget(prompt, thinking)
 
-            assertTrue("$preset polish budget must stay positive", budget > 0)
-            assertTrue(
-                "$preset polish budget must fit input and output in the context window",
-                budget * 2 + TokenEstimator.approxText(prompt) <= testModel().maxTokens,
-            )
+                assertTrue("$preset polish budget must stay positive", budget > 0)
+                assertTrue(
+                    "$preset polish budget must fit input and output in the context window",
+                    budget * 2 + TokenEstimator.approxText(prompt) <= testModel().maxTokens,
+                )
+            }
         }
     }
 }

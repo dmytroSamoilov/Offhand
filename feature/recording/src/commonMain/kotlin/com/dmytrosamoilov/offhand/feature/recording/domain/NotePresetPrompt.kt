@@ -39,11 +39,14 @@ internal object NotePresetPrompt {
     private fun markdownKind(kind: String): String =
         "$kind in Markdown, organised under section headings"
 
-    private fun sectionPolishRule(sections: List<String>): String =
-        "- Keep only these section headings: ${quoteList(sections)}. " +
-            "Move a point that sits under the wrong heading to the heading where it belongs, " +
-            "keep each point as one \"- \" line in sections that use \"- \" lines, and remove " +
-            "a heading that has nothing under it as well as lines that only say none or not mentioned."
+    private fun sectionPolishRule(sections: List<String>): String = listOf(
+        "- Keep only these section headings: ${quoteList(sections)}. Never use any other heading.",
+        "- Move a point that sits under the wrong heading to the heading where it belongs. " +
+            "When a point clearly belongs under one of the allowed headings that the draft " +
+            "does not have yet, add that heading and move the point under it.",
+        "- Keep each point as one \"- \" line in sections that use \"- \" lines, and remove " +
+            "a heading that has nothing under it as well as lines that only say none or not mentioned.",
+    ).joinToString(LINE_BREAK)
 
     private fun quoteList(sections: List<String>): String =
         sections.joinToString(SECTION_LIST_SEPARATOR) { "\"$it\"" }

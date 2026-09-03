@@ -21,6 +21,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCa
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNotePresetUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsThinkingEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteRecordedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
@@ -126,7 +127,9 @@ class RecordingSessionManagerTest {
     )
 
     private fun stubPolish(json: String) {
-        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY), any()) } returns AiResult(
+        coEvery {
+            aiBackend.processText(ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY, thinkingEnabled = false), any())
+        } returns AiResult(
             text = json,
             processingTimeMs = 0,
             inputTokens = 5,
@@ -135,10 +138,14 @@ class RecordingSessionManagerTest {
         )
     }
 
+    private val isThinkingEnabled: IsThinkingEnabledUseCase = mockk {
+        every { this@mockk.invoke() } returns false
+    }
+
     private fun CoroutineScope.manager() = RecordingSessionManager(
         recorder = recorder,
         speechToText = speechToText,
-        transcriptStructurer = TranscriptStructurer(aiBackend, testModelManager()),
+        transcriptStructurer = TranscriptStructurer(aiBackend, testModelManager(), isThinkingEnabled),
         createRecordingNote = createRecordingNote,
         markNoteRecorded = markNoteRecorded,
         discardNote = discardNote,
