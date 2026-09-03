@@ -7,6 +7,7 @@ import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.AppLockState
 import com.dmytrosamoilov.offhand.core.security.DatabasePassphraseProvider
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserPreferencesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
@@ -26,6 +27,7 @@ class RootViewModel(
     private val modelDownloadController: ModelDownloadController,
     private val resumeInterruptedNotes: Lazy<ResumeInterruptedNotesUseCase>,
     private val sweepOrphanedRecordings: Lazy<SweepOrphanedRecordingsUseCase>,
+    private val clearShareCache: ClearShareCacheUseCase,
 ) : BaseViewModel() {
 
     val uiState: StateFlow<RootUiState> = combine(
@@ -70,6 +72,7 @@ class RootViewModel(
             uiState.first { it.phase == RootPhase.READY }
             resumeInterruptedNotes.value.invoke()
             sweepOrphanedRecordings.value.invoke()
+            clearShareCache()
         }
     }
 

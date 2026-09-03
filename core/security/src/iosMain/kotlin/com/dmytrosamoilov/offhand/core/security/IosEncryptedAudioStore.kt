@@ -34,6 +34,7 @@ class IosEncryptedAudioStore : EncryptedAudioStore {
                     error = null,
                 )
             }
+            excludeFromBackup(path)
         }
 
     override fun newRecordingFileName(): String = "note-${NSUUID().UUIDString}$FILE_EXTENSION"

@@ -15,6 +15,7 @@ kotlin {
         }
         androidMain.dependencies {
             api(libs.coroutines.android)
+            implementation(libs.androidx.lifecycle.process)
             implementation(libs.tink.android)
             implementation(libs.timber)
         }

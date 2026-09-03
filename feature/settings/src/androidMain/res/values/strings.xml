@@ -39,8 +39,8 @@
     <string name="settings_dynamic_color_description">Color the app from your wallpaper (Material You) instead of the built-in palette.</string>
 
     <string name="settings_privacy_title">Privacy</string>
-    <string name="settings_telemetry_label">Anonymous stability reports</string>
-    <string name="settings_telemetry_description">Crash and performance data only. Never your notes, recordings or any personal data.</string>
+    <string name="settings_telemetry_label">Anonymous usage &amp; stability reports</string>
+    <string name="settings_telemetry_description">Usage statistics and crash reports — things like app opens, device model and app version. Never your notes, recordings or any personal data.</string>
     <string name="settings_feedback_title">Feedback</string>
     <string name="settings_feature_request_label">Request a feature</string>
     <string name="settings_feature_request_description">Missing something? Tell the developer what the app should do next.</string>

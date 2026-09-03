@@ -6,6 +6,7 @@ import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.AppLockState
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserPreferencesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinator
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
@@ -30,6 +31,7 @@ class IosRootViewModel(
     private val modelDownloadController: ModelDownloadController,
     private val resumeInterruptedNotes: ResumeInterruptedNotesUseCase,
     private val sweepOrphanedRecordings: SweepOrphanedRecordingsUseCase,
+    private val clearShareCache: ClearShareCacheUseCase,
     pendingNotesCoordinator: PendingNotesCoordinator,
 ) : BaseViewModel() {
 
@@ -72,6 +74,7 @@ class IosRootViewModel(
             phase.first { it == IosRootPhase.READY }
             resumeInterruptedNotes()
             sweepOrphanedRecordings()
+            clearShareCache()
         }
     }
 

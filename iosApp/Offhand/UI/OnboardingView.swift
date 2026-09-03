@@ -147,11 +147,11 @@ struct OnboardingView: View {
         case .telemetryConsent:
             StepCard(
                 icon: "chart.bar.fill",
-                title: String(localized: "Share stability reports?"),
-                message: String(localized: "Anonymous crash and stability data only — never your notes, audio, or any personal data."),
+                title: String(localized: "Share usage & stability reports?"),
+                message: String(localized: "Anonymous usage statistics and crash reports — things like app opens, device model and app version. Never your notes, audio, or any personal data."),
                 content: {
                     ToggleCard(
-                        label: String(localized: "Share stability reports"),
+                        label: String(localized: "Share usage & stability reports"),
                         isOn: Binding(
                             get: { state.isTelemetryEnabled },
                             set: { viewModel.onTelemetryToggled(granted: $0) }

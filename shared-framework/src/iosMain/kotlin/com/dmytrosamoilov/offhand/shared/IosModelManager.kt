@@ -7,6 +7,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.AvailableModel
 import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.ModelState
+import com.dmytrosamoilov.offhand.core.security.excludeFromBackup
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +18,6 @@ import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
-import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 
 class IosModelManager(
@@ -102,7 +102,6 @@ class IosModelManager(
             mutableModelState.value = ModelState.Error("Model download failed")
             throw IosFileDownloader.DownloadFailedException(model.modelFile)
         }
-        excludeFromBackup(modelPath())
         mutableModelState.value = ModelState.Downloaded
     }
 
@@ -150,15 +149,8 @@ class IosModelManager(
                 error = null,
             )
         }
+        excludeFromBackup(directory)
         return directory
-    }
-
-    private fun excludeFromBackup(path: String) {
-        NSURL.fileURLWithPath(path).setResourceValue(
-            true,
-            forKey = platform.Foundation.NSURLIsExcludedFromBackupKey,
-            error = null,
-        )
     }
 
     private companion object {

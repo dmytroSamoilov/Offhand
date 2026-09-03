@@ -61,6 +61,8 @@ targets:
         product: LiteRTLM
       - package: Firebase
         product: FirebaseCrashlytics
+      - package: Firebase
+        product: FirebaseAnalyticsCore
       - framework: Frameworks/sherpa-onnx.xcframework
         embed: false
       - framework: Frameworks/onnxruntime.xcframework
@@ -116,6 +118,8 @@ targets:
         # Off until the stored consent says otherwise, so nothing is collected
         # before the user has answered.
         FirebaseCrashlyticsCollectionEnabled: false
+        FirebaseAnalyticsCollectionEnabled: false
+        GOOGLE_ADS_ON_DEVICE_CONVERSION_EVENT_DATA_ENABLED: false
   OffhandWidgets:
     type: app-extension
     platform: iOS

@@ -22,8 +22,8 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinat
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.SessionPhase
 import com.dmytrosamoilov.offhand.feature.settings.di.featureSettingsModule
-import com.dmytrosamoilov.offhand.telemetry.CrashReportingController
 import com.dmytrosamoilov.offhand.telemetry.FirebaseReporting
+import com.dmytrosamoilov.offhand.telemetry.TelemetryController
 import com.dmytrosamoilov.offhand.telemetry.ReleaseLogTree
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.component.KoinComponent
@@ -33,7 +33,7 @@ import timber.log.Timber
 
 class OffhandApplication : Application(), KoinComponent {
 
-    private lateinit var crashReportingController: CrashReportingController
+    private lateinit var telemetryController: TelemetryController
     private lateinit var pendingNotesCoordinator: PendingNotesCoordinator
     private lateinit var sessionManager: RecordingSessionManager
     private lateinit var modelManager: ModelManager
@@ -59,7 +59,7 @@ class OffhandApplication : Application(), KoinComponent {
                 appModule,
             )
         }
-        crashReportingController = get()
+        telemetryController = get()
         pendingNotesCoordinator = get()
         sessionManager = get()
         modelManager = get()
@@ -69,7 +69,7 @@ class OffhandApplication : Application(), KoinComponent {
             Timber.plant(ReleaseLogTree { FirebaseReporting.instanceOrNull(this) })
         }
         Logger.setMinSeverity(if (BuildConfig.DEBUG) Severity.Verbose else Severity.Assert)
-        crashReportingController.start()
+        telemetryController.start()
         pendingNotesCoordinator.start()
     }
 

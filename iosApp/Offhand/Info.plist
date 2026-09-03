@@ -24,7 +24,11 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>FirebaseAnalyticsCollectionEnabled</key>
+	<false/>
 	<key>FirebaseCrashlyticsCollectionEnabled</key>
+	<false/>
+	<key>GOOGLE_ADS_ON_DEVICE_CONVERSION_EVENT_DATA_ENABLED</key>
 	<false/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
@@ -43,16 +47,14 @@
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 </dict>
 </plist>

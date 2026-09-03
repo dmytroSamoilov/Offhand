@@ -1,10 +1,11 @@
+import FirebaseAnalytics
 import FirebaseCore
 import FirebaseCrashlytics
 import Foundation
 import OffhandShared
 import os
 
-// Follows the stored telemetry consent, like the Android CrashReportingController.
+// Follows the stored telemetry consent, like the Android TelemetryController.
 //
 // It goes one step further than Android: Firebase is not configured at all until
 // consent is granted. Merely calling FirebaseApp.configure() makes Firebase reach
@@ -12,13 +13,13 @@ import os
 // is not something a "nothing leaves your device" app should do before the user
 // has said yes. The trade is a slightly later start, so a crash in the first
 // moments of launch may go unreported.
-final class CrashReporting {
+final class TelemetryController {
 
-    static let shared = CrashReporting()
+    static let shared = TelemetryController()
 
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier ?? "com.dmytrosamoilov.offhand",
-        category: "CrashReporting"
+        category: "Telemetry"
     )
 
     private var task: Task<Void, Never>?
@@ -39,19 +40,22 @@ final class CrashReporting {
             // nothing has been sent.
             if FirebaseApp.app() != nil {
                 Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)
+                Crashlytics.crashlytics().deleteUnsentReports()
+                Analytics.setAnalyticsCollectionEnabled(false)
             }
             return
         }
         guard configureIfNeeded() else { return }
         Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
+        Analytics.setAnalyticsCollectionEnabled(true)
     }
 
     // A build without GoogleService-Info.plist is the normal state of a fresh
-    // clone, so treat it as "reporting unavailable" rather than crashing.
+    // clone, so treat it as "telemetry unavailable" rather than crashing.
     private func configureIfNeeded() -> Bool {
         if FirebaseApp.app() != nil { return true }
         guard Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") != nil else {
-            Self.logger.notice("No Firebase config in this build; crash reporting stays off.")
+            Self.logger.notice("No Firebase config in this build; telemetry stays off.")
             return false
         }
         FirebaseApp.configure()

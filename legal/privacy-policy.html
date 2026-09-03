@@ -89,10 +89,10 @@
 <body>
 <main>
   <h1>Privacy Policy</h1>
-  <p class="meta">Offhand — private on-device voice notes<br>Last updated: July 19, 2026</p>
+  <p class="meta">Offhand — private on-device voice notes<br>Last updated: September 3, 2026</p>
 
   <div class="highlight">
-    <p><strong>The short version:</strong> your recordings, transcripts and notes never leave your phone. Offhand processes everything with AI models that run entirely on your device, and stores your data in encrypted form locally. The only data that can ever be sent off the device is anonymous crash reporting — and only if you explicitly opt in.</p>
+    <p><strong>The short version:</strong> your recordings, transcripts and notes never leave your phone. Offhand processes everything with AI models that run entirely on your device, and stores your data in encrypted form locally. The only data that can ever be sent off the device is anonymous telemetry — crash reports and usage statistics — and only if you explicitly opt in.</p>
   </div>
 
   <h2>1. Who we are</h2>
@@ -115,17 +115,19 @@
     <tr><td>Transcripts, notes, titles, overviews</td><td>Encrypted database on your device</td><td>Never</td></tr>
     <tr><td>App settings (theme, preferences, consent choices)</td><td>Local app storage</td><td>Never</td></tr>
     <tr><td>Crash and stability reports</td><td>Firebase Crashlytics (Google)</td><td>Only if you opt in</td></tr>
+    <tr><td>Usage statistics (app opens, sessions, device model, app version)</td><td>Firebase Analytics (Google)</td><td>Only if you opt in</td></tr>
   </table>
-  <p>Offhand has no user accounts, no advertising, no behavioural analytics, and no tracking. We do not sell, rent, or share any data.</p>
+  <p>Offhand has no user accounts, no advertising, and no advertising trackers. The only analytics is the opt-in, anonymous usage telemetry described in section 4 — never linked to your identity or your content. We do not sell, rent, or share any data.</p>
 
-  <h2>4. Optional crash reporting</h2>
-  <p>During onboarding (and at any time in Settings) you can choose whether to share anonymous crash and stability reports. If you decline, nothing is sent. If you opt in, we use <strong>Firebase Crashlytics</strong>, a service provided by Google, to receive:</p>
+  <h2>4. Optional telemetry: crash reports and usage statistics</h2>
+  <p>During onboarding (and at any time in Settings) you can choose whether to share anonymous telemetry. If you decline, nothing is sent. If you opt in, we use <strong>Firebase Crashlytics</strong> and <strong>Firebase Analytics</strong>, services provided by Google, to receive:</p>
   <ul>
     <li>crash stack traces and error information from the app's code;</li>
-    <li>basic device information such as device model, operating system version, and app version;</li>
-    <li>technical identifiers Crashlytics uses to group reports (not linked to your name, email, or any account).</li>
+    <li>anonymous usage statistics such as the number of app opens and sessions, and which screens inside the app are viewed (screen names only, never their content);</li>
+    <li>basic device information such as device model, operating system version, app version, and a coarse country derived from your IP address;</li>
+    <li>technical identifiers used to group reports (not linked to your name, email, or any account).</li>
   </ul>
-  <p>Crash reports never include your recordings, transcripts, notes, or any content you create in the app. Crashlytics data is retained by Google for a limited period (currently 90 days for crash data). You can withdraw consent at any time in <em>Settings</em>; reporting stops immediately. For details on Google's handling of this data, see the <a href="https://firebase.google.com/support/privacy">Firebase Privacy and Security documentation</a>.</p>
+  <p>Offhand ships the variant of the Analytics SDK that has no access to the advertising identifier (AdId on Android, IDFA on iOS), and advertising-ID collection is additionally disabled in the app's configuration. Telemetry never includes your recordings, transcripts, notes, or any content you create in the app. Crash data is retained by Google for a limited period (currently 90 days); Analytics data follows Firebase's default retention (up to 14 months). You can withdraw consent at any time in <em>Settings</em>; collection stops immediately and unsent crash reports are discarded. For details on Google's handling of this data, see the <a href="https://firebase.google.com/support/privacy">Firebase Privacy and Security documentation</a>.</p>
 
   <h2>5. One-time AI model download</h2>
   <p>To work fully offline, Offhand needs to download its AI model files once after installation. These files are fetched over an encrypted connection (HTTPS) from <a href="https://huggingface.co">huggingface.co</a>, a public model-hosting service. This is a plain file download: no content from your device is included in the request beyond what any web download technically requires (such as your IP address, which the hosting provider may log under its own privacy policy). After the download completes, transcription and note generation require no internet connection at all.</p>
@@ -142,7 +144,7 @@
     <li>All notes and transcripts are stored in a database encrypted with SQLCipher (AES-256).</li>
     <li>Audio recordings are stored as encrypted files; encryption keys are protected by the Android Keystore on your device.</li>
     <li>The app blocks screenshots and screen recording of its content by other apps.</li>
-    <li>Your data is excluded from Android cloud backups.</li>
+    <li>Your data is excluded from Android and iOS cloud backups.</li>
   </ul>
   <p>Because your content exists only on your device, deleting the app (or clearing its data) permanently deletes all recordings, transcripts and notes. We cannot recover them for you — and that is by design.</p>
 
@@ -150,9 +152,9 @@
   <ul>
     <li><strong>Access and portability</strong> — your notes are on your device; you can view, copy, or share them at any time.</li>
     <li><strong>Deletion</strong> — delete individual notes in the app, or remove everything by uninstalling the app or clearing its data.</li>
-    <li><strong>Consent</strong> — crash reporting is off unless you turn it on, and you can withdraw consent at any time in Settings.</li>
+    <li><strong>Consent</strong> — telemetry (crash reports and usage statistics) is off unless you turn it on, and you can withdraw consent at any time in Settings.</li>
   </ul>
-  <p>If you are in the European Economic Area, the United Kingdom, or another region with data-protection laws, you may have additional statutory rights (such as access, rectification, erasure, and complaint to a supervisory authority). Since we do not hold your content, most of these rights are exercised directly on your device; for crash-report data, contact us and we will assist.</p>
+  <p>If you are in the European Economic Area, the United Kingdom, or another region with data-protection laws, you may have additional statutory rights (such as access, rectification, erasure, and complaint to a supervisory authority). Since we do not hold your content, most of these rights are exercised directly on your device; for telemetry data, contact us and we will assist.</p>
 
   <h2>9. Children</h2>
   <p>Offhand is not directed at children under 13 (or the equivalent minimum age in your jurisdiction), and we do not knowingly collect personal data from children.</p>

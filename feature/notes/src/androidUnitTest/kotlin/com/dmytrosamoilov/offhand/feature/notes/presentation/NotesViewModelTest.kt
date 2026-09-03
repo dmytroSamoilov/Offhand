@@ -11,6 +11,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlaybackState
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
@@ -65,6 +66,7 @@ class NotesViewModelTest {
     private val updateNote: UpdateNoteUseCase = mockk(relaxed = true)
     private val deleteNote: DeleteNoteUseCase = mockk(relaxed = true)
     private val prepareNoteShare: PrepareNoteShareUseCase = mockk()
+    private val clearShareCache: ClearShareCacheUseCase = mockk(relaxed = true)
     private val shouldRequestReview: ShouldRequestReviewUseCase = mockk {
         coEvery { this@mockk.invoke() } returns false
     }
@@ -116,6 +118,7 @@ class NotesViewModelTest {
         updateNote = updateNote,
         deleteNote = deleteNote,
         prepareNoteShare = prepareNoteShare,
+        clearShareCache = clearShareCache,
         shouldRequestReview = shouldRequestReview,
         markReviewAttempt = markReviewAttempt,
         reviewLauncher = reviewLauncher,
@@ -252,6 +255,16 @@ class NotesViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         coVerify { markReviewAttempt() }
+    }
+
+    @Test
+    fun `share completion clears the share cache`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+
+        viewModel.onShareCompleted()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { clearShareCache() }
     }
 
     @Test

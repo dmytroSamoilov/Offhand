@@ -81,7 +81,7 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
         )
     }
     single { OnboardingStepPolicy(asksNotificationPermission = true) }
-    factory { IosRootViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    factory { IosRootViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
 }
 
 class IosDefaultNoteTitleProvider(

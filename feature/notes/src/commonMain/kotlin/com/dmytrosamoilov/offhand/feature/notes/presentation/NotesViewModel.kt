@@ -9,6 +9,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
@@ -36,6 +37,7 @@ class NotesViewModel(
     private val updateNote: UpdateNoteUseCase,
     private val deleteNote: DeleteNoteUseCase,
     private val prepareNoteShare: PrepareNoteShareUseCase,
+    private val clearShareCache: ClearShareCacheUseCase,
     private val shouldRequestReview: ShouldRequestReviewUseCase,
     private val markReviewAttempt: MarkReviewAttemptUseCase,
     val reviewLauncher: InAppReviewLauncher,
@@ -172,6 +174,12 @@ class NotesViewModel(
 
     fun onShareLaunched() {
         mutableUiState.update { it.copy(pendingShare = null) }
+    }
+
+    fun onShareCompleted() {
+        launchSafely(showLoading = false) {
+            clearShareCache()
+        }
     }
 
     fun onPlayPauseClicked() {

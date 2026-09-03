@@ -14,4 +14,6 @@ interface AppLockManager {
     val lockState: StateFlow<AppLockState>
 
     fun markUnlocked()
+
+    fun markLocked()
 }

@@ -30,6 +30,8 @@ import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSData
 import platform.Foundation.NSFileHandle
 import platform.Foundation.NSFileManager
+import platform.Foundation.NSFileProtectionCompleteUnlessOpen
+import platform.Foundation.NSFileProtectionKey
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
@@ -106,6 +108,7 @@ class IosAudioPlayer(
         progressJob?.cancel()
         player?.stop()
         player = null
+        NSFileManager.defaultManager.removeItemAtPath(playbackWavPath(), error = null)
         mutableState.value = AudioPlaybackState()
     }
 
@@ -120,11 +123,21 @@ class IosAudioPlayer(
         }
     }
 
-    private suspend fun writePlaybackWav(audioFileName: String): String {
+    private fun playbackWavPath(): String {
         val caches = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, true)
             .first() as String
-        val path = "$caches/$PLAYBACK_FILE"
-        NSFileManager.defaultManager.createFileAtPath(path, contents = null, attributes = null)
+        return "$caches/$PLAYBACK_FILE"
+    }
+
+    private suspend fun writePlaybackWav(audioFileName: String): String {
+        val path = playbackWavPath()
+        // createFileAtPath leaves an existing file untouched, so a stale copy must go first.
+        NSFileManager.defaultManager.removeItemAtPath(path, error = null)
+        NSFileManager.defaultManager.createFileAtPath(
+            path,
+            contents = null,
+            attributes = mapOf(NSFileProtectionKey to NSFileProtectionCompleteUnlessOpen),
+        )
         val handle = requireNotNull(NSFileHandle.fileHandleForWritingAtPath(path))
         var pcmBytes = 0
         try {

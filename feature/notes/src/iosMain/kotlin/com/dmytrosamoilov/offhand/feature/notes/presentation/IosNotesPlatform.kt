@@ -5,6 +5,9 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 import com.dmytrosamoilov.offhand.feature.notes.domain.ShareCacheDirectoryProvider
 import com.dmytrosamoilov.offhand.feature.notes.domain.review.AppInstallInfoProvider
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSDate
 import platform.Foundation.NSDocumentDirectory
@@ -20,6 +23,12 @@ class IosShareCacheDirectoryProvider : ShareCacheDirectoryProvider {
         val caches = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, true)
             .first() as String
         return "$caches/shared_notes"
+    }
+
+    override suspend fun clearShareDirectory() {
+        withContext(Dispatchers.IO) {
+            NSFileManager.defaultManager.removeItemAtPath(shareDirectoryPath(), error = null)
+        }
     }
 }
 

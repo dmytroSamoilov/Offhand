@@ -20,7 +20,7 @@ struct OffhandApp: App {
             )
         )
         installRecordingControls()
-        CrashReporting.shared.start()
+        TelemetryController.shared.start()
     }
 
     // Lets the Live Activity's buttons drive the same session the in-app

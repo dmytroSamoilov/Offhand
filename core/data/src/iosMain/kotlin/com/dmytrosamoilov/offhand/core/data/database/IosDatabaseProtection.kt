@@ -2,6 +2,7 @@
 
 package com.dmytrosamoilov.offhand.core.data.database
 
+import com.dmytrosamoilov.offhand.core.security.excludeFromBackup
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
@@ -25,6 +26,7 @@ internal fun createProtectedDatabaseDirectory(): String {
             error = null,
         )
     }
+    excludeFromBackup(directory)
     return directory
 }
 

@@ -93,7 +93,7 @@ struct AboutSupportView: View {
     private var privacySection: some View {
         Section {
             Toggle(
-                String(localized: "Share stability reports"),
+                String(localized: "Share usage & stability reports"),
                 isOn: Binding(
                     get: { state.isTelemetryEnabled },
                     set: { viewModel.onTelemetryChanged(granted: $0) }
@@ -102,7 +102,7 @@ struct AboutSupportView: View {
         } header: {
             Text(String(localized: "Privacy"))
         } footer: {
-            Text(String(localized: "Anonymous crash and stability data only — never your notes, audio, or any personal data."))
+            Text(String(localized: "Anonymous usage statistics and crash reports — things like app opens, device model and app version. Never your notes, audio, or any personal data."))
         }
     }
 

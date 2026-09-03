@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalForeignApi::class)
+
 package com.dmytrosamoilov.offhand.core.data.di
 
 import androidx.datastore.core.DataStore
@@ -19,9 +21,12 @@ import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import com.dmytrosamoilov.offhand.core.data.preferences.DataStoreUserPreferencesRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomNotesRepository
+import com.dmytrosamoilov.offhand.core.security.excludeFromBackup
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import okio.Path.Companion.toPath
+import platform.Foundation.NSFileManager
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -46,10 +51,19 @@ private fun createNotesDatabase(): NotesDatabase {
     return database
 }
 
-private fun createUserPreferencesDataStore(): DataStore<Preferences> =
-    PreferenceDataStoreFactory.createWithPath {
-        "${iosDocumentsDirectory()}/datastore/$USER_PREFERENCES_FILE_NAME".toPath()
+private fun createUserPreferencesDataStore(): DataStore<Preferences> {
+    val directory = "${iosDocumentsDirectory()}/datastore"
+    NSFileManager.defaultManager.createDirectoryAtPath(
+        directory,
+        withIntermediateDirectories = true,
+        attributes = null,
+        error = null,
+    )
+    excludeFromBackup(directory)
+    return PreferenceDataStoreFactory.createWithPath {
+        "$directory/$USER_PREFERENCES_FILE_NAME".toPath()
     }
+}
 
 val coreDataModule = module {
     single { createNotesDatabase() }

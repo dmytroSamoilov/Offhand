@@ -30,6 +30,7 @@ enum DeviceAuthenticator {
 struct LockScreenView: View {
     let onAuthenticated: () -> Void
 
+    @Environment(\.scenePhase) private var scenePhase
     @State private var isAuthenticating = false
     @State private var didFail = false
 
@@ -59,7 +60,14 @@ struct LockScreenView: View {
         .padding(.horizontal, 24)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemGroupedBackground))
-        .task { authenticate() }
+        // Re-locking inserts this view while the app is entering the background,
+        // where LAContext fails instantly — prompt only once the scene is active.
+        .task { if scenePhase == .active { authenticate() } }
+        .onChange(of: scenePhase) {
+            if scenePhase == .active && !isAuthenticating && !didFail {
+                authenticate()
+            }
+        }
     }
 
     private func authenticate() {

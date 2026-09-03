@@ -38,7 +38,7 @@
     <string name="onboarding_notification_failed_title">Model download didn\'t finish</string>
     <string name="onboarding_notification_failed_text">Check your connection. Offhand will resume the download when you record your next note.</string>
 
-    <string name="onboarding_consent_title">Help improve stability?</string>
-    <string name="onboarding_consent_body">Share anonymous crash and performance reports so we can keep the app reliable. This never includes your notes, recordings, transcripts, or any personal data — everything you record stays on this device. You can change this anytime in Settings.</string>
+    <string name="onboarding_consent_title">Help improve Offhand?</string>
+    <string name="onboarding_consent_body">Share anonymous usage statistics and crash reports — things like app opens, device model and app version — so we can keep the app fast and reliable. This never includes your notes, recordings, transcripts, or any personal data — everything you record stays on this device. You can change this anytime in Settings.</string>
     <string name="onboarding_consent_toggle_label">Share anonymous reports</string>
 </resources>

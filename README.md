@@ -46,11 +46,11 @@ That is the point of this repo being public:
 - **Network access** — the only outbound traffic in the codebase is the one-time model
   download over HTTPS:
   [`ModelDownloader.kt`](core/ai-local/src/main/kotlin/com/dmytrosamoilov/offhand/core/ai/local/ModelDownloader.kt).
-- **Crash reporting is off by default and opt-in** — Crashlytics auto-collection is
-  disabled in the [manifest](app/src/main/AndroidManifest.xml) and only activated when you
-  consent:
-  [`CrashReportingController.kt`](app/src/main/java/com/dmytrosamoilov/offhand/telemetry/CrashReportingController.kt).
-  Crash reports never contain note content.
+- **Telemetry is off by default and opt-in** — Crashlytics and Analytics auto-collection
+  are disabled in the [manifest](app/src/main/AndroidManifest.xml) and only activated when
+  you consent:
+  [`TelemetryController.kt`](app/src/main/java/com/dmytrosamoilov/offhand/telemetry/TelemetryController.kt).
+  Crash reports and usage statistics never contain note content.
 - **Encryption at rest** — SQLCipher database and Keystore-wrapped keys in
   [`core/security`](core/security) and [`core/data`](core/data).
 - **No screenshots, no backups** — `FLAG_SECURE` blocks screen capture;
@@ -69,8 +69,9 @@ Two product flavors: `production` (`com.dmytrosamoilov.offhand`) and `dev`
 1. Clone and open in Android Studio (or use `./gradlew assembleDevDebug`). The models
    (Whisper + Gemma) are ungated on Hugging Face — no account or token needed; the app
    downloads them on first run.
-2. Optional — Crashlytics (opt-in telemetry) needs your own Firebase project's
-   `google-services.json` in `app/`. The app builds and runs fine without it.
+2. Optional — Firebase telemetry (opt-in crash reporting + usage analytics) needs your own
+   Firebase project's `google-services.json` in `app/`. The app builds and runs fine
+   without it.
 
 ```
 ./gradlew assembleDebug testDebugUnitTest lintDebug :app:lintDevDebug

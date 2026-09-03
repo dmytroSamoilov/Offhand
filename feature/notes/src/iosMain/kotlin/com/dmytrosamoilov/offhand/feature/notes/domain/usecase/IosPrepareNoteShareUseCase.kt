@@ -23,8 +23,12 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import platform.Foundation.NSData
+import platform.Foundation.NSDataWritingAtomic
+import platform.Foundation.NSDataWritingFileProtectionCompleteUnlessOpen
 import platform.Foundation.NSFileHandle
 import platform.Foundation.NSFileManager
+import platform.Foundation.NSFileProtectionCompleteUnlessOpen
+import platform.Foundation.NSFileProtectionKey
 import platform.Foundation.closeFile
 import platform.Foundation.create
 import platform.Foundation.fileHandleForWritingAtPath
@@ -66,7 +70,7 @@ class IosPrepareNoteShareUseCase(
         NSFileManager.defaultManager.createDirectoryAtPath(
             shareDir,
             withIntermediateDirectories = true,
-            attributes = null,
+            attributes = mapOf(NSFileProtectionKey to NSFileProtectionCompleteUnlessOpen),
             error = null,
         )
         return shareDir
@@ -88,7 +92,11 @@ class IosPrepareNoteShareUseCase(
             overview = note.body,
             transcript = note.transcript,
         )
-        content.encodeToByteArray().toNsData().writeToFile(path, atomically = true)
+        content.encodeToByteArray().toNsData().writeToFile(
+            path,
+            options = NSDataWritingAtomic or NSDataWritingFileProtectionCompleteUnlessOpen,
+            error = null,
+        )
         return path
     }
 
@@ -97,7 +105,11 @@ class IosPrepareNoteShareUseCase(
 
     private fun writeAudioFile(shareDir: String, baseName: String, audioFileName: String): String {
         val path = "$shareDir/$baseName.wav"
-        NSFileManager.defaultManager.createFileAtPath(path, contents = null, attributes = null)
+        NSFileManager.defaultManager.createFileAtPath(
+            path,
+            contents = null,
+            attributes = mapOf(NSFileProtectionKey to NSFileProtectionCompleteUnlessOpen),
+        )
         val handle = requireNotNull(NSFileHandle.fileHandleForWritingAtPath(path))
         var pcmBytes = 0
         try {

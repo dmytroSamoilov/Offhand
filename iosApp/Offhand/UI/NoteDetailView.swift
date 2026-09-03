@@ -104,7 +104,7 @@ struct NoteDetailView: View {
                 .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: shareItemsBinding) {
-            ActivityShareSheet(items: shareItems)
+            ActivityShareSheet(items: shareItems, onComplete: dismissShare)
         }
         .onChange(of: state.pendingShare) {
             if let pending = state.pendingShare {
@@ -264,8 +264,14 @@ struct NoteDetailView: View {
     private var shareItemsBinding: Binding<Bool> {
         Binding(
             get: { !shareItems.isEmpty },
-            set: { isShown in if !isShown { shareItems = [] } }
+            set: { isShown in if !isShown { dismissShare() } }
         )
+    }
+
+    private func dismissShare() {
+        guard !shareItems.isEmpty else { return }
+        shareItems = []
+        viewModel.onShareCompleted()
     }
 }
 
@@ -510,9 +516,14 @@ private struct NoteEditorView: View {
 
 private struct ActivityShareSheet: UIViewControllerRepresentable {
     let items: [URL]
+    let onComplete: () -> Void
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: items, applicationActivities: nil)
+        let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        // Fires once the chosen activity has consumed the files (or on cancel),
+        // so the decrypted share copies are safe to delete.
+        controller.completionWithItemsHandler = { _, _, _, _ in onComplete() }
+        return controller
     }
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
