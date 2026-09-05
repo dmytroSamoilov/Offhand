@@ -20,21 +20,7 @@ struct OffhandApp: App {
                 shareFallbackTitle: String(localized: "Recording")
             )
         )
-        installRecordingControls()
         TelemetryController.shared.start()
-    }
-
-    // Lets the Live Activity's buttons drive the same session the in-app
-    // transport does, without linking the shared framework into the widget.
-    private func installRecordingControls() {
-        RecordingControlBridge.handler = { command in
-            let sessionManager = SharedGraph.shared.sessionManager()
-            switch command {
-            case .pause: sessionManager.pause()
-            case .resume: sessionManager.resume()
-            case .stop: sessionManager.stop()
-            }
-        }
     }
 
     var body: some Scene {
