@@ -3,8 +3,9 @@
 [![Release](https://img.shields.io/github/v/release/dmytroSamoilov/Offhand?include_prereleases&label=release)](https://github.com/dmytroSamoilov/Offhand/releases)
 ![Status](https://img.shields.io/badge/status-stable-release)
 
-> **Latest release: [Offhand 1.0.1](https://github.com/dmytroSamoilov/Offhand/releases/latest)** —
-> note style presets, a redesigned onboarding, and smarter sharing. See the
+> **Latest release: [Offhand 1.2.2](https://github.com/dmytroSamoilov/Offhand/releases/latest)** —
+> Offhand comes to iPhone and iPad, six new languages, recording that survives
+> switching apps, and the faster, more resilient processing engine from 1.2.0. See the
 > [releases page](https://github.com/dmytroSamoilov/Offhand/releases) for the full history.
 
 Private voice notes with on-device AI. Offhand records voice memos, meetings, and

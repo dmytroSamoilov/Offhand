@@ -6,6 +6,13 @@ final class MicAudioSource: NSObject, IosAudioSource {
     private let audioEngine = AVAudioEngine()
     private var pendingSamples: [Int16] = []
     private let frameSamples = 800
+    private var converter: AVAudioConverter?
+    private static let targetFormat = AVAudioFormat(
+        commonFormat: .pcmFormatInt16,
+        sampleRate: 16000,
+        channels: 1,
+        interleaved: true
+    )
 
     private var interruptionObserver: NSObjectProtocol?
     private var routeChangeObserver: NSObjectProtocol?
@@ -113,23 +120,13 @@ final class MicAudioSource: NSObject, IosAudioSource {
         inputNode.removeTap(onBus: 0)
         let inputFormat = inputNode.outputFormat(forBus: 0)
         // Immediately after a route change the input node can report an unusable
-        // format; building a converter from it would trap.
+        // format, and after a Bluetooth route change it can report a stale one.
+        // installTap raises an uncatchable Objective-C exception when the format
+        // passed in disagrees with the hardware, so the tap takes no explicit
+        // format and the converter is built from the buffers actually delivered.
         guard inputFormat.sampleRate > 0, inputFormat.channelCount > 0 else { return false }
-        guard let targetFormat = AVAudioFormat(
-            commonFormat: .pcmFormatInt16,
-            sampleRate: 16000,
-            channels: 1,
-            interleaved: true
-        ), let converter = AVAudioConverter(from: inputFormat, to: targetFormat) else {
-            return false
-        }
-        inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, _ in
-            self?.convertAndDeliver(
-                buffer: buffer,
-                converter: converter,
-                targetFormat: targetFormat,
-                onFrame: frameSink
-            )
+        inputNode.installTap(onBus: 0, bufferSize: 4096, format: nil) { [weak self] buffer, _ in
+            self?.convertAndDeliver(buffer: buffer, onFrame: frameSink)
         }
         return true
     }
@@ -283,12 +280,16 @@ final class MicAudioSource: NSObject, IosAudioSource {
         failureSink = nil
     }
 
-    private func convertAndDeliver(
-        buffer: AVAudioPCMBuffer,
-        converter: AVAudioConverter,
-        targetFormat: AVAudioFormat,
-        onFrame: (KotlinShortArray) -> Void
-    ) {
+    private func converter(from inputFormat: AVAudioFormat, to targetFormat: AVAudioFormat) -> AVAudioConverter? {
+        if let converter, converter.inputFormat == inputFormat { return converter }
+        let created = AVAudioConverter(from: inputFormat, to: targetFormat)
+        converter = created
+        return created
+    }
+
+    private func convertAndDeliver(buffer: AVAudioPCMBuffer, onFrame: (KotlinShortArray) -> Void) {
+        guard let targetFormat = MicAudioSource.targetFormat,
+              let converter = converter(from: buffer.format, to: targetFormat) else { return }
         let ratio = targetFormat.sampleRate / buffer.format.sampleRate
         let capacity = AVAudioFrameCount(Double(buffer.frameLength) * ratio) + 16
         guard let converted = AVAudioPCMBuffer(pcmFormat: targetFormat, frameCapacity: capacity) else { return }
