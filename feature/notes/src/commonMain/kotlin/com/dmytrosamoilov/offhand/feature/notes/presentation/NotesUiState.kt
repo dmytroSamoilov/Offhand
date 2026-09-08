@@ -15,6 +15,7 @@ data class NotesUiState(
     val isDeveloperMode: Boolean = false,
     val noteProgress: Map<Long, Int> = emptyMap(),
     val modelPreparation: ModelPreparationUi? = null,
+    val searchQuery: String = "",
 )
 
 data class NoteShareUi(
@@ -45,6 +46,13 @@ data class NoteCardUi(
     val preview: String,
     val durationText: String?,
     val status: NoteStatusUi,
+    val titleHighlights: List<TextRangeUi> = emptyList(),
+    val previewHighlights: List<TextRangeUi> = emptyList(),
+)
+
+data class TextRangeUi(
+    val start: Int,
+    val end: Int,
 )
 
 data class NoteDetailUi(

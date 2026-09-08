@@ -62,4 +62,8 @@
     <string name="notes_copy_overview_description">Copy overview</string>
     <string name="notes_copy_transcript_description">Copy transcript</string>
     <string name="notes_copied">Copied</string>
+    <string name="notes_search_placeholder">Search notes</string>
+    <string name="notes_search_clear_description">Clear search</string>
+    <string name="notes_search_empty_state">No notes match your search.</string>
+    <string name="notes_search_cancel_description">Cancel search</string>
 </resources>

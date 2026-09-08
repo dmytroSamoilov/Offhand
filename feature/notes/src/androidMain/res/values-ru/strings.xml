@@ -55,4 +55,8 @@
     <string name="notes_copy_overview_description">Скопировать обзор</string>
     <string name="notes_copy_transcript_description">Скопировать расшифровку</string>
     <string name="notes_copied">Скопировано</string>
+    <string name="notes_search_placeholder">Поиск по заметкам</string>
+    <string name="notes_search_clear_description">Очистить поиск</string>
+    <string name="notes_search_empty_state">По вашему запросу заметок не найдено.</string>
+    <string name="notes_search_cancel_description">Отменить поиск</string>
 </resources>

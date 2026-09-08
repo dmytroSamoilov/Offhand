@@ -8,7 +8,10 @@ import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlaybackState
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
+import com.dmytrosamoilov.offhand.feature.notes.domain.NoteSearchResult
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareBundle
+import com.dmytrosamoilov.offhand.feature.notes.domain.NoteTextCleaner
+import com.dmytrosamoilov.offhand.feature.notes.domain.TextMatch
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -19,42 +22,40 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 
-private val MARKDOWN_TOKENS = Regex("[#*>`_\\[\\]]")
 private val WHITESPACE_RUNS = Regex("\\s+")
-private const val PREVIEW_MAX_CHARS = 220
 
-internal fun List<Note>.toSectionsUi(dateLabelFormatter: DateLabelFormatter): List<NotesSectionUi> {
+internal fun List<NoteSearchResult>.toSectionsUi(dateLabelFormatter: DateLabelFormatter): List<NotesSectionUi> {
     val zone = TimeZone.currentSystemDefault()
     val today = Clock.System.now().toLocalDateTime(zone).date
-    return groupBy { Instant.fromEpochMilliseconds(it.createdAtEpochMs).toLocalDateTime(zone).date }
-        .map { (date, notes) ->
+    return groupBy { Instant.fromEpochMilliseconds(it.note.createdAtEpochMs).toLocalDateTime(zone).date }
+        .map { (date, results) ->
             NotesSectionUi(
                 dayLabel = date.toDayLabel(today, dateLabelFormatter),
-                notes = notes.map { it.toCardUi(zone, today, dateLabelFormatter) },
+                notes = results.map { it.toCardUi(zone, today, dateLabelFormatter) },
             )
         }
 }
 
-private fun Note.toCardUi(
+private fun NoteSearchResult.toCardUi(
     zone: TimeZone,
     today: LocalDate,
     dateLabelFormatter: DateLabelFormatter,
 ): NoteCardUi {
-    val createdAt = Instant.fromEpochMilliseconds(createdAtEpochMs).toLocalDateTime(zone)
+    val createdAt = Instant.fromEpochMilliseconds(note.createdAtEpochMs).toLocalDateTime(zone)
     return NoteCardUi(
-        id = id,
-        title = title,
+        id = note.id,
+        title = note.title,
         dayLabel = createdAt.date.toDayLabel(today, dateLabelFormatter),
         time = dateLabelFormatter.time(createdAt),
-        preview = body
-            .replace(MARKDOWN_TOKENS, " ")
-            .replace(WHITESPACE_RUNS, " ")
-            .trim()
-            .take(PREVIEW_MAX_CHARS),
-        durationText = durationMs?.let(::formatClock),
-        status = status.toUi(),
+        preview = snippet ?: NoteTextCleaner.preview(note.body),
+        durationText = note.durationMs?.let(::formatClock),
+        status = note.status.toUi(),
+        titleHighlights = titleMatches.map(TextMatch::toUi),
+        previewHighlights = snippetMatches.map(TextMatch::toUi),
     )
 }
+
+private fun TextMatch.toUi(): TextRangeUi = TextRangeUi(start = start, end = end)
 
 private fun LocalDate.toDayLabel(
     today: LocalDate,

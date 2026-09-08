@@ -53,4 +53,8 @@
     <string name="notes_copy_overview_description">अवलोकन कॉपी करें</string>
     <string name="notes_copy_transcript_description">ट्रांसक्रिप्ट कॉपी करें</string>
     <string name="notes_copied">कॉपी हो गया</string>
+    <string name="notes_search_placeholder">नोट्स खोजें</string>
+    <string name="notes_search_clear_description">खोज साफ़ करें</string>
+    <string name="notes_search_empty_state">आपकी खोज से मेल खाने वाला कोई नोट नहीं है।</string>
+    <string name="notes_search_cancel_description">खोज रद्द करें</string>
 </resources>

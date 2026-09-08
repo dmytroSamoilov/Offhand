@@ -16,6 +16,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttempt
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -32,6 +34,7 @@ class NotesViewModel(
     private val recordingProcessController: RecordingProcessController,
     private val dateLabelFormatter: DateLabelFormatter,
     observeNotes: ObserveNotesUseCase,
+    private val searchNotes: SearchNotesUseCase,
     observeDeveloperOptions: ObserveDeveloperOptionsUseCase,
     private val getNote: GetNoteUseCase,
     private val updateNote: UpdateNoteUseCase,
@@ -53,13 +56,21 @@ class NotesViewModel(
     val reviewRequests: SharedFlow<Unit> = mutableReviewRequests.asSharedFlow()
 
     private var selectedNote: Note? = null
+    private val allNotes = MutableStateFlow<List<Note>>(emptyList())
+    private val searchQuery = MutableStateFlow("")
 
     init {
         viewModelScope.launch {
             observeNotes().collect { notes ->
-                mutableUiState.update { it.copy(sections = notes.toSectionsUi(dateLabelFormatter)) }
+                allNotes.value = notes
                 refreshSelected(notes)
             }
+        }
+        viewModelScope.launch {
+            combine(allNotes, searchQuery) { notes, query -> searchNotes(notes, query) }
+                .collect { results ->
+                    mutableUiState.update { it.copy(sections = results.toSectionsUi(dateLabelFormatter)) }
+                }
         }
         viewModelScope.launch {
             audioPlayer.state.collect { playback ->
@@ -81,6 +92,11 @@ class NotesViewModel(
                 mutableUiState.update { it.copy(modelPreparation = downloadState.toPreparationUi()) }
             }
         }
+    }
+
+    fun onSearchQueryChanged(query: String) {
+        searchQuery.value = query
+        mutableUiState.update { it.copy(searchQuery = query) }
     }
 
     fun onNoteSelected(id: Long) {

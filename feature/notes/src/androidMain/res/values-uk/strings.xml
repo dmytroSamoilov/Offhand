@@ -55,4 +55,8 @@
     <string name="notes_copy_overview_description">Скопіювати огляд</string>
     <string name="notes_copy_transcript_description">Скопіювати розшифровку</string>
     <string name="notes_copied">Скопійовано</string>
+    <string name="notes_search_placeholder">Пошук у нотатках</string>
+    <string name="notes_search_clear_description">Очистити пошук</string>
+    <string name="notes_search_empty_state">За вашим запитом нотаток не знайдено.</string>
+    <string name="notes_search_cancel_description">Скасувати пошук</string>
 </resources>

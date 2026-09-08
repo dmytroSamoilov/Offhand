@@ -111,6 +111,21 @@ import com.dmytrosamoilov.offhand.feature.notes.R
 import java.util.Locale
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -167,6 +182,8 @@ fun NotesScreen(
                 AnimatedPane {
                     NotesListPane(
                         sections = state.sections,
+                        searchQuery = state.searchQuery,
+                        onSearchQueryChanged = viewModel::onSearchQueryChanged,
                         modelPreparation = state.modelPreparation,
                         onNoteClick = { id ->
                             viewModel.onNoteSelected(id)
@@ -382,6 +399,8 @@ private fun RetranscribeConfirmationDialog(
 @Composable
 private fun NotesListPane(
     sections: List<NotesSectionUi>,
+    searchQuery: String,
+    onSearchQueryChanged: (String) -> Unit,
     modelPreparation: ModelPreparationUi?,
     onNoteClick: (Long) -> Unit,
     onDeleteRequested: (Long) -> Unit,
@@ -420,19 +439,8 @@ private fun NotesListPane(
                 .padding(innerPadding),
         ) {
             ModelPreparationBanner(preparation = modelPreparation)
-            if (sections.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = stringResource(R.string.notes_empty_state),
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(32.dp),
-                    )
-                }
+            if (sections.isEmpty() && searchQuery.isBlank()) {
+                EmptyListMessage(text = stringResource(R.string.notes_empty_state))
             } else {
                 LazyColumn(
                     state = listState,
@@ -440,11 +448,19 @@ private fun NotesListPane(
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         end = 16.dp,
-                        top = 12.dp,
+                        top = 4.dp,
                         bottom = 16.dp,
                     ),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
+                    item(key = SEARCH_ITEM_KEY, contentType = "search") {
+                        NotesSearchField(query = searchQuery, onQueryChanged = onSearchQueryChanged)
+                    }
+                    if (sections.isEmpty()) {
+                        item(key = EMPTY_SEARCH_ITEM_KEY, contentType = "empty") {
+                            EmptyListMessage(text = stringResource(R.string.notes_search_empty_state))
+                        }
+                    }
                     sections.forEach { section ->
                         item(key = section.dayLabel.headerKey(), contentType = "header") {
                             SectionHeader(dayLabel = section.dayLabel)
@@ -461,6 +477,94 @@ private fun NotesListPane(
                 }
             }
         }
+    }
+}
+
+private const val SEARCH_ITEM_KEY = "search"
+private const val EMPTY_SEARCH_ITEM_KEY = "empty-search"
+
+@Composable
+private fun EmptyListMessage(text: String) {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(32.dp),
+        )
+    }
+}
+
+@Composable
+private fun NotesSearchField(query: String, onQueryChanged: (String) -> Unit) {
+    val focusManager = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    var isFocused by remember { mutableStateOf(false) }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TextField(
+            value = query,
+            onValueChange = onQueryChanged,
+            modifier = Modifier
+                .weight(1f)
+                .onFocusChanged { isFocused = it.isFocused },
+            placeholder = { Text(text = stringResource(R.string.notes_search_placeholder)) },
+            leadingIcon = { Icon(imageVector = Icons.Filled.Search, contentDescription = null) },
+            trailingIcon = { if (query.isNotEmpty()) ClearSearchButton(onClick = { onQueryChanged("") }) },
+            singleLine = true,
+            shape = CircleShape,
+            colors = searchFieldColors(),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { keyboard?.hide() }),
+        )
+        AnimatedVisibility(visible = isFocused, enter = fadeIn(), exit = fadeOut()) {
+            CancelSearchButton(
+                onClick = {
+                    onQueryChanged("")
+                    focusManager.clearFocus()
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun searchFieldColors(): TextFieldColors {
+    val container = MaterialTheme.colorScheme.surfaceContainerHigh
+    return TextFieldDefaults.colors(
+        focusedContainerColor = container,
+        unfocusedContainerColor = container,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+        disabledIndicatorColor = Color.Transparent,
+    )
+}
+
+@Composable
+private fun CancelSearchButton(onClick: () -> Unit) {
+    IconButton(onClick = onClick, modifier = Modifier.padding(start = 4.dp)) {
+        Icon(
+            imageVector = Icons.Filled.Close,
+            contentDescription = stringResource(R.string.notes_search_cancel_description),
+        )
+    }
+}
+
+@Composable
+private fun ClearSearchButton(onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        Icon(
+            imageVector = Icons.Filled.Cancel,
+            contentDescription = stringResource(R.string.notes_search_clear_description),
+        )
     }
 }
 
@@ -600,7 +704,7 @@ private fun NoteCard(
                 Spacer(modifier = Modifier.width(14.dp))
                 Column {
                     Text(
-                        text = note.cardTitle(),
+                        text = note.cardTitle().highlighted(note.titleHighlights),
                         style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -697,10 +801,19 @@ private fun NoteCardUi.cardTitle(): String = when (status) {
 }
 
 @Composable
-private fun NoteCardUi.cardPreview(): String = when (status) {
-    NoteStatusUi.PROCESSING -> stringResource(R.string.notes_processing_preview)
-    NoteStatusUi.FAILED -> stringResource(R.string.notes_failed_description)
-    NoteStatusUi.READY -> preview
+private fun NoteCardUi.cardPreview(): AnnotatedString = when (status) {
+    NoteStatusUi.PROCESSING -> AnnotatedString(stringResource(R.string.notes_processing_preview))
+    NoteStatusUi.FAILED -> AnnotatedString(stringResource(R.string.notes_failed_description))
+    NoteStatusUi.READY -> preview.highlighted(previewHighlights)
+}
+
+@Composable
+private fun String.highlighted(ranges: List<TextRangeUi>): AnnotatedString {
+    val style = SpanStyle(background = MaterialTheme.extendedColors.searchHighlight)
+    return buildAnnotatedString {
+        append(this@highlighted)
+        ranges.forEach { range -> addStyle(style, range.start, range.end.coerceAtMost(length)) }
+    }
 }
 
 @Composable

@@ -7,6 +7,7 @@ enum Brand {
     static let onPrimaryContainer = dynamic(light: 0x041E49, dark: 0xD3E3FD)
     static let primaryContainer = dynamic(light: 0xD3E3FD, dark: 0x0842A0)
     static let teal = dynamic(light: 0x006A60, dark: 0x82D5C8)
+    static let searchHighlight = dynamic(light: 0xFFDF9E, dark: 0x5C4300)
     static let tertiaryContainer = dynamic(light: 0x9EF2E2, dark: 0x005048)
     static let onTertiaryContainer = dynamic(light: 0x00201C, dark: 0x9EF2E2)
     static let tealContainer = dynamic(light: 0x9EF2E2, dark: 0x003731)

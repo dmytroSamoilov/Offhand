@@ -9,6 +9,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesViewModel
@@ -26,6 +27,7 @@ val featureNotesModule = module {
     factoryOf(::MarkReviewAttemptUseCase)
     factoryOf(::ObserveDeveloperOptionsUseCase)
     factoryOf(::ObserveNotesUseCase)
+    factoryOf(::SearchNotesUseCase)
     factoryOf(::ShouldRequestReviewUseCase)
     factoryOf(::UpdateNoteUseCase)
     viewModelOf(::NotesViewModel)

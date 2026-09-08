@@ -54,4 +54,8 @@
     <string name="notes_copy_overview_description">Copiar visão geral</string>
     <string name="notes_copy_transcript_description">Copiar transcrição</string>
     <string name="notes_copied">Copiado</string>
+    <string name="notes_search_placeholder">Buscar notas</string>
+    <string name="notes_search_clear_description">Limpar busca</string>
+    <string name="notes_search_empty_state">Nenhuma nota corresponde à sua busca.</string>
+    <string name="notes_search_cancel_description">Cancelar busca</string>
 </resources>

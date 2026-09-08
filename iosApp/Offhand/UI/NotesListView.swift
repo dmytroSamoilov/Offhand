@@ -17,9 +17,11 @@ struct NotesListView: View {
         pendingShare: nil,
         isDeveloperMode: false,
         noteProgress: [:],
-        modelPreparation: nil
+        modelPreparation: nil,
+        searchQuery: ""
     )
     @State private var isRecordSheetVisible = false
+    @State private var searchQuery = ""
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
@@ -106,6 +108,8 @@ struct NotesListView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .searchable(text: $searchQuery, prompt: Text(String(localized: "Search notes")))
+        .onChange(of: searchQuery) { viewModel.onSearchQueryChanged(query: searchQuery) }
         .safeAreaInset(edge: .top) {
             if let preparation = state.modelPreparation {
                 ModelPreparationBanner(percent: Int(preparation.progressPercent))
@@ -114,11 +118,15 @@ struct NotesListView: View {
         .navigationTitle(String(localized: "Notes"))
         .overlay(alignment: .center) {
             if state.sections.isEmpty {
-                ContentUnavailableView(
-                    String(localized: "No notes yet"),
-                    systemImage: "mic",
-                    description: Text(String(localized: "Tap the microphone to record your first note."))
-                )
+                if searchQuery.isEmpty {
+                    ContentUnavailableView(
+                        String(localized: "No notes yet"),
+                        systemImage: "mic",
+                        description: Text(String(localized: "Tap the microphone to record your first note."))
+                    )
+                } else {
+                    ContentUnavailableView.search(text: searchQuery)
+                }
             }
         }
         .overlay(alignment: .bottomTrailing) {
@@ -202,7 +210,7 @@ private struct NoteCardRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(note.title)
+            Text(highlighted(note.title, note.titleHighlights))
                 .font(.headline)
                 .lineLimit(1)
             if note.status == .processing {
@@ -220,7 +228,7 @@ private struct NoteCardRow: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             } else if !note.preview.isEmpty {
-                Text(note.preview)
+                Text(highlighted(note.preview, note.previewHighlights))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
@@ -240,5 +248,19 @@ private struct NoteCardRow: View {
     private var progressText: String {
         if let progress { return "\(progress)%" }
         return String(localized: "Preparing your note")
+    }
+
+    private func highlighted(_ text: String, _ ranges: [TextRangeUi]) -> AttributedString {
+        var attributed = AttributedString(text)
+        let utf16 = text.utf16
+        for range in ranges {
+            guard let lower = utf16.index(utf16.startIndex, offsetBy: Int(range.start), limitedBy: utf16.endIndex),
+                  let upper = utf16.index(utf16.startIndex, offsetBy: Int(range.end), limitedBy: utf16.endIndex),
+                  lower < upper,
+                  let start = AttributedString.Index(lower, within: attributed),
+                  let end = AttributedString.Index(upper, within: attributed) else { continue }
+            attributed[start..<end].backgroundColor = Brand.searchHighlight
+        }
+        return attributed
     }
 }

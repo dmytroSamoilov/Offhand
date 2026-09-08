@@ -17,16 +17,19 @@ import androidx.compose.ui.platform.LocalContext
 data class ExtendedColors(
     val warningContainer: Color,
     val onWarningContainer: Color,
+    val searchHighlight: Color,
 )
 
 private val LightExtendedColors = ExtendedColors(
     warningContainer = Yellow90,
     onWarningContainer = Yellow10,
+    searchHighlight = Yellow90,
 )
 
 private val DarkExtendedColors = ExtendedColors(
     warningContainer = Yellow30,
     onWarningContainer = Yellow90,
+    searchHighlight = Yellow30,
 )
 
 private val LocalExtendedColors = staticCompositionLocalOf { LightExtendedColors }

@@ -53,4 +53,8 @@
     <string name="notes_copy_overview_description">Übersicht kopieren</string>
     <string name="notes_copy_transcript_description">Transkript kopieren</string>
     <string name="notes_copied">Kopiert</string>
+    <string name="notes_search_placeholder">Notizen durchsuchen</string>
+    <string name="notes_search_clear_description">Suche löschen</string>
+    <string name="notes_search_empty_state">Keine Notizen passen zu deiner Suche.</string>
+    <string name="notes_search_cancel_description">Suche abbrechen</string>
 </resources>

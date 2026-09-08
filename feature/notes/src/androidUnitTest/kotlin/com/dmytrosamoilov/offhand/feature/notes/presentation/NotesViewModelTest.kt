@@ -18,6 +18,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttempt
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
@@ -113,6 +114,7 @@ class NotesViewModelTest {
         recordingProcessController = recordingProcessController,
         dateLabelFormatter = dateLabelFormatter,
         observeNotes = observeNotes,
+        searchNotes = SearchNotesUseCase(),
         observeDeveloperOptions = observeDeveloperOptions,
         getNote = getNote,
         updateNote = updateNote,
