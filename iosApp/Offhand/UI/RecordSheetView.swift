@@ -179,6 +179,9 @@ struct RecordSheetView: View {
                         .background(Color(.secondarySystemFill), in: Circle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(
+                    state.isPaused ? String(localized: "Resume recording") : String(localized: "Pause recording")
+                )
                 Button {
                     viewModel.onStopRecording()
                 } label: {
@@ -189,6 +192,7 @@ struct RecordSheetView: View {
                         .background(Brand.primary, in: Circle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(String(localized: "Save note"))
             }
             Button(String(localized: "Discard"), role: .destructive) {
                 isDiscardConfirmationVisible = true

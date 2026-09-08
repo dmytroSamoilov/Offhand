@@ -14,6 +14,9 @@ kotlin {
             implementation(project(":feature:recording"))
             implementation(libs.kotlinx.datetime)
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
         androidMain.dependencies {
             implementation(project(":core:audio"))
             implementation(project(":core:security"))

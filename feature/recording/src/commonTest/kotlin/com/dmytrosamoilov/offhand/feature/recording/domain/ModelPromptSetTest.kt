@@ -2,10 +2,10 @@ package com.dmytrosamoilov.offhand.feature.recording.domain
 
 import com.dmytrosamoilov.offhand.core.ai.api.ModelFamily
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import kotlin.test.Test
 
 class ModelPromptSetTest {
 
@@ -56,7 +56,7 @@ class ModelPromptSetTest {
             NotePreset.entries.forEach { preset ->
                 val prompt = promptSet.structureNote(preset)
                 NotePresetPrompt.sections(preset).forEach { section ->
-                    assertTrue("$preset misses $section", prompt.contains(section))
+                    assertTrue(prompt.contains(section), "$preset misses $section")
                 }
             }
         }
@@ -94,8 +94,8 @@ class ModelPromptSetTest {
             )
             prompts.flatMap { QUOTED_TEXT.findAll(it) }.map { it.groupValues[1] }.forEach { quoted ->
                 assertFalse(
-                    "$preset quotes a copyable sentence: $quoted",
                     quoted.startsWith("I ") || quoted.startsWith("The speaker "),
+                    "$preset quotes a copyable sentence: $quoted",
                 )
             }
         }
@@ -123,7 +123,7 @@ class ModelPromptSetTest {
             val prompt = ModelPromptSet.Gemma4.polishNote(preset, thinkingEnabled = false)
             assertTrue(prompt.contains(NotePresetPrompt.noteKind(preset)))
             NotePresetPrompt.sections(preset).forEach { section ->
-                assertTrue("$preset polish prompt misses $section", prompt.contains(section))
+                assertTrue(prompt.contains(section), "$preset polish prompt misses $section")
             }
         }
     }
@@ -140,9 +140,9 @@ class ModelPromptSetTest {
     fun `sectioned polish prompts allow adding a missing allowed heading`() {
         NotePreset.entries.filter { NotePresetPrompt.sections(it).isNotEmpty() }.forEach { preset ->
             assertTrue(
-                "$preset polish prompt must allow adding a missing heading",
                 ModelPromptSet.Gemma4.polishNote(preset, thinkingEnabled = false)
                     .contains("add that heading"),
+                "$preset polish prompt must allow adding a missing heading",
             )
         }
         assertFalse(

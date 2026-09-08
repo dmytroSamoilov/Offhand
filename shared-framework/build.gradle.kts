@@ -37,6 +37,7 @@ kotlin {
             api(project(":feature:onboarding"))
             api(project(":feature:recording"))
             api(project(":feature:settings"))
+            implementation(project(":testing:fakes"))
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
         }

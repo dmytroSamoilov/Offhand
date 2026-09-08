@@ -38,6 +38,11 @@ android {
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
         }
+        create("uitest") {
+            dimension = "environment"
+            applicationIdSuffix = ".uitest"
+            versionNameSuffix = "-uitest"
+        }
     }
 
     buildTypes {
@@ -55,6 +60,14 @@ android {
 
 googleServices {
     missingGoogleServicesStrategy = MissingGoogleServicesStrategy.WARN
+}
+
+// Smoke-test builds have no Firebase client; without the generated resources
+// FirebaseReporting stays off, the same as a missing config file.
+tasks.configureEach {
+    if (name.startsWith("processUitest") && name.endsWith("GoogleServices")) {
+        enabled = false
+    }
 }
 
 androidComponents {
@@ -110,4 +123,5 @@ dependencies {
     implementation(libs.firebase.analytics)
 
     debugImplementation(libs.leakcanary.android)
+    "uitestImplementation"(project(":testing:fakes"))
 }

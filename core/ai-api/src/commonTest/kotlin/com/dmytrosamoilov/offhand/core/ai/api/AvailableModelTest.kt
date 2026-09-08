@@ -1,8 +1,8 @@
 package com.dmytrosamoilov.offhand.core.ai.api
 
 import kotlinx.serialization.json.Json
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.Test
 
 class AvailableModelTest {
 
@@ -46,7 +46,7 @@ class AvailableModelTest {
     }
 
     @Test
-    fun `download url is derived from repo, commit and file`() {
+    fun `download url is derived from repo commit and file`() {
         val model = json.decodeFromString(ModelCatalogFile.serializer(), catalogJson).models.first()
 
         assertEquals(

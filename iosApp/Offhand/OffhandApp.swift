@@ -3,6 +3,12 @@ import SwiftUI
 
 @main
 struct OffhandApp: App {
+    #if UI_TEST
+    private static let useSmokeFakes = true
+    #else
+    private static let useSmokeFakes = false
+    #endif
+
     init() {
         SharedModulesKt.startSharedKoin(
             deps: IosPlatformDeps(
@@ -18,7 +24,8 @@ struct OffhandApp: App {
                     transcript: String(localized: "Transcript")
                 ),
                 shareFallbackTitle: String(localized: "Recording")
-            )
+            ),
+            useSmokeFakes: Self.useSmokeFakes
         )
         TelemetryController.shared.start()
     }

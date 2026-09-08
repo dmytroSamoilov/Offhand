@@ -2,10 +2,10 @@ package com.dmytrosamoilov.offhand.feature.notes.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.feature.notes.domain.TextMatch
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.test.Test
 
 class SearchNotesUseCaseTest {
 

@@ -21,6 +21,7 @@ import com.dmytrosamoilov.offhand.feature.recording.di.featureRecordingModule
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioRecorder
 import com.dmytrosamoilov.offhand.feature.recording.domain.DefaultNoteTitleProvider
 import com.dmytrosamoilov.offhand.feature.settings.di.featureSettingsModule
+import com.dmytrosamoilov.offhand.testing.fakes.smokeFakesModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -41,8 +42,14 @@ class IosPlatformDeps(
 )
 
 fun startSharedKoin(deps: IosPlatformDeps) {
+    startSharedKoin(deps, useSmokeFakes = false)
+}
+
+// Smoke-test builds swap the AI engines, the device gate and the microphone for
+// canned fakes so a simulator without the 2.4 GB model can walk the whole flow.
+fun startSharedKoin(deps: IosPlatformDeps, useSmokeFakes: Boolean) {
     startKoin {
-        modules(sharedIosModules(deps))
+        modules(sharedIosModules(deps) + if (useSmokeFakes) listOf(smokeFakesModule) else emptyList())
     }
 }
 

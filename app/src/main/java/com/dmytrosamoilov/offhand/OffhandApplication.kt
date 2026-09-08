@@ -15,6 +15,7 @@ import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.di.coreSecurityModule
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import com.dmytrosamoilov.offhand.di.FlavorModules
 import com.dmytrosamoilov.offhand.di.appModule
 import com.dmytrosamoilov.offhand.feature.notes.di.featureNotesAndroidModule
 import com.dmytrosamoilov.offhand.feature.notes.di.featureNotesModule
@@ -48,20 +49,22 @@ class OffhandApplication : Application(), KoinComponent {
         startKoin {
             androidContext(this@OffhandApplication)
             modules(
-                coreAiApiModule,
-                coreAiLocalModule,
-                coreAudioModule,
-                coreDeviceModule,
-                coreSecurityModule,
-                coreDataModule,
-                featureNotesModule,
-                featureNotesAndroidModule,
-                featureOnboardingModule,
-                featureOnboardingAndroidModule,
-                featureRecordingModule,
-                featureRecordingAndroidModule,
-                featureSettingsModule,
-                appModule,
+                listOf(
+                    coreAiApiModule,
+                    coreAiLocalModule,
+                    coreAudioModule,
+                    coreDeviceModule,
+                    coreSecurityModule,
+                    coreDataModule,
+                    featureNotesModule,
+                    featureNotesAndroidModule,
+                    featureOnboardingModule,
+                    featureOnboardingAndroidModule,
+                    featureRecordingModule,
+                    featureRecordingAndroidModule,
+                    featureSettingsModule,
+                    appModule,
+                ) + FlavorModules.overrides,
             )
         }
         telemetryController = get()

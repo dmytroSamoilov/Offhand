@@ -372,6 +372,8 @@ private struct ToggleCard: View {
                 RoundedRectangle(cornerRadius: 12)
                     .strokeBorder(Color(.systemGray4), lineWidth: 1)
             )
+            .contentShape(Rectangle())
+            .onTapGesture { isOn.toggle() }
     }
 }
 

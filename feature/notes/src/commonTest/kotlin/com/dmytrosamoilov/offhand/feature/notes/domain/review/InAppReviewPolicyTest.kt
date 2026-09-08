@@ -1,17 +1,20 @@
 package com.dmytrosamoilov.offhand.feature.notes.domain.review
 
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
-import java.util.concurrent.TimeUnit
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import kotlin.test.Test
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 class InAppReviewPolicyTest {
 
     private val policy = InAppReviewPolicy(InAppReviewRules.PRODUCTION)
-    private val now = TimeUnit.DAYS.toMillis(1_000)
-    private val matureInstall = now - TimeUnit.DAYS.toMillis(30)
+    private val now = 1_000.days.inWholeMilliseconds
+    private val matureInstall = now - 30.days.inWholeMilliseconds
 
     private fun shouldRequest(
         savedRecordingsCount: Int = 5,
@@ -32,7 +35,7 @@ class InAppReviewPolicyTest {
 
     @Test
     fun `young install blocks the request`() {
-        assertFalse(shouldRequest(installedAtMs = now - TimeUnit.DAYS.toMillis(6)))
+        assertFalse(shouldRequest(installedAtMs = now - 6.days.inWholeMilliseconds))
     }
 
     @Test
@@ -44,8 +47,8 @@ class InAppReviewPolicyTest {
     fun `second attempt in a burst waits for the attempt gap`() {
         val state = policy.nextStateAfterAttempt(ReviewPromptState(), now)
 
-        assertFalse(shouldRequest(state = state, nowMs = now + TimeUnit.HOURS.toMillis(23)))
-        assertTrue(shouldRequest(state = state, nowMs = now + TimeUnit.HOURS.toMillis(24)))
+        assertFalse(shouldRequest(state = state, nowMs = now + 23.hours.inWholeMilliseconds))
+        assertTrue(shouldRequest(state = state, nowMs = now + 24.hours.inWholeMilliseconds))
     }
 
     @Test
@@ -55,7 +58,7 @@ class InAppReviewPolicyTest {
         repeat(3) {
             assertTrue(shouldRequest(state = state, nowMs = clock))
             state = policy.nextStateAfterAttempt(state, clock)
-            clock += TimeUnit.DAYS.toMillis(1)
+            clock += 1.days.inWholeMilliseconds
         }
 
         assertFalse(shouldRequest(state = state, nowMs = clock))
@@ -64,7 +67,7 @@ class InAppReviewPolicyTest {
     @Test
     fun `a lapsed burst window blocks further attempts until the cooldown passes`() {
         val state = policy.nextStateAfterAttempt(ReviewPromptState(), now)
-        val afterWindow = now + TimeUnit.DAYS.toMillis(6)
+        val afterWindow = now + 6.days.inWholeMilliseconds
 
         assertFalse(shouldRequest(state = state, nowMs = afterWindow))
     }
@@ -75,24 +78,24 @@ class InAppReviewPolicyTest {
         var clock = now
         repeat(3) {
             state = policy.nextStateAfterAttempt(state, clock)
-            clock += TimeUnit.DAYS.toMillis(1)
+            clock += 1.days.inWholeMilliseconds
         }
         val lastAttemptAt = state.lastAttemptAtMs
 
         assertFalse(
-            shouldRequest(state = state, nowMs = lastAttemptAt + TimeUnit.DAYS.toMillis(44)),
+            shouldRequest(state = state, nowMs = lastAttemptAt + 44.days.inWholeMilliseconds),
         )
         assertTrue(
-            shouldRequest(state = state, nowMs = lastAttemptAt + TimeUnit.DAYS.toMillis(45)),
+            shouldRequest(state = state, nowMs = lastAttemptAt + 45.days.inWholeMilliseconds),
         )
     }
 
     @Test
     fun `attempt after the cooldown starts a fresh burst`() {
         val exhausted = ReviewPromptState(
-            burstStartedAtMs = now - TimeUnit.DAYS.toMillis(50),
+            burstStartedAtMs = now - 50.days.inWholeMilliseconds,
             attemptCount = 3,
-            lastAttemptAtMs = now - TimeUnit.DAYS.toMillis(46),
+            lastAttemptAtMs = now - 46.days.inWholeMilliseconds,
         )
 
         val next = policy.nextStateAfterAttempt(exhausted, now)
@@ -103,7 +106,7 @@ class InAppReviewPolicyTest {
     @Test
     fun `attempt inside an active burst increments the count`() {
         val started = policy.nextStateAfterAttempt(ReviewPromptState(), now)
-        val later = now + TimeUnit.DAYS.toMillis(1)
+        val later = now + 1.days.inWholeMilliseconds
 
         val next = policy.nextStateAfterAttempt(started, later)
 
@@ -115,7 +118,7 @@ class InAppReviewPolicyTest {
     @Test
     fun `debug rules collapse the timeline to minutes`() {
         val debugPolicy = InAppReviewPolicy(InAppReviewRules.DEBUG)
-        val installedAt = now - TimeUnit.MINUTES.toMillis(5)
+        val installedAt = now - 5.minutes.inWholeMilliseconds
 
         assertTrue(
             debugPolicy.shouldRequestReview(
@@ -131,7 +134,7 @@ class InAppReviewPolicyTest {
                 savedRecordingsCount = 1,
                 installedAtMs = installedAt,
                 state = afterFirst,
-                nowMs = now + TimeUnit.SECONDS.toMillis(59),
+                nowMs = now + 59.seconds.inWholeMilliseconds,
             ),
         )
         assertTrue(
@@ -139,16 +142,16 @@ class InAppReviewPolicyTest {
                 savedRecordingsCount = 1,
                 installedAtMs = installedAt,
                 state = afterFirst,
-                nowMs = now + TimeUnit.MINUTES.toMillis(1),
+                nowMs = now + 1.minutes.inWholeMilliseconds,
             ),
         )
     }
 
     @Test
     fun `legacy single-attempt state is honored as a cooldown anchor`() {
-        val migrated = ReviewPromptState(lastAttemptAtMs = now - TimeUnit.DAYS.toMillis(10))
+        val migrated = ReviewPromptState(lastAttemptAtMs = now - 10.days.inWholeMilliseconds)
 
         assertFalse(shouldRequest(state = migrated))
-        assertTrue(shouldRequest(state = migrated, nowMs = now + TimeUnit.DAYS.toMillis(36)))
+        assertTrue(shouldRequest(state = migrated, nowMs = now + 36.days.inWholeMilliseconds))
     }
 }

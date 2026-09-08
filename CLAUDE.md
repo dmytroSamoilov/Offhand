@@ -16,14 +16,17 @@ POC decisions and roadmap: .claude/POC/ (read before implementing features).
 
 ### Android
 - Flavors: `production` (com.dmytrosamoilov.offhand) and `dev` (.dev applicationId suffix, "Offhand Dev" label). Day-to-day work and device installs use `dev`.
+- Smoke-test flavor `uitest` (.uitest suffix, "Offhand UI Test"): `app/src/uitest` installs `smokeFakesModule` from `:testing:fakes`, replacing the AI engines, model manager, device gate and microphone with canned fakes, so the whole record → note flow runs on an emulator without the 2.4 GB model. The Google Services task is disabled for it. Build with `./gradlew assembleUitestDebug`; the Maestro flow lives in `.maestro/smoke.yaml`.
 - Build: `./gradlew assembleDevDebug` (both flavors: `assembleDebug`)
 - Unit tests: `./gradlew testDebugUnitTest`
+- Shared tests on Kotlin/Native (catches K/N-only regex and stdlib differences): `./gradlew :core:ai-api:iosSimulatorArm64Test :core:audio:iosSimulatorArm64Test :core:common:iosSimulatorArm64Test :core:device:iosSimulatorArm64Test :feature:notes:iosSimulatorArm64Test :feature:recording:iosSimulatorArm64Test`. Put MockK-free tests in `commonTest` with `kotlin.test`; K/N rejects commas in backticked test names and JUnit's message-first assert order.
 - Lint: `./gradlew lintDebug :app:lintDevDebug`
 - Run all: `./gradlew assembleDebug testDebugUnitTest lintDebug :app:lintDevDebug`
 - Telemetry: `FirebaseInitProvider` is removed in `AndroidManifest.xml`, so Firebase never self-initialises — `TelemetryController` initialises it (Crashlytics + Analytics) only after telemetry consent, because initialising alone contacts Google. Keep it that way, and keep `ReleaseLogTree` resolving Crashlytics per log rather than capturing it, since Firebase may not exist yet when the tree is planted. iOS holds the same line.
 
 ### iOS
 - Flavors mirror Android via Xcode configurations: schemes `Offhand-dev` (com.dmytrosamoilov.offhand.dev, "Offhand Dev") and `Offhand-prod` (com.dmytrosamoilov.offhand, "Offhand"). Day-to-day work uses `Offhand-dev`.
+- Smoke-test scheme `Offhand-uitest` (config `Debug-uitest`, .uitest suffix) compiles with `UI_TEST`, which makes `OffhandApp` start Koin with the same `smokeFakesModule`. It has no Firebase config and no release configuration.
 - Configurations: `Debug-dev`, `Release-dev`, `Debug-prod`, `Release-prod`. The flavor is driven by `APP_ID_SUFFIX` / `APP_DISPLAY_NAME` in `iosApp/project.yml`.
 - `iosApp/Offhand.xcodeproj` is generated and gitignored — edit `iosApp/project.yml`, then run `xcodegen generate` in `iosApp/`. Close the project in Xcode first: regenerating under an open Xcode leaves it holding a stale project, and its saved scheme selection in `xcuserdata` can point at a scheme that no longer exists. If Xcode misbehaves after a regenerate, quit it and run `rm -rf Offhand.xcodeproj/xcuserdata Offhand.xcodeproj/project.xcworkspace/xcuserdata` — that is editor state only, and `Package.resolved` lives in `xcshareddata` so SPM pins survive.
 - Shared framework (rebuild after any commonMain/iosMain change): `./gradlew :shared-framework:assembleOffhandSharedReleaseXCFramework`

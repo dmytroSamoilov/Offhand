@@ -28,3 +28,152 @@ jobs:
 
       - name: Build, test and lint
         run: ./gradlew assembleDebug testDebugUnitTest lintDebug :app:lintDevDebug
+
+  # Kotlin/Native has its own regex and stdlib quirks; running the shared tests
+  # on the simulator target catches what the JVM run cannot.
+  shared-tests-ios:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run shared tests on the iOS simulator target
+        run: >-
+          ./gradlew
+          :core:ai-api:iosSimulatorArm64Test
+          :core:audio:iosSimulatorArm64Test
+          :core:common:iosSimulatorArm64Test
+          :core:device:iosSimulatorArm64Test
+          :feature:notes:iosSimulatorArm64Test
+          :feature:recording:iosSimulatorArm64Test
+
+  # Smoke flow against the uitest flavor: fake AI engines and microphone, so
+  # no model download and no real audio. See .maestro/smoke.yaml.
+  smoke-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      MAESTRO_VERSION: 2.10.0
+      API_LEVEL: 34
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build the uitest flavor
+        run: ./gradlew assembleUitestDebug
+
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Run the smoke flow on an emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.API_LEVEL }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: |
+            adb install -r app/build/outputs/apk/uitest/debug/app-uitest-debug.apk
+            maestro test --format junit --output maestro-android.xml .maestro/smoke.yaml
+
+      - name: Upload Maestro artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-android
+          path: |
+            maestro-android.xml
+            ~/.maestro/tests
+
+  smoke-ios:
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      MAESTRO_VERSION: 2.10.0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Install tools
+        run: |
+          brew install xcodegen
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Build the shared framework
+        run: ./gradlew :shared-framework:assembleOffhandSharedReleaseXCFramework
+
+      - name: Fetch sherpa-onnx and onnxruntime xcframeworks
+        run: iosApp/Tools/fetch-frameworks.sh
+
+      - name: Pick a simulator
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available -j | jq -r '[.devices[][] | select(.name | test("^iPhone"))][0].udid')
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+
+      - name: Build the uitest scheme
+        working-directory: iosApp
+        run: |
+          xcodegen generate
+          xcodebuild build -project Offhand.xcodeproj -scheme Offhand-uitest \
+            -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO -quiet
+
+      - name: Install the app
+        run: |
+          APP=$(find iosApp/build/DerivedData/Build/Products -name "Offhand.app" -path "*uitest*" | head -1)
+          xcrun simctl install "${{ steps.sim.outputs.udid }}" "$APP"
+          xcrun simctl privacy "${{ steps.sim.outputs.udid }}" grant microphone com.dmytrosamoilov.offhand.uitest
+
+      - name: Run the smoke flow
+        run: maestro --device "${{ steps.sim.outputs.udid }}" test --format junit --output maestro-ios.xml .maestro/smoke.yaml
+
+      - name: Upload Maestro artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-ios
+          path: |
+            maestro-ios.xml
+            ~/.maestro/tests

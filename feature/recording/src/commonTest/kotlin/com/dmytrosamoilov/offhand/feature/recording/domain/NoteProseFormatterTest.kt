@@ -1,12 +1,12 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.Test
 
 class NoteProseFormatterTest {
 
     @Test
-    fun `bullet and numbered markers are dropped, sentences stay`() {
+    fun `bullet and numbered markers are dropped and sentences stay`() {
         val formatted = NoteProseFormatter.format(
             listOf("- I am behind on the release\n* I need Anna to review\n1. I ship on Friday"),
         )
