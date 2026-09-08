@@ -52,4 +52,7 @@
     <string name="notes_preset_description">Изменить стиль заметки</string>
     <string name="notes_preset_sheet_title">Переписать эту заметку как</string>
     <string name="notes_preset_sheet_body">Запись сохраняется. Название и обзор будут написаны заново по расшифровке в выбранном стиле.</string>
+    <string name="notes_copy_overview_description">Скопировать обзор</string>
+    <string name="notes_copy_transcript_description">Скопировать расшифровку</string>
+    <string name="notes_copied">Скопировано</string>
 </resources>

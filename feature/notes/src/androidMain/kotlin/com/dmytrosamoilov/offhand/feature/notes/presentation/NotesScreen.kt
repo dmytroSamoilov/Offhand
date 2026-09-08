@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.WarningAmber
@@ -95,7 +96,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCard
+import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCardAction
 import com.dmytrosamoilov.offhand.core.designsystem.component.MarkdownText
+import com.dmytrosamoilov.offhand.core.ui.rememberSensitiveClipboard
 import com.dmytrosamoilov.offhand.core.designsystem.component.MorphingLoadingIndicator
 import com.dmytrosamoilov.offhand.core.designsystem.component.RoundedCheckbox
 import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
@@ -1022,6 +1025,11 @@ private fun NoteDetailContent(
                     labelContainerColor = MaterialTheme.colorScheme.primaryContainer,
                     labelContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     initiallyExpanded = true,
+                    action = rememberCopyAction(
+                        text = note.body,
+                        clipboardLabel = stringResource(R.string.notes_overview_heading),
+                        contentDescription = stringResource(R.string.notes_copy_overview_description),
+                    ),
                 ) {
                     MarkdownText(markdown = note.body)
                 }
@@ -1035,11 +1043,33 @@ private fun NoteDetailContent(
                     labelContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     labelContentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                     initiallyExpanded = note.status != NoteStatusUi.READY,
+                    action = rememberCopyAction(
+                        text = note.transcript,
+                        clipboardLabel = stringResource(R.string.notes_transcript_heading),
+                        contentDescription = stringResource(R.string.notes_copy_transcript_description),
+                    ),
                 ) {
                     MarkdownText(markdown = note.transcript)
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun rememberCopyAction(
+    text: String,
+    clipboardLabel: String,
+    contentDescription: String,
+): CollapsibleCardAction {
+    val clipboard = rememberSensitiveClipboard()
+    val copiedMessage = stringResource(R.string.notes_copied)
+    return remember(text, clipboardLabel, contentDescription, copiedMessage) {
+        CollapsibleCardAction(
+            icon = Icons.Filled.ContentCopy,
+            contentDescription = contentDescription,
+            onClick = { clipboard.copy(clipboardLabel, text, copiedMessage) },
+        )
     }
 }
 

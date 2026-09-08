@@ -51,4 +51,7 @@
     <string name="notes_preset_description">Cambiar estilo de la nota</string>
     <string name="notes_preset_sheet_title">Reescribir esta nota como</string>
     <string name="notes_preset_sheet_body">La grabación se conserva. El título y la visión general se escriben de nuevo a partir de la transcripción, en el estilo que elijas.</string>
+    <string name="notes_copy_overview_description">Copiar visión general</string>
+    <string name="notes_copy_transcript_description">Copiar transcripción</string>
+    <string name="notes_copied">Copiado</string>
 </resources>

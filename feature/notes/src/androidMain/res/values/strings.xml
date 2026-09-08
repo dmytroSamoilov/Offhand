@@ -59,4 +59,7 @@
     <string name="notes_fake_review_failure" translatable="false">Simulate failure</string>
     <string name="notes_preset_sheet_title">Rewrite this note as</string>
     <string name="notes_preset_sheet_body">The recording is kept. The title and overview are written again from the transcript in the style you pick.</string>
+    <string name="notes_copy_overview_description">Copy overview</string>
+    <string name="notes_copy_transcript_description">Copy transcript</string>
+    <string name="notes_copied">Copied</string>
 </resources>

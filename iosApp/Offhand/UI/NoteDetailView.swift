@@ -23,7 +23,10 @@ struct NoteDetailView: View {
                     } else {
                         CollapsibleSection(
                             title: String(localized: "Overview"),
+                            copyLabel: String(localized: "Copy overview"),
                             text: detail.body,
+                            labelBackground: Brand.primaryContainer,
+                            labelForeground: Brand.onPrimaryContainer,
                             initiallyExpanded: true
                         )
                         .id(detail.id)
@@ -31,7 +34,10 @@ struct NoteDetailView: View {
                     if !detail.transcript.isEmpty {
                         CollapsibleSection(
                             title: String(localized: "Transcript"),
+                            copyLabel: String(localized: "Copy transcript"),
                             text: detail.transcript,
+                            labelBackground: Brand.tertiaryContainer,
+                            labelForeground: Brand.onTertiaryContainer,
                             initiallyExpanded: detail.status != .ready
                         )
                         .id(detail.id)
@@ -277,47 +283,126 @@ struct NoteDetailView: View {
 
 private struct CollapsibleSection: View {
     let title: String
+    let copyLabel: String
     let text: String
+    let labelBackground: Color
+    let labelForeground: Color
     @State private var isExpanded: Bool
+    @State private var contentHeight: CGFloat = 0
 
-    init(title: String, text: String, initiallyExpanded: Bool) {
+    private static let collapsedMaxHeight: CGFloat = 168
+    private static let fadeHeight: CGFloat = 56
+    static let pillHeight: CGFloat = 32
+    private let cardBackground = Color(.secondarySystemGroupedBackground)
+
+    init(
+        title: String,
+        copyLabel: String,
+        text: String,
+        labelBackground: Color,
+        labelForeground: Color,
+        initiallyExpanded: Bool
+    ) {
         self.title = title
+        self.copyLabel = copyLabel
         self.text = text
+        self.labelBackground = labelBackground
+        self.labelForeground = labelForeground
         _isExpanded = State(initialValue: initiallyExpanded)
     }
 
+    private var isOverflowing: Bool { contentHeight > Self.collapsedMaxHeight }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 7) {
-            Button {
-                withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
-            } label: {
-                HStack {
-                    Text(title)
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-                    Spacer()
-                    Image(systemName: "chevron.down")
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader
+            sectionContent
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(cardBackground, in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private var sectionHeader: some View {
+        HStack(spacing: 8) {
+            Text(title)
+                .font(.footnote.weight(.semibold))
+                .padding(.horizontal, 14)
+                .frame(height: Self.pillHeight)
+                .background(labelBackground, in: Capsule())
+                .foregroundStyle(labelForeground)
+            if isOverflowing {
+                Button(action: toggle) {
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                        .rotationEffect(.degrees(isExpanded ? 0 : -90))
+                        .frame(width: Self.pillHeight, height: Self.pillHeight)
+                        .background(labelBackground, in: Circle())
+                        .foregroundStyle(labelForeground)
                 }
-                .padding(.leading, 16)
-                .padding(.trailing, 4)
-                .contentShape(Rectangle())
+                .buttonStyle(.plain)
+                .accessibilityLabel(isExpanded ? String(localized: "Show less") : String(localized: "Show more"))
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(title)
-            if isExpanded {
-                MarkdownBlocks(raw: text)
-                    .textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(
-                        Color(.secondarySystemGroupedBackground),
-                        in: RoundedRectangle(cornerRadius: 12)
-                    )
+            Spacer()
+            CopySectionButton(
+                text: text,
+                accessibilityLabel: copyLabel,
+                background: labelBackground,
+                foreground: labelForeground
+            )
+        }
+    }
+
+    private var sectionContent: some View {
+        ZStack(alignment: .bottom) {
+            MarkdownBlocks(raw: text)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
+                .frame(maxHeight: isExpanded ? nil : Self.collapsedMaxHeight, alignment: .top)
+                .clipped()
+            if !isExpanded && isOverflowing {
+                LinearGradient(
+                    colors: [cardBackground.opacity(0), cardBackground],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: Self.fadeHeight)
+                .allowsHitTesting(false)
             }
+        }
+    }
+
+    private func toggle() {
+        withAnimation(.easeInOut(duration: 0.3)) { isExpanded.toggle() }
+    }
+}
+
+private struct CopySectionButton: View {
+    let text: String
+    let accessibilityLabel: String
+    let background: Color
+    let foreground: Color
+    @State private var copiedAt: Date?
+
+    var body: some View {
+        Button {
+            SensitivePasteboard.copy(text)
+            copiedAt = .now
+        } label: {
+            Image(systemName: copiedAt == nil ? "doc.on.doc" : "checkmark")
+                .font(.caption.weight(.semibold))
+                .frame(width: CollapsibleSection.pillHeight, height: CollapsibleSection.pillHeight)
+                .background(background, in: Circle())
+                .foregroundStyle(foreground)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityLabel)
+        .sensoryFeedback(.success, trigger: copiedAt) { _, new in new != nil }
+        .task(id: copiedAt) {
+            guard copiedAt != nil else { return }
+            try? await Task.sleep(for: .seconds(1.5))
+            copiedAt = nil
         }
     }
 }
