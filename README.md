@@ -64,8 +64,9 @@ That is the point of this repo being public:
 
 ## Building
 
-Two product flavors: `production` (`com.dmytrosamoilov.offhand`) and `dev`
-(`com.dmytrosamoilov.offhand.dev`, "Offhand Dev" label) — they install side by side.
+Three product flavors that install side by side: `production` (`com.dmytrosamoilov.offhand`),
+`dev` (`com.dmytrosamoilov.offhand.dev`, "Offhand Dev" label) and `uitest`
+(`com.dmytrosamoilov.offhand.uitest`, "Offhand UI Test" — see [Testing](#testing)).
 
 1. Clone and open in Android Studio (or use `./gradlew assembleDevDebug`). The models
    (Whisper + Gemma) are ungated on Hugging Face — no account or token needed; the app
@@ -77,6 +78,82 @@ Two product flavors: `production` (`com.dmytrosamoilov.offhand`) and `dev`
 ```
 ./gradlew assembleDebug testDebugUnitTest lintDebug :app:lintDevDebug
 ```
+
+## Testing
+
+### Unit tests
+
+```
+./gradlew testDebugUnitTest
+```
+
+Tests that need no Android or MockK live in `commonTest` and also run on the
+Kotlin/Native iOS target, which catches K/N-only differences (regex classes, stdlib)
+that the JVM run cannot:
+
+```
+./gradlew :core:ai-api:iosSimulatorArm64Test :core:audio:iosSimulatorArm64Test \
+  :core:common:iosSimulatorArm64Test :core:device:iosSimulatorArm64Test \
+  :feature:notes:iosSimulatorArm64Test :feature:recording:iosSimulatorArm64Test
+```
+
+### Smoke tests (Maestro)
+
+The `uitest` flavor (Android) and the `Offhand-uitest` scheme (iOS) are the normal app
+with the AI swapped for fakes from `:testing:fakes`: the model manager reports the model
+as downloaded, speech-to-text returns canned sentences, the note structurer returns a
+fixed note titled "Smoke test note", and the microphone is a tone generator. So the
+whole record → note flow runs on any emulator or simulator, with no 2.4 GB download,
+no real audio, and no device gate. Nothing else is faked — onboarding, the encrypted
+database, the recording pipeline, list, search and detail are all real.
+
+One [Maestro](https://maestro.mobile.dev) flow, `.maestro/smoke.yaml`, drives both
+platforms and covers:
+
+1. Fresh install and onboarding (app lock and telemetry consent switched off)
+2. Recording through the fake microphone, saving, closing the sheet
+3. The processed note appearing in the list
+4. Search for "budget" with the highlighted snippet
+5. Opening the note and rendering the Overview and Transcript sections
+
+Playback, editing, sharing, deleting, settings and model quality are not covered.
+
+**Install Maestro** (the plain `maestro` formula is an unrelated app — use the tap):
+
+```
+brew trust mobile-dev-inc/tap && brew install mobile-dev-inc/tap/maestro
+```
+
+**Android**, with an emulator running or a device connected:
+
+```
+./gradlew assembleUitestDebug
+adb install -r app/build/outputs/apk/uitest/debug/app-uitest-debug.apk
+maestro test .maestro/smoke.yaml
+```
+
+**iOS**, with a booted simulator: build the `Offhand-uitest` scheme (Xcode, or
+`xcodebuild -scheme Offhand-uitest -destination 'id=<simulator udid>'`), install the
+`.app` with `xcrun simctl install booted <path>`, then:
+
+```
+xcrun simctl privacy booted grant microphone com.dmytrosamoilov.offhand.uitest
+maestro test .maestro/smoke.yaml
+```
+
+With several devices connected, add `--device <id>` before `test`. A failed run leaves
+screenshots and a UI hierarchy dump under `~/.maestro/tests/<timestamp>/`.
+
+Two platform quirks the flow already handles: the Android record sheet starts recording
+by itself when opened, and iOS toggles only react to taps on the switch, so the
+onboarding toggle cards accept a tap anywhere on the row.
+
+### Continuous integration
+
+`.github/workflows/ci.yml` runs on every push and pull request: Android build, unit
+tests and lint; the shared tests on the iOS simulator target; and the smoke flow on an
+Android emulator (Ubuntu, KVM) and on an iOS simulator (macOS). Maestro artifacts are
+attached to failed runs.
 
 ## Architecture
 
@@ -98,6 +175,7 @@ implementations:
 :feature:recording      recording UI, foreground service, AI pipeline
 :feature:notes          list / detail / edit, adaptive two-pane
 :feature:settings       acceleration tier, model management, privacy
+:testing:fakes          canned AI, model, device and microphone for smoke tests
 ```
 
 Three layers inside each feature (domain → data → presentation), use cases wrapping
