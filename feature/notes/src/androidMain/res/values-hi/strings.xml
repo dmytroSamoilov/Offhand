@@ -50,6 +50,7 @@
     <string name="notes_preset_description">नोट की शैली बदलें</string>
     <string name="notes_preset_sheet_title">इस नोट को इस रूप में फिर से लिखें</string>
     <string name="notes_preset_sheet_body">रिकॉर्डिंग सुरक्षित रहती है। आपकी चुनी शैली में ट्रांसक्रिप्ट से शीर्षक और अवलोकन दोबारा लिखे जाते हैं।</string>
+    <string name="notes_style_sheet_custom_header">आपकी शैलियाँ</string>
     <string name="notes_copy_overview_description">अवलोकन कॉपी करें</string>
     <string name="notes_copy_transcript_description">ट्रांसक्रिप्ट कॉपी करें</string>
     <string name="notes_copied">कॉपी हो गया</string>

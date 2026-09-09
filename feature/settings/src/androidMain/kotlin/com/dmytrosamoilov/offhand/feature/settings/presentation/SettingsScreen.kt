@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,16 +24,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
+import com.dmytrosamoilov.offhand.core.ui.component.CustomNoteStyleIcon
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOptionCard
+import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleCard
 import com.dmytrosamoilov.offhand.core.ui.component.toDomain
 import com.dmytrosamoilov.offhand.feature.settings.R
 import org.koin.androidx.compose.koinViewModel
@@ -41,6 +45,7 @@ import org.koin.androidx.compose.koinViewModel
 fun SettingsScreen(
     onAboutSupportClick: () -> Unit,
     onBackupClick: () -> Unit,
+    onNoteStylesClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = koinViewModel(),
 ) {
@@ -65,8 +70,10 @@ fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 NoteStyleSection(
-                    selected = state.notePreset,
-                    onSelected = viewModel::onNotePresetSelected,
+                    selected = state.noteStyle,
+                    customStyles = state.customStyles,
+                    onSelected = viewModel::onNoteStyleSelected,
+                    onManageClick = onNoteStylesClick,
                 )
                 SecuritySection(
                     isAppLockEnabled = state.isAppLockEnabled,
@@ -86,24 +93,69 @@ fun SettingsScreen(
 
 @Composable
 private fun NoteStyleSection(
-    selected: NotePreset,
-    onSelected: (NotePreset) -> Unit,
+    selected: NoteStyleRef,
+    customStyles: List<CustomStyleOptionUi>,
+    onSelected: (NoteStyleRef) -> Unit,
+    onManageClick: () -> Unit,
 ) {
     SettingsCard(title = stringResource(R.string.settings_note_style_title)) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             NotePresetOption.entries.forEach { option ->
+                val style = NoteStyleRef.BuiltIn(option.toDomain())
                 NotePresetOptionCard(
                     option = option,
-                    isSelected = option.toDomain() == selected,
-                    onClick = { onSelected(option.toDomain()) },
+                    isSelected = style == selected,
+                    onClick = { onSelected(style) },
+                )
+            }
+            customStyles.forEach { custom ->
+                val style = NoteStyleRef.Custom(custom.id)
+                NoteStyleCard(
+                    title = custom.name,
+                    description = custom.description,
+                    icon = CustomNoteStyleIcon,
+                    isSelected = style == selected,
+                    onClick = { onSelected(style) },
                 )
             }
         }
+        Spacer(modifier = Modifier.height(12.dp))
+        ManageStylesRow(onClick = onManageClick)
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = stringResource(R.string.settings_note_style_note),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun ManageStylesRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.settings_note_styles_manage),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = stringResource(R.string.settings_note_styles_manage_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
         )
     }
 }

@@ -23,6 +23,12 @@ data object AboutSupportRoute
 @Serializable
 data object BackupRoute
 
+@Serializable
+data object NoteStylesRoute
+
+@Serializable
+data class NoteStyleEditorRoute(val styleId: Long)
+
 enum class TopLevelDestination(
     @param:StringRes val labelRes: Int,
     val icon: ImageVector,

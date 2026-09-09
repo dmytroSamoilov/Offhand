@@ -10,6 +10,8 @@
     <string name="backup_passphrase_mismatch">पासफ़्रेज़ मेल नहीं खाते।</string>
     <string name="backup_include_audio_label">ऑडियो रिकॉर्डिंग शामिल करें</string>
     <string name="backup_include_audio_description">रिकॉर्डिंग से फ़ाइल काफ़ी बड़ी हो जाती है।</string>
+    <string name="backup_include_styles_label">नोट शैलियाँ शामिल करें</string>
+    <string name="backup_include_styles_description">आपकी अपनी नोट शैलियाँ नोटों के साथ जाती हैं।</string>
     <string name="backup_restore_title">रीस्टोर करें</string>
     <string name="backup_restore_body">बैकअप फ़ाइल से नोट्स और फ़ोल्डर जोड़ें। इस फ़ोन पर मौजूद नोट्स बने रहेंगे और डुप्लिकेट छोड़ दिए जाएंगे।</string>
     <string name="backup_restore_button">बैकअप फ़ाइल चुनें</string>

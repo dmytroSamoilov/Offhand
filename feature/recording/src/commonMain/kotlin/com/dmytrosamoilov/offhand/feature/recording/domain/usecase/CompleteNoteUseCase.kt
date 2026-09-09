@@ -1,7 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 
 class CompleteNoteUseCase(
@@ -15,7 +15,7 @@ class CompleteNoteUseCase(
         transcriptionTimeMs: Long,
         structuringTimeMs: Long,
         hardwareBackend: String,
-        preset: NotePreset,
+        style: NoteStyleRef,
     ): Boolean {
         val note = notesRepository.getNote(noteId) ?: return false
         notesRepository.updateNote(
@@ -27,7 +27,7 @@ class CompleteNoteUseCase(
                 structuringTimeMs = structuringTimeMs,
                 hardwareBackend = hardwareBackend,
                 status = NoteStatus.READY,
-                preset = preset,
+                style = style,
             ),
         )
         return true

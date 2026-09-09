@@ -2,8 +2,8 @@ package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
 import co.touchlab.kermit.Logger
 import com.dmytrosamoilov.offhand.core.data.domain.Note
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
@@ -35,7 +35,7 @@ class ResumeInterruptedNotesUseCase(
         val audioFileName = note.audioFileName
         val resumed = backfillDurationIfMissing(note, audioFileName)
         when {
-            resumed.transcript.isNotBlank() -> restructureViaService(resumed.id, resumed.preset)
+            resumed.transcript.isNotBlank() -> restructureViaService(resumed.id, resumed.style)
             audioFileName != null -> retryViaService(resumed.id, audioFileName)
             resumed.status == NoteStatus.RECORDING -> notesRepository.deleteNote(resumed.id)
             else -> failNote(resumed.id)
@@ -62,10 +62,10 @@ class ResumeInterruptedNotesUseCase(
         sessionManager.retryNote(noteId, audioFileName)
     }
 
-    private fun restructureViaService(noteId: Long, preset: NotePreset) {
-        if (recordingProcessController.restructureNote(noteId, preset)) return
+    private fun restructureViaService(noteId: Long, style: NoteStyleRef) {
+        if (recordingProcessController.restructureNote(noteId, style)) return
         Logger.withTag(LOG_TAG).w { "Service unavailable, structuring note $noteId in-process" }
-        sessionManager.restructureNote(noteId, preset)
+        sessionManager.restructureNote(noteId, style)
     }
 
     private companion object {

@@ -1,15 +1,18 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain
 
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 
-internal object NotePresetPrompt {
+internal object BuiltInNoteStyles {
 
-    fun fieldRules(preset: NotePreset): String = listOfNotNull(
-        FIELD_RULES_HEADER,
-        TITLE_RULE,
-        "$OVERVIEW_RULE_PREFIX${overviewRule(preset)}",
-        EMPTY_SECTION_RULE.takeIf { sections(preset).isNotEmpty() },
-    ).joinToString(LINE_BREAK)
+    fun spec(preset: NotePreset): NoteStyleSpec = NoteStyleSpec(
+        ref = NoteStyleRef.BuiltIn(preset),
+        kind = kind(preset),
+        sections = sections(preset),
+        overviewRule = overviewRule(preset),
+        language = NoteStyleLanguage.RECORDING,
+    )
 
     fun sections(preset: NotePreset): List<String> = when (preset) {
         NotePreset.SUMMARY -> emptyList()
@@ -18,38 +21,12 @@ internal object NotePresetPrompt {
         NotePreset.LEGAL -> LEGAL_SECTIONS
     }
 
-    fun noteKind(preset: NotePreset): String = when (preset) {
+    private fun kind(preset: NotePreset): String = when (preset) {
         NotePreset.SUMMARY -> SUMMARY_KIND
-        NotePreset.MEETING -> markdownKind(MEETING_KIND)
-        NotePreset.VISIT -> markdownKind(VISIT_KIND)
-        NotePreset.LEGAL -> markdownKind(LEGAL_KIND)
+        NotePreset.MEETING -> NoteStylePrompt.markdownKind(MEETING_KIND)
+        NotePreset.VISIT -> NoteStylePrompt.markdownKind(VISIT_KIND)
+        NotePreset.LEGAL -> NoteStylePrompt.markdownKind(LEGAL_KIND)
     }
-
-    fun polishStructureRule(preset: NotePreset): String {
-        val sections = sections(preset)
-        return if (sections.isEmpty()) PROSE_POLISH_RULE else sectionPolishRule(sections)
-    }
-
-    fun polishFieldRules(): String = listOf(
-        FIELD_RULES_HEADER,
-        POLISH_TITLE_RULE,
-        "$OVERVIEW_RULE_PREFIX$POLISHED_OVERVIEW_RULE",
-    ).joinToString(LINE_BREAK)
-
-    private fun markdownKind(kind: String): String =
-        "$kind in Markdown, organised under section headings"
-
-    private fun sectionPolishRule(sections: List<String>): String = listOf(
-        "- Keep only these section headings: ${quoteList(sections)}. Never use any other heading.",
-        "- Move a point that sits under the wrong heading to the heading where it belongs. " +
-            "When a point clearly belongs under one of the allowed headings that the draft " +
-            "does not have yet, add that heading and move the point under it.",
-        "- Keep each point as one \"- \" line in sections that use \"- \" lines, and remove " +
-            "a heading that has nothing under it as well as lines that only say none or not mentioned.",
-    ).joinToString(LINE_BREAK)
-
-    private fun quoteList(sections: List<String>): String =
-        sections.joinToString(SECTION_LIST_SEPARATOR) { "\"$it\"" }
 
     private fun overviewRule(preset: NotePreset): String = when (preset) {
         NotePreset.SUMMARY -> SUMMARY_OVERVIEW
@@ -58,30 +35,12 @@ internal object NotePresetPrompt {
         NotePreset.LEGAL -> LEGAL_OVERVIEW
     }
 
-    private const val LINE_BREAK = "\n"
-    private const val SECTION_LIST_SEPARATOR = ", "
-    private const val FIELD_RULES_HEADER = "Rules for the fields:"
-    private const val TITLE_RULE =
-        "- \"title\": a short title for the recording, at most 8 words."
-    private const val POLISH_TITLE_RULE =
-        "- \"title\": a short title for the note, at most 8 words."
-    private const val OVERVIEW_RULE_PREFIX = "- \"overview\": "
-    private const val POLISHED_OVERVIEW_RULE = "the full polished note and nothing else."
-    private const val EMPTY_SECTION_RULE =
-        "- Write a heading only when the recording really contains that kind of content. " +
-            "Never write a heading with nothing under it, and never write none, not mentioned or N/A."
-
     private const val SUMMARY_KIND =
         "a first-person summary of one voice note, written as plain paragraphs " +
             "in the speaker's own voice"
     private const val MEETING_KIND = "meeting notes"
     private const val VISIT_KIND = "a visit report"
     private const val LEGAL_KIND = "a legal file note"
-
-    private const val PROSE_POLISH_RULE =
-        "- Keep the note as plain sentences in short paragraphs, in the first person the " +
-            "speaker uses. Never use headings, bullet points, dashes at the start of a line, " +
-            "or numbered lists."
 
     private val MEETING_SECTIONS =
         listOf("## Discussion", "## Decisions", "## Action items", "## Open questions")

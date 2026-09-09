@@ -3,10 +3,14 @@
 package com.dmytrosamoilov.offhand.feature.backup.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
+import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStylesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
 import com.dmytrosamoilov.offhand.core.data.domain.Note
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.security.BackupCrypto
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
@@ -16,6 +20,8 @@ import com.dmytrosamoilov.offhand.feature.backup.domain.BackupFile
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupFolder
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupManifest
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupNote
+import com.dmytrosamoilov.offhand.feature.backup.domain.BackupNoteStyle
+import com.dmytrosamoilov.offhand.feature.backup.domain.BackupNoteStyleSection
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupSummary
 import com.dmytrosamoilov.offhand.feature.backup.domain.archive.BackupArchive
 import com.dmytrosamoilov.offhand.feature.backup.domain.archive.BackupFormat
@@ -36,6 +42,7 @@ import okio.use
 class CreateBackupUseCase(
     private val notesRepository: NotesRepository,
     private val foldersRepository: FoldersRepository,
+    private val customNoteStylesRepository: CustomNoteStylesRepository,
     private val audioStore: EncryptedAudioStore,
     private val crypto: BackupCrypto,
     private val buildInfo: BuildInfo,
@@ -45,17 +52,20 @@ class CreateBackupUseCase(
         file: BackupFile,
         passphrase: ByteArray,
         includeAudio: Boolean,
+        includeStyles: Boolean = true,
         onProgress: (Int) -> Unit = {},
     ): BackupSummary = withContext(Dispatchers.IO) {
         val notes = notesRepository.observeNotes().first().filter { it.status.isSettled() }
         val folders = foldersRepository.observeFolders().first()
+        val styles = if (includeStyles) customNoteStylesRepository.observeStyles().first() else emptyList()
         val audioSizes = if (includeAudio) audioSizesOf(notes) else emptyMap()
         val totalAudioBytes = audioSizes.values.sum()
         val sink = BackupArchive(crypto).openForWrite(file.openWrite(), passphrase)
         sink.use { out ->
-            out.writeTextRecord(RecordKind.MANIFEST, json.encodeToString(manifest(notes, folders, includeAudio, totalAudioBytes)))
+            out.writeTextRecord(RecordKind.MANIFEST, json.encodeToString(manifest(notes, folders, styles, includeAudio, totalAudioBytes)))
+            out.writeTextRecord(RecordKind.STYLES, json.encodeToString(styles.map(CustomNoteStyle::toBackup)))
             out.writeTextRecord(RecordKind.FOLDERS, json.encodeToString(folders.map(Folder::toBackup)))
-            out.writeTextRecord(RecordKind.NOTES, json.encodeToString(notes.map { it.toBackup(includeAudio) }))
+            out.writeTextRecord(RecordKind.NOTES, json.encodeToString(notes.map { it.toBackup(includeAudio, includeStyles) }))
             val progress = ProgressTracker(totalAudioBytes, onProgress)
             audioSizes.forEach { (fileName, size) -> out.writeAudioRecord(fileName, size, progress) }
             out.writeEndRecord()
@@ -89,8 +99,13 @@ class CreateBackupUseCase(
         if (remaining > 0) write(ByteArray(remaining.toInt()))
     }
 
-    private fun manifest(notes: List<Note>, folders: List<Folder>, includeAudio: Boolean, totalAudioBytes: Long) =
-        BackupManifest(
+    private fun manifest(
+        notes: List<Note>,
+        folders: List<Folder>,
+        styles: List<CustomNoteStyle>,
+        includeAudio: Boolean,
+        totalAudioBytes: Long,
+    ) = BackupManifest(
             formatVersion = BackupFormat.VERSION,
             appVersion = buildInfo.appVersion,
             platform = buildInfo.platform,
@@ -99,6 +114,7 @@ class CreateBackupUseCase(
             folderCount = folders.size,
             includesAudio = includeAudio,
             totalAudioBytes = totalAudioBytes,
+            styleCount = styles.size,
         )
 
     private class ProgressTracker(private val total: Long, private val onProgress: (Int) -> Unit) {
@@ -126,7 +142,7 @@ internal fun NoteStatus.isSettled(): Boolean = this == NoteStatus.READY || this 
 
 internal fun Folder.toBackup(): BackupFolder = BackupFolder(id = id, name = name, createdAtEpochMs = createdAtEpochMs)
 
-internal fun Note.toBackup(includeAudio: Boolean): BackupNote = BackupNote(
+internal fun Note.toBackup(includeAudio: Boolean, includeStyles: Boolean): BackupNote = BackupNote(
     id = id,
     title = title,
     body = body,
@@ -138,6 +154,16 @@ internal fun Note.toBackup(includeAudio: Boolean): BackupNote = BackupNote(
     audioFileName = if (includeAudio) audioFileName else null,
     durationMs = durationMs,
     status = status.name,
-    preset = preset.name,
+    preset = (style as? NoteStyleRef.BuiltIn)?.preset?.name ?: NotePreset.DEFAULT.name,
     folderId = folderId,
+    customStyleId = (style as? NoteStyleRef.Custom)?.id?.takeIf { includeStyles },
+)
+
+internal fun CustomNoteStyle.toBackup(): BackupNoteStyle = BackupNoteStyle(
+    id = id,
+    name = name,
+    noteKind = noteKind,
+    language = language.name,
+    sections = sections.map { BackupNoteStyleSection(it.heading, it.guidance, it.format.name) },
+    createdAtEpochMs = createdAtEpochMs,
 )

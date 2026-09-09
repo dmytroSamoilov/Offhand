@@ -10,6 +10,8 @@
     <string name="backup_passphrase_mismatch">Die Passphrasen stimmen nicht überein.</string>
     <string name="backup_include_audio_label">Audioaufnahmen einschließen</string>
     <string name="backup_include_audio_description">Aufnahmen machen die Datei deutlich größer.</string>
+    <string name="backup_include_styles_label">Notizstile einschließen</string>
+    <string name="backup_include_styles_description">Deine eigenen Notizstile wandern mit den Notizen mit.</string>
     <string name="backup_restore_title">Wiederherstellen</string>
     <string name="backup_restore_body">Notizen und Ordner aus einer Sicherungsdatei hinzufügen. Vorhandene Notizen bleiben erhalten, Duplikate werden übersprungen.</string>
     <string name="backup_restore_button">Sicherungsdatei wählen</string>

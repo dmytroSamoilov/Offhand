@@ -2,14 +2,16 @@ package com.dmytrosamoilov.offhand.feature.settings.presentation
 
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveAppLockEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNotePresetUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveEntitlementsUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNotePresetUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,8 +21,10 @@ import kotlinx.coroutines.launch
 class SettingsViewModel(
     observeDynamicColor: ObserveDynamicColorUseCase,
     private val setDynamicColor: SetDynamicColorUseCase,
-    observeNotePreset: ObserveNotePresetUseCase,
-    private val setNotePreset: SetNotePresetUseCase,
+    observeNoteStyle: ObserveNoteStyleUseCase,
+    private val setNoteStyle: SetNoteStyleUseCase,
+    observeCustomNoteStyles: ObserveCustomNoteStylesUseCase,
+    observeEntitlements: ObserveEntitlementsUseCase,
     observeAppLockEnabled: ObserveAppLockEnabledUseCase,
     private val setAppLockEnabled: SetAppLockEnabledUseCase,
     private val appLockManager: AppLockManager,
@@ -38,8 +42,18 @@ class SettingsViewModel(
             }
         }
         viewModelScope.launch {
-            observeNotePreset().collect { preset ->
-                mutableUiState.update { it.copy(notePreset = preset) }
+            observeNoteStyle().collect { style ->
+                mutableUiState.update { it.copy(noteStyle = style) }
+            }
+        }
+        viewModelScope.launch {
+            observeCustomNoteStyles().collect { styles ->
+                mutableUiState.update { it.copy(customStyles = styles.map { style -> style.toOptionUi() }) }
+            }
+        }
+        viewModelScope.launch {
+            observeEntitlements().collect { entitlements ->
+                mutableUiState.update { it.copy(isCustomStylesUnlocked = entitlements.customStylesUnlocked) }
             }
         }
         viewModelScope.launch {
@@ -55,9 +69,9 @@ class SettingsViewModel(
         mutableUiState.update { it.copy(isDeviceSecure = appLockManager.isDeviceSecure) }
     }
 
-    fun onNotePresetSelected(preset: NotePreset) {
+    fun onNoteStyleSelected(style: NoteStyleRef) {
         launchSafely(showLoading = false) {
-            setNotePreset(preset)
+            setNoteStyle(style)
         }
     }
 

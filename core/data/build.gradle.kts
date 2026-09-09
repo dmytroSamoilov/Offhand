@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.offhand.kmp.library)
     alias(libs.plugins.androidx.room)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -22,6 +23,7 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.room.runtime)
             implementation(libs.datastore.preferences.core)
+            implementation(libs.kotlinx.serialization.json)
         }
         androidMain.dependencies {
             api(libs.coroutines.android)

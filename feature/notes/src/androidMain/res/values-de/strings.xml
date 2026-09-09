@@ -50,6 +50,7 @@
     <string name="notes_preset_description">Notizstil ändern</string>
     <string name="notes_preset_sheet_title">Diese Notiz neu schreiben als</string>
     <string name="notes_preset_sheet_body">Die Aufnahme bleibt erhalten. Titel und Übersicht werden aus dem Transkript neu geschrieben — im Stil, den du wählst.</string>
+    <string name="notes_style_sheet_custom_header">Deine Stile</string>
     <string name="notes_copy_overview_description">Übersicht kopieren</string>
     <string name="notes_copy_transcript_description">Transkript kopieren</string>
     <string name="notes_copied">Kopiert</string>

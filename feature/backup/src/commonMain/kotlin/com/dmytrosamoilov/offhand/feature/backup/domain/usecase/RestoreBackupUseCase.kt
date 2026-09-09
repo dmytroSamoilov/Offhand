@@ -1,9 +1,15 @@
 package com.dmytrosamoilov.offhand.feature.backup.domain.usecase
 
+import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
+import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStylesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleSection
+import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.security.BackupCrypto
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
@@ -14,6 +20,7 @@ import com.dmytrosamoilov.offhand.feature.backup.domain.BackupFile
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupFolder
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupManifest
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupNote
+import com.dmytrosamoilov.offhand.feature.backup.domain.BackupNoteStyle
 import com.dmytrosamoilov.offhand.feature.backup.domain.RestoreSummary
 import com.dmytrosamoilov.offhand.feature.backup.domain.archive.BackupArchive
 import com.dmytrosamoilov.offhand.feature.backup.domain.archive.RecordHeader
@@ -31,6 +38,7 @@ import okio.use
 class RestoreBackupUseCase(
     private val notesRepository: NotesRepository,
     private val foldersRepository: FoldersRepository,
+    private val customNoteStylesRepository: CustomNoteStylesRepository,
     private val audioStore: EncryptedAudioStore,
     private val crypto: BackupCrypto,
 ) {
@@ -49,6 +57,7 @@ class RestoreBackupUseCase(
                 when (header.kind) {
                     RecordKind.END -> break
                     RecordKind.MANIFEST -> throw BackupException.Corrupt("Duplicate manifest")
+                    RecordKind.STYLES -> session.restoreStyles(json.decodeFromString(input.readTextRecord(header)))
                     RecordKind.FOLDERS -> session.restoreFolders(json.decodeFromString(input.readTextRecord(header)))
                     RecordKind.NOTES -> session.restoreNotes(json.decodeFromString(input.readTextRecord(header)))
                     RecordKind.AUDIO -> session.restoreAudio(header, input)
@@ -70,12 +79,21 @@ class RestoreBackupUseCase(
         private val onProgress: (Int) -> Unit,
     ) {
         private val folderIds = mutableMapOf<Long, Long>()
+        private val styleIds = mutableMapOf<Long, Long>()
         private val noteIdsByAudioName = mutableMapOf<String, Long>()
         private var notesRestored = 0
         private var notesSkipped = 0
         private var foldersCreated = 0
         private var foldersReused = 0
         private var audioBytesDone = 0L
+
+        suspend fun restoreStyles(styles: List<BackupNoteStyle>) {
+            val existing = customNoteStylesRepository.observeStyles().first()
+            styles.forEach { style ->
+                styleIds[style.id] = existing.firstOrNull { it.name.equals(style.name, ignoreCase = true) }?.id
+                    ?: customNoteStylesRepository.createStyle(style.toDomain())
+            }
+        }
 
         suspend fun restoreFolders(folders: List<BackupFolder>) {
             val existing = foldersRepository.observeFolders().first()
@@ -92,7 +110,7 @@ class RestoreBackupUseCase(
                 if (existing.any { it.isSameAs(note) }) {
                     notesSkipped += 1
                 } else {
-                    val newId = notesRepository.createNote(note.toDomain(folderIds))
+                    val newId = notesRepository.createNote(note.toDomain(folderIds, styleIds))
                     note.audioFileName?.let { noteIdsByAudioName[it] = newId }
                     notesRestored += 1
                 }
@@ -160,7 +178,7 @@ class RestoreBackupUseCase(
 internal fun Note.isSameAs(backup: BackupNote): Boolean =
     createdAtEpochMs == backup.createdAtEpochMs && title == backup.title
 
-internal fun BackupNote.toDomain(folderIds: Map<Long, Long>): Note = Note(
+internal fun BackupNote.toDomain(folderIds: Map<Long, Long>, styleIds: Map<Long, Long>): Note = Note(
     id = 0,
     title = title,
     body = body,
@@ -172,6 +190,15 @@ internal fun BackupNote.toDomain(folderIds: Map<Long, Long>): Note = Note(
     audioFileName = null,
     durationMs = durationMs,
     status = NoteStatus.entries.firstOrNull { it.name == status }?.takeIf { it.isSettled() } ?: NoteStatus.READY,
-    preset = NotePreset.fromName(preset),
+    style = customStyleId?.let(styleIds::get)?.let(NoteStyleRef::Custom) ?: NoteStyleRef.BuiltIn(NotePreset.fromName(preset)),
     folderId = folderId?.let(folderIds::get),
+)
+
+internal fun BackupNoteStyle.toDomain(): CustomNoteStyle = CustomNoteStyle(
+    id = 0,
+    name = name,
+    noteKind = noteKind,
+    language = NoteStyleLanguage.fromName(language),
+    sections = sections.map { NoteStyleSection(it.heading, it.guidance, SectionFormat.fromName(it.format)) },
+    createdAtEpochMs = createdAtEpochMs,
 )

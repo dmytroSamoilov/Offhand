@@ -1,7 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.data.domain.Note
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
@@ -95,7 +95,7 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify { recordingProcessController.restructureNote(1, NotePreset.DEFAULT) }
+        verify { recordingProcessController.restructureNote(1, NoteStyleRef.DEFAULT) }
         verify(exactly = 0) { recordingProcessController.retryNote(any(), any()) }
     }
 
@@ -109,7 +109,7 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify { recordingProcessController.restructureNote(1, NotePreset.DEFAULT) }
+        verify { recordingProcessController.restructureNote(1, NoteStyleRef.DEFAULT) }
         coVerify(exactly = 0) { failNote(any()) }
     }
 
@@ -159,7 +159,7 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify { recordingProcessController.restructureNote(3, NotePreset.DEFAULT) }
+        verify { recordingProcessController.restructureNote(3, NoteStyleRef.DEFAULT) }
         coVerify(exactly = 0) { notesRepository.deleteNote(any()) }
     }
 
@@ -202,7 +202,7 @@ class ResumeInterruptedNotesUseCaseTest {
                 withArg { updated -> assertEquals(10_000L, updated.durationMs) },
             )
         }
-        verify { recordingProcessController.restructureNote(3, NotePreset.DEFAULT) }
+        verify { recordingProcessController.restructureNote(3, NoteStyleRef.DEFAULT) }
     }
 
     @Test
@@ -214,7 +214,7 @@ class ResumeInterruptedNotesUseCaseTest {
         useCase()
 
         coVerify(exactly = 0) { notesRepository.updateNote(any()) }
-        verify { recordingProcessController.restructureNote(1, NotePreset.DEFAULT) }
+        verify { recordingProcessController.restructureNote(1, NoteStyleRef.DEFAULT) }
     }
 
     @Test
@@ -271,6 +271,6 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify { sessionManager.restructureNote(1, NotePreset.DEFAULT) }
+        verify { sessionManager.restructureNote(1, NoteStyleRef.DEFAULT) }
     }
 }

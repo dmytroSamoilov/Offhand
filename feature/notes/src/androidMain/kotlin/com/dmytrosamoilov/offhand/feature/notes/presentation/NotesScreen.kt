@@ -105,8 +105,10 @@ import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOptionCard
+import com.dmytrosamoilov.offhand.core.ui.component.CustomNoteStyleIcon
+import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleCard
 import com.dmytrosamoilov.offhand.core.ui.component.toDomain
-import com.dmytrosamoilov.offhand.core.ui.component.toUi
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.feature.notes.R
 import java.util.Locale
 import kotlinx.coroutines.launch
@@ -285,11 +287,12 @@ fun NotesScreen(
         )
     }
 
-    val selectedPreset = state.selected?.preset
-    if (state.isPresetSheetVisible && selectedPreset != null) {
-        NotePresetSheet(
-            selected = selectedPreset.toUi(),
-            onSelected = { option -> viewModel.onPresetSelected(option.toDomain()) },
+    val selectedStyle = state.selected?.style
+    if (state.isPresetSheetVisible && selectedStyle != null) {
+        NoteStyleSheet(
+            selected = selectedStyle,
+            customStyles = state.customStyles,
+            onSelected = viewModel::onStyleSelected,
             onDismiss = viewModel::onPresetSheetDismissed,
         )
     }
@@ -297,9 +300,10 @@ fun NotesScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NotePresetSheet(
-    selected: NotePresetOption,
-    onSelected: (NotePresetOption) -> Unit,
+private fun NoteStyleSheet(
+    selected: NoteStyleRef,
+    customStyles: List<NoteStyleOptionUi>,
+    onSelected: (NoteStyleRef) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -324,8 +328,25 @@ private fun NotePresetSheet(
             NotePresetOption.entries.forEach { option ->
                 NotePresetOptionCard(
                     option = option,
-                    isSelected = option == selected,
-                    onClick = { onSelected(option) },
+                    isSelected = selected == NoteStyleRef.BuiltIn(option.toDomain()),
+                    onClick = { onSelected(NoteStyleRef.BuiltIn(option.toDomain())) },
+                )
+            }
+            if (customStyles.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.notes_style_sheet_custom_header),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+            customStyles.forEach { style ->
+                NoteStyleCard(
+                    title = style.name,
+                    description = style.description,
+                    icon = CustomNoteStyleIcon,
+                    isSelected = selected == NoteStyleRef.Custom(style.id),
+                    onClick = { onSelected(NoteStyleRef.Custom(style.id)) },
                 )
             }
         }

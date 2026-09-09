@@ -1,0 +1,89 @@
+# Runs after 01-smoke.yaml and relies on the note it created. Covers creating a
+# custom note style, previewing it on the sample, picking it as the default,
+# rewriting a note with it and deleting it again. Android only until the iOS
+# screens exist.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- assertVisible: "Smoke test note"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Settings"
+      - tapOn: "Manage note styles"
+      - assertVisible: "Built in"
+      - tapOn: "New style"
+
+      # Fill the form: name, kind, two sections. The keyboard is closed after
+      # every field so the next tap does not land on it.
+      - tapOn: "Name"
+      - inputText: "Sales debrief"
+      - hideKeyboard
+      - tapOn: "What kind of note is this?"
+      - inputText: "a sales call debrief"
+      - hideKeyboard
+      - tapOn: "Heading"
+      - inputText: "Customer"
+      - hideKeyboard
+      - tapOn: "What goes here"
+      - inputText: "who the customer is and their role"
+      - hideKeyboard
+      - scrollUntilVisible:
+          element: "Add section"
+      - tapOn: "Add section"
+      - scrollUntilVisible:
+          element: "Try it on a sample"
+      - tapOn:
+          text: "Heading"
+          below: "Section 2"
+      - inputText: "Next steps"
+      - hideKeyboard
+      - tapOn:
+          text: "One bullet per point"
+          below: "Section 2"
+
+      # Preview runs the style through the (fake) model
+      - scrollUntilVisible:
+          element: "Try it on a sample"
+      - tapOn: "Try it on a sample"
+      - extendedWaitUntil:
+          visible: "Preview"
+          timeout: 10000
+      - scrollUntilVisible:
+          element: "Smoke test note"
+          timeout: 30000
+      - tapOn: "Save"
+
+      # The style is listed and can be chosen as the default
+      - assertVisible: "Sales debrief"
+      - assertVisible: "Customer, Next steps"
+      - back
+      - tapOn: "Sales debrief"
+
+      # Rewrite the existing note with it
+      - tapOn: "Notes"
+      - tapOn: "Smoke test note"
+      - runFlow:
+          when:
+            visible: "In-app review · dev build"
+          commands:
+            - tapOn: "COUNT ATTEMPT"
+      - tapOn: "More actions"
+      - tapOn: "Change note style"
+      - assertVisible: "Your styles"
+      - tapOn: "Sales debrief"
+      - extendedWaitUntil:
+          visible: "Overview"
+          timeout: 60000
+      - back
+
+      # Delete the style; the note survives
+      - tapOn: "Settings"
+      - tapOn: "Manage note styles"
+      - tapOn: "Delete style"
+      - tapOn: "Delete"
+      - assertNotVisible: "Sales debrief"
+      - back
+      - tapOn: "Notes"
+      - assertVisible: "Smoke test note"

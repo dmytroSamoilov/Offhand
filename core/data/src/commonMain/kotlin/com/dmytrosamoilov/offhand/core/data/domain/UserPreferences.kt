@@ -10,7 +10,7 @@ data class UserPreferences(
     val developerOptions: Boolean,
     val savedRecordingsCount: Int,
     val reviewPrompt: ReviewPromptState,
-    val notePreset: NotePreset,
+    val noteStyle: NoteStyleRef,
 )
 
 data class ReviewPromptState(
@@ -33,7 +33,7 @@ interface UserPreferencesRepository {
 
     suspend fun setDeveloperOptions(enabled: Boolean)
 
-    suspend fun setNotePreset(preset: NotePreset)
+    suspend fun setNoteStyle(style: NoteStyleRef)
 
     suspend fun incrementSavedRecordingsCount()
 

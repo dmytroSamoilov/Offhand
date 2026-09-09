@@ -13,16 +13,22 @@ import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_3_4
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_4_5
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_5_6
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_6_7
+import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_7_8
 import com.dmytrosamoilov.offhand.core.data.database.FolderDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteDao
+import com.dmytrosamoilov.offhand.core.data.database.NoteStyleDao
 import com.dmytrosamoilov.offhand.core.data.database.NotesDatabase
 import com.dmytrosamoilov.offhand.core.data.database.applyCompleteUnlessOpenProtection
 import com.dmytrosamoilov.offhand.core.data.database.createProtectedDatabaseDirectory
 import com.dmytrosamoilov.offhand.core.data.database.iosDocumentsDirectory
+import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStylesRepository
+import com.dmytrosamoilov.offhand.core.data.domain.EntitlementsRepository
 import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import com.dmytrosamoilov.offhand.core.data.preferences.DataStoreUserPreferencesRepository
+import com.dmytrosamoilov.offhand.core.data.repository.AlwaysUnlockedEntitlementsRepository
+import com.dmytrosamoilov.offhand.core.data.repository.RoomCustomNoteStylesRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomFoldersRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomNotesRepository
 import com.dmytrosamoilov.offhand.core.security.excludeFromBackup
@@ -50,6 +56,7 @@ private fun createNotesDatabase(): NotesDatabase {
             MIGRATION_4_5,
             MIGRATION_5_6,
             MIGRATION_6_7,
+            MIGRATION_7_8,
         )
         .build()
     applyCompleteUnlessOpenProtection(databasePath)
@@ -74,8 +81,11 @@ val coreDataModule = module {
     single { createNotesDatabase() }
     factory<NoteDao> { get<NotesDatabase>().noteDao() }
     factory<FolderDao> { get<NotesDatabase>().folderDao() }
+    factory<NoteStyleDao> { get<NotesDatabase>().noteStyleDao() }
     singleOf(::RoomNotesRepository) bind NotesRepository::class
     singleOf(::RoomFoldersRepository) bind FoldersRepository::class
+    singleOf(::RoomCustomNoteStylesRepository) bind CustomNoteStylesRepository::class
+    singleOf(::AlwaysUnlockedEntitlementsRepository) bind EntitlementsRepository::class
     single<UserPreferencesRepository> {
         DataStoreUserPreferencesRepository(createUserPreferencesDataStore(), get())
     }

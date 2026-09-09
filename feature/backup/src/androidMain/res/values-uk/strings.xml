@@ -10,6 +10,8 @@
     <string name="backup_passphrase_mismatch">Парольні фрази не збігаються.</string>
     <string name="backup_include_audio_label">Додати аудіозаписи</string>
     <string name="backup_include_audio_description">Із записами файл стає значно більшим.</string>
+    <string name="backup_include_styles_label">Включити стилі нотаток</string>
+    <string name="backup_include_styles_description">Ваші стилі нотаток зберігаються разом із нотатками.</string>
     <string name="backup_restore_title">Відновити</string>
     <string name="backup_restore_body">Додайте нотатки й папки з файлу резервної копії. Нотатки на цьому телефоні збережуться, дублікати буде пропущено.</string>
     <string name="backup_restore_button">Вибрати файл копії</string>

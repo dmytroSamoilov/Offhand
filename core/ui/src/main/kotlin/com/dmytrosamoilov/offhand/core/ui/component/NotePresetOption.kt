@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.FactCheck
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.Groups
@@ -81,6 +82,25 @@ fun NotePresetOptionCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    NoteStyleCard(
+        title = stringResource(option.labelRes),
+        description = stringResource(option.descriptionRes),
+        icon = option.icon,
+        isSelected = isSelected,
+        onClick = onClick,
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun NoteStyleCard(
+    title: String,
+    description: String,
+    icon: ImageVector,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val containerColor by animateColorAsState(
         targetValue = if (isSelected) {
             MaterialTheme.colorScheme.secondaryContainer
@@ -109,7 +129,7 @@ fun NotePresetOptionCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = option.icon,
+                imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp),
@@ -117,12 +137,12 @@ fun NotePresetOptionCard(
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(option.labelRes),
+                    text = title,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = stringResource(option.descriptionRes),
+                    text = description,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -132,3 +152,6 @@ fun NotePresetOptionCard(
         }
     }
 }
+
+val CustomNoteStyleIcon: ImageVector
+    get() = Icons.Filled.EditNote

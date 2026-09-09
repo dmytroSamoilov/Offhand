@@ -1,0 +1,32 @@
+# Runs after 01-smoke.yaml. Covers building a note style from a plain-text
+# description: the fake model answers the drafting prompt with a two-section
+# style that fills the editor form. Android only until the iOS screens exist.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- assertVisible: "Smoke test note"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Settings"
+      - tapOn: "Manage note styles"
+      - tapOn: "New style"
+      - tapOn: "Describe it and let the AI fill the form"
+      - tapOn: "For example.*"
+      - inputText: "After each sales call I want the customer, their needs and the agreed next steps"
+      - hideKeyboard
+      - tapOn: "Build the style"
+      - extendedWaitUntil:
+          visible: "Sales debrief"
+          timeout: 30000
+      - assertVisible: "a sales call debrief"
+      - assertVisible: "Customer"
+      - scrollUntilVisible:
+          element: "Next steps"
+      - assertVisible: "each agreed task with who does it and by when"
+      - back
+      - assertVisible: "Built in"
+      - back
+      - tapOn: "Notes"
+      - assertVisible: "Smoke test note"

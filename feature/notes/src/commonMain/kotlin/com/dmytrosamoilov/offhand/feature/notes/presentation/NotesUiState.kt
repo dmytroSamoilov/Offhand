@@ -1,6 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 
 data class NotesUiState(
     val sections: List<NotesSectionUi> = emptyList(),
@@ -21,6 +21,13 @@ data class NotesUiState(
     val folderEditor: FolderEditorUi? = null,
     val pendingDeleteFolderId: Long? = null,
     val moveToFolder: MoveToFolderUi? = null,
+    val customStyles: List<NoteStyleOptionUi> = emptyList(),
+)
+
+data class NoteStyleOptionUi(
+    val id: Long,
+    val name: String,
+    val description: String,
 )
 
 data class MoveToFolderUi(
@@ -94,7 +101,7 @@ data class NoteDetailUi(
     val hasAudio: Boolean,
     val metrics: NoteMetricsUi?,
     val status: NoteStatusUi,
-    val preset: NotePreset,
+    val style: NoteStyleRef,
     val folderId: Long? = null,
     val folderName: String? = null,
 )

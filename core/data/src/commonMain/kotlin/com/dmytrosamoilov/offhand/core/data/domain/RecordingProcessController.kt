@@ -6,5 +6,5 @@ interface RecordingProcessController {
 
     fun retryNote(noteId: Long, audioFileName: String): Boolean
 
-    fun restructureNote(noteId: Long, preset: NotePreset): Boolean
+    fun restructureNote(noteId: Long, style: NoteStyleRef): Boolean
 }

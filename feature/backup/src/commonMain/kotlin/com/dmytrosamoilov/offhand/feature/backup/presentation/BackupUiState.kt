@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.backup.presentation
 
 data class BackupUiState(
     val includeAudio: Boolean = true,
+    val includeStyles: Boolean = true,
     val passphrase: String = "",
     val passphraseConfirmation: String = "",
     val passphraseError: PassphraseErrorUi? = null,

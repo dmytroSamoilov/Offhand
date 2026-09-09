@@ -1,10 +1,10 @@
 package com.dmytrosamoilov.offhand.feature.settings.domain.usecase
 
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 
-class SetNotePresetUseCase(
+class SetNoteStyleUseCase(
     private val repository: UserPreferencesRepository,
 ) {
-    suspend operator fun invoke(preset: NotePreset) = repository.setNotePreset(preset)
+    suspend operator fun invoke(style: NoteStyleRef) = repository.setNoteStyle(style)
 }

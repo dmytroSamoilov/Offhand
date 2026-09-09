@@ -28,6 +28,10 @@ class BackupViewModel(
         mutableUiState.update { it.copy(includeAudio = enabled) }
     }
 
+    fun onIncludeStylesChanged(enabled: Boolean) {
+        mutableUiState.update { it.copy(includeStyles = enabled) }
+    }
+
     fun onPassphraseChanged(value: String) {
         mutableUiState.update { it.copy(passphrase = value, passphraseError = null) }
     }
@@ -74,8 +78,9 @@ class BackupViewModel(
     fun onBackupTargetChosen(file: BackupFile) {
         if (!validateBackupPassphrase()) return
         val includeAudio = mutableUiState.value.includeAudio
+        val includeStyles = mutableUiState.value.includeStyles
         runOperation(BackupModeUi.BACKUP) { passphrase, report ->
-            val summary = createBackup(file, passphrase, includeAudio, report)
+            val summary = createBackup(file, passphrase, includeAudio, includeStyles, report)
             BackupOperationUi.BackupCompleted(summary.notes, summary.folders, summary.audioBytes)
         }
     }

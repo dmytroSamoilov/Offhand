@@ -5,7 +5,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.Note
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
@@ -15,6 +15,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCa
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.FolderSaveResult
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
@@ -48,6 +49,7 @@ class NotesViewModel(
     private val deleteFolder: DeleteFolderUseCase,
     private val moveNoteToFolder: MoveNoteToFolderUseCase,
     observeDeveloperOptions: ObserveDeveloperOptionsUseCase,
+    observeCustomNoteStyles: ObserveCustomNoteStylesUseCase,
     private val getNote: GetNoteUseCase,
     private val updateNote: UpdateNoteUseCase,
     private val deleteNote: DeleteNoteUseCase,
@@ -100,6 +102,11 @@ class NotesViewModel(
         viewModelScope.launch {
             observeDeveloperOptions().collect { enabled ->
                 mutableUiState.update { it.copy(isDeveloperMode = enabled) }
+            }
+        }
+        viewModelScope.launch {
+            observeCustomNoteStyles().collect { styles ->
+                mutableUiState.update { it.copy(customStyles = styles.map { style -> style.toOptionUi() }) }
             }
         }
         viewModelScope.launch {
@@ -278,10 +285,10 @@ class NotesViewModel(
         mutableUiState.update { it.copy(isPresetSheetVisible = false) }
     }
 
-    fun onPresetSelected(preset: NotePreset) {
+    fun onStyleSelected(style: NoteStyleRef) {
         val note = selectedNote ?: return
         mutableUiState.update { it.copy(isPresetSheetVisible = false) }
-        recordingProcessController.restructureNote(note.id, preset)
+        recordingProcessController.restructureNote(note.id, style)
     }
 
     fun onShareRequested() {

@@ -12,6 +12,24 @@ data class BackupManifest(
     val folderCount: Int,
     val includesAudio: Boolean,
     val totalAudioBytes: Long,
+    val styleCount: Int = 0,
+)
+
+@Serializable
+data class BackupNoteStyle(
+    val id: Long,
+    val name: String,
+    val noteKind: String,
+    val language: String,
+    val sections: List<BackupNoteStyleSection>,
+    val createdAtEpochMs: Long,
+)
+
+@Serializable
+data class BackupNoteStyleSection(
+    val heading: String,
+    val guidance: String,
+    val format: String,
 )
 
 @Serializable
@@ -36,6 +54,7 @@ data class BackupNote(
     val status: String,
     val preset: String,
     val folderId: Long?,
+    val customStyleId: Long? = null,
 )
 
 data class BackupSummary(

@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.feature.recording.domain.DefaultNoteTitleProvider
@@ -25,7 +26,7 @@ class CreateRecordingNoteUseCaseTest {
         every { defaultNoteTitleProvider.titleFor(4) } returns "Recording 4"
         coEvery { notesRepository.createNote(any()) } returns 42L
 
-        val noteId = useCase("audio.pcm.enc", NotePreset.MEETING)
+        val noteId = useCase("audio.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.MEETING))
 
         assertEquals(42L, noteId)
         coVerify {
@@ -35,7 +36,7 @@ class CreateRecordingNoteUseCaseTest {
                     assertEquals(NoteStatus.RECORDING, note.status)
                     assertEquals("audio.pcm.enc", note.audioFileName)
                     assertNull(note.durationMs)
-                    assertEquals(NotePreset.MEETING, note.preset)
+                    assertEquals(NoteStyleRef.BuiltIn(NotePreset.MEETING), note.style)
                 },
             )
         }
@@ -47,7 +48,7 @@ class CreateRecordingNoteUseCaseTest {
         every { defaultNoteTitleProvider.titleFor(1) } returns "Recording 1"
         coEvery { notesRepository.createNote(any()) } returns 1L
 
-        useCase(null, NotePreset.SUMMARY)
+        useCase(null, NoteStyleRef.BuiltIn(NotePreset.SUMMARY))
 
         coVerify {
             notesRepository.createNote(withArg { note -> assertEquals("Recording 1", note.title) })

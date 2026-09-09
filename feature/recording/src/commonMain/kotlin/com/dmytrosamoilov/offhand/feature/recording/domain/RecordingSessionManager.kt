@@ -7,13 +7,14 @@ import com.dmytrosamoilov.offhand.core.ai.api.TranscriptionResult
 import com.dmytrosamoilov.offhand.core.audio.AudioChunk
 import com.dmytrosamoilov.offhand.core.audio.VadSnapshot
 import com.dmytrosamoilov.offhand.core.audio.WavCodec
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStylePreview
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateRecordingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
-import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNotePresetUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
@@ -47,7 +48,7 @@ class RecordingSessionManager(
     private val registerSavedRecording: RegisterSavedRecordingUseCase,
     private val saveNoteTranscript: SaveNoteTranscriptUseCase,
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
-    private val getNotePreset: GetNotePresetUseCase,
+    private val getNoteStyle: GetNoteStyleUseCase,
     private val getNote: GetNoteUseCase,
     private val audioStore: EncryptedAudioStore,
     private val audioBackup: RecordingAudioBackup,
@@ -83,7 +84,7 @@ class RecordingSessionManager(
 
     private var isDiscardRequested = false
 
-    private var sessionPreset = NotePreset.DEFAULT
+    private var sessionStyle: NoteStyleRef = NoteStyleRef.DEFAULT
 
     fun start() {
         if (mutableSession.value.phase.isActive()) return
@@ -146,13 +147,13 @@ class RecordingSessionManager(
                     transcripts = stored.texts,
                     transcriptionMs = stored.transcriptionTimeMs,
                     progressOffset = RETRY_WHISPER_SHARE,
-                    preset = note.preset,
+                    style = note.style,
                 )
             }
         }
     }
 
-    fun restructureNote(noteId: Long, preset: NotePreset) {
+    fun restructureNote(noteId: Long, style: NoteStyleRef) {
         if (noteId in mutableProcessingNoteIds.value) return
         mutableProcessingNoteIds.update { it + noteId }
         scope.launch {
@@ -168,11 +169,19 @@ class RecordingSessionManager(
                     transcripts = transcriptStructurer.splitStoredTranscript(note.transcript),
                     transcriptionMs = note.transcriptionTimeMs ?: 0,
                     progressOffset = 0f,
-                    preset = preset,
+                    style = style,
                 )
             }
         }
     }
+
+    internal suspend fun previewNoteStyle(spec: NoteStyleSpec, sampleTranscript: String): NoteStylePreview =
+        withProcessingLock {
+            val structured = transcriptStructurer.structure(listOf(sampleTranscript), spec) {}
+            NoteStylePreview(title = structured.title, overview = structured.overview)
+        }
+
+    internal suspend fun <T> withProcessingLock(block: suspend () -> T): T = processingMutex.withLock { block() }
 
     private suspend fun transcribeStoredAudio(
         audioFileName: String,
@@ -260,7 +269,7 @@ class RecordingSessionManager(
     )
 
     private suspend fun runSession() {
-        sessionPreset = getNotePreset()
+        sessionStyle = getNoteStyle()
         openAudioBackup()
         mutableActiveRecordingNoteId.value = createSessionNote()
         val queue = Channel<AudioChunk>(Channel.UNLIMITED)
@@ -280,7 +289,7 @@ class RecordingSessionManager(
     }
 
     private suspend fun createSessionNote(): Long? = try {
-        createRecordingNote(audioFileName, sessionPreset)
+        createRecordingNote(audioFileName, sessionStyle)
     } catch (cancellation: CancellationException) {
         throw cancellation
     } catch (t: Throwable) {
@@ -306,7 +315,7 @@ class RecordingSessionManager(
         when {
             chunkTranscripts.isNotEmpty() -> {
                 markNoteRecorded(noteId, recorder.vad.value.totalElapsedMs, audioFileName) ?: return
-                startProcessing(noteId, chunkTranscripts, transcriptionTimeMs, sessionPreset)
+                startProcessing(noteId, chunkTranscripts, transcriptionTimeMs, sessionStyle)
             }
             audioFileName != null -> {
                 markNoteRecorded(noteId, recorder.vad.value.totalElapsedMs, audioFileName)
@@ -414,16 +423,16 @@ class RecordingSessionManager(
         registerSavedRecording()
         val chunkTranscripts = sortedTranscripts()
         val recordedTranscriptionMs = transcriptionTimeMs
-        val preset = sessionPreset
+        val style = sessionStyle
         mutableSession.value = RecordingSession()
-        startProcessing(noteId, chunkTranscripts, recordedTranscriptionMs, preset)
+        startProcessing(noteId, chunkTranscripts, recordedTranscriptionMs, style)
     }
 
     private fun startProcessing(
         noteId: Long,
         chunkTranscripts: List<String>,
         transcriptionMs: Long,
-        preset: NotePreset,
+        style: NoteStyleRef,
     ) {
         mutableProcessingNoteIds.update { it + noteId }
         scope.launch {
@@ -433,7 +442,7 @@ class RecordingSessionManager(
                 return@launch
             }
             processingMutex.withLock {
-                processNote(noteId, chunkTranscripts, transcriptionMs, 0f, preset)
+                processNote(noteId, chunkTranscripts, transcriptionMs, 0f, style)
             }
         }
     }
@@ -456,7 +465,7 @@ class RecordingSessionManager(
         transcripts: List<String>,
         transcriptionMs: Long,
         progressOffset: Float,
-        preset: NotePreset,
+        style: NoteStyleRef,
     ) {
         try {
             if (transcripts.isEmpty()) {
@@ -466,13 +475,13 @@ class RecordingSessionManager(
             }
             persistTranscript(noteId, transcripts, transcriptionMs)
             val structured = try {
-                transcriptStructurer.structure(transcripts, preset) { fraction ->
+                transcriptStructurer.structure(transcripts, style) { fraction ->
                     updateProgress(noteId, progressOffset + fraction * (1f - progressOffset))
                 }
             } catch (backendFailure: AiBackendException) {
                 Logger.withTag(LOG_TAG)
                     .w(backendFailure) { "Structuring unavailable for note $noteId, keeping transcript" }
-                transcriptStructurer.transcriptOnly(transcripts)
+                transcriptStructurer.transcriptOnly(transcripts, style)
             }
             val stillExists = completeNote(
                 noteId = noteId,
@@ -482,7 +491,7 @@ class RecordingSessionManager(
                 transcriptionTimeMs = transcriptionMs,
                 structuringTimeMs = structured.structuringTimeMs,
                 hardwareBackend = structured.hardwareBackend.name,
-                preset = preset,
+                style = structured.style,
             )
             if (stillExists) {
                 mutableEvents.emit(NoteProcessingEvent.Completed(noteId))

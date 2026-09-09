@@ -13,6 +13,8 @@ class ModelPromptSetTest {
 
     private val QUOTED_TEXT = Regex("\"([^\"]+)\"")
 
+    private fun spec(preset: NotePreset): NoteStyleSpec = BuiltInNoteStyles.spec(preset)
+
     @Test
     fun `every model family maps to its own prompt set`() {
         assertEquals(ModelPromptSet.Gemma4, ModelPromptSet.forFamily(ModelFamily.GEMMA4))
@@ -21,18 +23,18 @@ class ModelPromptSetTest {
     @Test
     fun `gemma structure prompt never mentions thinking blocks`() {
         NotePreset.entries.forEach { preset ->
-            assertFalse(ModelPromptSet.Gemma4.structureNote(preset).contains("thinking"))
+            assertFalse(ModelPromptSet.Gemma4.structureNote(spec(preset)).contains("thinking"))
         }
     }
 
     @Test
     fun `polish prompt mentions a thinking block only when thinking is enabled`() {
         NotePreset.entries.forEach { preset ->
-            val thinking = ModelPromptSet.Gemma4.polishNote(preset, thinkingEnabled = true)
+            val thinking = ModelPromptSet.Gemma4.polishNote(spec(preset), thinkingEnabled = true)
             assertTrue(thinking.contains("<thinking></thinking>"))
             assertTrue(thinking.contains("After the thinking block"))
 
-            val plain = ModelPromptSet.Gemma4.polishNote(preset, thinkingEnabled = false)
+            val plain = ModelPromptSet.Gemma4.polishNote(spec(preset), thinkingEnabled = false)
             assertFalse(plain.contains("thinking"))
             assertTrue(plain.contains("Output a single JSON object and nothing else"))
         }
@@ -42,7 +44,7 @@ class ModelPromptSetTest {
     fun `all structure prompts share the json shape and factuality rules`() {
         promptSets.forEach { promptSet ->
             NotePreset.entries.forEach { preset ->
-                val prompt = promptSet.structureNote(preset)
+                val prompt = promptSet.structureNote(spec(preset))
                 assertTrue(prompt.contains("""{"title": "...", "overview": "..."}"""))
                 assertTrue(prompt.contains("never invent or guess anything"))
                 assertTrue(prompt.contains("at most 8 words"))
@@ -54,8 +56,8 @@ class ModelPromptSetTest {
     fun `each preset prompt names every section it will be merged by`() {
         promptSets.forEach { promptSet ->
             NotePreset.entries.forEach { preset ->
-                val prompt = promptSet.structureNote(preset)
-                NotePresetPrompt.sections(preset).forEach { section ->
+                val prompt = promptSet.structureNote(spec(preset))
+                BuiltInNoteStyles.sections(preset).forEach { section ->
                     assertTrue(prompt.contains(section), "$preset misses $section")
                 }
             }
@@ -64,9 +66,9 @@ class ModelPromptSetTest {
 
     @Test
     fun `sectioned presets forbid empty headings`() {
-        NotePreset.entries.filter { NotePresetPrompt.sections(it).isNotEmpty() }.forEach { preset ->
+        NotePreset.entries.filter { BuiltInNoteStyles.sections(it).isNotEmpty() }.forEach { preset ->
             assertTrue(
-                ModelPromptSet.Gemma4.structureNote(preset)
+                ModelPromptSet.Gemma4.structureNote(spec(preset))
                     .contains("Never write a heading with nothing under it"),
             )
         }
@@ -74,7 +76,7 @@ class ModelPromptSetTest {
 
     @Test
     fun `summary preset asks for first person prose without lists`() {
-        val prompt = ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY)
+        val prompt = ModelPromptSet.Gemma4.structureNote(spec(NotePreset.SUMMARY))
 
         assertTrue(prompt.contains("the speaker's own voice"))
         assertTrue(prompt.contains("Keep the first person the speaker uses"))
@@ -88,9 +90,9 @@ class ModelPromptSetTest {
     fun `no preset prompt quotes a first-person example sentence`() {
         NotePreset.entries.forEach { preset ->
             val prompts = listOf(
-                ModelPromptSet.Gemma4.structureNote(preset),
-                ModelPromptSet.Gemma4.polishNote(preset, thinkingEnabled = false),
-                ModelPromptSet.Gemma4.polishNote(preset, thinkingEnabled = true),
+                ModelPromptSet.Gemma4.structureNote(spec(preset)),
+                ModelPromptSet.Gemma4.polishNote(spec(preset), thinkingEnabled = false),
+                ModelPromptSet.Gemma4.polishNote(spec(preset), thinkingEnabled = true),
             )
             prompts.flatMap { QUOTED_TEXT.findAll(it) }.map { it.groupValues[1] }.forEach { quoted ->
                 assertFalse(
@@ -106,7 +108,7 @@ class ModelPromptSetTest {
         promptSets.forEach { promptSet ->
             NotePreset.entries.forEach { preset ->
                 listOf(false, true).forEach { thinking ->
-                    val prompt = promptSet.polishNote(preset, thinking)
+                    val prompt = promptSet.polishNote(spec(preset), thinking)
                     assertTrue(prompt.contains("""{"title": "...", "overview": "..."}"""))
                     assertTrue(prompt.contains("at most 8 words"))
                     assertTrue(prompt.contains("Say each thing only once"))
@@ -120,9 +122,9 @@ class ModelPromptSetTest {
     @Test
     fun `polish prompt explains the note kind of its preset`() {
         NotePreset.entries.forEach { preset ->
-            val prompt = ModelPromptSet.Gemma4.polishNote(preset, thinkingEnabled = false)
-            assertTrue(prompt.contains(NotePresetPrompt.noteKind(preset)))
-            NotePresetPrompt.sections(preset).forEach { section ->
+            val prompt = ModelPromptSet.Gemma4.polishNote(spec(preset), thinkingEnabled = false)
+            assertTrue(prompt.contains(spec(preset).kind))
+            BuiltInNoteStyles.sections(preset).forEach { section ->
                 assertTrue(prompt.contains(section), "$preset polish prompt misses $section")
             }
         }
@@ -130,7 +132,7 @@ class ModelPromptSetTest {
 
     @Test
     fun `summary polish prompt keeps prose and forbids lists`() {
-        val prompt = ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY, thinkingEnabled = false)
+        val prompt = ModelPromptSet.Gemma4.polishNote(spec(NotePreset.SUMMARY), thinkingEnabled = false)
 
         assertTrue(prompt.contains("first person"))
         assertTrue(prompt.contains("Never use headings, bullet points"))
@@ -138,23 +140,23 @@ class ModelPromptSetTest {
 
     @Test
     fun `sectioned polish prompts allow adding a missing allowed heading`() {
-        NotePreset.entries.filter { NotePresetPrompt.sections(it).isNotEmpty() }.forEach { preset ->
+        NotePreset.entries.filter { BuiltInNoteStyles.sections(it).isNotEmpty() }.forEach { preset ->
             assertTrue(
-                ModelPromptSet.Gemma4.polishNote(preset, thinkingEnabled = false)
+                ModelPromptSet.Gemma4.polishNote(spec(preset), thinkingEnabled = false)
                     .contains("add that heading"),
                 "$preset polish prompt must allow adding a missing heading",
             )
         }
         assertFalse(
-            ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY, thinkingEnabled = false)
+            ModelPromptSet.Gemma4.polishNote(spec(NotePreset.SUMMARY), thinkingEnabled = false)
                 .contains("add that heading"),
         )
     }
 
     @Test
     fun `presets do not leak each others instructions`() {
-        val meeting = ModelPromptSet.Gemma4.structureNote(NotePreset.MEETING)
-        val legal = ModelPromptSet.Gemma4.structureNote(NotePreset.LEGAL)
+        val meeting = ModelPromptSet.Gemma4.structureNote(spec(NotePreset.MEETING))
+        val legal = ModelPromptSet.Gemma4.structureNote(spec(NotePreset.LEGAL))
 
         assertFalse(meeting.contains("## Advice given"))
         assertFalse(legal.contains("## Action items"))

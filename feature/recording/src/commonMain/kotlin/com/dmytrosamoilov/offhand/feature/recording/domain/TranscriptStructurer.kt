@@ -7,7 +7,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.AiResult
 import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.TokenEstimator
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsThinkingEnabledUseCase
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -18,6 +18,7 @@ data class StructuredNote(
     val transcript: String,
     val structuringTimeMs: Long,
     val hardwareBackend: HardwareBackend,
+    val style: NoteStyleRef,
 )
 
 class TranscriptStructurer(
@@ -25,12 +26,19 @@ class TranscriptStructurer(
     private val modelManager: ModelManager,
     private val isThinkingEnabled: IsThinkingEnabledUseCase,
     private val defaultNoteTitleProvider: DefaultNoteTitleProvider,
+    private val noteStyleResolver: NoteStyleResolver,
 ) {
 
     suspend fun structure(
         chunkTranscripts: List<String>,
-        preset: NotePreset,
+        style: NoteStyleRef,
         onProgress: (Float) -> Unit = {},
+    ): StructuredNote = structure(chunkTranscripts, noteStyleResolver.resolve(style), onProgress)
+
+    internal suspend fun structure(
+        chunkTranscripts: List<String>,
+        spec: NoteStyleSpec,
+        onProgress: (Float) -> Unit,
     ): StructuredNote {
         // Raw Whisper chunks are stored verbatim — only title and overview
         // round-trip through the model.
@@ -39,11 +47,11 @@ class TranscriptStructurer(
             "\"${chunk.replace('"', '\'')}\""
         }
         val promptSet = ModelPromptSet.forFamily(modelManager.model.family)
-        val prompt = promptSet.structureNote(preset)
+        val prompt = promptSet.structureNote(spec)
         val segments = splitIntoSegments(quoted, segmentTokenBudget(prompt))
         val pass = structureSegments(segments, prompt, onProgress)
-        val merged = mergedOverview(pass.notes, preset)
-        val polished = polish(merged, preset, promptSet)
+        val merged = mergedOverview(pass.notes, spec)
+        val polished = polish(merged, spec, promptSet)
         onProgress(1f)
         val overview = (polished?.overview ?: merged).ifBlank { transcript }
         return StructuredNote(
@@ -52,13 +60,14 @@ class TranscriptStructurer(
             transcript = transcript,
             structuringTimeMs = pass.timeMs + (polished?.processingTimeMs ?: 0),
             hardwareBackend = polished?.hardwareBackend ?: pass.backend,
+            style = spec.ref,
         )
     }
 
     fun joinChunks(chunkTranscripts: List<String>): String =
         chunkTranscripts.joinToString(PARAGRAPH_SEPARATOR)
 
-    fun transcriptOnly(chunkTranscripts: List<String>): StructuredNote {
+    fun transcriptOnly(chunkTranscripts: List<String>, style: NoteStyleRef): StructuredNote {
         val transcript = joinChunks(chunkTranscripts)
         return StructuredNote(
             title = fallbackTitle(transcript),
@@ -66,6 +75,7 @@ class TranscriptStructurer(
             transcript = transcript,
             structuringTimeMs = 0,
             hardwareBackend = HardwareBackend.CPU,
+            style = style,
         )
     }
 
@@ -101,11 +111,11 @@ class TranscriptStructurer(
     // segment passes must never degrade because the extra pass misbehaved.
     private suspend fun polish(
         merged: String,
-        preset: NotePreset,
+        spec: NoteStyleSpec,
         promptSet: ModelPromptSet,
     ): PolishedNote? {
         val thinkingEnabled = isThinkingEnabled()
-        val prompt = promptSet.polishNote(preset, thinkingEnabled)
+        val prompt = promptSet.polishNote(spec, thinkingEnabled)
         if (merged.isBlank() ||
             TokenEstimator.approxText(merged) > polishTokenBudget(prompt, thinkingEnabled)
         ) {
@@ -113,7 +123,7 @@ class TranscriptStructurer(
         }
         val result = polishSafely(prompt, merged.replace('"', '\'')) ?: return null
         val note = parseNoteJson(result.text)
-        val overview = normalizeOverview(listOf(note.overview), preset)
+        val overview = normalizeOverview(listOf(note.overview), spec)
         if (overview.length < merged.length * MIN_POLISH_RETAIN) return null
         return PolishedNote(note.title, overview, result.processingTimeMs, result.hardwareBackend)
     }
@@ -142,11 +152,11 @@ class TranscriptStructurer(
         ?: parts.firstNotNullOfOrNull { it.title.ifBlank { null } }
         ?: fallbackTitle(overview)
 
-    private fun mergedOverview(parts: List<ParsedNote>, preset: NotePreset): String =
-        normalizeOverview(parts.mapNotNull { it.overview.ifBlank { null } }, preset)
+    private fun mergedOverview(parts: List<ParsedNote>, spec: NoteStyleSpec): String =
+        normalizeOverview(parts.mapNotNull { it.overview.ifBlank { null } }, spec)
 
-    private fun normalizeOverview(overviews: List<String>, preset: NotePreset): String {
-        val sections = NotePresetPrompt.sections(preset)
+    private fun normalizeOverview(overviews: List<String>, spec: NoteStyleSpec): String {
+        val sections = spec.sections
         return if (sections.isEmpty()) {
             NoteProseFormatter.format(overviews)
         } else {

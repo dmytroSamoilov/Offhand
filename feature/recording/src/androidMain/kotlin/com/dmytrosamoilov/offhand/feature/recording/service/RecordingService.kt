@@ -12,7 +12,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.designsystem.R as DesignR
 import com.dmytrosamoilov.offhand.feature.recording.R
 import com.dmytrosamoilov.offhand.feature.recording.domain.NoteProcessingEvent
@@ -79,9 +79,9 @@ class RecordingService : Service(), KoinComponent {
     private fun startNoteRestructure(intent: Intent) {
         val noteId = intent.getLongExtra(EXTRA_RETRY_NOTE_ID, -1L)
         if (noteId <= 0) return
-        val preset = NotePreset.fromName(intent.getStringExtra(EXTRA_PRESET))
+        val style = NoteStyleRef.fromStorageKey(intent.getStringExtra(EXTRA_STYLE))
         startForeground(processingNotification(), processingForegroundType())
-        sessionManager.restructureNote(noteId, preset)
+        sessionManager.restructureNote(noteId, style)
         observeSession()
     }
 
@@ -311,8 +311,8 @@ class RecordingService : Service(), KoinComponent {
             "com.dmytrosamoilov.offhand.extra.RETRY_NOTE_ID"
         private const val EXTRA_RETRY_AUDIO_FILE =
             "com.dmytrosamoilov.offhand.extra.RETRY_AUDIO_FILE"
-        private const val EXTRA_PRESET =
-            "com.dmytrosamoilov.offhand.extra.NOTE_PRESET"
+        private const val EXTRA_STYLE =
+            "com.dmytrosamoilov.offhand.extra.NOTE_STYLE"
 
         fun start(context: Context) {
             context.startForegroundService(serviceIntent(context, ACTION_START))
@@ -330,11 +330,11 @@ class RecordingService : Service(), KoinComponent {
             )
         }
 
-        fun restructureNote(context: Context, noteId: Long, preset: NotePreset) {
+        fun restructureNote(context: Context, noteId: Long, style: NoteStyleRef) {
             context.startForegroundService(
                 serviceIntent(context, ACTION_RESTRUCTURE_NOTE)
                     .putExtra(EXTRA_RETRY_NOTE_ID, noteId)
-                    .putExtra(EXTRA_PRESET, preset.name),
+                    .putExtra(EXTRA_STYLE, style.storageKey()),
             )
         }
 

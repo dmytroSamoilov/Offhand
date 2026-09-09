@@ -1,13 +1,17 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
+import com.dmytrosamoilov.offhand.core.data.domain.Entitlements
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNotePresetUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveEntitlementsUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNotePresetUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUseCase
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -31,8 +35,10 @@ class SettingsViewModelTest {
 
     private val setDynamicColor: SetDynamicColorUseCase = mockk(relaxed = true)
     private val observeDynamicColor: ObserveDynamicColorUseCase = mockk()
-    private val setNotePreset: SetNotePresetUseCase = mockk(relaxed = true)
-    private val observeNotePreset: ObserveNotePresetUseCase = mockk()
+    private val setNoteStyle: SetNoteStyleUseCase = mockk(relaxed = true)
+    private val observeNoteStyle: ObserveNoteStyleUseCase = mockk()
+    private val observeCustomNoteStyles: ObserveCustomNoteStylesUseCase = mockk()
+    private val observeEntitlements: ObserveEntitlementsUseCase = mockk()
     private val setAppLockEnabled: SetAppLockEnabledUseCase = mockk(relaxed = true)
     private val observeAppLockEnabled: ObserveAppLockEnabledUseCase = mockk()
     private val appLockManager: AppLockManager = mockk()
@@ -41,7 +47,9 @@ class SettingsViewModelTest {
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         every { observeDynamicColor() } returns flowOf(true)
-        every { observeNotePreset() } returns flowOf(NotePreset.MEETING)
+        every { observeNoteStyle() } returns flowOf(NoteStyleRef.BuiltIn(NotePreset.MEETING))
+        every { observeCustomNoteStyles() } returns flowOf(emptyList())
+        every { observeEntitlements() } returns flowOf(Entitlements(customStylesUnlocked = true))
         every { observeAppLockEnabled() } returns flowOf(true)
         every { appLockManager.isDeviceSecure } returns true
     }
@@ -54,8 +62,10 @@ class SettingsViewModelTest {
     private fun viewModel() = SettingsViewModel(
         observeDynamicColor = observeDynamicColor,
         setDynamicColor = setDynamicColor,
-        observeNotePreset = observeNotePreset,
-        setNotePreset = setNotePreset,
+        observeNoteStyle = observeNoteStyle,
+        setNoteStyle = setNoteStyle,
+        observeCustomNoteStyles = observeCustomNoteStyles,
+        observeEntitlements = observeEntitlements,
         observeAppLockEnabled = observeAppLockEnabled,
         setAppLockEnabled = setAppLockEnabled,
         appLockManager = appLockManager,
@@ -66,7 +76,7 @@ class SettingsViewModelTest {
         val viewModel = viewModel()
         dispatcher.scheduler.advanceUntilIdle()
 
-        assertEquals(NotePreset.MEETING, viewModel.uiState.value.notePreset)
+        assertEquals(NoteStyleRef.BuiltIn(NotePreset.MEETING), viewModel.uiState.value.noteStyle)
         assertTrue(viewModel.uiState.value.isDynamicColorEnabled)
     }
 
@@ -75,10 +85,10 @@ class SettingsViewModelTest {
         val viewModel = viewModel()
         dispatcher.scheduler.advanceUntilIdle()
 
-        viewModel.onNotePresetSelected(NotePreset.VISIT)
+        viewModel.onNoteStyleSelected(NoteStyleRef.BuiltIn(NotePreset.VISIT))
         dispatcher.scheduler.advanceUntilIdle()
 
-        coVerify { setNotePreset(NotePreset.VISIT) }
+        coVerify { setNoteStyle(NoteStyleRef.BuiltIn(NotePreset.VISIT)) }
     }
 
     @Test

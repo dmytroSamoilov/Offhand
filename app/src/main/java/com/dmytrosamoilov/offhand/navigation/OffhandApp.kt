@@ -19,10 +19,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.dmytrosamoilov.offhand.feature.backup.presentation.BackupScreen
 import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesScreen
 import com.dmytrosamoilov.offhand.feature.recording.presentation.RecordingSheetHost
 import com.dmytrosamoilov.offhand.feature.settings.presentation.AboutSupportScreen
+import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStyleEditorScreen
+import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStylesScreen
 import com.dmytrosamoilov.offhand.feature.settings.presentation.SettingsScreen
 
 @Composable
@@ -76,6 +79,20 @@ fun OffhandApp(
                     SettingsScreen(
                         onAboutSupportClick = { navController.navigate(AboutSupportRoute) },
                         onBackupClick = { navController.navigate(BackupRoute) },
+                        onNoteStylesClick = { navController.navigate(NoteStylesRoute) },
+                    )
+                }
+                composable<NoteStylesRoute> {
+                    NoteStylesScreen(
+                        onBack = { navController.navigateUp() },
+                        onCreateStyle = { navController.navigate(NoteStyleEditorRoute(styleId = 0L)) },
+                        onEditStyle = { styleId -> navController.navigate(NoteStyleEditorRoute(styleId)) },
+                    )
+                }
+                composable<NoteStyleEditorRoute> { entry ->
+                    NoteStyleEditorScreen(
+                        styleId = entry.toRoute<NoteStyleEditorRoute>().styleId,
+                        onBack = { navController.navigateUp() },
                     )
                 }
                 composable<AboutSupportRoute> {

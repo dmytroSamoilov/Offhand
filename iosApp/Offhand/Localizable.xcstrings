@@ -2421,6 +2421,46 @@
         }
       }
     },
+    "Include note styles" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notizstile einschließen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir estilos de nota"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "नोट शैलियाँ शामिल करें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir estilos de nota"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включить стили заметок"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Додати стилі нотаток"
+          }
+        }
+      }
+    },
     "It will keep processing on this device. You can close this." : {
       "localizations" : {
         "de" : {

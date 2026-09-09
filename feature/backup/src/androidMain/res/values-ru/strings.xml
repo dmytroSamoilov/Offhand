@@ -10,6 +10,8 @@
     <string name="backup_passphrase_mismatch">Парольные фразы не совпадают.</string>
     <string name="backup_include_audio_label">Включить аудиозаписи</string>
     <string name="backup_include_audio_description">С записями файл становится намного больше.</string>
+    <string name="backup_include_styles_label">Включить стили заметок</string>
+    <string name="backup_include_styles_description">Ваши стили заметок сохраняются вместе с заметками.</string>
     <string name="backup_restore_title">Восстановить</string>
     <string name="backup_restore_body">Добавьте заметки и папки из файла резервной копии. Заметки на этом телефоне сохранятся, дубликаты будут пропущены.</string>
     <string name="backup_restore_button">Выбрать файл копии</string>

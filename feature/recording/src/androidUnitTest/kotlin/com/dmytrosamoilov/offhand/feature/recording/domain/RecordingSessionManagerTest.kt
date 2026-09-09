@@ -11,6 +11,7 @@ import com.dmytrosamoilov.offhand.core.audio.ChunkBoundaryReason
 import com.dmytrosamoilov.offhand.core.audio.VadSnapshot
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.security.AudioOutputStream
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
@@ -18,7 +19,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteU
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateRecordingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
-import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNotePresetUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsThinkingEnabledUseCase
@@ -91,8 +92,8 @@ class RecordingSessionManagerTest {
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase = mockk {
         coEvery { this@mockk.invoke() } returns true
     }
-    private val getNotePreset: GetNotePresetUseCase = mockk {
-        coEvery { this@mockk.invoke() } returns NotePreset.SUMMARY
+    private val getNoteStyle: GetNoteStyleUseCase = mockk {
+        coEvery { this@mockk.invoke() } returns NoteStyleRef.BuiltIn(NotePreset.SUMMARY)
     }
     private val getNote: GetNoteUseCase = mockk()
     private val audioStore: EncryptedAudioStore = mockk {
@@ -118,7 +119,7 @@ class RecordingSessionManagerTest {
         structuringTimeMs = null,
         hardwareBackend = null,
         status = NoteStatus.PROCESSING,
-        preset = NotePreset.SUMMARY,
+        style = NoteStyleRef.BuiltIn(NotePreset.SUMMARY),
     )
 
     private fun sttResult(text: String) = TranscriptionResult(
@@ -128,7 +129,7 @@ class RecordingSessionManagerTest {
 
     private fun stubPolish(json: String) {
         coEvery {
-            aiBackend.processText(ModelPromptSet.Gemma4.polishNote(NotePreset.SUMMARY, thinkingEnabled = false), any())
+            aiBackend.processText(ModelPromptSet.Gemma4.polishNote(BuiltInNoteStyles.spec(NotePreset.SUMMARY), thinkingEnabled = false), any())
         } returns AiResult(
             text = json,
             processingTimeMs = 0,
@@ -150,7 +151,7 @@ class RecordingSessionManagerTest {
         recorder = recorder,
         speechToText = speechToText,
         transcriptStructurer =
-            TranscriptStructurer(aiBackend, testModelManager(), isThinkingEnabled, defaultNoteTitleProvider),
+            TranscriptStructurer(aiBackend, testModelManager(), isThinkingEnabled, defaultNoteTitleProvider, NoteStyleResolver(mockk())),
         createRecordingNote = createRecordingNote,
         markNoteRecorded = markNoteRecorded,
         discardNote = discardNote,
@@ -160,7 +161,7 @@ class RecordingSessionManagerTest {
         registerSavedRecording = registerSavedRecording,
         saveNoteTranscript = saveNoteTranscript,
         isAiCoreDownloaded = isAiCoreDownloaded,
-        getNotePreset = getNotePreset,
+        getNoteStyle = getNoteStyle,
         getNote = getNote,
         audioStore = audioStore,
         audioBackup = audioBackup,
@@ -176,9 +177,9 @@ class RecordingSessionManagerTest {
             sttResult("first part of the meeting"),
             sttResult("second part of the meeting"),
         )
-        coEvery { createRecordingNote("note-1.pcm.enc", NotePreset.SUMMARY) } returns 42L
+        coEvery { createRecordingNote("note-1.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.SUMMARY)) } returns 42L
         coEvery { markNoteRecorded(42L, any(), "note-1.pcm.enc") } returns storedNote(42L)
-        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns AiResult(
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(BuiltInNoteStyles.spec(NotePreset.SUMMARY)), any()) } returns AiResult(
             text = """{"title": "Meeting notes", "overview": "- first\n- second"}""",
             processingTimeMs = 300,
             inputTokens = 20,
@@ -216,7 +217,7 @@ class RecordingSessionManagerTest {
                 transcriptionTimeMs = 400,
                 structuringTimeMs = 300,
                 hardwareBackend = "CPU",
-                preset = NotePreset.SUMMARY,
+                style = NoteStyleRef.BuiltIn(NotePreset.SUMMARY),
             )
         }
         coroutineContext.cancelChildren()
@@ -231,7 +232,7 @@ class RecordingSessionManagerTest {
             sttResult("only good chunk") andThenThrows IllegalStateException("engine hiccup")
         coEvery { createRecordingNote(any(), any()) } returns 7L
         coEvery { markNoteRecorded(7L, any(), any()) } returns storedNote(7L)
-        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns AiResult(
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(BuiltInNoteStyles.spec(NotePreset.SUMMARY)), any()) } returns AiResult(
             text = """{"title": "Partial notes", "overview": "- good chunk content"}""",
             processingTimeMs = 100,
             inputTokens = 5,
@@ -255,7 +256,7 @@ class RecordingSessionManagerTest {
                 transcriptionTimeMs = 200,
                 structuringTimeMs = 100,
                 hardwareBackend = "CPU",
-                preset = NotePreset.SUMMARY,
+                style = NoteStyleRef.BuiltIn(NotePreset.SUMMARY),
             )
         }
     }
@@ -292,7 +293,7 @@ class RecordingSessionManagerTest {
         every { audioStore.sizeOf("note-7.pcm.enc") } returns 64_000L
         stubBackupRead(64_000)
         coEvery { speechToText.transcribe(any()) } returns sttResult("recovered transcript")
-        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns AiResult(
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(BuiltInNoteStyles.spec(NotePreset.SUMMARY)), any()) } returns AiResult(
             text = """{"title": "Recovered", "overview": "- body"}""",
             processingTimeMs = 100,
             inputTokens = 5,
@@ -316,7 +317,7 @@ class RecordingSessionManagerTest {
                 transcriptionTimeMs = 200,
                 structuringTimeMs = 100,
                 hardwareBackend = "CPU",
-                preset = NotePreset.SUMMARY,
+                style = NoteStyleRef.BuiltIn(NotePreset.SUMMARY),
             )
         }
         verify { speechToText.release() }
@@ -330,7 +331,7 @@ class RecordingSessionManagerTest {
         justRun { recorder.resetVad() }
         justRun { recorder.stop() }
         justRun { audioStore.delete("note-1.pcm.enc") }
-        coEvery { createRecordingNote("note-1.pcm.enc", NotePreset.SUMMARY) } returns 5L
+        coEvery { createRecordingNote("note-1.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.SUMMARY)) } returns 5L
 
         val manager = manager()
         manager.start()
@@ -404,7 +405,7 @@ class RecordingSessionManagerTest {
                 transcriptionTimeMs = any(),
                 structuringTimeMs = any(),
                 hardwareBackend = any(),
-                preset = any(),
+                style = any(),
             )
         }
     }
@@ -440,7 +441,7 @@ class RecordingSessionManagerTest {
                 transcriptionTimeMs = 200,
                 structuringTimeMs = 0,
                 hardwareBackend = "CPU",
-                preset = NotePreset.SUMMARY,
+                style = NoteStyleRef.BuiltIn(NotePreset.SUMMARY),
             )
         }
         coroutineContext.cancelChildren()
@@ -453,7 +454,7 @@ class RecordingSessionManagerTest {
         every { audioStore.sizeOf("note-7.pcm.enc") } returns 200_000L
         stubBackupRead(100_000)
         coEvery { speechToText.transcribe(any()) } returns sttResult("recovered transcript")
-        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(NotePreset.SUMMARY), any()) } returns AiResult(
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(BuiltInNoteStyles.spec(NotePreset.SUMMARY)), any()) } returns AiResult(
             text = """{"title": "Recovered", "overview": "- body"}""",
             processingTimeMs = 100,
             inputTokens = 5,
@@ -477,7 +478,7 @@ class RecordingSessionManagerTest {
                 transcriptionTimeMs = 200,
                 structuringTimeMs = 100,
                 hardwareBackend = "CPU",
-                preset = NotePreset.SUMMARY,
+                style = NoteStyleRef.BuiltIn(NotePreset.SUMMARY),
             )
         }
     }

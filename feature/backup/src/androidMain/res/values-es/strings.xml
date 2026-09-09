@@ -10,6 +10,8 @@
     <string name="backup_passphrase_mismatch">Las contraseñas no coinciden.</string>
     <string name="backup_include_audio_label">Incluir grabaciones de audio</string>
     <string name="backup_include_audio_description">Las grabaciones hacen el archivo mucho más grande.</string>
+    <string name="backup_include_styles_label">Incluir estilos de nota</string>
+    <string name="backup_include_styles_description">Tus estilos de nota propios viajan con las notas.</string>
     <string name="backup_restore_title">Restaurar</string>
     <string name="backup_restore_body">Añade notas y carpetas desde un archivo de copia. Las notas que ya están en este teléfono se conservan y los duplicados se omiten.</string>
     <string name="backup_restore_button">Elegir un archivo de copia</string>

@@ -7,6 +7,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUs
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
@@ -30,6 +31,7 @@ val featureNotesModule = module {
     factoryOf(::CreateFolderUseCase)
     factoryOf(::DeleteFolderUseCase)
     factoryOf(::MoveNoteToFolderUseCase)
+    factoryOf(::ObserveCustomNoteStylesUseCase)
     factoryOf(::ObserveFoldersUseCase)
     factoryOf(::RenameFolderUseCase)
     factoryOf(::DeleteNoteUseCase)

@@ -1,10 +1,16 @@
 package com.dmytrosamoilov.offhand.feature.backup.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
+import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStylesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleSection
+import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.security.AndroidBackupCrypto
 import com.dmytrosamoilov.offhand.core.security.AudioInputStream
@@ -38,10 +44,20 @@ class BackupRoundTripTest {
 
     private val sourceAudio = mapOf("note-a.pcm.enc" to ByteArray(70_000) { (it % 251).toByte() })
     private val sourceFolders = listOf(Folder(id = 10, name = "Work", createdAtEpochMs = 1))
+    private val sourceStyles = listOf(
+        CustomNoteStyle(
+            id = 20,
+            name = "Sales debrief",
+            noteKind = "a sales call debrief",
+            language = NoteStyleLanguage.ENGLISH,
+            sections = listOf(NoteStyleSection("Customer", "who they are", SectionFormat.SENTENCES)),
+            createdAtEpochMs = 2,
+        ),
+    )
     private val sourceNotes = listOf(
         note(id = 1, title = "Budget", createdAt = 100, audio = "note-a.pcm.enc", folderId = 10),
         note(id = 2, title = "Draft", createdAt = 200, audio = null, folderId = null, status = NoteStatus.PROCESSING),
-        note(id = 3, title = "Standup", createdAt = 300, audio = null, folderId = null),
+        note(id = 3, title = "Standup", createdAt = 300, audio = null, folderId = null, style = NoteStyleRef.Custom(20)),
     )
 
     @Test
@@ -53,7 +69,7 @@ class BackupRoundTripTest {
         assertEquals(70_000L, summary.audioBytes)
 
         val target = Target()
-        val restored = RestoreBackupUseCase(target.notes, target.folders, target.audioStore, crypto)
+        val restored = RestoreBackupUseCase(target.notes, target.folders, target.styles, target.audioStore, crypto)
             .invoke(bufferFile(archive), passphrase)
 
         assertEquals(2, restored.notesRestored)
@@ -61,7 +77,37 @@ class BackupRoundTripTest {
         val budget = target.saved.values.first { it.title == "Budget" }
         assertEquals(target.createdFolderIds.single(), budget.folderId)
         assertArrayEquals(sourceAudio.getValue("note-a.pcm.enc"), target.audioFiles.getValue(budget.audioFileName!!))
-        assertNull(target.saved.values.first { it.title == "Standup" }.audioFileName)
+        val standup = target.saved.values.first { it.title == "Standup" }
+        assertNull(standup.audioFileName)
+        assertEquals(NoteStyleRef.Custom(target.createdStyleIds.single()), standup.style)
+        assertEquals("Sales debrief", target.styleList.single().name)
+        assertEquals(NoteStyleLanguage.ENGLISH, target.styleList.single().language)
+    }
+
+    @Test
+    fun `styles can be left out and their notes fall back to the built-in style`() = runTest {
+        val archive = Buffer()
+        createBackup().invoke(bufferFile(archive), passphrase, includeAudio = false, includeStyles = false)
+        val target = Target()
+
+        RestoreBackupUseCase(target.notes, target.folders, target.styles, target.audioStore, crypto)
+            .invoke(bufferFile(archive), passphrase)
+
+        assertEquals(0, target.styleList.size)
+        assertEquals(NoteStyleRef.DEFAULT, target.saved.values.first { it.title == "Standup" }.style)
+    }
+
+    @Test
+    fun `restore reuses a custom style with the same name`() = runTest {
+        val archive = Buffer()
+        createBackup().invoke(bufferFile(archive), passphrase, includeAudio = false)
+        val target = Target(existingStyles = listOf(sourceStyles.single().copy(id = 99, name = "sales DEBRIEF")))
+
+        RestoreBackupUseCase(target.notes, target.folders, target.styles, target.audioStore, crypto)
+            .invoke(bufferFile(archive), passphrase)
+
+        assertEquals(0, target.createdStyleIds.size)
+        assertEquals(NoteStyleRef.Custom(99), target.saved.values.first { it.title == "Standup" }.style)
     }
 
     @Test
@@ -73,7 +119,7 @@ class BackupRoundTripTest {
             existingFolders = listOf(Folder(id = 77, name = "work", createdAtEpochMs = 5)),
             existingNotes = listOf(note(id = 50, title = "Budget", createdAt = 100, audio = null, folderId = null)),
         )
-        val restored = RestoreBackupUseCase(target.notes, target.folders, target.audioStore, crypto)
+        val restored = RestoreBackupUseCase(target.notes, target.folders, target.styles, target.audioStore, crypto)
             .invoke(bufferFile(archive), passphrase)
 
         assertEquals(1, restored.notesRestored)
@@ -90,7 +136,7 @@ class BackupRoundTripTest {
 
         assertThrows(BackupException.WrongPassphrase::class.java) {
             runBlocking {
-                RestoreBackupUseCase(target.notes, target.folders, target.audioStore, crypto)
+                RestoreBackupUseCase(target.notes, target.folders, target.styles, target.audioStore, crypto)
                     .invoke(bufferFile(archive), "nope".encodeToByteArray())
             }
         }
@@ -100,6 +146,7 @@ class BackupRoundTripTest {
     private fun createBackup() = CreateBackupUseCase(
         notesRepository = mockk { every { observeNotes() } returns MutableStateFlow(sourceNotes) },
         foldersRepository = mockk { every { observeFolders() } returns MutableStateFlow(sourceFolders) },
+        customNoteStylesRepository = mockk { every { observeStyles() } returns MutableStateFlow(sourceStyles) },
         audioStore = mockk {
             every { pcmSizeOf(any()) } answers { sourceAudio.getValue(firstArg()).size.toLong() }
             every { openForRead(any()) } answers { AudioInputStream(ByteArrayInputStream(sourceAudio.getValue(firstArg()))) }
@@ -116,9 +163,12 @@ class BackupRoundTripTest {
     private class Target(
         existingFolders: List<Folder> = emptyList(),
         existingNotes: List<Note> = emptyList(),
+        existingStyles: List<CustomNoteStyle> = emptyList(),
     ) {
         val saved = linkedMapOf<Long, Note>().apply { existingNotes.forEach { put(it.id, it) } }
         val createdFolderIds = mutableListOf<Long>()
+        val createdStyleIds = mutableListOf<Long>()
+        val styleList = existingStyles.toMutableList()
         val audioFiles = mutableMapOf<String, ByteArray>()
         private val folderList = existingFolders.toMutableList()
         private var nextId = 1000L
@@ -140,6 +190,16 @@ class BackupRoundTripTest {
                 val id = nextId++
                 folderList += Folder(id, firstArg(), 0)
                 createdFolderIds += id
+                id
+            }
+        }
+
+        val styles: CustomNoteStylesRepository = mockk {
+            every { observeStyles() } answers { MutableStateFlow(styleList.toList()) }
+            coEvery { createStyle(any()) } answers {
+                val id = nextId++
+                styleList += firstArg<CustomNoteStyle>().copy(id = id)
+                createdStyleIds += id
                 id
             }
         }
@@ -172,6 +232,7 @@ class BackupRoundTripTest {
         audio: String?,
         folderId: Long?,
         status: NoteStatus = NoteStatus.READY,
+        style: NoteStyleRef = NoteStyleRef.DEFAULT,
     ) = Note(
         id = id,
         title = title,
@@ -184,6 +245,7 @@ class BackupRoundTripTest {
         audioFileName = audio,
         durationMs = 5_000,
         status = status,
+        style = style,
         folderId = folderId,
     )
 }

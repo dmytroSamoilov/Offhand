@@ -6,6 +6,7 @@ struct BackupView: View {
     private let viewModel = AppViewModels.backup
     @State private var state = BackupUiState(
         includeAudio: true,
+        includeStyles: true,
         passphrase: "",
         passphraseConfirmation: "",
         passphraseError: nil,
@@ -198,6 +199,10 @@ private struct BackupSheet: View {
                 Toggle(String(localized: "Include audio recordings"), isOn: Binding(
                     get: { state.includeAudio },
                     set: { viewModel.onIncludeAudioChanged(enabled: $0) }
+                ))
+                Toggle(String(localized: "Include note styles"), isOn: Binding(
+                    get: { state.includeStyles },
+                    set: { viewModel.onIncludeStylesChanged(enabled: $0) }
                 ))
             } footer: {
                 Text(String(localized: "Recordings make the file much larger."))

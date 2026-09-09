@@ -5,6 +5,7 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
 import com.dmytrosamoilov.offhand.core.common.DurationFormatter
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
+import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlaybackState
@@ -100,7 +101,7 @@ internal fun Note.toDetailUi(
     hasAudio = audioFileName != null,
     metrics = toMetricsUi(),
     status = status.toUi(),
-    preset = preset,
+    style = style,
     folderId = folderId,
     folderName = folderId?.let(folderNames::get),
 )
@@ -160,3 +161,9 @@ private fun Note.toMetricsUi(): NoteMetricsUi? {
         hardwareBackend = backend,
     )
 }
+
+internal fun CustomNoteStyle.toOptionUi(): NoteStyleOptionUi = NoteStyleOptionUi(
+    id = id,
+    name = name,
+    description = sections.joinToString(separator = ", ") { it.heading },
+)

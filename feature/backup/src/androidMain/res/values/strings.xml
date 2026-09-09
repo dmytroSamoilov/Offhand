@@ -10,6 +10,8 @@
     <string name="backup_passphrase_mismatch">The passphrases do not match.</string>
     <string name="backup_include_audio_label">Include audio recordings</string>
     <string name="backup_include_audio_description">Recordings make the file much larger.</string>
+    <string name="backup_include_styles_label">Include note styles</string>
+    <string name="backup_include_styles_description">Your custom note styles travel with the notes.</string>
     <string name="backup_restore_title">Restore</string>
     <string name="backup_restore_body">Add notes and folders from a backup file. Notes already on this phone are kept and duplicates are skipped.</string>
     <string name="backup_restore_button">Choose a backup file</string>

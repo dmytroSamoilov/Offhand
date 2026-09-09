@@ -2,7 +2,8 @@ package com.dmytrosamoilov.offhand.feature.backup.domain.archive
 
 internal object BackupFormat {
     val MAGIC: ByteArray = "OFHB".encodeToByteArray()
-    const val VERSION = 1
+    const val VERSION = 2
+    const val MIN_SUPPORTED_VERSION = 1
     const val SALT_BYTES = 16
     const val NONCE_PREFIX_BYTES = 8
     const val NONCE_BYTES = 12
@@ -20,7 +21,8 @@ internal enum class RecordKind(val code: Byte) {
     MANIFEST(1),
     FOLDERS(2),
     NOTES(3),
-    AUDIO(4);
+    AUDIO(4),
+    STYLES(5);
 
     companion object {
         fun fromCode(code: Byte): RecordKind? = entries.firstOrNull { it.code == code }

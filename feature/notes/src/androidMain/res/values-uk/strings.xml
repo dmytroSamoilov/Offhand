@@ -52,6 +52,7 @@
     <string name="notes_preset_description">Змінити стиль нотатки</string>
     <string name="notes_preset_sheet_title">Переписати цю нотатку як</string>
     <string name="notes_preset_sheet_body">Запис зберігається. Назву й огляд буде написано заново за розшифровкою у вибраному стилі.</string>
+    <string name="notes_style_sheet_custom_header">Ваші стилі</string>
     <string name="notes_copy_overview_description">Скопіювати огляд</string>
     <string name="notes_copy_transcript_description">Скопіювати розшифровку</string>
     <string name="notes_copied">Скопійовано</string>

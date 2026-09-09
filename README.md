@@ -118,6 +118,8 @@ and cover:
 6. Folders: create, move the note in (menu and leading swipe), filter by folder, rename, delete
 7. Returning from a note leaves the search field unfocused (Android)
 8. Backup and restore through the system file picker, including the passphrase prompt (Android only; the iOS picker is not scriptable)
+9. Custom note styles: create one with two sections, preview it on the sample, pick it as the default, rewrite a note with it, delete it (Android only until the iOS screens exist)
+10. Building a note style from a plain-text description; the fake model answers the drafting prompt with a canned two-section style (Android only)
 
 The flows assume a phone-sized screen; on tablets and unfolded foldables the app switches
 to its two-pane layout and the steps no longer line up.

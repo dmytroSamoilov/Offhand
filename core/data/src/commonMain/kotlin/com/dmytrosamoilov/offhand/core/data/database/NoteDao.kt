@@ -32,4 +32,7 @@ internal interface NoteDao {
 
     @Query("UPDATE notes SET folderId = NULL WHERE folderId = :folderId")
     suspend fun clearFolder(folderId: Long)
+
+    @Query("UPDATE notes SET customStyleId = NULL WHERE customStyleId = :styleId")
+    suspend fun clearCustomStyle(styleId: Long)
 }

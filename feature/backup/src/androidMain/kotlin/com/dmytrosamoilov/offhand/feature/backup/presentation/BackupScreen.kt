@@ -216,6 +216,7 @@ private fun OptionsStep(state: BackupUiState, viewModel: BackupViewModel, onSave
         singleLine = true,
     )
     IncludeAudioRow(checked = state.includeAudio, onCheckedChange = viewModel::onIncludeAudioChanged)
+    IncludeStylesRow(checked = state.includeStyles, onCheckedChange = viewModel::onIncludeStylesChanged)
     Button(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
         Text(text = stringResource(R.string.backup_save_button))
     }
@@ -283,14 +284,39 @@ private fun PassphraseErrorUi.message(): String = when (this) {
 
 @Composable
 private fun IncludeAudioRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    OptionSwitchRow(
+        label = stringResource(R.string.backup_include_audio_label),
+        description = stringResource(R.string.backup_include_audio_description),
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+    )
+}
+
+@Composable
+private fun IncludeStylesRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    OptionSwitchRow(
+        label = stringResource(R.string.backup_include_styles_label),
+        description = stringResource(R.string.backup_include_styles_description),
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+    )
+}
+
+@Composable
+private fun OptionSwitchRow(
+    label: String,
+    description: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = stringResource(R.string.backup_include_audio_label), style = MaterialTheme.typography.bodyLarge)
+            Text(text = label, style = MaterialTheme.typography.bodyLarge)
             Text(
-                text = stringResource(R.string.backup_include_audio_description),
+                text = description,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

@@ -30,7 +30,9 @@ internal class BackupArchive(private val crypto: BackupCrypto) {
         val magic = input.readByteArray(BackupFormat.MAGIC.size.toLong())
         if (!magic.contentEquals(BackupFormat.MAGIC)) throw BackupException.Corrupt("Not an Offhand backup")
         val version = input.readByte().toInt()
-        if (version != BackupFormat.VERSION) throw BackupException.UnsupportedVersion(version)
+        if (version !in BackupFormat.MIN_SUPPORTED_VERSION..BackupFormat.VERSION) {
+            throw BackupException.UnsupportedVersion(version)
+        }
         val iterations = input.readInt()
         if (iterations <= 0) throw BackupException.Corrupt("Invalid key derivation parameters")
         val salt = input.readByteArray(BackupFormat.SALT_BYTES.toLong())

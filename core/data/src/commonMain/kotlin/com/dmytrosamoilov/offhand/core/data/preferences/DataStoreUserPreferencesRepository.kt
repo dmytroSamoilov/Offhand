@@ -8,7 +8,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
@@ -41,7 +41,7 @@ internal class DataStoreUserPreferencesRepository(
                     lastAttemptAtMs = preferences[KEY_LAST_REVIEW_ATTEMPT_AT_MS]
                         ?: preferences[KEY_LEGACY_LAST_REVIEW_REQUEST_AT_MS] ?: 0L,
                 ),
-                notePreset = NotePreset.fromName(preferences[KEY_NOTE_PRESET]),
+                noteStyle = NoteStyleRef.fromStorageKey(preferences[KEY_NOTE_STYLE]),
             )
         }
 
@@ -65,8 +65,8 @@ internal class DataStoreUserPreferencesRepository(
         dataStore.edit { it[KEY_DEVELOPER_OPTIONS] = enabled }
     }
 
-    override suspend fun setNotePreset(preset: NotePreset) {
-        dataStore.edit { it[KEY_NOTE_PRESET] = preset.name }
+    override suspend fun setNoteStyle(style: NoteStyleRef) {
+        dataStore.edit { it[KEY_NOTE_STYLE] = style.storageKey() }
     }
 
     override suspend fun incrementSavedRecordingsCount() {
@@ -95,6 +95,6 @@ internal class DataStoreUserPreferencesRepository(
         val KEY_REVIEW_BURST_ATTEMPTS = intPreferencesKey("review_burst_attempts")
         val KEY_LAST_REVIEW_ATTEMPT_AT_MS = longPreferencesKey("last_review_attempt_at_ms")
         val KEY_LEGACY_LAST_REVIEW_REQUEST_AT_MS = longPreferencesKey("last_review_request_at_ms")
-        val KEY_NOTE_PRESET = stringPreferencesKey("note_preset")
+        val KEY_NOTE_STYLE = stringPreferencesKey("note_preset")
     }
 }
