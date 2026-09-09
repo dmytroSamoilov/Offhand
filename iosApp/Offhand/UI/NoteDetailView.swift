@@ -113,7 +113,7 @@ struct NoteDetailView: View {
             }
         }
         .sheet(isPresented: presetBinding) {
-            NoteStyleSheet(viewModel: viewModel, current: detail.preset)
+            NoteStyleSheet(viewModel: viewModel, current: detail.style, customStyles: state.customStyles)
                 .presentationDetents([.medium, .large])
         }
 
@@ -430,7 +430,7 @@ private struct CopySectionButton: View {
     }
 }
 
-private struct MarkdownBlocks: View {
+struct MarkdownBlocks: View {
     let raw: String
 
     var body: some View {
@@ -539,75 +539,39 @@ struct MoveToFolderSheet: View {
 
 private struct NoteStyleSheet: View {
     let viewModel: NotesViewModel
-    let current: NotePreset
-
-    private struct StyleOption {
-        let preset: NotePreset
-        let label: String
-        let details: String
-        let symbol: String
-    }
-
-    private var options: [StyleOption] {
-        [
-            StyleOption(
-                preset: .summary,
-                label: String(localized: "Summary"),
-                details: String(localized: "Main topics, key decisions, action items and a short overview."),
-                symbol: "doc.plaintext"
-            ),
-            StyleOption(
-                preset: .meeting,
-                label: String(localized: "Meeting notes"),
-                details: String(localized: "Discussion, decisions, action items and open questions."),
-                symbol: "person.3"
-            ),
-            StyleOption(
-                preset: .visit,
-                label: String(localized: "Visit report"),
-                details: String(localized: "Who the visit was about, observations, what was done and follow-ups."),
-                symbol: "list.clipboard"
-            ),
-            StyleOption(
-                preset: .legal,
-                label: String(localized: "Legal note"),
-                details: String(localized: "Matter, facts stated, instructions, advice given and next steps."),
-                symbol: "building.columns"
-            ),
-        ]
-    }
+    let current: NoteStyleRef
+    let customStyles: [NoteStyleOptionUi]
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    ForEach(options, id: \.symbol) { option in
-                        HStack(spacing: 12) {
-                            Image(systemName: option.symbol)
-                                .foregroundStyle(Brand.primary)
-                                .frame(width: 28)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(option.label)
-                                    .font(.body)
-                                    .foregroundStyle(Color.primary)
-                                Text(option.details)
-                                    .font(.caption)
-                                    .foregroundStyle(Color.secondary)
-                            }
-                            Spacer()
-                            if option.preset == current {
-                                Image(systemName: "checkmark")
-                                    .fontWeight(.semibold)
-                                    .foregroundStyle(Brand.primary)
-                            }
-                        }
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            viewModel.onPresetSelected(preset: option.preset)
+                    ForEach([NotePreset.summary, .meeting, .visit, .legal], id: \.self) { preset in
+                        StyleOptionRow(
+                            title: NoteStyleLabels.label(for: preset),
+                            details: NoteStyleLabels.details(for: preset),
+                            symbol: NoteStyleLabels.symbol(for: preset),
+                            isSelected: current.builtInPreset == preset
+                        ) {
+                            viewModel.onStyleSelected(style: NoteStyleRefBuiltIn(preset: preset))
                         }
                     }
                 } footer: {
                     Text(String(localized: "The recording is kept. The title and overview are written again from the transcript in the style you pick."))
+                }
+                if !customStyles.isEmpty {
+                    Section(String(localized: "Your styles")) {
+                        ForEach(customStyles, id: \.id) { style in
+                            StyleOptionRow(
+                                title: style.name,
+                                details: style.description_,
+                                symbol: NoteStyleLabels.customSymbol,
+                                isSelected: current.customId == style.id
+                            ) {
+                                viewModel.onStyleSelected(style: NoteStyleRefCustom(id: style.id))
+                            }
+                        }
+                    }
                 }
             }
             .navigationTitle(String(localized: "Rewrite this note as"))

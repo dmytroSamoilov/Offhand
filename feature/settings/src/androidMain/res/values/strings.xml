@@ -27,7 +27,7 @@
     <string name="settings_delete_model_dialog_confirm">Delete</string>
     <string name="settings_delete_model_dialog_cancel">Cancel</string>
 
-    <string name="settings_note_style_title">Note style</string>
+    <string name="settings_note_style_title">Default note style</string>
     <string name="settings_note_style_note">Applies to new recordings. You can restyle an existing note from the note screen.</string>
     <string name="settings_note_styles_manage">Manage note styles</string>
     <string name="settings_note_styles_manage_subtitle">Create your own headings and format</string>

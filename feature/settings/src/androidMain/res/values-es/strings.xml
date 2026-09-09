@@ -26,7 +26,7 @@
     <string name="settings_delete_model_dialog_confirm">Eliminar</string>
     <string name="settings_delete_model_dialog_cancel">Cancelar</string>
 
-    <string name="settings_note_style_title">Estilo de las notas</string>
+    <string name="settings_note_style_title">Estilo de nota predeterminado</string>
     <string name="settings_note_style_note">Se aplica a las grabaciones nuevas. Puedes cambiar el estilo de una nota existente desde la pantalla de la nota.</string>
     <string name="settings_note_styles_manage">Gestionar estilos de nota</string>
     <string name="settings_note_styles_manage_subtitle">Crea tus propios encabezados y formato</string>

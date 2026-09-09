@@ -26,7 +26,7 @@
     <string name="settings_delete_model_dialog_confirm">Löschen</string>
     <string name="settings_delete_model_dialog_cancel">Abbrechen</string>
 
-    <string name="settings_note_style_title">Notizstil</string>
+    <string name="settings_note_style_title">Standard-Notizstil</string>
     <string name="settings_note_style_note">Gilt für neue Aufnahmen. Eine vorhandene Notiz kannst du direkt auf dem Notiz-Bildschirm umformulieren lassen.</string>
     <string name="settings_note_styles_manage">Notizstile verwalten</string>
     <string name="settings_note_styles_manage_subtitle">Eigene Überschriften und Formate anlegen</string>

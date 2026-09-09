@@ -26,7 +26,7 @@
     <string name="settings_delete_model_dialog_confirm">Видалити</string>
     <string name="settings_delete_model_dialog_cancel">Скасувати</string>
 
-    <string name="settings_note_style_title">Стиль нотаток</string>
+    <string name="settings_note_style_title">Стиль нотаток за умовчанням</string>
     <string name="settings_note_style_note">Застосовується до нових записів. Стиль наявної нотатки можна змінити на її екрані.</string>
     <string name="settings_note_styles_manage">Керування стилями нотаток</string>
     <string name="settings_note_styles_manage_subtitle">Створіть власні заголовки та формат</string>

@@ -395,58 +395,43 @@ private struct DownloadSizeBadge: View {
 }
 
 struct NotePresetPicker: View {
-    let selected: NotePreset
+    let selected: NotePreset?
     let onSelect: (NotePreset) -> Void
-
-    private let options: [(NotePreset, String, String, String)] = [
-        (
-            .summary,
-            String(localized: "Summary"),
-            String(localized: "Main topics, key decisions, action items and a short overview."),
-            "doc.plaintext"
-        ),
-        (
-            .meeting,
-            String(localized: "Meeting notes"),
-            String(localized: "Discussion, decisions, action items and open questions."),
-            "person.3"
-        ),
-        (
-            .visit,
-            String(localized: "Visit report"),
-            String(localized: "Who the visit was about, observations, what was done and follow-ups."),
-            "list.clipboard"
-        ),
-        (
-            .legal,
-            String(localized: "Legal note"),
-            String(localized: "Matter, facts stated, instructions, advice given and next steps."),
-            "building.columns"
-        ),
-    ]
 
     var body: some View {
         VStack(spacing: 10) {
-            ForEach(options, id: \.1) { option in
-                presetCard(option)
+            ForEach([NotePreset.summary, .meeting, .visit, .legal], id: \.self) { preset in
+                PresetCard(
+                    title: NoteStyleLabels.label(for: preset),
+                    details: NoteStyleLabels.details(for: preset),
+                    symbol: NoteStyleLabels.symbol(for: preset),
+                    isSelected: selected == preset
+                ) {
+                    onSelect(preset)
+                }
             }
         }
         .animation(.easeInOut(duration: 0.15), value: selected)
     }
+}
 
-    private func presetCard(_ option: (NotePreset, String, String, String)) -> some View {
-        let isSelected = selected == option.0
-        return Button {
-            onSelect(option.0)
-        } label: {
+struct PresetCard: View {
+    let title: String
+    let details: String
+    let symbol: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
             HStack(spacing: 16) {
-                Image(systemName: option.3)
+                Image(systemName: symbol)
                     .foregroundStyle(Brand.primary)
                     .frame(width: 24)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(option.1)
+                    Text(title)
                         .foregroundStyle(Brand.onSurface)
-                    Text(option.2)
+                    Text(details)
                         .font(.caption)
                         .foregroundStyle(Brand.onSurfaceVariant)
                         .multilineTextAlignment(.leading)

@@ -26,7 +26,7 @@
     <string name="settings_delete_model_dialog_confirm">हटाएं</string>
     <string name="settings_delete_model_dialog_cancel">रद्द करें</string>
 
-    <string name="settings_note_style_title">नोट की शैली</string>
+    <string name="settings_note_style_title">डिफ़ॉल्ट नोट शैली</string>
     <string name="settings_note_style_note">नई रिकॉर्डिंग पर लागू होती है। किसी मौजूदा नोट की शैली आप नोट की स्क्रीन से बदल सकते हैं।</string>
     <string name="settings_note_styles_manage">नोट शैलियाँ प्रबंधित करें</string>
     <string name="settings_note_styles_manage_subtitle">अपने शीर्षक और फ़ॉर्मैट बनाएँ</string>

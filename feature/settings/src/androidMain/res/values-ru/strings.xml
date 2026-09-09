@@ -26,7 +26,7 @@
     <string name="settings_delete_model_dialog_confirm">Удалить</string>
     <string name="settings_delete_model_dialog_cancel">Отмена</string>
 
-    <string name="settings_note_style_title">Стиль заметок</string>
+    <string name="settings_note_style_title">Стиль заметок по умолчанию</string>
     <string name="settings_note_style_note">Применяется к новым записям. Стиль существующей заметки можно изменить на её экране.</string>
     <string name="settings_note_styles_manage">Управление стилями заметок</string>
     <string name="settings_note_styles_manage_subtitle">Создайте свои заголовки и формат</string>

@@ -5,7 +5,9 @@ struct SettingsView: View {
     private let viewModel = AppViewModels.settings
     @Environment(\.scenePhase) private var scenePhase
     @State private var state = SettingsUiState(
-        notePreset: .summary,
+        noteStyle: NoteStyleRefBuiltIn(preset: .summary),
+        customStyles: [],
+        isCustomStylesUnlocked: false,
         isDynamicColorEnabled: false,
         isAppLockEnabled: false,
         isDeviceSecure: false
@@ -20,10 +22,20 @@ struct SettingsView: View {
                         isPresetPickerVisible = true
                     } label: {
                         HStack {
-                            Text(String(localized: "Note style"))
+                            Text(String(localized: "Default note style"))
                                 .foregroundStyle(.primary)
                             Spacer()
-                            Text(presetLabel(state.notePreset))
+                            Text(NoteStyleLabels.label(for: state.noteStyle, customStyles: state.customStyles))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    NavigationLink {
+                        NoteStylesView()
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(String(localized: "Manage note styles"))
+                            Text(String(localized: "Create your own headings and format"))
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -84,16 +96,30 @@ struct SettingsView: View {
         .sheet(isPresented: $isPresetPickerVisible) {
             NavigationStack {
                 ScrollView {
-                    NotePresetPicker(selected: state.notePreset) { preset in
-                        viewModel.onNotePresetSelected(preset: preset)
-                        isPresetPickerVisible = false
+                    VStack(alignment: .leading, spacing: 10) {
+                        NotePresetPicker(selected: state.noteStyle.builtInPreset) { preset in
+                            viewModel.onNoteStyleSelected(style: NoteStyleRefBuiltIn(preset: preset))
+                            isPresetPickerVisible = false
+                        }
+                        if !state.customStyles.isEmpty {
+                            Text(String(localized: "Your styles"))
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                                .padding(.top, 8)
+                            ForEach(state.customStyles, id: \.id) { style in
+                                CustomStyleCard(style: style, isSelected: state.noteStyle.customId == style.id) {
+                                    viewModel.onNoteStyleSelected(style: NoteStyleRefCustom(id: style.id))
+                                    isPresetPickerVisible = false
+                                }
+                            }
+                        }
                     }
                     .padding()
                 }
-                .navigationTitle(String(localized: "Note style"))
+                .navigationTitle(String(localized: "Default note style"))
                 .navigationBarTitleDisplayMode(.inline)
             }
-            .presentationDetents([.medium])
+            .presentationDetents([.medium, .large])
         }
         .onChange(of: scenePhase) {
             // A passcode can be added or removed while this screen is backgrounded.
@@ -110,14 +136,20 @@ struct SettingsView: View {
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
+}
 
-    private func presetLabel(_ preset: NotePreset) -> String {
-        switch preset {
-        case .summary: return String(localized: "Summary")
-        case .meeting: return String(localized: "Meeting")
-        case .visit: return String(localized: "Visit")
-        case .legal: return String(localized: "File note")
-        default: return String(localized: "Summary")
-        }
+private struct CustomStyleCard: View {
+    let style: CustomStyleOptionUi
+    let isSelected: Bool
+    let onSelect: () -> Void
+
+    var body: some View {
+        PresetCard(
+            title: style.name,
+            details: style.description_,
+            symbol: NoteStyleLabels.customSymbol,
+            isSelected: isSelected,
+            action: onSelect
+        )
     }
 }

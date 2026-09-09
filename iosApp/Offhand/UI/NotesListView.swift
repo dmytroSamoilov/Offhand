@@ -23,7 +23,8 @@ struct NotesListView: View {
         selectedFolderId: nil,
         folderEditor: nil,
         pendingDeleteFolderId: nil,
-        moveToFolder: nil
+        moveToFolder: nil,
+        customStyles: []
     )
     @State private var isRecordSheetVisible = false
     @State private var searchQuery = ""
