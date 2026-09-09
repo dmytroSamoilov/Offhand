@@ -402,7 +402,7 @@ struct NotePresetPicker: View {
         (
             .summary,
             String(localized: "Summary"),
-            String(localized: "A clean write-up of what was said, without repetition or filler."),
+            String(localized: "Main topics, key decisions, action items and a short overview."),
             "doc.plaintext"
         ),
         (

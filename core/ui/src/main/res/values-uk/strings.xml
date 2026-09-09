@@ -3,7 +3,7 @@
     <string name="core_ui_error_title">Щось пішло не так</string>
     <string name="core_ui_error_confirm">ОК</string>
     <string name="core_ui_note_preset_summary">Резюме</string>
-    <string name="core_ui_note_preset_summary_description">Акуратний виклад сказаного — без повторів і зайвих слів.</string>
+    <string name="core_ui_note_preset_summary_description">Основні теми, ключові рішення, завдання та короткий огляд.</string>
     <string name="core_ui_note_preset_meeting">Нотатки зі зустрічі</string>
     <string name="core_ui_note_preset_meeting_description">Обговорення, рішення, завдання й відкриті питання.</string>
     <string name="core_ui_note_preset_visit">Звіт про візит</string>

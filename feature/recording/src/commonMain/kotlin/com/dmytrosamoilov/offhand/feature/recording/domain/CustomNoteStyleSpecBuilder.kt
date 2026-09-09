@@ -1,21 +1,30 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain
 
 import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleSection
 import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
 
 internal object CustomNoteStyleSpecBuilder {
 
-    fun build(style: CustomNoteStyle): NoteStyleSpec {
-        val kind = style.noteKind.toPromptText().ifBlank { DEFAULT_KIND }
-        val sections = style.sections.map { it.promptHeading() }
+    fun build(style: CustomNoteStyle): NoteStyleSpec =
+        build(NoteStyleRef.Custom(style.id), style.noteKind, style.sections, style.language)
+
+    fun build(
+        ref: NoteStyleRef,
+        noteKind: String,
+        sections: List<NoteStyleSection>,
+        language: NoteStyleLanguage,
+    ): NoteStyleSpec {
+        val kind = noteKind.toPromptText().ifBlank { DEFAULT_KIND }
+        val headings = sections.map { it.promptHeading() }
         return NoteStyleSpec(
-            ref = NoteStyleRef.Custom(style.id),
+            ref = ref,
             kind = NoteStylePrompt.markdownKind(kind),
-            sections = sections,
-            overviewRule = overviewRule(kind, sections, style.sections),
-            language = style.language,
+            sections = headings,
+            overviewRule = overviewRule(kind, headings, sections),
+            language = language,
         )
     }
 

@@ -4,15 +4,14 @@ import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
 
 internal object NoteStylePrompt {
 
-    fun fieldRules(spec: NoteStyleSpec): String = listOfNotNull(
+    fun fieldRules(spec: NoteStyleSpec): String = listOf(
         FIELD_RULES_HEADER,
         TITLE_RULE,
         "$OVERVIEW_RULE_PREFIX${spec.overviewRule}",
-        EMPTY_SECTION_RULE.takeIf { spec.sections.isNotEmpty() },
+        EMPTY_SECTION_RULE,
     ).joinToString(LINE_BREAK)
 
-    fun polishStructureRule(spec: NoteStyleSpec): String =
-        if (spec.sections.isEmpty()) PROSE_POLISH_RULE else sectionPolishRule(spec.sections)
+    fun polishStructureRule(spec: NoteStyleSpec): String = sectionPolishRule(spec.sections)
 
     fun polishFieldRules(): String = listOf(
         FIELD_RULES_HEADER,
@@ -56,10 +55,6 @@ internal object NoteStylePrompt {
     private const val EMPTY_SECTION_RULE =
         "- Write a heading only when the recording really contains that kind of content. " +
             "Never write a heading with nothing under it, and never write none, not mentioned or N/A."
-    private const val PROSE_POLISH_RULE =
-        "- Keep the note as plain sentences in short paragraphs, in the first person the " +
-            "speaker uses. Never use headings, bullet points, dashes at the start of a line, " +
-            "or numbered lists."
     private const val RECORDING_LANGUAGE_RULE =
         "Write the title and the overview in the same language the recording is spoken in."
     private const val DRAFT_LANGUAGE_RULE =

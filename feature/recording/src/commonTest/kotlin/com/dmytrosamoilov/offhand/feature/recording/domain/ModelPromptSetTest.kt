@@ -65,8 +65,8 @@ class ModelPromptSetTest {
     }
 
     @Test
-    fun `sectioned presets forbid empty headings`() {
-        NotePreset.entries.filter { BuiltInNoteStyles.sections(it).isNotEmpty() }.forEach { preset ->
+    fun `every preset forbids empty headings`() {
+        NotePreset.entries.forEach { preset ->
             assertTrue(
                 ModelPromptSet.Gemma4.structureNote(spec(preset))
                     .contains("Never write a heading with nothing under it"),
@@ -75,13 +75,16 @@ class ModelPromptSetTest {
     }
 
     @Test
-    fun `summary preset asks for first person prose without lists`() {
+    fun `summary preset is the four-section quick summary`() {
         val prompt = ModelPromptSet.Gemma4.structureNote(spec(NotePreset.SUMMARY))
 
-        assertTrue(prompt.contains("the speaker's own voice"))
-        assertTrue(prompt.contains("Keep the first person the speaker uses"))
-        assertTrue(prompt.contains("Never use headings, bullet points"))
-        assertTrue(prompt.contains("Say each thing only once"))
+        assertEquals(
+            listOf("## Main Topics", "## Key Decisions", "## Action Items", "## Summary Overview"),
+            BuiltInNoteStyles.sections(NotePreset.SUMMARY),
+        )
+        assertTrue(prompt.contains("a summary of the recording in Markdown"))
+        assertTrue(prompt.contains("Under \"## Action Items\" write one \"- \" line per point: list all tasks"))
+        assertTrue(prompt.contains("Under \"## Summary Overview\" write short plain sentences: provide a brief, one-paragraph overview"))
     }
 
     // Models copy quoted first-person sentences straight into the note as if
@@ -131,26 +134,14 @@ class ModelPromptSetTest {
     }
 
     @Test
-    fun `summary polish prompt keeps prose and forbids lists`() {
-        val prompt = ModelPromptSet.Gemma4.polishNote(spec(NotePreset.SUMMARY), thinkingEnabled = false)
-
-        assertTrue(prompt.contains("first person"))
-        assertTrue(prompt.contains("Never use headings, bullet points"))
-    }
-
-    @Test
-    fun `sectioned polish prompts allow adding a missing allowed heading`() {
-        NotePreset.entries.filter { BuiltInNoteStyles.sections(it).isNotEmpty() }.forEach { preset ->
+    fun `polish prompts allow adding a missing allowed heading`() {
+        NotePreset.entries.forEach { preset ->
             assertTrue(
                 ModelPromptSet.Gemma4.polishNote(spec(preset), thinkingEnabled = false)
                     .contains("add that heading"),
                 "$preset polish prompt must allow adding a missing heading",
             )
         }
-        assertFalse(
-            ModelPromptSet.Gemma4.polishNote(spec(NotePreset.SUMMARY), thinkingEnabled = false)
-                .contains("add that heading"),
-        )
     }
 
     @Test

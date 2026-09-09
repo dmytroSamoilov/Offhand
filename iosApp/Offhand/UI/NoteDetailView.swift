@@ -553,7 +553,7 @@ private struct NoteStyleSheet: View {
             StyleOption(
                 preset: .summary,
                 label: String(localized: "Summary"),
-                details: String(localized: "A clean write-up of what was said, without repetition or filler."),
+                details: String(localized: "Main topics, key decisions, action items and a short overview."),
                 symbol: "doc.plaintext"
             ),
             StyleOption(

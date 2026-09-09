@@ -338,13 +338,13 @@ class TranscriptStructurerTest {
     }
 
     @Test
-    fun `summary preset strips headings and bullets the model still emits`() = runTest {
+    fun `summary preset merges the model output under its own headings`() = runTest {
         coEvery { aiBackend.processText(any(), any()) } returns
-            result("""{"title": "My day", "overview": "## Today\n- I am tired\n- I ship on Friday"}""")
+            result("""{"title": "My day", "overview": "## Main Topics\n- Shipping\n## Action Items\n- Ship on Friday"}""")
 
         val note = structurer.structure(listOf("short transcript"), NoteStyleRef.BuiltIn(NotePreset.SUMMARY))
 
-        assertEquals("Today\nI am tired\nI ship on Friday", note.overview)
+        assertEquals("## Main Topics\n- Shipping\n\n## Action Items\n- Ship on Friday", note.overview)
     }
 
     @Test

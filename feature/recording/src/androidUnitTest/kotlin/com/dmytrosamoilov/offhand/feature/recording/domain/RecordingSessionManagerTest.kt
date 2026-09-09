@@ -212,7 +212,7 @@ class RecordingSessionManagerTest {
             completeNote(
                 noteId = 42L,
                 title = "Meeting notes",
-                body = "first\nsecond",
+                body = "- first\n- second",
                 transcript = "first part of the meeting\n\nsecond part of the meeting",
                 transcriptionTimeMs = 400,
                 structuringTimeMs = 300,
@@ -251,7 +251,7 @@ class RecordingSessionManagerTest {
             completeNote(
                 noteId = 7L,
                 title = "Partial notes",
-                body = "good chunk content",
+                body = "- good chunk content",
                 transcript = "only good chunk",
                 transcriptionTimeMs = 200,
                 structuringTimeMs = 100,
@@ -312,7 +312,7 @@ class RecordingSessionManagerTest {
             completeNote(
                 noteId = 7L,
                 title = "Recovered",
-                body = "body",
+                body = "- body",
                 transcript = "recovered transcript",
                 transcriptionTimeMs = 200,
                 structuringTimeMs = 100,
@@ -473,7 +473,7 @@ class RecordingSessionManagerTest {
             completeNote(
                 noteId = 7L,
                 title = "Recovered",
-                body = "body",
+                body = "- body",
                 transcript = "recovered transcript",
                 transcriptionTimeMs = 200,
                 structuringTimeMs = 100,

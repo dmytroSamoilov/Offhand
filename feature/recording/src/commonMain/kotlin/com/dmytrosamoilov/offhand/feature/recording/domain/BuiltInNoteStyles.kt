@@ -3,19 +3,29 @@ package com.dmytrosamoilov.offhand.feature.recording.domain
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleSection
+import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
 
 internal object BuiltInNoteStyles {
 
-    fun spec(preset: NotePreset): NoteStyleSpec = NoteStyleSpec(
-        ref = NoteStyleRef.BuiltIn(preset),
-        kind = kind(preset),
-        sections = sections(preset),
-        overviewRule = overviewRule(preset),
-        language = NoteStyleLanguage.RECORDING,
-    )
+    fun spec(preset: NotePreset): NoteStyleSpec = when (preset) {
+        NotePreset.SUMMARY -> CustomNoteStyleSpecBuilder.build(
+            ref = NoteStyleRef.BuiltIn(preset),
+            noteKind = SUMMARY_KIND,
+            sections = SUMMARY_SECTIONS,
+            language = NoteStyleLanguage.RECORDING,
+        )
+        else -> NoteStyleSpec(
+            ref = NoteStyleRef.BuiltIn(preset),
+            kind = NoteStylePrompt.markdownKind(kind(preset)),
+            sections = sections(preset),
+            overviewRule = overviewRule(preset),
+            language = NoteStyleLanguage.RECORDING,
+        )
+    }
 
     fun sections(preset: NotePreset): List<String> = when (preset) {
-        NotePreset.SUMMARY -> emptyList()
+        NotePreset.SUMMARY -> spec(preset).sections
         NotePreset.MEETING -> MEETING_SECTIONS
         NotePreset.VISIT -> VISIT_SECTIONS
         NotePreset.LEGAL -> LEGAL_SECTIONS
@@ -23,21 +33,41 @@ internal object BuiltInNoteStyles {
 
     private fun kind(preset: NotePreset): String = when (preset) {
         NotePreset.SUMMARY -> SUMMARY_KIND
-        NotePreset.MEETING -> NoteStylePrompt.markdownKind(MEETING_KIND)
-        NotePreset.VISIT -> NoteStylePrompt.markdownKind(VISIT_KIND)
-        NotePreset.LEGAL -> NoteStylePrompt.markdownKind(LEGAL_KIND)
+        NotePreset.MEETING -> MEETING_KIND
+        NotePreset.VISIT -> VISIT_KIND
+        NotePreset.LEGAL -> LEGAL_KIND
     }
 
     private fun overviewRule(preset: NotePreset): String = when (preset) {
-        NotePreset.SUMMARY -> SUMMARY_OVERVIEW
+        NotePreset.SUMMARY -> spec(preset).overviewRule
         NotePreset.MEETING -> MEETING_OVERVIEW
         NotePreset.VISIT -> VISIT_OVERVIEW
         NotePreset.LEGAL -> LEGAL_OVERVIEW
     }
 
-    private const val SUMMARY_KIND =
-        "a first-person summary of one voice note, written as plain paragraphs " +
-            "in the speaker's own voice"
+    private const val SUMMARY_KIND = "a summary of the recording"
+    private val SUMMARY_SECTIONS = listOf(
+        NoteStyleSection(
+            heading = "Main Topics",
+            guidance = "list the primary subjects discussed in the recording",
+            format = SectionFormat.BULLETS,
+        ),
+        NoteStyleSection(
+            heading = "Key Decisions",
+            guidance = "list all significant decisions made during the discussion",
+            format = SectionFormat.BULLETS,
+        ),
+        NoteStyleSection(
+            heading = "Action Items",
+            guidance = "list all tasks that need to be completed following the recording",
+            format = SectionFormat.BULLETS,
+        ),
+        NoteStyleSection(
+            heading = "Summary Overview",
+            guidance = "provide a brief, one-paragraph overview of the entire recording",
+            format = SectionFormat.SENTENCES,
+        ),
+    )
     private const val MEETING_KIND = "meeting notes"
     private const val VISIT_KIND = "a visit report"
     private const val LEGAL_KIND = "a legal file note"
@@ -53,20 +83,6 @@ internal object BuiltInNoteStyles {
         "## Advice given",
         "## Next steps",
     )
-
-    private const val SUMMARY_OVERVIEW =
-        "the recording written down again in the speaker's own voice. " +
-            "Keep the first person the speaker uses: write what the speaker says about " +
-            "themselves with I and we, never as the speaker or they. " +
-            "Say each thing only once. When a thought is repeated, restarted or said again in other " +
-            "words, keep the clearest version and drop the rest. When many sentences are spent on " +
-            "one point, write that point in one or two sentences that still carry the specific " +
-            "details: names, dates, numbers, amounts, decisions and what the speaker wants to do next. " +
-            "Tidy up half-finished and rambling sentences, but keep the speaker's own words and tone, " +
-            "and never add anything that was not said. " +
-            "Write plain sentences in short paragraphs, in the order the topics came up. " +
-            "Never use headings, bullet points, dashes at the start of a line, or numbered lists. " +
-            "Make it as long as the content needs and no longer."
 
     private const val MEETING_OVERVIEW =
         "meeting notes in Markdown, built only from these section headings: " +

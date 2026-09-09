@@ -155,14 +155,8 @@ class TranscriptStructurer(
     private fun mergedOverview(parts: List<ParsedNote>, spec: NoteStyleSpec): String =
         normalizeOverview(parts.mapNotNull { it.overview.ifBlank { null } }, spec)
 
-    private fun normalizeOverview(overviews: List<String>, spec: NoteStyleSpec): String {
-        val sections = spec.sections
-        return if (sections.isEmpty()) {
-            NoteProseFormatter.format(overviews)
-        } else {
-            NoteSectionMerger.merge(overviews, sections)
-        }
-    }
+    private fun normalizeOverview(overviews: List<String>, spec: NoteStyleSpec): String =
+        NoteSectionMerger.merge(overviews, spec.sections)
 
     private fun parseNoteJson(raw: String): ParsedNote {
         val cleaned = ModelResponseCleaner.stripThinking(raw)
