@@ -71,7 +71,7 @@ appId: com.dmytrosamoilov.offhand.uitest
     commands:
       - tapOn: "Record a note"
 - extendedWaitUntil:
-    visible: "00:0[4-9]"
+    visible: "00:(0[4-9]|[1-5][0-9])"
     timeout: 15000
 - tapOn: "Save note"
 - tapOn: "Done"
