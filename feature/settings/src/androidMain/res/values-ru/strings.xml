@@ -60,4 +60,6 @@
     <string name="settings_developer_title">Разработчик</string>
     <string name="settings_developer_label">Параметры разработчика</string>
     <string name="settings_developer_description">Показывает управление моделями, ускорение и диагностику обработки.</string>
+    <string name="settings_backup_title">Резервная копия</string>
+    <string name="settings_backup_subtitle">Перенесите заметки на новый телефон или сохраните копию</string>
 </resources>

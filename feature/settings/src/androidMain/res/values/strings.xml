@@ -61,4 +61,6 @@
     <string name="settings_developer_title">Developer</string>
     <string name="settings_developer_label">Developer options</string>
     <string name="settings_developer_description">Show model management, acceleration and processing diagnostics.</string>
+    <string name="settings_backup_title">Backup &amp; restore</string>
+    <string name="settings_backup_subtitle">Move your notes to a new phone or keep a copy</string>
 </resources>

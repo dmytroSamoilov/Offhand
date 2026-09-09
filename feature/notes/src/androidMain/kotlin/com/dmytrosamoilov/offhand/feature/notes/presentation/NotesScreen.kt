@@ -139,8 +139,9 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.foundation.focusGroup
-import androidx.compose.ui.focus.focusProperties
+import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
+import kotlinx.coroutines.delay
+import com.dmytrosamoilov.offhand.core.designsystem.focus.userInitiatedFocusOnly
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -476,11 +477,15 @@ private fun NotesListPane(
             listState.scrollToItem(0)
         }
     }
+    val haptics = haptics()
     Scaffold(
         topBar = { AppTopBar(title = stringResource(R.string.notes_title)) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onNewRecording,
+                onClick = {
+                    haptics.confirm()
+                    onNewRecording()
+                },
                 modifier = Modifier.size(80.dp),
                 shape = MaterialTheme.shapes.large,
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -499,8 +504,7 @@ private fun NotesListPane(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .focusProperties { onEnter = { cancelFocusChange() } }
-                .focusGroup(),
+                .userInitiatedFocusOnly(),
         ) {
             ModelPreparationBanner(preparation = modelPreparation)
             val isLibraryEmpty = sections.isEmpty() && folders.isEmpty() &&
@@ -1001,11 +1005,18 @@ private fun SwipeableNoteCard(
 ) {
     val currentOnDeleteRequested by rememberUpdatedState(onDeleteRequested)
     val currentOnMoveRequested by rememberUpdatedState(onMoveRequested)
+    val haptics = haptics()
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             when (value) {
-                SwipeToDismissBoxValue.EndToStart -> currentOnDeleteRequested()
-                SwipeToDismissBoxValue.StartToEnd -> currentOnMoveRequested()
+                SwipeToDismissBoxValue.EndToStart -> {
+                    haptics.gestureEnd()
+                    currentOnDeleteRequested()
+                }
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    haptics.gestureEnd()
+                    currentOnMoveRequested()
+                }
                 SwipeToDismissBoxValue.Settled -> Unit
             }
             value == SwipeToDismissBoxValue.Settled
@@ -1502,6 +1513,7 @@ private fun NoteDetailContent(
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
+        ProcessingHaptics(noteId = note.id, status = note.status)
         when (note.status) {
             NoteStatusUi.PROCESSING -> DetailStatusCard(
                 text = stringResource(
@@ -1562,15 +1574,35 @@ private fun rememberCopyAction(
     contentDescription: String,
 ): CollapsibleCardAction {
     val clipboard = rememberSensitiveClipboard()
+    val haptics = haptics()
     val copiedMessage = stringResource(R.string.notes_copied)
     return remember(text, clipboardLabel, contentDescription, copiedMessage) {
         CollapsibleCardAction(
             icon = Icons.Filled.ContentCopy,
             contentDescription = contentDescription,
-            onClick = { clipboard.copy(clipboardLabel, text, copiedMessage) },
+            onClick = {
+                haptics.confirm()
+                clipboard.copy(clipboardLabel, text, copiedMessage)
+            },
         )
     }
 }
+
+@Composable
+private fun ProcessingHaptics(noteId: Long, status: NoteStatusUi) {
+    val haptics = haptics()
+    var previousStatus by remember(noteId) { mutableStateOf(status) }
+    LaunchedEffect(noteId, status) {
+        if (previousStatus == NoteStatusUi.PROCESSING && status == NoteStatusUi.READY) haptics.confirm()
+        previousStatus = status
+        while (status == NoteStatusUi.PROCESSING) {
+            delay(PROCESSING_TICK_MS)
+            haptics.tick()
+        }
+    }
+}
+
+private const val PROCESSING_TICK_MS = 2_500L
 
 @Composable
 private fun TrustBadges() {
@@ -1677,13 +1709,17 @@ private fun AudioPlayerCard(
     onSeek: (Float) -> Unit,
 ) {
     var dragFraction by remember { mutableStateOf<Float?>(null) }
+    val haptics = haptics()
     Card(modifier = Modifier.fillMaxWidth(), shape = CircleShape) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             FilledIconButton(
-                onClick = onPlayPause,
+                onClick = {
+                    haptics.confirm()
+                    onPlayPause()
+                },
                 modifier = Modifier.size(48.dp),
                 shape = CircleShape,
             ) {

@@ -45,6 +45,20 @@ struct SettingsView: View {
                 }
                 Section {
                     NavigationLink {
+                        BackupView()
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(String(localized: "Backup & restore"))
+                            Text(String(localized: "Move your notes to a new iPhone or keep a copy"))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                } header: {
+                    Text(String(localized: "Backup"))
+                }
+                Section {
+                    NavigationLink {
                         AboutSupportView()
                     } label: {
                         VStack(alignment: .leading, spacing: 2) {

@@ -20,6 +20,9 @@ data object SettingsRoute
 @Serializable
 data object AboutSupportRoute
 
+@Serializable
+data object BackupRoute
+
 enum class TopLevelDestination(
     @param:StringRes val labelRes: Int,
     val icon: ImageVector,

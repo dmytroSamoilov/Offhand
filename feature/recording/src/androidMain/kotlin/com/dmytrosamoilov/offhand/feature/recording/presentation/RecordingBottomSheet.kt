@@ -69,6 +69,7 @@ import com.dmytrosamoilov.offhand.core.designsystem.component.CookieShape
 import com.dmytrosamoilov.offhand.core.designsystem.component.MorphingLoadingIndicator
 import com.dmytrosamoilov.offhand.feature.recording.R
 import org.koin.androidx.compose.koinViewModel
+import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 
 @Composable
 fun RecordingSheetHost(
@@ -119,6 +120,7 @@ private fun RecordingBottomSheet(
             isNoteSaved = true
         }
     }
+    val haptics = haptics()
     LaunchedEffect(state.phase) {
         if (state.phase.isSessionActive()) {
             wasSessionActive = true
@@ -149,10 +151,20 @@ private fun RecordingBottomSheet(
                 )
                 state.phase == RecordingPhaseUi.RECORDING -> RecordingContent(
                     state = state,
-                    onPauseClick = viewModel::onPauseRecording,
-                    onResumeClick = viewModel::onResumeRecording,
-                    onStopClick = viewModel::onStopRecording,
+                    onPauseClick = {
+                        haptics.tick()
+                        viewModel.onPauseRecording()
+                    },
+                    onResumeClick = {
+                        haptics.tick()
+                        viewModel.onResumeRecording()
+                    },
+                    onStopClick = {
+                        haptics.confirm()
+                        viewModel.onStopRecording()
+                    },
                     onDiscardConfirmed = {
+                        haptics.reject()
                         viewModel.onDiscardRecording()
                         onDismiss()
                     },

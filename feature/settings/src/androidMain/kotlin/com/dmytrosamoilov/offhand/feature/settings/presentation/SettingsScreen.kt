@@ -40,6 +40,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun SettingsScreen(
     onAboutSupportClick: () -> Unit,
+    onBackupClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = koinViewModel(),
 ) {
@@ -76,6 +77,7 @@ fun SettingsScreen(
                     isDynamicColorEnabled = state.isDynamicColorEnabled,
                     onDynamicColorChanged = viewModel::onDynamicColorChanged,
                 )
+                BackupCard(onClick = onBackupClick)
                 AboutSupportCard(onClick = onAboutSupportClick)
             }
         }
@@ -143,8 +145,16 @@ private fun AppearanceSection(
 }
 
 @Composable
-private fun AboutSupportCard(onClick: () -> Unit) {
-    val context = LocalContext.current
+private fun BackupCard(onClick: () -> Unit) {
+    NavigationCard(
+        title = stringResource(R.string.settings_backup_title),
+        subtitle = stringResource(R.string.settings_backup_subtitle),
+        onClick = onClick,
+    )
+}
+
+@Composable
+private fun NavigationCard(title: String, subtitle: String, onClick: () -> Unit) {
     Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -153,15 +163,9 @@ private fun AboutSupportCard(onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
+                Text(text = title, style = MaterialTheme.typography.titleMedium)
                 Text(
-                    text = stringResource(R.string.settings_about_support_title),
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Text(
-                    text = stringResource(
-                        R.string.settings_about_support_subtitle,
-                        appVersion(context),
-                    ),
+                    text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -174,4 +178,14 @@ private fun AboutSupportCard(onClick: () -> Unit) {
             )
         }
     }
+}
+
+@Composable
+private fun AboutSupportCard(onClick: () -> Unit) {
+    val context = LocalContext.current
+    NavigationCard(
+        title = stringResource(R.string.settings_about_support_title),
+        subtitle = stringResource(R.string.settings_about_support_subtitle, appVersion(context)),
+        onClick = onClick,
+    )
 }

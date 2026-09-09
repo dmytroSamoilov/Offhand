@@ -19,7 +19,7 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val appModule = module {
-    single { BuildInfo(isDebugBuild = BuildConfig.DEBUG) }
+    single { BuildInfo(isDebugBuild = BuildConfig.DEBUG, appVersion = BuildConfig.VERSION_NAME, platform = "android") }
     singleOf(::LiteRtLmManager) bind ModelManager::class
     singleOf(::LocalAiBackend) bind AiBackend::class
     singleOf(::WhisperSpeechToText) bind SpeechToText::class

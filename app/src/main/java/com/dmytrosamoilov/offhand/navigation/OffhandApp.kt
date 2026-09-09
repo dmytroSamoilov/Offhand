@@ -19,6 +19,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.dmytrosamoilov.offhand.feature.backup.presentation.BackupScreen
 import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesScreen
 import com.dmytrosamoilov.offhand.feature.recording.presentation.RecordingSheetHost
 import com.dmytrosamoilov.offhand.feature.settings.presentation.AboutSupportScreen
@@ -74,10 +75,14 @@ fun OffhandApp(
                 composable<SettingsRoute> {
                     SettingsScreen(
                         onAboutSupportClick = { navController.navigate(AboutSupportRoute) },
+                        onBackupClick = { navController.navigate(BackupRoute) },
                     )
                 }
                 composable<AboutSupportRoute> {
                     AboutSupportScreen(onBack = { navController.navigateUp() })
+                }
+                composable<BackupRoute> {
+                    BackupScreen(onBack = { navController.navigateUp() })
                 }
             }
         }

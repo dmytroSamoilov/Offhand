@@ -60,4 +60,6 @@
     <string name="settings_developer_title">Розробник</string>
     <string name="settings_developer_label">Параметри розробника</string>
     <string name="settings_developer_description">Показує керування моделями, прискорення та діагностику обробки.</string>
+    <string name="settings_backup_title">Резервна копія</string>
+    <string name="settings_backup_subtitle">Перенесіть нотатки на новий телефон або збережіть копію</string>
 </resources>

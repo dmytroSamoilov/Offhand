@@ -104,6 +104,7 @@ dependencies {
     implementation(project(":feature:recording"))
     implementation(project(":feature:notes"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:backup"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.process)

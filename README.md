@@ -117,6 +117,7 @@ and cover:
 5. Opening the note and rendering the Overview and Transcript sections
 6. Folders: create, move the note in (menu and leading swipe), filter by folder, rename, delete
 7. Returning from a note leaves the search field unfocused (Android)
+8. Backup and restore through the system file picker, including the passphrase prompt (Android only; the iOS picker is not scriptable)
 
 The flows assume a phone-sized screen; on tablets and unfolded foldables the app switches
 to its two-pane layout and the steps no longer line up.
@@ -180,6 +181,7 @@ implementations:
 :feature:recording      recording UI, foreground service, AI pipeline
 :feature:notes          list / detail / edit, adaptive two-pane
 :feature:settings       acceleration tier, model management, privacy
+:feature:backup         passphrase-encrypted backup and restore of notes, folders and audio
 :testing:fakes          canned AI, model, device and microphone for smoke tests
 ```
 

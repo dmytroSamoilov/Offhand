@@ -49,6 +49,7 @@ struct NoteDetailView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .task(id: processingHapticsKey) { await runProcessingHaptics() }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button { viewModel.onEditStarted() } label: { Image(systemName: "pencil") }
@@ -158,6 +159,17 @@ struct NoteDetailView: View {
             .foregroundStyle(Brand.onPrimaryContainer)
     }
 
+    private var processingHapticsKey: String { "\(detail.id)-\(detail.status)" }
+
+    private func runProcessingHaptics() async {
+        guard detail.status == .processing else { return }
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(2.5))
+            guard !Task.isCancelled else { return }
+            Haptics.tap()
+        }
+    }
+
     private var metadataLine: String {
         var parts = [detail.createdAt]
         if detail.wordCount > 0 {
@@ -218,6 +230,7 @@ struct NoteDetailView: View {
     private var playbackCard: some View {
         HStack(spacing: 14) {
             Button {
+                Haptics.confirm()
                 viewModel.onPlayPauseClicked()
             } label: {
                 Image(systemName: state.playback.isPlaying ? "pause.circle.fill" : "play.circle.fill")
@@ -383,6 +396,7 @@ private struct CollapsibleSection: View {
     }
 
     private func toggle() {
+        Haptics.tap()
         withAnimation(.easeInOut(duration: 0.3)) { isExpanded.toggle() }
     }
 }

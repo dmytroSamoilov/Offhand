@@ -3,6 +3,7 @@ package com.dmytrosamoilov.offhand.shared
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
+import com.dmytrosamoilov.offhand.feature.backup.presentation.BackupViewModel
 import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesViewModel
 import com.dmytrosamoilov.offhand.feature.onboarding.presentation.OnboardingViewModel
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
@@ -25,6 +26,8 @@ object SharedGraph {
     fun settingsViewModel(): SettingsViewModel = KoinPlatform.getKoin().get()
 
     fun aboutSupportViewModel(): AboutSupportViewModel = KoinPlatform.getKoin().get()
+
+    fun backupViewModel(): BackupViewModel = KoinPlatform.getKoin().get()
 
     fun sessionManager(): RecordingSessionManager = KoinPlatform.getKoin().get()
 

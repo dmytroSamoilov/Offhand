@@ -75,6 +75,7 @@ struct RecordSheetView: View {
             titleVisibility: .visible
         ) {
             Button(String(localized: "Discard"), role: .destructive) {
+                Haptics.warning()
                 viewModel.onDiscardRecording()
                 dismiss()
             }
@@ -171,6 +172,7 @@ struct RecordSheetView: View {
             }
             HStack(spacing: 32) {
                 Button {
+                    Haptics.tap()
                     state.isPaused ? viewModel.onResumeRecording() : viewModel.onPauseRecording()
                 } label: {
                     Image(systemName: state.isPaused ? "play.fill" : "pause.fill")
@@ -183,6 +185,7 @@ struct RecordSheetView: View {
                     state.isPaused ? String(localized: "Resume recording") : String(localized: "Pause recording")
                 )
                 Button {
+                    Haptics.confirm()
                     viewModel.onStopRecording()
                 } label: {
                     Image(systemName: "stop.fill")

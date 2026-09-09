@@ -44,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.dmytrosamoilov.offhand.core.designsystem.R
+import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 
 @Composable
 fun CollapsibleCard(
@@ -57,6 +58,7 @@ fun CollapsibleCard(
     content: @Composable () -> Unit,
 ) {
     var isExpanded by rememberSaveable { mutableStateOf(initiallyExpanded) }
+    val haptics = haptics()
     var isOverflowing by remember { mutableStateOf(false) }
     val collapsedMaxHeightPx = with(LocalDensity.current) { collapsedMaxHeight.roundToPx() }
     val containerColor = CardDefaults.cardColors().containerColor
@@ -85,7 +87,10 @@ fun CollapsibleCard(
                         ),
                         containerColor = labelContainerColor,
                         contentColor = labelContentColor,
-                        onClick = { isExpanded = !isExpanded },
+                        onClick = {
+                            haptics.tick()
+                            isExpanded = !isExpanded
+                        },
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))

@@ -60,4 +60,6 @@
     <string name="settings_developer_title">Entwickler</string>
     <string name="settings_developer_label">Entwickleroptionen</string>
     <string name="settings_developer_description">Zeigt Modellverwaltung, Beschleunigung und Verarbeitungs-Diagnosen.</string>
+    <string name="settings_backup_title">Sichern &amp; wiederherstellen</string>
+    <string name="settings_backup_subtitle">Notizen auf ein neues Handy übertragen oder eine Kopie behalten</string>
 </resources>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="backup_title">Резервна копія</string>
+    <string name="backup_back_description">Назад</string>
+    <string name="backup_create_title">Резервна копія</string>
+    <string name="backup_create_body">Збережіть зашифровану копію нотаток, папок і записів у файл. Для відновлення знадобиться парольна фраза, відновити її неможливо.</string>
+    <string name="backup_passphrase_label">Парольна фраза</string>
+    <string name="backup_passphrase_confirm_label">Повторіть парольну фразу</string>
+    <string name="backup_passphrase_too_short">Не менше %1$d символів.</string>
+    <string name="backup_passphrase_mismatch">Парольні фрази не збігаються.</string>
+    <string name="backup_include_audio_label">Додати аудіозаписи</string>
+    <string name="backup_include_audio_description">Із записами файл стає значно більшим.</string>
+    <string name="backup_restore_title">Відновити</string>
+    <string name="backup_restore_body">Додайте нотатки й папки з файлу резервної копії. Нотатки на цьому телефоні збережуться, дублікати буде пропущено.</string>
+    <string name="backup_restore_button">Вибрати файл копії</string>
+    <string name="backup_restore_dialog_title">Введіть парольну фразу копії</string>
+    <string name="backup_restore_dialog_confirm">Відновити</string>
+    <string name="backup_cancel">Скасувати</string>
+    <string name="backup_ok">OK</string>
+    <string name="backup_progress_backup">Створення копії</string>
+    <string name="backup_progress_restore">Відновлення</string>
+    <string name="backup_done_backup_title">Копію збережено</string>
+    <string name="backup_done_backup_body">Збережено нотаток: %1$d, папок: %2$d.</string>
+    <string name="backup_done_restore_title">Відновлення завершено</string>
+    <string name="backup_done_restore_body">Відновлено нотаток: %1$d, пропущено дублікатів: %2$d. Папки: створено %3$d, використано наявних %4$d.</string>
+    <string name="backup_failed_backup_title">Не вдалося створити копію</string>
+    <string name="backup_failed_restore_title">Не вдалося відновити</string>
+    <string name="backup_error_wrong_passphrase">Ця парольна фраза не підходить до цієї копії.</string>
+    <string name="backup_error_corrupt">Цей файл не є придатною копією Offhand.</string>
+    <string name="backup_error_unsupported">Цю копію створено в новішій версії Offhand.</string>
+    <string name="backup_error_io">Не вдалося прочитати або записати файл.</string>
+    <string name="backup_start_button">Створити копію</string>
+    <string name="backup_step_passphrase_title">Задайте парольну фразу</string>
+    <string name="backup_warning">Збережіть цю парольну фразу в надійному місці. Якщо її буде втрачено, ні ви, ні ми не зможемо відновити нотатки з цієї копії.</string>
+    <string name="backup_continue">Продовжити</string>
+    <string name="backup_step_options_title">Параметри копії</string>
+    <string name="backup_file_name_label">Назва файлу</string>
+    <string name="backup_save_button">Зберегти копію</string>
+    <string name="backup_done">Готово</string>
+</resources>

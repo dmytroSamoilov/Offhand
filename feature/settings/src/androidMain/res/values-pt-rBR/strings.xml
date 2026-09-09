@@ -60,4 +60,6 @@
     <string name="settings_developer_title">Desenvolvedor</string>
     <string name="settings_developer_label">Opções de desenvolvedor</string>
     <string name="settings_developer_description">Mostra gerenciamento de modelos, aceleração e diagnósticos de processamento.</string>
+    <string name="settings_backup_title">Backup e restauração</string>
+    <string name="settings_backup_subtitle">Leve suas notas para um novo telefone ou guarde uma cópia</string>
 </resources>

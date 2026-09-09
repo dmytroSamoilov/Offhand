@@ -17,6 +17,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import com.dmytrosamoilov.offhand.di.FlavorModules
 import com.dmytrosamoilov.offhand.di.appModule
+import com.dmytrosamoilov.offhand.feature.backup.di.featureBackupModule
 import com.dmytrosamoilov.offhand.feature.notes.di.featureNotesAndroidModule
 import com.dmytrosamoilov.offhand.feature.notes.di.featureNotesModule
 import com.dmytrosamoilov.offhand.feature.onboarding.di.featureOnboardingAndroidModule
@@ -63,6 +64,7 @@ class OffhandApplication : Application(), KoinComponent {
                     featureRecordingModule,
                     featureRecordingAndroidModule,
                     featureSettingsModule,
+                    featureBackupModule,
                     appModule,
                 ) + FlavorModules.overrides,
             )

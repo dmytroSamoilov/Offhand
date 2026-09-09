@@ -9,7 +9,9 @@ import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
 import kotlin.experimental.ExperimentalNativeApi
 import com.dmytrosamoilov.offhand.core.data.di.coreDataModule
 import com.dmytrosamoilov.offhand.core.device.di.coreDeviceModule
+import com.dmytrosamoilov.offhand.core.security.BackupCrypto
 import com.dmytrosamoilov.offhand.core.security.di.coreSecurityModule
+import com.dmytrosamoilov.offhand.feature.backup.di.featureBackupModule
 import com.dmytrosamoilov.offhand.feature.notes.di.featureNotesIosModule
 import com.dmytrosamoilov.offhand.feature.notes.di.featureNotesModule
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareLabels
@@ -39,6 +41,8 @@ class IosPlatformDeps(
     val untitledNoteTitle: String,
     val shareLabels: NoteShareLabels,
     val shareFallbackTitle: String,
+    val appVersion: String,
+    val backupCrypto: IosBackupCryptoBridge,
 )
 
 fun startSharedKoin(deps: IosPlatformDeps) {
@@ -64,12 +68,14 @@ fun sharedIosModules(deps: IosPlatformDeps): List<Module> = listOf(
     featureRecordingModule,
     featureRecordingIosModule,
     featureSettingsModule,
+    featureBackupModule,
     platformDepsModule(deps),
 )
 
 @OptIn(ExperimentalNativeApi::class)
 private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
-    single { BuildInfo(isDebugBuild = Platform.isDebugBinary) }
+    single { BuildInfo(isDebugBuild = Platform.isDebugBinary, appVersion = deps.appVersion, platform = "ios") }
+    single<BackupCrypto> { IosBackupCrypto(deps.backupCrypto) }
     single { deps.gemmaEngine }
     single { deps.whisperEngine }
     single { IosFileDownloader() }

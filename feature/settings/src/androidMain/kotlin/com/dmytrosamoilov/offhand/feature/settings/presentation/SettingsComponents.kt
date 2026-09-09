@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 
 @Composable
 internal fun SettingsCard(
@@ -54,7 +55,15 @@ internal fun SwitchRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
+        val haptics = haptics()
+        Switch(
+            checked = checked,
+            onCheckedChange = { isOn ->
+                haptics.toggle(isOn)
+                onCheckedChange(isOn)
+            },
+            enabled = enabled,
+        )
     }
 }
 

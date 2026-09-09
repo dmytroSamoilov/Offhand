@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="backup_title">बैकअप और रीस्टोर</string>
+    <string name="backup_back_description">वापस</string>
+    <string name="backup_create_title">बैकअप</string>
+    <string name="backup_create_body">अपने नोट्स, फ़ोल्डर और रिकॉर्डिंग की एन्क्रिप्टेड कॉपी एक फ़ाइल में सहेजें। रीस्टोर करने के लिए पासफ़्रेज़ चाहिए होगा और इसे वापस नहीं पाया जा सकता।</string>
+    <string name="backup_passphrase_label">पासफ़्रेज़</string>
+    <string name="backup_passphrase_confirm_label">पासफ़्रेज़ दोबारा लिखें</string>
+    <string name="backup_passphrase_too_short">कम से कम %1$d वर्ण इस्तेमाल करें।</string>
+    <string name="backup_passphrase_mismatch">पासफ़्रेज़ मेल नहीं खाते।</string>
+    <string name="backup_include_audio_label">ऑडियो रिकॉर्डिंग शामिल करें</string>
+    <string name="backup_include_audio_description">रिकॉर्डिंग से फ़ाइल काफ़ी बड़ी हो जाती है।</string>
+    <string name="backup_restore_title">रीस्टोर करें</string>
+    <string name="backup_restore_body">बैकअप फ़ाइल से नोट्स और फ़ोल्डर जोड़ें। इस फ़ोन पर मौजूद नोट्स बने रहेंगे और डुप्लिकेट छोड़ दिए जाएंगे।</string>
+    <string name="backup_restore_button">बैकअप फ़ाइल चुनें</string>
+    <string name="backup_restore_dialog_title">बैकअप का पासफ़्रेज़ डालें</string>
+    <string name="backup_restore_dialog_confirm">रीस्टोर करें</string>
+    <string name="backup_cancel">रद्द करें</string>
+    <string name="backup_ok">ठीक है</string>
+    <string name="backup_progress_backup">बैकअप हो रहा है</string>
+    <string name="backup_progress_restore">रीस्टोर हो रहा है</string>
+    <string name="backup_done_backup_title">बैकअप सहेजा गया</string>
+    <string name="backup_done_backup_body">%1$d नोट्स और %2$d फ़ोल्डर सहेजे गए।</string>
+    <string name="backup_done_restore_title">रीस्टोर पूरा हुआ</string>
+    <string name="backup_done_restore_body">%1$d नोट्स रीस्टोर हुए, %2$d डुप्लिकेट छोड़े गए। फ़ोल्डर: %3$d बनाए गए, %4$d दोबारा इस्तेमाल हुए।</string>
+    <string name="backup_failed_backup_title">बैकअप विफल</string>
+    <string name="backup_failed_restore_title">रीस्टोर विफल</string>
+    <string name="backup_error_wrong_passphrase">यह पासफ़्रेज़ इस बैकअप को नहीं खोलता।</string>
+    <string name="backup_error_corrupt">यह फ़ाइल पढ़ने योग्य Offhand बैकअप नहीं है।</string>
+    <string name="backup_error_unsupported">यह बैकअप Offhand के नए वर्शन से बनाया गया था।</string>
+    <string name="backup_error_io">फ़ाइल पढ़ी या लिखी नहीं जा सकी।</string>
+    <string name="backup_start_button">बैकअप लें</string>
+    <string name="backup_step_passphrase_title">पासफ़्रेज़ सेट करें</string>
+    <string name="backup_warning">इस पासफ़्रेज़ को सुरक्षित रखें। यह खो जाने पर न आप और न हम इस बैकअप के नोट्स वापस पा सकेंगे।</string>
+    <string name="backup_continue">जारी रखें</string>
+    <string name="backup_step_options_title">बैकअप विकल्प</string>
+    <string name="backup_file_name_label">फ़ाइल का नाम</string>
+    <string name="backup_save_button">बैकअप सहेजें</string>
+    <string name="backup_done">हो गया</string>
+</resources>

@@ -144,6 +144,7 @@ struct NotesListView: View {
                         .buttonStyle(.plain)
                         .swipeActions(edge: .leading, allowsFullSwipe: true) {
                             Button {
+                                Haptics.confirm()
                                 viewModel.onMoveToFolderRequested(noteId: note.id)
                             } label: {
                                 Label(String(localized: "Move to folder"), systemImage: "folder")
@@ -152,6 +153,7 @@ struct NotesListView: View {
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button(role: .destructive) {
+                                Haptics.confirm()
                                 viewModel.onDeleteRequested(id: note.id)
                             } label: {
                                 Label(String(localized: "Delete"), systemImage: "trash")
@@ -256,6 +258,7 @@ struct NotesListView: View {
 
     private var recordButton: some View {
         Button {
+            Haptics.confirm()
             isRecordSheetVisible = true
         } label: {
             Image(systemName: "mic.fill")

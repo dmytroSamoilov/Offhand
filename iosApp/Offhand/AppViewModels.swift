@@ -12,4 +12,5 @@ enum AppViewModels {
     static let onboarding = SharedGraph.shared.onboardingViewModel()
     static let settings = SharedGraph.shared.settingsViewModel()
     static let aboutSupport = SharedGraph.shared.aboutSupportViewModel()
+    static let backup = SharedGraph.shared.backupViewModel()
 }
