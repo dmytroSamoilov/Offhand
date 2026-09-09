@@ -20,6 +20,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCa
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
@@ -75,6 +76,9 @@ class NotesViewModelTest {
     private val moveNoteToFolder: MoveNoteToFolderUseCase = mockk(relaxed = true)
     private val observeCustomNoteStyles: ObserveCustomNoteStylesUseCase = mockk {
         every { this@mockk.invoke() } returns flowOf(emptyList())
+    }
+    private val isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
     }
     private val observeDeveloperOptions: ObserveDeveloperOptionsUseCase = mockk {
         every { this@mockk() } returns flowOf(false)
@@ -138,6 +142,7 @@ class NotesViewModelTest {
         moveNoteToFolder = moveNoteToFolder,
         observeDeveloperOptions = observeDeveloperOptions,
         observeCustomNoteStyles = observeCustomNoteStyles,
+        isCustomNoteStylesAvailable = isCustomNoteStylesAvailable,
         getNote = getNote,
         updateNote = updateNote,
         deleteNote = deleteNote,

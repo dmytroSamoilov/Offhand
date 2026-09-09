@@ -81,25 +81,46 @@ fun NoteStyleEditorScreen(
     }
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
         Scaffold(
-            topBar = { EditorTopBar(isNew = state.isNew, onBack = onBack, onSave = viewModel::onSaveRequested) },
+            topBar = {
+                EditorTopBar(
+                    isNew = state.isNew,
+                    canSave = !state.isLocked,
+                    onBack = onBack,
+                    onSave = viewModel::onSaveRequested,
+                )
+            },
             contentWindowInsets = WindowInsets(0.dp),
         ) { innerPadding ->
-            EditorContent(
-                state = state,
-                viewModel = viewModel,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .verticalScroll(rememberScrollState())
-                    .imePadding()
-                    .padding(16.dp),
-            )
+            if (state.isLocked) {
+                LockedContent(modifier = Modifier.padding(innerPadding).padding(16.dp))
+            } else {
+                EditorContent(
+                    state = state,
+                    viewModel = viewModel,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .verticalScroll(rememberScrollState())
+                        .imePadding()
+                        .padding(16.dp),
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun EditorTopBar(isNew: Boolean, onBack: () -> Unit, onSave: () -> Unit) {
+private fun LockedContent(modifier: Modifier = Modifier) {
+    Text(
+        text = stringResource(R.string.settings_note_styles_locked),
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun EditorTopBar(isNew: Boolean, canSave: Boolean, onBack: () -> Unit, onSave: () -> Unit) {
     AppTopBar(
         title = stringResource(
             if (isNew) R.string.settings_note_style_editor_new_title else R.string.settings_note_style_editor_edit_title,
@@ -113,7 +134,9 @@ private fun EditorTopBar(isNew: Boolean, onBack: () -> Unit, onSave: () -> Unit)
             }
         },
         actions = {
-            TextButton(onClick = onSave) { Text(text = stringResource(R.string.settings_note_style_editor_save)) }
+            if (canSave) {
+                TextButton(onClick = onSave) { Text(text = stringResource(R.string.settings_note_style_editor_save)) }
+            }
         },
     )
 }

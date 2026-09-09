@@ -20,6 +20,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUse
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
@@ -50,6 +51,7 @@ class NotesViewModel(
     private val moveNoteToFolder: MoveNoteToFolderUseCase,
     observeDeveloperOptions: ObserveDeveloperOptionsUseCase,
     observeCustomNoteStyles: ObserveCustomNoteStylesUseCase,
+    isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase,
     private val getNote: GetNoteUseCase,
     private val updateNote: UpdateNoteUseCase,
     private val deleteNote: DeleteNoteUseCase,
@@ -105,8 +107,10 @@ class NotesViewModel(
             }
         }
         viewModelScope.launch {
-            observeCustomNoteStyles().collect { styles ->
-                mutableUiState.update { it.copy(customStyles = styles.map { style -> style.toOptionUi() }) }
+            combine(observeCustomNoteStyles(), isCustomNoteStylesAvailable()) { styles, unlocked ->
+                styles.takeIf { unlocked }.orEmpty().map { style -> style.toOptionUi() }
+            }.collect { styles ->
+                mutableUiState.update { it.copy(customStyles = styles) }
             }
         }
         viewModelScope.launch {

@@ -4,10 +4,10 @@ import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveEntitlementsUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
@@ -15,6 +15,7 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -24,7 +25,7 @@ class SettingsViewModel(
     observeNoteStyle: ObserveNoteStyleUseCase,
     private val setNoteStyle: SetNoteStyleUseCase,
     observeCustomNoteStyles: ObserveCustomNoteStylesUseCase,
-    observeEntitlements: ObserveEntitlementsUseCase,
+    isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase,
     observeAppLockEnabled: ObserveAppLockEnabledUseCase,
     private val setAppLockEnabled: SetAppLockEnabledUseCase,
     private val appLockManager: AppLockManager,
@@ -47,13 +48,10 @@ class SettingsViewModel(
             }
         }
         viewModelScope.launch {
-            observeCustomNoteStyles().collect { styles ->
-                mutableUiState.update { it.copy(customStyles = styles.map { style -> style.toOptionUi() }) }
-            }
-        }
-        viewModelScope.launch {
-            observeEntitlements().collect { entitlements ->
-                mutableUiState.update { it.copy(isCustomStylesUnlocked = entitlements.customStylesUnlocked) }
+            combine(observeCustomNoteStyles(), isCustomNoteStylesAvailable()) { styles, unlocked ->
+                styles.takeIf { unlocked }.orEmpty().map { style -> style.toOptionUi() } to unlocked
+            }.collect { (styles, unlocked) ->
+                mutableUiState.update { it.copy(customStyles = styles, isCustomStylesUnlocked = unlocked) }
             }
         }
         viewModelScope.launch {

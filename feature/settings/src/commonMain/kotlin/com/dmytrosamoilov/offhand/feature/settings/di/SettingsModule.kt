@@ -3,11 +3,11 @@ package com.dmytrosamoilov.offhand.feature.settings.di
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.DeleteCustomNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.DraftNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.GetCustomNoteStyleUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveEntitlementsUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.PreviewNoteStyleUseCase
@@ -30,11 +30,11 @@ val featureSettingsModule = module {
     factoryOf(::DeleteCustomNoteStyleUseCase)
     factoryOf(::DraftNoteStyleUseCase)
     factoryOf(::GetCustomNoteStyleUseCase)
+    factoryOf(::IsCustomNoteStylesAvailableUseCase)
     factoryOf(::ObserveAppLockEnabledUseCase)
     factoryOf(::ObserveCustomNoteStylesUseCase)
     factoryOf(::ObserveDeveloperOptionsUseCase)
     factoryOf(::ObserveDynamicColorUseCase)
-    factoryOf(::ObserveEntitlementsUseCase)
     factoryOf(::ObserveNoteStyleUseCase)
     factoryOf(::ObserveTelemetryConsentUseCase)
     factoryOf(::PreviewNoteStyleUseCase)
@@ -54,6 +54,7 @@ val featureSettingsModule = module {
             saveCustomNoteStyle = get(),
             previewNoteStyle = get(),
             draftNoteStyle = get(),
+            isCustomNoteStylesAvailable = get(),
         )
     }
 }

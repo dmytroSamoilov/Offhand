@@ -3,6 +3,7 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackendException
+import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleDraft
@@ -15,6 +16,7 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleValidation
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleValidator
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.DraftNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.GetCustomNoteStyleUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.PreviewNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SaveCustomNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SaveNoteStyleResult
@@ -24,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class NoteStyleEditorViewModel(
     private val styleId: Long,
@@ -31,6 +34,7 @@ class NoteStyleEditorViewModel(
     private val saveCustomNoteStyle: SaveCustomNoteStyleUseCase,
     private val previewNoteStyle: PreviewNoteStyleUseCase,
     private val draftNoteStyle: DraftNoteStyleUseCase,
+    isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase,
 ) : BaseViewModel() {
 
     private val mutableUiState = MutableStateFlow(NoteStyleEditorUiState(isNew = styleId == NEW_STYLE_ID))
@@ -40,6 +44,11 @@ class NoteStyleEditorViewModel(
 
     init {
         if (styleId != NEW_STYLE_ID) loadExisting()
+        viewModelScope.launch {
+            isCustomNoteStylesAvailable().collect { unlocked ->
+                mutableUiState.update { it.copy(isLocked = !unlocked) }
+            }
+        }
     }
 
     private fun loadExisting() {
@@ -127,6 +136,7 @@ class NoteStyleEditorViewModel(
     )
 
     fun onSaveRequested() {
+        if (mutableUiState.value.isLocked) return
         launchSafely(showLoading = false) {
             when (val result = saveCustomNoteStyle(currentStyle())) {
                 is SaveNoteStyleResult.Saved -> mutableUiState.update { it.copy(isSaved = true) }

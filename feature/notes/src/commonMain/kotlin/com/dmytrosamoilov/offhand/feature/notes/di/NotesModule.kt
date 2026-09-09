@@ -12,6 +12,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUse
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
@@ -21,7 +22,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
-import org.koin.core.module.dsl.viewModelOf
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val featureNotesModule = module {
@@ -36,11 +37,38 @@ val featureNotesModule = module {
     factoryOf(::RenameFolderUseCase)
     factoryOf(::DeleteNoteUseCase)
     factoryOf(::GetNoteUseCase)
+    factoryOf(::IsCustomNoteStylesAvailableUseCase)
     factoryOf(::MarkReviewAttemptUseCase)
     factoryOf(::ObserveDeveloperOptionsUseCase)
     factoryOf(::ObserveNotesUseCase)
     factoryOf(::SearchNotesUseCase)
     factoryOf(::ShouldRequestReviewUseCase)
     factoryOf(::UpdateNoteUseCase)
-    viewModelOf(::NotesViewModel)
+    viewModel {
+        NotesViewModel(
+            recordingProcessController = get(),
+            dateLabelFormatter = get(),
+            observeNotes = get(),
+            observeFolders = get(),
+            searchNotes = get(),
+            createFolder = get(),
+            renameFolder = get(),
+            deleteFolder = get(),
+            moveNoteToFolder = get(),
+            observeDeveloperOptions = get(),
+            observeCustomNoteStyles = get(),
+            isCustomNoteStylesAvailable = get(),
+            getNote = get(),
+            updateNote = get(),
+            deleteNote = get(),
+            prepareNoteShare = get(),
+            clearShareCache = get(),
+            shouldRequestReview = get(),
+            markReviewAttempt = get(),
+            reviewLauncher = get(),
+            audioPlayer = get(),
+            sessionManager = get(),
+            aiCoreDownloadStatus = get(),
+        )
+    }
 }

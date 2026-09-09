@@ -3,8 +3,8 @@ package com.dmytrosamoilov.offhand.feature.settings.presentation
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.DeleteCustomNoteStyleUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveEntitlementsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class NoteStylesViewModel(
     observeCustomNoteStyles: ObserveCustomNoteStylesUseCase,
-    observeEntitlements: ObserveEntitlementsUseCase,
+    isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase,
     private val deleteCustomNoteStyle: DeleteCustomNoteStyleUseCase,
 ) : BaseViewModel() {
 
@@ -27,8 +27,8 @@ class NoteStylesViewModel(
             }
         }
         viewModelScope.launch {
-            observeEntitlements().collect { entitlements ->
-                mutableUiState.update { it.copy(isUnlocked = entitlements.customStylesUnlocked) }
+            isCustomNoteStylesAvailable().collect { unlocked ->
+                mutableUiState.update { it.copy(isUnlocked = unlocked) }
             }
         }
     }

@@ -1,13 +1,16 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
-import com.dmytrosamoilov.offhand.core.data.domain.Entitlements
+import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleSection
+import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveEntitlementsUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
@@ -19,11 +22,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -38,7 +43,7 @@ class SettingsViewModelTest {
     private val setNoteStyle: SetNoteStyleUseCase = mockk(relaxed = true)
     private val observeNoteStyle: ObserveNoteStyleUseCase = mockk()
     private val observeCustomNoteStyles: ObserveCustomNoteStylesUseCase = mockk()
-    private val observeEntitlements: ObserveEntitlementsUseCase = mockk()
+    private val isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase = mockk()
     private val setAppLockEnabled: SetAppLockEnabledUseCase = mockk(relaxed = true)
     private val observeAppLockEnabled: ObserveAppLockEnabledUseCase = mockk()
     private val appLockManager: AppLockManager = mockk()
@@ -49,7 +54,7 @@ class SettingsViewModelTest {
         every { observeDynamicColor() } returns flowOf(true)
         every { observeNoteStyle() } returns flowOf(NoteStyleRef.BuiltIn(NotePreset.MEETING))
         every { observeCustomNoteStyles() } returns flowOf(emptyList())
-        every { observeEntitlements() } returns flowOf(Entitlements(customStylesUnlocked = true))
+        every { isCustomNoteStylesAvailable() } returns flowOf(true)
         every { observeAppLockEnabled() } returns flowOf(true)
         every { appLockManager.isDeviceSecure } returns true
     }
@@ -65,7 +70,7 @@ class SettingsViewModelTest {
         observeNoteStyle = observeNoteStyle,
         setNoteStyle = setNoteStyle,
         observeCustomNoteStyles = observeCustomNoteStyles,
-        observeEntitlements = observeEntitlements,
+        isCustomNoteStylesAvailable = isCustomNoteStylesAvailable,
         observeAppLockEnabled = observeAppLockEnabled,
         setAppLockEnabled = setAppLockEnabled,
         appLockManager = appLockManager,
@@ -126,4 +131,33 @@ class SettingsViewModelTest {
         assertEquals(false, viewModel.uiState.value.isDeviceSecure)
         coVerify { setAppLockEnabled(false) }
     }
+
+    @Test
+    fun `custom styles are hidden from the default picker while locked`() = runTest(dispatcher) {
+        every { observeCustomNoteStyles() } returns flowOf(listOf(customStyle))
+        every { isCustomNoteStylesAvailable() } returns flowOf(false)
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.customStyles.isEmpty())
+        assertFalse(viewModel.uiState.value.isCustomStylesUnlocked)
+    }
+
+    @Test
+    fun `custom styles are listed once unlocked`() = runTest(dispatcher) {
+        every { observeCustomNoteStyles() } returns flowOf(listOf(customStyle))
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        assertEquals(listOf("Debrief"), viewModel.uiState.value.customStyles.map { it.name })
+    }
+
+    private val customStyle = CustomNoteStyle(
+        id = 1,
+        name = "Debrief",
+        noteKind = "",
+        language = NoteStyleLanguage.RECORDING,
+        sections = listOf(NoteStyleSection("Customer", "", SectionFormat.SENTENCES)),
+        createdAtEpochMs = 0,
+    )
 }

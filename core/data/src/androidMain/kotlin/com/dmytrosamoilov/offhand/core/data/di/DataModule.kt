@@ -22,7 +22,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import com.dmytrosamoilov.offhand.core.data.preferences.DataStoreUserPreferencesRepository
-import com.dmytrosamoilov.offhand.core.data.repository.AlwaysUnlockedEntitlementsRepository
+import com.dmytrosamoilov.offhand.core.data.repository.MockEntitlementsRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomCustomNoteStylesRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomFoldersRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomNotesRepository
@@ -79,7 +79,7 @@ val coreDataModule = module {
     singleOf(::RoomNotesRepository) bind NotesRepository::class
     singleOf(::RoomFoldersRepository) bind FoldersRepository::class
     singleOf(::RoomCustomNoteStylesRepository) bind CustomNoteStylesRepository::class
-    singleOf(::AlwaysUnlockedEntitlementsRepository) bind EntitlementsRepository::class
+    singleOf(::MockEntitlementsRepository) bind EntitlementsRepository::class
     single<UserPreferencesRepository> {
         DataStoreUserPreferencesRepository(createUserPreferencesDataStore(androidContext()), get())
     }

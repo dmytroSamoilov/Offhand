@@ -11,14 +11,17 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleErrors
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleFieldError
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.DraftNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.GetCustomNoteStyleUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.PreviewNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SaveCustomNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SaveNoteStyleResult
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -39,6 +42,9 @@ class NoteStyleEditorViewModelTest {
     private val saveStyle: SaveCustomNoteStyleUseCase = mockk()
     private val previewStyle: PreviewNoteStyleUseCase = mockk()
     private val draftStyle: DraftNoteStyleUseCase = mockk()
+    private val isAvailable: IsCustomNoteStylesAvailableUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
 
     private val stored = CustomNoteStyle(
         id = 3,
@@ -58,7 +64,7 @@ class NoteStyleEditorViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel(styleId: Long) = NoteStyleEditorViewModel(styleId, getStyle, saveStyle, previewStyle, draftStyle)
+    private fun viewModel(styleId: Long) = NoteStyleEditorViewModel(styleId, getStyle, saveStyle, previewStyle, draftStyle, isAvailable)
 
     @Test
     fun `new editor starts with one empty section`() {
@@ -200,5 +206,21 @@ class NoteStyleEditorViewModelTest {
         advanceUntilIdle()
 
         assertEquals(DescribeStatusUi.MODEL_UNAVAILABLE, viewModel.uiState.value.describe?.status)
+    }
+
+    @Test
+    fun `a locked editor reports the lock and refuses to save`() = runTest(dispatcher) {
+        every { isAvailable() } returns flowOf(false)
+        val viewModel = viewModel(0L)
+        advanceUntilIdle()
+        viewModel.onNameChanged("Debrief")
+        viewModel.onSectionHeadingChanged(0, "A")
+
+        viewModel.onSaveRequested()
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isLocked)
+        assertFalse(viewModel.uiState.value.isSaved)
+        coVerify(exactly = 0) { saveStyle(any()) }
     }
 }
