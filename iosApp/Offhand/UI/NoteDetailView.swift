@@ -54,6 +54,11 @@ struct NoteDetailView: View {
                 Button { viewModel.onEditStarted() } label: { Image(systemName: "pencil") }
                 Button { viewModel.onShareRequested() } label: { Image(systemName: "square.and.arrow.up") }
                 Menu {
+                    Button {
+                        viewModel.onMoveToFolderRequested()
+                    } label: {
+                        Label(String(localized: "Move to folder"), systemImage: "folder")
+                    }
                     if !detail.transcript.isEmpty {
                         Button {
                             viewModel.onPresetSheetRequested()
@@ -76,6 +81,7 @@ struct NoteDetailView: View {
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }
+                .accessibilityLabel(String(localized: "More actions"))
             }
         }
         .confirmationDialog(
@@ -109,6 +115,7 @@ struct NoteDetailView: View {
             NoteStyleSheet(viewModel: viewModel, current: detail.preset)
                 .presentationDetents([.medium, .large])
         }
+
         .sheet(isPresented: shareItemsBinding) {
             ActivityShareSheet(items: shareItems, onComplete: dismissShare)
         }
@@ -152,12 +159,14 @@ struct NoteDetailView: View {
     }
 
     private var metadataLine: String {
-        guard detail.wordCount > 0 else { return detail.createdAt }
-        let words = String.localizedStringWithFormat(
-            String(localized: "%d words"),
-            Int(detail.wordCount)
-        )
-        return "\(detail.createdAt) · \(words)"
+        var parts = [detail.createdAt]
+        if detail.wordCount > 0 {
+            parts.append(String.localizedStringWithFormat(String(localized: "%d words"), Int(detail.wordCount)))
+        }
+        if let folder = detail.folderName {
+            parts.append(folder)
+        }
+        return parts.joined(separator: " · ")
     }
 
     private var processingCard: some View {
@@ -472,6 +481,45 @@ private struct MarkdownBlocks: View {
     private func inlineMarkdown(_ raw: String) -> AttributedString {
         let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
         return (try? AttributedString(markdown: raw, options: options)) ?? AttributedString(raw)
+    }
+}
+
+struct MoveToFolderSheet: View {
+    let folders: [FolderUi]
+    let currentFolderId: Int64?
+    let onMove: (Int64?) -> Void
+    let onCancel: () -> Void
+
+    var body: some View {
+        NavigationStack {
+            List {
+                folderRow(title: String(localized: "No folder"), isSelected: currentFolderId == nil) { onMove(nil) }
+                ForEach(folders, id: \.id) { folder in
+                    folderRow(title: folder.name, isSelected: folder.id == currentFolderId) { onMove(folder.id) }
+                }
+            }
+            .navigationTitle(String(localized: "Move to folder"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(String(localized: "Cancel"), action: onCancel)
+                }
+            }
+        }
+    }
+
+    private func folderRow(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        HStack {
+            Text(title).foregroundStyle(Color.primary)
+            Spacer()
+            if isSelected {
+                Image(systemName: "checkmark")
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Brand.primary)
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture(perform: action)
     }
 }
 

@@ -59,4 +59,19 @@
     <string name="notes_search_clear_description">Очистить поиск</string>
     <string name="notes_search_empty_state">По вашему запросу заметок не найдено.</string>
     <string name="notes_search_cancel_description">Отменить поиск</string>
+    <string name="notes_folder_all">Все заметки</string>
+    <string name="notes_folder_new">Новая папка</string>
+    <string name="notes_folder_options_description">Параметры папки</string>
+    <string name="notes_folder_rename">Переименовать папку</string>
+    <string name="notes_folder_delete">Удалить папку</string>
+    <string name="notes_folder_name_label">Название папки</string>
+    <string name="notes_folder_save">Сохранить</string>
+    <string name="notes_folder_error_blank">Введите название папки.</string>
+    <string name="notes_folder_error_too_long">Не более %1$d символов.</string>
+    <string name="notes_folder_error_duplicate">Папка с таким названием уже существует.</string>
+    <string name="notes_folder_delete_dialog_title">Удалить эту папку?</string>
+    <string name="notes_folder_delete_dialog_body">Заметки из неё сохранятся и вернутся во «Все заметки».</string>
+    <string name="notes_folder_empty_state">В этой папке пока нет заметок.</string>
+    <string name="notes_move_to_folder">Переместить в папку</string>
+    <string name="notes_folder_none">Без папки</string>
 </resources>

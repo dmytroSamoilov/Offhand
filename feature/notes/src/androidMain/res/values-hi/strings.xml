@@ -57,4 +57,19 @@
     <string name="notes_search_clear_description">खोज साफ़ करें</string>
     <string name="notes_search_empty_state">आपकी खोज से मेल खाने वाला कोई नोट नहीं है।</string>
     <string name="notes_search_cancel_description">खोज रद्द करें</string>
+    <string name="notes_folder_all">सभी नोट्स</string>
+    <string name="notes_folder_new">नया फ़ोल्डर</string>
+    <string name="notes_folder_options_description">फ़ोल्डर विकल्प</string>
+    <string name="notes_folder_rename">फ़ोल्डर का नाम बदलें</string>
+    <string name="notes_folder_delete">फ़ोल्डर हटाएं</string>
+    <string name="notes_folder_name_label">फ़ोल्डर का नाम</string>
+    <string name="notes_folder_save">सहेजें</string>
+    <string name="notes_folder_error_blank">फ़ोल्डर का नाम लिखें।</string>
+    <string name="notes_folder_error_too_long">अधिकतम %1$d वर्ण इस्तेमाल करें।</string>
+    <string name="notes_folder_error_duplicate">इस नाम का फ़ोल्डर पहले से मौजूद है।</string>
+    <string name="notes_folder_delete_dialog_title">यह फ़ोल्डर हटाएं?</string>
+    <string name="notes_folder_delete_dialog_body">इसके नोट्स सुरक्षित रहेंगे और सभी नोट्स में वापस आ जाएंगे।</string>
+    <string name="notes_folder_empty_state">इस फ़ोल्डर में अभी कोई नोट नहीं है।</string>
+    <string name="notes_move_to_folder">फ़ोल्डर में ले जाएं</string>
+    <string name="notes_folder_none">कोई फ़ोल्डर नहीं</string>
 </resources>

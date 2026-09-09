@@ -16,7 +16,35 @@ data class NotesUiState(
     val noteProgress: Map<Long, Int> = emptyMap(),
     val modelPreparation: ModelPreparationUi? = null,
     val searchQuery: String = "",
+    val folders: List<FolderUi> = emptyList(),
+    val selectedFolderId: Long? = null,
+    val folderEditor: FolderEditorUi? = null,
+    val pendingDeleteFolderId: Long? = null,
+    val moveToFolder: MoveToFolderUi? = null,
 )
+
+data class MoveToFolderUi(
+    val noteId: Long,
+    val currentFolderId: Long?,
+)
+
+data class FolderUi(
+    val id: Long,
+    val name: String,
+    val noteCount: Int,
+)
+
+data class FolderEditorUi(
+    val folderId: Long?,
+    val name: String,
+    val error: FolderNameErrorUi? = null,
+)
+
+enum class FolderNameErrorUi {
+    BLANK,
+    TOO_LONG,
+    DUPLICATE,
+}
 
 data class NoteShareUi(
     val filePaths: List<String>,
@@ -48,6 +76,7 @@ data class NoteCardUi(
     val status: NoteStatusUi,
     val titleHighlights: List<TextRangeUi> = emptyList(),
     val previewHighlights: List<TextRangeUi> = emptyList(),
+    val folderName: String? = null,
 )
 
 data class TextRangeUi(
@@ -66,6 +95,8 @@ data class NoteDetailUi(
     val metrics: NoteMetricsUi?,
     val status: NoteStatusUi,
     val preset: NotePreset,
+    val folderId: Long? = null,
+    val folderName: String? = null,
 )
 
 enum class NoteStatusUi {

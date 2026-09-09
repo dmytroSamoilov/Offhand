@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.core.data.database
 
+import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
@@ -17,6 +18,7 @@ internal fun NoteEntity.toDomain(): Note = Note(
     durationMs = durationMs,
     status = NoteStatus.entries.firstOrNull { it.name == status } ?: NoteStatus.READY,
     preset = NotePreset.fromName(preset),
+    folderId = folderId,
 )
 
 internal fun Note.toEntity(): NoteEntity = NoteEntity(
@@ -32,4 +34,11 @@ internal fun Note.toEntity(): NoteEntity = NoteEntity(
     durationMs = durationMs,
     status = status.name,
     preset = preset.name,
+    folderId = folderId,
+)
+
+internal fun FolderEntity.toDomain(): Folder = Folder(
+    id = id,
+    name = name,
+    createdAtEpochMs = createdAtEpochMs,
 )

@@ -4,10 +4,12 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
 import com.dmytrosamoilov.offhand.core.common.DurationFormatter
+import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlaybackState
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
+import com.dmytrosamoilov.offhand.feature.notes.domain.FolderNameError
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteSearchResult
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareBundle
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteTextCleaner
@@ -24,22 +26,37 @@ import kotlinx.datetime.toLocalDateTime
 
 private val WHITESPACE_RUNS = Regex("\\s+")
 
-internal fun List<NoteSearchResult>.toSectionsUi(dateLabelFormatter: DateLabelFormatter): List<NotesSectionUi> {
+internal fun List<NoteSearchResult>.toSectionsUi(
+    dateLabelFormatter: DateLabelFormatter,
+    folderNames: Map<Long, String> = emptyMap(),
+): List<NotesSectionUi> {
     val zone = TimeZone.currentSystemDefault()
     val today = Clock.System.now().toLocalDateTime(zone).date
     return groupBy { Instant.fromEpochMilliseconds(it.note.createdAtEpochMs).toLocalDateTime(zone).date }
         .map { (date, results) ->
             NotesSectionUi(
                 dayLabel = date.toDayLabel(today, dateLabelFormatter),
-                notes = results.map { it.toCardUi(zone, today, dateLabelFormatter) },
+                notes = results.map { it.toCardUi(zone, today, dateLabelFormatter, folderNames) },
             )
         }
+}
+
+internal fun List<Folder>.toFoldersUi(notes: List<Note>): List<FolderUi> {
+    val counts = notes.groupingBy { it.folderId }.eachCount()
+    return map { folder -> FolderUi(id = folder.id, name = folder.name, noteCount = counts[folder.id] ?: 0) }
+}
+
+internal fun FolderNameError.toUi(): FolderNameErrorUi = when (this) {
+    FolderNameError.BLANK -> FolderNameErrorUi.BLANK
+    FolderNameError.TOO_LONG -> FolderNameErrorUi.TOO_LONG
+    FolderNameError.DUPLICATE -> FolderNameErrorUi.DUPLICATE
 }
 
 private fun NoteSearchResult.toCardUi(
     zone: TimeZone,
     today: LocalDate,
     dateLabelFormatter: DateLabelFormatter,
+    folderNames: Map<Long, String>,
 ): NoteCardUi {
     val createdAt = Instant.fromEpochMilliseconds(note.createdAtEpochMs).toLocalDateTime(zone)
     return NoteCardUi(
@@ -52,6 +69,7 @@ private fun NoteSearchResult.toCardUi(
         status = note.status.toUi(),
         titleHighlights = titleMatches.map(TextMatch::toUi),
         previewHighlights = snippetMatches.map(TextMatch::toUi),
+        folderName = note.folderId?.let(folderNames::get),
     )
 }
 
@@ -69,7 +87,10 @@ private fun LocalDate.toDayLabel(
 private fun countWords(text: String): Int =
     text.split(WHITESPACE_RUNS).count { it.isNotBlank() }
 
-internal fun Note.toDetailUi(dateLabelFormatter: DateLabelFormatter): NoteDetailUi = NoteDetailUi(
+internal fun Note.toDetailUi(
+    dateLabelFormatter: DateLabelFormatter,
+    folderNames: Map<Long, String> = emptyMap(),
+): NoteDetailUi = NoteDetailUi(
     id = id,
     title = title,
     body = body,
@@ -80,6 +101,8 @@ internal fun Note.toDetailUi(dateLabelFormatter: DateLabelFormatter): NoteDetail
     metrics = toMetricsUi(),
     status = status.toUi(),
     preset = preset,
+    folderId = folderId,
+    folderName = folderId?.let(folderNames::get),
 )
 
 private fun Note.createdAtLocalDateTime(): LocalDateTime =

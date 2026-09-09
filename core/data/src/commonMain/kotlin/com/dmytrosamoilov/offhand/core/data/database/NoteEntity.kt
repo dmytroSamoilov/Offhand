@@ -17,4 +17,5 @@ internal data class NoteEntity(
     val durationMs: Long?,
     val status: String,
     val preset: String,
+    val folderId: Long?,
 )

@@ -12,6 +12,11 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlaybackState
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
@@ -60,6 +65,13 @@ class NotesViewModelTest {
     )
 
     private val observeNotes: ObserveNotesUseCase = mockk()
+    private val observeFolders: ObserveFoldersUseCase = mockk {
+        every { this@mockk() } returns flowOf(emptyList())
+    }
+    private val createFolder: CreateFolderUseCase = mockk(relaxed = true)
+    private val renameFolder: RenameFolderUseCase = mockk(relaxed = true)
+    private val deleteFolder: DeleteFolderUseCase = mockk(relaxed = true)
+    private val moveNoteToFolder: MoveNoteToFolderUseCase = mockk(relaxed = true)
     private val observeDeveloperOptions: ObserveDeveloperOptionsUseCase = mockk {
         every { this@mockk() } returns flowOf(false)
     }
@@ -114,7 +126,12 @@ class NotesViewModelTest {
         recordingProcessController = recordingProcessController,
         dateLabelFormatter = dateLabelFormatter,
         observeNotes = observeNotes,
+        observeFolders = observeFolders,
         searchNotes = SearchNotesUseCase(),
+        createFolder = createFolder,
+        renameFolder = renameFolder,
+        deleteFolder = deleteFolder,
+        moveNoteToFolder = moveNoteToFolder,
         observeDeveloperOptions = observeDeveloperOptions,
         getNote = getNote,
         updateNote = updateNote,

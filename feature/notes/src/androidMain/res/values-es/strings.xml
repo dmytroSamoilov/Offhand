@@ -58,4 +58,19 @@
     <string name="notes_search_clear_description">Borrar búsqueda</string>
     <string name="notes_search_empty_state">Ninguna nota coincide con tu búsqueda.</string>
     <string name="notes_search_cancel_description">Cancelar búsqueda</string>
+    <string name="notes_folder_all">Todas las notas</string>
+    <string name="notes_folder_new">Nueva carpeta</string>
+    <string name="notes_folder_options_description">Opciones de carpeta</string>
+    <string name="notes_folder_rename">Renombrar carpeta</string>
+    <string name="notes_folder_delete">Eliminar carpeta</string>
+    <string name="notes_folder_name_label">Nombre de la carpeta</string>
+    <string name="notes_folder_save">Guardar</string>
+    <string name="notes_folder_error_blank">Escribe un nombre para la carpeta.</string>
+    <string name="notes_folder_error_too_long">Usa como máximo %1$d caracteres.</string>
+    <string name="notes_folder_error_duplicate">Ya existe una carpeta con este nombre.</string>
+    <string name="notes_folder_delete_dialog_title">¿Eliminar esta carpeta?</string>
+    <string name="notes_folder_delete_dialog_body">Sus notas se conservan y vuelven a Todas las notas.</string>
+    <string name="notes_folder_empty_state">Aún no hay notas en esta carpeta.</string>
+    <string name="notes_move_to_folder">Mover a carpeta</string>
+    <string name="notes_folder_none">Sin carpeta</string>
 </resources>

@@ -126,6 +126,21 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DriveFileMove
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.RadioButton
+import com.dmytrosamoilov.offhand.feature.notes.domain.FolderNameValidator
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.foundation.focusGroup
+import androidx.compose.ui.focus.focusProperties
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -140,6 +155,8 @@ fun NotesScreen(
     val navigator = rememberListDetailPaneScaffoldNavigator<Long>()
     val paneScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(state.pendingShare) {
         val share = state.pendingShare ?: return@LaunchedEffect
@@ -175,6 +192,11 @@ fun NotesScreen(
         }
     }
 
+    LaunchedEffect(state.selected?.id, state.folderEditor) {
+        focusManager.clearFocus()
+        keyboard?.hide()
+    }
+
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
         NavigableListDetailPaneScaffold(
             navigator = navigator,
@@ -184,14 +206,22 @@ fun NotesScreen(
                         sections = state.sections,
                         searchQuery = state.searchQuery,
                         onSearchQueryChanged = viewModel::onSearchQueryChanged,
+                        folders = state.folders,
+                        selectedFolderId = state.selectedFolderId,
+                        onFolderSelected = viewModel::onFolderSelected,
+                        onNewFolder = viewModel::onNewFolderRequested,
+                        onRenameFolder = viewModel::onRenameFolderRequested,
+                        onDeleteFolder = viewModel::onDeleteFolderRequested,
                         modelPreparation = state.modelPreparation,
                         onNoteClick = { id ->
+                            focusManager.clearFocus()
                             viewModel.onNoteSelected(id)
                             paneScope.launch {
                                 navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id)
                             }
                         },
                         onDeleteRequested = viewModel::onDeleteRequested,
+                        onMoveRequested = viewModel::onMoveToFolderRequested,
                         onNewRecording = onNewRecording,
                     )
                 }
@@ -211,6 +241,31 @@ fun NotesScreen(
         DeleteConfirmationDialog(
             onConfirm = viewModel::onDeleteConfirmed,
             onDismiss = viewModel::onDeleteDismissed,
+        )
+    }
+
+    state.folderEditor?.let { editor ->
+        FolderEditorDialog(
+            editor = editor,
+            onNameChanged = viewModel::onFolderNameChanged,
+            onConfirm = viewModel::onFolderEditorConfirmed,
+            onDismiss = viewModel::onFolderEditorDismissed,
+        )
+    }
+
+    if (state.pendingDeleteFolderId != null) {
+        DeleteFolderDialog(
+            onConfirm = viewModel::onDeleteFolderConfirmed,
+            onDismiss = viewModel::onDeleteFolderDismissed,
+        )
+    }
+
+    state.moveToFolder?.let { target ->
+        MoveToFolderSheet(
+            folders = state.folders,
+            currentFolderId = target.currentFolderId,
+            onMove = viewModel::onMoveToFolder,
+            onDismiss = viewModel::onMoveToFolderDismissed,
         )
     }
 
@@ -401,9 +456,16 @@ private fun NotesListPane(
     sections: List<NotesSectionUi>,
     searchQuery: String,
     onSearchQueryChanged: (String) -> Unit,
+    folders: List<FolderUi>,
+    selectedFolderId: Long?,
+    onFolderSelected: (Long?) -> Unit,
+    onNewFolder: () -> Unit,
+    onRenameFolder: (Long) -> Unit,
+    onDeleteFolder: (Long) -> Unit,
     modelPreparation: ModelPreparationUi?,
     onNoteClick: (Long) -> Unit,
     onDeleteRequested: (Long) -> Unit,
+    onMoveRequested: (Long) -> Unit,
     onNewRecording: () -> Unit,
 ) {
     val listState = rememberLazyListState()
@@ -436,10 +498,14 @@ private fun NotesListPane(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .focusProperties { onEnter = { cancelFocusChange() } }
+                .focusGroup(),
         ) {
             ModelPreparationBanner(preparation = modelPreparation)
-            if (sections.isEmpty() && searchQuery.isBlank()) {
+            val isLibraryEmpty = sections.isEmpty() && folders.isEmpty() &&
+                searchQuery.isBlank() && selectedFolderId == null
+            if (isLibraryEmpty) {
                 EmptyListMessage(text = stringResource(R.string.notes_empty_state))
             } else {
                 LazyColumn(
@@ -456,9 +522,19 @@ private fun NotesListPane(
                     item(key = SEARCH_ITEM_KEY, contentType = "search") {
                         NotesSearchField(query = searchQuery, onQueryChanged = onSearchQueryChanged)
                     }
+                    item(key = FOLDERS_ITEM_KEY, contentType = "folders") {
+                        FolderChips(
+                            folders = folders,
+                            selectedFolderId = selectedFolderId,
+                            onFolderSelected = onFolderSelected,
+                            onNewFolder = onNewFolder,
+                            onRenameFolder = onRenameFolder,
+                            onDeleteFolder = onDeleteFolder,
+                        )
+                    }
                     if (sections.isEmpty()) {
                         item(key = EMPTY_SEARCH_ITEM_KEY, contentType = "empty") {
-                            EmptyListMessage(text = stringResource(R.string.notes_search_empty_state))
+                            EmptyListMessage(text = stringResource(emptyMessageRes(searchQuery, selectedFolderId)))
                         }
                     }
                     sections.forEach { section ->
@@ -466,8 +542,9 @@ private fun NotesListPane(
                             SectionHeader(dayLabel = section.dayLabel)
                         }
                         items(section.notes, key = { it.id }) { note ->
-                            SwipeToDeleteContainer(
+                            SwipeableNoteCard(
                                 onDeleteRequested = { onDeleteRequested(note.id) },
+                                onMoveRequested = { onMoveRequested(note.id) },
                                 modifier = Modifier.animateItem(),
                             ) {
                                 NoteCard(note = note, onClick = { onNoteClick(note.id) })
@@ -481,7 +558,275 @@ private fun NotesListPane(
 }
 
 private const val SEARCH_ITEM_KEY = "search"
+private const val FOLDERS_ITEM_KEY = "folders"
 private const val EMPTY_SEARCH_ITEM_KEY = "empty-search"
+
+private fun emptyMessageRes(searchQuery: String, selectedFolderId: Long?): Int = when {
+    searchQuery.isNotBlank() -> R.string.notes_search_empty_state
+    selectedFolderId != null -> R.string.notes_folder_empty_state
+    else -> R.string.notes_empty_state
+}
+
+@Composable
+private fun FolderChips(
+    folders: List<FolderUi>,
+    selectedFolderId: Long?,
+    onFolderSelected: (Long?) -> Unit,
+    onNewFolder: () -> Unit,
+    onRenameFolder: (Long) -> Unit,
+    onDeleteFolder: (Long) -> Unit,
+) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(vertical = 4.dp),
+    ) {
+        item(key = ALL_NOTES_CHIP_KEY) {
+            FilterChip(
+                selected = selectedFolderId == null,
+                onClick = { onFolderSelected(null) },
+                label = { Text(text = stringResource(R.string.notes_folder_all)) },
+            )
+        }
+        items(folders, key = { it.id }) { folder ->
+            FolderChip(
+                folder = folder,
+                isSelected = folder.id == selectedFolderId,
+                onSelected = { onFolderSelected(folder.id) },
+                onRename = { onRenameFolder(folder.id) },
+                onDelete = { onDeleteFolder(folder.id) },
+            )
+        }
+        item(key = NEW_FOLDER_CHIP_KEY) { NewFolderChip(onClick = onNewFolder) }
+    }
+}
+
+private const val ALL_NOTES_CHIP_KEY = "all-notes"
+private const val NEW_FOLDER_CHIP_KEY = "new-folder"
+
+@Composable
+private fun NewFolderChip(onClick: () -> Unit) {
+    AssistChip(
+        onClick = onClick,
+        label = { Text(text = stringResource(R.string.notes_folder_new)) },
+        leadingIcon = {
+            Icon(imageVector = Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+        },
+    )
+}
+
+@Composable
+private fun FolderChip(
+    folder: FolderUi,
+    isSelected: Boolean,
+    onSelected: () -> Unit,
+    onRename: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    var isMenuExpanded by remember { mutableStateOf(false) }
+    Box {
+        FilterChip(
+            selected = isSelected,
+            onClick = { if (isSelected) isMenuExpanded = true else onSelected() },
+            label = { Text(text = folder.name) },
+            trailingIcon = if (isSelected) {
+                { FolderOptionsIcon() }
+            } else {
+                null
+            },
+        )
+        FolderChipMenu(
+            expanded = isMenuExpanded,
+            onDismiss = { isMenuExpanded = false },
+            onRename = onRename,
+            onDelete = onDelete,
+        )
+    }
+}
+
+@Composable
+private fun FolderOptionsIcon() {
+    Icon(
+        imageVector = Icons.Filled.MoreVert,
+        contentDescription = stringResource(R.string.notes_folder_options_description),
+        modifier = Modifier.size(18.dp),
+    )
+}
+
+@Composable
+private fun FolderChipMenu(
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    onRename: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        DropdownMenuItem(
+            text = { Text(text = stringResource(R.string.notes_folder_rename)) },
+            leadingIcon = { Icon(imageVector = Icons.Filled.Edit, contentDescription = null) },
+            onClick = {
+                onDismiss()
+                onRename()
+            },
+        )
+        DropdownMenuItem(
+            text = {
+                Text(
+                    text = stringResource(R.string.notes_folder_delete),
+                    color = MaterialTheme.colorScheme.error,
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            },
+            onClick = {
+                onDismiss()
+                onDelete()
+            },
+        )
+    }
+}
+
+@Composable
+private fun FolderEditorDialog(
+    editor: FolderEditorUi,
+    onNameChanged: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(
+                    if (editor.folderId == null) R.string.notes_folder_new else R.string.notes_folder_rename,
+                ),
+            )
+        },
+        text = { FolderNameField(editor = editor, onNameChanged = onNameChanged, onDone = onConfirm) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(text = stringResource(R.string.notes_folder_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.notes_delete_dialog_cancel))
+            }
+        },
+    )
+}
+
+@Composable
+private fun FolderNameField(
+    editor: FolderEditorUi,
+    onNameChanged: (String) -> Unit,
+    onDone: () -> Unit,
+) {
+    var value by remember(editor.folderId) {
+        mutableStateOf(TextFieldValue(editor.name, TextRange(0, editor.name.length)))
+    }
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    OutlinedTextField(
+        value = value,
+        onValueChange = { changed ->
+            value = changed
+            onNameChanged(changed.text)
+        },
+        modifier = Modifier.focusRequester(focusRequester),
+        singleLine = true,
+        label = { Text(text = stringResource(R.string.notes_folder_name_label)) },
+        isError = editor.error != null,
+        supportingText = editor.error?.let { error -> { Text(text = error.message()) } },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { onDone() }),
+    )
+}
+
+@Composable
+private fun FolderNameErrorUi.message(): String = when (this) {
+    FolderNameErrorUi.BLANK -> stringResource(R.string.notes_folder_error_blank)
+    FolderNameErrorUi.TOO_LONG -> stringResource(R.string.notes_folder_error_too_long, FolderNameValidator.MAX_LENGTH)
+    FolderNameErrorUi.DUPLICATE -> stringResource(R.string.notes_folder_error_duplicate)
+}
+
+@Composable
+private fun DeleteFolderDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.notes_folder_delete_dialog_title)) },
+        text = { Text(text = stringResource(R.string.notes_folder_delete_dialog_body)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(text = stringResource(R.string.notes_delete_dialog_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.notes_delete_dialog_cancel))
+            }
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MoveToFolderSheet(
+    folders: List<FolderUi>,
+    currentFolderId: Long?,
+    onMove: (Long?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(bottom = 24.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.notes_move_to_folder),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+            )
+            FolderChoiceRow(
+                label = stringResource(R.string.notes_folder_none),
+                isSelected = currentFolderId == null,
+                onClick = { onMove(null) },
+            )
+            folders.forEach { folder ->
+                FolderChoiceRow(
+                    label = folder.name,
+                    isSelected = folder.id == currentFolderId,
+                    onClick = { onMove(folder.id) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FolderChoiceRow(label: String, isSelected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 24.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        RadioButton(selected = isSelected, onClick = null)
+        Text(text = label, style = MaterialTheme.typography.bodyLarge)
+    }
+}
 
 @Composable
 private fun EmptyListMessage(text: String) {
@@ -648,46 +993,49 @@ private fun SectionHeader(dayLabel: NoteDayLabelUi) {
 }
 
 @Composable
-private fun SwipeToDeleteContainer(
+private fun SwipeableNoteCard(
     onDeleteRequested: () -> Unit,
+    onMoveRequested: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     val currentOnDeleteRequested by rememberUpdatedState(onDeleteRequested)
+    val currentOnMoveRequested by rememberUpdatedState(onMoveRequested)
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
-            if (value == SwipeToDismissBoxValue.EndToStart) {
-                currentOnDeleteRequested()
+            when (value) {
+                SwipeToDismissBoxValue.EndToStart -> currentOnDeleteRequested()
+                SwipeToDismissBoxValue.StartToEnd -> currentOnMoveRequested()
+                SwipeToDismissBoxValue.Settled -> Unit
             }
             value == SwipeToDismissBoxValue.Settled
         },
     )
     SwipeToDismissBox(
         state = dismissState,
-        backgroundContent = { SwipeToDeleteBackground() },
+        backgroundContent = { SwipeBackground(direction = dismissState.dismissDirection) },
         modifier = modifier,
-        enableDismissFromStartToEnd = false,
     ) {
         content()
     }
 }
 
 @Composable
-private fun SwipeToDeleteBackground() {
+private fun SwipeBackground(direction: SwipeToDismissBoxValue) {
+    val isMove = direction == SwipeToDismissBoxValue.StartToEnd
+    val containerColor = if (isMove) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.errorContainer
+    val contentColor = if (isMove) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                color = MaterialTheme.colorScheme.errorContainer,
-                shape = CardDefaults.shape,
-            )
+            .background(color = containerColor, shape = CardDefaults.shape)
             .padding(horizontal = 24.dp),
-        contentAlignment = Alignment.CenterEnd,
+        contentAlignment = if (isMove) Alignment.CenterStart else Alignment.CenterEnd,
     ) {
         Icon(
-            imageVector = Icons.Filled.Delete,
+            imageVector = if (isMove) Icons.Filled.DriveFileMove else Icons.Filled.Delete,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onErrorContainer,
+            tint = contentColor,
         )
     }
 }
@@ -729,27 +1077,38 @@ private fun NoteCard(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-            if (note.status == NoteStatusUi.READY && note.durationText != null) {
+            if (note.status == NoteStatusUi.READY && (note.durationText != null || note.folderName != null)) {
                 Spacer(modifier = Modifier.height(12.dp))
-                NoteCardMetadata(durationText = note.durationText)
+                NoteCardMetadata(durationText = note.durationText, folderName = note.folderName)
             }
         }
     }
 }
 
 @Composable
-private fun NoteCardMetadata(durationText: String) {
+private fun NoteCardMetadata(durationText: String?, folderName: String?) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        if (durationText != null) MetadataWithIcon(icon = Icons.Filled.Mic, text = durationText)
+        if (folderName != null) MetadataWithIcon(icon = Icons.Filled.Folder, text = folderName)
+    }
+}
+
+@Composable
+private fun MetadataWithIcon(icon: ImageVector, text: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Icon(
-            imageVector = Icons.Filled.Mic,
+            imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(14.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        MetadataText(text = durationText)
+        MetadataText(text = text)
     }
 }
 
@@ -846,6 +1205,7 @@ private fun NoteDetailPane(
             onRetryTranscription = viewModel::onRetryTranscriptionRequested,
             onRetranscribeRequested = viewModel::onRetranscribeRequested,
             onPresetRequested = viewModel::onPresetSheetRequested,
+            onMoveToFolderRequested = viewModel::onMoveToFolderRequested,
         )
     }
 }
@@ -881,6 +1241,7 @@ private fun NoteDetail(
     onRetryTranscription: () -> Unit,
     onRetranscribeRequested: () -> Unit,
     onPresetRequested: () -> Unit,
+    onMoveToFolderRequested: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -893,6 +1254,7 @@ private fun NoteDetail(
                 onDeleteRequested = onDeleteRequested,
                 onRetranscribeRequested = onRetranscribeRequested,
                 onPresetRequested = onPresetRequested,
+                onMoveToFolderRequested = onMoveToFolderRequested,
             )
         },
         contentWindowInsets = WindowInsets(0.dp),
@@ -920,6 +1282,7 @@ private fun NoteDetailTopBar(
     onDeleteRequested: () -> Unit,
     onRetranscribeRequested: () -> Unit,
     onPresetRequested: () -> Unit,
+    onMoveToFolderRequested: () -> Unit,
 ) {
     AppTopBar(
         title = "",
@@ -945,6 +1308,7 @@ private fun NoteDetailTopBar(
                     showPreset = note.transcript.isNotBlank(),
                     onRetranscribeRequested = onRetranscribeRequested,
                     onPresetRequested = onPresetRequested,
+                    onMoveToFolderRequested = onMoveToFolderRequested,
                     onDeleteRequested = onDeleteRequested,
                 )
             } else {
@@ -975,6 +1339,7 @@ private fun NoteOverflowMenu(
     showPreset: Boolean,
     onRetranscribeRequested: () -> Unit,
     onPresetRequested: () -> Unit,
+    onMoveToFolderRequested: () -> Unit,
     onDeleteRequested: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -986,6 +1351,12 @@ private fun NoteOverflowMenu(
             )
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            MoveToFolderMenuItem(
+                onClick = {
+                    expanded = false
+                    onMoveToFolderRequested()
+                },
+            )
             if (showPreset) {
                 PresetMenuItem(
                     onClick = {
@@ -1010,6 +1381,17 @@ private fun NoteOverflowMenu(
             )
         }
     }
+}
+
+@Composable
+private fun MoveToFolderMenuItem(onClick: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text(text = stringResource(R.string.notes_move_to_folder)) },
+        leadingIcon = {
+            Icon(imageVector = Icons.Filled.DriveFileMove, contentDescription = null)
+        },
+        onClick = onClick,
+    )
 }
 
 @Composable
@@ -1092,6 +1474,10 @@ private fun NoteDetailContent(
                         String.format(Locale.getDefault(), "%,d", note.wordCount),
                     ),
                 )
+            }
+            if (note.folderName != null) {
+                MetadataText(text = stringResource(R.string.notes_metadata_separator))
+                MetadataText(text = note.folderName)
             }
         }
         Spacer(modifier = Modifier.height(10.dp))

@@ -18,7 +18,12 @@ struct NotesListView: View {
         isDeveloperMode: false,
         noteProgress: [:],
         modelPreparation: nil,
-        searchQuery: ""
+        searchQuery: "",
+        folders: [],
+        selectedFolderId: nil,
+        folderEditor: nil,
+        pendingDeleteFolderId: nil,
+        moveToFolder: nil
     )
     @State private var isRecordSheetVisible = false
     @State private var searchQuery = ""
@@ -29,6 +34,15 @@ struct NotesListView: View {
         .sheet(isPresented: $isRecordSheetVisible) {
             RecordSheetView(autoStart: true)
         }
+        .sheet(isPresented: moveToFolderBinding) {
+            MoveToFolderSheet(
+                folders: state.folders,
+                currentFolderId: state.moveToFolder?.currentFolderId?.int64Value,
+                onMove: { viewModel.onMoveToFolder(folderId: $0.map { KotlinLong(value: $0) }) },
+                onCancel: { viewModel.onMoveToFolderDismissed() }
+            )
+            .presentationDetents([.medium, .large])
+        }
         .confirmationDialog(
             String(localized: "Delete this note?"),
             isPresented: deleteBinding,
@@ -36,6 +50,29 @@ struct NotesListView: View {
         ) {
             Button(String(localized: "Delete"), role: .destructive) { viewModel.onDeleteConfirmed() }
             Button(String(localized: "Cancel"), role: .cancel) { viewModel.onDeleteDismissed() }
+        }
+        .confirmationDialog(
+            String(localized: "Delete this folder?"),
+            isPresented: deleteFolderBinding,
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "Delete"), role: .destructive) { viewModel.onDeleteFolderConfirmed() }
+            Button(String(localized: "Cancel"), role: .cancel) { viewModel.onDeleteFolderDismissed() }
+        } message: {
+            Text(String(localized: "Its notes are kept and go back to All notes."))
+        }
+        .alert(
+            state.folderEditor?.folderId == nil ? String(localized: "New folder") : String(localized: "Rename folder"),
+            isPresented: folderEditorBinding
+        ) {
+            TextField(String(localized: "Folder name"), text: folderNameBinding)
+                .textInputAutocapitalization(.sentences)
+            Button(String(localized: "Save")) { viewModel.onFolderEditorConfirmed() }
+            Button(String(localized: "Cancel"), role: .cancel) { viewModel.onFolderEditorDismissed() }
+        } message: {
+            if let error = state.folderEditor?.error {
+                Text(folderErrorMessage(error))
+            }
         }
         .task {
             for await newState in viewModel.uiState {
@@ -84,6 +121,18 @@ struct NotesListView: View {
 
     private var notesList: some View {
         List {
+            Section {
+                FolderChips(
+                    folders: state.folders,
+                    selectedFolderId: state.selectedFolderId?.int64Value,
+                    onSelect: { viewModel.onFolderSelected(folderId: $0.map { KotlinLong(value: $0) }) },
+                    onNew: { viewModel.onNewFolderRequested() },
+                    onRename: { viewModel.onRenameFolderRequested(folderId: $0) },
+                    onDelete: { viewModel.onDeleteFolderRequested(folderId: $0) }
+                )
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            }
             ForEach(state.sections, id: \.self) { section in
                 Section(dayTitle(section.dayLabel)) {
                     ForEach(section.notes, id: \.id) { note in
@@ -93,6 +142,14 @@ struct NotesListView: View {
                             NoteCardRow(note: note, progress: state.noteProgress[KotlinLong(value: note.id)]?.intValue)
                         }
                         .buttonStyle(.plain)
+                        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                            Button {
+                                viewModel.onMoveToFolderRequested(noteId: note.id)
+                            } label: {
+                                Label(String(localized: "Move to folder"), systemImage: "folder")
+                            }
+                            .tint(Brand.primary)
+                        }
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button(role: .destructive) {
                                 viewModel.onDeleteRequested(id: note.id)
@@ -118,14 +175,19 @@ struct NotesListView: View {
         .navigationTitle(String(localized: "Notes"))
         .overlay(alignment: .center) {
             if state.sections.isEmpty {
-                if searchQuery.isEmpty {
+                if !searchQuery.isEmpty {
+                    ContentUnavailableView.search(text: searchQuery)
+                } else if state.selectedFolderId != nil {
+                    ContentUnavailableView(
+                        String(localized: "No notes in this folder yet."),
+                        systemImage: "folder"
+                    )
+                } else {
                     ContentUnavailableView(
                         String(localized: "No notes yet"),
                         systemImage: "mic",
                         description: Text(String(localized: "Tap the microphone to record your first note."))
                     )
-                } else {
-                    ContentUnavailableView.search(text: searchQuery)
                 }
             }
         }
@@ -154,6 +216,44 @@ struct NotesListView: View {
         )
     }
 
+    private var moveToFolderBinding: Binding<Bool> {
+        Binding(
+            get: { state.moveToFolder != nil },
+            set: { isShown in if !isShown { viewModel.onMoveToFolderDismissed() } }
+        )
+    }
+
+    private var deleteFolderBinding: Binding<Bool> {
+        Binding(
+            get: { state.pendingDeleteFolderId != nil },
+            set: { isShown in if !isShown { viewModel.onDeleteFolderDismissed() } }
+        )
+    }
+
+    private var folderEditorBinding: Binding<Bool> {
+        Binding(
+            get: { state.folderEditor != nil },
+            set: { isShown in if !isShown { viewModel.onFolderEditorDismissed() } }
+        )
+    }
+
+    private var folderNameBinding: Binding<String> {
+        Binding(
+            get: { state.folderEditor?.name ?? "" },
+            set: { viewModel.onFolderNameChanged(name: $0) }
+        )
+    }
+
+    private func folderErrorMessage(_ error: FolderNameErrorUi) -> String {
+        switch error {
+        case .blank: return String(localized: "Enter a folder name.")
+        case .tooLong:
+            return String(format: String(localized: "Use at most %d characters."), Int(FolderNameValidator.shared.MAX_LENGTH))
+        case .duplicate: return String(localized: "A folder with this name already exists.")
+        default: return ""
+        }
+    }
+
     private var recordButton: some View {
         Button {
             isRecordSheetVisible = true
@@ -176,6 +276,72 @@ struct NotesListView: View {
         case .yesterday: return String(localized: "Yesterday")
         case .date(let date): return date.text
         }
+    }
+}
+
+private struct FolderChips: View {
+    let folders: [FolderUi]
+    let selectedFolderId: Int64?
+    let onSelect: (Int64?) -> Void
+    let onNew: () -> Void
+    let onRename: (Int64) -> Void
+    let onDelete: (Int64) -> Void
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                FolderChip(title: String(localized: "All notes"), isSelected: selectedFolderId == nil) {
+                    onSelect(nil)
+                }
+                ForEach(folders, id: \.id) { folder in
+                    FolderChip(title: folder.name, isSelected: folder.id == selectedFolderId) {
+                        onSelect(folder.id)
+                    }
+                    .contextMenu {
+                        Button {
+                            onRename(folder.id)
+                        } label: {
+                            Label(String(localized: "Rename folder"), systemImage: "pencil")
+                        }
+                        Button(role: .destructive) {
+                            onDelete(folder.id)
+                        } label: {
+                            Label(String(localized: "Delete folder"), systemImage: "trash")
+                        }
+                    }
+                }
+                Button(action: onNew) {
+                    Label(String(localized: "New folder"), systemImage: "plus")
+                        .font(.subheadline.weight(.medium))
+                        .padding(.horizontal, 14)
+                        .frame(height: 32)
+                        .background(Color(.secondarySystemGroupedBackground), in: Capsule())
+                        .foregroundStyle(Brand.primary)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 4)
+        }
+    }
+}
+
+private struct FolderChip: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.subheadline.weight(.medium))
+                .lineLimit(1)
+                .padding(.horizontal, 14)
+                .frame(height: 32)
+                .background(isSelected ? Brand.primaryContainer : Color(.secondarySystemGroupedBackground), in: Capsule())
+                .foregroundStyle(isSelected ? Brand.onPrimaryContainer : Color.primary)
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -237,6 +403,10 @@ private struct NoteCardRow: View {
                 Text(note.time)
                 if let duration = note.durationText {
                     Label(duration, systemImage: "waveform")
+                }
+                if let folder = note.folderName {
+                    Label(folder, systemImage: "folder")
+                        .lineLimit(1)
                 }
             }
             .font(.caption)

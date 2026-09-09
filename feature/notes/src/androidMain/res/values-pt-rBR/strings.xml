@@ -58,4 +58,19 @@
     <string name="notes_search_clear_description">Limpar busca</string>
     <string name="notes_search_empty_state">Nenhuma nota corresponde à sua busca.</string>
     <string name="notes_search_cancel_description">Cancelar busca</string>
+    <string name="notes_folder_all">Todas as notas</string>
+    <string name="notes_folder_new">Nova pasta</string>
+    <string name="notes_folder_options_description">Opções da pasta</string>
+    <string name="notes_folder_rename">Renomear pasta</string>
+    <string name="notes_folder_delete">Excluir pasta</string>
+    <string name="notes_folder_name_label">Nome da pasta</string>
+    <string name="notes_folder_save">Salvar</string>
+    <string name="notes_folder_error_blank">Digite um nome para a pasta.</string>
+    <string name="notes_folder_error_too_long">Use no máximo %1$d caracteres.</string>
+    <string name="notes_folder_error_duplicate">Já existe uma pasta com esse nome.</string>
+    <string name="notes_folder_delete_dialog_title">Excluir esta pasta?</string>
+    <string name="notes_folder_delete_dialog_body">As notas dela são mantidas e voltam para Todas as notas.</string>
+    <string name="notes_folder_empty_state">Ainda não há notas nesta pasta.</string>
+    <string name="notes_move_to_folder">Mover para pasta</string>
+    <string name="notes_folder_none">Sem pasta</string>
 </resources>

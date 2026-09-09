@@ -16,7 +16,7 @@ POC decisions and roadmap: .claude/POC/ (read before implementing features).
 
 ### Android
 - Flavors: `production` (com.dmytrosamoilov.offhand) and `dev` (.dev applicationId suffix, "Offhand Dev" label). Day-to-day work and device installs use `dev`.
-- Smoke-test flavor `uitest` (.uitest suffix, "Offhand UI Test"): `app/src/uitest` installs `smokeFakesModule` from `:testing:fakes`, replacing the AI engines, model manager, device gate and microphone with canned fakes, so the whole record → note flow runs on an emulator without the 2.4 GB model. The Google Services task is disabled for it. Build with `./gradlew assembleUitestDebug`; the Maestro flow lives in `.maestro/smoke.yaml`.
+- Smoke-test flavor `uitest` (.uitest suffix, "Offhand UI Test"): `app/src/uitest` installs `smokeFakesModule` from `:testing:fakes`, replacing the AI engines, model manager, device gate and microphone with canned fakes, so the whole record → note flow runs on an emulator without the 2.4 GB model. The Google Services task is disabled for it. Build with `./gradlew assembleUitestDebug`; the Maestro flow lives in `.maestro/`.
 - Build: `./gradlew assembleDevDebug` (both flavors: `assembleDebug`)
 - Unit tests: `./gradlew testDebugUnitTest`
 - Shared tests on Kotlin/Native (catches K/N-only regex and stdlib differences): `./gradlew :core:ai-api:iosSimulatorArm64Test :core:audio:iosSimulatorArm64Test :core:common:iosSimulatorArm64Test :core:device:iosSimulatorArm64Test :feature:notes:iosSimulatorArm64Test :feature:recording:iosSimulatorArm64Test`. Put MockK-free tests in `commonTest` with `kotlin.test`; K/N rejects commas in backticked test names and JUnit's message-first assert order.

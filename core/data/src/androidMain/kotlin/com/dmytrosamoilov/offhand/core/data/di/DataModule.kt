@@ -10,11 +10,15 @@ import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_2_3
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_3_4
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_4_5
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_5_6
+import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_6_7
+import com.dmytrosamoilov.offhand.core.data.database.FolderDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteDao
 import com.dmytrosamoilov.offhand.core.data.database.NotesDatabase
+import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import com.dmytrosamoilov.offhand.core.data.preferences.DataStoreUserPreferencesRepository
+import com.dmytrosamoilov.offhand.core.data.repository.RoomFoldersRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomNotesRepository
 import com.dmytrosamoilov.offhand.core.security.DatabasePassphraseProvider
 import com.dmytrosamoilov.offhand.core.security.PassphraseInvalidatedException
@@ -50,6 +54,7 @@ private fun createNotesDatabase(
             MIGRATION_3_4,
             MIGRATION_4_5,
             MIGRATION_5_6,
+            MIGRATION_6_7,
         )
         .build()
 }
@@ -62,7 +67,9 @@ private fun createUserPreferencesDataStore(context: Context): DataStore<Preferen
 val coreDataModule = module {
     single { createNotesDatabase(androidContext(), get()) }
     factory<NoteDao> { get<NotesDatabase>().noteDao() }
+    factory<FolderDao> { get<NotesDatabase>().folderDao() }
     singleOf(::RoomNotesRepository) bind NotesRepository::class
+    singleOf(::RoomFoldersRepository) bind FoldersRepository::class
     single<UserPreferencesRepository> {
         DataStoreUserPreferencesRepository(createUserPreferencesDataStore(androidContext()), get())
     }

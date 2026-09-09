@@ -13,6 +13,7 @@ data class Note(
     val durationMs: Long? = null,
     val status: NoteStatus = NoteStatus.READY,
     val preset: NotePreset = NotePreset.DEFAULT,
+    val folderId: Long? = null,
 )
 
 enum class NoteStatus {

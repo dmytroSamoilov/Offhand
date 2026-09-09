@@ -3,6 +3,7 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
+import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
@@ -10,6 +11,12 @@ import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.FolderSaveResult
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
@@ -34,7 +41,12 @@ class NotesViewModel(
     private val recordingProcessController: RecordingProcessController,
     private val dateLabelFormatter: DateLabelFormatter,
     observeNotes: ObserveNotesUseCase,
+    observeFolders: ObserveFoldersUseCase,
     private val searchNotes: SearchNotesUseCase,
+    private val createFolder: CreateFolderUseCase,
+    private val renameFolder: RenameFolderUseCase,
+    private val deleteFolder: DeleteFolderUseCase,
+    private val moveNoteToFolder: MoveNoteToFolderUseCase,
     observeDeveloperOptions: ObserveDeveloperOptionsUseCase,
     private val getNote: GetNoteUseCase,
     private val updateNote: UpdateNoteUseCase,
@@ -57,6 +69,8 @@ class NotesViewModel(
 
     private var selectedNote: Note? = null
     private val allNotes = MutableStateFlow<List<Note>>(emptyList())
+    private val folders = MutableStateFlow<List<Folder>>(emptyList())
+    private val selectedFolderId = MutableStateFlow<Long?>(null)
     private val searchQuery = MutableStateFlow("")
 
     init {
@@ -67,10 +81,16 @@ class NotesViewModel(
             }
         }
         viewModelScope.launch {
-            combine(allNotes, searchQuery) { notes, query -> searchNotes(notes, query) }
-                .collect { results ->
-                    mutableUiState.update { it.copy(sections = results.toSectionsUi(dateLabelFormatter)) }
+            observeFolders().collect { latest ->
+                folders.value = latest
+                if (selectedFolderId.value != null && latest.none { it.id == selectedFolderId.value }) {
+                    selectedFolderId.value = null
                 }
+            }
+        }
+        viewModelScope.launch {
+            combine(allNotes, folders, selectedFolderId, searchQuery, ::listContent)
+                .collect { content -> mutableUiState.update { content(it) } }
         }
         viewModelScope.launch {
             audioPlayer.state.collect { playback ->
@@ -94,6 +114,99 @@ class NotesViewModel(
         }
     }
 
+    private fun listContent(
+        notes: List<Note>,
+        folders: List<Folder>,
+        folderId: Long?,
+        query: String,
+    ): (NotesUiState) -> NotesUiState {
+        val inFolder = if (folderId == null) notes else notes.filter { it.folderId == folderId }
+        val sections = searchNotes(inFolder, query).toSectionsUi(dateLabelFormatter, folders.namesById())
+        val foldersUi = folders.toFoldersUi(notes)
+        return { state -> state.copy(sections = sections, folders = foldersUi, selectedFolderId = folderId) }
+    }
+
+    private fun List<Folder>.namesById(): Map<Long, String> = associate { it.id to it.name }
+
+    fun onFolderSelected(folderId: Long?) {
+        selectedFolderId.value = folderId
+    }
+
+    fun onNewFolderRequested() {
+        mutableUiState.update { it.copy(folderEditor = FolderEditorUi(folderId = null, name = "")) }
+    }
+
+    fun onRenameFolderRequested(folderId: Long) {
+        val folder = folders.value.firstOrNull { it.id == folderId } ?: return
+        mutableUiState.update { it.copy(folderEditor = FolderEditorUi(folderId = folderId, name = folder.name)) }
+    }
+
+    fun onFolderNameChanged(name: String) {
+        mutableUiState.update { state ->
+            state.copy(folderEditor = state.folderEditor?.copy(name = name, error = null))
+        }
+    }
+
+    fun onFolderEditorDismissed() {
+        mutableUiState.update { it.copy(folderEditor = null) }
+    }
+
+    fun onFolderEditorConfirmed() {
+        val editor = mutableUiState.value.folderEditor ?: return
+        launchSafely(showLoading = false) {
+            val result = editor.folderId?.let { renameFolder(it, editor.name) } ?: createFolder(editor.name)
+            when (result) {
+                is FolderSaveResult.Rejected -> mutableUiState.update { state ->
+                    state.copy(folderEditor = state.folderEditor?.copy(error = result.error.toUi()))
+                }
+                is FolderSaveResult.Saved -> {
+                    if (editor.folderId == null) selectedFolderId.value = result.folderId
+                    mutableUiState.update { it.copy(folderEditor = null) }
+                }
+            }
+        }
+    }
+
+    fun onDeleteFolderRequested(folderId: Long) {
+        mutableUiState.update { it.copy(pendingDeleteFolderId = folderId) }
+    }
+
+    fun onDeleteFolderDismissed() {
+        mutableUiState.update { it.copy(pendingDeleteFolderId = null) }
+    }
+
+    fun onDeleteFolderConfirmed() {
+        val folderId = mutableUiState.value.pendingDeleteFolderId ?: return
+        mutableUiState.update { it.copy(pendingDeleteFolderId = null) }
+        launchSafely(showLoading = false) {
+            deleteFolder(folderId)
+        }
+    }
+
+    fun onMoveToFolderRequested() {
+        val note = selectedNote ?: return
+        onMoveToFolderRequested(note.id)
+    }
+
+    fun onMoveToFolderRequested(noteId: Long) {
+        val note = allNotes.value.firstOrNull { it.id == noteId } ?: selectedNote?.takeIf { it.id == noteId } ?: return
+        mutableUiState.update {
+            it.copy(moveToFolder = MoveToFolderUi(noteId = note.id, currentFolderId = note.folderId))
+        }
+    }
+
+    fun onMoveToFolderDismissed() {
+        mutableUiState.update { it.copy(moveToFolder = null) }
+    }
+
+    fun onMoveToFolder(folderId: Long?) {
+        val target = mutableUiState.value.moveToFolder ?: return
+        mutableUiState.update { it.copy(moveToFolder = null) }
+        launchSafely(showLoading = false) {
+            moveNoteToFolder(target.noteId, folderId)
+        }
+    }
+
     fun onSearchQueryChanged(query: String) {
         searchQuery.value = query
         mutableUiState.update { it.copy(searchQuery = query) }
@@ -106,7 +219,7 @@ class NotesViewModel(
             loadAudio(note)
             mutableUiState.update {
                 it.copy(
-                    selected = note.toDetailUi(dateLabelFormatter),
+                    selected = note.toDetailUi(dateLabelFormatter, folders.value.namesById()),
                     editor = null,
                     pendingDeleteNoteId = null,
                 )
@@ -136,7 +249,7 @@ class NotesViewModel(
             if (state.editor != null) {
                 state
             } else {
-                state.copy(selected = refreshed.toDetailUi(dateLabelFormatter))
+                state.copy(selected = refreshed.toDetailUi(dateLabelFormatter, folders.value.namesById()))
             }
         }
     }
@@ -151,6 +264,7 @@ class NotesViewModel(
                 pendingDeleteNoteId = null,
                 isShareDialogVisible = false,
                 isPresetSheetVisible = false,
+                moveToFolder = null,
                 pendingShare = null,
             )
         }
@@ -254,7 +368,7 @@ class NotesViewModel(
             updateNote(updated)
             selectedNote = updated
             mutableUiState.update {
-                it.copy(selected = updated.toDetailUi(dateLabelFormatter), editor = null)
+                it.copy(selected = updated.toDetailUi(dateLabelFormatter, folders.value.namesById()), editor = null)
             }
         }
     }

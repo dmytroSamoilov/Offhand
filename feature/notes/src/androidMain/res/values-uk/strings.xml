@@ -59,4 +59,19 @@
     <string name="notes_search_clear_description">Очистити пошук</string>
     <string name="notes_search_empty_state">За вашим запитом нотаток не знайдено.</string>
     <string name="notes_search_cancel_description">Скасувати пошук</string>
+    <string name="notes_folder_all">Усі нотатки</string>
+    <string name="notes_folder_new">Нова папка</string>
+    <string name="notes_folder_options_description">Параметри папки</string>
+    <string name="notes_folder_rename">Перейменувати папку</string>
+    <string name="notes_folder_delete">Видалити папку</string>
+    <string name="notes_folder_name_label">Назва папки</string>
+    <string name="notes_folder_save">Зберегти</string>
+    <string name="notes_folder_error_blank">Введіть назву папки.</string>
+    <string name="notes_folder_error_too_long">Не більше %1$d символів.</string>
+    <string name="notes_folder_error_duplicate">Папка з такою назвою вже існує.</string>
+    <string name="notes_folder_delete_dialog_title">Видалити цю папку?</string>
+    <string name="notes_folder_delete_dialog_body">Нотатки з неї збережуться й повернуться до «Усі нотатки».</string>
+    <string name="notes_folder_empty_state">У цій папці ще немає нотаток.</string>
+    <string name="notes_move_to_folder">Перемістити в папку</string>
+    <string name="notes_folder_none">Без папки</string>
 </resources>

@@ -33,3 +33,15 @@ internal val MIGRATION_5_6 = object : Migration(5, 6) {
         connection.execSQL("ALTER TABLE notes ADD COLUMN preset TEXT NOT NULL DEFAULT 'SUMMARY'")
     }
 }
+
+internal val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS folders (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "name TEXT NOT NULL, " +
+                "createdAtEpochMs INTEGER NOT NULL)",
+        )
+        connection.execSQL("ALTER TABLE notes ADD COLUMN folderId INTEGER")
+    }
+}

@@ -107,14 +107,19 @@ whole record → note flow runs on any emulator or simulator, with no 2.4 GB dow
 no real audio, and no device gate. Nothing else is faked — onboarding, the encrypted
 database, the recording pipeline, list, search and detail are all real.
 
-One [Maestro](https://maestro.mobile.dev) flow, `.maestro/smoke.yaml`, drives both
-platforms and covers:
+The [Maestro](https://maestro.mobile.dev) flows in `.maestro/` drive both platforms
+and cover:
 
 1. Fresh install and onboarding (app lock and telemetry consent switched off)
 2. Recording through the fake microphone, saving, closing the sheet
 3. The processed note appearing in the list
 4. Search for "budget" with the highlighted snippet
 5. Opening the note and rendering the Overview and Transcript sections
+6. Folders: create, move the note in (menu and leading swipe), filter by folder, rename, delete
+7. Returning from a note leaves the search field unfocused (Android)
+
+The flows assume a phone-sized screen; on tablets and unfolded foldables the app switches
+to its two-pane layout and the steps no longer line up.
 
 Playback, editing, sharing, deleting, settings and model quality are not covered.
 
@@ -129,7 +134,7 @@ brew trust mobile-dev-inc/tap && brew install mobile-dev-inc/tap/maestro
 ```
 ./gradlew assembleUitestDebug
 adb install -r app/build/outputs/apk/uitest/debug/app-uitest-debug.apk
-maestro test .maestro/smoke.yaml
+maestro test .maestro/
 ```
 
 **iOS**, with a booted simulator: build the `Offhand-uitest` scheme (Xcode, or
@@ -138,7 +143,7 @@ maestro test .maestro/smoke.yaml
 
 ```
 xcrun simctl privacy booted grant microphone com.dmytrosamoilov.offhand.uitest
-maestro test .maestro/smoke.yaml
+maestro test .maestro/
 ```
 
 With several devices connected, add `--device <id>` before `test`. A failed run leaves

@@ -57,4 +57,19 @@
     <string name="notes_search_clear_description">Suche löschen</string>
     <string name="notes_search_empty_state">Keine Notizen passen zu deiner Suche.</string>
     <string name="notes_search_cancel_description">Suche abbrechen</string>
+    <string name="notes_folder_all">Alle Notizen</string>
+    <string name="notes_folder_new">Neuer Ordner</string>
+    <string name="notes_folder_options_description">Ordneroptionen</string>
+    <string name="notes_folder_rename">Ordner umbenennen</string>
+    <string name="notes_folder_delete">Ordner löschen</string>
+    <string name="notes_folder_name_label">Ordnername</string>
+    <string name="notes_folder_save">Speichern</string>
+    <string name="notes_folder_error_blank">Gib einen Ordnernamen ein.</string>
+    <string name="notes_folder_error_too_long">Höchstens %1$d Zeichen.</string>
+    <string name="notes_folder_error_duplicate">Ein Ordner mit diesem Namen existiert bereits.</string>
+    <string name="notes_folder_delete_dialog_title">Diesen Ordner löschen?</string>
+    <string name="notes_folder_delete_dialog_body">Die Notizen bleiben erhalten und landen wieder unter „Alle Notizen“.</string>
+    <string name="notes_folder_empty_state">Noch keine Notizen in diesem Ordner.</string>
+    <string name="notes_move_to_folder">In Ordner verschieben</string>
+    <string name="notes_folder_none">Kein Ordner</string>
 </resources>

@@ -93,4 +93,16 @@ appId: com.dmytrosamoilov.offhand.uitest
     commands:
       - tapOn: "COUNT ATTEMPT"
 - assertVisible: "Overview"
+- scrollUntilVisible:
+    element: "Transcript"
+    direction: DOWN
 - assertVisible: "Transcript"
+
+# Going back must not hand focus to the search field (regression: keyboard popped up)
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+      - assertVisible: "Smoke test note"
+      - assertNotVisible: "Cancel search"

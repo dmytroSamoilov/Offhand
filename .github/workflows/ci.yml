@@ -58,7 +58,7 @@ jobs:
           :feature:recording:iosSimulatorArm64Test
 
   # Smoke flow against the uitest flavor: fake AI engines and microphone, so
-  # no model download and no real audio. See .maestro/smoke.yaml.
+  # no model download and no real audio. See .maestro/.
   smoke-android:
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -103,7 +103,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
             adb install -r app/build/outputs/apk/uitest/debug/app-uitest-debug.apk
-            maestro test --format junit --output maestro-android.xml .maestro/smoke.yaml
+            maestro test --format junit --output maestro-android.xml .maestro/
 
       - name: Upload Maestro artifacts
         if: failure()
@@ -167,7 +167,7 @@ jobs:
           xcrun simctl privacy "${{ steps.sim.outputs.udid }}" grant microphone com.dmytrosamoilov.offhand.uitest
 
       - name: Run the smoke flow
-        run: maestro --device "${{ steps.sim.outputs.udid }}" test --format junit --output maestro-ios.xml .maestro/smoke.yaml
+        run: maestro --device "${{ steps.sim.outputs.udid }}" test --format junit --output maestro-ios.xml .maestro/
 
       - name: Upload Maestro artifacts
         if: failure()

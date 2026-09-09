@@ -66,4 +66,19 @@
     <string name="notes_search_clear_description">Clear search</string>
     <string name="notes_search_empty_state">No notes match your search.</string>
     <string name="notes_search_cancel_description">Cancel search</string>
+    <string name="notes_folder_all">All notes</string>
+    <string name="notes_folder_new">New folder</string>
+    <string name="notes_folder_options_description">Folder options</string>
+    <string name="notes_folder_rename">Rename folder</string>
+    <string name="notes_folder_delete">Delete folder</string>
+    <string name="notes_folder_name_label">Folder name</string>
+    <string name="notes_folder_save">Save</string>
+    <string name="notes_folder_error_blank">Enter a folder name.</string>
+    <string name="notes_folder_error_too_long">Use at most %1$d characters.</string>
+    <string name="notes_folder_error_duplicate">A folder with this name already exists.</string>
+    <string name="notes_folder_delete_dialog_title">Delete this folder?</string>
+    <string name="notes_folder_delete_dialog_body">Its notes are kept and go back to All notes.</string>
+    <string name="notes_folder_empty_state">No notes in this folder yet.</string>
+    <string name="notes_move_to_folder">Move to folder</string>
+    <string name="notes_folder_none">No folder</string>
 </resources>

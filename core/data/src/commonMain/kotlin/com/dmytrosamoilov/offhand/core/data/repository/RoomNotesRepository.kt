@@ -29,4 +29,7 @@ internal class RoomNotesRepository(
         noteDao.getById(id)?.audioFileName?.let(audioStore::delete)
         noteDao.deleteById(id)
     }
+
+    override suspend fun moveNoteToFolder(noteId: Long, folderId: Long?) =
+        noteDao.moveToFolder(noteId, folderId)
 }
