@@ -16,6 +16,7 @@ internal class MockEntitlementsRepository : EntitlementsRepository {
             customStylesUnlocked = true,
             audioImportUnlocked = true,
             calendarSuggestionsUnlocked = true,
+            documentExportUnlocked = true,
         )
     }
 }

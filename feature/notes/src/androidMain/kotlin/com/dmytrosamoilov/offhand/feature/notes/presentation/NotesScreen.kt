@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +30,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -48,6 +49,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -62,8 +64,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
@@ -100,6 +106,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCard
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
+import androidx.compose.material3.FilterChip
 import com.dmytrosamoilov.offhand.core.designsystem.component.LabelPill
 import androidx.compose.runtime.Immutable
 import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCardAction
@@ -118,6 +126,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.feature.notes.R
 import java.util.Locale
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.text.AnnotatedString
@@ -175,9 +185,26 @@ fun NotesScreen(
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
 
+    var pendingSavePath by remember { mutableStateOf<String?>(null) }
+    val saveContract = remember { SaveNoteDocumentContract() }
+    val saveLauncher = rememberLauncherForActivityResult(saveContract) { target ->
+        val source = pendingSavePath
+        pendingSavePath = null
+        if (target != null && source != null) {
+            paneScope.launch {
+                withContext(Dispatchers.IO) { copyToDocument(context, source, target) }
+                viewModel.onShareCompleted()
+            }
+        }
+    }
     LaunchedEffect(state.pendingShare) {
         val share = state.pendingShare ?: return@LaunchedEffect
-        context.startActivity(NoteShareIntentFactory.createChooser(context, share))
+        if (share.saveToDevice) {
+            pendingSavePath = share.filePaths.first()
+            saveLauncher.launch(share)
+        } else {
+            context.startActivity(NoteShareIntentFactory.createChooser(context, share))
+        }
         viewModel.onShareLaunched()
     }
 
@@ -296,7 +323,9 @@ fun NotesScreen(
     if (state.isShareDialogVisible) {
         ShareNoteSheet(
             hasAudio = state.selected?.hasAudio == true,
+            isDocumentExportUnlocked = state.isDocumentExportUnlocked,
             onConfirm = viewModel::onShareConfirmed,
+            onSaveToDevice = viewModel::onSaveToDeviceConfirmed,
             onDismiss = viewModel::onShareDismissed,
         )
     }
@@ -371,41 +400,56 @@ private fun NoteStyleSheet(
     }
 }
 
+private enum class ShareTabUi { TEXT, AUDIO }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ShareNoteSheet(
     hasAudio: Boolean,
-    onConfirm: (Boolean, Boolean) -> Unit,
+    isDocumentExportUnlocked: Boolean,
+    onConfirm: (NoteExportFormat?, Boolean) -> Unit,
+    onSaveToDevice: (NoteExportFormat?, Boolean) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var includeNote by remember { mutableStateOf(true) }
-    var includeAudio by remember { mutableStateOf(hasAudio) }
+    var tab by remember { mutableStateOf(ShareTabUi.TEXT) }
+    var noteFormat by remember { mutableStateOf(NoteExportFormat.TEXT) }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         ShareNoteSheetContent(
-            includeNote = includeNote,
-            includeAudio = includeAudio,
+            tab = tab,
+            noteFormat = noteFormat,
             hasAudio = hasAudio,
-            onIncludeNoteChanged = { includeNote = it },
-            onIncludeAudioChanged = { includeAudio = it },
-            onShare = { onConfirm(includeNote, includeAudio) },
+            isDocumentExportUnlocked = isDocumentExportUnlocked,
+            onTabSelected = { tab = it },
+            onFormatSelected = { noteFormat = it },
+            onShare = {
+                val isText = tab == ShareTabUi.TEXT
+                onConfirm(noteFormat.takeIf { isText }, !isText)
+            },
+            onSaveToDevice = {
+                val isText = tab == ShareTabUi.TEXT
+                onSaveToDevice(noteFormat.takeIf { isText }, !isText)
+            },
         )
     }
 }
 
 @Composable
 private fun ShareNoteSheetContent(
-    includeNote: Boolean,
-    includeAudio: Boolean,
+    tab: ShareTabUi,
+    noteFormat: NoteExportFormat,
     hasAudio: Boolean,
-    onIncludeNoteChanged: (Boolean) -> Unit,
-    onIncludeAudioChanged: (Boolean) -> Unit,
+    isDocumentExportUnlocked: Boolean,
+    onTabSelected: (ShareTabUi) -> Unit,
+    onFormatSelected: (NoteExportFormat) -> Unit,
     onShare: () -> Unit,
+    onSaveToDevice: () -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
+            .verticalScroll(rememberScrollState())
             .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -413,60 +457,196 @@ private fun ShareNoteSheetContent(
             text = stringResource(R.string.notes_share_dialog_title),
             style = MaterialTheme.typography.titleLarge,
         )
+        ShareTabs(selected = tab, hasAudio = hasAudio, onSelected = onTabSelected)
+        when (tab) {
+            ShareTabUi.TEXT -> ShareFormatOptions(
+                selected = noteFormat,
+                isDocumentExportUnlocked = isDocumentExportUnlocked,
+                onSelected = onFormatSelected,
+            )
+            ShareTabUi.AUDIO -> ShareAudioDetails()
+        }
         Text(
             text = stringResource(R.string.notes_share_dialog_body),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 12.dp),
         )
-        ShareOptionCard(
-            label = stringResource(R.string.notes_share_option_note),
-            checked = includeNote,
-            onCheckedChange = onIncludeNoteChanged,
+        ShareActions(
+            isEnabled = tab == ShareTabUi.AUDIO || !noteFormat.isLocked(isDocumentExportUnlocked),
+            onShare = onShare,
+            onSaveToDevice = onSaveToDevice,
         )
-        if (hasAudio) {
-            ShareOptionCard(
-                label = stringResource(R.string.notes_share_option_audio),
-                checked = includeAudio,
-                onCheckedChange = onIncludeAudioChanged,
-            )
+    }
+}
+
+@Composable
+private fun ShareActions(isEnabled: Boolean, onShare: () -> Unit, onSaveToDevice: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        OutlinedButton(onClick = onSaveToDevice, enabled = isEnabled, modifier = Modifier.weight(1f)) {
+            Text(text = stringResource(R.string.notes_share_save), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        Spacer(modifier = Modifier.height(4.dp))
-        Button(
-            onClick = onShare,
-            enabled = includeNote || includeAudio,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(text = stringResource(R.string.notes_share_dialog_confirm))
+        Button(onClick = onShare, enabled = isEnabled, modifier = Modifier.weight(1f)) {
+            Text(text = stringResource(R.string.notes_share_dialog_confirm), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
 
 @Composable
-private fun ShareOptionCard(
-    label: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
+private fun ShareTabs(selected: ShareTabUi, hasAudio: Boolean, onSelected: (ShareTabUi) -> Unit) {
+    val haptics = haptics()
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        ShareTabUi.entries.forEachIndexed { index, tab ->
+            SegmentedButton(
+                selected = tab == selected,
+                enabled = tab == ShareTabUi.TEXT || hasAudio,
+                onClick = {
+                    haptics.tick()
+                    onSelected(tab)
+                },
+                shape = SegmentedButtonDefaults.itemShape(index = index, count = ShareTabUi.entries.size),
+            ) {
+                Text(text = stringResource(tab.labelRes()))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShareFormatOptions(
+    selected: NoteExportFormat,
+    isDocumentExportUnlocked: Boolean,
+    onSelected: (NoteExportFormat) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        NoteExportFormat.entries.forEach { format ->
+            ShareFormatCard(
+                format = format,
+                isSelected = format == selected,
+                isLocked = format.isLocked(isDocumentExportUnlocked),
+                onClick = { onSelected(format) },
+            )
+        }
+        if (!isDocumentExportUnlocked) {
+            Text(
+                text = stringResource(R.string.notes_share_format_locked),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ShareFormatCard(
+    format: NoteExportFormat,
+    isSelected: Boolean,
+    isLocked: Boolean,
+    onClick: () -> Unit,
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .toggleable(value = checked, role = Role.Checkbox, onValueChange = onCheckedChange),
+            .selectable(selected = isSelected, enabled = !isLocked, role = Role.RadioButton, onClick = onClick),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            ShareOptionLabel(
+                label = stringResource(format.labelRes()),
+                hint = stringResource(format.hintRes()),
+                isDimmed = isLocked,
+                badge = { if (format != NoteExportFormat.TEXT) ProBadge(isLocked = isLocked) },
+                modifier = Modifier.weight(1f),
+            )
+            if (!isLocked) RoundedCheckbox(checked = isSelected)
+        }
+    }
+}
+
+@Composable
+private fun ShareAudioDetails() {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            ShareOptionLabel(
+                label = stringResource(R.string.notes_share_audio_format),
+                hint = stringResource(R.string.notes_share_audio_hint),
+                isDimmed = false,
+                badge = {},
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Text(
+                text = stringResource(R.string.notes_share_audio_details),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ShareOptionLabel(
+    label: String,
+    hint: String,
+    isDimmed: Boolean,
+    badge: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f),
+                color = if (isDimmed) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
             )
-            RoundedCheckbox(checked = checked)
+            badge()
         }
+        Text(
+            text = hint,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
+}
+
+@Composable
+private fun ProBadge(isLocked: Boolean) {
+    Icon(
+        imageVector = Icons.Filled.WorkspacePremium,
+        contentDescription = stringResource(R.string.notes_share_pro_description),
+        tint = if (isLocked) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.primary,
+        modifier = Modifier.size(18.dp),
+    )
+}
+
+private fun NoteExportFormat.isLocked(isDocumentExportUnlocked: Boolean): Boolean =
+    this != NoteExportFormat.TEXT && !isDocumentExportUnlocked
+
+private fun ShareTabUi.labelRes(): Int = when (this) {
+    ShareTabUi.TEXT -> R.string.notes_share_tab_text
+    ShareTabUi.AUDIO -> R.string.notes_share_tab_audio
+}
+
+private fun NoteExportFormat.labelRes(): Int = when (this) {
+    NoteExportFormat.TEXT -> R.string.notes_share_format_text
+    NoteExportFormat.PDF -> R.string.notes_share_format_pdf
+    NoteExportFormat.DOCX -> R.string.notes_share_format_docx
+}
+
+private fun NoteExportFormat.hintRes(): Int = when (this) {
+    NoteExportFormat.TEXT -> R.string.notes_share_format_text_hint
+    NoteExportFormat.PDF -> R.string.notes_share_format_pdf_hint
+    NoteExportFormat.DOCX -> R.string.notes_share_format_docx_hint
 }
 
 @Composable
@@ -1358,16 +1538,11 @@ private fun NoteDetailTopBar(
         },
         actions = {
             if (showEditActions) {
-                IconButton(onClick = onEdit) {
-                    Icon(
-                        imageVector = Icons.Filled.Edit,
-                        contentDescription = stringResource(R.string.notes_edit_description),
-                    )
-                }
                 ShareNoteButton(onClick = onShareRequested)
                 NoteOverflowMenu(
                     showRetranscribe = note.hasAudio,
                     showPreset = note.transcript.isNotBlank(),
+                    onEdit = onEdit,
                     onRetranscribeRequested = onRetranscribeRequested,
                     onPresetRequested = onPresetRequested,
                     onMoveToFolderRequested = onMoveToFolderRequested,
@@ -1399,6 +1574,7 @@ private fun ShareNoteButton(onClick: () -> Unit) {
 private fun NoteOverflowMenu(
     showRetranscribe: Boolean,
     showPreset: Boolean,
+    onEdit: () -> Unit,
     onRetranscribeRequested: () -> Unit,
     onPresetRequested: () -> Unit,
     onMoveToFolderRequested: () -> Unit,
@@ -1413,6 +1589,12 @@ private fun NoteOverflowMenu(
             )
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            EditMenuItem(
+                onClick = {
+                    expanded = false
+                    onEdit()
+                },
+            )
             MoveToFolderMenuItem(
                 onClick = {
                     expanded = false
@@ -1443,6 +1625,15 @@ private fun NoteOverflowMenu(
             )
         }
     }
+}
+
+@Composable
+private fun EditMenuItem(onClick: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text(text = stringResource(R.string.notes_edit_description)) },
+        leadingIcon = { Icon(imageVector = Icons.Filled.Edit, contentDescription = null) },
+        onClick = onClick,
+    )
 }
 
 @Composable

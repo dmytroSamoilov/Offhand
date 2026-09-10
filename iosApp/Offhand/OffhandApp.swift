@@ -21,12 +21,17 @@ struct OffhandApp: App {
                     title: String(localized: "Title"),
                     date: String(localized: "Date"),
                     overview: String(localized: "Overview"),
-                    transcript: String(localized: "Transcript")
+                    transcript: String(localized: "Transcript"),
+                    recorded: String(localized: "Recorded"),
+                    duration: String(localized: "Duration"),
+                    createdWith: String(localized: "Created with Offhand"),
+                    exported: String(localized: "Exported")
                 ),
                 shareFallbackTitle: String(localized: "Recording"),
                 appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "",
                 backupCrypto: BackupCryptoImpl(),
-                audioDecoder: AudioDecoderImpl()
+                audioDecoder: AudioDecoderImpl(),
+                noteDocuments: NoteDocumentBridgeImpl()
             ),
             useSmokeFakes: Self.useSmokeFakes
         )

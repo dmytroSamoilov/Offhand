@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package com.dmytrosamoilov.offhand.feature.notes.di
 
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
@@ -14,6 +16,8 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCalendarSuggestionsAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteDocumentBuilder
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
@@ -23,6 +27,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestRevi
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
 import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesViewModel
+import kotlin.time.ExperimentalTime
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
@@ -42,6 +47,8 @@ val featureNotesModule = module {
     factoryOf(::GetNoteUseCase)
     factoryOf(::IsCalendarSuggestionsAvailableUseCase)
     factoryOf(::IsCustomNoteStylesAvailableUseCase)
+    factoryOf(::IsDocumentExportAvailableUseCase)
+    factory { NoteDocumentBuilder(get(), get(), get()) }
     factoryOf(::MarkReviewAttemptUseCase)
     factoryOf(::ObserveDeveloperOptionsUseCase)
     factoryOf(::ObserveNoteSuggestionsUseCase)
@@ -77,6 +84,7 @@ val featureNotesModule = module {
             requestNoteSuggestions = get(),
             updateSuggestionStatus = get(),
             isCalendarSuggestionsAvailable = get(),
+            isDocumentExportAvailable = get(),
             sessionManager = get(),
             aiCoreDownloadStatus = get(),
         )

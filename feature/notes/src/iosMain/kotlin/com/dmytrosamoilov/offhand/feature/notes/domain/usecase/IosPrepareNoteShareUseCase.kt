@@ -10,6 +10,10 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareBundle
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareLabelsProvider
 import com.dmytrosamoilov.offhand.feature.notes.domain.ShareCacheDirectoryProvider
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.DocxWriter
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteDocumentBuilder
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NotePdfRenderer
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlinx.cinterop.BetaInteropApi
@@ -41,17 +45,19 @@ class IosPrepareNoteShareUseCase(
     private val noteShareLabelsProvider: NoteShareLabelsProvider,
     private val shareCacheDirectoryProvider: ShareCacheDirectoryProvider,
     private val dateLabelFormatter: DateLabelFormatter,
+    private val documentBuilder: NoteDocumentBuilder,
+    private val pdfRenderer: NotePdfRenderer,
 ) : PrepareNoteShareUseCase {
 
     override suspend fun invoke(
         note: Note,
-        includeNote: Boolean,
+        noteFormat: NoteExportFormat?,
         includeAudio: Boolean,
     ): NoteShareBundle = withContext(Dispatchers.IO) {
         val shareDir = prepareShareDir()
         val baseName = fileBaseName(note)
         val files = buildList {
-            if (includeNote) add(writeNoteFile(shareDir, baseName, note))
+            if (noteFormat != null) add(writeNoteFile(shareDir, baseName, note, noteFormat))
             val audioFileName = note.audioFileName
             if (includeAudio && audioFileName != null) {
                 add(writeAudioFile(shareDir, baseName, audioFileName))
@@ -60,7 +66,7 @@ class IosPrepareNoteShareUseCase(
         check(files.isNotEmpty())
         NoteShareBundle(
             filePaths = files,
-            mimeType = mimeType(files.size, includeNote),
+            mimeType = mimeType(files.size, noteFormat),
         )
     }
 
@@ -83,21 +89,30 @@ class IosPrepareNoteShareUseCase(
         zone = TimeZone.currentSystemDefault(),
     )
 
-    private fun writeNoteFile(shareDir: String, baseName: String, note: Note): String {
-        val path = "$shareDir/$baseName.txt"
-        val content = NoteShareFormatter.textContent(
-            labels = noteShareLabelsProvider.labels(),
-            title = note.title,
-            formattedDate = dateLabelFormatter.dateTime(note.createdAtLocalDateTime()),
-            overview = note.body,
-            transcript = note.transcript,
-        )
-        content.encodeToByteArray().toNsData().writeToFile(
+    private suspend fun writeNoteFile(shareDir: String, baseName: String, note: Note, format: NoteExportFormat): String {
+        val path = "$shareDir/$baseName.${format.fileExtension}"
+        when (format) {
+            NoteExportFormat.TEXT -> writeProtected(path, textContent(note).encodeToByteArray())
+            NoteExportFormat.DOCX -> writeProtected(path, DocxWriter.write(documentBuilder.build(note)))
+            NoteExportFormat.PDF -> pdfRenderer.render(documentBuilder.build(note), path)
+        }
+        return path
+    }
+
+    private fun textContent(note: Note): String = NoteShareFormatter.textContent(
+        labels = noteShareLabelsProvider.labels(),
+        title = note.title,
+        formattedDate = dateLabelFormatter.dateTime(note.createdAtLocalDateTime()),
+        overview = note.body,
+        transcript = note.transcript,
+    )
+
+    private fun writeProtected(path: String, bytes: ByteArray) {
+        bytes.toNsData().writeToFile(
             path,
             options = NSDataWritingAtomic or NSDataWritingFileProtectionCompleteUnlessOpen,
             error = null,
         )
-        return path
     }
 
     private fun Note.createdAtLocalDateTime(): LocalDateTime =
@@ -139,9 +154,9 @@ class IosPrepareNoteShareUseCase(
         return path
     }
 
-    private fun mimeType(fileCount: Int, includeNote: Boolean): String = when {
+    private fun mimeType(fileCount: Int, noteFormat: NoteExportFormat?): String = when {
         fileCount > 1 -> MIME_ANY
-        includeNote -> MIME_TEXT
+        noteFormat != null -> noteFormat.mimeType
         else -> MIME_AUDIO
     }
 
@@ -153,7 +168,6 @@ class IosPrepareNoteShareUseCase(
 
     private companion object {
         const val MIME_ANY = "*/*"
-        const val MIME_TEXT = "text/plain"
         const val MIME_AUDIO = "audio/wav"
         const val SAMPLE_RATE = 16_000
         const val CHANNELS = 1

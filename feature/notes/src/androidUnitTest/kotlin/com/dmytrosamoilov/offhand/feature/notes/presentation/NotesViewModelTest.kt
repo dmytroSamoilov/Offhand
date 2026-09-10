@@ -28,6 +28,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSugges
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
@@ -108,6 +109,9 @@ class NotesViewModelTest {
     private val updateNote: UpdateNoteUseCase = mockk(relaxed = true)
     private val deleteNote: DeleteNoteUseCase = mockk(relaxed = true)
     private val prepareNoteShare: PrepareNoteShareUseCase = mockk()
+    private val isDocumentExportAvailable: IsDocumentExportAvailableUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
     private val clearShareCache: ClearShareCacheUseCase = mockk(relaxed = true)
     private val shouldRequestReview: ShouldRequestReviewUseCase = mockk {
         coEvery { this@mockk.invoke() } returns false
@@ -179,6 +183,7 @@ class NotesViewModelTest {
         requestNoteSuggestions = requestNoteSuggestions,
         updateSuggestionStatus = updateSuggestionStatus,
         isCalendarSuggestionsAvailable = isCalendarSuggestionsAvailable,
+        isDocumentExportAvailable = isDocumentExportAvailable,
         sessionManager = sessionManager,
         aiCoreDownloadStatus = AiCoreDownloadStatus(modelManager, speechToText),
     )

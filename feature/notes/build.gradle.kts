@@ -10,12 +10,14 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":core:ai-api"))
+            implementation(project(":core:common"))
             implementation(project(":core:data"))
             implementation(project(":feature:recording"))
             implementation(libs.kotlinx.datetime)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
+            implementation(libs.coroutines.test)
         }
         androidMain.dependencies {
             implementation(project(":core:audio"))

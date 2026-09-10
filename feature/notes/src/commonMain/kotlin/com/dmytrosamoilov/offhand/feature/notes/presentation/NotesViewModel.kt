@@ -26,6 +26,8 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCalendarSuggest
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
@@ -78,6 +80,7 @@ class NotesViewModel(
     private val requestNoteSuggestions: RequestNoteSuggestionsUseCase,
     private val updateSuggestionStatus: UpdateSuggestionStatusUseCase,
     private val isCalendarSuggestionsAvailable: IsCalendarSuggestionsAvailableUseCase,
+    isDocumentExportAvailable: IsDocumentExportAvailableUseCase,
     private val sessionManager: RecordingSessionManager,
     aiCoreDownloadStatus: AiCoreDownloadStatus,
 ) : BaseViewModel() {
@@ -143,6 +146,11 @@ class NotesViewModel(
                 if (event is NoteProcessingEvent.ImportRejected) {
                     mutableUiState.update { it.copy(importMessage = event.reason.toMessageUi()) }
                 }
+            }
+        }
+        viewModelScope.launch {
+            isDocumentExportAvailable().collect { unlocked ->
+                mutableUiState.update { it.copy(isDocumentExportUnlocked = unlocked) }
             }
         }
         viewModelScope.launch {
@@ -364,13 +372,23 @@ class NotesViewModel(
         mutableUiState.update { it.copy(isShareDialogVisible = false) }
     }
 
-    fun onShareConfirmed(includeNote: Boolean, includeAudio: Boolean) {
+    fun onShareConfirmed(noteFormat: NoteExportFormat?, includeAudio: Boolean) {
+        share(noteFormat, includeAudio, saveToDevice = false)
+    }
+
+    // Save to device goes through the system file picker, which takes one file.
+    fun onSaveToDeviceConfirmed(noteFormat: NoteExportFormat?, includeAudio: Boolean) {
+        share(noteFormat, includeAudio, saveToDevice = true)
+    }
+
+    private fun share(noteFormat: NoteExportFormat?, includeAudio: Boolean, saveToDevice: Boolean) {
         val note = selectedNote ?: return
-        if (!includeNote && !includeAudio) return
+        if (noteFormat == null && !includeAudio) return
+        if (noteFormat != null && noteFormat != NoteExportFormat.TEXT && !mutableUiState.value.isDocumentExportUnlocked) return
         mutableUiState.update { it.copy(isShareDialogVisible = false) }
         launchSafely {
-            val share = prepareNoteShare(note, includeNote, includeAudio)
-            mutableUiState.update { it.copy(pendingShare = share.toUi()) }
+            val share = prepareNoteShare(note, noteFormat, includeAudio)
+            mutableUiState.update { it.copy(pendingShare = share.toUi(saveToDevice)) }
         }
     }
 

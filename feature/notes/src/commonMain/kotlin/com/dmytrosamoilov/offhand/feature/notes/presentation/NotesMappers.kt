@@ -124,9 +124,10 @@ internal fun AiCoreDownloadState.toPreparationUi(): ModelPreparationUi? = when (
     is AiCoreDownloadState.Idle -> null
 }
 
-internal fun NoteShareBundle.toUi(): NoteShareUi = NoteShareUi(
+internal fun NoteShareBundle.toUi(saveToDevice: Boolean): NoteShareUi = NoteShareUi(
     filePaths = filePaths,
     mimeType = mimeType,
+    saveToDevice = saveToDevice,
 )
 
 internal fun AudioPlaybackState.toUi(): AudioPlaybackUi = AudioPlaybackUi(

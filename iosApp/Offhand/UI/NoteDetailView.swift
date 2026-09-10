@@ -55,9 +55,13 @@ struct NoteDetailView: View {
         .task(id: processingHapticsKey) { await runProcessingHaptics() }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
-                Button { viewModel.onEditStarted() } label: { Image(systemName: "pencil") }
                 Button { viewModel.onShareRequested() } label: { Image(systemName: "square.and.arrow.up") }
                 Menu {
+                    Button {
+                        viewModel.onEditStarted()
+                    } label: {
+                        Label(String(localized: "Edit note"), systemImage: "pencil")
+                    }
                     Button {
                         viewModel.onMoveToFolderRequested()
                     } label: {
@@ -98,17 +102,13 @@ struct NoteDetailView: View {
         } message: {
             Text(String(localized: "The recording will be transcribed and summarized again, replacing the current title, overview and transcript. The audio recording itself is kept."))
         }
-        .confirmationDialog(
-            String(localized: "Share note"),
-            isPresented: shareBinding,
-            titleVisibility: .visible
-        ) {
-            Button(String(localized: "Note text")) { viewModel.onShareConfirmed(includeNote: true, includeAudio: false) }
-            if detail.hasAudio {
-                Button(String(localized: "Audio")) { viewModel.onShareConfirmed(includeNote: false, includeAudio: true) }
-                Button(String(localized: "Note and audio")) { viewModel.onShareConfirmed(includeNote: true, includeAudio: true) }
-            }
-            Button(String(localized: "Cancel"), role: .cancel) { viewModel.onShareDismissed() }
+        .sheet(isPresented: shareBinding) {
+            ShareNoteSheet(
+                viewModel: viewModel,
+                hasAudio: detail.hasAudio,
+                isDocumentExportUnlocked: state.isDocumentExportUnlocked
+            )
+            .presentationDetents([.fraction(0.72), .large])
         }
         .sheet(isPresented: editorBinding) {
             if let editor = state.editor {

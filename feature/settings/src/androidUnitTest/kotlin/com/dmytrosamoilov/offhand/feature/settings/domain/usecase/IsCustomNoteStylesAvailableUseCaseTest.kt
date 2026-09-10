@@ -18,9 +18,9 @@ class IsCustomNoteStylesAvailableUseCaseTest {
     @Test
     fun `mirrors the custom styles entitlement and drops repeats`() = runTest {
         every { repository.observeEntitlements() } returns flowOf(
-            Entitlements(customStylesUnlocked = false, audioImportUnlocked = true, calendarSuggestionsUnlocked = true),
-            Entitlements(customStylesUnlocked = false, audioImportUnlocked = true, calendarSuggestionsUnlocked = true),
-            Entitlements(customStylesUnlocked = true, audioImportUnlocked = true, calendarSuggestionsUnlocked = true),
+            Entitlements(customStylesUnlocked = false, audioImportUnlocked = true, calendarSuggestionsUnlocked = true, documentExportUnlocked = true),
+            Entitlements(customStylesUnlocked = false, audioImportUnlocked = true, calendarSuggestionsUnlocked = true, documentExportUnlocked = true),
+            Entitlements(customStylesUnlocked = true, audioImportUnlocked = true, calendarSuggestionsUnlocked = true, documentExportUnlocked = true),
         )
 
         assertEquals(listOf(false, true), useCase().toList())

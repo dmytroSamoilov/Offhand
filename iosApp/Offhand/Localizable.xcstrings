@@ -987,42 +987,42 @@
         }
       }
     },
-    "Audio" : {
+    "Audio file" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Audio"
+            "value" : "Audiodatei"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Audio"
+            "value" : "Archivo de audio"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ऑडियो"
+            "value" : "ऑडियो फ़ाइल"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Áudio"
+            "value" : "Arquivo de áudio"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Аудио"
+            "value" : "Аудиофайл"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Аудіо"
+            "value" : "Аудіофайл"
           }
         }
       }
@@ -1863,6 +1863,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Створіть власні заголовки та формат"
+          }
+        }
+      }
+    },
+    "Created with Offhand" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erstellt mit Offhand"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creado con Offhand"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand से बनाया गया"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criado com o Offhand"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создано в Offhand"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Створено в Offhand"
           }
         }
       }
@@ -2787,6 +2827,46 @@
         }
       }
     },
+    "Duration" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dauer"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duración"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "अवधि"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duração"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Длительность"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тривалість"
+          }
+        }
+      }
+    },
     "Edit note" : {
       "localizations" : {
         "de" : {
@@ -3023,6 +3103,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Усе залишається на цьому пристрої."
+          }
+        }
+      }
+    },
+    "Exported" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportado"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "एक्सपोर्ट किया गया"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportado"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экспортировано"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Експортовано"
           }
         }
       }
@@ -4989,46 +5109,6 @@
         }
       }
     },
-    "Note and audio" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Notiz und Audio"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nota y audio"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "नोट और ऑडियो"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nota e áudio"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Заметка и аудио"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нотатка й аудіо"
-          }
-        }
-      }
-    },
     "Note saved" : {
       "localizations" : {
         "de" : {
@@ -5105,46 +5185,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Стилі нотаток"
-          }
-        }
-      }
-    },
-    "Note text" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Notiztext"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Texto de la nota"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "नोट का टेक्स्ट"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Texto da nota"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Текст заметки"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Текст нотатки"
           }
         }
       }
@@ -5305,6 +5345,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Offhand Pro" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro"
           }
         }
       }
@@ -5909,6 +5989,86 @@
         }
       }
     },
+    "PDF and Word exports are part of Offhand Pro." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF- und Word-Export sind Teil von Offhand Pro."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La exportación a PDF y Word forma parte de Offhand Pro."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF और Word एक्सपोर्ट Offhand Pro का हिस्सा हैं।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A exportação em PDF e Word faz parte do Offhand Pro."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экспорт в PDF и Word входит в Offhand Pro."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Експорт у PDF і Word входить до Offhand Pro."
+          }
+        }
+      }
+    },
+    "PDF file" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF-Datei"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archivo PDF"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF फ़ाइल"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arquivo PDF"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF-файл"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF-файл"
+          }
+        }
+      }
+    },
     "Passphrase" : {
       "localizations" : {
         "de" : {
@@ -6145,6 +6305,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Будь ласка, не закривайте Offhand, поки готується нотатка."
+          }
+        }
+      }
+    },
+    "Please keep in mind that shared copies are no longer encrypted once they leave this device." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denk daran: Geteilte Kopien sind nicht mehr verschlüsselt, sobald sie dieses Gerät verlassen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ten en cuenta que las copias compartidas dejan de estar cifradas al salir de este dispositivo."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ध्यान रखें कि शेयर की गई कॉपी इस डिवाइस से जाने के बाद एन्क्रिप्टेड नहीं रहती।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lembre-se: cópias compartilhadas deixam de ser criptografadas ao sair deste dispositivo."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помните: копии перестают быть зашифрованными, как только покидают это устройство."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Памʼятайте: копії перестають бути зашифрованими, щойно залишають цей пристрій."
           }
         }
       }
@@ -6505,6 +6705,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Записати нотатку"
+          }
+        }
+      }
+    },
+    "Recorded" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufgenommen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grabado"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "रिकॉर्ड किया गया"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gravado"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записано"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записано"
           }
         }
       }
@@ -7673,6 +7913,46 @@
         }
       }
     },
+    "Share" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teilen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "शेयर करें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartilhar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поделиться"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поділитися"
+          }
+        }
+      }
+    },
     "Share note" : {
       "localizations" : {
         "de" : {
@@ -8353,6 +8633,46 @@
         }
       }
     },
+    "Text file" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Textdatei"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archivo de texto"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "टेक्स्ट फ़ाइल"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arquivo de texto"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Текстовый файл"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Текстовий файл"
+          }
+        }
+      }
+    },
     "That note needs another try" : {
       "localizations" : {
         "de" : {
@@ -8749,6 +9069,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Запис зберігається. Назву й огляд буде написано заново за розшифровкою у вибраному стилі."
+          }
+        }
+      }
+    },
+    "The recording is shared as an uncompressed WAV file, 16 kHz mono. Every player and transcription tool opens it." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Aufnahme wird als unkomprimierte WAV-Datei geteilt, 16 kHz mono. Jeder Player und jedes Transkriptionstool öffnet sie."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La grabación se comparte como un archivo WAV sin comprimir, 16 kHz mono. Cualquier reproductor o herramienta de transcripción lo abre."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "रिकॉर्डिंग बिना कंप्रेशन वाली WAV फ़ाइल के रूप में शेयर होती है, 16 kHz मोनो। इसे हर प्लेयर और ट्रांसक्रिप्शन टूल खोल सकता है।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A gravação é compartilhada como um arquivo WAV sem compressão, 16 kHz mono. Qualquer player ou ferramenta de transcrição abre."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запись передаётся несжатым файлом WAV, 16 кГц, моно. Его открывает любой плеер или сервис расшифровки."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запис передається нестисненим файлом WAV, 16 кГц, моно. Його відкриває будь-який програвач або сервіс розшифровки."
           }
         }
       }
@@ -9914,6 +10274,46 @@
         }
       }
     },
+    "WAV file" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WAV-Datei"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archivo WAV"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WAV फ़ाइल"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arquivo WAV"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Файл WAV"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Файл WAV"
+          }
+        }
+      }
+    },
     "We were unable to create an overview and transcript for this note." : {
       "localizations" : {
         "de" : {
@@ -10110,6 +10510,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Про кого був візит, спостереження, що зроблено та подальші кроки."
+          }
+        }
+      }
+    },
+    "Word file" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Word-Datei"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archivo de Word"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Word फ़ाइल"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arquivo do Word"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Файл Word"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Файл Word"
           }
         }
       }

@@ -24,7 +24,7 @@ class ImportAudioUseCaseTest {
 
     @Test
     fun `locked entitlement refuses the import without touching the pipeline`() = runTest {
-        every { entitlements.observeEntitlements() } returns flowOf(Entitlements(customStylesUnlocked = true, audioImportUnlocked = false, calendarSuggestionsUnlocked = true))
+        every { entitlements.observeEntitlements() } returns flowOf(Entitlements(customStylesUnlocked = true, audioImportUnlocked = false, calendarSuggestionsUnlocked = true, documentExportUnlocked = true))
 
         assertEquals(ImportAudioResult.LOCKED, useCase(source))
         verify(exactly = 0) { controller.importAudio(any()) }
@@ -32,7 +32,7 @@ class ImportAudioUseCaseTest {
 
     @Test
     fun `unlocked import goes through the process controller`() = runTest {
-        every { entitlements.observeEntitlements() } returns flowOf(Entitlements(customStylesUnlocked = true, audioImportUnlocked = true, calendarSuggestionsUnlocked = true))
+        every { entitlements.observeEntitlements() } returns flowOf(Entitlements(customStylesUnlocked = true, audioImportUnlocked = true, calendarSuggestionsUnlocked = true, documentExportUnlocked = true))
         every { controller.importAudio(source) } returns true
 
         assertEquals(ImportAudioResult.STARTED, useCase(source))
@@ -41,7 +41,7 @@ class ImportAudioUseCaseTest {
 
     @Test
     fun `falls back to in-process import when the service cannot start`() = runTest {
-        every { entitlements.observeEntitlements() } returns flowOf(Entitlements(customStylesUnlocked = true, audioImportUnlocked = true, calendarSuggestionsUnlocked = true))
+        every { entitlements.observeEntitlements() } returns flowOf(Entitlements(customStylesUnlocked = true, audioImportUnlocked = true, calendarSuggestionsUnlocked = true, documentExportUnlocked = true))
         every { controller.importAudio(source) } returns false
         justRun { sessionManager.importAudio(source) }
 

@@ -27,6 +27,7 @@ struct NotesListView: View {
         customStyles: [],
         importMessage: nil,
         smartSuggestions: nil,
+        isDocumentExportUnlocked: false,
         pendingCalendarEvent: nil
     )
     @State private var isRecordSheetVisible = false

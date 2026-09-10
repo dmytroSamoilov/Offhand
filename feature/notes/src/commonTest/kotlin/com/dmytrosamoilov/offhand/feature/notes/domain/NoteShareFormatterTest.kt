@@ -15,6 +15,10 @@ class NoteShareFormatterTest {
         date = "Date",
         overview = "Overview",
         transcript = "Transcript",
+        recorded = "Recorded",
+        duration = "Duration",
+        createdWith = "Created with Offhand",
+        exported = "Exported",
     )
 
     @Test

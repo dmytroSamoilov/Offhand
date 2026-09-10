@@ -7,6 +7,14 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareLabels
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareLabelsProvider
 import com.dmytrosamoilov.offhand.feature.notes.domain.ShareCacheDirectoryProvider
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.DocumentFooter
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteDocument
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteDocumentBuilder
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NotePdfRenderer
+import io.mockk.coEvery
+import io.mockk.coJustRun
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import java.io.ByteArrayInputStream
@@ -31,11 +39,23 @@ class PrepareNoteShareUseCaseTest {
             date = "Date",
             overview = "Overview",
             transcript = "Transcript",
+            recorded = "Recorded",
+            duration = "Duration",
+            createdWith = "Created with Offhand",
+            exported = "Exported",
         )
         every { fallbackTitle() } returns "Recording"
     }
     private val dateLabelFormatter: DateLabelFormatter = mockk {
         every { dateTime(any()) } returns "Jun 15, 2025 · 15:06"
+    }
+
+    private val document = NoteDocument("Board meeting", emptyList(), emptyList(), DocumentFooter("Created with Offhand", "Exported", null))
+    private val documentBuilder: NoteDocumentBuilder = mockk {
+        coEvery { build(any()) } returns document
+    }
+    private val pdfRenderer: NotePdfRenderer = mockk {
+        coJustRun { render(any(), any()) }
     }
 
     private lateinit var useCase: PrepareNoteShareUseCase
@@ -62,12 +82,14 @@ class PrepareNoteShareUseCaseTest {
             labelsProvider,
             cacheDirectoryProvider,
             dateLabelFormatter,
+            documentBuilder,
+            pdfRenderer,
         )
     }
 
     @Test
     fun `sharing the note only writes a single text file`() = runTest {
-        val share = useCase(note, includeNote = true, includeAudio = false)
+        val share = useCase(note, noteFormat = NoteExportFormat.TEXT, includeAudio = false)
 
         assertEquals(1, share.filePaths.size)
         assertEquals("text/plain", share.mimeType)
@@ -80,7 +102,7 @@ class PrepareNoteShareUseCaseTest {
     fun `sharing audio only writes a wav file`() = runTest {
         every { audioStore.openForRead("note-1.pcm.enc") } returns AudioInputStream(ByteArrayInputStream(ByteArray(10)))
 
-        val share = useCase(note, includeNote = false, includeAudio = true)
+        val share = useCase(note, noteFormat = null, includeAudio = true)
 
         assertEquals(1, share.filePaths.size)
         assertEquals("audio/wav", share.mimeType)
@@ -91,7 +113,7 @@ class PrepareNoteShareUseCaseTest {
     fun `sharing note and audio produces two files with a generic mime type`() = runTest {
         every { audioStore.openForRead("note-1.pcm.enc") } returns AudioInputStream(ByteArrayInputStream(ByteArray(10)))
 
-        val share = useCase(note, includeNote = true, includeAudio = true)
+        val share = useCase(note, noteFormat = NoteExportFormat.TEXT, includeAudio = true)
 
         assertEquals(2, share.filePaths.size)
         assertEquals("*/*", share.mimeType)
@@ -101,8 +123,28 @@ class PrepareNoteShareUseCaseTest {
     fun `previous share directory contents are cleared before writing`() = runTest {
         val staleFile = File(folder.root, "stale.txt").apply { writeText("stale") }
 
-        useCase(note, includeNote = true, includeAudio = false)
+        useCase(note, noteFormat = NoteExportFormat.TEXT, includeAudio = false)
 
         assertTrue(!staleFile.exists())
+    }
+
+    @Test
+    fun `sharing as word writes a docx package from the built document`() = runTest {
+        val share = useCase(note, noteFormat = NoteExportFormat.DOCX, includeAudio = false)
+
+        assertEquals(NoteExportFormat.DOCX.mimeType, share.mimeType)
+        val file = File(share.filePaths.single())
+        assertTrue(file.name.endsWith(".docx"))
+        assertTrue(file.readBytes().decodeToString().contains("Board meeting"))
+        coVerify { documentBuilder.build(note) }
+    }
+
+    @Test
+    fun `sharing as pdf hands the built document to the renderer`() = runTest {
+        val share = useCase(note, noteFormat = NoteExportFormat.PDF, includeAudio = false)
+
+        assertEquals("application/pdf", share.mimeType)
+        assertTrue(share.filePaths.single().endsWith(".pdf"))
+        coVerify { pdfRenderer.render(document, share.filePaths.single()) }
     }
 }

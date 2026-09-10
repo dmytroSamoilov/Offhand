@@ -25,6 +25,7 @@ data class NotesUiState(
     val customStyles: List<NoteStyleOptionUi> = emptyList(),
     val importMessage: ImportMessageUi? = null,
     val smartSuggestions: SmartSuggestionsUi? = null,
+    val isDocumentExportUnlocked: Boolean = false,
     val pendingCalendarEvent: CalendarEventSuggestion? = null,
 )
 
@@ -83,6 +84,7 @@ enum class FolderNameErrorUi {
 data class NoteShareUi(
     val filePaths: List<String>,
     val mimeType: String,
+    val saveToDevice: Boolean = false,
 )
 
 data class ModelPreparationUi(

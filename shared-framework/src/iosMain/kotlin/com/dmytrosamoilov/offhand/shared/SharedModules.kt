@@ -20,6 +20,8 @@ import com.dmytrosamoilov.offhand.feature.onboarding.di.featureOnboardingModule
 import com.dmytrosamoilov.offhand.feature.onboarding.presentation.OnboardingStepPolicy
 import com.dmytrosamoilov.offhand.feature.recording.di.featureRecordingIosModule
 import com.dmytrosamoilov.offhand.feature.recording.di.featureRecordingModule
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.AppIconProvider
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NotePdfRenderer
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioDecoder
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioRecorder
 import com.dmytrosamoilov.offhand.feature.recording.domain.DefaultNoteTitleProvider
@@ -45,6 +47,7 @@ class IosPlatformDeps(
     val appVersion: String,
     val backupCrypto: IosBackupCryptoBridge,
     val audioDecoder: IosAudioDecoderBridge,
+    val noteDocuments: IosNoteDocumentBridge,
 )
 
 fun startSharedKoin(deps: IosPlatformDeps) {
@@ -79,6 +82,8 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
     single { BuildInfo(isDebugBuild = Platform.isDebugBinary, appVersion = deps.appVersion, platform = "ios") }
     single<BackupCrypto> { IosBackupCrypto(deps.backupCrypto) }
     single<AudioDecoder> { IosAudioDecoder(deps.audioDecoder) }
+    single<NotePdfRenderer> { IosNotePdfRenderer(deps.noteDocuments) }
+    single<AppIconProvider> { IosAppIconProvider(deps.noteDocuments) }
     single { deps.gemmaEngine }
     single { deps.whisperEngine }
     single { IosFileDownloader() }

@@ -14,6 +14,10 @@ class NoteShareLabelsProviderImpl(
         date = context.getString(R.string.notes_share_date_label),
         overview = context.getString(R.string.notes_overview_heading),
         transcript = context.getString(R.string.notes_transcript_heading),
+        recorded = context.getString(R.string.notes_share_recorded_label),
+        duration = context.getString(R.string.notes_share_duration_label),
+        createdWith = context.getString(R.string.notes_share_created_with),
+        exported = context.getString(R.string.notes_share_exported_label),
     )
 
     override fun fallbackTitle(): String = context.getString(R.string.notes_recording_fallback_title)

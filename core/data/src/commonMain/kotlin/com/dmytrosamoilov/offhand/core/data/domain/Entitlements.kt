@@ -6,6 +6,7 @@ data class Entitlements(
     val customStylesUnlocked: Boolean,
     val audioImportUnlocked: Boolean,
     val calendarSuggestionsUnlocked: Boolean,
+    val documentExportUnlocked: Boolean,
 )
 
 interface EntitlementsRepository {
