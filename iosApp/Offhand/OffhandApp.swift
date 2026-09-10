@@ -25,7 +25,8 @@ struct OffhandApp: App {
                 ),
                 shareFallbackTitle: String(localized: "Recording"),
                 appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "",
-                backupCrypto: BackupCryptoImpl()
+                backupCrypto: BackupCryptoImpl(),
+                audioDecoder: AudioDecoderImpl()
             ),
             useSmokeFakes: Self.useSmokeFakes
         )

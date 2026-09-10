@@ -73,7 +73,6 @@
     <string name="notes_folder_empty_state">इस फ़ोल्डर में अभी कोई नोट नहीं है।</string>
     <string name="notes_move_to_folder">फ़ोल्डर में ले जाएं</string>
     <string name="notes_folder_none">कोई फ़ोल्डर नहीं</string>
-    <string name="notes_import_audio_description">ऑडियो फ़ाइल आयात करें</string>
     <string name="notes_import_locked">ऑडियो आयात Offhand Pro का हिस्सा है।</string>
     <string name="notes_import_error_title">यह फ़ाइल आयात नहीं हो सकी</string>
     <string name="notes_import_error_unsupported">यह ऑडियो फ़ॉर्मैट समर्थित नहीं है।</string>

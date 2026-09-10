@@ -116,4 +116,14 @@
     <string name="settings_developer_description">Show model management, acceleration and processing diagnostics.</string>
     <string name="settings_backup_title">Backup &amp; restore</string>
     <string name="settings_backup_subtitle">Move your notes to a new phone or keep a copy</string>
+    <string name="settings_import_audio_title">Import audio</string>
+    <string name="settings_import_audio_subtitle">Turn audio files into notes. Pick one or several at once</string>
+    <string name="settings_import_locked">Audio import is part of Offhand Pro.</string>
+    <string name="settings_import_unreadable">Some of the files could not be read.</string>
+    <string name="settings_import_dismiss">OK</string>
+    <string name="settings_import_started_title">Import started</string>
+    <plurals name="settings_import_started">
+        <item quantity="one">%d file is being imported. The note is created in the background and will show up in your notes list as soon as it is ready.</item>
+        <item quantity="other">%d files are being imported. The notes are created in the background and will show up in your notes list as soon as they are ready.</item>
+    </plurals>
 </resources>

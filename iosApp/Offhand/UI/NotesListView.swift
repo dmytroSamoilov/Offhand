@@ -25,7 +25,6 @@ struct NotesListView: View {
         pendingDeleteFolderId: nil,
         moveToFolder: nil,
         customStyles: [],
-        isAudioImportUnlocked: false,
         importMessage: nil,
         smartSuggestions: nil,
         pendingCalendarEvent: nil

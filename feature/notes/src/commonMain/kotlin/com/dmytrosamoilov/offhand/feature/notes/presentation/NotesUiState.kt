@@ -23,7 +23,6 @@ data class NotesUiState(
     val pendingDeleteFolderId: Long? = null,
     val moveToFolder: MoveToFolderUi? = null,
     val customStyles: List<NoteStyleOptionUi> = emptyList(),
-    val isAudioImportUnlocked: Boolean = false,
     val importMessage: ImportMessageUi? = null,
     val smartSuggestions: SmartSuggestionsUi? = null,
     val pendingCalendarEvent: CalendarEventSuggestion? = null,
@@ -47,7 +46,6 @@ data class CalendarEventUi(
 )
 
 enum class ImportMessageUi {
-    LOCKED,
     UNSUPPORTED,
     TOO_LONG,
     UNREADABLE,

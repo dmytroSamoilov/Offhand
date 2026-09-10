@@ -75,7 +75,6 @@
     <string name="notes_folder_empty_state">У цій папці ще немає нотаток.</string>
     <string name="notes_move_to_folder">Перемістити в папку</string>
     <string name="notes_folder_none">Без папки</string>
-    <string name="notes_import_audio_description">Імпортувати аудіофайл</string>
     <string name="notes_import_locked">Імпорт аудіо входить до Offhand Pro.</string>
     <string name="notes_import_error_title">Не вдалося імпортувати цей файл</string>
     <string name="notes_import_error_unsupported">Цей аудіоформат не підтримується.</string>

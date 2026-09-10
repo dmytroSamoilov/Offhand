@@ -9,7 +9,15 @@ data class SettingsUiState(
     val isDynamicColorEnabled: Boolean = false,
     val isAppLockEnabled: Boolean = false,
     val isDeviceSecure: Boolean = false,
+    val isAudioImportUnlocked: Boolean = false,
+    val importNotice: ImportNoticeUi? = null,
 )
+
+sealed interface ImportNoticeUi {
+    data object Locked : ImportNoticeUi
+    data object Unreadable : ImportNoticeUi
+    data class Started(val fileCount: Int) : ImportNoticeUi
+}
 
 data class CustomStyleOptionUi(
     val id: Long,

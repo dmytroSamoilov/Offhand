@@ -3,7 +3,6 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
-import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
@@ -37,9 +36,6 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.ImportRejection
 import com.dmytrosamoilov.offhand.feature.recording.domain.NoteProcessingEvent
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
-import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
-import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
-import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RequestNoteSuggestionsUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,8 +74,6 @@ class NotesViewModel(
     private val markReviewAttempt: MarkReviewAttemptUseCase,
     val reviewLauncher: InAppReviewLauncher,
     private val audioPlayer: AudioPlayer,
-    private val importAudio: ImportAudioUseCase,
-    isAudioImportAvailable: IsAudioImportAvailableUseCase,
     private val observeNoteSuggestions: ObserveNoteSuggestionsUseCase,
     private val requestNoteSuggestions: RequestNoteSuggestionsUseCase,
     private val updateSuggestionStatus: UpdateSuggestionStatusUseCase,
@@ -149,11 +143,6 @@ class NotesViewModel(
                 if (event is NoteProcessingEvent.ImportRejected) {
                     mutableUiState.update { it.copy(importMessage = event.reason.toMessageUi()) }
                 }
-            }
-        }
-        viewModelScope.launch {
-            isAudioImportAvailable().collect { unlocked ->
-                mutableUiState.update { it.copy(isAudioImportUnlocked = unlocked) }
             }
         }
         viewModelScope.launch {
@@ -484,18 +473,6 @@ class NotesViewModel(
         val noteId = noteSuggestions?.noteId ?: return
         launchSafely(showLoading = false) {
             updateSuggestionStatus(noteId, index, status)
-        }
-    }
-
-    fun onAudioImportSelected(source: AudioImportSource?) {
-        if (source == null) {
-            mutableUiState.update { it.copy(importMessage = ImportMessageUi.UNREADABLE) }
-            return
-        }
-        launchSafely(showLoading = false) {
-            if (importAudio(source) == ImportAudioResult.LOCKED) {
-                mutableUiState.update { it.copy(importMessage = ImportMessageUi.LOCKED) }
-            }
         }
     }
 

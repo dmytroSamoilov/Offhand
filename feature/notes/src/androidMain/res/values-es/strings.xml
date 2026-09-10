@@ -74,7 +74,6 @@
     <string name="notes_folder_empty_state">Aún no hay notas en esta carpeta.</string>
     <string name="notes_move_to_folder">Mover a carpeta</string>
     <string name="notes_folder_none">Sin carpeta</string>
-    <string name="notes_import_audio_description">Importar archivo de audio</string>
     <string name="notes_import_locked">La importación de audio forma parte de Offhand Pro.</string>
     <string name="notes_import_error_title">No se pudo importar este archivo</string>
     <string name="notes_import_error_unsupported">Este formato de audio no es compatible.</string>

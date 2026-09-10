@@ -80,15 +80,23 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun consumeSharedAudio(intent: Intent?) {
-        if (intent?.action != Intent.ACTION_SEND || intent.type?.startsWith(AUDIO_MIME_PREFIX) != true) return
-        val uri = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java) ?: return
+        if (intent?.type?.startsWith(AUDIO_MIME_PREFIX) != true) return
+        val uris = sharedAudioUris(intent)
         intent.removeExtra(Intent.EXTRA_STREAM)
+        if (uris.isEmpty()) return
         lifecycleScope.launch {
-            val source = importIntake.stage(uri)
-            val locked = source != null && importAudio(source) == ImportAudioResult.LOCKED
-            if (source == null) showToast(NotesR.string.notes_import_error_unreadable)
-            if (locked) showToast(NotesR.string.notes_import_locked)
+            val sources = uris.map { uri -> importIntake.stage(uri) }
+            val results = sources.filterNotNull().map { source -> importAudio(source) }
+            if (sources.any { it == null }) showToast(NotesR.string.notes_import_error_unreadable)
+            if (results.any { it == ImportAudioResult.LOCKED }) showToast(NotesR.string.notes_import_locked)
         }
+    }
+
+    private fun sharedAudioUris(intent: Intent): List<Uri> = when (intent.action) {
+        Intent.ACTION_SEND -> listOfNotNull(IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java))
+        Intent.ACTION_SEND_MULTIPLE ->
+            IntentCompat.getParcelableArrayListExtra(intent, Intent.EXTRA_STREAM, Uri::class.java).orEmpty()
+        else -> emptyList()
     }
 
     private fun showToast(message: Int) {

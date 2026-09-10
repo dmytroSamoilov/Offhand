@@ -119,11 +119,6 @@ import com.dmytrosamoilov.offhand.feature.notes.R
 import java.util.Locale
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material.icons.filled.UploadFile
-import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportIntake
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -177,12 +172,6 @@ fun NotesScreen(
     val navigator = rememberListDetailPaneScaffoldNavigator<Long>()
     val paneScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val importIntake: AudioImportIntake = koinInject()
-    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) {
-            paneScope.launch { viewModel.onAudioImportSelected(importIntake.stage(uri)) }
-        }
-    }
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
 
@@ -251,7 +240,6 @@ fun NotesScreen(
                         onDeleteRequested = viewModel::onDeleteRequested,
                         onMoveRequested = viewModel::onMoveToFolderRequested,
                         onNewRecording = onNewRecording,
-                        onImportAudio = { importLauncher.launch(arrayOf(AUDIO_MIME_TYPE)) },
                     )
                 }
             },
@@ -519,7 +507,6 @@ private fun NotesListPane(
     onDeleteRequested: (Long) -> Unit,
     onMoveRequested: (Long) -> Unit,
     onNewRecording: () -> Unit,
-    onImportAudio: () -> Unit,
 ) {
     val listState = rememberLazyListState()
     // Foundation ≥1.8 anchors prepended items above the viewport; re-pin to the
@@ -532,10 +519,7 @@ private fun NotesListPane(
     val haptics = haptics()
     Scaffold(
         topBar = {
-            AppTopBar(
-                title = stringResource(R.string.notes_title),
-                actions = { ImportAudioAction(onClick = onImportAudio) },
-            )
+            AppTopBar(title = stringResource(R.string.notes_title))
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -1919,19 +1903,8 @@ private fun DeleteConfirmationDialog(
 }
 
 @Composable
-private fun ImportAudioAction(onClick: () -> Unit) {
-    IconButton(onClick = onClick) {
-        Icon(
-            imageVector = Icons.Filled.UploadFile,
-            contentDescription = stringResource(R.string.notes_import_audio_description),
-        )
-    }
-}
-
-@Composable
 private fun ImportMessageDialog(message: ImportMessageUi, onDismiss: () -> Unit) {
     val body = when (message) {
-        ImportMessageUi.LOCKED -> R.string.notes_import_locked
         ImportMessageUi.UNSUPPORTED -> R.string.notes_import_error_unsupported
         ImportMessageUi.TOO_LONG -> R.string.notes_import_error_too_long
         ImportMessageUi.UNREADABLE -> R.string.notes_import_error_unreadable
@@ -1946,7 +1919,6 @@ private fun ImportMessageDialog(message: ImportMessageUi, onDismiss: () -> Unit)
     )
 }
 
-private const val AUDIO_MIME_TYPE = "audio/*"
 private const val CALENDAR_EVENT_MIME_TYPE = "vnd.android.cursor.item/event"
 
 @Composable

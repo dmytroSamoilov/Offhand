@@ -42,6 +42,11 @@ appId: com.dmytrosamoilov.offhand.uitest
       - launchApp
       - assertVisible: "Smoke test note"
       - tapOn: "Smoke test note"
+      - runFlow:
+          when:
+            visible: "In-app review · dev build"
+          commands:
+            - tapOn: "COUNT ATTEMPT"
       - scrollUntilVisible:
           element:
             text: "Send quarterly report"
@@ -72,5 +77,10 @@ appId: com.dmytrosamoilov.offhand.uitest
           timeout: 5000
       - launchApp
       - tapOn: "Smoke test note"
+      - runFlow:
+          when:
+            visible: "In-app review · dev build"
+          commands:
+            - tapOn: "COUNT ATTEMPT"
       - assertVisible: "Send quarterly report"
       - assertNotVisible: "Budget review with Anna"

@@ -170,6 +170,25 @@ jobs:
           xcrun simctl install "${{ steps.sim.outputs.udid }}" "$APP"
           xcrun simctl privacy "${{ steps.sim.outputs.udid }}" grant microphone com.dmytrosamoilov.offhand.uitest
 
+      # The import flow picks the sample from "On My iPhone", which is the
+      # local file provider's storage inside the simulator; the Files app
+      # creates that group on first launch, so open it once first.
+      - name: Seed the import sample
+        run: |
+          xcrun simctl launch "${{ steps.sim.outputs.udid }}" com.apple.DocumentsApp
+          sleep 5
+          GROUPS="$HOME/Library/Developer/CoreSimulator/Devices/${{ steps.sim.outputs.udid }}/data/Containers/Shared/AppGroup"
+          STORAGE=""
+          for GROUP in "$GROUPS"/*/; do
+            if plutil -p "$GROUP/.com.apple.mobile_container_manager.metadata.plist" 2>/dev/null | grep -q "FileProvider.LocalStorage"; then
+              STORAGE="$GROUP"
+            fi
+          done
+          test -n "$STORAGE"
+          mkdir -p "$STORAGE/File Provider Storage"
+          cp .maestro/assets/import-sample.m4a "$STORAGE/File Provider Storage/import-sample.m4a"
+          xcrun simctl terminate "${{ steps.sim.outputs.udid }}" com.apple.DocumentsApp
+
       - name: Run the smoke flow
         run: maestro --device "${{ steps.sim.outputs.udid }}" test --format junit --output maestro-ios.xml .maestro/
 

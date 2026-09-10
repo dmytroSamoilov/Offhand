@@ -115,4 +115,14 @@
     <string name="settings_developer_description">Zeigt Modellverwaltung, Beschleunigung und Verarbeitungs-Diagnosen.</string>
     <string name="settings_backup_title">Sichern &amp; wiederherstellen</string>
     <string name="settings_backup_subtitle">Notizen auf ein neues Handy übertragen oder eine Kopie behalten</string>
+    <string name="settings_import_audio_title">Audio importieren</string>
+    <string name="settings_import_audio_subtitle">Mache aus Audiodateien Notizen. Wähle eine oder mehrere auf einmal</string>
+    <string name="settings_import_locked">Der Audio-Import ist Teil von Offhand Pro.</string>
+    <string name="settings_import_unreadable">Einige der Dateien konnten nicht gelesen werden.</string>
+    <string name="settings_import_dismiss">OK</string>
+    <string name="settings_import_started_title">Import gestartet</string>
+    <plurals name="settings_import_started">
+        <item quantity="one">%d Datei wird importiert. Die Notiz wird im Hintergrund erstellt und erscheint in deiner Notizenliste, sobald sie fertig ist.</item>
+        <item quantity="other">%d Dateien werden importiert. Die Notizen werden im Hintergrund erstellt und erscheinen in deiner Notizenliste, sobald sie fertig sind.</item>
+    </plurals>
 </resources>

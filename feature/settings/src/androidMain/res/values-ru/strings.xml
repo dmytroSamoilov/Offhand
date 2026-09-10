@@ -115,4 +115,16 @@
     <string name="settings_developer_description">Показывает управление моделями, ускорение и диагностику обработки.</string>
     <string name="settings_backup_title">Резервная копия</string>
     <string name="settings_backup_subtitle">Перенесите заметки на новый телефон или сохраните копию</string>
+    <string name="settings_import_audio_title">Импорт аудио</string>
+    <string name="settings_import_audio_subtitle">Превратите аудиофайлы в заметки. Выберите один или несколько сразу</string>
+    <string name="settings_import_locked">Импорт аудио входит в Offhand Pro.</string>
+    <string name="settings_import_unreadable">Некоторые файлы не удалось прочитать.</string>
+    <string name="settings_import_dismiss">ОК</string>
+    <string name="settings_import_started_title">Импорт начат</string>
+    <plurals name="settings_import_started">
+        <item quantity="one">Импортируется %d файл. Заметка создаётся в фоне и появится в списке заметок, как только будет готова.</item>
+        <item quantity="few">Импортируется %d файла. Заметки создаются в фоне и появятся в списке заметок, как только будут готовы.</item>
+        <item quantity="many">Импортируется %d файлов. Заметки создаются в фоне и появятся в списке заметок, как только будут готовы.</item>
+        <item quantity="other">Импортируется %d файла. Заметки создаются в фоне и появятся в списке заметок, как только будут готовы.</item>
+    </plurals>
 </resources>

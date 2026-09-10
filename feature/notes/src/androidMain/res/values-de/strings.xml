@@ -73,7 +73,6 @@
     <string name="notes_folder_empty_state">Noch keine Notizen in diesem Ordner.</string>
     <string name="notes_move_to_folder">In Ordner verschieben</string>
     <string name="notes_folder_none">Kein Ordner</string>
-    <string name="notes_import_audio_description">Audiodatei importieren</string>
     <string name="notes_import_locked">Der Audio-Import ist Teil von Offhand Pro.</string>
     <string name="notes_import_error_title">Diese Datei konnte nicht importiert werden</string>
     <string name="notes_import_error_unsupported">Dieses Audioformat wird nicht unterstützt.</string>

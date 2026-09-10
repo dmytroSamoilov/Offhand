@@ -115,4 +115,14 @@
     <string name="settings_developer_description">मॉडल प्रबंधन, एक्सेलेरेशन और प्रोसेसिंग डायग्नोस्टिक्स दिखाता है।</string>
     <string name="settings_backup_title">बैकअप और रीस्टोर</string>
     <string name="settings_backup_subtitle">अपने नोट्स नए फ़ोन पर ले जाएं या एक कॉपी रखें</string>
+    <string name="settings_import_audio_title">ऑडियो इंपोर्ट करें</string>
+    <string name="settings_import_audio_subtitle">ऑडियो फ़ाइलों को नोट्स में बदलें। एक या कई फ़ाइलें एक साथ चुनें</string>
+    <string name="settings_import_locked">ऑडियो इंपोर्ट Offhand Pro का हिस्सा है।</string>
+    <string name="settings_import_unreadable">कुछ फ़ाइलें पढ़ी नहीं जा सकीं।</string>
+    <string name="settings_import_dismiss">ठीक है</string>
+    <string name="settings_import_started_title">इंपोर्ट शुरू हुआ</string>
+    <plurals name="settings_import_started">
+        <item quantity="one">%d फ़ाइल इंपोर्ट हो रही है। नोट बैकग्राउंड में बनता है और तैयार होते ही आपकी नोट्स सूची में दिखेगा।</item>
+        <item quantity="other">%d फ़ाइलें इंपोर्ट हो रही हैं। नोट्स बैकग्राउंड में बनते हैं और तैयार होते ही आपकी नोट्स सूची में दिखेंगे।</item>
+    </plurals>
 </resources>

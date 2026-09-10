@@ -36,8 +36,6 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCas
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
-import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
-import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RequestNoteSuggestionsUseCase
 import app.cash.turbine.test
 import io.mockk.coEvery
@@ -91,7 +89,6 @@ class NotesViewModelTest {
     private val isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase = mockk {
         every { this@mockk.invoke() } returns flowOf(true)
     }
-    private val importAudio: ImportAudioUseCase = mockk()
     private val storedSuggestions = MutableStateFlow<NoteSuggestions?>(null)
     private val observeNoteSuggestions: ObserveNoteSuggestionsUseCase = mockk {
         every { this@mockk.invoke(any()) } returns storedSuggestions
@@ -102,9 +99,6 @@ class NotesViewModelTest {
     private val updateSuggestionStatus: UpdateSuggestionStatusUseCase = mockk(relaxed = true)
     private val suggestingNoteIds = MutableStateFlow<Set<Long>>(emptySet())
     private val isCalendarSuggestionsAvailable: IsCalendarSuggestionsAvailableUseCase = mockk {
-        every { this@mockk.invoke() } returns flowOf(true)
-    }
-    private val isAudioImportAvailable: IsAudioImportAvailableUseCase = mockk {
         every { this@mockk.invoke() } returns flowOf(true)
     }
     private val observeDeveloperOptions: ObserveDeveloperOptionsUseCase = mockk {
@@ -181,8 +175,6 @@ class NotesViewModelTest {
         markReviewAttempt = markReviewAttempt,
         reviewLauncher = reviewLauncher,
         audioPlayer = audioPlayer,
-        importAudio = importAudio,
-        isAudioImportAvailable = isAudioImportAvailable,
         observeNoteSuggestions = observeNoteSuggestions,
         requestNoteSuggestions = requestNoteSuggestions,
         updateSuggestionStatus = updateSuggestionStatus,

@@ -6,7 +6,11 @@ import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleSection
 import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
@@ -15,6 +19,7 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteSty
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUseCase
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -47,6 +52,8 @@ class SettingsViewModelTest {
     private val setAppLockEnabled: SetAppLockEnabledUseCase = mockk(relaxed = true)
     private val observeAppLockEnabled: ObserveAppLockEnabledUseCase = mockk()
     private val appLockManager: AppLockManager = mockk()
+    private val importAudio: ImportAudioUseCase = mockk()
+    private val isAudioImportAvailable: IsAudioImportAvailableUseCase = mockk()
 
     @Before
     fun setUp() {
@@ -57,6 +64,8 @@ class SettingsViewModelTest {
         every { isCustomNoteStylesAvailable() } returns flowOf(true)
         every { observeAppLockEnabled() } returns flowOf(true)
         every { appLockManager.isDeviceSecure } returns true
+        every { isAudioImportAvailable() } returns flowOf(true)
+        coEvery { importAudio(any()) } returns ImportAudioResult.STARTED
     }
 
     @After
@@ -74,6 +83,8 @@ class SettingsViewModelTest {
         observeAppLockEnabled = observeAppLockEnabled,
         setAppLockEnabled = setAppLockEnabled,
         appLockManager = appLockManager,
+        importAudio = importAudio,
+        isAudioImportAvailable = isAudioImportAvailable,
     )
 
     @Test
@@ -160,4 +171,41 @@ class SettingsViewModelTest {
         sections = listOf(NoteStyleSection("Customer", "", SectionFormat.SENTENCES)),
         createdAtEpochMs = 0,
     )
+
+    @Test
+    fun `importing several files starts each one and reports the count`() = runTest {
+        val viewModel = viewModel()
+        val sources = listOf(AudioImportSource("/a", "a.m4a"), AudioImportSource("/b", "b.mp3"))
+
+        viewModel.onAudioImportSelected(sources, unreadableCount = 0)
+        advanceUntilIdle()
+
+        assertEquals(ImportNoticeUi.Started(2), viewModel.uiState.value.importNotice)
+        coVerify { importAudio(sources[0]) }
+        coVerify { importAudio(sources[1]) }
+        viewModel.onImportNoticeDismissed()
+        assertEquals(null, viewModel.uiState.value.importNotice)
+    }
+
+    @Test
+    fun `a locked entitlement wins over unreadable files and a started import`() = runTest {
+        coEvery { importAudio(any()) } returns ImportAudioResult.LOCKED
+        val viewModel = viewModel()
+
+        viewModel.onAudioImportSelected(listOf(AudioImportSource("/a", "a.m4a")), unreadableCount = 1)
+        advanceUntilIdle()
+
+        assertEquals(ImportNoticeUi.Locked, viewModel.uiState.value.importNotice)
+    }
+
+    @Test
+    fun `unreadable files are reported when nothing was locked`() = runTest {
+        val viewModel = viewModel()
+
+        viewModel.onAudioImportSelected(listOf(AudioImportSource("/a", "a.m4a")), unreadableCount = 1)
+        advanceUntilIdle()
+
+        assertEquals(ImportNoticeUi.Unreadable, viewModel.uiState.value.importNotice)
+        coVerify(exactly = 1) { importAudio(any()) }
+    }
 }

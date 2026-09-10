@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.settings.presentation
 
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
+import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
@@ -12,6 +13,9 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteSty
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +33,8 @@ class SettingsViewModel(
     observeAppLockEnabled: ObserveAppLockEnabledUseCase,
     private val setAppLockEnabled: SetAppLockEnabledUseCase,
     private val appLockManager: AppLockManager,
+    private val importAudio: ImportAudioUseCase,
+    isAudioImportAvailable: IsAudioImportAvailableUseCase,
 ) : BaseViewModel() {
 
     private val mutableUiState = MutableStateFlow(
@@ -59,6 +65,11 @@ class SettingsViewModel(
                 mutableUiState.update { it.copy(isAppLockEnabled = enabled) }
             }
         }
+        viewModelScope.launch {
+            isAudioImportAvailable().collect { unlocked ->
+                mutableUiState.update { it.copy(isAudioImportUnlocked = unlocked) }
+            }
+        }
     }
 
     // A passcode can be added or removed in system settings while this screen is
@@ -83,5 +94,30 @@ class SettingsViewModel(
         launchSafely(showLoading = false) {
             setAppLockEnabled(enabled && appLockManager.isDeviceSecure)
         }
+    }
+
+    // unreadableCount: files the picker handed over that could not be staged.
+    fun onAudioImportSelected(sources: List<AudioImportSource>, unreadableCount: Int) {
+        if (sources.isEmpty() && unreadableCount == 0) return
+        launchSafely(showLoading = false) {
+            val results = sources.map { source -> importAudio(source) }
+            val notice = importNotice(
+                hasUnreadable = unreadableCount > 0,
+                isLocked = results.any { it == ImportAudioResult.LOCKED },
+                startedCount = results.count { it == ImportAudioResult.STARTED },
+            )
+            mutableUiState.update { it.copy(importNotice = notice) }
+        }
+    }
+
+    private fun importNotice(hasUnreadable: Boolean, isLocked: Boolean, startedCount: Int): ImportNoticeUi? = when {
+        isLocked -> ImportNoticeUi.Locked
+        hasUnreadable -> ImportNoticeUi.Unreadable
+        startedCount > 0 -> ImportNoticeUi.Started(startedCount)
+        else -> null
+    }
+
+    fun onImportNoticeDismissed() {
+        mutableUiState.update { it.copy(importNotice = null) }
     }
 }

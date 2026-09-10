@@ -115,4 +115,16 @@
     <string name="settings_developer_description">Показує керування моделями, прискорення та діагностику обробки.</string>
     <string name="settings_backup_title">Резервна копія</string>
     <string name="settings_backup_subtitle">Перенесіть нотатки на новий телефон або збережіть копію</string>
+    <string name="settings_import_audio_title">Імпорт аудіо</string>
+    <string name="settings_import_audio_subtitle">Перетворюйте аудіофайли на нотатки. Виберіть один або кілька одразу</string>
+    <string name="settings_import_locked">Імпорт аудіо входить до Offhand Pro.</string>
+    <string name="settings_import_unreadable">Деякі файли не вдалося прочитати.</string>
+    <string name="settings_import_dismiss">ОК</string>
+    <string name="settings_import_started_title">Імпорт розпочато</string>
+    <plurals name="settings_import_started">
+        <item quantity="one">Імпортується %d файл. Нотатка створюється у фоні й зʼявиться у списку нотаток, щойно буде готова.</item>
+        <item quantity="few">Імпортується %d файли. Нотатки створюються у фоні й зʼявляться у списку нотаток, щойно будуть готові.</item>
+        <item quantity="many">Імпортується %d файлів. Нотатки створюються у фоні й зʼявляться у списку нотаток, щойно будуть готові.</item>
+        <item quantity="other">Імпортується %d файла. Нотатки створюються у фоні й зʼявляться у списку нотаток, щойно будуть готові.</item>
+    </plurals>
 </resources>
