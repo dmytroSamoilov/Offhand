@@ -12,12 +12,18 @@ class FakeAiBackend : AiBackend {
     override suspend fun processText(systemPrompt: String, userText: String): AiResult {
         delay(PROCESSING_MS)
         return AiResult(
-            text = if (systemPrompt.startsWith(STYLE_DRAFT_PROMPT_START)) STYLE_JSON else noteJson(userText),
+            text = cannedAnswer(systemPrompt) ?: noteJson(userText),
             processingTimeMs = PROCESSING_MS,
             inputTokens = userText.length / CHARS_PER_TOKEN,
             outputTokens = OUTPUT_TOKENS,
             hardwareBackend = HardwareBackend.CPU,
         )
+    }
+
+    private fun cannedAnswer(systemPrompt: String): String? = when {
+        systemPrompt.startsWith(STYLE_DRAFT_PROMPT_START) -> STYLE_JSON
+        systemPrompt.startsWith(CALENDAR_PROMPT_START) -> CALENDAR_JSON
+        else -> null
     }
 
     private fun noteJson(userText: String): String {
@@ -33,6 +39,10 @@ class FakeAiBackend : AiBackend {
     companion object {
         const val TITLE = "Smoke test note"
         const val STYLE_DRAFT_PROMPT_START = "You will receive a short description, written by a user"
+        const val CALENDAR_PROMPT_START = "You will receive a note written from a voice recording. The recording was made on"
+        const val CALENDAR_JSON = "<thinking>Two dated items.</thinking>\n" +
+            """{"events": [{"title": "Budget review with Anna", "date": "2030-01-15", "time": "10:00", "durationMinutes": 45, "location": "Room 4", "details": "Anna presents the iPad screenshots."}, """ +
+            """{"title": "Send quarterly report", "date": "2030-01-20", "time": "", "durationMinutes": 60, "location": "", "details": "The report is due on the 20th."}]}"""
         const val STYLE_JSON = "<thinking>A debrief needs the customer and the follow-ups.</thinking>\n" +
             """{"name": "Sales debrief", "kind": "a sales call debrief", "sections": [""" +
             """{"heading": "Customer", "guidance": "who the customer is and their role", "format": "sentences"}, """ +

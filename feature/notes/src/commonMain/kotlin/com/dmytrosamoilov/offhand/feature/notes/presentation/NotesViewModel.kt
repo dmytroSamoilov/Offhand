@@ -3,10 +3,13 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
+import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
+import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
@@ -20,6 +23,9 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUse
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCalendarSuggestionsAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
@@ -28,14 +34,25 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareU
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.ImportRejection
+import com.dmytrosamoilov.offhand.feature.recording.domain.NoteProcessingEvent
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RequestNoteSuggestionsUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -61,7 +78,13 @@ class NotesViewModel(
     private val markReviewAttempt: MarkReviewAttemptUseCase,
     val reviewLauncher: InAppReviewLauncher,
     private val audioPlayer: AudioPlayer,
-    sessionManager: RecordingSessionManager,
+    private val importAudio: ImportAudioUseCase,
+    isAudioImportAvailable: IsAudioImportAvailableUseCase,
+    private val observeNoteSuggestions: ObserveNoteSuggestionsUseCase,
+    private val requestNoteSuggestions: RequestNoteSuggestionsUseCase,
+    private val updateSuggestionStatus: UpdateSuggestionStatusUseCase,
+    private val isCalendarSuggestionsAvailable: IsCalendarSuggestionsAvailableUseCase,
+    private val sessionManager: RecordingSessionManager,
     aiCoreDownloadStatus: AiCoreDownloadStatus,
 ) : BaseViewModel() {
 
@@ -72,6 +95,9 @@ class NotesViewModel(
     val reviewRequests: SharedFlow<Unit> = mutableReviewRequests.asSharedFlow()
 
     private var selectedNote: Note? = null
+    private var noteSuggestions: NoteSuggestions? = null
+    private var pendingSuggestionIndex: Int? = null
+    private val selectedNoteId = MutableStateFlow<Long?>(null)
     private val allNotes = MutableStateFlow<List<Note>>(emptyList())
     private val folders = MutableStateFlow<List<Folder>>(emptyList())
     private val selectedFolderId = MutableStateFlow<Long?>(null)
@@ -119,10 +145,52 @@ class NotesViewModel(
             }
         }
         viewModelScope.launch {
+            sessionManager.events.collect { event ->
+                if (event is NoteProcessingEvent.ImportRejected) {
+                    mutableUiState.update { it.copy(importMessage = event.reason.toMessageUi()) }
+                }
+            }
+        }
+        viewModelScope.launch {
+            isAudioImportAvailable().collect { unlocked ->
+                mutableUiState.update { it.copy(isAudioImportUnlocked = unlocked) }
+            }
+        }
+        viewModelScope.launch {
+            observeSmartSuggestions().collect { suggestions ->
+                mutableUiState.update { it.copy(smartSuggestions = suggestions) }
+            }
+        }
+        viewModelScope.launch {
             aiCoreDownloadStatus.state.collect { downloadState ->
                 mutableUiState.update { it.copy(modelPreparation = downloadState.toPreparationUi()) }
             }
         }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun observeSmartSuggestions(): Flow<SmartSuggestionsUi?> = selectedNoteId.flatMapLatest { noteId ->
+        if (noteId == null) return@flatMapLatest flowOf(null)
+        combine(
+            observeNoteSuggestions(noteId),
+            sessionManager.suggestingNoteIds.map { noteId in it },
+            isCalendarSuggestionsAvailable(),
+            allNotes.map { notes -> notes.firstOrNull { it.id == noteId }?.status },
+        ) { suggestions: NoteSuggestions?, isSuggesting: Boolean, unlocked: Boolean, status: NoteStatus? ->
+            noteSuggestions = suggestions
+            suggestions.toSmartSuggestionsUi(isSuggesting, unlocked, status)
+        }
+    }
+
+    private fun NoteSuggestions?.toSmartSuggestionsUi(
+        isSuggesting: Boolean,
+        unlocked: Boolean,
+        status: NoteStatus?,
+    ): SmartSuggestionsUi? = when {
+        !unlocked || status != NoteStatus.READY -> null
+        isSuggesting -> SmartSuggestionsUi.Loading
+        this == null -> SmartSuggestionsUi.NotRun
+        else -> toUi(dateLabelFormatter)
     }
 
     private fun listContent(
@@ -227,6 +295,7 @@ class NotesViewModel(
         launchSafely(showLoading = false) {
             val note = getNote(id) ?: return@launchSafely
             selectedNote = note
+            selectedNoteId.value = note.id
             loadAudio(note)
             mutableUiState.update {
                 it.copy(
@@ -267,6 +336,8 @@ class NotesViewModel(
 
     fun onDetailClosed() {
         selectedNote = null
+        selectedNoteId.value = null
+        pendingSuggestionIndex = null
         audioPlayer.reset()
         mutableUiState.update {
             it.copy(
@@ -277,6 +348,7 @@ class NotesViewModel(
                 isPresetSheetVisible = false,
                 moveToFolder = null,
                 pendingShare = null,
+                pendingCalendarEvent = null,
             )
         }
     }
@@ -382,6 +454,59 @@ class NotesViewModel(
                 it.copy(selected = updated.toDetailUi(dateLabelFormatter, folders.value.namesById()), editor = null)
             }
         }
+    }
+
+    fun onSuggestionsRequested() {
+        val note = selectedNote ?: return
+        launchSafely(showLoading = false) {
+            requestNoteSuggestions(note.id)
+        }
+    }
+
+    fun onSuggestionAddRequested(index: Int) {
+        val event = noteSuggestions?.events?.getOrNull(index)?.event ?: return
+        pendingSuggestionIndex = index
+        mutableUiState.update { it.copy(pendingCalendarEvent = event) }
+    }
+
+    fun onCalendarEventLaunched(isAdded: Boolean) {
+        val index = pendingSuggestionIndex
+        pendingSuggestionIndex = null
+        mutableUiState.update { it.copy(pendingCalendarEvent = null) }
+        if (isAdded && index != null) setSuggestionStatus(index, SuggestionStatus.ADDED)
+    }
+
+    fun onSuggestionDismissed(index: Int) {
+        setSuggestionStatus(index, SuggestionStatus.DISMISSED)
+    }
+
+    private fun setSuggestionStatus(index: Int, status: SuggestionStatus) {
+        val noteId = noteSuggestions?.noteId ?: return
+        launchSafely(showLoading = false) {
+            updateSuggestionStatus(noteId, index, status)
+        }
+    }
+
+    fun onAudioImportSelected(source: AudioImportSource?) {
+        if (source == null) {
+            mutableUiState.update { it.copy(importMessage = ImportMessageUi.UNREADABLE) }
+            return
+        }
+        launchSafely(showLoading = false) {
+            if (importAudio(source) == ImportAudioResult.LOCKED) {
+                mutableUiState.update { it.copy(importMessage = ImportMessageUi.LOCKED) }
+            }
+        }
+    }
+
+    fun onImportMessageDismissed() {
+        mutableUiState.update { it.copy(importMessage = null) }
+    }
+
+    private fun ImportRejection.toMessageUi(): ImportMessageUi = when (this) {
+        ImportRejection.UNSUPPORTED -> ImportMessageUi.UNSUPPORTED
+        ImportRejection.TOO_LONG -> ImportMessageUi.TOO_LONG
+        ImportRejection.UNREADABLE -> ImportMessageUi.UNREADABLE
     }
 
     fun onRetryTranscriptionRequested() {

@@ -109,15 +109,18 @@ private fun RecordingBottomSheet(
         skipPartiallyExpanded = true,
         confirmValueChange = { target -> target != SheetValue.Hidden || !isCapturing },
     )
-    var isNoteSaved by rememberSaveable { mutableStateOf(false) }
+    var wasNoteSaved by rememberSaveable { mutableStateOf(false) }
     var wasSessionActive by rememberSaveable { mutableStateOf(false) }
+    // Read the saved id in the same composition that sees the phase go idle,
+    // otherwise a single conflated update reads as a finished, unsaved session.
+    val isNoteSaved = wasNoteSaved || state.savedNoteId != null
     val isSessionFinished = wasSessionActive && !isNoteSaved &&
         state.phase == RecordingPhaseUi.IDLE
 
     LaunchedEffect(Unit) { viewModel.onSheetOpened() }
     LaunchedEffect(state.savedNoteId) {
         if (state.savedNoteId != null) {
-            isNoteSaved = true
+            wasNoteSaved = true
         }
     }
     val haptics = haptics()

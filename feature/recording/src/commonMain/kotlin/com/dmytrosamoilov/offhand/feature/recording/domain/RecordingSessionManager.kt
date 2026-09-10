@@ -7,19 +7,26 @@ import com.dmytrosamoilov.offhand.core.ai.api.TranscriptionResult
 import com.dmytrosamoilov.offhand.core.audio.AudioChunk
 import com.dmytrosamoilov.offhand.core.audio.VadSnapshot
 import com.dmytrosamoilov.offhand.core.audio.WavCodec
+import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStylePreview
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
+import com.dmytrosamoilov.offhand.core.security.closeQuietly
+import com.dmytrosamoilov.offhand.core.security.writeChunk
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateImportedNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateRecordingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsCalendarSuggestionsAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteRecordedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteTranscriptUseCase
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +47,7 @@ class RecordingSessionManager(
     private val speechToText: SpeechToText,
     private val transcriptStructurer: TranscriptStructurer,
     private val createRecordingNote: CreateRecordingNoteUseCase,
+    private val createImportedNote: CreateImportedNoteUseCase,
     private val markNoteRecorded: MarkNoteRecordedUseCase,
     private val discardNote: DiscardNoteUseCase,
     private val completeNote: CompleteNoteUseCase,
@@ -50,8 +58,12 @@ class RecordingSessionManager(
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
     private val getNoteStyle: GetNoteStyleUseCase,
     private val getNote: GetNoteUseCase,
+    private val calendarEventExtractor: CalendarEventExtractor,
+    private val saveNoteSuggestions: SaveNoteSuggestionsUseCase,
+    private val isCalendarSuggestionsAvailable: IsCalendarSuggestionsAvailableUseCase,
     private val audioStore: EncryptedAudioStore,
     private val audioBackup: RecordingAudioBackup,
+    private val audioDecoder: AudioDecoder,
     private val scope: CoroutineScope,
 ) {
 
@@ -63,6 +75,9 @@ class RecordingSessionManager(
 
     private val mutableProcessingNoteIds = MutableStateFlow<Set<Long>>(emptySet())
     val processingNoteIds: StateFlow<Set<Long>> = mutableProcessingNoteIds.asStateFlow()
+
+    private val mutableSuggestingNoteIds = MutableStateFlow<Set<Long>>(emptySet())
+    val suggestingNoteIds: StateFlow<Set<Long>> = mutableSuggestingNoteIds.asStateFlow()
 
     private val mutableNoteProgress = MutableStateFlow<Map<Long, Int>>(emptyMap())
     val noteProgress: StateFlow<Map<Long, Int>> = mutableNoteProgress.asStateFlow()
@@ -121,9 +136,12 @@ class RecordingSessionManager(
         recorder.stop()
     }
 
+    // The saved note id survives the drain so a sheet that missed the
+    // conflated update still learns the note was saved; opening or closing
+    // the sheet clears it.
     fun resetToIdle() {
         val phase = mutableSession.value.phase
-        if (phase == SessionPhase.FAILED) {
+        if (phase == SessionPhase.FAILED || phase == SessionPhase.IDLE) {
             mutableSession.value = RecordingSession()
         }
     }
@@ -174,6 +192,106 @@ class RecordingSessionManager(
             }
         }
     }
+
+    fun importAudio(source: AudioImportSource) {
+        scope.launch {
+            processingMutex.withLock { importLocked(source) }
+        }
+    }
+
+    private suspend fun importLocked(source: AudioImportSource) {
+        val fileName = audioStore.newRecordingFileName()
+        val style = getNoteStyle()
+        val noteId = createImportedNote(importedTitle(source.displayName), fileName, style)
+        mutableProcessingNoteIds.update { it + noteId }
+        updateProgress(noteId, 0f)
+        val decoded = decodeImport(source, fileName) { fraction ->
+            updateProgress(noteId, fraction * IMPORT_DECODE_SHARE)
+        }
+        if (decoded == null) {
+            rejectImport(noteId, fileName, source)
+            return
+        }
+        markNoteRecorded(noteId, decoded.durationMs, fileName)
+        val stored = transcribeStoredAudio(fileName) { fraction ->
+            updateProgress(noteId, IMPORT_DECODE_SHARE + fraction * (RETRY_WHISPER_SHARE - IMPORT_DECODE_SHARE))
+        }
+        processNote(noteId, stored.texts, stored.transcriptionTimeMs, RETRY_WHISPER_SHARE, style)
+    }
+
+    fun suggestEvents(noteId: Long) {
+        if (noteId in mutableProcessingNoteIds.value) return
+        mutableProcessingNoteIds.update { it + noteId }
+        scope.launch {
+            processingMutex.withLock {
+                try {
+                    suggestEventsLocked(noteId)
+                } finally {
+                    mutableProcessingNoteIds.update { it - noteId }
+                }
+            }
+        }
+    }
+
+    // Still under the processing lock and still counted as processing, so the
+    // foreground service outlives the extraction and no retry can interleave.
+    private suspend fun suggestEventsLocked(noteId: Long) {
+        mutableSuggestingNoteIds.update { it + noteId }
+        try {
+            val note = getNote(noteId)?.takeIf { it.status == NoteStatus.READY } ?: return
+            if (!isCalendarSuggestionsAvailable() || !isAiCoreDownloaded()) return
+            saveNoteSuggestions(noteId, calendarEventExtractor.extract(note))
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (t: Throwable) {
+            Logger.withTag(LOG_TAG).w(t) { "Calendar suggestions failed for note $noteId" }
+        } finally {
+            mutableSuggestingNoteIds.update { it - noteId }
+        }
+    }
+
+    private var lastImportRejection: ImportRejection = ImportRejection.UNREADABLE
+
+    private suspend fun decodeImport(
+        source: AudioImportSource,
+        fileName: String,
+        onProgress: (Float) -> Unit,
+    ): DecodedAudio? {
+        val stream = audioStore.openForWrite(fileName)
+        return try {
+            audioDecoder.decode(source, onPcm = { bytes, length -> stream.writeChunk(bytes, length) }, onProgress = onProgress)
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (rejected: AudioImportException) {
+            Logger.withTag(LOG_TAG).w { "Import rejected: ${rejected.message}" }
+            lastImportRejection = rejected.toRejection()
+            null
+        } catch (t: Throwable) {
+            Logger.withTag(LOG_TAG).e(t) { "Import decoding failed" }
+            lastImportRejection = ImportRejection.UNREADABLE
+            null
+        } finally {
+            stream.closeQuietly()
+            audioDecoder.discard(source)
+        }
+    }
+
+    private suspend fun rejectImport(noteId: Long, fileName: String, source: AudioImportSource) {
+        runCatching { discardNote(noteId) }
+        runCatching { audioStore.delete(fileName) }
+        mutableProcessingNoteIds.update { it - noteId }
+        mutableNoteProgress.update { it - noteId }
+        mutableEvents.emit(NoteProcessingEvent.ImportRejected(noteId, lastImportRejection))
+    }
+
+    private fun AudioImportException.toRejection(): ImportRejection = when (this) {
+        is AudioImportException.Unsupported -> ImportRejection.UNSUPPORTED
+        is AudioImportException.TooLong -> ImportRejection.TOO_LONG
+        is AudioImportException.Unreadable -> ImportRejection.UNREADABLE
+    }
+
+    private fun importedTitle(displayName: String): String =
+        displayName.substringBeforeLast('.').trim().ifBlank { displayName }
 
     internal suspend fun previewNoteStyle(spec: NoteStyleSpec, sampleTranscript: String): NoteStylePreview =
         withProcessingLock {
@@ -424,7 +542,7 @@ class RecordingSessionManager(
         val chunkTranscripts = sortedTranscripts()
         val recordedTranscriptionMs = transcriptionTimeMs
         val style = sessionStyle
-        mutableSession.value = RecordingSession()
+        mutableSession.value = RecordingSession(noteId = noteId)
         startProcessing(noteId, chunkTranscripts, recordedTranscriptionMs, style)
     }
 
@@ -468,34 +586,9 @@ class RecordingSessionManager(
         style: NoteStyleRef,
     ) {
         try {
-            if (transcripts.isEmpty()) {
-                failNote(noteId)
-                mutableEvents.emit(NoteProcessingEvent.Failed(noteId))
-                return
-            }
-            persistTranscript(noteId, transcripts, transcriptionMs)
-            val structured = try {
-                transcriptStructurer.structure(transcripts, style) { fraction ->
-                    updateProgress(noteId, progressOffset + fraction * (1f - progressOffset))
-                }
-            } catch (backendFailure: AiBackendException) {
-                Logger.withTag(LOG_TAG)
-                    .w(backendFailure) { "Structuring unavailable for note $noteId, keeping transcript" }
-                transcriptStructurer.transcriptOnly(transcripts, style)
-            }
-            val stillExists = completeNote(
-                noteId = noteId,
-                title = structured.title,
-                body = structured.overview,
-                transcript = structured.transcript,
-                transcriptionTimeMs = transcriptionMs,
-                structuringTimeMs = structured.structuringTimeMs,
-                hardwareBackend = structured.hardwareBackend.name,
-                style = structured.style,
-            )
-            if (stillExists) {
-                mutableEvents.emit(NoteProcessingEvent.Completed(noteId))
-            }
+            val completed = structureNote(noteId, transcripts, transcriptionMs, progressOffset, style)
+            mutableNoteProgress.update { it - noteId }
+            if (completed) suggestEventsLocked(noteId)
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (t: Throwable) {
@@ -507,6 +600,51 @@ class RecordingSessionManager(
             mutableProcessingNoteIds.update { it - noteId }
             mutableNoteProgress.update { it - noteId }
         }
+    }
+
+    private suspend fun structureNote(
+        noteId: Long,
+        transcripts: List<String>,
+        transcriptionMs: Long,
+        progressOffset: Float,
+        style: NoteStyleRef,
+    ): Boolean {
+        if (transcripts.isEmpty()) {
+            failNote(noteId)
+            mutableEvents.emit(NoteProcessingEvent.Failed(noteId))
+            return false
+        }
+        persistTranscript(noteId, transcripts, transcriptionMs)
+        val structured = structureOrKeepTranscript(noteId, transcripts, progressOffset, style)
+        val stillExists = completeNote(
+            noteId = noteId,
+            title = structured.title,
+            body = structured.overview,
+            transcript = structured.transcript,
+            transcriptionTimeMs = transcriptionMs,
+            structuringTimeMs = structured.structuringTimeMs,
+            hardwareBackend = structured.hardwareBackend.name,
+            style = structured.style,
+        )
+        if (stillExists) {
+            mutableEvents.emit(NoteProcessingEvent.Completed(noteId))
+        }
+        return stillExists
+    }
+
+    private suspend fun structureOrKeepTranscript(
+        noteId: Long,
+        transcripts: List<String>,
+        progressOffset: Float,
+        style: NoteStyleRef,
+    ): StructuredNote = try {
+        transcriptStructurer.structure(transcripts, style) { fraction ->
+            updateProgress(noteId, progressOffset + fraction * (1f - progressOffset))
+        }
+    } catch (backendFailure: AiBackendException) {
+        Logger.withTag(LOG_TAG)
+            .w(backendFailure) { "Structuring unavailable for note $noteId, keeping transcript" }
+        transcriptStructurer.transcriptOnly(transcripts, style)
     }
 
     private fun addChunk(chunk: AudioChunk) {
@@ -534,6 +672,7 @@ class RecordingSessionManager(
         const val RETRY_CHUNK_MS = 29_000L
         const val BYTES_PER_MS = AudioRecorder.SAMPLE_RATE * 2 / 1000L
         const val RETRY_WHISPER_SHARE = 0.6f
+        const val IMPORT_DECODE_SHARE = 0.15f
         const val MIN_CHUNK_SPEECH_MS = 1_000L
     }
 }

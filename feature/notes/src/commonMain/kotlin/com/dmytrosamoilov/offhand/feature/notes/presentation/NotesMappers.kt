@@ -4,10 +4,13 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
 import com.dmytrosamoilov.offhand.core.common.DurationFormatter
-import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
+import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
+import com.dmytrosamoilov.offhand.core.data.domain.SuggestedEvent
+import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlaybackState
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.FolderNameError
@@ -167,3 +170,22 @@ internal fun CustomNoteStyle.toOptionUi(): NoteStyleOptionUi = NoteStyleOptionUi
     name = name,
     description = sections.joinToString(separator = ", ") { it.heading },
 )
+
+internal fun NoteSuggestions.toUi(formatter: DateLabelFormatter): SmartSuggestionsUi {
+    val visible = events.withIndex().filter { it.value.status != SuggestionStatus.DISMISSED }
+    if (visible.isEmpty()) return SmartSuggestionsUi.Empty
+    return SmartSuggestionsUi.Ready(visible.map { (index, suggested) -> suggested.toUi(index, formatter) })
+}
+
+private fun SuggestedEvent.toUi(index: Int, formatter: DateLabelFormatter): CalendarEventUi {
+    val start = Instant.fromEpochMilliseconds(event.startEpochMs).toLocalDateTime(TimeZone.currentSystemDefault())
+    return CalendarEventUi(
+        index = index,
+        title = event.title,
+        whenText = if (event.isAllDay) formatter.day(start.date) else formatter.dateTime(start),
+        isAllDay = event.isAllDay,
+        location = event.location,
+        details = event.details,
+        isAdded = status == SuggestionStatus.ADDED,
+    )
+}

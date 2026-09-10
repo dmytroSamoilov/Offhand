@@ -75,4 +75,21 @@
     <string name="notes_folder_empty_state">У цій папці ще немає нотаток.</string>
     <string name="notes_move_to_folder">Перемістити в папку</string>
     <string name="notes_folder_none">Без папки</string>
+    <string name="notes_import_audio_description">Імпортувати аудіофайл</string>
+    <string name="notes_import_locked">Імпорт аудіо входить до Offhand Pro.</string>
+    <string name="notes_import_error_title">Не вдалося імпортувати цей файл</string>
+    <string name="notes_import_error_unsupported">Цей аудіоформат не підтримується.</string>
+    <string name="notes_import_error_too_long">Записи довші за 2 години імпортувати не можна.</string>
+    <string name="notes_import_error_unreadable">Не вдалося прочитати файл.</string>
+    <string name="notes_import_error_dismiss">Гаразд</string>
+    <string name="notes_calendar_sheet_title">Події календаря</string>
+    <string name="notes_calendar_add">Додати до календаря</string>
+    <string name="notes_calendar_all_day">Увесь день</string>
+    <string name="notes_calendar_no_app">На цьому пристрої не знайдено застосунку календаря.</string>
+    <string name="notes_suggestions_heading">Розумні підказки</string>
+    <string name="notes_suggestions_find">Знайти підказки</string>
+    <string name="notes_suggestions_loading">Шукаємо дати й зустрічі…</string>
+    <string name="notes_suggestions_empty">Для цієї нотатки немає підказок.</string>
+    <string name="notes_suggestions_added">Додано</string>
+    <string name="notes_suggestions_dismiss">Приховати підказку</string>
 </resources>

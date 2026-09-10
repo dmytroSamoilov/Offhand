@@ -6,6 +6,10 @@ import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.ModelState
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechModelState
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
+import com.dmytrosamoilov.offhand.core.data.domain.CalendarEventSuggestion
+import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
+import com.dmytrosamoilov.offhand.core.data.domain.SuggestedEvent
+import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlaybackState
@@ -19,6 +23,9 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUse
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCalendarSuggestionsAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
@@ -29,6 +36,9 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCas
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RequestNoteSuggestionsUseCase
 import app.cash.turbine.test
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -36,6 +46,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -80,6 +91,22 @@ class NotesViewModelTest {
     private val isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase = mockk {
         every { this@mockk.invoke() } returns flowOf(true)
     }
+    private val importAudio: ImportAudioUseCase = mockk()
+    private val storedSuggestions = MutableStateFlow<NoteSuggestions?>(null)
+    private val observeNoteSuggestions: ObserveNoteSuggestionsUseCase = mockk {
+        every { this@mockk.invoke(any()) } returns storedSuggestions
+    }
+    private val requestNoteSuggestions: RequestNoteSuggestionsUseCase = mockk {
+        coEvery { this@mockk.invoke(any()) } returns true
+    }
+    private val updateSuggestionStatus: UpdateSuggestionStatusUseCase = mockk(relaxed = true)
+    private val suggestingNoteIds = MutableStateFlow<Set<Long>>(emptySet())
+    private val isCalendarSuggestionsAvailable: IsCalendarSuggestionsAvailableUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
+    private val isAudioImportAvailable: IsAudioImportAvailableUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
     private val observeDeveloperOptions: ObserveDeveloperOptionsUseCase = mockk {
         every { this@mockk() } returns flowOf(false)
     }
@@ -98,6 +125,8 @@ class NotesViewModelTest {
     }
     private val sessionManager: RecordingSessionManager = mockk {
         every { noteProgress } returns MutableStateFlow(emptyMap())
+        every { events } returns MutableSharedFlow()
+        every { suggestingNoteIds } returns this@NotesViewModelTest.suggestingNoteIds
     }
     private val modelState = MutableStateFlow<ModelState>(ModelState.Ready)
     private val modelManager: ModelManager = mockk {
@@ -152,6 +181,12 @@ class NotesViewModelTest {
         markReviewAttempt = markReviewAttempt,
         reviewLauncher = reviewLauncher,
         audioPlayer = audioPlayer,
+        importAudio = importAudio,
+        isAudioImportAvailable = isAudioImportAvailable,
+        observeNoteSuggestions = observeNoteSuggestions,
+        requestNoteSuggestions = requestNoteSuggestions,
+        updateSuggestionStatus = updateSuggestionStatus,
+        isCalendarSuggestionsAvailable = isCalendarSuggestionsAvailable,
         sessionManager = sessionManager,
         aiCoreDownloadStatus = AiCoreDownloadStatus(modelManager, speechToText),
     )
@@ -183,6 +218,80 @@ class NotesViewModelTest {
         assertEquals("12.4 s", detail?.metrics?.transcriptionTime)
         assertEquals("4.2 s", detail?.metrics?.structuringTime)
         assertEquals("CPU", detail?.metrics?.hardwareBackend)
+    }
+
+    @Test
+    fun `smart suggestions follow the stored state and hand one event to the calendar`() = runTest(dispatcher) {
+        val suggestion = CalendarEventSuggestion(
+            title = "Sync with Maria",
+            startEpochMs = 1_800_000_000_000L,
+            endEpochMs = 1_800_003_600_000L,
+            isAllDay = false,
+            location = "Berlin",
+            details = "Show the demo.",
+        )
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(SmartSuggestionsUi.NotRun, viewModel.uiState.value.smartSuggestions)
+
+        suggestingNoteIds.value = setOf(5L)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(SmartSuggestionsUi.Loading, viewModel.uiState.value.smartSuggestions)
+
+        suggestingNoteIds.value = emptySet()
+        storedSuggestions.value = NoteSuggestions(5L, listOf(SuggestedEvent(suggestion)))
+        dispatcher.scheduler.advanceUntilIdle()
+        val ready = viewModel.uiState.value.smartSuggestions as SmartSuggestionsUi.Ready
+        assertEquals(listOf("Sync with Maria"), ready.events.map { it.title })
+        assertEquals("Berlin", ready.events.single().location)
+        assertFalse(ready.events.single().isAdded)
+
+        viewModel.onSuggestionAddRequested(0)
+        assertEquals(suggestion, viewModel.uiState.value.pendingCalendarEvent)
+        viewModel.onCalendarEventLaunched(isAdded = true)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertNull(viewModel.uiState.value.pendingCalendarEvent)
+        coVerify { updateSuggestionStatus(5L, 0, SuggestionStatus.ADDED) }
+    }
+
+    @Test
+    fun `dismissed suggestions are hidden and an all-dismissed note reads as empty`() = runTest(dispatcher) {
+        val event = CalendarEventSuggestion("Sync", 1L, 2L, false, "", "")
+        storedSuggestions.value = NoteSuggestions(
+            noteId = 5L,
+            events = listOf(SuggestedEvent(event, SuggestionStatus.DISMISSED), SuggestedEvent(event.copy(title = "Report"))),
+        )
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val ready = viewModel.uiState.value.smartSuggestions as SmartSuggestionsUi.Ready
+        assertEquals(listOf(1), ready.events.map { it.index })
+
+        viewModel.onSuggestionDismissed(1)
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify { updateSuggestionStatus(5L, 1, SuggestionStatus.DISMISSED) }
+
+        storedSuggestions.value = NoteSuggestions(5L, emptyList())
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(SmartSuggestionsUi.Empty, viewModel.uiState.value.smartSuggestions)
+    }
+
+    @Test
+    fun `locked entitlement hides the section and never asks for suggestions`() = runTest(dispatcher) {
+        every { isCalendarSuggestionsAvailable() } returns flowOf(false)
+        coEvery { requestNoteSuggestions(any()) } returns false
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.smartSuggestions)
+
+        viewModel.onSuggestionsRequested()
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify { requestNoteSuggestions(5L) }
+        coVerify(exactly = 0) { updateSuggestionStatus(any(), any(), any()) }
     }
 
     @Test

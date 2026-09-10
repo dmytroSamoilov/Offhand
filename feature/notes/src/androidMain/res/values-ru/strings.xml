@@ -75,4 +75,21 @@
     <string name="notes_folder_empty_state">В этой папке пока нет заметок.</string>
     <string name="notes_move_to_folder">Переместить в папку</string>
     <string name="notes_folder_none">Без папки</string>
+    <string name="notes_import_audio_description">Импортировать аудиофайл</string>
+    <string name="notes_import_locked">Импорт аудио входит в Offhand Pro.</string>
+    <string name="notes_import_error_title">Не удалось импортировать этот файл</string>
+    <string name="notes_import_error_unsupported">Этот аудиоформат не поддерживается.</string>
+    <string name="notes_import_error_too_long">Записи длиннее 2 часов импортировать нельзя.</string>
+    <string name="notes_import_error_unreadable">Не удалось прочитать файл.</string>
+    <string name="notes_import_error_dismiss">ОК</string>
+    <string name="notes_calendar_sheet_title">События календаря</string>
+    <string name="notes_calendar_add">Добавить в календарь</string>
+    <string name="notes_calendar_all_day">Весь день</string>
+    <string name="notes_calendar_no_app">На этом устройстве не найдено приложение календаря.</string>
+    <string name="notes_suggestions_heading">Умные подсказки</string>
+    <string name="notes_suggestions_find">Найти подсказки</string>
+    <string name="notes_suggestions_loading">Ищем даты и встречи…</string>
+    <string name="notes_suggestions_empty">Для этой заметки нет подсказок.</string>
+    <string name="notes_suggestions_added">Добавлено</string>
+    <string name="notes_suggestions_dismiss">Скрыть подсказку</string>
 </resources>

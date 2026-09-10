@@ -82,4 +82,21 @@
     <string name="notes_folder_empty_state">No notes in this folder yet.</string>
     <string name="notes_move_to_folder">Move to folder</string>
     <string name="notes_folder_none">No folder</string>
+    <string name="notes_import_audio_description">Import audio file</string>
+    <string name="notes_import_locked">Audio import is part of Offhand Pro.</string>
+    <string name="notes_import_error_title">Could not import this file</string>
+    <string name="notes_import_error_unsupported">This audio format is not supported.</string>
+    <string name="notes_import_error_too_long">Recordings longer than 2 hours cannot be imported.</string>
+    <string name="notes_import_error_unreadable">The file could not be read.</string>
+    <string name="notes_import_error_dismiss">OK</string>
+    <string name="notes_calendar_sheet_title">Calendar events</string>
+    <string name="notes_calendar_add">Add to calendar</string>
+    <string name="notes_calendar_all_day">All day</string>
+    <string name="notes_calendar_no_app">No calendar app was found on this device.</string>
+    <string name="notes_suggestions_heading">Smart suggestions</string>
+    <string name="notes_suggestions_find">Find suggestions</string>
+    <string name="notes_suggestions_loading">Looking for dates and appointments…</string>
+    <string name="notes_suggestions_empty">No suggestions for this note.</string>
+    <string name="notes_suggestions_added">Added</string>
+    <string name="notes_suggestions_dismiss">Dismiss suggestion</string>
 </resources>

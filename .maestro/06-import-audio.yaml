@@ -1,0 +1,24 @@
+# Runs after 01-smoke.yaml. Expects an audio file named import-sample.* in the
+# device's Download folder (any format the platform decodes) and covers importing
+# it through the system file picker into a new note. Android only until the iOS
+# decoder exists.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- assertVisible: "Smoke test note"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Import audio file"
+      - tapOn:
+          text: "import-sample.*"
+      - extendedWaitUntil:
+          visible: "import-sample"
+          timeout: 15000
+      - extendedWaitUntil:
+          notVisible: "import-sample"
+          timeout: 90000
+      - assertVisible:
+          text: "Smoke test note"
+          index: 1

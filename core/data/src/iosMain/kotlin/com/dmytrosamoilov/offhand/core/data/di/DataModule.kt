@@ -14,9 +14,11 @@ import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_4_5
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_5_6
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_6_7
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_7_8
+import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_8_9
 import com.dmytrosamoilov.offhand.core.data.database.FolderDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteStyleDao
+import com.dmytrosamoilov.offhand.core.data.database.NoteSuggestionsDao
 import com.dmytrosamoilov.offhand.core.data.database.NotesDatabase
 import com.dmytrosamoilov.offhand.core.data.database.applyCompleteUnlessOpenProtection
 import com.dmytrosamoilov.offhand.core.data.database.createProtectedDatabaseDirectory
@@ -24,12 +26,14 @@ import com.dmytrosamoilov.offhand.core.data.database.iosDocumentsDirectory
 import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStylesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.EntitlementsRepository
 import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
+import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestionsRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import com.dmytrosamoilov.offhand.core.data.preferences.DataStoreUserPreferencesRepository
 import com.dmytrosamoilov.offhand.core.data.repository.MockEntitlementsRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomCustomNoteStylesRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomFoldersRepository
+import com.dmytrosamoilov.offhand.core.data.repository.RoomNoteSuggestionsRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomNotesRepository
 import com.dmytrosamoilov.offhand.core.security.excludeFromBackup
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -57,6 +61,7 @@ private fun createNotesDatabase(): NotesDatabase {
             MIGRATION_5_6,
             MIGRATION_6_7,
             MIGRATION_7_8,
+            MIGRATION_8_9,
         )
         .build()
     applyCompleteUnlessOpenProtection(databasePath)
@@ -82,9 +87,11 @@ val coreDataModule = module {
     factory<NoteDao> { get<NotesDatabase>().noteDao() }
     factory<FolderDao> { get<NotesDatabase>().folderDao() }
     factory<NoteStyleDao> { get<NotesDatabase>().noteStyleDao() }
+    factory<NoteSuggestionsDao> { get<NotesDatabase>().noteSuggestionsDao() }
     singleOf(::RoomNotesRepository) bind NotesRepository::class
     singleOf(::RoomFoldersRepository) bind FoldersRepository::class
     singleOf(::RoomCustomNoteStylesRepository) bind CustomNoteStylesRepository::class
+    singleOf(::RoomNoteSuggestionsRepository) bind NoteSuggestionsRepository::class
     singleOf(::MockEntitlementsRepository) bind EntitlementsRepository::class
     single<UserPreferencesRepository> {
         DataStoreUserPreferencesRepository(createUserPreferencesDataStore(), get())

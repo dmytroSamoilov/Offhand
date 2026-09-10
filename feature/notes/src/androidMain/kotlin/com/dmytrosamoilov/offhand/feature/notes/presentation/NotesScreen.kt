@@ -6,6 +6,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
@@ -96,6 +100,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCard
+import com.dmytrosamoilov.offhand.core.designsystem.component.LabelPill
+import androidx.compose.runtime.Immutable
 import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCardAction
 import com.dmytrosamoilov.offhand.core.designsystem.component.MarkdownText
 import com.dmytrosamoilov.offhand.core.ui.rememberSensitiveClipboard
@@ -113,6 +119,11 @@ import com.dmytrosamoilov.offhand.feature.notes.R
 import java.util.Locale
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.filled.UploadFile
+import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportIntake
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -144,6 +155,14 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 import kotlinx.coroutines.delay
 import com.dmytrosamoilov.offhand.core.designsystem.focus.userInitiatedFocusOnly
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.provider.CalendarContract
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
+import com.dmytrosamoilov.offhand.core.data.domain.CalendarEventSuggestion
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -158,6 +177,12 @@ fun NotesScreen(
     val navigator = rememberListDetailPaneScaffoldNavigator<Long>()
     val paneScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val importIntake: AudioImportIntake = koinInject()
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            paneScope.launch { viewModel.onAudioImportSelected(importIntake.stage(uri)) }
+        }
+    }
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
 
@@ -226,6 +251,7 @@ fun NotesScreen(
                         onDeleteRequested = viewModel::onDeleteRequested,
                         onMoveRequested = viewModel::onMoveToFolderRequested,
                         onNewRecording = onNewRecording,
+                        onImportAudio = { importLauncher.launch(arrayOf(AUDIO_MIME_TYPE)) },
                     )
                 }
             },
@@ -287,6 +313,10 @@ fun NotesScreen(
         )
     }
 
+    state.importMessage?.let { message ->
+        ImportMessageDialog(message = message, onDismiss = viewModel::onImportMessageDismissed)
+    }
+    CalendarEventLauncher(event = state.pendingCalendarEvent, onLaunched = viewModel::onCalendarEventLaunched)
     val selectedStyle = state.selected?.style
     if (state.isPresetSheetVisible && selectedStyle != null) {
         NoteStyleSheet(
@@ -489,6 +519,7 @@ private fun NotesListPane(
     onDeleteRequested: (Long) -> Unit,
     onMoveRequested: (Long) -> Unit,
     onNewRecording: () -> Unit,
+    onImportAudio: () -> Unit,
 ) {
     val listState = rememberLazyListState()
     // Foundation ≥1.8 anchors prepended items above the viewport; re-pin to the
@@ -500,7 +531,12 @@ private fun NotesListPane(
     }
     val haptics = haptics()
     Scaffold(
-        topBar = { AppTopBar(title = stringResource(R.string.notes_title)) },
+        topBar = {
+            AppTopBar(
+                title = stringResource(R.string.notes_title),
+                actions = { ImportAudioAction(onClick = onImportAudio) },
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -1226,6 +1262,7 @@ private fun NoteDetailPane(
         else -> NoteDetail(
             note = selected,
             playback = state.playback,
+            smartSuggestions = state.smartSuggestions,
             showMetrics = state.isDeveloperMode,
             progressPercent = state.noteProgress[selected.id],
             onBack = viewModel::onDetailClosed,
@@ -1238,6 +1275,11 @@ private fun NoteDetailPane(
             onRetranscribeRequested = viewModel::onRetranscribeRequested,
             onPresetRequested = viewModel::onPresetSheetRequested,
             onMoveToFolderRequested = viewModel::onMoveToFolderRequested,
+            suggestionActions = SuggestionActions(
+                onFind = viewModel::onSuggestionsRequested,
+                onAdd = viewModel::onSuggestionAddRequested,
+                onDismiss = viewModel::onSuggestionDismissed,
+            ),
         )
     }
 }
@@ -1262,6 +1304,7 @@ private fun EmptyDetailPlaceholder() {
 private fun NoteDetail(
     note: NoteDetailUi,
     playback: AudioPlaybackUi,
+    smartSuggestions: SmartSuggestionsUi?,
     showMetrics: Boolean,
     progressPercent: Int?,
     onBack: () -> Unit,
@@ -1274,6 +1317,7 @@ private fun NoteDetail(
     onRetranscribeRequested: () -> Unit,
     onPresetRequested: () -> Unit,
     onMoveToFolderRequested: () -> Unit,
+    suggestionActions: SuggestionActions,
 ) {
     Scaffold(
         topBar = {
@@ -1294,6 +1338,8 @@ private fun NoteDetail(
         NoteDetailContent(
             note = note,
             playback = playback,
+            smartSuggestions = smartSuggestions,
+            suggestionActions = suggestionActions,
             showMetrics = showMetrics,
             progressPercent = progressPercent,
             onPlayPause = onPlayPause,
@@ -1472,6 +1518,8 @@ private fun DeleteMenuItem(onClick: () -> Unit) {
 private fun NoteDetailContent(
     note: NoteDetailUi,
     playback: AudioPlaybackUi,
+    smartSuggestions: SmartSuggestionsUi?,
+    suggestionActions: SuggestionActions,
     showMetrics: Boolean,
     progressPercent: Int?,
     onPlayPause: () -> Unit,
@@ -1566,6 +1614,10 @@ private fun NoteDetailContent(
                     MarkdownText(markdown = note.body)
                 }
             }
+        }
+        if (smartSuggestions != null) {
+            Spacer(modifier = Modifier.height(16.dp))
+            SmartSuggestionsCard(suggestions = smartSuggestions, actions = suggestionActions)
         }
         if (note.transcript.isNotBlank()) {
             Spacer(modifier = Modifier.height(16.dp))
@@ -1865,3 +1917,211 @@ private fun DeleteConfirmationDialog(
         },
     )
 }
+
+@Composable
+private fun ImportAudioAction(onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        Icon(
+            imageVector = Icons.Filled.UploadFile,
+            contentDescription = stringResource(R.string.notes_import_audio_description),
+        )
+    }
+}
+
+@Composable
+private fun ImportMessageDialog(message: ImportMessageUi, onDismiss: () -> Unit) {
+    val body = when (message) {
+        ImportMessageUi.LOCKED -> R.string.notes_import_locked
+        ImportMessageUi.UNSUPPORTED -> R.string.notes_import_error_unsupported
+        ImportMessageUi.TOO_LONG -> R.string.notes_import_error_too_long
+        ImportMessageUi.UNREADABLE -> R.string.notes_import_error_unreadable
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.notes_import_error_title)) },
+        text = { Text(text = stringResource(body)) },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.notes_import_error_dismiss)) }
+        },
+    )
+}
+
+private const val AUDIO_MIME_TYPE = "audio/*"
+private const val CALENDAR_EVENT_MIME_TYPE = "vnd.android.cursor.item/event"
+
+@Composable
+private fun CalendarEventLauncher(event: CalendarEventSuggestion?, onLaunched: (Boolean) -> Unit) {
+    val context = LocalContext.current
+    var isCalendarMissing by remember { mutableStateOf(false) }
+    LaunchedEffect(event) {
+        if (event == null) return@LaunchedEffect
+        val opened = openCalendarInsert(context, event)
+        isCalendarMissing = !opened
+        onLaunched(opened)
+    }
+    if (isCalendarMissing) {
+        AlertDialog(
+            onDismissRequest = { isCalendarMissing = false },
+            title = { Text(text = stringResource(R.string.notes_calendar_sheet_title)) },
+            text = { Text(text = stringResource(R.string.notes_calendar_no_app)) },
+            confirmButton = {
+                TextButton(onClick = { isCalendarMissing = false }) {
+                    Text(text = stringResource(R.string.notes_import_error_dismiss))
+                }
+            },
+        )
+    }
+}
+
+private fun openCalendarInsert(context: Context, event: CalendarEventSuggestion): Boolean =
+    startCalendarInsert(context, calendarInsertIntent(event).setData(CalendarContract.Events.CONTENT_URI)) ||
+        startCalendarInsert(context, calendarInsertIntent(event).setType(CALENDAR_EVENT_MIME_TYPE))
+
+private fun startCalendarInsert(context: Context, intent: Intent): Boolean = try {
+    context.startActivity(intent)
+    true
+} catch (missing: ActivityNotFoundException) {
+    false
+}
+
+private fun calendarInsertIntent(event: CalendarEventSuggestion): Intent =
+    Intent(Intent.ACTION_INSERT)
+        .putExtra(CalendarContract.Events.TITLE, event.title)
+        .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.startEpochMs)
+        .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.endEpochMs)
+        .putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, event.isAllDay)
+        .putExtra(CalendarContract.Events.EVENT_LOCATION, event.location)
+        .putExtra(CalendarContract.Events.DESCRIPTION, event.details)
+
+@Immutable
+private data class SuggestionActions(
+    val onFind: () -> Unit,
+    val onAdd: (Int) -> Unit,
+    val onDismiss: (Int) -> Unit,
+)
+
+@Composable
+private fun SmartSuggestionsCard(suggestions: SmartSuggestionsUi, actions: SuggestionActions) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(vertical = 20.dp)) {
+            LabelPill(
+                title = stringResource(R.string.notes_suggestions_heading),
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.padding(horizontal = 20.dp),
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            SmartSuggestionsBody(suggestions = suggestions, actions = actions)
+        }
+    }
+}
+
+@Composable
+private fun SmartSuggestionsBody(suggestions: SmartSuggestionsUi, actions: SuggestionActions) {
+    when (suggestions) {
+        SmartSuggestionsUi.Loading -> SuggestionsStatus(text = stringResource(R.string.notes_suggestions_loading), showProgress = true)
+        SmartSuggestionsUi.Empty -> SuggestionsStatus(text = stringResource(R.string.notes_suggestions_empty))
+        SmartSuggestionsUi.NotRun -> FindSuggestionsButton(onClick = actions.onFind)
+        is SmartSuggestionsUi.Ready -> Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .height(IntrinsicSize.Max)
+                .padding(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            suggestions.events.forEach { event ->
+                key(event.index) {
+                    SuggestionCard(
+                        event = event,
+                        onAdd = { actions.onAdd(event.index) },
+                        onDismiss = { actions.onDismiss(event.index) },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SuggestionsStatus(text: String, showProgress: Boolean = false) {
+    Row(
+        modifier = Modifier.padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        if (showProgress) CircularProgressIndicator(modifier = Modifier.size(20.dp))
+        Text(text = text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun FindSuggestionsButton(onClick: () -> Unit) {
+    FilledTonalButton(onClick = onClick, modifier = Modifier.padding(horizontal = 20.dp)) {
+        Icon(imageVector = Icons.Filled.Event, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = stringResource(R.string.notes_suggestions_find))
+    }
+}
+
+@Composable
+private fun SuggestionCard(event: CalendarEventUi, onAdd: () -> Unit, onDismiss: () -> Unit) {
+    Surface(
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        modifier = Modifier
+            .width(SUGGESTION_CARD_WIDTH)
+            .fillMaxHeight(),
+    ) {
+        Column(modifier = Modifier.padding(16.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(text = event.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(
+                text = if (event.isAllDay) "${event.whenText} · ${stringResource(R.string.notes_calendar_all_day)}" else event.whenText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            SuggestionDetail(text = event.location)
+            SuggestionDetail(text = event.details)
+            Spacer(modifier = Modifier.weight(1f))
+            SuggestionCardActions(event = event, onAdd = onAdd, onDismiss = onDismiss)
+        }
+    }
+}
+
+@Composable
+private fun SuggestionDetail(text: String) {
+    if (text.isBlank()) return
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+
+@Composable
+private fun SuggestionCardActions(event: CalendarEventUi, onAdd: () -> Unit, onDismiss: () -> Unit) {
+    val haptics = haptics()
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (event.isAdded) {
+            Icon(imageVector = Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+            Text(text = stringResource(R.string.notes_suggestions_added), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+        } else {
+            FilledTonalButton(
+                onClick = {
+                    haptics.confirm()
+                    onAdd()
+                },
+            ) {
+                Text(text = stringResource(R.string.notes_calendar_add))
+            }
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        IconButton(onClick = onDismiss) {
+            Icon(imageVector = Icons.Filled.Close, contentDescription = stringResource(R.string.notes_suggestions_dismiss))
+        }
+    }
+}
+
+private val SUGGESTION_CARD_WIDTH = 260.dp

@@ -141,12 +141,14 @@ struct RootView: View {
             case .failed(let failed):
                 eventNoteId = failed.noteId
                 notifications.noteFailed(noteId: failed.noteId)
+            case .importRejected:
+                continue
             }
             guard eventNoteId == activeNoteId else { continue }
             switch onEnum(of: event) {
             case .completed:
                 activityController.finished()
-            case .failed:
+            case .failed, .importRejected:
                 activityController.cancelled()
             }
             activeNoteId = nil

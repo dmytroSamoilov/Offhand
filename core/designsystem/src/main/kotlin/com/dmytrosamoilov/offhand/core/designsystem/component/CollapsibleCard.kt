@@ -150,12 +150,17 @@ data class CollapsibleCardAction(
 )
 
 @Composable
-private fun LabelPill(title: String, containerColor: Color, contentColor: Color) {
+fun LabelPill(
+    title: String,
+    containerColor: Color,
+    contentColor: Color,
+    modifier: Modifier = Modifier,
+) {
     Surface(
         shape = CircleShape,
         color = containerColor,
         contentColor = contentColor,
-        modifier = Modifier.height(PILL_HEIGHT),
+        modifier = modifier.height(PILL_HEIGHT),
     ) {
         Box(
             contentAlignment = Alignment.Center,

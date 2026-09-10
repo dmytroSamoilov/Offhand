@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.recording.di
 
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleDrafter
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStylePreviewer
+import com.dmytrosamoilov.offhand.feature.recording.domain.CalendarEventExtractor
 import com.dmytrosamoilov.offhand.feature.recording.domain.NoteStyleResolver
 import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinator
 import com.dmytrosamoilov.offhand.feature.recording.domain.SessionNoteStyleDrafter
@@ -9,18 +10,24 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.SessionNoteStylePrevi
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.TranscriptStructurer
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateImportedNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateRecordingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsCalendarSuggestionsAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsThinkingEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteRecordedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RequestNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteTranscriptUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.presentation.RecordingViewModel
@@ -42,6 +49,7 @@ val featureRecordingModule = module {
     singleOf(::TranscriptStructurer)
     singleOf(::SessionNoteStylePreviewer) bind NoteStylePreviewer::class
     singleOf(::SessionNoteStyleDrafter) bind NoteStyleDrafter::class
+    singleOf(::CalendarEventExtractor)
     singleOf(::PendingNotesCoordinator)
     singleOf(::ResumeInterruptedNotesUseCase)
     single {
@@ -50,6 +58,7 @@ val featureRecordingModule = module {
             speechToText = get(),
             transcriptStructurer = get(),
             createRecordingNote = get(),
+            createImportedNote = get(),
             markNoteRecorded = get(),
             discardNote = get(),
             completeNote = get(),
@@ -60,23 +69,33 @@ val featureRecordingModule = module {
             isAiCoreDownloaded = get(),
             getNoteStyle = get(),
             getNote = get(),
+            calendarEventExtractor = get(),
+            saveNoteSuggestions = get(),
+            isCalendarSuggestionsAvailable = get(),
             audioStore = get(),
             audioBackup = get(),
+            audioDecoder = get(),
             scope = get(recordingSessionScopeQualifier),
         )
     }
     factoryOf(::CompleteNoteUseCase)
+    factoryOf(::CreateImportedNoteUseCase)
     factoryOf(::CreateRecordingNoteUseCase)
     factoryOf(::DiscardNoteUseCase)
     factoryOf(::FailNoteUseCase)
     factoryOf(::GetNoteStyleUseCase)
     factoryOf(::GetNoteUseCase)
+    factoryOf(::ImportAudioUseCase)
+    factoryOf(::IsAudioImportAvailableUseCase)
     factoryOf(::IsAiCoreDownloadedUseCase)
+    factoryOf(::IsCalendarSuggestionsAvailableUseCase)
     factoryOf(::IsThinkingEnabledUseCase)
     factoryOf(::MarkNoteProcessingUseCase)
     factoryOf(::MarkNoteRecordedUseCase)
     factoryOf(::ObserveDeveloperOptionsUseCase)
     factoryOf(::RegisterSavedRecordingUseCase)
+    factoryOf(::RequestNoteSuggestionsUseCase)
+    factoryOf(::SaveNoteSuggestionsUseCase)
     factoryOf(::SaveNoteTranscriptUseCase)
     factoryOf(::SweepOrphanedRecordingsUseCase)
     viewModelOf(::RecordingViewModel)

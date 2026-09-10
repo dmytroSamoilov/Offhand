@@ -60,3 +60,13 @@ internal val MIGRATION_7_8 = object : Migration(7, 8) {
         connection.execSQL("ALTER TABLE notes ADD COLUMN customStyleId INTEGER")
     }
 }
+
+internal val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS note_suggestions (" +
+                "noteId INTEGER PRIMARY KEY NOT NULL, " +
+                "eventsJson TEXT NOT NULL)",
+        )
+    }
+}

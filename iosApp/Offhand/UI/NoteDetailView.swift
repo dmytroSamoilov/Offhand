@@ -30,6 +30,9 @@ struct NoteDetailView: View {
                             initiallyExpanded: true
                         )
                         .id(detail.id)
+                        if let suggestions = state.smartSuggestions {
+                            SmartSuggestionsSection(viewModel: viewModel, suggestions: suggestions)
+                        }
                     }
                     if !detail.transcript.isEmpty {
                         CollapsibleSection(
@@ -111,6 +114,12 @@ struct NoteDetailView: View {
             if let editor = state.editor {
                 NoteEditorView(viewModel: viewModel, editor: editor)
             }
+        }
+        .sheet(item: pendingEventBinding) { pending in
+            CalendarEventEditor(suggestion: pending.suggestion) { saved in
+                viewModel.onCalendarEventLaunched(isAdded: saved)
+            }
+            .ignoresSafeArea()
         }
         .sheet(isPresented: presetBinding) {
             NoteStyleSheet(viewModel: viewModel, current: detail.style, customStyles: state.customStyles)
@@ -272,6 +281,13 @@ struct NoteDetailView: View {
         Binding(
             get: { state.isRetranscribeConfirmationVisible },
             set: { isShown in if !isShown { viewModel.onRetranscribeDismissed() } }
+        )
+    }
+
+    private var pendingEventBinding: Binding<PendingCalendarEvent?> {
+        Binding(
+            get: { state.pendingCalendarEvent.map { PendingCalendarEvent(suggestion: $0) } },
+            set: { pending in if pending == nil { viewModel.onCalendarEventLaunched(isAdded: false) } }
         )
     }
 

@@ -103,6 +103,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
             adb install -r app/build/outputs/apk/uitest/debug/app-uitest-debug.apk
+            adb push .maestro/assets/import-sample.m4a /sdcard/Download/import-sample.m4a
             maestro test --format junit --output maestro-android.xml .maestro/
 
       - name: Upload Maestro artifacts

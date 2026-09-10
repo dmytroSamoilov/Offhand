@@ -120,6 +120,8 @@ and cover:
 8. Backup and restore through the system file picker, including the passphrase prompt (Android only; the iOS picker is not scriptable)
 9. Custom note styles: create one with two sections, preview it on the sample, pick it as the default, rewrite a note with it, delete it
 10. Building a note style from a plain-text description; the fake model answers the drafting prompt with a canned two-section style
+11. Importing an audio file through the system picker into a new note (Android only; needs `.maestro/assets/import-sample.m4a` pushed to the device's Download folder first, see below)
+12. Smart suggestions on a finished note; the fake model answers with two canned calendar events, one is dismissed, the other is handed to the system calendar's event editor, and both states survive a relaunch
 
 The flows assume a phone-sized screen; on tablets and unfolded foldables the app switches
 to its two-pane layout and the steps no longer line up.
@@ -137,6 +139,7 @@ brew trust mobile-dev-inc/tap && brew install mobile-dev-inc/tap/maestro
 ```
 ./gradlew assembleUitestDebug
 adb install -r app/build/outputs/apk/uitest/debug/app-uitest-debug.apk
+adb push .maestro/assets/import-sample.m4a /sdcard/Download/import-sample.m4a
 maestro test .maestro/
 ```
 

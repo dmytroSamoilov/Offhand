@@ -73,4 +73,21 @@
     <string name="notes_folder_empty_state">इस फ़ोल्डर में अभी कोई नोट नहीं है।</string>
     <string name="notes_move_to_folder">फ़ोल्डर में ले जाएं</string>
     <string name="notes_folder_none">कोई फ़ोल्डर नहीं</string>
+    <string name="notes_import_audio_description">ऑडियो फ़ाइल आयात करें</string>
+    <string name="notes_import_locked">ऑडियो आयात Offhand Pro का हिस्सा है।</string>
+    <string name="notes_import_error_title">यह फ़ाइल आयात नहीं हो सकी</string>
+    <string name="notes_import_error_unsupported">यह ऑडियो फ़ॉर्मैट समर्थित नहीं है।</string>
+    <string name="notes_import_error_too_long">2 घंटे से लंबी रिकॉर्डिंग आयात नहीं की जा सकतीं।</string>
+    <string name="notes_import_error_unreadable">फ़ाइल पढ़ी नहीं जा सकी।</string>
+    <string name="notes_import_error_dismiss">ठीक है</string>
+    <string name="notes_calendar_sheet_title">कैलेंडर इवेंट</string>
+    <string name="notes_calendar_add">कैलेंडर में जोड़ें</string>
+    <string name="notes_calendar_all_day">पूरा दिन</string>
+    <string name="notes_calendar_no_app">इस डिवाइस पर कोई कैलेंडर ऐप नहीं मिला।</string>
+    <string name="notes_suggestions_heading">स्मार्ट सुझाव</string>
+    <string name="notes_suggestions_find">सुझाव खोजें</string>
+    <string name="notes_suggestions_loading">तारीखें और अपॉइंटमेंट खोजे जा रहे हैं…</string>
+    <string name="notes_suggestions_empty">इस नोट के लिए कोई सुझाव नहीं है।</string>
+    <string name="notes_suggestions_added">जोड़ा गया</string>
+    <string name="notes_suggestions_dismiss">सुझाव हटाएँ</string>
 </resources>

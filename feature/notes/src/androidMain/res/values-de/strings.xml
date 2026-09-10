@@ -73,4 +73,21 @@
     <string name="notes_folder_empty_state">Noch keine Notizen in diesem Ordner.</string>
     <string name="notes_move_to_folder">In Ordner verschieben</string>
     <string name="notes_folder_none">Kein Ordner</string>
+    <string name="notes_import_audio_description">Audiodatei importieren</string>
+    <string name="notes_import_locked">Der Audio-Import ist Teil von Offhand Pro.</string>
+    <string name="notes_import_error_title">Diese Datei konnte nicht importiert werden</string>
+    <string name="notes_import_error_unsupported">Dieses Audioformat wird nicht unterstützt.</string>
+    <string name="notes_import_error_too_long">Aufnahmen, die länger als 2 Stunden sind, können nicht importiert werden.</string>
+    <string name="notes_import_error_unreadable">Die Datei konnte nicht gelesen werden.</string>
+    <string name="notes_import_error_dismiss">OK</string>
+    <string name="notes_calendar_sheet_title">Kalendertermine</string>
+    <string name="notes_calendar_add">Zum Kalender hinzufügen</string>
+    <string name="notes_calendar_all_day">Ganztägig</string>
+    <string name="notes_calendar_no_app">Auf diesem Gerät wurde keine Kalender-App gefunden.</string>
+    <string name="notes_suggestions_heading">Smarte Vorschläge</string>
+    <string name="notes_suggestions_find">Vorschläge finden</string>
+    <string name="notes_suggestions_loading">Suche nach Daten und Terminen…</string>
+    <string name="notes_suggestions_empty">Keine Vorschläge für diese Notiz.</string>
+    <string name="notes_suggestions_added">Hinzugefügt</string>
+    <string name="notes_suggestions_dismiss">Vorschlag ausblenden</string>
 </resources>

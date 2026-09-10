@@ -12,13 +12,16 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUse
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCalendarSuggestionsAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
 import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
@@ -37,13 +40,16 @@ val featureNotesModule = module {
     factoryOf(::RenameFolderUseCase)
     factoryOf(::DeleteNoteUseCase)
     factoryOf(::GetNoteUseCase)
+    factoryOf(::IsCalendarSuggestionsAvailableUseCase)
     factoryOf(::IsCustomNoteStylesAvailableUseCase)
     factoryOf(::MarkReviewAttemptUseCase)
     factoryOf(::ObserveDeveloperOptionsUseCase)
+    factoryOf(::ObserveNoteSuggestionsUseCase)
     factoryOf(::ObserveNotesUseCase)
     factoryOf(::SearchNotesUseCase)
     factoryOf(::ShouldRequestReviewUseCase)
     factoryOf(::UpdateNoteUseCase)
+    factoryOf(::UpdateSuggestionStatusUseCase)
     viewModel {
         NotesViewModel(
             recordingProcessController = get(),
@@ -67,6 +73,12 @@ val featureNotesModule = module {
             markReviewAttempt = get(),
             reviewLauncher = get(),
             audioPlayer = get(),
+            importAudio = get(),
+            isAudioImportAvailable = get(),
+            observeNoteSuggestions = get(),
+            requestNoteSuggestions = get(),
+            updateSuggestionStatus = get(),
+            isCalendarSuggestionsAvailable = get(),
             sessionManager = get(),
             aiCoreDownloadStatus = get(),
         )

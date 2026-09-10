@@ -12,6 +12,10 @@ internal class MockEntitlementsRepository : EntitlementsRepository {
     override fun observeEntitlements(): Flow<Entitlements> = flowOf(MOCK_ENTITLEMENTS)
 
     private companion object {
-        val MOCK_ENTITLEMENTS = Entitlements(customStylesUnlocked = true)
+        val MOCK_ENTITLEMENTS = Entitlements(
+            customStylesUnlocked = true,
+            audioImportUnlocked = true,
+            calendarSuggestionsUnlocked = true,
+        )
     }
 }

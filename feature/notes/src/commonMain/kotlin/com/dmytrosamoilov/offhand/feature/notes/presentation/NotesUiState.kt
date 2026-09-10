@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
+import com.dmytrosamoilov.offhand.core.data.domain.CalendarEventSuggestion
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 
 data class NotesUiState(
@@ -22,7 +23,35 @@ data class NotesUiState(
     val pendingDeleteFolderId: Long? = null,
     val moveToFolder: MoveToFolderUi? = null,
     val customStyles: List<NoteStyleOptionUi> = emptyList(),
+    val isAudioImportUnlocked: Boolean = false,
+    val importMessage: ImportMessageUi? = null,
+    val smartSuggestions: SmartSuggestionsUi? = null,
+    val pendingCalendarEvent: CalendarEventSuggestion? = null,
 )
+
+sealed interface SmartSuggestionsUi {
+    data object Loading : SmartSuggestionsUi
+    data object NotRun : SmartSuggestionsUi
+    data object Empty : SmartSuggestionsUi
+    data class Ready(val events: List<CalendarEventUi>) : SmartSuggestionsUi
+}
+
+data class CalendarEventUi(
+    val index: Int,
+    val title: String,
+    val whenText: String,
+    val isAllDay: Boolean,
+    val location: String,
+    val details: String,
+    val isAdded: Boolean,
+)
+
+enum class ImportMessageUi {
+    LOCKED,
+    UNSUPPORTED,
+    TOO_LONG,
+    UNREADABLE,
+}
 
 data class NoteStyleOptionUi(
     val id: Long,

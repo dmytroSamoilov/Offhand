@@ -10,22 +10,27 @@ import com.dmytrosamoilov.offhand.core.audio.AudioChunk
 import com.dmytrosamoilov.offhand.core.audio.ChunkBoundaryReason
 import com.dmytrosamoilov.offhand.core.audio.VadSnapshot
 import com.dmytrosamoilov.offhand.core.data.domain.Note
+import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
+import com.dmytrosamoilov.offhand.core.data.domain.CalendarEventSuggestion
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.security.AudioOutputStream
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateImportedNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateRecordingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsCalendarSuggestionsAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsThinkingEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteRecordedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteTranscriptUseCase
 import io.mockk.coEvery
 import io.mockk.coJustRun
@@ -95,7 +100,20 @@ class RecordingSessionManagerTest {
     private val getNoteStyle: GetNoteStyleUseCase = mockk {
         coEvery { this@mockk.invoke() } returns NoteStyleRef.BuiltIn(NotePreset.SUMMARY)
     }
-    private val getNote: GetNoteUseCase = mockk()
+    private val getNote: GetNoteUseCase = mockk {
+        coEvery { this@mockk(any()) } returns null
+    }
+    private val calendarEventExtractor: CalendarEventExtractor = mockk {
+        coEvery { extract(any()) } returns emptyList()
+    }
+    private val saveNoteSuggestions: SaveNoteSuggestionsUseCase = mockk {
+        coEvery { this@mockk(any(), any()) } returns true
+    }
+    private val isCalendarSuggestionsAvailable: IsCalendarSuggestionsAvailableUseCase = mockk {
+        coEvery { this@mockk() } returns true
+    }
+    private val createImportedNote: CreateImportedNoteUseCase = mockk()
+    private val audioDecoder: AudioDecoder = mockk(relaxed = true)
     private val audioStore: EncryptedAudioStore = mockk {
         every { newRecordingFileName() } returns "note-1.pcm.enc"
         every { openForWrite("note-1.pcm.enc") } returns AudioOutputStream(ByteArrayOutputStream())
@@ -153,6 +171,7 @@ class RecordingSessionManagerTest {
         transcriptStructurer =
             TranscriptStructurer(aiBackend, testModelManager(), isThinkingEnabled, defaultNoteTitleProvider, NoteStyleResolver(mockk())),
         createRecordingNote = createRecordingNote,
+        createImportedNote = createImportedNote,
         markNoteRecorded = markNoteRecorded,
         discardNote = discardNote,
         completeNote = completeNote,
@@ -163,8 +182,12 @@ class RecordingSessionManagerTest {
         isAiCoreDownloaded = isAiCoreDownloaded,
         getNoteStyle = getNoteStyle,
         getNote = getNote,
+        calendarEventExtractor = calendarEventExtractor,
+        saveNoteSuggestions = saveNoteSuggestions,
+        isCalendarSuggestionsAvailable = isCalendarSuggestionsAvailable,
         audioStore = audioStore,
         audioBackup = audioBackup,
+        audioDecoder = audioDecoder,
         scope = this,
     )
 
@@ -321,6 +344,72 @@ class RecordingSessionManagerTest {
             )
         }
         verify { speechToText.release() }
+    }
+
+    @Test
+    fun `imported audio is decoded into the store and processed like a retry`() = runTest {
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        val source = AudioImportSource(handle = "/cache/imports/x", displayName = "Client call.m4a")
+        coEvery { createImportedNote("Client call", "note-1.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.SUMMARY)) } returns 9L
+        coEvery { audioDecoder.decode(source, any(), any()) } answers {
+            secondArg<(ByteArray, Int) -> Unit>().invoke(ByteArray(32_000), 32_000)
+            DecodedAudio(durationMs = 1_000)
+        }
+        coEvery { markNoteRecorded(9L, 1_000L, "note-1.pcm.enc") } returns storedNote(9L)
+        every { audioStore.sizeOf("note-1.pcm.enc") } returns 32_000L
+        stubBackupRead(32_000)
+        coEvery { speechToText.transcribe(any()) } returns sttResult("imported words")
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(BuiltInNoteStyles.spec(NotePreset.SUMMARY)), any()) } returns AiResult(
+            text = """{"title": "Client call", "overview": "- imported"}""",
+            processingTimeMs = 100,
+            inputTokens = 5,
+            outputTokens = 5,
+            hardwareBackend = HardwareBackend.CPU,
+        )
+        stubPolish("""{"title": "Client call", "overview": "- imported"}""")
+        coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
+
+        val manager = manager()
+        manager.importAudio(source)
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(manager.processingNoteIds.value.isEmpty())
+        coVerify {
+            completeNote(
+                noteId = 9L,
+                title = "Client call",
+                body = "- imported",
+                transcript = "imported words",
+                transcriptionTimeMs = 200,
+                structuringTimeMs = 100,
+                hardwareBackend = "CPU",
+                style = NoteStyleRef.BuiltIn(NotePreset.SUMMARY),
+            )
+        }
+        verify { audioDecoder.discard(source) }
+    }
+
+    @Test
+    fun `rejected import removes the placeholder note and reports why`() = runTest {
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        val source = AudioImportSource(handle = "/cache/imports/y", displayName = "movie.mkv")
+        coEvery { createImportedNote("movie", "note-1.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.SUMMARY)) } returns 4L
+        coEvery { audioDecoder.decode(source, any(), any()) } throws AudioImportException.Unsupported()
+        justRun { audioStore.delete("note-1.pcm.enc") }
+        val events = mutableListOf<NoteProcessingEvent>()
+
+        val manager = manager()
+        manager.events.onEach { events += it }.launchIn(this)
+        testScheduler.runCurrent()
+        manager.importAudio(source)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(listOf<NoteProcessingEvent>(NoteProcessingEvent.ImportRejected(4L, ImportRejection.UNSUPPORTED)), events)
+        assertTrue(manager.processingNoteIds.value.isEmpty())
+        coVerify { discardNote(4L) }
+        verify { audioStore.delete("note-1.pcm.enc") }
+        verify { audioDecoder.discard(source) }
+        coroutineContext.cancelChildren()
     }
 
     @Test
@@ -483,4 +572,51 @@ class RecordingSessionManagerTest {
         }
     }
 
+
+    @Test
+    fun `finished note gets its calendar suggestions extracted and saved`() = runTest {
+        val readyNote = storedNote(7L, transcript = "Call Anna on Monday").copy(status = NoteStatus.READY)
+        val event = CalendarEventSuggestion("Call Anna", 1_000L, 2_000L, false, "", "")
+        coEvery { getNote(7L) } returns readyNote
+        coEvery { markNoteProcessing(7L) } returns storedNote(7L)
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { audioStore.sizeOf("note-7.pcm.enc") } returns 32_000L
+        stubBackupRead(32_000)
+        coEvery { speechToText.transcribe(any()) } returns sttResult("Call Anna on Monday")
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(BuiltInNoteStyles.spec(NotePreset.SUMMARY)), any()) } returns AiResult(
+            text = """{"title": "Call", "overview": "- Anna"}""",
+            processingTimeMs = 300,
+            inputTokens = 20,
+            outputTokens = 20,
+            hardwareBackend = HardwareBackend.CPU,
+        )
+        stubPolish("""{"title": "Call", "overview": "- Anna"}""")
+        coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
+        coEvery { calendarEventExtractor.extract(readyNote) } returns listOf(event)
+
+        val manager = manager()
+        manager.retryNote(7L, "note-7.pcm.enc")
+        testScheduler.advanceUntilIdle()
+
+        coVerify { saveNoteSuggestions(7L, listOf(event)) }
+        assertTrue(manager.processingNoteIds.value.isEmpty())
+        assertTrue(manager.suggestingNoteIds.value.isEmpty())
+    }
+
+    @Test
+    fun `on-demand suggestions skip locked and unfinished notes`() = runTest {
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        coEvery { getNote(8L) } returns storedNote(8L).copy(status = NoteStatus.READY)
+        coEvery { isCalendarSuggestionsAvailable() } returns false
+        coEvery { getNote(9L) } returns storedNote(9L)
+
+        val manager = manager()
+        manager.suggestEvents(8L)
+        manager.suggestEvents(9L)
+        testScheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { calendarEventExtractor.extract(any()) }
+        coVerify(exactly = 0) { saveNoteSuggestions(any(), any()) }
+        assertTrue(manager.processingNoteIds.value.isEmpty())
+    }
 }

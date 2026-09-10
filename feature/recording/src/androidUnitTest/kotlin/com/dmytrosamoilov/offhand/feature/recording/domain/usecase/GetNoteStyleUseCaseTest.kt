@@ -23,7 +23,7 @@ class GetNoteStyleUseCaseTest {
     @Test
     fun `custom default style is used while unlocked`() = runTest {
         every { preferences.preferences } returns flowOf(preferences(NoteStyleRef.Custom(4)))
-        every { entitlements.observeEntitlements() } returns flowOf(Entitlements(customStylesUnlocked = true))
+        every { entitlements.observeEntitlements() } returns flowOf(Entitlements(customStylesUnlocked = true, audioImportUnlocked = true, calendarSuggestionsUnlocked = true))
 
         assertEquals(NoteStyleRef.Custom(4), useCase())
     }
@@ -31,7 +31,7 @@ class GetNoteStyleUseCaseTest {
     @Test
     fun `custom default style falls back to Summary when locked`() = runTest {
         every { preferences.preferences } returns flowOf(preferences(NoteStyleRef.Custom(4)))
-        every { entitlements.observeEntitlements() } returns flowOf(Entitlements(customStylesUnlocked = false))
+        every { entitlements.observeEntitlements() } returns flowOf(Entitlements(customStylesUnlocked = false, audioImportUnlocked = true, calendarSuggestionsUnlocked = true))
 
         assertEquals(NoteStyleRef.DEFAULT, useCase())
     }
