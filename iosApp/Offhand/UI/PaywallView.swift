@@ -52,6 +52,7 @@ struct PaywallView: View {
                     header
                     ComparisonTable(highlighted: state.feature)
                     planSection
+                    legalRow
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 8)
@@ -131,21 +132,21 @@ struct PaywallView: View {
             Button(String(localized: "Continue with the free version")) { viewModel.onClosed() }
                 .font(.footnote)
                 .padding(.top, 2)
-            Text(String(localized: "Payments go through the App Store. Offhand never sees your card, and your notes never leave your phone."))
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            HStack(spacing: 16) {
-                Button(String(localized: "Restore purchases")) { viewModel.onRestoreClicked() }
-                    .disabled(state.isPurchasing)
-                Link(String(localized: "Terms"), destination: URL(string: LegalLinks.shared.TERMS)!)
-                Link(String(localized: "Privacy"), destination: URL(string: LegalLinks.shared.PRIVACY_POLICY)!)
-            }
-            .font(.footnote)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 10)
         .background(.bar)
+    }
+
+    private var legalRow: some View {
+        HStack(spacing: 16) {
+            Button(String(localized: "Restore purchases")) { viewModel.onRestoreClicked() }
+                .disabled(state.isPurchasing)
+            Link(String(localized: "Terms"), destination: URL(string: LegalLinks.shared.TERMS)!)
+            Link(String(localized: "Privacy"), destination: URL(string: LegalLinks.shared.PRIVACY_POLICY)!)
+        }
+        .font(.footnote)
+        .frame(maxWidth: .infinity)
     }
 
     private var successContent: some View {
@@ -252,6 +253,12 @@ private struct ComparisonTable: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
+            Text(String(localized: "Payments go through the App Store. Offhand never sees your card, and your notes never leave your phone."))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 8)
         }
         .padding(.vertical, 6)
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))

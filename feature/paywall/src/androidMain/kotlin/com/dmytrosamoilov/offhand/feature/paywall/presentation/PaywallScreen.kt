@@ -101,14 +101,9 @@ private fun PaywallContent(state: PaywallUiState, viewModel: PaywallViewModel) {
             Header(feature = state.feature)
             ComparisonTable(highlighted = state.feature)
             PlanSection(state = state, onPlanSelected = viewModel::onPlanSelected, onRetry = viewModel::onRetryOffers)
-            Spacer(modifier = Modifier.height(4.dp))
+            LegalRow(isEnabled = !state.isPurchasing, onRestore = viewModel::onRestoreClicked)
         }
-        BottomActions(
-            state = state,
-            onPurchase = viewModel::onPurchaseClicked,
-            onRestore = viewModel::onRestoreClicked,
-            onContinueFree = viewModel::onClosed,
-        )
+        BottomActions(state = state, onPurchase = viewModel::onPurchaseClicked, onContinueFree = viewModel::onClosed)
     }
 }
 
@@ -173,6 +168,12 @@ private fun ComparisonTable(highlighted: ProFeature) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+            Text(
+                text = stringResource(R.string.paywall_privacy_note),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 8.dp),
             )
         }
     }
@@ -316,8 +317,21 @@ private fun BestValueBadge() {
 }
 
 @Composable
-private fun BottomActions(state: PaywallUiState, onPurchase: () -> Unit, onRestore: () -> Unit, onContinueFree: () -> Unit) {
+private fun LegalRow(isEnabled: Boolean, onRestore: () -> Unit) {
     val context = LocalContext.current
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TextButton(onClick = onRestore, enabled = isEnabled) { Text(text = stringResource(R.string.paywall_restore)) }
+        TextButton(onClick = { openLink(context, LegalLinks.TERMS) }) { Text(text = stringResource(R.string.paywall_terms)) }
+        TextButton(onClick = { openLink(context, LegalLinks.PRIVACY_POLICY) }) { Text(text = stringResource(R.string.paywall_privacy)) }
+    }
+}
+
+@Composable
+private fun BottomActions(state: PaywallUiState, onPurchase: () -> Unit, onContinueFree: () -> Unit) {
     val offer = state.selectedOffer
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
@@ -336,17 +350,6 @@ private fun BottomActions(state: PaywallUiState, onPurchase: () -> Unit, onResto
             )
         }
         TextButton(onClick = onContinueFree) { Text(text = stringResource(R.string.paywall_continue_free)) }
-        Text(
-            text = stringResource(R.string.paywall_privacy_note),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-        Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onRestore, enabled = !state.isPurchasing) { Text(text = stringResource(R.string.paywall_restore)) }
-            TextButton(onClick = { openLink(context, LegalLinks.TERMS) }) { Text(text = stringResource(R.string.paywall_terms)) }
-            TextButton(onClick = { openLink(context, LegalLinks.PRIVACY_POLICY) }) { Text(text = stringResource(R.string.paywall_privacy)) }
-        }
     }
 }
 
