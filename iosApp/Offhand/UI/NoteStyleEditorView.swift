@@ -28,10 +28,7 @@ struct NoteStyleEditorView: View {
 
     var body: some View {
         Form {
-            if state.isLocked {
-                Text(String(localized: "Custom styles are part of Offhand Pro."))
-                    .foregroundStyle(.secondary)
-            } else if handle != nil {
+            if handle != nil {
                 editorContent
             }
         }
@@ -39,9 +36,14 @@ struct NoteStyleEditorView: View {
         .navigationTitle(state.isNew ? String(localized: "New note style") : String(localized: "Edit note style"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if !state.isLocked {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(String(localized: "Save")) { viewModel.onSaveRequested() }
+            ToolbarItem(placement: .confirmationAction) {
+                Button {
+                    viewModel.onSaveRequested()
+                } label: {
+                    HStack(spacing: 6) {
+                        if state.isLocked { ProCrown(size: 16) }
+                        Text(String(localized: "Save"))
+                    }
                 }
             }
             ToolbarItemGroup(placement: .keyboard) {

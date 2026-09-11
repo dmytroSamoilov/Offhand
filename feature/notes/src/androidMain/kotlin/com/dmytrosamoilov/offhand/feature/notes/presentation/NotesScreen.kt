@@ -49,7 +49,6 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.WarningAmber
-import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -109,6 +108,7 @@ import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCard
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
 import androidx.compose.material3.FilterChip
 import com.dmytrosamoilov.offhand.core.designsystem.component.LabelPill
+import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
 import androidx.compose.runtime.Immutable
 import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCardAction
 import com.dmytrosamoilov.offhand.core.designsystem.component.MarkdownText
@@ -339,6 +339,7 @@ fun NotesScreen(
         NoteStyleSheet(
             selected = selectedStyle,
             customStyles = state.customStyles,
+            isCustomStylesUnlocked = state.isCustomStylesUnlocked,
             onSelected = viewModel::onStyleSelected,
             onDismiss = viewModel::onPresetSheetDismissed,
         )
@@ -350,6 +351,7 @@ fun NotesScreen(
 private fun NoteStyleSheet(
     selected: NoteStyleRef,
     customStyles: List<NoteStyleOptionUi>,
+    isCustomStylesUnlocked: Boolean,
     onSelected: (NoteStyleRef) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -394,6 +396,7 @@ private fun NoteStyleSheet(
                     icon = CustomNoteStyleIcon,
                     isSelected = selected == NoteStyleRef.Custom(style.id),
                     onClick = { onSelected(NoteStyleRef.Custom(style.id)) },
+                    showProCrown = !isCustomStylesUnlocked,
                 )
             }
         }
@@ -472,26 +475,37 @@ private fun ShareNoteSheetContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         ShareActions(
-            isEnabled = tab == ShareTabUi.AUDIO || !noteFormat.isLocked(isDocumentExportUnlocked),
+            showProCrown = tab == ShareTabUi.TEXT && noteFormat.isLocked(isDocumentExportUnlocked),
             onShare = onShare,
             onSaveToDevice = onSaveToDevice,
         )
     }
 }
 
+// A locked format keeps both buttons live: the crown says what is coming,
+// and the ViewModel opens the paywall before any export.
 @Composable
-private fun ShareActions(isEnabled: Boolean, onShare: () -> Unit, onSaveToDevice: () -> Unit) {
+private fun ShareActions(showProCrown: Boolean, onShare: () -> Unit, onSaveToDevice: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        OutlinedButton(onClick = onSaveToDevice, enabled = isEnabled, modifier = Modifier.weight(1f)) {
-            Text(text = stringResource(R.string.notes_share_save), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        OutlinedButton(onClick = onSaveToDevice, modifier = Modifier.weight(1f)) {
+            ShareActionLabel(text = stringResource(R.string.notes_share_save), showProCrown = showProCrown)
         }
-        Button(onClick = onShare, enabled = isEnabled, modifier = Modifier.weight(1f)) {
-            Text(text = stringResource(R.string.notes_share_dialog_confirm), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Button(onClick = onShare, modifier = Modifier.weight(1f)) {
+            ShareActionLabel(text = stringResource(R.string.notes_share_dialog_confirm), showProCrown = showProCrown)
         }
     }
+}
+
+@Composable
+private fun ShareActionLabel(text: String, showProCrown: Boolean) {
+    if (showProCrown) {
+        ProCrown(size = 16.dp)
+        Spacer(modifier = Modifier.width(6.dp))
+    }
+    Text(text = text, maxLines = 1, overflow = TextOverflow.Ellipsis)
 }
 
 @Composable
@@ -529,13 +543,6 @@ private fun ShareFormatOptions(
                 onClick = { onSelected(format) },
             )
         }
-        if (!isDocumentExportUnlocked) {
-            Text(
-                text = stringResource(R.string.notes_share_format_locked),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
     }
 }
 
@@ -549,7 +556,7 @@ private fun ShareFormatCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .selectable(selected = isSelected, enabled = !isLocked, role = Role.RadioButton, onClick = onClick),
+            .selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick),
     ) {
         Row(
             modifier = Modifier
@@ -560,11 +567,11 @@ private fun ShareFormatCard(
             ShareOptionLabel(
                 label = stringResource(format.labelRes()),
                 hint = stringResource(format.hintRes()),
-                isDimmed = isLocked,
-                badge = { if (format != NoteExportFormat.TEXT) ProBadge(isLocked = isLocked) },
+                isDimmed = false,
+                badge = { if (isLocked) ProCrown() },
                 modifier = Modifier.weight(1f),
             )
-            if (!isLocked) RoundedCheckbox(checked = isSelected)
+            RoundedCheckbox(checked = isSelected)
         }
     }
 }
@@ -617,16 +624,6 @@ private fun ShareOptionLabel(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
-}
-
-@Composable
-private fun ProBadge(isLocked: Boolean) {
-    Icon(
-        imageVector = Icons.Filled.WorkspacePremium,
-        contentDescription = stringResource(R.string.notes_share_pro_description),
-        tint = if (isLocked) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.primary,
-        modifier = Modifier.size(18.dp),
-    )
 }
 
 private fun NoteExportFormat.isLocked(isDocumentExportUnlocked: Boolean): Boolean =
@@ -2167,12 +2164,18 @@ private data class SuggestionActions(
 private fun SmartSuggestionsCard(suggestions: SmartSuggestionsUi, actions: SuggestionActions) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(vertical = 20.dp)) {
-            LabelPill(
-                title = stringResource(R.string.notes_suggestions_heading),
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            Row(
                 modifier = Modifier.padding(horizontal = 20.dp),
-            )
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                LabelPill(
+                    title = stringResource(R.string.notes_suggestions_heading),
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+                if (suggestions == SmartSuggestionsUi.Locked) ProCrown()
+            }
             Spacer(modifier = Modifier.height(12.dp))
             SmartSuggestionsBody(suggestions = suggestions, actions = actions)
         }
@@ -2184,7 +2187,11 @@ private fun SmartSuggestionsBody(suggestions: SmartSuggestionsUi, actions: Sugge
     when (suggestions) {
         SmartSuggestionsUi.Loading -> SuggestionsStatus(text = stringResource(R.string.notes_suggestions_loading), showProgress = true)
         SmartSuggestionsUi.Empty -> SuggestionsStatus(text = stringResource(R.string.notes_suggestions_empty))
-        SmartSuggestionsUi.NotRun -> FindSuggestionsButton(onClick = actions.onFind)
+        SmartSuggestionsUi.NotRun -> FindSuggestionsButton(onClick = actions.onFind, showProCrown = false)
+        SmartSuggestionsUi.Locked -> Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SuggestionsStatus(text = stringResource(R.string.notes_suggestions_locked))
+            FindSuggestionsButton(onClick = actions.onFind, showProCrown = true)
+        }
         is SmartSuggestionsUi.Ready -> Row(
             modifier = Modifier
                 .horizontalScroll(rememberScrollState())
@@ -2218,9 +2225,13 @@ private fun SuggestionsStatus(text: String, showProgress: Boolean = false) {
 }
 
 @Composable
-private fun FindSuggestionsButton(onClick: () -> Unit) {
+private fun FindSuggestionsButton(onClick: () -> Unit, showProCrown: Boolean) {
     FilledTonalButton(onClick = onClick, modifier = Modifier.padding(horizontal = 20.dp)) {
-        Icon(imageVector = Icons.Filled.Event, contentDescription = null, modifier = Modifier.size(18.dp))
+        if (showProCrown) {
+            ProCrown(size = 18.dp)
+        } else {
+            Icon(imageVector = Icons.Filled.Event, contentDescription = null, modifier = Modifier.size(18.dp))
+        }
         Spacer(modifier = Modifier.width(8.dp))
         Text(text = stringResource(R.string.notes_suggestions_find))
     }

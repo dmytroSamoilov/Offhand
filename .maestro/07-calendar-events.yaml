@@ -6,14 +6,47 @@ appId: com.dmytrosamoilov.offhand.uitest
 ---
 - launchApp
 - assertVisible: "Smoke test note"
+# Suggestions are off by default; the smoke note was processed without them,
+# so after switching them on the section offers "Find suggestions"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Settings"
+      - scrollUntilVisible:
+          element:
+            text: "Show smart suggestions"
+          direction: DOWN
+      - tapOn: "Show smart suggestions"
+      - tapOn: "Notes"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Settings"
+      - tapOn: "Show smart suggestions"
+      - tapOn:
+          text: "Notes"
+          index: 1
 - tapOn: "Smoke test note"
 - runFlow:
     when:
       visible: "In-app review · dev build"
     commands:
       - tapOn: "COUNT ATTEMPT"
+# iOS shows the real App Store rating prompt on this open
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- scrollUntilVisible:
+    element:
+      text: "Find suggestions"
+    direction: DOWN
+- tapOn: "Find suggestions"
 - extendedWaitUntil:
-    visible: "Smart suggestions"
+    visible: "Budget review with Anna"
     timeout: 30000
 # Centre the cards so their buttons sit clear of the floating tab bar
 - scrollUntilVisible:

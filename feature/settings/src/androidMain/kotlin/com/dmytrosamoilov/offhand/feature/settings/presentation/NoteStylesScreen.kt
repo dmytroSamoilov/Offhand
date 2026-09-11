@@ -37,6 +37,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
+import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.core.ui.component.CustomNoteStyleIcon
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
@@ -57,7 +58,7 @@ fun NoteStylesScreen(
         Scaffold(
             topBar = { NoteStylesTopBar(onBack = onBack) },
             floatingActionButton = {
-                if (state.isUnlocked) NewStyleButton(onClick = onCreateStyle)
+                NewStyleButton(isUnlocked = state.isUnlocked, onClick = onCreateStyle)
             },
             contentWindowInsets = WindowInsets(0.dp),
         ) { innerPadding ->
@@ -92,11 +93,11 @@ private fun NoteStylesTopBar(onBack: () -> Unit) {
 }
 
 @Composable
-private fun NewStyleButton(onClick: () -> Unit) {
+private fun NewStyleButton(isUnlocked: Boolean, onClick: () -> Unit) {
     val label = stringResource(R.string.settings_note_styles_new)
     ExtendedFloatingActionButton(
         onClick = onClick,
-        icon = { Icon(imageVector = Icons.Filled.Add, contentDescription = null) },
+        icon = { if (isUnlocked) Icon(imageVector = Icons.Filled.Add, contentDescription = null) else ProCrown(size = 22.dp) },
         text = { Text(text = label) },
         modifier = Modifier.semantics { contentDescription = label },
     )
@@ -121,7 +122,7 @@ private fun NoteStylesList(
             SectionHeader(text = stringResource(R.string.settings_note_styles_custom))
         }
         if (state.customStyles.isEmpty()) {
-            item { EmptyStylesHint(isUnlocked = state.isUnlocked) }
+            item { EmptyStylesHint() }
         }
         items(state.customStyles, key = { it.id }) { style ->
             CustomStyleRow(style = style, onClick = { onEditStyle(style.id) }, onDelete = { onDeleteStyle(style.id) })
@@ -191,11 +192,9 @@ private fun RowScope.StyleTexts(title: String, description: String) {
 }
 
 @Composable
-private fun EmptyStylesHint(isUnlocked: Boolean) {
+private fun EmptyStylesHint() {
     Text(
-        text = stringResource(
-            if (isUnlocked) R.string.settings_note_styles_empty else R.string.settings_note_styles_locked,
-        ),
+        text = stringResource(R.string.settings_note_styles_empty),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(vertical = 8.dp),

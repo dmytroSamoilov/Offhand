@@ -34,7 +34,6 @@
     <string name="settings_note_styles_built_in">Встроенные</string>
     <string name="settings_note_styles_custom">Ваши стили</string>
     <string name="settings_note_styles_empty">Своих стилей пока нет. Создайте стиль, чтобы задать ИИ свои заголовки.</string>
-    <string name="settings_note_styles_locked">Свои стили входят в Offhand Pro.</string>
     <string name="settings_note_styles_new">Новый стиль</string>
     <string name="settings_note_styles_delete">Удалить стиль</string>
     <string name="settings_note_styles_delete_dialog_title">Удалить этот стиль?</string>
@@ -117,7 +116,6 @@
     <string name="settings_backup_subtitle">Перенесите заметки на новый телефон или сохраните копию</string>
     <string name="settings_import_audio_title">Импорт аудио</string>
     <string name="settings_import_audio_subtitle">Превратите аудиофайлы в заметки. Выберите один или несколько сразу</string>
-    <string name="settings_import_locked">Импорт аудио входит в Offhand Pro.</string>
     <string name="settings_import_unreadable">Некоторые файлы не удалось прочитать.</string>
     <string name="settings_import_dismiss">ОК</string>
     <string name="settings_import_started_title">Импорт начат</string>
@@ -127,4 +125,16 @@
         <item quantity="many">Импортируется %d файлов. Заметки создаются в фоне и появятся в списке заметок, как только будут готовы.</item>
         <item quantity="other">Импортируется %d файла. Заметки создаются в фоне и появятся в списке заметок, как только будут готовы.</item>
     </plurals>
+    <string name="settings_pro_upgrade_subtitle">Свои стили, экспорт в PDF и Word, умные подсказки и импорт аудио</string>
+    <string name="settings_pro_upgrade">Перейти на Pro</string>
+    <string name="settings_subscription_title">Подписка</string>
+    <string name="settings_subscription_lifetime">Навсегда, ваша без ограничений</string>
+    <string name="settings_subscription_trial">Пробный период</string>
+    <string name="settings_subscription_trial_until">Пробный период до %1$s</string>
+    <string name="settings_subscription_yearly">Годовая</string>
+    <string name="settings_subscription_yearly_renews">Годовая, продлится %1$s</string>
+    <string name="settings_subscription_manage">Управлять подпиской</string>
+    <string name="settings_smart_suggestions_title">Умные подсказки</string>
+    <string name="settings_smart_suggestions_label">Показывать умные подсказки</string>
+    <string name="settings_smart_suggestions_description">Находит события календаря и задачи в каждой новой заметке. Добавляет несколько секунд обработки.</string>
 </resources>

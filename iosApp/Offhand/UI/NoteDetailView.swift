@@ -122,7 +122,12 @@ struct NoteDetailView: View {
             .ignoresSafeArea()
         }
         .sheet(isPresented: presetBinding) {
-            NoteStyleSheet(viewModel: viewModel, current: detail.style, customStyles: state.customStyles)
+            NoteStyleSheet(
+                viewModel: viewModel,
+                current: detail.style,
+                customStyles: state.customStyles,
+                isCustomStylesUnlocked: state.isCustomStylesUnlocked
+            )
                 .presentationDetents([.medium, .large])
         }
 
@@ -557,6 +562,7 @@ private struct NoteStyleSheet: View {
     let viewModel: NotesViewModel
     let current: NoteStyleRef
     let customStyles: [NoteStyleOptionUi]
+    let isCustomStylesUnlocked: Bool
 
     var body: some View {
         NavigationStack {
@@ -582,7 +588,8 @@ private struct NoteStyleSheet: View {
                                 title: style.name,
                                 details: style.description_,
                                 symbol: NoteStyleLabels.customSymbol,
-                                isSelected: current.customId == style.id
+                                isSelected: current.customId == style.id,
+                                showProCrown: !isCustomStylesUnlocked
                             ) {
                                 viewModel.onStyleSelected(style: NoteStyleRefCustom(id: style.id))
                             }

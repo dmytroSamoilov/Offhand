@@ -49,13 +49,11 @@
     <string name="notes_share_tab_audio">Arquivo de áudio</string>
     <string name="notes_share_audio_format">Arquivo WAV</string>
     <string name="notes_share_audio_details">A gravação é compartilhada como um arquivo WAV sem compressão, 16 kHz mono. Qualquer player ou ferramenta de transcrição abre.</string>
-    <string name="notes_share_pro_description">Offhand Pro</string>
     <string name="notes_share_save">Salvar</string>
     <string name="notes_share_date_label">Data</string>
     <string name="notes_share_format_text">Arquivo de texto</string>
     <string name="notes_share_format_pdf">Arquivo PDF</string>
     <string name="notes_share_format_docx">Arquivo do Word</string>
-    <string name="notes_share_format_locked">A exportação em PDF e Word faz parte do Offhand Pro.</string>
     <string name="notes_share_recorded_label">Gravado</string>
     <string name="notes_share_duration_label">Duração</string>
     <string name="notes_share_created_with">Criado com o Offhand</string>
@@ -86,7 +84,6 @@
     <string name="notes_folder_empty_state">Ainda não há notas nesta pasta.</string>
     <string name="notes_move_to_folder">Mover para pasta</string>
     <string name="notes_folder_none">Sem pasta</string>
-    <string name="notes_import_locked">A importação de áudio faz parte do Offhand Pro.</string>
     <string name="notes_import_error_title">Não foi possível importar este arquivo</string>
     <string name="notes_import_error_unsupported">Este formato de áudio não é compatível.</string>
     <string name="notes_import_error_too_long">Gravações com mais de 2 horas não podem ser importadas.</string>
@@ -102,4 +99,5 @@
     <string name="notes_suggestions_empty">Nenhuma sugestão para esta nota.</string>
     <string name="notes_suggestions_added">Adicionado</string>
     <string name="notes_suggestions_dismiss">Descartar sugestão</string>
+    <string name="notes_suggestions_locked">O Offhand Pro encontra eventos de agenda e tarefas nas suas notas.</string>
 </resources>

@@ -9,6 +9,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.di.coreAiApiModule
 import com.dmytrosamoilov.offhand.core.ai.local.di.coreAiLocalModule
 import com.dmytrosamoilov.offhand.core.audio.di.coreAudioModule
+import com.dmytrosamoilov.offhand.core.data.billing.ForegroundActivityHolder
 import com.dmytrosamoilov.offhand.core.data.di.coreDataModule
 import com.dmytrosamoilov.offhand.core.device.di.coreDeviceModule
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
@@ -22,6 +23,7 @@ import com.dmytrosamoilov.offhand.feature.notes.di.featureNotesAndroidModule
 import com.dmytrosamoilov.offhand.feature.notes.di.featureNotesModule
 import com.dmytrosamoilov.offhand.feature.onboarding.di.featureOnboardingAndroidModule
 import com.dmytrosamoilov.offhand.feature.onboarding.di.featureOnboardingModule
+import com.dmytrosamoilov.offhand.feature.paywall.di.featurePaywallModule
 import com.dmytrosamoilov.offhand.feature.recording.di.featureRecordingAndroidModule
 import com.dmytrosamoilov.offhand.feature.recording.di.featureRecordingModule
 import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinator
@@ -65,6 +67,7 @@ class OffhandApplication : Application(), KoinComponent {
                     featureRecordingAndroidModule,
                     featureSettingsModule,
                     featureBackupModule,
+                    featurePaywallModule,
                     appModule,
                 ) + FlavorModules.overrides,
             )
@@ -74,6 +77,7 @@ class OffhandApplication : Application(), KoinComponent {
         sessionManager = get()
         appLockManager = get()
         modelManager = get()
+        registerActivityLifecycleCallbacks(get<ForegroundActivityHolder>())
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         } else {

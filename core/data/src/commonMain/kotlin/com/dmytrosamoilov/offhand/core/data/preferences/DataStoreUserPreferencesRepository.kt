@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
@@ -42,6 +43,8 @@ internal class DataStoreUserPreferencesRepository(
                         ?: preferences[KEY_LEGACY_LAST_REVIEW_REQUEST_AT_MS] ?: 0L,
                 ),
                 noteStyle = NoteStyleRef.fromStorageKey(preferences[KEY_NOTE_STYLE]),
+                proOverride = proOverride(preferences),
+                smartSuggestionsEnabled = preferences[KEY_SMART_SUGGESTIONS] ?: false,
             )
         }
 
@@ -76,6 +79,20 @@ internal class DataStoreUserPreferencesRepository(
         }
     }
 
+    override suspend fun setSmartSuggestionsEnabled(enabled: Boolean) {
+        dataStore.edit { it[KEY_SMART_SUGGESTIONS] = enabled }
+    }
+
+    override suspend fun setProOverride(override: ProOverride) {
+        dataStore.edit { it[KEY_PRO_OVERRIDE] = override.name }
+    }
+
+    private fun proOverride(preferences: Preferences): ProOverride {
+        if (!buildInfo.isDebugBuild) return ProOverride.STORE
+        val name = preferences[KEY_PRO_OVERRIDE] ?: return ProOverride.STORE
+        return ProOverride.entries.firstOrNull { it.name == name } ?: ProOverride.STORE
+    }
+
     override suspend fun setReviewPromptState(state: ReviewPromptState) {
         dataStore.edit { preferences ->
             preferences[KEY_REVIEW_BURST_STARTED_AT_MS] = state.burstStartedAtMs
@@ -96,5 +113,7 @@ internal class DataStoreUserPreferencesRepository(
         val KEY_LAST_REVIEW_ATTEMPT_AT_MS = longPreferencesKey("last_review_attempt_at_ms")
         val KEY_LEGACY_LAST_REVIEW_REQUEST_AT_MS = longPreferencesKey("last_review_request_at_ms")
         val KEY_NOTE_STYLE = stringPreferencesKey("note_preset")
+        val KEY_PRO_OVERRIDE = stringPreferencesKey("debug_pro_override")
+        val KEY_SMART_SUGGESTIONS = booleanPreferencesKey("smart_suggestions_enabled")
     }
 }

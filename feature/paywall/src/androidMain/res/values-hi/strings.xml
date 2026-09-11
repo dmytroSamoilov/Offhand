@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="paywall_tagline">हर रिकॉर्डिंग से और ज़्यादा पाएँ।</string>
+    <string name="paywall_free_private">डिज़ाइन से ही निजी</string>
+    <string name="paywall_free_offline">पूरी तरह ऑफ़लाइन</string>
+    <string name="paywall_free_no_ads">न विज्ञापन, न खाता</string>
+    <string name="paywall_free_unlimited">असीमित नोट्स और रिकॉर्डिंग</string>
+    <string name="paywall_free_backup">एन्क्रिप्टेड बैकअप, खोज और फ़ोल्डर</string>
+    <string name="paywall_pro_styles">आपके फ़ॉर्मैट में नोट्स</string>
+    <string name="paywall_pro_export">सुव्यवस्थित दस्तावेज़ साझा करें</string>
+    <string name="paywall_pro_suggestions">कोई फ़ॉलो-अप न छूटे</string>
+    <string name="paywall_pro_import">किसी भी रिकॉर्डिंग को नोट बनाएँ</string>
+    <string name="paywall_pro_more">नई Pro सुविधाएँ आते ही शामिल हो जाती हैं</string>
+    <string name="paywall_plan_yearly">वार्षिक</string>
+    <string name="paywall_plan_yearly_price">%1$s / वर्ष</string>
+    <string name="paywall_plan_yearly_renews">हर साल नवीनीकृत होता है</string>
+    <string name="paywall_plan_lifetime">आजीवन</string>
+    <string name="paywall_plan_lifetime_hint">एक बार भुगतान, हमेशा के लिए</string>
+    <string name="paywall_cta_trial">मुफ़्त ट्रायल शुरू करें</string>
+    <string name="paywall_cta_subscribe">सदस्यता लें</string>
+    <string name="paywall_cta_lifetime">आजीवन खरीदें</string>
+    <string name="paywall_yearly_disclosure">%1$s प्रति वर्ष, अपने आप नवीनीकृत होता है। स्टोर खाते से कभी भी रद्द करें।</string>
+    <string name="paywall_restore">खरीदारी पुनर्स्थापित करें</string>
+    <string name="paywall_terms">नियम</string>
+    <string name="paywall_privacy">गोपनीयता</string>
+    <string name="paywall_offers_unavailable">कीमतें लोड नहीं हो सकीं। अपना कनेक्शन जाँचें और फिर कोशिश करें।</string>
+    <string name="paywall_retry">फिर कोशिश करें</string>
+    <string name="paywall_message_failed">खरीदारी पूरी नहीं हुई और कोई शुल्क नहीं लिया गया।</string>
+    <string name="paywall_message_pending">आपका भुगतान अभी प्रोसेस हो रहा है। पूरा होते ही Pro चालू हो जाएगा।</string>
+    <string name="paywall_message_restore_nothing">इस स्टोर खाते के लिए कोई पिछली खरीदारी नहीं मिली।</string>
+    <string name="paywall_message_dismiss">ठीक है</string>
+    <string name="paywall_success_title">अब आपके पास Offhand Pro है</string>
+    <string name="paywall_success_body">एक स्वतंत्र, निजी ऐप का समर्थन करने के लिए धन्यवाद।</string>
+    <string name="paywall_close">बंद करें</string>
+    <string name="paywall_no_browser">लिंक खोलने के लिए कोई ब्राउज़र नहीं मिला।</string>
+    <string name="paywall_context_tagline">Offhand Pro का हिस्सा। हर रिकॉर्डिंग से और ज़्यादा पाएँ।</string>
+    <string name="paywall_context_styles">अपनी नोट शैली सहेजें</string>
+    <string name="paywall_context_export">यह नोट PDF या Word में साझा करें</string>
+    <string name="paywall_context_suggestions">अपने नोट्स में तारीखें और काम ढूँढें</string>
+    <string name="paywall_context_import">अपनी रिकॉर्डिंग को नोट्स में बदलें</string>
+    <string name="paywall_pro_styles_hint">आपके शीर्षक, आपके सेक्शन, हर बार</string>
+    <string name="paywall_pro_export_hint">PDF और Word, क्लाइंट, ईमेल और प्रिंट के लिए तैयार</string>
+    <string name="paywall_pro_suggestions_hint">तारीखें और काम सीधे आपके कैलेंडर में</string>
+    <string name="paywall_pro_import_hint">वॉइस मेमो, कॉल और दूसरे ऐप्स की फ़ाइलें</string>
+    <string name="paywall_plan_yearly_monthly">लगभग %1$s प्रति माह</string>
+    <string name="paywall_plan_best_value">सबसे किफ़ायती</string>
+    <string name="paywall_no_charge">आज कोई शुल्क नहीं</string>
+    <string name="paywall_privacy_note">भुगतान Google Play से होता है। Offhand आपका कार्ड कभी नहीं देखता और आपके नोट्स आपके फ़ोन से बाहर नहीं जाते।</string>
+    <string name="paywall_continue_free">मुफ़्त संस्करण के साथ जारी रखें</string>
+    <string name="paywall_success_continue">आपने जो शुरू किया था, वह अब आगे बढ़ रहा है।</string>
+    <plurals name="paywall_plan_trial">
+        <item quantity="one">%d दिन का मुफ़्त ट्रायल</item>
+        <item quantity="other">%d दिन का मुफ़्त ट्रायल</item>
+    </plurals>
+    <plurals name="paywall_trial_disclosure">
+        <item quantity="one">%1$d दिन मुफ़्त, फिर %2$s प्रति वर्ष। स्टोर खाते से कभी भी रद्द करें।</item>
+        <item quantity="other">%1$d दिन मुफ़्त, फिर %2$s प्रति वर्ष। स्टोर खाते से कभी भी रद्द करें।</item>
+    </plurals>
+    <plurals name="paywall_cta_trial_days">
+        <item quantity="one">%d दिन का मुफ़्त ट्रायल शुरू करें</item>
+        <item quantity="other">%d दिन का मुफ़्त ट्रायल शुरू करें</item>
+    </plurals>
+    <plurals name="paywall_plan_lifetime_vs_yearly">
+        <item quantity="one">वार्षिक के %d साल से भी कम</item>
+        <item quantity="other">वार्षिक के %d साल से भी कम</item>
+    </plurals>
+</resources>

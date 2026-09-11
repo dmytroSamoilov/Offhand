@@ -7,6 +7,10 @@ import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleSection
 import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
+import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
+import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
@@ -16,9 +20,14 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamic
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOverrideUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStatusUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -54,6 +63,12 @@ class SettingsViewModelTest {
     private val appLockManager: AppLockManager = mockk()
     private val importAudio: ImportAudioUseCase = mockk()
     private val isAudioImportAvailable: IsAudioImportAvailableUseCase = mockk()
+    private val observeSmartSuggestionsEnabled: ObserveSmartSuggestionsEnabledUseCase = mockk()
+    private val setSmartSuggestionsEnabled: SetSmartSuggestionsEnabledUseCase = mockk(relaxed = true)
+    private val observeProStatus: ObserveProStatusUseCase = mockk()
+    private val observeProOverride: ObserveProOverrideUseCase = mockk()
+    private val setProOverride: SetProOverrideUseCase = mockk(relaxed = true)
+    private val gate: ProUpgradeGate = mockk()
 
     @Before
     fun setUp() {
@@ -66,6 +81,10 @@ class SettingsViewModelTest {
         every { appLockManager.isDeviceSecure } returns true
         every { isAudioImportAvailable() } returns flowOf(true)
         coEvery { importAudio(any()) } returns ImportAudioResult.STARTED
+        every { observeSmartSuggestionsEnabled() } returns flowOf(false)
+        every { observeProStatus() } returns flowOf(ProStatus.LIFETIME)
+        every { observeProOverride() } returns flowOf(ProOverride.STORE)
+        coEvery { gate.requirePro(any()) } returns true
     }
 
     @After
@@ -85,6 +104,13 @@ class SettingsViewModelTest {
         appLockManager = appLockManager,
         importAudio = importAudio,
         isAudioImportAvailable = isAudioImportAvailable,
+        observeSmartSuggestionsEnabled = observeSmartSuggestionsEnabled,
+        setSmartSuggestionsEnabled = setSmartSuggestionsEnabled,
+        observeProStatus = observeProStatus,
+        observeProOverride = observeProOverride,
+        setProOverride = setProOverride,
+        proUpgradeGate = gate,
+        buildInfo = BuildInfo(isDebugBuild = false, appVersion = "1", platform = "test"),
     )
 
     @Test
@@ -144,14 +170,53 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `custom styles are hidden from the default picker while locked`() = runTest(dispatcher) {
+    fun `custom styles stay listed while locked and selecting one goes through the paywall`() = runTest(dispatcher) {
         every { observeCustomNoteStyles() } returns flowOf(listOf(customStyle))
         every { isCustomNoteStylesAvailable() } returns flowOf(false)
+        coEvery { gate.requirePro(any()) } returns false
         val viewModel = viewModel()
         advanceUntilIdle()
 
-        assertTrue(viewModel.uiState.value.customStyles.isEmpty())
+        assertEquals(listOf("Debrief"), viewModel.uiState.value.customStyles.map { it.name })
         assertFalse(viewModel.uiState.value.isCustomStylesUnlocked)
+
+        viewModel.onNoteStyleSelected(NoteStyleRef.Custom(1))
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { setNoteStyle(any()) }
+    }
+
+    @Test
+    fun `switching smart suggestions on asks the paywall first`() = runTest(dispatcher) {
+        coEvery { gate.requirePro(any()) } returns false
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.onSmartSuggestionsChanged(true)
+        advanceUntilIdle()
+        coVerify(exactly = 0) { setSmartSuggestionsEnabled(any()) }
+
+        viewModel.onSmartSuggestionsChanged(false)
+        advanceUntilIdle()
+        coVerify { setSmartSuggestionsEnabled(false) }
+    }
+
+    @Test
+    fun `the import picker opens only after the paywall passes`() = runTest(dispatcher) {
+        coEvery { gate.requirePro(any()) } returns false
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.onImportAudioClicked()
+        advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.isImportPickerRequested)
+
+        coEvery { gate.requirePro(any()) } returns true
+        viewModel.onImportAudioClicked()
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isImportPickerRequested)
+        viewModel.onImportPickerOpened()
+        assertFalse(viewModel.uiState.value.isImportPickerRequested)
     }
 
     @Test
@@ -181,21 +246,20 @@ class SettingsViewModelTest {
         advanceUntilIdle()
 
         assertEquals(ImportNoticeUi.Started(2), viewModel.uiState.value.importNotice)
-        coVerify { importAudio(sources[0]) }
-        coVerify { importAudio(sources[1]) }
+        coVerify { importAudio(sources) }
         viewModel.onImportNoticeDismissed()
         assertEquals(null, viewModel.uiState.value.importNotice)
     }
 
     @Test
-    fun `a locked entitlement wins over unreadable files and a started import`() = runTest {
+    fun `a declined paywall starts nothing and shows no started notice`() = runTest {
         coEvery { importAudio(any()) } returns ImportAudioResult.LOCKED
         val viewModel = viewModel()
 
-        viewModel.onAudioImportSelected(listOf(AudioImportSource("/a", "a.m4a")), unreadableCount = 1)
+        viewModel.onAudioImportSelected(listOf(AudioImportSource("/a", "a.m4a")), unreadableCount = 0)
         advanceUntilIdle()
 
-        assertEquals(ImportNoticeUi.Locked, viewModel.uiState.value.importNotice)
+        assertEquals(null, viewModel.uiState.value.importNotice)
     }
 
     @Test

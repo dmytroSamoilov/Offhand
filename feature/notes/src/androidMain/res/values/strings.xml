@@ -53,7 +53,6 @@
     <string name="notes_share_tab_audio">Audio file</string>
     <string name="notes_share_audio_format">WAV file</string>
     <string name="notes_share_audio_details">The recording is shared as an uncompressed WAV file, 16 kHz mono. Every player and transcription tool opens it.</string>
-    <string name="notes_share_pro_description">Offhand Pro</string>
     <string name="notes_share_format_text_hint" translatable="false">.txt</string>
     <string name="notes_share_format_pdf_hint" translatable="false">.pdf</string>
     <string name="notes_share_format_docx_hint" translatable="false">.docx</string>
@@ -63,7 +62,6 @@
     <string name="notes_share_format_text">Text file</string>
     <string name="notes_share_format_pdf">PDF file</string>
     <string name="notes_share_format_docx">Word file</string>
-    <string name="notes_share_format_locked">PDF and Word exports are part of Offhand Pro.</string>
     <string name="notes_share_recorded_label">Recorded</string>
     <string name="notes_share_duration_label">Duration</string>
     <string name="notes_share_created_with">Created with Offhand</string>
@@ -98,7 +96,6 @@
     <string name="notes_folder_empty_state">No notes in this folder yet.</string>
     <string name="notes_move_to_folder">Move to folder</string>
     <string name="notes_folder_none">No folder</string>
-    <string name="notes_import_locked">Audio import is part of Offhand Pro.</string>
     <string name="notes_import_error_title">Could not import this file</string>
     <string name="notes_import_error_unsupported">This audio format is not supported.</string>
     <string name="notes_import_error_too_long">Recordings longer than 2 hours cannot be imported.</string>
@@ -114,4 +111,5 @@
     <string name="notes_suggestions_empty">No suggestions for this note.</string>
     <string name="notes_suggestions_added">Added</string>
     <string name="notes_suggestions_dismiss">Dismiss suggestion</string>
+    <string name="notes_suggestions_locked">Offhand Pro finds calendar events and to-dos in your notes.</string>
 </resources>

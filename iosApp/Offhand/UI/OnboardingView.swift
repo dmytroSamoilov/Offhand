@@ -420,6 +420,7 @@ struct PresetCard: View {
     let details: String
     let symbol: String
     let isSelected: Bool
+    var showProCrown = false
     let action: () -> Void
 
     var body: some View {
@@ -438,6 +439,7 @@ struct PresetCard: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 12)
+                if showProCrown { ProCrown() }
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
                     .foregroundStyle(isSelected ? Brand.primary : Color(.systemGray3))

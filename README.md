@@ -121,7 +121,8 @@ and cover:
 9. Custom note styles: create one with two sections, preview it on the sample, pick it as the default, rewrite a note with it, delete it
 10. Building a note style from a plain-text description; the fake model answers the drafting prompt with a canned two-section style
 11. Importing an audio file from Settings through the system picker into a new note (needs `.maestro/assets/import-sample.m4a` in the device's Download folder on Android or in the simulator's "On My iPhone" storage on iOS, see below)
-12. Smart suggestions on a finished note; the fake model answers with two canned calendar events, one is dismissed, the other is handed to the system calendar's event editor, and both states survive a relaunch
+12. Smart suggestions: switching them on in Settings, asking for them on the finished note; the fake model answers with two canned calendar events, one is dismissed, the other is handed to the system calendar's event editor, and both states survive a relaunch
+13. The Pro paywall: the debug override in Settings plays a free user, crowns appear, the paywall opens from the Upgrade card and from Import audio, a simulated purchase unlocks the app and the import picker that was waiting behind the paywall opens on its own
 
 The flows assume a phone-sized screen; on tablets and unfolded foldables the app switches
 to its two-pane layout and the steps no longer line up.

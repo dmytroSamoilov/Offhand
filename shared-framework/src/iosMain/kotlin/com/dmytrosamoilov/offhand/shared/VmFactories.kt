@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModelStore
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.feature.backup.presentation.BackupViewModel
 import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesViewModel
 import com.dmytrosamoilov.offhand.feature.onboarding.presentation.OnboardingViewModel
+import com.dmytrosamoilov.offhand.feature.paywall.presentation.PaywallViewModel
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.presentation.RecordingViewModel
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
@@ -34,6 +36,10 @@ object SharedGraph {
     fun backupViewModel(): BackupViewModel = KoinPlatform.getKoin().get()
 
     fun noteStylesViewModel(): NoteStylesViewModel = KoinPlatform.getKoin().get()
+
+    fun paywallViewModel(): PaywallViewModel = KoinPlatform.getKoin().get()
+
+    fun proUpgradeGate(): ProUpgradeGate = KoinPlatform.getKoin().get()
 
     fun noteStyleEditor(styleId: Long): NoteStyleEditorHandle = NoteStyleEditorHandle(styleId)
 

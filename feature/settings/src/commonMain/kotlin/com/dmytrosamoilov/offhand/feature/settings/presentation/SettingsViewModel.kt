@@ -2,20 +2,32 @@ package com.dmytrosamoilov.offhand.feature.settings.presentation
 
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
+import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
+import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
+import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
+import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOverrideUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStatusUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,6 +47,13 @@ class SettingsViewModel(
     private val appLockManager: AppLockManager,
     private val importAudio: ImportAudioUseCase,
     isAudioImportAvailable: IsAudioImportAvailableUseCase,
+    observeSmartSuggestionsEnabled: ObserveSmartSuggestionsEnabledUseCase,
+    private val setSmartSuggestionsEnabled: SetSmartSuggestionsEnabledUseCase,
+    observeProStatus: ObserveProStatusUseCase,
+    observeProOverride: ObserveProOverrideUseCase,
+    private val setProOverride: SetProOverrideUseCase,
+    private val proUpgradeGate: ProUpgradeGate,
+    buildInfo: BuildInfo,
 ) : BaseViewModel() {
 
     private val mutableUiState = MutableStateFlow(
@@ -43,33 +62,19 @@ class SettingsViewModel(
     val uiState: StateFlow<SettingsUiState> = mutableUiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            observeDynamicColor().collect { enabled ->
-                mutableUiState.update { it.copy(isDynamicColorEnabled = enabled) }
-            }
-        }
-        viewModelScope.launch {
-            observeNoteStyle().collect { style ->
-                mutableUiState.update { it.copy(noteStyle = style) }
-            }
-        }
-        viewModelScope.launch {
-            combine(observeCustomNoteStyles(), isCustomNoteStylesAvailable()) { styles, unlocked ->
-                styles.takeIf { unlocked }.orEmpty().map { style -> style.toOptionUi() } to unlocked
-            }.collect { (styles, unlocked) ->
-                mutableUiState.update { it.copy(customStyles = styles, isCustomStylesUnlocked = unlocked) }
-            }
-        }
-        viewModelScope.launch {
-            observeAppLockEnabled().collect { enabled ->
-                mutableUiState.update { it.copy(isAppLockEnabled = enabled) }
-            }
-        }
-        viewModelScope.launch {
-            isAudioImportAvailable().collect { unlocked ->
-                mutableUiState.update { it.copy(isAudioImportUnlocked = unlocked) }
-            }
-        }
+        collect(observeDynamicColor()) { enabled -> copy(isDynamicColorEnabled = enabled) }
+        collect(observeNoteStyle()) { style -> copy(noteStyle = style) }
+        collect(observeAppLockEnabled()) { enabled -> copy(isAppLockEnabled = enabled) }
+        collect(observeCustomNoteStyles()) { styles -> copy(customStyles = styles.map { it.toOptionUi() }) }
+        collect(isCustomNoteStylesAvailable()) { unlocked -> copy(isCustomStylesUnlocked = unlocked) }
+        collect(isAudioImportAvailable()) { unlocked -> copy(isAudioImportUnlocked = unlocked) }
+        collect(observeSmartSuggestionsEnabled()) { enabled -> copy(isSmartSuggestionsEnabled = enabled) }
+        collect(observeProStatus()) { status -> copy(pro = status.toUi(), isSmartSuggestionsUnlocked = status.isPro) }
+        if (buildInfo.isDebugBuild) collect(observeProOverride()) { override -> copy(proOverride = override) }
+    }
+
+    private fun <T> collect(flow: Flow<T>, reduce: SettingsUiState.(T) -> SettingsUiState) {
+        viewModelScope.launch { flow.collect { value -> mutableUiState.update { it.reduce(value) } } }
     }
 
     // A passcode can be added or removed in system settings while this screen is
@@ -80,6 +85,7 @@ class SettingsViewModel(
 
     fun onNoteStyleSelected(style: NoteStyleRef) {
         launchSafely(showLoading = false) {
+            if (style is NoteStyleRef.Custom && !proUpgradeGate.requirePro(ProFeature.CUSTOM_STYLES)) return@launchSafely
             setNoteStyle(style)
         }
     }
@@ -96,22 +102,53 @@ class SettingsViewModel(
         }
     }
 
+    // Off is free for everyone; switching it on is the Pro action.
+    fun onSmartSuggestionsChanged(enabled: Boolean) {
+        launchSafely(showLoading = false) {
+            if (enabled && !proUpgradeGate.requirePro(ProFeature.SMART_SUGGESTIONS)) return@launchSafely
+            setSmartSuggestionsEnabled(enabled)
+        }
+    }
+
+    fun onUpgradeClicked() {
+        launchSafely(showLoading = false) {
+            proUpgradeGate.requirePro(ProFeature.GENERAL)
+        }
+    }
+
+    fun onProOverrideSelected(override: ProOverride) {
+        launchSafely(showLoading = false) {
+            setProOverride(override)
+        }
+    }
+
+    // The picker only opens once the gate has passed, so a free user meets
+    // the paywall before choosing files.
+    fun onImportAudioClicked() {
+        launchSafely(showLoading = false) {
+            if (!proUpgradeGate.requirePro(ProFeature.AUDIO_IMPORT)) return@launchSafely
+            mutableUiState.update { it.copy(isImportPickerRequested = true) }
+        }
+    }
+
+    fun onImportPickerOpened() {
+        mutableUiState.update { it.copy(isImportPickerRequested = false) }
+    }
+
     // unreadableCount: files the picker handed over that could not be staged.
     fun onAudioImportSelected(sources: List<AudioImportSource>, unreadableCount: Int) {
         if (sources.isEmpty() && unreadableCount == 0) return
         launchSafely(showLoading = false) {
-            val results = sources.map { source -> importAudio(source) }
+            val result = importAudio(sources)
             val notice = importNotice(
                 hasUnreadable = unreadableCount > 0,
-                isLocked = results.any { it == ImportAudioResult.LOCKED },
-                startedCount = results.count { it == ImportAudioResult.STARTED },
+                startedCount = if (result == ImportAudioResult.STARTED) sources.size else 0,
             )
             mutableUiState.update { it.copy(importNotice = notice) }
         }
     }
 
-    private fun importNotice(hasUnreadable: Boolean, isLocked: Boolean, startedCount: Int): ImportNoticeUi? = when {
-        isLocked -> ImportNoticeUi.Locked
+    private fun importNotice(hasUnreadable: Boolean, startedCount: Int): ImportNoticeUi? = when {
         hasUnreadable -> ImportNoticeUi.Unreadable
         startedCount > 0 -> ImportNoticeUi.Started(startedCount)
         else -> null
@@ -120,4 +157,11 @@ class SettingsViewModel(
     fun onImportNoticeDismissed() {
         mutableUiState.update { it.copy(importNotice = null) }
     }
+}
+
+private fun ProStatus.toUi(): ProStatusUi = when {
+    plan == ProPlan.LIFETIME -> ProStatusUi.Lifetime
+    plan == ProPlan.YEARLY && isTrial -> ProStatusUi.Trial(renewsAtMs)
+    plan == ProPlan.YEARLY -> ProStatusUi.Yearly(renewsAtMs)
+    else -> ProStatusUi.Free
 }

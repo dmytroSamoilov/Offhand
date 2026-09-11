@@ -34,7 +34,6 @@
     <string name="settings_note_styles_built_in">Вбудовані</string>
     <string name="settings_note_styles_custom">Ваші стилі</string>
     <string name="settings_note_styles_empty">Власних стилів ще немає. Створіть стиль, щоб задати ШІ свої заголовки.</string>
-    <string name="settings_note_styles_locked">Власні стилі входять до Offhand Pro.</string>
     <string name="settings_note_styles_new">Новий стиль</string>
     <string name="settings_note_styles_delete">Видалити стиль</string>
     <string name="settings_note_styles_delete_dialog_title">Видалити цей стиль?</string>
@@ -117,7 +116,6 @@
     <string name="settings_backup_subtitle">Перенесіть нотатки на новий телефон або збережіть копію</string>
     <string name="settings_import_audio_title">Імпорт аудіо</string>
     <string name="settings_import_audio_subtitle">Перетворюйте аудіофайли на нотатки. Виберіть один або кілька одразу</string>
-    <string name="settings_import_locked">Імпорт аудіо входить до Offhand Pro.</string>
     <string name="settings_import_unreadable">Деякі файли не вдалося прочитати.</string>
     <string name="settings_import_dismiss">ОК</string>
     <string name="settings_import_started_title">Імпорт розпочато</string>
@@ -127,4 +125,16 @@
         <item quantity="many">Імпортується %d файлів. Нотатки створюються у фоні й зʼявляться у списку нотаток, щойно будуть готові.</item>
         <item quantity="other">Імпортується %d файла. Нотатки створюються у фоні й зʼявляться у списку нотаток, щойно будуть готові.</item>
     </plurals>
+    <string name="settings_pro_upgrade_subtitle">Власні стилі, експорт у PDF і Word, розумні підказки та імпорт аудіо</string>
+    <string name="settings_pro_upgrade">Перейти на Pro</string>
+    <string name="settings_subscription_title">Підписка</string>
+    <string name="settings_subscription_lifetime">Назавжди, ваша без обмежень</string>
+    <string name="settings_subscription_trial">Пробний період</string>
+    <string name="settings_subscription_trial_until">Пробний період до %1$s</string>
+    <string name="settings_subscription_yearly">Річна</string>
+    <string name="settings_subscription_yearly_renews">Річна, поновиться %1$s</string>
+    <string name="settings_subscription_manage">Керувати підпискою</string>
+    <string name="settings_smart_suggestions_title">Розумні підказки</string>
+    <string name="settings_smart_suggestions_label">Показувати розумні підказки</string>
+    <string name="settings_smart_suggestions_description">Знаходить події календаря й завдання в кожній новій нотатці. Додає кілька секунд обробки.</string>
 </resources>

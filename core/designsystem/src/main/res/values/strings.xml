@@ -2,4 +2,5 @@
 <resources>
     <string name="designsystem_show_more">Show more</string>
     <string name="designsystem_show_less">Show less</string>
+    <string name="designsystem_pro_badge" translatable="false">Offhand Pro</string>
 </resources>

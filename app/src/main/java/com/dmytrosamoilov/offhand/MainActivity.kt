@@ -86,9 +86,8 @@ class MainActivity : FragmentActivity() {
         if (uris.isEmpty()) return
         lifecycleScope.launch {
             val sources = uris.map { uri -> importIntake.stage(uri) }
-            val results = sources.filterNotNull().map { source -> importAudio(source) }
+            if (importAudio(sources.filterNotNull()) == ImportAudioResult.LOCKED) importIntake.discard(sources.filterNotNull())
             if (sources.any { it == null }) showToast(NotesR.string.notes_import_error_unreadable)
-            if (results.any { it == ImportAudioResult.LOCKED }) showToast(NotesR.string.notes_import_locked)
         }
     }
 

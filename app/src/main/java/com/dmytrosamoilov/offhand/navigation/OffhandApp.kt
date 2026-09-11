@@ -22,6 +22,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.dmytrosamoilov.offhand.feature.backup.presentation.BackupScreen
 import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesScreen
+import com.dmytrosamoilov.offhand.feature.paywall.presentation.PaywallHost
 import com.dmytrosamoilov.offhand.feature.recording.presentation.RecordingSheetHost
 import com.dmytrosamoilov.offhand.feature.settings.presentation.AboutSupportScreen
 import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStyleEditorScreen
@@ -109,6 +110,7 @@ fun OffhandApp(
         isVisible = isRecordingSheetVisible,
         onVisibilityChange = { isRecordingSheetVisible = it },
     )
+    PaywallHost()
 }
 
 private fun NavController.navigateToTopLevel(route: Any) {

@@ -8,6 +8,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.SpeechModelState
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
 import com.dmytrosamoilov.offhand.core.data.domain.CalendarEventSuggestion
 import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.SuggestedEvent
 import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
 import com.dmytrosamoilov.offhand.core.data.domain.Note
@@ -15,6 +16,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlaybackState
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteFolderUseCase
@@ -29,6 +31,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionS
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
@@ -112,6 +115,12 @@ class NotesViewModelTest {
     private val isDocumentExportAvailable: IsDocumentExportAvailableUseCase = mockk {
         every { this@mockk.invoke() } returns flowOf(true)
     }
+    private val isSmartSuggestionsEnabled: IsSmartSuggestionsEnabledUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
+    private val gate: ProUpgradeGate = mockk {
+        coEvery { requirePro(any()) } returns true
+    }
     private val clearShareCache: ClearShareCacheUseCase = mockk(relaxed = true)
     private val shouldRequestReview: ShouldRequestReviewUseCase = mockk {
         coEvery { this@mockk.invoke() } returns false
@@ -184,6 +193,8 @@ class NotesViewModelTest {
         updateSuggestionStatus = updateSuggestionStatus,
         isCalendarSuggestionsAvailable = isCalendarSuggestionsAvailable,
         isDocumentExportAvailable = isDocumentExportAvailable,
+        isSmartSuggestionsEnabled = isSmartSuggestionsEnabled,
+        proUpgradeGate = gate,
         sessionManager = sessionManager,
         aiCoreDownloadStatus = AiCoreDownloadStatus(modelManager, speechToText),
     )
@@ -276,19 +287,28 @@ class NotesViewModelTest {
     }
 
     @Test
-    fun `locked entitlement hides the section and never asks for suggestions`() = runTest(dispatcher) {
+    fun `a free user sees the locked card and a declined paywall asks for nothing`() = runTest(dispatcher) {
         every { isCalendarSuggestionsAvailable() } returns flowOf(false)
-        coEvery { requestNoteSuggestions(any()) } returns false
+        coEvery { gate.requirePro(any()) } returns false
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(SmartSuggestionsUi.Locked, viewModel.uiState.value.smartSuggestions)
+
+        viewModel.onSuggestionsRequested()
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify(exactly = 0) { requestNoteSuggestions(any()) }
+    }
+
+    @Test
+    fun `the settings toggle off hides the section for everyone`() = runTest(dispatcher) {
+        every { isSmartSuggestionsEnabled() } returns flowOf(false)
         val viewModel = viewModel()
         viewModel.onNoteSelected(5)
         dispatcher.scheduler.advanceUntilIdle()
 
         assertNull(viewModel.uiState.value.smartSuggestions)
-
-        viewModel.onSuggestionsRequested()
-        dispatcher.scheduler.advanceUntilIdle()
-        coVerify { requestNoteSuggestions(5L) }
-        coVerify(exactly = 0) { updateSuggestionStatus(any(), any(), any()) }
     }
 
     @Test
@@ -390,6 +410,20 @@ class NotesViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         coVerify { markReviewAttempt() }
+    }
+
+    @Test
+    fun `a pro format meets the paywall before any export is prepared`() = runTest(dispatcher) {
+        coEvery { gate.requirePro(any()) } returns false
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onShareConfirmed(NoteExportFormat.PDF, includeAudio = false)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { prepareNoteShare(any(), any(), any()) }
+        coVerify { gate.requirePro(any()) }
     }
 
     @Test

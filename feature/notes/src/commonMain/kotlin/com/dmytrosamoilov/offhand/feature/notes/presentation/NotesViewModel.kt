@@ -8,6 +8,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
+import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
@@ -27,6 +29,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSugges
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
@@ -81,6 +84,8 @@ class NotesViewModel(
     private val updateSuggestionStatus: UpdateSuggestionStatusUseCase,
     private val isCalendarSuggestionsAvailable: IsCalendarSuggestionsAvailableUseCase,
     isDocumentExportAvailable: IsDocumentExportAvailableUseCase,
+    private val isSmartSuggestionsEnabled: IsSmartSuggestionsEnabledUseCase,
+    private val proUpgradeGate: ProUpgradeGate,
     private val sessionManager: RecordingSessionManager,
     aiCoreDownloadStatus: AiCoreDownloadStatus,
 ) : BaseViewModel() {
@@ -131,9 +136,9 @@ class NotesViewModel(
         }
         viewModelScope.launch {
             combine(observeCustomNoteStyles(), isCustomNoteStylesAvailable()) { styles, unlocked ->
-                styles.takeIf { unlocked }.orEmpty().map { style -> style.toOptionUi() }
-            }.collect { styles ->
-                mutableUiState.update { it.copy(customStyles = styles) }
+                styles.map { style -> style.toOptionUi() } to unlocked
+            }.collect { (styles, unlocked) ->
+                mutableUiState.update { it.copy(customStyles = styles, isCustomStylesUnlocked = unlocked) }
             }
         }
         viewModelScope.launch {
@@ -172,19 +177,24 @@ class NotesViewModel(
             observeNoteSuggestions(noteId),
             sessionManager.suggestingNoteIds.map { noteId in it },
             isCalendarSuggestionsAvailable(),
+            isSmartSuggestionsEnabled(),
             allNotes.map { notes -> notes.firstOrNull { it.id == noteId }?.status },
-        ) { suggestions: NoteSuggestions?, isSuggesting: Boolean, unlocked: Boolean, status: NoteStatus? ->
+        ) { suggestions: NoteSuggestions?, isSuggesting: Boolean, unlocked: Boolean, enabled: Boolean, status: NoteStatus? ->
             noteSuggestions = suggestions
-            suggestions.toSmartSuggestionsUi(isSuggesting, unlocked, status)
+            suggestions.toSmartSuggestionsUi(isSuggesting, unlocked, enabled, status)
         }
     }
 
+    // The Settings toggle hides the section for everyone; a free user who has
+    // it on (a lapsed purchase) sees the locked card that leads to the paywall.
     private fun NoteSuggestions?.toSmartSuggestionsUi(
         isSuggesting: Boolean,
         unlocked: Boolean,
+        enabled: Boolean,
         status: NoteStatus?,
     ): SmartSuggestionsUi? = when {
-        !unlocked || status != NoteStatus.READY -> null
+        !enabled || status != NoteStatus.READY -> null
+        !unlocked -> SmartSuggestionsUi.Locked
         isSuggesting -> SmartSuggestionsUi.Loading
         this == null -> SmartSuggestionsUi.NotRun
         else -> toUi(dateLabelFormatter)
@@ -361,7 +371,10 @@ class NotesViewModel(
     fun onStyleSelected(style: NoteStyleRef) {
         val note = selectedNote ?: return
         mutableUiState.update { it.copy(isPresetSheetVisible = false) }
-        recordingProcessController.restructureNote(note.id, style)
+        launchSafely(showLoading = false) {
+            if (style is NoteStyleRef.Custom && !proUpgradeGate.requirePro(ProFeature.CUSTOM_STYLES)) return@launchSafely
+            recordingProcessController.restructureNote(note.id, style)
+        }
     }
 
     fun onShareRequested() {
@@ -381,11 +394,20 @@ class NotesViewModel(
         share(noteFormat, includeAudio, saveToDevice = true)
     }
 
+    // PDF and Word are the Pro formats. The sheet closes before the gate is
+    // asked: a modal sheet would otherwise sit above the paywall on both
+    // platforms, so a declined upgrade lands back on the note.
     private fun share(noteFormat: NoteExportFormat?, includeAudio: Boolean, saveToDevice: Boolean) {
         val note = selectedNote ?: return
         if (noteFormat == null && !includeAudio) return
-        if (noteFormat != null && noteFormat != NoteExportFormat.TEXT && !mutableUiState.value.isDocumentExportUnlocked) return
         mutableUiState.update { it.copy(isShareDialogVisible = false) }
+        launchSafely(showLoading = false) {
+            if (noteFormat.isProFormat() && !proUpgradeGate.requirePro(ProFeature.DOCUMENT_EXPORT)) return@launchSafely
+            prepareShare(note, noteFormat, includeAudio, saveToDevice)
+        }
+    }
+
+    private fun prepareShare(note: Note, noteFormat: NoteExportFormat?, includeAudio: Boolean, saveToDevice: Boolean) {
         launchSafely {
             val share = prepareNoteShare(note, noteFormat, includeAudio)
             mutableUiState.update { it.copy(pendingShare = share.toUi(saveToDevice)) }
@@ -466,6 +488,7 @@ class NotesViewModel(
     fun onSuggestionsRequested() {
         val note = selectedNote ?: return
         launchSafely(showLoading = false) {
+            if (!proUpgradeGate.requirePro(ProFeature.SMART_SUGGESTIONS)) return@launchSafely
             requestNoteSuggestions(note.id)
         }
     }
@@ -552,3 +575,5 @@ class NotesViewModel(
         super.onCleared()
     }
 }
+
+private fun NoteExportFormat?.isProFormat(): Boolean = this != null && this != NoteExportFormat.TEXT

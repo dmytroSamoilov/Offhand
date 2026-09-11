@@ -6,6 +6,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleDraftException
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStylePreview
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleSection
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleErrors
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleFieldError
@@ -45,6 +46,9 @@ class NoteStyleEditorViewModelTest {
     private val isAvailable: IsCustomNoteStylesAvailableUseCase = mockk {
         every { this@mockk.invoke() } returns flowOf(true)
     }
+    private val gate: ProUpgradeGate = mockk {
+        coEvery { requirePro(any()) } returns true
+    }
 
     private val stored = CustomNoteStyle(
         id = 3,
@@ -64,7 +68,7 @@ class NoteStyleEditorViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel(styleId: Long) = NoteStyleEditorViewModel(styleId, getStyle, saveStyle, previewStyle, draftStyle, isAvailable)
+    private fun viewModel(styleId: Long) = NoteStyleEditorViewModel(styleId, getStyle, saveStyle, previewStyle, draftStyle, isAvailable, gate)
 
     @Test
     fun `new editor starts with one empty section`() {
@@ -209,8 +213,9 @@ class NoteStyleEditorViewModelTest {
     }
 
     @Test
-    fun `a locked editor reports the lock and refuses to save`() = runTest(dispatcher) {
+    fun `a locked editor keeps the draft and refuses to save when the paywall is declined`() = runTest(dispatcher) {
         every { isAvailable() } returns flowOf(false)
+        coEvery { gate.requirePro(any()) } returns false
         val viewModel = viewModel(0L)
         advanceUntilIdle()
         viewModel.onNameChanged("Debrief")
@@ -221,6 +226,20 @@ class NoteStyleEditorViewModelTest {
 
         assertTrue(viewModel.uiState.value.isLocked)
         assertFalse(viewModel.uiState.value.isSaved)
+        assertEquals("Debrief", viewModel.uiState.value.name)
+        coVerify(exactly = 0) { saveStyle(any()) }
+    }
+
+    @Test
+    fun `an invalid draft never reaches the paywall`() = runTest(dispatcher) {
+        every { isAvailable() } returns flowOf(false)
+        val viewModel = viewModel(0L)
+        advanceUntilIdle()
+
+        viewModel.onSaveRequested()
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { gate.requirePro(any()) }
         coVerify(exactly = 0) { saveStyle(any()) }
     }
 }

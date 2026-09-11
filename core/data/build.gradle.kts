@@ -31,6 +31,7 @@ kotlin {
             implementation(libs.sqlcipher.android)
             implementation(libs.okio)
             implementation(libs.timber)
+            implementation(libs.play.billing.ktx)
         }
         iosMain.dependencies {
             implementation(libs.sqlite.bundled)
@@ -38,6 +39,7 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
+            implementation(libs.coroutines.test)
         }
     }
 }

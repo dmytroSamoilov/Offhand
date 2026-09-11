@@ -5,11 +5,13 @@ import UserNotifications
 struct RootView: View {
     private let viewModel = AppViewModels.root
     private let sessionManager = SharedGraph.shared.sessionManager()
+    private let proUpgradeGate = SharedGraph.shared.proUpgradeGate()
     @State private var activityController = NoteActivityController()
     @State private var finishCoordinator = NoteFinishCoordinator()
     @State private var activeNoteId: Int64?
     @State private var phase: IosRootPhase = .loading
     @State private var selectedTab = 0
+    @State private var isPaywallPresented = false
     @ObservedObject private var notifications = NoteNotifications.shared
     @Environment(\.scenePhase) private var scenePhase
 
@@ -28,9 +30,19 @@ struct RootView: View {
             }
         }
         .privacyShielded()
+        // Any shared ViewModel that calls ProUpgradeGate.requirePro() raises this
+        // cover; closing it resumes that call with the store's answer.
+        .fullScreenCover(isPresented: $isPaywallPresented, onDismiss: { AppViewModels.paywall.onClosed() }) {
+            PaywallView()
+        }
         .task {
             for await newPhase in viewModel.phase {
                 phase = newPhase
+            }
+        }
+        .task {
+            for await feature in proUpgradeGate.requestedFeature {
+                isPaywallPresented = feature != nil
             }
         }
         .task { await observeSession() }

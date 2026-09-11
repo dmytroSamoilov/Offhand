@@ -34,7 +34,6 @@
     <string name="settings_note_styles_built_in">Integrados</string>
     <string name="settings_note_styles_custom">Tus estilos</string>
     <string name="settings_note_styles_empty">Aún no hay estilos propios. Crea uno para darle a la IA tus propios encabezados.</string>
-    <string name="settings_note_styles_locked">Los estilos propios forman parte de Offhand Pro.</string>
     <string name="settings_note_styles_new">Nuevo estilo</string>
     <string name="settings_note_styles_delete">Eliminar estilo</string>
     <string name="settings_note_styles_delete_dialog_title">¿Eliminar este estilo?</string>
@@ -117,7 +116,6 @@
     <string name="settings_backup_subtitle">Lleva tus notas a un teléfono nuevo o guarda una copia</string>
     <string name="settings_import_audio_title">Importar audio</string>
     <string name="settings_import_audio_subtitle">Convierte archivos de audio en notas. Elige uno o varios a la vez</string>
-    <string name="settings_import_locked">La importación de audio forma parte de Offhand Pro.</string>
     <string name="settings_import_unreadable">Algunos de los archivos no se pudieron leer.</string>
     <string name="settings_import_dismiss">Aceptar</string>
     <string name="settings_import_started_title">Importación iniciada</string>
@@ -126,4 +124,16 @@
         <item quantity="many">Se están importando %d archivos. Las notas se crean en segundo plano y aparecerán en tu lista de notas en cuanto estén listas.</item>
         <item quantity="other">Se están importando %d archivos. Las notas se crean en segundo plano y aparecerán en tu lista de notas en cuanto estén listas.</item>
     </plurals>
+    <string name="settings_pro_upgrade_subtitle">Estilos personalizados, exportación a PDF y Word, sugerencias inteligentes e importación de audio</string>
+    <string name="settings_pro_upgrade">Mejorar</string>
+    <string name="settings_subscription_title">Suscripción</string>
+    <string name="settings_subscription_lifetime">De por vida, tuya para siempre</string>
+    <string name="settings_subscription_trial">Prueba gratis</string>
+    <string name="settings_subscription_trial_until">Prueba gratis hasta el %1$s</string>
+    <string name="settings_subscription_yearly">Anual</string>
+    <string name="settings_subscription_yearly_renews">Anual, se renueva el %1$s</string>
+    <string name="settings_subscription_manage">Gestionar suscripción</string>
+    <string name="settings_smart_suggestions_title">Sugerencias inteligentes</string>
+    <string name="settings_smart_suggestions_label">Mostrar sugerencias inteligentes</string>
+    <string name="settings_smart_suggestions_description">Encuentra eventos de calendario y tareas en cada nota nueva. Añade unos segundos de procesamiento.</string>
 </resources>

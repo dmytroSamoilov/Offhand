@@ -160,6 +160,7 @@ schemes:
         Offhand: all
     run:
       config: Debug-dev
+      storeKitConfiguration: Offhand.storekit
     test:
       config: Debug-dev
     profile:
@@ -188,6 +189,7 @@ schemes:
         Offhand: all
     run:
       config: Debug-uitest
+      storeKitConfiguration: Offhand.storekit
     test:
       config: Debug-uitest
     profile:

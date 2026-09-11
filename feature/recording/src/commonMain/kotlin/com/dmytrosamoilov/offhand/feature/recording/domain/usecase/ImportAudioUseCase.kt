@@ -1,24 +1,29 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
-import com.dmytrosamoilov.offhand.core.data.domain.EntitlementsRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
-import kotlinx.coroutines.flow.first
 
 enum class ImportAudioResult {
     STARTED,
     LOCKED,
 }
 
+// One gate check per batch: a free user sees the paywall once and, after
+// buying, every staged file continues into the pipeline.
 class ImportAudioUseCase(
-    private val entitlements: EntitlementsRepository,
+    private val proUpgradeGate: ProUpgradeGate,
     private val recordingProcessController: RecordingProcessController,
     private val sessionManager: RecordingSessionManager,
 ) {
-    suspend operator fun invoke(source: AudioImportSource): ImportAudioResult {
-        if (!entitlements.observeEntitlements().first().audioImportUnlocked) return ImportAudioResult.LOCKED
-        if (!recordingProcessController.importAudio(source)) sessionManager.importAudio(source)
+    suspend operator fun invoke(sources: List<AudioImportSource>): ImportAudioResult {
+        if (sources.isEmpty()) return ImportAudioResult.STARTED
+        if (!proUpgradeGate.requirePro(ProFeature.AUDIO_IMPORT)) return ImportAudioResult.LOCKED
+        sources.forEach { source ->
+            if (!recordingProcessController.importAudio(source)) sessionManager.importAudio(source)
+        }
         return ImportAudioResult.STARTED
     }
 }

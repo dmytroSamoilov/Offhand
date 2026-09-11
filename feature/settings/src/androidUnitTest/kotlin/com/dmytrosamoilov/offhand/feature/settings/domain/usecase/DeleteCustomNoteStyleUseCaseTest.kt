@@ -3,6 +3,7 @@ package com.dmytrosamoilov.offhand.feature.settings.domain.usecase
 import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStylesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
@@ -49,5 +50,7 @@ class DeleteCustomNoteStyleUseCaseTest {
         savedRecordingsCount = 0,
         reviewPrompt = ReviewPromptState(),
         noteStyle = style,
+        proOverride = ProOverride.STORE,
+        smartSuggestionsEnabled = false,
     )
 }

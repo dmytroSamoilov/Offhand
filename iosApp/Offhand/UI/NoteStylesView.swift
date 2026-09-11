@@ -23,9 +23,7 @@ struct NoteStylesView: View {
             }
             Section(String(localized: "Your styles")) {
                 if state.customStyles.isEmpty {
-                    Text(state.isUnlocked
-                        ? String(localized: "No custom styles yet. Create one to give the AI your own headings.")
-                        : String(localized: "Custom styles are part of Offhand Pro."))
+                    Text(String(localized: "No custom styles yet. Create one to give the AI your own headings."))
                         .foregroundStyle(.secondary)
                 }
                 ForEach(state.customStyles, id: \.id) { style in
@@ -57,12 +55,17 @@ struct NoteStylesView: View {
         .navigationTitle(String(localized: "Note styles"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if state.isUnlocked {
-                ToolbarItem(placement: .primaryAction) {
-                    NavigationLink {
-                        NoteStyleEditorView(styleId: 0)
-                    } label: {
+            ToolbarItem(placement: .primaryAction) {
+                NavigationLink {
+                    NoteStyleEditorView(styleId: 0)
+                } label: {
+                    if state.isUnlocked {
                         Label(String(localized: "New style"), systemImage: "plus")
+                    } else {
+                        HStack(spacing: 6) {
+                            ProCrown(size: 16)
+                            Text(String(localized: "New style"))
+                        }
                     }
                 }
             }

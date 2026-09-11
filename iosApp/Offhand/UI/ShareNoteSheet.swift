@@ -78,9 +78,7 @@ struct ShareNoteSheet: View {
     }
 
     private var footerText: String {
-        isDocumentExportUnlocked
-            ? String(localized: "Please keep in mind that shared copies are no longer encrypted once they leave this device.")
-            : String(localized: "PDF and Word exports are part of Offhand Pro.")
+        String(localized: "Please keep in mind that shared copies are no longer encrypted once they leave this device.")
     }
 
     private func formatRow(_ option: NoteExportFormat) -> some View {
@@ -92,29 +90,23 @@ struct ShareNoteSheet: View {
                 optionLabel(
                     title: title(for: option),
                     fileExtension: fileExtension(for: option),
-                    isDimmed: isLocked,
-                    isPro: option != .text
+                    isDimmed: false,
+                    isPro: isLocked
                 )
                 Spacer()
-                if format == option && !isLocked {
+                if format == option {
                     Image(systemName: "checkmark").foregroundStyle(Brand.primary)
                 }
             }
         }
         .buttonStyle(.plain)
-        .disabled(isLocked)
     }
 
     private func optionLabel(title: String, fileExtension: String, isDimmed: Bool, isPro: Bool) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 6) {
                 Text(title).foregroundStyle(isDimmed ? AnyShapeStyle(.secondary) : AnyShapeStyle(.primary))
-                if isPro {
-                    Image(systemName: "crown.fill")
-                        .font(.caption2)
-                        .foregroundStyle(isDimmed ? AnyShapeStyle(.secondary) : AnyShapeStyle(Brand.primary))
-                        .accessibilityLabel(String(localized: "Offhand Pro"))
-                }
+                if isPro { ProCrown(size: 16) }
             }
             Text(fileExtension).font(.footnote).foregroundStyle(.secondary)
         }
@@ -126,10 +118,13 @@ struct ShareNoteSheet: View {
             let isText = tab == .text
             viewModel.onShareConfirmed(noteFormat: isText ? format : nil, includeAudio: !isText)
         } label: {
-            Text(String(localized: "Share")).frame(maxWidth: .infinity)
+            HStack(spacing: 6) {
+                if tab == .text && isLocked(format) { ProCrown(size: 16) }
+                Text(String(localized: "Share"))
+            }
+            .frame(maxWidth: .infinity)
         }
         .buttonStyle(.borderedProminent)
-        .disabled(tab == .text && isLocked(format))
         .padding()
         .background(.bar)
     }

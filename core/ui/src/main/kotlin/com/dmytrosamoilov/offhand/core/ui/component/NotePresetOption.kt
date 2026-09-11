@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
 import com.dmytrosamoilov.offhand.core.designsystem.component.RoundedCheckbox
 import com.dmytrosamoilov.offhand.core.ui.R
 
@@ -100,6 +101,7 @@ fun NoteStyleCard(
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    showProCrown: Boolean = false,
 ) {
     val containerColor by animateColorAsState(
         targetValue = if (isSelected) {
@@ -148,6 +150,10 @@ fun NoteStyleCard(
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
+            if (showProCrown) {
+                ProCrown()
+                Spacer(modifier = Modifier.width(12.dp))
+            }
             RoundedCheckbox(checked = isSelected)
         }
     }

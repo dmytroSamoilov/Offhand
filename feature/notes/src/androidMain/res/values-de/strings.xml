@@ -48,13 +48,11 @@
     <string name="notes_share_tab_audio">Audiodatei</string>
     <string name="notes_share_audio_format">WAV-Datei</string>
     <string name="notes_share_audio_details">Die Aufnahme wird als unkomprimierte WAV-Datei geteilt, 16 kHz mono. Jeder Player und jedes Transkriptionstool öffnet sie.</string>
-    <string name="notes_share_pro_description">Offhand Pro</string>
     <string name="notes_share_save">Speichern</string>
     <string name="notes_share_date_label">Datum</string>
     <string name="notes_share_format_text">Textdatei</string>
     <string name="notes_share_format_pdf">PDF-Datei</string>
     <string name="notes_share_format_docx">Word-Datei</string>
-    <string name="notes_share_format_locked">PDF- und Word-Export sind Teil von Offhand Pro.</string>
     <string name="notes_share_recorded_label">Aufgenommen</string>
     <string name="notes_share_duration_label">Dauer</string>
     <string name="notes_share_created_with">Erstellt mit Offhand</string>
@@ -85,7 +83,6 @@
     <string name="notes_folder_empty_state">Noch keine Notizen in diesem Ordner.</string>
     <string name="notes_move_to_folder">In Ordner verschieben</string>
     <string name="notes_folder_none">Kein Ordner</string>
-    <string name="notes_import_locked">Der Audio-Import ist Teil von Offhand Pro.</string>
     <string name="notes_import_error_title">Diese Datei konnte nicht importiert werden</string>
     <string name="notes_import_error_unsupported">Dieses Audioformat wird nicht unterstützt.</string>
     <string name="notes_import_error_too_long">Aufnahmen, die länger als 2 Stunden sind, können nicht importiert werden.</string>
@@ -101,4 +98,5 @@
     <string name="notes_suggestions_empty">Keine Vorschläge für diese Notiz.</string>
     <string name="notes_suggestions_added">Hinzugefügt</string>
     <string name="notes_suggestions_dismiss">Vorschlag ausblenden</string>
+    <string name="notes_suggestions_locked">Offhand Pro findet Kalendertermine und Aufgaben in deinen Notizen.</string>
 </resources>

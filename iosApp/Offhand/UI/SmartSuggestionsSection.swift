@@ -12,13 +12,16 @@ struct SmartSuggestionsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(String(localized: "Smart suggestions"))
-                .font(.footnote.weight(.semibold))
-                .padding(.horizontal, 14)
-                .frame(height: 32)
-                .background(Brand.secondaryContainer, in: Capsule())
-                .foregroundStyle(Brand.onSecondaryContainer)
-                .padding(.horizontal, 20)
+            HStack(spacing: 8) {
+                Text(String(localized: "Smart suggestions"))
+                    .font(.footnote.weight(.semibold))
+                    .padding(.horizontal, 14)
+                    .frame(height: 32)
+                    .background(Brand.secondaryContainer, in: Capsule())
+                    .foregroundStyle(Brand.onSecondaryContainer)
+                if case .locked = onEnum(of: suggestions) { ProCrown() }
+            }
+            .padding(.horizontal, 20)
             content
         }
         .padding(.vertical, 20)
@@ -40,12 +43,13 @@ struct SmartSuggestionsSection: View {
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 20)
         case .notRun:
-            Button {
-                viewModel.onSuggestionsRequested()
-            } label: {
-                Label(String(localized: "Find suggestions"), systemImage: "calendar.badge.plus")
+            findButton(crowned: false)
+        case .locked:
+            VStack(alignment: .leading, spacing: 12) {
+                Text(String(localized: "Offhand Pro finds calendar events and to-dos in your notes."))
+                    .foregroundStyle(.secondary)
+                findButton(crowned: true)
             }
-            .buttonStyle(.bordered)
             .padding(.horizontal, 20)
         case .ready(let ready):
             ScrollView(.horizontal, showsIndicators: false) {
@@ -58,6 +62,21 @@ struct SmartSuggestionsSection: View {
                 .padding(.horizontal, 20)
             }
         }
+    }
+}
+
+extension SmartSuggestionsSection {
+    fileprivate func findButton(crowned: Bool) -> some View {
+        Button {
+            viewModel.onSuggestionsRequested()
+        } label: {
+            HStack(spacing: 6) {
+                if crowned { ProCrown(size: 16) } else { Image(systemName: "calendar.badge.plus") }
+                Text(String(localized: "Find suggestions"))
+            }
+        }
+        .buttonStyle(.bordered)
+        .padding(.horizontal, crowned ? 0 : 20)
     }
 }
 

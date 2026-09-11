@@ -9,6 +9,9 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomN
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOverrideUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStatusUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.PreviewNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SaveCustomNoteStyleUseCase
@@ -16,6 +19,8 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnab
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.presentation.AboutSupportViewModel
 import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStyleEditorViewModel
@@ -36,6 +41,9 @@ val featureSettingsModule = module {
     factoryOf(::ObserveDeveloperOptionsUseCase)
     factoryOf(::ObserveDynamicColorUseCase)
     factoryOf(::ObserveNoteStyleUseCase)
+    factoryOf(::ObserveProOverrideUseCase)
+    factoryOf(::ObserveProStatusUseCase)
+    factoryOf(::ObserveSmartSuggestionsEnabledUseCase)
     factoryOf(::ObserveTelemetryConsentUseCase)
     factoryOf(::PreviewNoteStyleUseCase)
     factoryOf(::SaveCustomNoteStyleUseCase)
@@ -43,6 +51,8 @@ val featureSettingsModule = module {
     factoryOf(::SetDeveloperOptionsUseCase)
     factoryOf(::SetDynamicColorUseCase)
     factoryOf(::SetNoteStyleUseCase)
+    factoryOf(::SetProOverrideUseCase)
+    factoryOf(::SetSmartSuggestionsEnabledUseCase)
     factoryOf(::SetTelemetryConsentUseCase)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::AboutSupportViewModel)
@@ -55,6 +65,7 @@ val featureSettingsModule = module {
             previewNoteStyle = get(),
             draftNoteStyle = get(),
             isCustomNoteStylesAvailable = get(),
+            proUpgradeGate = get(),
         )
     }
 }

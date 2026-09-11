@@ -51,6 +51,7 @@ struct StyleOptionRow: View {
     let details: String
     let symbol: String
     let isSelected: Bool
+    var showProCrown = false
     let action: () -> Void
 
     var body: some View {
@@ -67,6 +68,7 @@ struct StyleOptionRow: View {
                     .foregroundStyle(Color.secondary)
             }
             Spacer()
+            if showProCrown { ProCrown() }
             if isSelected {
                 Image(systemName: "checkmark")
                     .fontWeight(.semibold)

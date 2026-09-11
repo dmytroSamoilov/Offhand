@@ -10,6 +10,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleDraft
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleDraftException
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleSection
+import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleErrors
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleValidation
@@ -35,6 +37,7 @@ class NoteStyleEditorViewModel(
     private val previewNoteStyle: PreviewNoteStyleUseCase,
     private val draftNoteStyle: DraftNoteStyleUseCase,
     isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase,
+    private val proUpgradeGate: ProUpgradeGate,
 ) : BaseViewModel() {
 
     private val mutableUiState = MutableStateFlow(NoteStyleEditorUiState(isNew = styleId == NEW_STYLE_ID))
@@ -135,10 +138,13 @@ class NoteStyleEditorViewModel(
         sections = draft.sections.map { SectionDraftUi(it.heading, it.guidance, it.format) },
     )
 
+    // Free users build and try the style; saving is where the paywall sits,
+    // and the draft survives it either way.
     fun onSaveRequested() {
-        if (mutableUiState.value.isLocked) return
+        val style = validatedStyle() ?: return
         launchSafely(showLoading = false) {
-            when (val result = saveCustomNoteStyle(currentStyle())) {
+            if (!proUpgradeGate.requirePro(ProFeature.CUSTOM_STYLES)) return@launchSafely
+            when (val result = saveCustomNoteStyle(style)) {
                 is SaveNoteStyleResult.Saved -> mutableUiState.update { it.copy(isSaved = true) }
                 is SaveNoteStyleResult.Invalid -> mutableUiState.update { it.copy(errors = result.errors) }
             }

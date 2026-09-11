@@ -24,17 +24,23 @@ import com.dmytrosamoilov.offhand.core.data.database.applyCompleteUnlessOpenProt
 import com.dmytrosamoilov.offhand.core.data.database.createProtectedDatabaseDirectory
 import com.dmytrosamoilov.offhand.core.data.database.iosDocumentsDirectory
 import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStylesRepository
-import com.dmytrosamoilov.offhand.core.data.domain.EntitlementsRepository
 import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestionsRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProStatusCache
+import com.dmytrosamoilov.offhand.core.data.domain.ProStatusRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProStore
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
+import com.dmytrosamoilov.offhand.core.data.preferences.DataStoreProStatusCache
 import com.dmytrosamoilov.offhand.core.data.preferences.DataStoreUserPreferencesRepository
-import com.dmytrosamoilov.offhand.core.data.repository.MockEntitlementsRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomCustomNoteStylesRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomFoldersRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomNoteSuggestionsRepository
+import com.dmytrosamoilov.offhand.core.data.repository.DebugOverrideProStore
+import com.dmytrosamoilov.offhand.core.data.repository.ProUpgradeCoordinator
 import com.dmytrosamoilov.offhand.core.data.repository.RoomNotesRepository
+import com.dmytrosamoilov.offhand.core.data.repository.StoreProStatusRepository
 import com.dmytrosamoilov.offhand.core.security.excludeFromBackup
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +48,7 @@ import kotlinx.coroutines.IO
 import okio.Path.Companion.toPath
 import platform.Foundation.NSFileManager
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
@@ -92,8 +99,10 @@ val coreDataModule = module {
     singleOf(::RoomFoldersRepository) bind FoldersRepository::class
     singleOf(::RoomCustomNoteStylesRepository) bind CustomNoteStylesRepository::class
     singleOf(::RoomNoteSuggestionsRepository) bind NoteSuggestionsRepository::class
-    singleOf(::MockEntitlementsRepository) bind EntitlementsRepository::class
-    single<UserPreferencesRepository> {
-        DataStoreUserPreferencesRepository(createUserPreferencesDataStore(), get())
-    }
+    single<ProStore> { DebugOverrideProStore(get(named(PLATFORM_PRO_STORE)), get()) }
+    single<ProStatusCache> { DataStoreProStatusCache(get()) }
+    singleOf(::StoreProStatusRepository) bind ProStatusRepository::class
+    singleOf(::ProUpgradeCoordinator) bind ProUpgradeGate::class
+    single<DataStore<Preferences>> { createUserPreferencesDataStore() }
+    single<UserPreferencesRepository> { DataStoreUserPreferencesRepository(get(), get()) }
 }

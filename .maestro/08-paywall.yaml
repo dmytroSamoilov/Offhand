@@ -1,0 +1,80 @@
+# Runs after 01-smoke.yaml. The smoke fake owns the lifetime plan, so the debug
+# override in Settings plays the free user: crowns appear, the paywall opens
+# from the Upgrade card and from Import audio, a simulated purchase flips the
+# override to Pro, and the import picker that was waiting behind the paywall
+# opens on its own.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- assertVisible: "Smoke test note"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Settings"
+      - scrollUntilVisible:
+          element:
+            text: "Free"
+          direction: DOWN
+      - tapOn: "Free"
+      - scrollUntilVisible:
+          element:
+            text: "Upgrade"
+          direction: UP
+      - assertVisible: "Offhand Pro"
+      - tapOn: "Upgrade"
+      - assertVisible: "Never miss a follow-up"
+      - assertVisible: "Start 14-day free trial"
+      - tapOn: "Close"
+      - assertNotVisible: "Start 14-day free trial"
+      - scrollUntilVisible:
+          element:
+            text: "Import audio"
+          direction: DOWN
+      - tapOn: "Import audio"
+      - assertVisible: "Turn your recordings into notes"
+      - tapOn: "Start 14-day free trial"
+      # The success beat lasts under two seconds, so the check is what follows
+      # it: the gate resumes the import click and the system picker opens
+      - extendedWaitUntil:
+          notVisible: "Start 14-day free trial"
+          timeout: 10000
+      - assertVisible: "Downloads|Recent|Files"
+      - back
+      - scrollUntilVisible:
+          element:
+            text: "Subscription"
+          direction: UP
+      - assertVisible: "Lifetime, yours forever"
+      - scrollUntilVisible:
+          element:
+            text: "Store"
+          direction: DOWN
+      - tapOn: "Store"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Settings"
+      - scrollUntilVisible:
+          element: "Pro status override"
+      - tapOn: "Free"
+      - scrollUntilVisible:
+          element: "Upgrade"
+          direction: UP
+      - tapOn: "Upgrade"
+      - assertVisible: "Never miss a follow-up"
+      - assertVisible: "Start 14-day free trial"
+      - tapOn: "Close"
+      - assertNotVisible: "Start 14-day free trial"
+      - tapOn: "Import audio"
+      - assertVisible: "Turn your recordings into notes"
+      - tapOn: "Start 14-day free trial"
+      - extendedWaitUntil:
+          visible: "Cancel"
+          timeout: 10000
+      - tapOn: "Cancel"
+      - assertVisible: "Lifetime, yours forever"
+      - scrollUntilVisible:
+          element: "Pro status override"
+      - tapOn: "Store"

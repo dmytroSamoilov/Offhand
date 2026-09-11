@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="paywall_tagline">Отримуйте більше від кожного запису.</string>
+    <string name="paywall_free_private">Приватність за замовчуванням</string>
+    <string name="paywall_free_offline">Повністю офлайн</string>
+    <string name="paywall_free_no_ads">Без реклами й без облікового запису</string>
+    <string name="paywall_free_unlimited">Необмежено нотаток і записів</string>
+    <string name="paywall_free_backup">Зашифрована резервна копія, пошук і папки</string>
+    <string name="paywall_pro_styles">Нотатки у вашому форматі</string>
+    <string name="paywall_pro_export">Охайні документи</string>
+    <string name="paywall_pro_suggestions">Не пропускайте follow-up</string>
+    <string name="paywall_pro_import">Будь-який запис стає нотаткою</string>
+    <string name="paywall_pro_more">Нові функції Pro включено одразу після виходу</string>
+    <string name="paywall_plan_yearly">Рік</string>
+    <string name="paywall_plan_yearly_price">%1$s / рік</string>
+    <string name="paywall_plan_yearly_renews">Поновлюється щороку</string>
+    <string name="paywall_plan_lifetime">Назавжди</string>
+    <string name="paywall_plan_lifetime_hint">Один платіж, назавжди</string>
+    <string name="paywall_cta_trial">Спробувати безкоштовно</string>
+    <string name="paywall_cta_subscribe">Оформити підписку</string>
+    <string name="paywall_cta_lifetime">Купити назавжди</string>
+    <string name="paywall_yearly_disclosure">%1$s на рік, поновлюється автоматично. Скасувати можна будь-коли в обліковому записі магазину.</string>
+    <string name="paywall_restore">Відновити покупки</string>
+    <string name="paywall_terms">Умови</string>
+    <string name="paywall_privacy">Конфіденційність</string>
+    <string name="paywall_offers_unavailable">Не вдалося завантажити ціни. Перевірте з’єднання і спробуйте ще раз.</string>
+    <string name="paywall_retry">Повторити</string>
+    <string name="paywall_message_failed">Покупку не завершено, кошти не списано.</string>
+    <string name="paywall_message_pending">Платіж ще обробляється. Pro відкриється, щойно він завершиться.</string>
+    <string name="paywall_message_restore_nothing">Для цього облікового запису магазину покупок не знайдено.</string>
+    <string name="paywall_message_dismiss">OK</string>
+    <string name="paywall_success_title">У вас Offhand Pro</string>
+    <string name="paywall_success_body">Дякуємо, що підтримуєте незалежний приватний застосунок.</string>
+    <string name="paywall_close">Закрити</string>
+    <string name="paywall_no_browser">Не знайдено браузер, щоб відкрити посилання.</string>
+    <string name="paywall_context_tagline">Частина Offhand Pro. Отримуйте більше від кожного запису.</string>
+    <string name="paywall_context_styles">Зберегти власний стиль нотаток</string>
+    <string name="paywall_context_export">Поділитися нотаткою у PDF або Word</string>
+    <string name="paywall_context_suggestions">Знайти дати й завдання в нотатках</string>
+    <string name="paywall_context_import">Перетворити записи на нотатки</string>
+    <string name="paywall_pro_styles_hint">Ваші заголовки, ваші розділи, щоразу</string>
+    <string name="paywall_pro_export_hint">PDF і Word, готові для клієнтів, пошти й друку</string>
+    <string name="paywall_pro_suggestions_hint">Дати й завдання одразу в календар</string>
+    <string name="paywall_pro_import_hint">Голосові нотатки, дзвінки й файли з інших застосунків</string>
+    <string name="paywall_plan_yearly_monthly">Близько %1$s на місяць</string>
+    <string name="paywall_plan_best_value">Найвигідніше</string>
+    <string name="paywall_no_charge">Сьогодні нічого не списується</string>
+    <string name="paywall_privacy_note">Оплата проходить через Google Play. Offhand не бачить вашу картку, а нотатки не покидають телефон.</string>
+    <string name="paywall_continue_free">Продовжити з безкоштовною версією</string>
+    <string name="paywall_success_continue">Те, що ви почали, уже виконується.</string>
+    <plurals name="paywall_plan_trial">
+        <item quantity="one">%d день безкоштовно</item>
+        <item quantity="few">%d дні безкоштовно</item>
+        <item quantity="many">%d днів безкоштовно</item>
+        <item quantity="other">%d дня безкоштовно</item>
+    </plurals>
+    <plurals name="paywall_trial_disclosure">
+        <item quantity="one">%1$d день безкоштовно, потім %2$s на рік. Скасувати можна будь-коли в обліковому записі магазину.</item>
+        <item quantity="few">%1$d дні безкоштовно, потім %2$s на рік. Скасувати можна будь-коли в обліковому записі магазину.</item>
+        <item quantity="many">%1$d днів безкоштовно, потім %2$s на рік. Скасувати можна будь-коли в обліковому записі магазину.</item>
+        <item quantity="other">%1$d дня безкоштовно, потім %2$s на рік. Скасувати можна будь-коли в обліковому записі магазину.</item>
+    </plurals>
+    <plurals name="paywall_cta_trial_days">
+        <item quantity="one">Почати %d день безкоштовно</item>
+        <item quantity="few">Почати %d дні безкоштовно</item>
+        <item quantity="many">Почати %d днів безкоштовно</item>
+        <item quantity="other">Почати %d дня безкоштовно</item>
+    </plurals>
+    <plurals name="paywall_plan_lifetime_vs_yearly">
+        <item quantity="one">Менше %d року річної підписки</item>
+        <item quantity="few">Менше %d років річної підписки</item>
+        <item quantity="many">Менше %d років річної підписки</item>
+        <item quantity="other">Менше %d років річної підписки</item>
+    </plurals>
+</resources>

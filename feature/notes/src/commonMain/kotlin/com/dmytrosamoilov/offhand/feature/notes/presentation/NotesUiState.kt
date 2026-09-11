@@ -26,10 +26,12 @@ data class NotesUiState(
     val importMessage: ImportMessageUi? = null,
     val smartSuggestions: SmartSuggestionsUi? = null,
     val isDocumentExportUnlocked: Boolean = false,
+    val isCustomStylesUnlocked: Boolean = false,
     val pendingCalendarEvent: CalendarEventSuggestion? = null,
 )
 
 sealed interface SmartSuggestionsUi {
+    data object Locked : SmartSuggestionsUi
     data object Loading : SmartSuggestionsUi
     data object NotRun : SmartSuggestionsUi
     data object Empty : SmartSuggestionsUi

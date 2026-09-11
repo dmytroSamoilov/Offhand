@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -17,7 +18,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
 import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 
 @Composable
@@ -41,9 +44,21 @@ internal fun SwitchRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     enabled: Boolean = true,
+    showProCrown: Boolean = false,
 ) {
+    val haptics = haptics()
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(
+                value = checked,
+                enabled = enabled,
+                role = Role.Switch,
+                onValueChange = { isOn ->
+                    haptics.toggle(isOn)
+                    onCheckedChange(isOn)
+                },
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -55,15 +70,8 @@ internal fun SwitchRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        val haptics = haptics()
-        Switch(
-            checked = checked,
-            onCheckedChange = { isOn ->
-                haptics.toggle(isOn)
-                onCheckedChange(isOn)
-            },
-            enabled = enabled,
-        )
+        if (showProCrown) ProCrown()
+        Switch(checked = checked, onCheckedChange = null, enabled = enabled)
     }
 }
 

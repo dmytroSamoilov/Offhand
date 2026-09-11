@@ -31,6 +31,12 @@ class AudioImportIntake(
         AudioImportSource(handle = target.absolutePath, displayName = displayName)
     }
 
+    // Staged copies that never reached the decoder, such as a share that
+    // ended at a declined paywall.
+    suspend fun discard(sources: List<AudioImportSource>) = withContext(Dispatchers.IO) {
+        sources.forEach { source -> File(source.handle).delete() }
+    }
+
     private fun importDirectory(): File = File(context.cacheDir, IMPORT_DIRECTORY).apply { mkdirs() }
 
     private fun displayNameOf(uri: Uri): String {

@@ -17,6 +17,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCalendarSuggestionsAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteDocumentBuilder
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
@@ -48,6 +49,7 @@ val featureNotesModule = module {
     factoryOf(::IsCalendarSuggestionsAvailableUseCase)
     factoryOf(::IsCustomNoteStylesAvailableUseCase)
     factoryOf(::IsDocumentExportAvailableUseCase)
+    factoryOf(::IsSmartSuggestionsEnabledUseCase)
     factory { NoteDocumentBuilder(get(), get(), get()) }
     factoryOf(::MarkReviewAttemptUseCase)
     factoryOf(::ObserveDeveloperOptionsUseCase)
@@ -85,6 +87,8 @@ val featureNotesModule = module {
             updateSuggestionStatus = get(),
             isCalendarSuggestionsAvailable = get(),
             isDocumentExportAvailable = get(),
+            isSmartSuggestionsEnabled = get(),
+            proUpgradeGate = get(),
             sessionManager = get(),
             aiCoreDownloadStatus = get(),
         )

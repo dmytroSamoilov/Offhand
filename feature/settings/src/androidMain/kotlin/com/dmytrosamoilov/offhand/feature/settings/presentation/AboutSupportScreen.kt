@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dmytrosamoilov.offhand.core.common.LegalLinks
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.feature.settings.R
@@ -327,10 +328,10 @@ private fun AboutSection() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.height(4.dp))
-        TextButton(onClick = { openLink(context, TERMS_URL) }) {
+        TextButton(onClick = { openLink(context, LegalLinks.TERMS) }) {
             Text(text = stringResource(R.string.settings_about_terms))
         }
-        TextButton(onClick = { openLink(context, PRIVACY_POLICY_URL) }) {
+        TextButton(onClick = { openLink(context, LegalLinks.PRIVACY_POLICY) }) {
             Text(text = stringResource(R.string.settings_about_privacy))
         }
     }
@@ -391,5 +392,3 @@ internal fun appVersion(context: Context): String = runCatching {
 }.getOrDefault("unknown")
 
 private const val FEEDBACK_EMAIL = "dmytro@dmytrosamoilov.com"
-private const val TERMS_URL = "https://dmytrosamoilov.com/offhand/terms-and-conditions"
-private const val PRIVACY_POLICY_URL = "https://dmytrosamoilov.com/offhand/privacy-policy"

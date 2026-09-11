@@ -1,9 +1,10 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
-import com.dmytrosamoilov.offhand.core.data.domain.Entitlements
-import com.dmytrosamoilov.offhand.core.data.domain.EntitlementsRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
+import com.dmytrosamoilov.offhand.core.data.domain.ProStatusRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
@@ -17,13 +18,13 @@ import org.junit.Test
 class GetNoteStyleUseCaseTest {
 
     private val preferences: UserPreferencesRepository = mockk()
-    private val entitlements: EntitlementsRepository = mockk()
+    private val entitlements: ProStatusRepository = mockk()
     private val useCase = GetNoteStyleUseCase(preferences, entitlements)
 
     @Test
     fun `custom default style is used while unlocked`() = runTest {
         every { preferences.preferences } returns flowOf(preferences(NoteStyleRef.Custom(4)))
-        every { entitlements.observeEntitlements() } returns flowOf(Entitlements(customStylesUnlocked = true, audioImportUnlocked = true, calendarSuggestionsUnlocked = true, documentExportUnlocked = true))
+        every { entitlements.observeStatus() } returns flowOf(ProStatus.LIFETIME)
 
         assertEquals(NoteStyleRef.Custom(4), useCase())
     }
@@ -31,7 +32,7 @@ class GetNoteStyleUseCaseTest {
     @Test
     fun `custom default style falls back to Summary when locked`() = runTest {
         every { preferences.preferences } returns flowOf(preferences(NoteStyleRef.Custom(4)))
-        every { entitlements.observeEntitlements() } returns flowOf(Entitlements(customStylesUnlocked = false, audioImportUnlocked = true, calendarSuggestionsUnlocked = true, documentExportUnlocked = true))
+        every { entitlements.observeStatus() } returns flowOf(ProStatus.FREE)
 
         assertEquals(NoteStyleRef.DEFAULT, useCase())
     }
@@ -52,5 +53,7 @@ class GetNoteStyleUseCaseTest {
         savedRecordingsCount = 0,
         reviewPrompt = ReviewPromptState(),
         noteStyle = style,
+        proOverride = ProOverride.STORE,
+        smartSuggestionsEnabled = false,
     )
 }

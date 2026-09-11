@@ -8,6 +8,13 @@ struct OffhandApp: App {
     #else
     private static let useSmokeFakes = false
     #endif
+    // The shared framework is always a release binary, so the app decides
+    // what counts as a debug build (developer options, the Pro override).
+    #if DEBUG
+    private static let isDebugBuild = true
+    #else
+    private static let isDebugBuild = false
+    #endif
 
     init() {
         SharedModulesKt.startSharedKoin(
@@ -31,7 +38,9 @@ struct OffhandApp: App {
                 appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "",
                 backupCrypto: BackupCryptoImpl(),
                 audioDecoder: AudioDecoderImpl(),
-                noteDocuments: NoteDocumentBridgeImpl()
+                noteDocuments: NoteDocumentBridgeImpl(),
+                proStore: StoreKitProStore(),
+                isDebugBuild: Self.isDebugBuild
             ),
             useSmokeFakes: Self.useSmokeFakes
         )
