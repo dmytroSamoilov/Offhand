@@ -10,4 +10,6 @@
     <string name="core_ui_note_preset_visit_description">Who the visit was about, observations, what was done and follow-ups.</string>
     <string name="core_ui_note_preset_legal">Legal note</string>
     <string name="core_ui_note_preset_legal_description">Matter, facts stated, instructions, advice given and next steps.</string>
+    <string name="core_ui_styles_custom_header">Your styles</string>
+    <string name="core_ui_styles_built_in_header">Built in</string>
 </resources>

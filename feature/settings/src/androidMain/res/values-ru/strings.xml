@@ -137,4 +137,8 @@
     <string name="settings_smart_suggestions_title">Умные подсказки</string>
     <string name="settings_smart_suggestions_label">Показывать умные подсказки</string>
     <string name="settings_smart_suggestions_description">Находит события календаря и задачи в каждой новой заметке. Добавляет несколько секунд обработки.</string>
+    <string name="settings_notes_title">Заметки</string>
+    <string name="settings_backup_section_title">Резервная копия</string>
+    <string name="settings_about_section_title">О приложении</string>
+    <string name="settings_about_footer">Offhand хранит каждую запись и заметку на этом устройстве. Ничего никуда не загружается.</string>
 </resources>

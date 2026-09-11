@@ -106,7 +106,7 @@ struct ShareNoteSheet: View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 6) {
                 Text(title).foregroundStyle(isDimmed ? AnyShapeStyle(.secondary) : AnyShapeStyle(.primary))
-                if isPro { ProCrown(size: 16) }
+                if isPro { ProBadge() }
             }
             Text(fileExtension).font(.footnote).foregroundStyle(.secondary)
         }
@@ -118,11 +118,7 @@ struct ShareNoteSheet: View {
             let isText = tab == .text
             viewModel.onShareConfirmed(noteFormat: isText ? format : nil, includeAudio: !isText)
         } label: {
-            HStack(spacing: 6) {
-                if tab == .text && isLocked(format) { ProCrown(size: 16) }
-                Text(String(localized: "Share"))
-            }
-            .frame(maxWidth: .infinity)
+            Text(String(localized: "Share")).frame(maxWidth: .infinity)
         }
         .buttonStyle(.borderedProminent)
         .padding()

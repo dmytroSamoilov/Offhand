@@ -420,7 +420,7 @@ struct PresetCard: View {
     let details: String
     let symbol: String
     let isSelected: Bool
-    var showProCrown = false
+    var showProBadge = false
     let action: () -> Void
 
     var body: some View {
@@ -430,8 +430,11 @@ struct PresetCard: View {
                     .foregroundStyle(Brand.primary)
                     .frame(width: 24)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .foregroundStyle(Brand.onSurface)
+                    HStack(spacing: 6) {
+                        Text(title)
+                            .foregroundStyle(Brand.onSurface)
+                        if showProBadge { ProBadge() }
+                    }
                     Text(details)
                         .font(.caption)
                         .foregroundStyle(Brand.onSurfaceVariant)
@@ -439,7 +442,6 @@ struct PresetCard: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 12)
-                if showProCrown { ProCrown() }
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
                     .foregroundStyle(isSelected ? Brand.primary : Color(.systemGray3))

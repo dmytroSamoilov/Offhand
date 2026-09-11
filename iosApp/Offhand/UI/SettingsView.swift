@@ -80,17 +80,14 @@ struct SettingsView: View {
                     Button {
                         viewModel.onImportAudioClicked()
                     } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 6) {
                                 Text(String(localized: "Import audio")).foregroundStyle(.primary)
-                                Text(String(localized: "Turn audio files into notes. Pick one or several at once"))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                if !state.isAudioImportUnlocked { ProBadge() }
                             }
-                            if !state.isAudioImportUnlocked {
-                                Spacer()
-                                ProCrown()
-                            }
+                            Text(String(localized: "Turn audio files into notes. Pick one or several at once"))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
                     }
                 } header: {
@@ -129,25 +126,28 @@ struct SettingsView: View {
             NavigationStack {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 10) {
-                        NotePresetPicker(selected: state.noteStyle.builtInPreset) { preset in
-                            viewModel.onNoteStyleSelected(style: NoteStyleRefBuiltIn(preset: preset))
-                            isPresetPickerVisible = false
-                        }
                         if !state.customStyles.isEmpty {
                             Text(String(localized: "Your styles"))
                                 .font(.footnote.weight(.semibold))
                                 .foregroundStyle(.secondary)
-                                .padding(.top, 8)
                             ForEach(state.customStyles, id: \.id) { style in
                                 CustomStyleCard(
                                     style: style,
                                     isSelected: state.noteStyle.customId == style.id,
-                                    showProCrown: !state.isCustomStylesUnlocked
+                                    showProBadge: !state.isCustomStylesUnlocked
                                 ) {
                                     viewModel.onNoteStyleSelected(style: NoteStyleRefCustom(id: style.id))
                                     isPresetPickerVisible = false
                                 }
                             }
+                            Text(String(localized: "Built in"))
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                                .padding(.top, 8)
+                        }
+                        NotePresetPicker(selected: state.noteStyle.builtInPreset) { preset in
+                            viewModel.onNoteStyleSelected(style: NoteStyleRefBuiltIn(preset: preset))
+                            isPresetPickerVisible = false
                         }
                     }
                     .padding()
@@ -298,13 +298,15 @@ struct SettingsView: View {
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(String(localized: "Show smart suggestions")).foregroundStyle(.primary)
+                    HStack(spacing: 6) {
+                        Text(String(localized: "Show smart suggestions")).foregroundStyle(.primary)
+                        if !state.isSmartSuggestionsUnlocked { ProBadge() }
+                    }
                     Text(String(localized: "Find calendar events and to-dos in every new note. Adds a few seconds of processing."))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                if !state.isSmartSuggestionsUnlocked { ProCrown() }
                 Toggle("", isOn: .constant(state.isSmartSuggestionsEnabled))
                     .labelsHidden()
                     .allowsHitTesting(false)
@@ -337,7 +339,7 @@ struct SettingsView: View {
 private struct CustomStyleCard: View {
     let style: CustomStyleOptionUi
     let isSelected: Bool
-    var showProCrown = false
+    var showProBadge = false
     let onSelect: () -> Void
 
     var body: some View {
@@ -346,7 +348,7 @@ private struct CustomStyleCard: View {
             details: style.description_,
             symbol: NoteStyleLabels.customSymbol,
             isSelected: isSelected,
-            showProCrown: showProCrown,
+            showProBadge: showProBadge,
             action: onSelect
         )
     }

@@ -136,4 +136,8 @@
     <string name="settings_smart_suggestions_title">Sugerencias inteligentes</string>
     <string name="settings_smart_suggestions_label">Mostrar sugerencias inteligentes</string>
     <string name="settings_smart_suggestions_description">Encuentra eventos de calendario y tareas en cada nota nueva. Añade unos segundos de procesamiento.</string>
+    <string name="settings_notes_title">Notas</string>
+    <string name="settings_backup_section_title">Copia de seguridad</string>
+    <string name="settings_about_section_title">Acerca de</string>
+    <string name="settings_about_footer">Offhand guarda cada grabación y nota en este dispositivo. No se sube nada a ningún sitio.</string>
 </resources>

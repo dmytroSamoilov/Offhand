@@ -10,4 +10,6 @@
     <string name="core_ui_note_preset_visit_description">विज़िट किसके बारे में थी, टिप्पणियां, क्या किया गया और आगे के काम।</string>
     <string name="core_ui_note_preset_legal">कानूनी नोट</string>
     <string name="core_ui_note_preset_legal_description">मामला, बताए गए तथ्य, निर्देश, दी गई सलाह और अगले कदम।</string>
+    <string name="core_ui_styles_custom_header">आपकी शैलियाँ</string>
+    <string name="core_ui_styles_built_in_header">पहले से मौजूद</string>
 </resources>

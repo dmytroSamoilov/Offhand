@@ -7,20 +7,6 @@ struct NoteStylesView: View {
 
     var body: some View {
         List {
-            Section(String(localized: "Built in")) {
-                ForEach([NotePreset.summary, .meeting, .visit, .legal], id: \.self) { preset in
-                    Label {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(NoteStyleLabels.label(for: preset))
-                            Text(NoteStyleLabels.details(for: preset))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    } icon: {
-                        Image(systemName: NoteStyleLabels.symbol(for: preset)).foregroundStyle(Brand.primary)
-                    }
-                }
-            }
             Section(String(localized: "Your styles")) {
                 if state.customStyles.isEmpty {
                     Text(String(localized: "No custom styles yet. Create one to give the AI your own headings."))
@@ -51,6 +37,20 @@ struct NoteStylesView: View {
                     }
                 }
             }
+            Section(String(localized: "Built in")) {
+                ForEach([NotePreset.summary, .meeting, .visit, .legal], id: \.self) { preset in
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(NoteStyleLabels.label(for: preset))
+                            Text(NoteStyleLabels.details(for: preset))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: NoteStyleLabels.symbol(for: preset)).foregroundStyle(Brand.primary)
+                    }
+                }
+            }
         }
         .navigationTitle(String(localized: "Note styles"))
         .navigationBarTitleDisplayMode(.inline)
@@ -63,8 +63,8 @@ struct NoteStylesView: View {
                         Label(String(localized: "New style"), systemImage: "plus")
                     } else {
                         HStack(spacing: 6) {
-                            ProCrown(size: 16)
                             Text(String(localized: "New style"))
+                            ProBadge()
                         }
                     }
                 }

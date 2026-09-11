@@ -37,7 +37,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
-import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
+import com.dmytrosamoilov.offhand.core.designsystem.component.ProBadge
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.core.ui.component.CustomNoteStyleIcon
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
@@ -97,8 +97,13 @@ private fun NewStyleButton(isUnlocked: Boolean, onClick: () -> Unit) {
     val label = stringResource(R.string.settings_note_styles_new)
     ExtendedFloatingActionButton(
         onClick = onClick,
-        icon = { if (isUnlocked) Icon(imageVector = Icons.Filled.Add, contentDescription = null) else ProCrown(size = 22.dp) },
-        text = { Text(text = label) },
+        icon = { Icon(imageVector = Icons.Filled.Add, contentDescription = null) },
+        text = {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(text = label)
+                if (!isUnlocked) ProBadge()
+            }
+        },
         modifier = Modifier.semantics { contentDescription = label },
     )
 }
@@ -115,18 +120,18 @@ private fun NoteStylesList(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        item { SectionHeader(text = stringResource(R.string.settings_note_styles_built_in)) }
-        items(NotePresetOption.entries) { option -> BuiltInStyleRow(option) }
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-            SectionHeader(text = stringResource(R.string.settings_note_styles_custom))
-        }
+        item { SectionHeader(text = stringResource(R.string.settings_note_styles_custom)) }
         if (state.customStyles.isEmpty()) {
             item { EmptyStylesHint() }
         }
         items(state.customStyles, key = { it.id }) { style ->
             CustomStyleRow(style = style, onClick = { onEditStyle(style.id) }, onDelete = { onDeleteStyle(style.id) })
         }
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            SectionHeader(text = stringResource(R.string.settings_note_styles_built_in))
+        }
+        items(NotePresetOption.entries) { option -> BuiltInStyleRow(option) }
     }
 }
 

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.relocation.BringIntoViewRequester
@@ -49,7 +48,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
 import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
-import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
 import com.dmytrosamoilov.offhand.core.designsystem.component.MarkdownText
 import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
@@ -84,12 +82,7 @@ fun NoteStyleEditorScreen(
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
         Scaffold(
             topBar = {
-                EditorTopBar(
-                    isNew = state.isNew,
-                    showProCrown = state.isLocked,
-                    onBack = onBack,
-                    onSave = viewModel::onSaveRequested,
-                )
+                EditorTopBar(isNew = state.isNew, onBack = onBack, onSave = viewModel::onSaveRequested)
             },
             contentWindowInsets = WindowInsets(0.dp),
         ) { innerPadding ->
@@ -108,7 +101,7 @@ fun NoteStyleEditorScreen(
 }
 
 @Composable
-private fun EditorTopBar(isNew: Boolean, showProCrown: Boolean, onBack: () -> Unit, onSave: () -> Unit) {
+private fun EditorTopBar(isNew: Boolean, onBack: () -> Unit, onSave: () -> Unit) {
     AppTopBar(
         title = stringResource(
             if (isNew) R.string.settings_note_style_editor_new_title else R.string.settings_note_style_editor_edit_title,
@@ -122,13 +115,7 @@ private fun EditorTopBar(isNew: Boolean, showProCrown: Boolean, onBack: () -> Un
             }
         },
         actions = {
-            TextButton(onClick = onSave) {
-                if (showProCrown) {
-                    ProCrown(size = 16.dp)
-                    Spacer(modifier = Modifier.width(6.dp))
-                }
-                Text(text = stringResource(R.string.settings_note_style_editor_save))
-            }
+            TextButton(onClick = onSave) { Text(text = stringResource(R.string.settings_note_style_editor_save)) }
         },
     )
 }

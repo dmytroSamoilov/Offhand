@@ -3,6 +3,7 @@ package com.dmytrosamoilov.offhand.core.ui.component
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,7 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
-import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
+import com.dmytrosamoilov.offhand.core.designsystem.component.ProBadge
 import com.dmytrosamoilov.offhand.core.designsystem.component.RoundedCheckbox
 import com.dmytrosamoilov.offhand.core.ui.R
 
@@ -101,7 +102,7 @@ fun NoteStyleCard(
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    showProCrown: Boolean = false,
+    showProBadge: Boolean = false,
 ) {
     val containerColor by animateColorAsState(
         targetValue = if (isSelected) {
@@ -138,11 +139,14 @@ fun NoteStyleCard(
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    if (showProBadge) ProBadge()
+                }
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
@@ -150,10 +154,6 @@ fun NoteStyleCard(
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
-            if (showProCrown) {
-                ProCrown()
-                Spacer(modifier = Modifier.width(12.dp))
-            }
             RoundedCheckbox(checked = isSelected)
         }
     }

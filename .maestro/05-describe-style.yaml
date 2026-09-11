@@ -28,7 +28,8 @@ appId: com.dmytrosamoilov.offhand.uitest
       - back
       - assertVisible: "Built in"
       - back
-      - tapOn: "Notes"
+      - tapOn:
+          id: "tab_notes"
       - assertVisible: "Smoke test note"
 - runFlow:
     when:

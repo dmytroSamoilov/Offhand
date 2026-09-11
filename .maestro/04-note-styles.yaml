@@ -58,10 +58,12 @@ appId: com.dmytrosamoilov.offhand.uitest
       - assertVisible: "Sales debrief"
       - assertVisible: "Customer, Next steps"
       - back
+      - tapOn: "Default note style"
       - tapOn: "Sales debrief"
 
       # Rewrite the existing note with it
-      - tapOn: "Notes"
+      - tapOn:
+          id: "tab_notes"
       - tapOn: "Smoke test note"
       - runFlow:
           when:
@@ -84,7 +86,8 @@ appId: com.dmytrosamoilov.offhand.uitest
       - tapOn: "Delete"
       - assertNotVisible: "Sales debrief"
       - back
-      - tapOn: "Notes"
+      - tapOn:
+          id: "tab_notes"
       - assertVisible: "Smoke test note"
 - runFlow:
     when:

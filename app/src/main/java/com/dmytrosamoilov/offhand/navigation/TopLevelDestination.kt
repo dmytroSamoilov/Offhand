@@ -36,4 +36,8 @@ enum class TopLevelDestination(
 ) {
     NOTES(R.string.destination_notes, Icons.AutoMirrored.Filled.Notes, NotesRoute),
     SETTINGS(R.string.destination_settings, Icons.Filled.Settings, SettingsGraphRoute),
+    ;
+
+    val testTag: String
+        get() = "tab_${name.lowercase()}"
 }

@@ -37,14 +37,7 @@ struct NoteStyleEditorView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button {
-                    viewModel.onSaveRequested()
-                } label: {
-                    HStack(spacing: 6) {
-                        if state.isLocked { ProCrown(size: 16) }
-                        Text(String(localized: "Save"))
-                    }
-                }
+                Button(String(localized: "Save")) { viewModel.onSaveRequested() }
             }
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()

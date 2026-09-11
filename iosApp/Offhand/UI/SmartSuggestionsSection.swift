@@ -19,7 +19,7 @@ struct SmartSuggestionsSection: View {
                     .frame(height: 32)
                     .background(Brand.secondaryContainer, in: Capsule())
                     .foregroundStyle(Brand.onSecondaryContainer)
-                if case .locked = onEnum(of: suggestions) { ProCrown() }
+                if case .locked = onEnum(of: suggestions) { ProBadge() }
             }
             .padding(.horizontal, 20)
             content
@@ -43,12 +43,12 @@ struct SmartSuggestionsSection: View {
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 20)
         case .notRun:
-            findButton(crowned: false)
+            findButton(inset: false)
         case .locked:
             VStack(alignment: .leading, spacing: 12) {
                 Text(String(localized: "Offhand Pro finds calendar events and to-dos in your notes."))
                     .foregroundStyle(.secondary)
-                findButton(crowned: true)
+                findButton(inset: true)
             }
             .padding(.horizontal, 20)
         case .ready(let ready):
@@ -66,17 +66,14 @@ struct SmartSuggestionsSection: View {
 }
 
 extension SmartSuggestionsSection {
-    fileprivate func findButton(crowned: Bool) -> some View {
+    fileprivate func findButton(inset: Bool) -> some View {
         Button {
             viewModel.onSuggestionsRequested()
         } label: {
-            HStack(spacing: 6) {
-                if crowned { ProCrown(size: 16) } else { Image(systemName: "calendar.badge.plus") }
-                Text(String(localized: "Find suggestions"))
-            }
+            Label(String(localized: "Find suggestions"), systemImage: "calendar.badge.plus")
         }
         .buttonStyle(.bordered)
-        .padding(.horizontal, crowned ? 0 : 20)
+        .padding(.horizontal, inset ? 0 : 20)
     }
 }
 

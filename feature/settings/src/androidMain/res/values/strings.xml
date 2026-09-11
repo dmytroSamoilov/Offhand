@@ -141,4 +141,8 @@
     <string name="settings_smart_suggestions_title">Smart suggestions</string>
     <string name="settings_smart_suggestions_label">Show smart suggestions</string>
     <string name="settings_smart_suggestions_description">Find calendar events and to-dos in every new note. Adds a few seconds of processing.</string>
+    <string name="settings_notes_title">Notes</string>
+    <string name="settings_backup_section_title">Backup</string>
+    <string name="settings_about_section_title">About</string>
+    <string name="settings_about_footer">Offhand keeps every recording and note on this device. Nothing is uploaded anywhere.</string>
 </resources>

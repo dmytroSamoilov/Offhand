@@ -137,4 +137,8 @@
     <string name="settings_smart_suggestions_title">Розумні підказки</string>
     <string name="settings_smart_suggestions_label">Показувати розумні підказки</string>
     <string name="settings_smart_suggestions_description">Знаходить події календаря й завдання в кожній новій нотатці. Додає кілька секунд обробки.</string>
+    <string name="settings_notes_title">Нотатки</string>
+    <string name="settings_backup_section_title">Резервна копія</string>
+    <string name="settings_about_section_title">Про застосунок</string>
+    <string name="settings_about_footer">Offhand зберігає кожен запис і нотатку на цьому пристрої. Нічого нікуди не завантажується.</string>
 </resources>

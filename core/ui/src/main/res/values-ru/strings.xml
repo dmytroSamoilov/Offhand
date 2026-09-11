@@ -10,4 +10,6 @@
     <string name="core_ui_note_preset_visit_description">О ком был визит, наблюдения, что было сделано и дальнейшие шаги.</string>
     <string name="core_ui_note_preset_legal">Юридическая заметка</string>
     <string name="core_ui_note_preset_legal_description">Дело, изложенные факты, поручения, данные рекомендации и следующие шаги.</string>
+    <string name="core_ui_styles_custom_header">Ваши стили</string>
+    <string name="core_ui_styles_built_in_header">Встроенные</string>
 </resources>

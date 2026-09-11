@@ -18,7 +18,8 @@ appId: com.dmytrosamoilov.offhand.uitest
             text: "Show smart suggestions"
           direction: DOWN
       - tapOn: "Show smart suggestions"
-      - tapOn: "Notes"
+      - tapOn:
+          id: "tab_notes"
 - runFlow:
     when:
       platform: iOS

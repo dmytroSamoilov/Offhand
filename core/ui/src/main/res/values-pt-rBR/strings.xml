@@ -10,4 +10,6 @@
     <string name="core_ui_note_preset_visit_description">Sobre quem foi a visita, observações, o que foi feito e próximos passos.</string>
     <string name="core_ui_note_preset_legal">Nota jurídica</string>
     <string name="core_ui_note_preset_legal_description">Assunto, fatos declarados, instruções, orientações dadas e próximos passos.</string>
+    <string name="core_ui_styles_custom_header">Seus estilos</string>
+    <string name="core_ui_styles_built_in_header">Integrados</string>
 </resources>

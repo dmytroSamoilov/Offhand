@@ -135,4 +135,8 @@
     <string name="settings_smart_suggestions_title">स्मार्ट सुझाव</string>
     <string name="settings_smart_suggestions_label">स्मार्ट सुझाव दिखाएँ</string>
     <string name="settings_smart_suggestions_description">हर नए नोट में कैलेंडर इवेंट और काम ढूँढता है। प्रोसेसिंग में कुछ सेकंड और लगते हैं।</string>
+    <string name="settings_notes_title">नोट्स</string>
+    <string name="settings_backup_section_title">बैकअप</string>
+    <string name="settings_about_section_title">जानकारी</string>
+    <string name="settings_about_footer">Offhand हर रिकॉर्डिंग और नोट इसी डिवाइस पर रखता है। कुछ भी कहीं अपलोड नहीं होता।</string>
 </resources>

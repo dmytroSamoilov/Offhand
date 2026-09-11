@@ -108,7 +108,7 @@ import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCard
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
 import androidx.compose.material3.FilterChip
 import com.dmytrosamoilov.offhand.core.designsystem.component.LabelPill
-import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
+import com.dmytrosamoilov.offhand.core.designsystem.component.ProBadge
 import androidx.compose.runtime.Immutable
 import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCardAction
 import com.dmytrosamoilov.offhand.core.designsystem.component.MarkdownText
@@ -118,7 +118,8 @@ import com.dmytrosamoilov.offhand.core.designsystem.component.RoundedCheckbox
 import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
-import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOptionCard
+import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleChoice
+import com.dmytrosamoilov.offhand.core.ui.component.NoteStylePickerSheet
 import com.dmytrosamoilov.offhand.core.ui.component.CustomNoteStyleIcon
 import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleCard
 import com.dmytrosamoilov.offhand.core.ui.component.toDomain
@@ -346,7 +347,6 @@ fun NotesScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NoteStyleSheet(
     selected: NoteStyleRef,
@@ -355,52 +355,15 @@ private fun NoteStyleSheet(
     onSelected: (NoteStyleRef) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.notes_preset_sheet_title),
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Text(
-                text = stringResource(R.string.notes_preset_sheet_body),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 12.dp),
-            )
-            NotePresetOption.entries.forEach { option ->
-                NotePresetOptionCard(
-                    option = option,
-                    isSelected = selected == NoteStyleRef.BuiltIn(option.toDomain()),
-                    onClick = { onSelected(NoteStyleRef.BuiltIn(option.toDomain())) },
-                )
-            }
-            if (customStyles.isNotEmpty()) {
-                Text(
-                    text = stringResource(R.string.notes_style_sheet_custom_header),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp),
-                )
-            }
-            customStyles.forEach { style ->
-                NoteStyleCard(
-                    title = style.name,
-                    description = style.description,
-                    icon = CustomNoteStyleIcon,
-                    isSelected = selected == NoteStyleRef.Custom(style.id),
-                    onClick = { onSelected(NoteStyleRef.Custom(style.id)) },
-                    showProCrown = !isCustomStylesUnlocked,
-                )
-            }
-        }
-    }
+    NoteStylePickerSheet(
+        title = stringResource(R.string.notes_preset_sheet_title),
+        body = stringResource(R.string.notes_preset_sheet_body),
+        selected = selected,
+        customStyles = customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) },
+        isCustomStylesUnlocked = isCustomStylesUnlocked,
+        onSelected = onSelected,
+        onDismiss = onDismiss,
+    )
 }
 
 private enum class ShareTabUi { TEXT, AUDIO }
@@ -474,38 +437,25 @@ private fun ShareNoteSheetContent(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        ShareActions(
-            showProCrown = tab == ShareTabUi.TEXT && noteFormat.isLocked(isDocumentExportUnlocked),
-            onShare = onShare,
-            onSaveToDevice = onSaveToDevice,
-        )
+        ShareActions(onShare = onShare, onSaveToDevice = onSaveToDevice)
     }
 }
 
-// A locked format keeps both buttons live: the crown says what is coming,
-// and the ViewModel opens the paywall before any export.
+// A locked format keeps both buttons live and plain: the row already carries
+// the Pro marker, and the ViewModel opens the paywall before any export.
 @Composable
-private fun ShareActions(showProCrown: Boolean, onShare: () -> Unit, onSaveToDevice: () -> Unit) {
+private fun ShareActions(onShare: () -> Unit, onSaveToDevice: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         OutlinedButton(onClick = onSaveToDevice, modifier = Modifier.weight(1f)) {
-            ShareActionLabel(text = stringResource(R.string.notes_share_save), showProCrown = showProCrown)
+            Text(text = stringResource(R.string.notes_share_save), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         Button(onClick = onShare, modifier = Modifier.weight(1f)) {
-            ShareActionLabel(text = stringResource(R.string.notes_share_dialog_confirm), showProCrown = showProCrown)
+            Text(text = stringResource(R.string.notes_share_dialog_confirm), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
-}
-
-@Composable
-private fun ShareActionLabel(text: String, showProCrown: Boolean) {
-    if (showProCrown) {
-        ProCrown(size = 16.dp)
-        Spacer(modifier = Modifier.width(6.dp))
-    }
-    Text(text = text, maxLines = 1, overflow = TextOverflow.Ellipsis)
 }
 
 @Composable
@@ -568,7 +518,7 @@ private fun ShareFormatCard(
                 label = stringResource(format.labelRes()),
                 hint = stringResource(format.hintRes()),
                 isDimmed = false,
-                badge = { if (isLocked) ProCrown() },
+                badge = { if (isLocked) ProBadge() },
                 modifier = Modifier.weight(1f),
             )
             RoundedCheckbox(checked = isSelected)
@@ -2174,7 +2124,7 @@ private fun SmartSuggestionsCard(suggestions: SmartSuggestionsUi, actions: Sugge
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 )
-                if (suggestions == SmartSuggestionsUi.Locked) ProCrown()
+                if (suggestions == SmartSuggestionsUi.Locked) ProBadge()
             }
             Spacer(modifier = Modifier.height(12.dp))
             SmartSuggestionsBody(suggestions = suggestions, actions = actions)
@@ -2187,10 +2137,10 @@ private fun SmartSuggestionsBody(suggestions: SmartSuggestionsUi, actions: Sugge
     when (suggestions) {
         SmartSuggestionsUi.Loading -> SuggestionsStatus(text = stringResource(R.string.notes_suggestions_loading), showProgress = true)
         SmartSuggestionsUi.Empty -> SuggestionsStatus(text = stringResource(R.string.notes_suggestions_empty))
-        SmartSuggestionsUi.NotRun -> FindSuggestionsButton(onClick = actions.onFind, showProCrown = false)
+        SmartSuggestionsUi.NotRun -> FindSuggestionsButton(onClick = actions.onFind)
         SmartSuggestionsUi.Locked -> Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             SuggestionsStatus(text = stringResource(R.string.notes_suggestions_locked))
-            FindSuggestionsButton(onClick = actions.onFind, showProCrown = true)
+            FindSuggestionsButton(onClick = actions.onFind)
         }
         is SmartSuggestionsUi.Ready -> Row(
             modifier = Modifier
@@ -2225,13 +2175,9 @@ private fun SuggestionsStatus(text: String, showProgress: Boolean = false) {
 }
 
 @Composable
-private fun FindSuggestionsButton(onClick: () -> Unit, showProCrown: Boolean) {
+private fun FindSuggestionsButton(onClick: () -> Unit) {
     FilledTonalButton(onClick = onClick, modifier = Modifier.padding(horizontal = 20.dp)) {
-        if (showProCrown) {
-            ProCrown(size = 18.dp)
-        } else {
-            Icon(imageVector = Icons.Filled.Event, contentDescription = null, modifier = Modifier.size(18.dp))
-        }
+        Icon(imageVector = Icons.Filled.Event, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(modifier = Modifier.width(8.dp))
         Text(text = stringResource(R.string.notes_suggestions_find))
     }

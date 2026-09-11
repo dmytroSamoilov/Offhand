@@ -135,4 +135,8 @@
     <string name="settings_smart_suggestions_title">Smarte Vorschläge</string>
     <string name="settings_smart_suggestions_label">Smarte Vorschläge anzeigen</string>
     <string name="settings_smart_suggestions_description">Findet Kalendertermine und Aufgaben in jeder neuen Notiz. Dauert ein paar Sekunden länger.</string>
+    <string name="settings_notes_title">Notizen</string>
+    <string name="settings_backup_section_title">Backup</string>
+    <string name="settings_about_section_title">Info</string>
+    <string name="settings_about_footer">Offhand behält jede Aufnahme und Notiz auf diesem Gerät. Nichts wird irgendwohin hochgeladen.</string>
 </resources>

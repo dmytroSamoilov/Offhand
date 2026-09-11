@@ -51,7 +51,7 @@ struct StyleOptionRow: View {
     let details: String
     let symbol: String
     let isSelected: Bool
-    var showProCrown = false
+    var showProBadge = false
     let action: () -> Void
 
     var body: some View {
@@ -60,15 +60,17 @@ struct StyleOptionRow: View {
                 .foregroundStyle(Brand.primary)
                 .frame(width: 28)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.body)
-                    .foregroundStyle(Color.primary)
+                HStack(spacing: 6) {
+                    Text(title)
+                        .font(.body)
+                        .foregroundStyle(Color.primary)
+                    if showProBadge { ProBadge() }
+                }
                 Text(details)
                     .font(.caption)
                     .foregroundStyle(Color.secondary)
             }
             Spacer()
-            if showProCrown { ProCrown() }
             if isSelected {
                 Image(systemName: "checkmark")
                     .fontWeight(.semibold)

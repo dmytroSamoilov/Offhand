@@ -35,6 +35,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,13 +52,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
+import com.dmytrosamoilov.offhand.core.designsystem.component.ProBadge
 import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
-import com.dmytrosamoilov.offhand.core.ui.component.CustomNoteStyleIcon
-import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
-import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOptionCard
-import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleCard
-import com.dmytrosamoilov.offhand.core.ui.component.toDomain
+import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleChoice
+import com.dmytrosamoilov.offhand.core.ui.component.NoteStylePickerSheet
+import com.dmytrosamoilov.offhand.core.ui.component.label
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportIntake
 import com.dmytrosamoilov.offhand.feature.settings.R
 import kotlinx.coroutines.launch
@@ -109,17 +111,11 @@ fun SettingsScreen(
                     status = state.pro,
                     onUpgradeClick = viewModel::onUpgradeClicked,
                 )
-                NoteStyleSection(
-                    selected = state.noteStyle,
-                    customStyles = state.customStyles,
-                    isCustomStylesUnlocked = state.isCustomStylesUnlocked,
-                    onSelected = viewModel::onNoteStyleSelected,
+                NotesSection(
+                    state = state,
+                    onStyleSelected = viewModel::onNoteStyleSelected,
                     onManageClick = onNoteStylesClick,
-                )
-                SmartSuggestionsSection(
-                    isEnabled = state.isSmartSuggestionsEnabled,
-                    isUnlocked = state.isSmartSuggestionsUnlocked,
-                    onEnabledChanged = viewModel::onSmartSuggestionsChanged,
+                    onSmartSuggestionsChanged = viewModel::onSmartSuggestionsChanged,
                 )
                 SecuritySection(
                     isAppLockEnabled = state.isAppLockEnabled,
@@ -130,9 +126,12 @@ fun SettingsScreen(
                     isDynamicColorEnabled = state.isDynamicColorEnabled,
                     onDynamicColorChanged = viewModel::onDynamicColorChanged,
                 )
-                BackupCard(onClick = onBackupClick)
-                ImportAudioCard(isUnlocked = state.isAudioImportUnlocked, onClick = viewModel::onImportAudioClicked)
-                AboutSupportCard(onClick = onAboutSupportClick)
+                BackupSection(
+                    isImportUnlocked = state.isAudioImportUnlocked,
+                    onBackupClick = onBackupClick,
+                    onImportClick = viewModel::onImportAudioClicked,
+                )
+                AboutSection(onClick = onAboutSupportClick)
                 state.proOverride?.let { override ->
                     ProOverrideSection(selected = override, onSelected = viewModel::onProOverrideSelected)
                 }
@@ -141,49 +140,51 @@ fun SettingsScreen(
     }
 }
 
+// Mirrors the iOS form: one Notes group with the default style, the style
+// manager and the suggestions switch.
 @Composable
-private fun NoteStyleSection(
-    selected: NoteStyleRef,
-    customStyles: List<CustomStyleOptionUi>,
-    isCustomStylesUnlocked: Boolean,
-    onSelected: (NoteStyleRef) -> Unit,
+private fun NotesSection(
+    state: SettingsUiState,
+    onStyleSelected: (NoteStyleRef) -> Unit,
     onManageClick: () -> Unit,
+    onSmartSuggestionsChanged: (Boolean) -> Unit,
 ) {
-    SettingsCard(title = stringResource(R.string.settings_note_style_title)) {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            NotePresetOption.entries.forEach { option ->
-                val style = NoteStyleRef.BuiltIn(option.toDomain())
-                NotePresetOptionCard(
-                    option = option,
-                    isSelected = style == selected,
-                    onClick = { onSelected(style) },
-                )
-            }
-            customStyles.forEach { custom ->
-                val style = NoteStyleRef.Custom(custom.id)
-                NoteStyleCard(
-                    title = custom.name,
-                    description = custom.description,
-                    icon = CustomNoteStyleIcon,
-                    isSelected = style == selected,
-                    onClick = { onSelected(style) },
-                    showProCrown = !isCustomStylesUnlocked,
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        ManageStylesRow(onClick = onManageClick)
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = stringResource(R.string.settings_note_style_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+    var isPickerVisible by remember { mutableStateOf(false) }
+    val choices = state.customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) }
+    SettingsCard(title = stringResource(R.string.settings_notes_title)) {
+        DefaultStyleRow(label = state.noteStyle.label(choices), onClick = { isPickerVisible = true })
+        SettingsLinkRow(
+            title = stringResource(R.string.settings_note_styles_manage),
+            subtitle = stringResource(R.string.settings_note_styles_manage_subtitle),
+            onClick = onManageClick,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        SwitchRow(
+            label = stringResource(R.string.settings_smart_suggestions_label),
+            description = stringResource(R.string.settings_smart_suggestions_description),
+            checked = state.isSmartSuggestionsEnabled,
+            onCheckedChange = onSmartSuggestionsChanged,
+            showProBadge = !state.isSmartSuggestionsUnlocked,
+        )
+    }
+    if (isPickerVisible) {
+        NoteStylePickerSheet(
+            title = stringResource(R.string.settings_note_style_title),
+            body = stringResource(R.string.settings_note_style_note),
+            selected = state.noteStyle,
+            customStyles = choices,
+            isCustomStylesUnlocked = state.isCustomStylesUnlocked,
+            onSelected = { style ->
+                isPickerVisible = false
+                onStyleSelected(style)
+            },
+            onDismiss = { isPickerVisible = false },
         )
     }
 }
 
 @Composable
-private fun ManageStylesRow(onClick: () -> Unit) {
+private fun DefaultStyleRow(label: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -192,22 +193,17 @@ private fun ManageStylesRow(onClick: () -> Unit) {
             .padding(vertical = 8.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.settings_note_styles_manage),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = stringResource(R.string.settings_note_styles_manage_subtitle),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        Text(
+            text = stringResource(R.string.settings_note_style_title),
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f),
+        )
+        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(modifier = Modifier.width(4.dp))
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -244,29 +240,6 @@ private fun AppearanceSection(
             description = stringResource(R.string.settings_dynamic_color_description),
             checked = isDynamicColorEnabled,
             onCheckedChange = onDynamicColorChanged,
-        )
-    }
-}
-
-@Composable
-private fun ImportAudioCard(isUnlocked: Boolean, onClick: () -> Unit) {
-    NavigationCard(
-        title = stringResource(R.string.settings_import_audio_title),
-        subtitle = stringResource(R.string.settings_import_audio_subtitle),
-        onClick = onClick,
-        showProCrown = !isUnlocked,
-    )
-}
-
-@Composable
-private fun SmartSuggestionsSection(isEnabled: Boolean, isUnlocked: Boolean, onEnabledChanged: (Boolean) -> Unit) {
-    SettingsCard(title = stringResource(R.string.settings_smart_suggestions_title)) {
-        SwitchRow(
-            label = stringResource(R.string.settings_smart_suggestions_label),
-            description = stringResource(R.string.settings_smart_suggestions_description),
-            checked = isEnabled,
-            onCheckedChange = onEnabledChanged,
-            showProCrown = !isUnlocked,
         )
     }
 }
@@ -412,51 +385,36 @@ private fun ImportNoticeDialog(title: String, text: String, onDismiss: () -> Uni
 private const val AUDIO_MIME_TYPE = "audio/*"
 
 @Composable
-private fun BackupCard(onClick: () -> Unit) {
-    NavigationCard(
-        title = stringResource(R.string.settings_backup_title),
-        subtitle = stringResource(R.string.settings_backup_subtitle),
-        onClick = onClick,
-    )
-}
-
-@Composable
-private fun NavigationCard(title: String, subtitle: String, onClick: () -> Unit, showProCrown: Boolean = false) {
-    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, style = MaterialTheme.typography.titleMedium)
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            if (showProCrown) {
-                ProCrown()
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+private fun BackupSection(isImportUnlocked: Boolean, onBackupClick: () -> Unit, onImportClick: () -> Unit) {
+    SettingsCard(title = stringResource(R.string.settings_backup_section_title)) {
+        SettingsLinkRow(
+            title = stringResource(R.string.settings_backup_title),
+            subtitle = stringResource(R.string.settings_backup_subtitle),
+            onClick = onBackupClick,
+        )
+        SettingsLinkRow(
+            title = stringResource(R.string.settings_import_audio_title),
+            subtitle = stringResource(R.string.settings_import_audio_subtitle),
+            onClick = onImportClick,
+            showProBadge = !isImportUnlocked,
+        )
     }
 }
 
 @Composable
-private fun AboutSupportCard(onClick: () -> Unit) {
+private fun AboutSection(onClick: () -> Unit) {
     val context = LocalContext.current
-    NavigationCard(
-        title = stringResource(R.string.settings_about_support_title),
-        subtitle = stringResource(R.string.settings_about_support_subtitle, appVersion(context)),
-        onClick = onClick,
-    )
+    SettingsCard(title = stringResource(R.string.settings_about_section_title)) {
+        SettingsLinkRow(
+            title = stringResource(R.string.settings_about_support_title),
+            subtitle = stringResource(R.string.settings_about_support_subtitle, appVersion(context)),
+            onClick = onClick,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.settings_about_footer),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
 }

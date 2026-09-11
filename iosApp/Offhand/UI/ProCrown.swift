@@ -14,3 +14,18 @@ struct ProCrown: View {
             .accessibilityLabel(String(localized: "Offhand Pro"))
     }
 }
+
+// The gating marker: a "PRO" pill placed right after a feature's title. The
+// crown stays for the tier itself (paywall, Settings card).
+struct ProBadge: View {
+    var body: some View {
+        Text(verbatim: "PRO")
+            .font(.caption2.weight(.bold))
+            .kerning(0.6)
+            .foregroundStyle(Brand.proGold)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(Brand.proGold.opacity(0.18), in: RoundedRectangle(cornerRadius: 6))
+            .accessibilityLabel(String(localized: "Offhand Pro"))
+    }
+}

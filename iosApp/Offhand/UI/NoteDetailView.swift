@@ -567,6 +567,21 @@ private struct NoteStyleSheet: View {
     var body: some View {
         NavigationStack {
             List {
+                if !customStyles.isEmpty {
+                    Section(String(localized: "Your styles")) {
+                        ForEach(customStyles, id: \.id) { style in
+                            StyleOptionRow(
+                                title: style.name,
+                                details: style.description_,
+                                symbol: NoteStyleLabels.customSymbol,
+                                isSelected: current.customId == style.id,
+                                showProBadge: !isCustomStylesUnlocked
+                            ) {
+                                viewModel.onStyleSelected(style: NoteStyleRefCustom(id: style.id))
+                            }
+                        }
+                    }
+                }
                 Section {
                     ForEach([NotePreset.summary, .meeting, .visit, .legal], id: \.self) { preset in
                         StyleOptionRow(
@@ -578,23 +593,10 @@ private struct NoteStyleSheet: View {
                             viewModel.onStyleSelected(style: NoteStyleRefBuiltIn(preset: preset))
                         }
                     }
+                } header: {
+                    Text(String(localized: "Built in"))
                 } footer: {
                     Text(String(localized: "The recording is kept. The title and overview are written again from the transcript in the style you pick."))
-                }
-                if !customStyles.isEmpty {
-                    Section(String(localized: "Your styles")) {
-                        ForEach(customStyles, id: \.id) { style in
-                            StyleOptionRow(
-                                title: style.name,
-                                details: style.description_,
-                                symbol: NoteStyleLabels.customSymbol,
-                                isSelected: current.customId == style.id,
-                                showProCrown: !isCustomStylesUnlocked
-                            ) {
-                                viewModel.onStyleSelected(style: NoteStyleRefCustom(id: style.id))
-                            }
-                        }
-                    }
                 }
             }
             .navigationTitle(String(localized: "Rewrite this note as"))

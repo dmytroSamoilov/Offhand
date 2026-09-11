@@ -23,7 +23,8 @@ appId: com.dmytrosamoilov.offhand.uitest
           timeout: 10000
       - assertVisible: "1 file is being imported.*"
       - tapOn: "OK"
-      - tapOn: "Notes"
+      - tapOn:
+          id: "tab_notes"
       # The fake engines finish the import within seconds, so the placeholder
       # named after the file may already be gone; wait for the second note
       - extendedWaitUntil:
