@@ -7,6 +7,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinat
 import com.dmytrosamoilov.offhand.feature.recording.domain.SessionNoteStyleDrafter
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.TranscriptStructurer
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ClearTranscriptionCheckpointUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateImportedNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateRecordingNoteUseCase
@@ -14,6 +15,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardNoteUs
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetTranscriptionCheckpointUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
@@ -27,6 +29,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RequestNoteSu
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteTranscriptUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveTranscriptionCheckpointUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.presentation.RecordingViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -63,6 +66,9 @@ val featureRecordingModule = module {
             markNoteProcessing = get(),
             registerSavedRecording = get(),
             saveNoteTranscript = get(),
+            getTranscriptionCheckpoint = get(),
+            saveTranscriptionCheckpoint = get(),
+            clearTranscriptionCheckpoint = get(),
             isAiCoreDownloaded = get(),
             getNoteStyle = get(),
             getNote = get(),
@@ -75,6 +81,7 @@ val featureRecordingModule = module {
             scope = get(recordingSessionScopeQualifier),
         )
     }
+    factoryOf(::ClearTranscriptionCheckpointUseCase)
     factoryOf(::CompleteNoteUseCase)
     factoryOf(::CreateImportedNoteUseCase)
     factoryOf(::CreateRecordingNoteUseCase)
@@ -82,6 +89,7 @@ val featureRecordingModule = module {
     factoryOf(::FailNoteUseCase)
     factoryOf(::GetNoteStyleUseCase)
     factoryOf(::GetNoteUseCase)
+    factoryOf(::GetTranscriptionCheckpointUseCase)
     factoryOf(::ImportAudioUseCase)
     factoryOf(::IsAudioImportAvailableUseCase)
     factoryOf(::IsAiCoreDownloadedUseCase)
@@ -94,6 +102,7 @@ val featureRecordingModule = module {
     factoryOf(::RequestNoteSuggestionsUseCase)
     factoryOf(::SaveNoteSuggestionsUseCase)
     factoryOf(::SaveNoteTranscriptUseCase)
+    factoryOf(::SaveTranscriptionCheckpointUseCase)
     factoryOf(::SweepOrphanedRecordingsUseCase)
     viewModelOf(::RecordingViewModel)
 }

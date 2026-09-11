@@ -29,7 +29,8 @@ struct NotesListView: View {
         smartSuggestions: nil,
         isDocumentExportUnlocked: false,
         isCustomStylesUnlocked: false,
-        pendingCalendarEvent: nil
+        pendingCalendarEvent: nil,
+        isRetranscribeAvailable: false
     )
     @State private var isRecordSheetVisible = false
     @State private var searchQuery = ""

@@ -74,7 +74,7 @@ struct NoteDetailView: View {
                             Label(String(localized: "Change note style"), systemImage: "slider.horizontal.3")
                         }
                     }
-                    if detail.hasAudio {
+                    if detail.hasAudio && state.isRetranscribeAvailable {
                         Button {
                             viewModel.onRetranscribeRequested()
                         } label: {

@@ -16,6 +16,7 @@ class ResumeInterruptedNotesUseCase(
     private val notesRepository: NotesRepository,
     private val sessionManager: RecordingSessionManager,
     private val failNote: FailNoteUseCase,
+    private val getTranscriptionCheckpoint: GetTranscriptionCheckpointUseCase,
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
     private val audioStore: EncryptedAudioStore,
 ) {
@@ -35,12 +36,17 @@ class ResumeInterruptedNotesUseCase(
         val audioFileName = note.audioFileName
         val resumed = backfillDurationIfMissing(note, audioFileName)
         when {
+            audioFileName != null && isTranscriptionUnfinished(resumed.id) -> retryViaService(resumed.id, audioFileName)
             resumed.transcript.isNotBlank() -> restructureViaService(resumed.id, resumed.style)
             audioFileName != null -> retryViaService(resumed.id, audioFileName)
             resumed.status == NoteStatus.RECORDING -> notesRepository.deleteNote(resumed.id)
             else -> failNote(resumed.id)
         }
     }
+
+    // A checkpoint means part of the audio was never transcribed; the retry
+    // path continues from it, where a restructure would drop that part.
+    private suspend fun isTranscriptionUnfinished(noteId: Long): Boolean = getTranscriptionCheckpoint(noteId) != null
 
     // A note interrupted mid-recording never went through the drain step that
     // stamps the duration, so it is derived from the decrypted audio size.

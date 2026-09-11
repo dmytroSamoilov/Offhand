@@ -15,10 +15,12 @@ import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_5_6
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_6_7
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_7_8
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_8_9
+import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_9_10
 import com.dmytrosamoilov.offhand.core.data.database.FolderDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteStyleDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteSuggestionsDao
+import com.dmytrosamoilov.offhand.core.data.database.TranscriptionCheckpointDao
 import com.dmytrosamoilov.offhand.core.data.database.NotesDatabase
 import com.dmytrosamoilov.offhand.core.data.database.applyCompleteUnlessOpenProtection
 import com.dmytrosamoilov.offhand.core.data.database.createProtectedDatabaseDirectory
@@ -26,6 +28,7 @@ import com.dmytrosamoilov.offhand.core.data.database.iosDocumentsDirectory
 import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStylesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestionsRepository
+import com.dmytrosamoilov.offhand.core.data.domain.TranscriptionCheckpointRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatusCache
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatusRepository
@@ -37,6 +40,7 @@ import com.dmytrosamoilov.offhand.core.data.preferences.DataStoreUserPreferences
 import com.dmytrosamoilov.offhand.core.data.repository.RoomCustomNoteStylesRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomFoldersRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomNoteSuggestionsRepository
+import com.dmytrosamoilov.offhand.core.data.repository.RoomTranscriptionCheckpointRepository
 import com.dmytrosamoilov.offhand.core.data.repository.DebugOverrideProStore
 import com.dmytrosamoilov.offhand.core.data.repository.ProUpgradeCoordinator
 import com.dmytrosamoilov.offhand.core.data.repository.RoomNotesRepository
@@ -69,6 +73,7 @@ private fun createNotesDatabase(): NotesDatabase {
             MIGRATION_6_7,
             MIGRATION_7_8,
             MIGRATION_8_9,
+            MIGRATION_9_10,
         )
         .build()
     applyCompleteUnlessOpenProtection(databasePath)
@@ -95,10 +100,12 @@ val coreDataModule = module {
     factory<FolderDao> { get<NotesDatabase>().folderDao() }
     factory<NoteStyleDao> { get<NotesDatabase>().noteStyleDao() }
     factory<NoteSuggestionsDao> { get<NotesDatabase>().noteSuggestionsDao() }
+    factory<TranscriptionCheckpointDao> { get<NotesDatabase>().transcriptionCheckpointDao() }
     singleOf(::RoomNotesRepository) bind NotesRepository::class
     singleOf(::RoomFoldersRepository) bind FoldersRepository::class
     singleOf(::RoomCustomNoteStylesRepository) bind CustomNoteStylesRepository::class
     singleOf(::RoomNoteSuggestionsRepository) bind NoteSuggestionsRepository::class
+    singleOf(::RoomTranscriptionCheckpointRepository) bind TranscriptionCheckpointRepository::class
     single<ProStore> { DebugOverrideProStore(get(named(PLATFORM_PRO_STORE)), get()) }
     single<ProStatusCache> { DataStoreProStatusCache(get()) }
     singleOf(::StoreProStatusRepository) bind ProStatusRepository::class

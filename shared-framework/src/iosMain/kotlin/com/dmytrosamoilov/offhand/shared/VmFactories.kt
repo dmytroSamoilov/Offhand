@@ -11,6 +11,7 @@ import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesViewModel
 import com.dmytrosamoilov.offhand.feature.onboarding.presentation.OnboardingViewModel
 import com.dmytrosamoilov.offhand.feature.paywall.presentation.PaywallViewModel
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.presentation.RecordingViewModel
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.presentation.AboutSupportViewModel
@@ -49,6 +50,9 @@ object SharedGraph {
     fun noteStyleEditor(styleId: Long): NoteStyleEditorHandle = NoteStyleEditorHandle(styleId)
 
     fun sessionManager(): RecordingSessionManager = KoinPlatform.getKoin().get()
+
+    // Called from the iOS background resume task, outside any screen.
+    suspend fun resumeInterruptedNotes() = KoinPlatform.getKoin().get<ResumeInterruptedNotesUseCase>().invoke()
 
     fun modelManager(): ModelManager = KoinPlatform.getKoin().get()
 

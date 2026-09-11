@@ -70,3 +70,14 @@ internal val MIGRATION_8_9 = object : Migration(8, 9) {
         )
     }
 }
+
+internal val MIGRATION_9_10 = object : Migration(9, 10) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS transcription_checkpoints (" +
+                "noteId INTEGER PRIMARY KEY NOT NULL, " +
+                "transcribedBytes INTEGER NOT NULL, " +
+                "transcriptionTimeMs INTEGER NOT NULL)",
+        )
+    }
+}

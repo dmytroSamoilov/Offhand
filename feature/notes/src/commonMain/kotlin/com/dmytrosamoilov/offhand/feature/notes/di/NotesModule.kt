@@ -6,6 +6,7 @@ import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.feature.notes.domain.review.InAppReviewPolicy
 import com.dmytrosamoilov.offhand.feature.notes.domain.review.InAppReviewRules
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearTranscriptionCheckpointUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
@@ -38,6 +39,7 @@ val featureNotesModule = module {
     singleOf(::InAppReviewPolicy)
     single { if (get<BuildInfo>().isDeveloperBuild) InAppReviewRules.DEBUG else InAppReviewRules.PRODUCTION }
     factoryOf(::ClearShareCacheUseCase)
+    factoryOf(::ClearTranscriptionCheckpointUseCase)
     factoryOf(::CreateFolderUseCase)
     factoryOf(::DeleteFolderUseCase)
     factoryOf(::MoveNoteToFolderUseCase)
@@ -91,6 +93,8 @@ val featureNotesModule = module {
             proUpgradeGate = get(),
             sessionManager = get(),
             aiCoreDownloadStatus = get(),
+            clearTranscriptionCheckpoint = get(),
+            buildInfo = get(),
         )
     }
 }

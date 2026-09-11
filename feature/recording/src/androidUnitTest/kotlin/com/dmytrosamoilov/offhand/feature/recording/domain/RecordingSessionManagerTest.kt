@@ -15,8 +15,10 @@ import com.dmytrosamoilov.offhand.core.data.domain.CalendarEventSuggestion
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.TranscriptionCheckpoint
 import com.dmytrosamoilov.offhand.core.security.AudioOutputStream
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ClearTranscriptionCheckpointUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateImportedNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateRecordingNoteUseCase
@@ -24,6 +26,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardNoteUs
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetTranscriptionCheckpointUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsCalendarSuggestionsAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsThinkingEnabledUseCase
@@ -32,6 +35,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteRecor
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteTranscriptUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveTranscriptionCheckpointUseCase
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
@@ -93,6 +97,15 @@ class RecordingSessionManagerTest {
     }
     private val saveNoteTranscript: SaveNoteTranscriptUseCase = mockk {
         coJustRun { this@mockk.invoke(any(), any(), any()) }
+    }
+    private val getTranscriptionCheckpoint: GetTranscriptionCheckpointUseCase = mockk {
+        coEvery { this@mockk.invoke(any()) } returns null
+    }
+    private val saveTranscriptionCheckpoint: SaveTranscriptionCheckpointUseCase = mockk {
+        coJustRun { this@mockk.invoke(any()) }
+    }
+    private val clearTranscriptionCheckpoint: ClearTranscriptionCheckpointUseCase = mockk {
+        coJustRun { this@mockk.invoke(any()) }
     }
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase = mockk {
         coEvery { this@mockk.invoke() } returns true
@@ -179,6 +192,9 @@ class RecordingSessionManagerTest {
         markNoteProcessing = markNoteProcessing,
         registerSavedRecording = registerSavedRecording,
         saveNoteTranscript = saveNoteTranscript,
+        getTranscriptionCheckpoint = getTranscriptionCheckpoint,
+        saveTranscriptionCheckpoint = saveTranscriptionCheckpoint,
+        clearTranscriptionCheckpoint = clearTranscriptionCheckpoint,
         isAiCoreDownloaded = isAiCoreDownloaded,
         getNoteStyle = getNoteStyle,
         getNote = getNote,
@@ -572,6 +588,67 @@ class RecordingSessionManagerTest {
         }
     }
 
+
+    @Test
+    fun `retry continues from the checkpoint and keeps the transcribed part`() = runTest {
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        val windowBytes = (29_000L * 32).toInt()
+        coEvery { markNoteProcessing(7L) } returns storedNote(7L).copy(transcript = "first window")
+        coEvery { getTranscriptionCheckpoint(7L) } returns TranscriptionCheckpoint(7L, windowBytes.toLong(), 150)
+        every { audioStore.sizeOf("note-7.pcm.enc") } returns (windowBytes * 2).toLong()
+        stubBackupRead(windowBytes * 2)
+        coEvery { speechToText.transcribe(any()) } returns sttResult("second window")
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(BuiltInNoteStyles.spec(NotePreset.SUMMARY)), any()) } returns AiResult(
+            text = """{"title": "Resumed", "overview": "- body"}""",
+            processingTimeMs = 100,
+            inputTokens = 5,
+            outputTokens = 5,
+            hardwareBackend = HardwareBackend.CPU,
+        )
+        stubPolish("""{"title": "Resumed", "overview": "- body"}""")
+        coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
+
+        val manager = manager()
+        manager.retryNote(7L, "note-7.pcm.enc")
+        testScheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { speechToText.transcribe(any()) }
+        coVerify { saveTranscriptionCheckpoint(TranscriptionCheckpoint(7L, (windowBytes * 2).toLong(), 350)) }
+        coVerify { clearTranscriptionCheckpoint(7L) }
+        coVerify {
+            completeNote(
+                noteId = 7L,
+                title = "Resumed",
+                body = "- body",
+                transcript = "first window\n\nsecond window",
+                transcriptionTimeMs = 350,
+                structuringTimeMs = 100,
+                hardwareBackend = "CPU",
+                style = NoteStyleRef.BuiltIn(NotePreset.SUMMARY),
+            )
+        }
+    }
+
+    @Test
+    fun `every transcribed window is checkpointed with its byte offset`() = runTest {
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        val windowBytes = (29_000L * 32).toInt()
+        coEvery { markNoteProcessing(7L) } returns storedNote(7L)
+        every { audioStore.sizeOf("note-7.pcm.enc") } returns (windowBytes * 2).toLong()
+        stubBackupRead(windowBytes * 2)
+        coEvery { speechToText.transcribe(any()) } returns sttResult("words")
+        coEvery { aiBackend.processText(any(), any()) } throws AiBackendException("offline")
+        coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
+
+        val manager = manager()
+        manager.retryNote(7L, "note-7.pcm.enc")
+        testScheduler.advanceUntilIdle()
+
+        coVerify { saveTranscriptionCheckpoint(TranscriptionCheckpoint(7L, windowBytes.toLong(), 200)) }
+        coVerify { saveTranscriptionCheckpoint(TranscriptionCheckpoint(7L, (windowBytes * 2).toLong(), 400)) }
+        coVerify { saveNoteTranscript(7L, "words", 200) }
+        coVerify { clearTranscriptionCheckpoint(7L) }
+    }
 
     @Test
     fun `finished note gets its calendar suggestions extracted and saved`() = runTest {

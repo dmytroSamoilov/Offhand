@@ -28,6 +28,7 @@ data class NotesUiState(
     val isDocumentExportUnlocked: Boolean = false,
     val isCustomStylesUnlocked: Boolean = false,
     val pendingCalendarEvent: CalendarEventSuggestion? = null,
+    val isRetranscribeAvailable: Boolean = false,
 )
 
 sealed interface SmartSuggestionsUi {

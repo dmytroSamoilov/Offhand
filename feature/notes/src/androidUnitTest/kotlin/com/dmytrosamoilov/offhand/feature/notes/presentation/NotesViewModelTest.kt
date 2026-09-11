@@ -6,6 +6,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.ModelState
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechModelState
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
+import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.CalendarEventSuggestion
 import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
@@ -197,6 +198,8 @@ class NotesViewModelTest {
         proUpgradeGate = gate,
         sessionManager = sessionManager,
         aiCoreDownloadStatus = AiCoreDownloadStatus(modelManager, speechToText),
+        clearTranscriptionCheckpoint = mockk(relaxed = true),
+        buildInfo = BuildInfo(isDeveloperBuild = true),
     )
 
     @Test

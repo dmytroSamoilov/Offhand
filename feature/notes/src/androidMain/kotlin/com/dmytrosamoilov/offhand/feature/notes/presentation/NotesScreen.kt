@@ -1375,6 +1375,7 @@ private fun NoteDetailPane(
             playback = state.playback,
             smartSuggestions = state.smartSuggestions,
             showMetrics = state.isDeveloperMode,
+            isRetranscribeAvailable = state.isRetranscribeAvailable,
             progressPercent = state.noteProgress[selected.id],
             onBack = viewModel::onDetailClosed,
             onEdit = viewModel::onEditStarted,
@@ -1417,6 +1418,7 @@ private fun NoteDetail(
     playback: AudioPlaybackUi,
     smartSuggestions: SmartSuggestionsUi?,
     showMetrics: Boolean,
+    isRetranscribeAvailable: Boolean,
     progressPercent: Int?,
     onBack: () -> Unit,
     onEdit: () -> Unit,
@@ -1434,6 +1436,7 @@ private fun NoteDetail(
         topBar = {
             NoteDetailTopBar(
                 showEditActions = note.status == NoteStatusUi.READY,
+                showRetranscribe = note.hasAudio && isRetranscribeAvailable,
                 note = note,
                 onBack = onBack,
                 onEdit = onEdit,
@@ -1464,6 +1467,7 @@ private fun NoteDetail(
 @Composable
 private fun NoteDetailTopBar(
     showEditActions: Boolean,
+    showRetranscribe: Boolean,
     note: NoteDetailUi,
     onBack: () -> Unit,
     onEdit: () -> Unit,
@@ -1487,7 +1491,7 @@ private fun NoteDetailTopBar(
             if (showEditActions) {
                 ShareNoteButton(onClick = onShareRequested)
                 NoteOverflowMenu(
-                    showRetranscribe = note.hasAudio,
+                    showRetranscribe = showRetranscribe,
                     showPreset = note.transcript.isNotBlank(),
                     onEdit = onEdit,
                     onRetranscribeRequested = onRetranscribeRequested,

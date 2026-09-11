@@ -11,6 +11,7 @@ final class NoteFinishCoordinator {
     // stays within BGTaskSchedulerPermittedIdentifiers.
     private static let bundleId = Bundle.main.bundleIdentifier ?? "com.dmytrosamoilov.offhand"
     private static let finishTaskPrefix = "\(bundleId).finish"
+    private static let resumeTaskIdentifier = "\(bundleId).finish.resume"
     private static let logger = os.Logger(subsystem: bundleId, category: "FinishTask")
 
     var onLegacyExpired: (() -> Void)?
@@ -77,6 +78,7 @@ final class NoteFinishCoordinator {
         task.expirationHandler = {
             expired.raise()
             scheduleReopenReminder()
+            scheduleResume()
             task.setTaskCompleted(success: false)
         }
         for await ids in sessionManager.processingNoteIds {
@@ -101,12 +103,84 @@ final class NoteFinishCoordinator {
         guard legacyTaskId == .invalid else { return }
         legacyTaskId = UIApplication.shared.beginBackgroundTask(withName: "finish-note") { [weak self] in
             scheduleReopenReminder()
+            Self.scheduleResume()
             self?.onLegacyExpired?()
             self?.endLegacyTask()
         }
         if legacyTaskId == .invalid {
             scheduleReopenReminder()
+            Self.scheduleResume()
             onLegacyExpired?()
+        }
+    }
+
+    // Safety net for the system, not the user, ending the work: a processing
+    // task runs the resume step later, when the device is idle and unlocked.
+    // A force quit still blocks it, iOS never relaunches a force-quit app.
+    func appEnteredBackgroundWithPendingWork() {
+        Self.scheduleResume()
+    }
+
+    // Must run before the app finishes launching, as BGTaskScheduler requires.
+    static func registerResumeTask() {
+        let registered = BGTaskScheduler.shared.register(forTaskWithIdentifier: resumeTaskIdentifier, using: .main) { task in
+            guard let task = task as? BGProcessingTask else {
+                task.setTaskCompleted(success: false)
+                return
+            }
+            Task { @MainActor in
+                await driveResume(task: task)
+            }
+        }
+        if !registered {
+            logger.error("Resume task registration was rejected")
+        }
+    }
+
+    private static func scheduleResume() {
+        let request = BGProcessingTaskRequest(identifier: resumeTaskIdentifier)
+        request.requiresNetworkConnectivity = false
+        request.requiresExternalPower = false
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            logger.error("Resume task submit failed: \(error)")
+        }
+    }
+
+    private static func cancelResume() {
+        BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: resumeTaskIdentifier)
+    }
+
+    // Notes and audio are unreadable while the device is locked (complete-unless-open
+    // protection), so a locked run is handed back for a later attempt rather
+    // than failing the note.
+    private static func driveResume(task: BGProcessingTask) async {
+        guard UIApplication.shared.isProtectedDataAvailable else {
+            scheduleResume()
+            task.setTaskCompleted(success: false)
+            return
+        }
+        let sessionManager = SharedGraph.shared.sessionManager()
+        let expired = ExpirationFlag()
+        task.expirationHandler = {
+            expired.raise()
+            scheduleResume()
+            task.setTaskCompleted(success: false)
+        }
+        do {
+            try await SharedGraph.shared.resumeInterruptedNotes()
+        } catch {
+            logger.error("Background resume failed: \(error)")
+            task.setTaskCompleted(success: false)
+            return
+        }
+        for await ids in sessionManager.processingNoteIds {
+            if expired.isRaised { return }
+            if ids.isEmpty { break }
+        }
+        if !expired.isRaised {
+            task.setTaskCompleted(success: true)
         }
     }
 
@@ -117,6 +191,7 @@ final class NoteFinishCoordinator {
     func allProcessingFinished() {
         submittedNoteIds.removeAll()
         endLegacyTask()
+        Self.cancelResume()
     }
 
     private func endLegacyTask() {

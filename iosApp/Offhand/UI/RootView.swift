@@ -184,6 +184,7 @@ struct RootView: View {
         let hasPendingWork = !sessionManager.processingNoteIds.value.isEmpty || session.phase == .draining
         if hasPendingWork {
             finishCoordinator.appEnteredBackgroundWhileProcessing()
+            finishCoordinator.appEnteredBackgroundWithPendingWork()
         } else {
             releaseModelIfIdle()
         }

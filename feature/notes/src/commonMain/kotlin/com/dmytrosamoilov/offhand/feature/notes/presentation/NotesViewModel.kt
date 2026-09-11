@@ -15,6 +15,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearTranscriptionCheckpointUseCase
+import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.FolderSaveResult
@@ -88,9 +90,12 @@ class NotesViewModel(
     private val proUpgradeGate: ProUpgradeGate,
     private val sessionManager: RecordingSessionManager,
     aiCoreDownloadStatus: AiCoreDownloadStatus,
+    private val clearTranscriptionCheckpoint: ClearTranscriptionCheckpointUseCase,
+    buildInfo: BuildInfo,
 ) : BaseViewModel() {
 
-    private val mutableUiState = MutableStateFlow(NotesUiState())
+    private val mutableUiState =
+        MutableStateFlow(NotesUiState(isRetranscribeAvailable = buildInfo.isDeveloperBuild))
     val uiState: StateFlow<NotesUiState> = mutableUiState.asStateFlow()
 
     private val mutableReviewRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -541,9 +546,16 @@ class NotesViewModel(
         mutableUiState.update { it.copy(isRetranscribeConfirmationVisible = false) }
     }
 
+    // A deliberate re-transcription starts from the beginning; only an
+    // interrupted one continues from its checkpoint.
     fun onRetranscribeConfirmed() {
         mutableUiState.update { it.copy(isRetranscribeConfirmationVisible = false) }
-        onRetryTranscriptionRequested()
+        val note = selectedNote ?: return
+        val audioFileName = note.audioFileName ?: return
+        launchSafely(showLoading = false) {
+            clearTranscriptionCheckpoint(note.id)
+            recordingProcessController.retryNote(note.id, audioFileName)
+        }
     }
 
     fun onDeleteRequested(id: Long) {

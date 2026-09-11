@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.core.data.repository
 
 import com.dmytrosamoilov.offhand.core.data.database.NoteDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteSuggestionsDao
+import com.dmytrosamoilov.offhand.core.data.database.TranscriptionCheckpointDao
 import com.dmytrosamoilov.offhand.core.data.database.toDomain
 import com.dmytrosamoilov.offhand.core.data.database.toEntity
 import com.dmytrosamoilov.offhand.core.data.domain.Note
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.map
 internal class RoomNotesRepository(
     private val noteDao: NoteDao,
     private val noteSuggestionsDao: NoteSuggestionsDao,
+    private val transcriptionCheckpointDao: TranscriptionCheckpointDao,
     private val audioStore: EncryptedAudioStore,
 ) : NotesRepository {
 
@@ -30,6 +32,7 @@ internal class RoomNotesRepository(
     override suspend fun deleteNote(id: Long) {
         noteDao.getById(id)?.audioFileName?.let(audioStore::delete)
         noteSuggestionsDao.deleteByNoteId(id)
+        transcriptionCheckpointDao.deleteByNoteId(id)
         noteDao.deleteById(id)
     }
 

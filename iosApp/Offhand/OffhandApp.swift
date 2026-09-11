@@ -18,6 +18,7 @@ struct OffhandApp: App {
     #endif
 
     init() {
+        NoteFinishCoordinator.registerResumeTask()
         SharedModulesKt.startSharedKoin(
             deps: IosPlatformDeps(
                 gemmaEngine: GemmaEngineImpl(),
