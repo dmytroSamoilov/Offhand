@@ -70,7 +70,7 @@ class SettingsViewModel(
         collect(isAudioImportAvailable()) { unlocked -> copy(isAudioImportUnlocked = unlocked) }
         collect(observeSmartSuggestionsEnabled()) { enabled -> copy(isSmartSuggestionsEnabled = enabled) }
         collect(observeProStatus()) { status -> copy(pro = status.toUi(), isSmartSuggestionsUnlocked = status.isPro) }
-        if (buildInfo.isDebugBuild) collect(observeProOverride()) { override -> copy(proOverride = override) }
+        if (buildInfo.isDeveloperBuild) collect(observeProOverride()) { override -> copy(proOverride = override) }
     }
 
     private fun <T> collect(flow: Flow<T>, reduce: SettingsUiState.(T) -> SettingsUiState) {

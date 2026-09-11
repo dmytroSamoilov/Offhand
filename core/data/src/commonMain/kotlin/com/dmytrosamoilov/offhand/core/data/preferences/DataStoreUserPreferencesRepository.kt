@@ -33,7 +33,7 @@ internal class DataStoreUserPreferencesRepository(
                     ?: preferences[KEY_ONBOARDING_COMPLETED] ?: false,
                 telemetryConsent = preferences[KEY_TELEMETRY_CONSENT] ?: false,
                 dynamicColor = preferences[KEY_DYNAMIC_COLOR] ?: false,
-                developerOptions = buildInfo.isDebugBuild &&
+                developerOptions = buildInfo.isDeveloperBuild &&
                     (preferences[KEY_DEVELOPER_OPTIONS] ?: false),
                 savedRecordingsCount = preferences[KEY_SAVED_RECORDINGS_COUNT] ?: 0,
                 reviewPrompt = ReviewPromptState(
@@ -88,7 +88,7 @@ internal class DataStoreUserPreferencesRepository(
     }
 
     private fun proOverride(preferences: Preferences): ProOverride {
-        if (!buildInfo.isDebugBuild) return ProOverride.STORE
+        if (!buildInfo.isDeveloperBuild) return ProOverride.STORE
         val name = preferences[KEY_PRO_OVERRIDE] ?: return ProOverride.STORE
         return ProOverride.entries.firstOrNull { it.name == name } ?: ProOverride.STORE
     }

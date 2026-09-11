@@ -52,7 +52,7 @@ class IosPlatformDeps(
     val audioDecoder: IosAudioDecoderBridge,
     val noteDocuments: IosNoteDocumentBridge,
     val proStore: IosProStoreBridge,
-    val isDebugBuild: Boolean,
+    val isDeveloperBuild: Boolean,
 )
 
 fun startSharedKoin(deps: IosPlatformDeps) {
@@ -84,7 +84,7 @@ fun sharedIosModules(deps: IosPlatformDeps): List<Module> = listOf(
 )
 
 private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
-    single { BuildInfo(isDebugBuild = deps.isDebugBuild, appVersion = deps.appVersion, platform = "ios") }
+    single { BuildInfo(isDeveloperBuild = deps.isDeveloperBuild, appVersion = deps.appVersion, platform = "ios") }
     single<BackupCrypto> { IosBackupCrypto(deps.backupCrypto) }
     single<AudioDecoder> { IosAudioDecoder(deps.audioDecoder) }
     single<NotePdfRenderer> { IosNotePdfRenderer(deps.noteDocuments) }

@@ -9,11 +9,12 @@ struct OffhandApp: App {
     private static let useSmokeFakes = false
     #endif
     // The shared framework is always a release binary, so the app decides
-    // what counts as a debug build (developer options, the Pro override).
+    // what counts as a developer build (developer options, the Pro override):
+    // any debug build, or the dev flavor, whose TestFlight builds are release.
     #if DEBUG
-    private static let isDebugBuild = true
+    private static let isDeveloperBuild = true
     #else
-    private static let isDebugBuild = false
+    private static let isDeveloperBuild = Bundle.main.bundleIdentifier?.hasSuffix(".dev") == true
     #endif
 
     init() {
@@ -40,7 +41,7 @@ struct OffhandApp: App {
                 audioDecoder: AudioDecoderImpl(),
                 noteDocuments: NoteDocumentBridgeImpl(),
                 proStore: StoreKitProStore(),
-                isDebugBuild: Self.isDebugBuild
+                isDeveloperBuild: Self.isDeveloperBuild
             ),
             useSmokeFakes: Self.useSmokeFakes
         )

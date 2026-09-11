@@ -114,11 +114,9 @@ struct SettingsView: View {
                 } footer: {
                     Text(String(localized: "Offhand keeps every recording and note on this device. Nothing is uploaded anywhere."))
                 }
-                #if DEBUG
                 if let override = state.proOverride {
                     proOverrideSection(override)
                 }
-                #endif
             }
             .navigationTitle(String(localized: "Settings"))
         }
@@ -317,7 +315,6 @@ struct SettingsView: View {
         .buttonStyle(.plain)
     }
 
-    #if DEBUG
     private func proOverrideSection(_ override: ProOverride) -> some View {
         Section(String(localized: "Developer")) {
             VStack(alignment: .leading, spacing: 8) {
@@ -335,7 +332,6 @@ struct SettingsView: View {
             }
         }
     }
-    #endif
 }
 
 private struct CustomStyleCard: View {

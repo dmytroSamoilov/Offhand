@@ -31,7 +31,7 @@ val featureNotesAndroidModule = module {
     singleOf(::PlayInAppReviewLauncher)
     singleOf(::FakeInAppReviewLauncher)
     single<InAppReviewLauncher> {
-        if (get<BuildInfo>().isDebugBuild) get<FakeInAppReviewLauncher>() else get<PlayInAppReviewLauncher>()
+        if (get<BuildInfo>().isDeveloperBuild) get<FakeInAppReviewLauncher>() else get<PlayInAppReviewLauncher>()
     }
     singleOf(::NoteShareLabelsProviderImpl) bind NoteShareLabelsProvider::class
     singleOf(::ShareCacheDirectoryProviderImpl) bind ShareCacheDirectoryProvider::class

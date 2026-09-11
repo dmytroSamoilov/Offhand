@@ -39,7 +39,7 @@ import org.junit.Test
 class BackupRoundTripTest {
 
     private val crypto = AndroidBackupCrypto()
-    private val buildInfo = BuildInfo(isDebugBuild = true, appVersion = "1.3.0", platform = "android")
+    private val buildInfo = BuildInfo(isDeveloperBuild = true, appVersion = "1.3.0", platform = "android")
     private val passphrase = "correct horse battery".encodeToByteArray()
 
     private val sourceAudio = mapOf("note-a.pcm.enc" to ByteArray(70_000) { (it % 251).toByte() })

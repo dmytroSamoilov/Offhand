@@ -110,7 +110,7 @@ class SettingsViewModelTest {
         observeProOverride = observeProOverride,
         setProOverride = setProOverride,
         proUpgradeGate = gate,
-        buildInfo = BuildInfo(isDebugBuild = false, appVersion = "1", platform = "test"),
+        buildInfo = BuildInfo(isDeveloperBuild = false, appVersion = "1", platform = "test"),
     )
 
     @Test
