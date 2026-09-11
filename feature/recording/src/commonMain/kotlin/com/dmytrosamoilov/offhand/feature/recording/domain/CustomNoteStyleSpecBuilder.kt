@@ -18,12 +18,13 @@ internal object CustomNoteStyleSpecBuilder {
         language: NoteStyleLanguage,
     ): NoteStyleSpec {
         val kind = noteKind.toPromptText().ifBlank { DEFAULT_KIND }
-        val headings = sections.map { it.promptHeading() }
+        val effective = sections.ifEmpty { listOf(SUMMARY_SECTION) }
+        val headings = effective.map { it.promptHeading() }
         return NoteStyleSpec(
             ref = ref,
             kind = NoteStylePrompt.markdownKind(kind),
             sections = headings,
-            overviewRule = overviewRule(kind, headings, sections),
+            overviewRule = overviewRule(kind, headings, effective),
             language = language,
         )
     }
@@ -47,6 +48,7 @@ internal object CustomNoteStyleSpecBuilder {
     private fun formatRule(format: SectionFormat): String = when (format) {
         SectionFormat.SENTENCES -> SENTENCES_RULE
         SectionFormat.BULLETS -> BULLETS_RULE
+        SectionFormat.FREE -> FREE_RULE
     }
 
     private fun NoteStyleSection.promptHeading(): String =
@@ -61,8 +63,12 @@ internal object CustomNoteStyleSpecBuilder {
     private const val HEADING_PREFIX = "## "
     private const val ONE_HEADING_RULE =
         "Every point goes under exactly one heading and is never repeated under another one."
+    // A style without sections still yields one heading, so the note keeps
+    // the same JSON shape and the same polish rules.
+    private val SUMMARY_SECTION = NoteStyleSection(heading = "Summary", guidance = "", format = SectionFormat.FREE)
     private const val SENTENCES_RULE = "write short plain sentences"
     private const val BULLETS_RULE = "write one \"- \" line per point"
+    private const val FREE_RULE = "write it in whatever form fits the content best"
     private val UNSAFE_CHARS = Regex("[\"{}\\\\`<>]")
     private val WHITESPACE = Regex("\\s+")
 }

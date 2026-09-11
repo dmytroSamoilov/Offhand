@@ -194,7 +194,7 @@ class NoteStyleEditorViewModel(
         val updated = sections.mapIndexed { position, section -> if (position == index) section.transform() else section }
         copy(
             sections = updated,
-            errors = errors.copy(headings = errors.headings - index, guidance = errors.guidance - index),
+            errors = errors.copy(headings = errors.headings - index),
         )
     }
 

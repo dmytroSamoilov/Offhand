@@ -17,7 +17,8 @@ data class NoteStyleSection(
 
 enum class SectionFormat {
     SENTENCES,
-    BULLETS;
+    BULLETS,
+    FREE;
 
     companion object {
         fun fromName(name: String?): SectionFormat = entries.firstOrNull { it.name == name } ?: SENTENCES

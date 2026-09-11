@@ -12,7 +12,7 @@ struct NoteStyleEditorView: View {
         noteKind: "",
         language: .recording,
         sections: [],
-        errors: NoteStyleErrors(name: nil, noteKind: nil, sections: nil, headings: [:], guidance: [:]),
+        errors: NoteStyleErrors(name: nil, noteKind: nil, sections: nil, headings: [:]),
         preview: nil,
         describe: nil,
         isSaved: false,
@@ -119,6 +119,11 @@ struct NoteStyleEditorView: View {
             sectionEditor(index: index, section: section)
         }
         Section {
+            if state.sections.isEmpty {
+                Text(String(localized: "Without sections the note is one free-form summary."))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
             sectionsErrorText
             Button {
                 viewModel.onSectionAdded()
@@ -144,13 +149,20 @@ struct NoteStyleEditorView: View {
             ), axis: .vertical)
             .lineLimit(2...5)
             .focused($isEditing)
-            errorText(state.errors.guidance[KotlinInt(int: Int32(index))], maxLength: NoteStyleLimits.shared.MAX_GUIDANCE_LENGTH)
+            if section.guidance.count > Int(NoteStyleLimits.shared.GUIDANCE_WARNING_LENGTH) {
+                Text(String(localized: "Long instructions may fail to process. The AI on this device has limited memory, so use them at your own risk."))
+                    .font(.footnote)
+                    .foregroundStyle(Brand.onWarningContainer)
+                    .padding(8)
+                    .background(Brand.warningContainer, in: RoundedRectangle(cornerRadius: 8))
+            }
             Picker("", selection: Binding(
                 get: { section.format },
                 set: { viewModel.onSectionFormatChanged(index: Int32(index), format: $0) }
             )) {
                 Text(String(localized: "Short sentences")).tag(SectionFormat.sentences)
-                Text(String(localized: "One bullet per point")).tag(SectionFormat.bullets)
+                Text(String(localized: "Bullet points")).tag(SectionFormat.bullets)
+                Text(String(localized: "Free")).tag(SectionFormat.free)
             }
             .pickerStyle(.segmented)
         } header: {
@@ -175,7 +187,6 @@ struct NoteStyleEditorView: View {
             Button { viewModel.onSectionRemoved(index: Int32(index)) } label: {
                 Image(systemName: "xmark")
             }
-            .disabled(state.sections.count <= 1)
             .accessibilityLabel(String(localized: "Remove section"))
         }
         .buttonStyle(.borderless)
@@ -184,10 +195,8 @@ struct NoteStyleEditorView: View {
 
     @ViewBuilder
     private var sectionsErrorText: some View {
-        if let error = state.errors.sections {
-            Text(error == .none
-                ? String(localized: "Add at least one section")
-                : String(format: String(localized: "Use at most %d sections"), Int(NoteStyleLimits.shared.MAX_SECTIONS)))
+        if state.errors.sections != nil {
+            Text(String(format: String(localized: "Use at most %d sections"), Int(NoteStyleLimits.shared.MAX_SECTIONS)))
                 .font(.footnote)
                 .foregroundStyle(.red)
         }

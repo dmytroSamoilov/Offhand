@@ -73,6 +73,9 @@ struct RootView: View {
             case .background:
                 handleBackgrounded()
             case .active:
+                // A code redeemed in the App Store app lands as a transaction;
+                // re-reading on activation shows it without a restart.
+                SharedGraph.shared.refreshProStatus()
                 finishCoordinator.appBecameActive()
                 // Only the come-back reminder is stale on activation; note-ready
                 // notifications must survive it.

@@ -39,7 +39,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       - inputText: "Next steps"
       - hideKeyboard
       - tapOn:
-          text: "One bullet per point"
+          text: "Bullet points"
           below: "Section 2"
 
       # Preview runs the style through the (fake) model
@@ -123,7 +123,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       - inputText: "Next steps"
       - tapOn: "Done"
       - tapOn:
-          text: "One bullet per point"
+          text: "Bullet points"
           index: 1
 
       # Preview runs the style through the (fake) model

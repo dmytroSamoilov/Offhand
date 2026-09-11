@@ -1,5 +1,6 @@
 import OffhandShared
 import StoreKit
+import UIKit
 
 // StoreKit 2 behind the shared ProStore seam: the verified current
 // entitlements decide the plan, Transaction.updates keeps it fresh, and
@@ -125,5 +126,17 @@ final class StoreKitProStore: IosProStoreBridge {
     private func yearlyStatus(of transaction: Transaction) -> ProStatus {
         let renewsAt = transaction.expirationDate.map { KotlinLong(value: Int64($0.timeIntervalSince1970 * 1000)) }
         return ProStatus(plan: .yearly, isTrial: transaction.offer?.type == .introductory, renewsAtMs: renewsAt)
+    }
+}
+
+// Apple's in-app redemption sheet; the resulting transaction arrives through
+// Transaction.updates like any purchase.
+enum OfferCodeRedemption {
+    static func present() {
+        let scene = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first { $0.activationState == .foregroundActive }
+        guard let scene else { return }
+        Task { try? await AppStore.presentOfferCodeRedeemSheet(in: scene) }
     }
 }

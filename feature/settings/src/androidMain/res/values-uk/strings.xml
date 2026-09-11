@@ -56,7 +56,9 @@
     <string name="settings_note_style_editor_guidance">Що сюди входить</string>
     <string name="settings_note_style_editor_guidance_hint">кожна домовленість: хто робить і до якого терміну</string>
     <string name="settings_note_style_editor_format_sentences">Короткі речення</string>
-    <string name="settings_note_style_editor_format_bullets">Один пункт на думку</string>
+    <string name="settings_note_style_editor_format_bullets">Списком</string>
+    <string name="settings_note_style_editor_format_free">Вільно</string>
+    <string name="settings_note_style_editor_guidance_warning">Довгі інструкції можуть не опрацюватися. ШІ на цьому пристрої має обмежену памʼять, використовуйте на власний ризик.</string>
     <string name="settings_note_style_editor_add_section">Додати розділ</string>
     <string name="settings_note_style_editor_remove_section">Вилучити розділ</string>
     <string name="settings_note_style_editor_move_up">Вище</string>
@@ -71,7 +73,6 @@
     <string name="settings_note_style_error_blank">Це поле обов’язкове</string>
     <string name="settings_note_style_error_too_long">Не більше %1$d символів</string>
     <string name="settings_note_style_error_duplicate">Така назва вже використовується</string>
-    <string name="settings_note_style_error_sections_none">Додайте хоча б один розділ</string>
     <string name="settings_note_style_error_sections_too_many">Не більше %1$d розділів</string>
     <string name="settings_note_style_describe_button">Опишіть, і ШІ заповнить форму</string>
     <string name="settings_note_style_describe_title">Опишіть свою нотатку</string>
@@ -141,4 +142,6 @@
     <string name="settings_backup_section_title">Резервна копія</string>
     <string name="settings_about_section_title">Про застосунок</string>
     <string name="settings_about_footer">Offhand зберігає кожен запис і нотатку на цьому пристрої. Нічого нікуди не завантажується.</string>
+    <string name="settings_note_style_editor_no_sections">Без розділів нотатка стає вільним резюме.</string>
+    <string name="settings_redeem_code">Ввести промокод</string>
 </resources>

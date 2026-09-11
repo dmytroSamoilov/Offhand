@@ -861,46 +861,6 @@
         }
       }
     },
-    "Add at least one section" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Füge mindestens einen Abschnitt hinzu"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Añade al menos una sección"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "कम से कम एक अनुभाग जोड़ें"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Adicione pelo menos uma seção"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Добавьте хотя бы один раздел"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Додайте хоча б один розділ"
-          }
-        }
-      }
-    },
     "Add notes and folders from a backup file. Notes already on this iPhone are kept and duplicates are skipped." : {
       "localizations" : {
         "de" : {
@@ -1697,6 +1657,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вбудовані"
+          }
+        }
+      }
+    },
+    "Bullet points" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stichpunkte"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viñetas"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "बुलेट पॉइंट"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tópicos"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Списком"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Списком"
           }
         }
       }
@@ -3982,6 +3982,46 @@
         }
       }
     },
+    "Free" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frei"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Libre"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "मुक्त"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Livre"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Свободно"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вільно"
+          }
+        }
+      }
+    },
     "Free for %1$d days, then %2$@ per year. Cancel anytime in your store account." : {
       "localizations" : {
         "en" : {
@@ -5206,6 +5246,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Заблокувати Offhand?"
+          }
+        }
+      }
+    },
+    "Long instructions may fail to process. The AI on this device has limited memory, so use them at your own risk." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lange Anweisungen können fehlschlagen. Die KI auf diesem Gerät hat begrenzten Speicher, nutze sie auf eigenes Risiko."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las instrucciones largas pueden fallar. La IA de este dispositivo tiene memoria limitada, úsalas bajo tu responsabilidad."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "लंबे निर्देश प्रोसेस होने में विफल हो सकते हैं। इस डिवाइस के AI की मेमोरी सीमित है, इसलिए अपने जोखिम पर उपयोग करें।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instruções longas podem falhar. A IA deste aparelho tem memória limitada, use por sua conta e risco."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Длинные инструкции могут не обработаться. У ИИ на этом устройстве ограниченная память, используйте на свой риск."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Довгі інструкції можуть не опрацюватися. ШІ на цьому пристрої має обмежену памʼять, використовуйте на власний ризик."
           }
         }
       }
@@ -7171,46 +7251,6 @@
         }
       }
     },
-    "One bullet per point" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein Punkt pro Aussage"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una viñeta por punto"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "हर बिंदु के लिए एक बुलेट"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Um marcador por ponto"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Один пункт на мысль"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Один пункт на думку"
-          }
-        }
-      }
-    },
     "One-time download · about %@ GB" : {
       "localizations" : {
         "de" : {
@@ -8574,6 +8614,46 @@
     "Recordings make the file much larger." : {
       "comment" : "A description of the size of the audio recordings included in a backup.",
       "isCommentAutoGenerated" : true
+    },
+    "Redeem a code" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code einlösen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canjear un código"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "कोड रिडीम करें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resgatar um código"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ввести промокод"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ввести промокод"
+          }
+        }
+      }
     },
     "Remove section" : {
       "localizations" : {
@@ -13006,6 +13086,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Про кого був візит, спостереження, що зроблено та подальші кроки."
+          }
+        }
+      }
+    },
+    "Without sections the note is one free-form summary." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne Abschnitte wird die Notiz eine freie Zusammenfassung."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin secciones, la nota es un resumen libre."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "बिना सेक्शन के नोट एक मुक्त सारांश होगा।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem seções, a nota vira um resumo livre."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без разделов заметка становится свободным резюме."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без розділів нотатка стає вільним резюме."
           }
         }
       }

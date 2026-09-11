@@ -56,7 +56,9 @@
     <string name="settings_note_style_editor_guidance">Qué va aquí</string>
     <string name="settings_note_style_editor_guidance_hint">cada tarea acordada con quién la hace y para cuándo</string>
     <string name="settings_note_style_editor_format_sentences">Frases cortas</string>
-    <string name="settings_note_style_editor_format_bullets">Una viñeta por punto</string>
+    <string name="settings_note_style_editor_format_bullets">Viñetas</string>
+    <string name="settings_note_style_editor_format_free">Libre</string>
+    <string name="settings_note_style_editor_guidance_warning">Las instrucciones largas pueden fallar. La IA de este dispositivo tiene memoria limitada, úsalas bajo tu responsabilidad.</string>
     <string name="settings_note_style_editor_add_section">Añadir sección</string>
     <string name="settings_note_style_editor_remove_section">Quitar sección</string>
     <string name="settings_note_style_editor_move_up">Subir</string>
@@ -71,7 +73,6 @@
     <string name="settings_note_style_error_blank">Este campo es obligatorio</string>
     <string name="settings_note_style_error_too_long">Usa como máximo %1$d caracteres</string>
     <string name="settings_note_style_error_duplicate">Este nombre ya está en uso</string>
-    <string name="settings_note_style_error_sections_none">Añade al menos una sección</string>
     <string name="settings_note_style_error_sections_too_many">Usa como máximo %1$d secciones</string>
     <string name="settings_note_style_describe_button">Descríbelo y deja que la IA rellene el formulario</string>
     <string name="settings_note_style_describe_title">Describe tu nota</string>
@@ -140,4 +141,6 @@
     <string name="settings_backup_section_title">Copia de seguridad</string>
     <string name="settings_about_section_title">Acerca de</string>
     <string name="settings_about_footer">Offhand guarda cada grabación y nota en este dispositivo. No se sube nada a ningún sitio.</string>
+    <string name="settings_note_style_editor_no_sections">Sin secciones, la nota es un resumen libre.</string>
+    <string name="settings_redeem_code">Canjear un código</string>
 </resources>

@@ -26,9 +26,18 @@ internal object NoteStyleDraftParser {
 
     private fun SectionJson.toSection(): NoteStyleSection = NoteStyleSection(
         heading = heading.clean(NoteStyleLimits.MAX_HEADING_LENGTH).trimStart('#', ' '),
-        guidance = guidance.clean(NoteStyleLimits.MAX_GUIDANCE_LENGTH),
-        format = if (format.trim().lowercase().startsWith(BULLETS_PREFIX)) SectionFormat.BULLETS else SectionFormat.SENTENCES,
+        guidance = guidance.clean(NoteStyleLimits.MAX_DRAFT_GUIDANCE_LENGTH),
+        format = format.toFormat(),
     )
+
+    private fun String.toFormat(): SectionFormat {
+        val normalized = trim().lowercase()
+        return when {
+            normalized.startsWith(BULLETS_PREFIX) -> SectionFormat.BULLETS
+            normalized.startsWith(FREE_PREFIX) -> SectionFormat.FREE
+            else -> SectionFormat.SENTENCES
+        }
+    }
 
     private fun String.clean(maxLength: Int): String =
         replace(WHITESPACE, " ").trim().trimEnd('.').take(maxLength).trim()
@@ -55,6 +64,7 @@ internal object NoteStyleDraftParser {
     )
 
     private const val BULLETS_PREFIX = "bullet"
+    private const val FREE_PREFIX = "free"
     private val WHITESPACE = Regex("\\s+")
     private val lenientJson = Json {
         ignoreUnknownKeys = true

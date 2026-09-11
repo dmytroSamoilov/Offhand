@@ -44,6 +44,23 @@ class CustomNoteStyleSpecBuilderTest {
     }
 
     @Test
+    fun `a style without sections becomes a single free summary section`() {
+        val spec = CustomNoteStyleSpecBuilder.build(style.copy(sections = emptyList()))
+
+        assertEquals(listOf("## Summary"), spec.sections)
+        assertTrue(spec.overviewRule.contains("Under \"## Summary\" write it in whatever form fits the content best."))
+    }
+
+    @Test
+    fun `a free section carries no structure rule beyond its guidance`() {
+        val free = style.copy(sections = listOf(NoteStyleSection("Notes", "anything worth keeping", SectionFormat.FREE)))
+
+        val rule = CustomNoteStyleSpecBuilder.build(free).overviewRule
+
+        assertTrue(rule.contains("Under \"## Notes\" write it in whatever form fits the content best: anything worth keeping."))
+    }
+
+    @Test
     fun `user text cannot break out of its slot`() {
         val hostile = style.copy(
             noteKind = "",

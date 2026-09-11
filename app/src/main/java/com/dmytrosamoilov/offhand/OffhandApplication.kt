@@ -11,6 +11,7 @@ import com.dmytrosamoilov.offhand.core.ai.local.di.coreAiLocalModule
 import com.dmytrosamoilov.offhand.core.audio.di.coreAudioModule
 import com.dmytrosamoilov.offhand.core.data.billing.ForegroundActivityHolder
 import com.dmytrosamoilov.offhand.core.data.di.coreDataModule
+import com.dmytrosamoilov.offhand.core.data.domain.ProStore
 import com.dmytrosamoilov.offhand.core.device.di.coreDeviceModule
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.di.coreSecurityModule
@@ -46,6 +47,7 @@ class OffhandApplication : Application(), KoinComponent {
     private lateinit var sessionManager: RecordingSessionManager
     private lateinit var appLockManager: AppLockManager
     private lateinit var modelManager: ModelManager
+    private lateinit var proStore: ProStore
 
     override fun onCreate() {
         super.onCreate()
@@ -77,6 +79,7 @@ class OffhandApplication : Application(), KoinComponent {
         sessionManager = get()
         appLockManager = get()
         modelManager = get()
+        proStore = get()
         registerActivityLifecycleCallbacks(get<ForegroundActivityHolder>())
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
@@ -92,8 +95,14 @@ class OffhandApplication : Application(), KoinComponent {
     // Re-lock on the way to the background, except mid-recording: replacing the
     // content with the lock screen tears down the record sheet and strands the
     // live capture. The recording service keeps the audio alive regardless.
+    // Coming back to the foreground also re-reads the store, so a code
+    // redeemed in the Play Store app shows up without a restart.
     private fun observeForegroundForLock() {
         ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onStart(owner: LifecycleOwner) {
+                proStore.refresh()
+            }
+
             override fun onStop(owner: LifecycleOwner) {
                 if (sessionManager.session.value.phase != SessionPhase.RECORDING) {
                     appLockManager.markLocked()

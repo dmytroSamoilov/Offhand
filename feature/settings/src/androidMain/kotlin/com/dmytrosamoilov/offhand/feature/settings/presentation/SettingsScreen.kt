@@ -247,10 +247,29 @@ private fun AppearanceSection(
 @Composable
 private fun ProSection(status: ProStatusUi, onUpgradeClick: () -> Unit) {
     when (status) {
-        ProStatusUi.Free -> UpgradeCard(onClick = onUpgradeClick)
+        ProStatusUi.Free -> Column {
+            UpgradeCard(onClick = onUpgradeClick)
+            RedeemCodeButton()
+        }
         else -> SubscriptionSection(status = status)
     }
 }
+
+// Play has no in-app redemption sheet; the store's redeem page opens and the
+// foreground refresh picks the purchase up on return.
+@Composable
+private fun RedeemCodeButton() {
+    val context = LocalContext.current
+    TextButton(onClick = { openLink(context, PLAY_REDEEM_URL) }) {
+        Text(text = stringResource(R.string.settings_redeem_code))
+    }
+}
+
+private fun openLink(context: Context, url: String) {
+    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
+}
+
+private const val PLAY_REDEEM_URL = "https://play.google.com/redeem"
 
 @Composable
 private fun UpgradeCard(onClick: () -> Unit) {
@@ -295,11 +314,14 @@ private fun SubscriptionSection(status: ProStatusUi) {
                 )
             }
         }
-        if (status != ProStatusUi.Lifetime) {
-            Spacer(modifier = Modifier.height(8.dp))
-            TextButton(onClick = { openSubscriptionManagement(context) }) {
-                Text(text = stringResource(R.string.settings_subscription_manage))
+        Spacer(modifier = Modifier.height(8.dp))
+        Row {
+            if (status != ProStatusUi.Lifetime) {
+                TextButton(onClick = { openSubscriptionManagement(context) }) {
+                    Text(text = stringResource(R.string.settings_subscription_manage))
+                }
             }
+            RedeemCodeButton()
         }
     }
 }
@@ -321,8 +343,7 @@ private fun formatDate(epochMs: Long): String =
 // Play's subscription center for this product; Play requires an in-app way
 // to reach it and it is where cancellation lives.
 private fun openSubscriptionManagement(context: Context) {
-    val url = "https://play.google.com/store/account/subscriptions?sku=offhand_pro&package=${context.packageName}"
-    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
+    openLink(context, "https://play.google.com/store/account/subscriptions?sku=offhand_pro&package=${context.packageName}")
 }
 
 @Composable

@@ -14,14 +14,15 @@ class NoteStyleDraftParserTest {
         val raw = "<thinking>A debrief needs the customer.</thinking>\n" +
             """{"name": "Sales debrief", "kind": "a sales call debrief.", "sections": [""" +
             """{"heading": "## Customer", "guidance": "who the customer is", "format": "sentences"}, """ +
-            """{"heading": "Next steps", "guidance": "each task with who and when.", "format": "Bullets"}]}"""
+            """{"heading": "Next steps", "guidance": "each task with who and when.", "format": "Bullets"}, """ +
+            """{"heading": "Notes", "guidance": "", "format": "free"}]}"""
 
         val draft = assertNotNull(NoteStyleDraftParser.parse(raw))
 
         assertEquals("Sales debrief", draft.name)
         assertEquals("a sales call debrief", draft.noteKind)
-        assertEquals(listOf("Customer", "Next steps"), draft.sections.map { it.heading })
-        assertEquals(listOf(SectionFormat.SENTENCES, SectionFormat.BULLETS), draft.sections.map { it.format })
+        assertEquals(listOf("Customer", "Next steps", "Notes"), draft.sections.map { it.heading })
+        assertEquals(listOf(SectionFormat.SENTENCES, SectionFormat.BULLETS, SectionFormat.FREE), draft.sections.map { it.format })
         assertEquals("each task with who and when", draft.sections[1].guidance)
     }
 

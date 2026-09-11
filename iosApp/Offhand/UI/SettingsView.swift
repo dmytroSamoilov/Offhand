@@ -255,8 +255,9 @@ struct SettingsView: View {
                         .buttonStyle(.borderedProminent)
                 }
                 .padding(.vertical, 4)
+                .listRowBackground(Brand.primaryContainer)
+                Button(String(localized: "Redeem a code")) { OfferCodeRedemption.present() }
             }
-            .listRowBackground(Brand.primaryContainer)
         } else {
             Section(String(localized: "Subscription")) {
                 HStack(spacing: 12) {
@@ -269,6 +270,7 @@ struct SettingsView: View {
                 if case .lifetime = onEnum(of: state.pro) {} else {
                     Link(String(localized: "Manage subscription"), destination: URL(string: "https://apps.apple.com/account/subscriptions")!)
                 }
+                Button(String(localized: "Redeem a code")) { OfferCodeRedemption.present() }
             }
         }
     }

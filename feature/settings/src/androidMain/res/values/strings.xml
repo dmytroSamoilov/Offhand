@@ -57,7 +57,9 @@
     <string name="settings_note_style_editor_guidance">What goes here</string>
     <string name="settings_note_style_editor_guidance_hint">each agreed task with who does it and by when</string>
     <string name="settings_note_style_editor_format_sentences">Short sentences</string>
-    <string name="settings_note_style_editor_format_bullets">One bullet per point</string>
+    <string name="settings_note_style_editor_format_bullets">Bullet points</string>
+    <string name="settings_note_style_editor_format_free">Free</string>
+    <string name="settings_note_style_editor_guidance_warning">Long instructions may fail to process. The AI on this device has limited memory, so use them at your own risk.</string>
     <string name="settings_note_style_editor_add_section">Add section</string>
     <string name="settings_note_style_editor_remove_section">Remove section</string>
     <string name="settings_note_style_editor_move_up">Move up</string>
@@ -72,7 +74,6 @@
     <string name="settings_note_style_error_blank">This field is required</string>
     <string name="settings_note_style_error_too_long">Use at most %1$d characters</string>
     <string name="settings_note_style_error_duplicate">This name is already used</string>
-    <string name="settings_note_style_error_sections_none">Add at least one section</string>
     <string name="settings_note_style_error_sections_too_many">Use at most %1$d sections</string>
     <string name="settings_note_style_describe_button">Describe it and let the AI fill the form</string>
     <string name="settings_note_style_describe_title">Describe your note</string>
@@ -145,4 +146,6 @@
     <string name="settings_backup_section_title">Backup</string>
     <string name="settings_about_section_title">About</string>
     <string name="settings_about_footer">Offhand keeps every recording and note on this device. Nothing is uploaded anywhere.</string>
+    <string name="settings_note_style_editor_no_sections">Without sections the note is one free-form summary.</string>
+    <string name="settings_redeem_code">Redeem a code</string>
 </resources>

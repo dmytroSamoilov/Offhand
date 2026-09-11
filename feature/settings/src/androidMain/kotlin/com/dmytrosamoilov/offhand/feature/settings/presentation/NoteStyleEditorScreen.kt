@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,7 +47,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLimits
 import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
+import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.designsystem.component.MarkdownText
 import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
@@ -240,8 +243,14 @@ private fun SectionsEditor(state: NoteStyleEditorUiState, viewModel: NoteStyleEd
                 count = state.sections.size,
                 section = section,
                 headingError = state.errors.headings[index],
-                guidanceError = state.errors.guidance[index],
                 viewModel = viewModel,
+            )
+        }
+        if (state.sections.isEmpty()) {
+            Text(
+                text = stringResource(R.string.settings_note_style_editor_no_sections),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         SectionsErrorText(error = state.errors.sections)
@@ -260,7 +269,6 @@ private fun SectionsEditor(state: NoteStyleEditorUiState, viewModel: NoteStyleEd
 private fun SectionsErrorText(error: NoteStyleSectionsError?) {
     val message = when (error) {
         null -> return
-        NoteStyleSectionsError.NONE -> stringResource(R.string.settings_note_style_error_sections_none)
         NoteStyleSectionsError.TOO_MANY ->
             stringResource(R.string.settings_note_style_error_sections_too_many, NoteStyleValidator.MAX_SECTIONS)
     }
@@ -273,7 +281,6 @@ private fun SectionCard(
     count: Int,
     section: SectionDraftUi,
     headingError: NoteStyleFieldError?,
-    guidanceError: NoteStyleFieldError?,
     viewModel: NoteStyleEditorViewModel,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
@@ -293,8 +300,7 @@ private fun SectionCard(
                 onValueChange = { viewModel.onSectionGuidanceChanged(index, it) },
                 label = { Text(text = stringResource(R.string.settings_note_style_editor_guidance)) },
                 placeholder = { Text(text = stringResource(R.string.settings_note_style_editor_guidance_hint)) },
-                isError = guidanceError != null,
-                supportingText = fieldErrorText(guidanceError, NoteStyleValidator.MAX_GUIDANCE_LENGTH),
+                supportingText = guidanceWarning(section.guidance),
                 minLines = 2,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -323,7 +329,7 @@ private fun SectionCardHeader(index: Int, count: Int, viewModel: NoteStyleEditor
                 contentDescription = stringResource(R.string.settings_note_style_editor_move_down),
             )
         }
-        IconButton(onClick = { viewModel.onSectionRemoved(index) }, enabled = count > 1) {
+        IconButton(onClick = { viewModel.onSectionRemoved(index) }) {
             Icon(
                 imageVector = Icons.Filled.Close,
                 contentDescription = stringResource(R.string.settings_note_style_editor_remove_section),
@@ -354,6 +360,22 @@ private fun FormatChoice(selected: SectionFormat, onSelected: (SectionFormat) ->
 private fun SectionFormat.labelRes(): Int = when (this) {
     SectionFormat.SENTENCES -> R.string.settings_note_style_editor_format_sentences
     SectionFormat.BULLETS -> R.string.settings_note_style_editor_format_bullets
+    SectionFormat.FREE -> R.string.settings_note_style_editor_format_free
+}
+
+// Long guidance is allowed; past the threshold the user is told the model
+// may not cope with it, and the choice stays theirs.
+private fun guidanceWarning(guidance: String): (@Composable () -> Unit)? {
+    if (guidance.length <= NoteStyleLimits.GUIDANCE_WARNING_LENGTH) return null
+    return {
+        Text(
+            text = stringResource(R.string.settings_note_style_editor_guidance_warning),
+            color = MaterialTheme.extendedColors.onWarningContainer,
+            modifier = Modifier
+                .background(MaterialTheme.extendedColors.warningContainer, MaterialTheme.shapes.small)
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+        )
+    }
 }
 
 @Composable

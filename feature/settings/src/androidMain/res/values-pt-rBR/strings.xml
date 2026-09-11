@@ -56,7 +56,9 @@
     <string name="settings_note_style_editor_guidance">O que entra aqui</string>
     <string name="settings_note_style_editor_guidance_hint">cada tarefa combinada, com quem faz e até quando</string>
     <string name="settings_note_style_editor_format_sentences">Frases curtas</string>
-    <string name="settings_note_style_editor_format_bullets">Um marcador por ponto</string>
+    <string name="settings_note_style_editor_format_bullets">Tópicos</string>
+    <string name="settings_note_style_editor_format_free">Livre</string>
+    <string name="settings_note_style_editor_guidance_warning">Instruções longas podem falhar. A IA deste aparelho tem memória limitada, use por sua conta e risco.</string>
     <string name="settings_note_style_editor_add_section">Adicionar seção</string>
     <string name="settings_note_style_editor_remove_section">Remover seção</string>
     <string name="settings_note_style_editor_move_up">Mover para cima</string>
@@ -71,7 +73,6 @@
     <string name="settings_note_style_error_blank">Este campo é obrigatório</string>
     <string name="settings_note_style_error_too_long">Use no máximo %1$d caracteres</string>
     <string name="settings_note_style_error_duplicate">Este nome já está em uso</string>
-    <string name="settings_note_style_error_sections_none">Adicione pelo menos uma seção</string>
     <string name="settings_note_style_error_sections_too_many">Use no máximo %1$d seções</string>
     <string name="settings_note_style_describe_button">Descreva e deixe a IA preencher o formulário</string>
     <string name="settings_note_style_describe_title">Descreva sua nota</string>
@@ -140,4 +141,6 @@
     <string name="settings_backup_section_title">Backup</string>
     <string name="settings_about_section_title">Sobre</string>
     <string name="settings_about_footer">O Offhand mantém cada gravação e nota neste aparelho. Nada é enviado para lugar nenhum.</string>
+    <string name="settings_note_style_editor_no_sections">Sem seções, a nota vira um resumo livre.</string>
+    <string name="settings_redeem_code">Resgatar um código</string>
 </resources>

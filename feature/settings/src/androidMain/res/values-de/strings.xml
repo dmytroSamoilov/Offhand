@@ -56,7 +56,9 @@
     <string name="settings_note_style_editor_guidance">Was gehört hierher</string>
     <string name="settings_note_style_editor_guidance_hint">jede vereinbarte Aufgabe mit Zuständigkeit und Termin</string>
     <string name="settings_note_style_editor_format_sentences">Kurze Sätze</string>
-    <string name="settings_note_style_editor_format_bullets">Ein Punkt pro Aussage</string>
+    <string name="settings_note_style_editor_format_bullets">Stichpunkte</string>
+    <string name="settings_note_style_editor_format_free">Frei</string>
+    <string name="settings_note_style_editor_guidance_warning">Lange Anweisungen können fehlschlagen. Die KI auf diesem Gerät hat begrenzten Speicher, nutze sie auf eigenes Risiko.</string>
     <string name="settings_note_style_editor_add_section">Abschnitt hinzufügen</string>
     <string name="settings_note_style_editor_remove_section">Abschnitt entfernen</string>
     <string name="settings_note_style_editor_move_up">Nach oben</string>
@@ -71,7 +73,6 @@
     <string name="settings_note_style_error_blank">Dieses Feld ist erforderlich</string>
     <string name="settings_note_style_error_too_long">Höchstens %1$d Zeichen verwenden</string>
     <string name="settings_note_style_error_duplicate">Dieser Name wird bereits verwendet</string>
-    <string name="settings_note_style_error_sections_none">Füge mindestens einen Abschnitt hinzu</string>
     <string name="settings_note_style_error_sections_too_many">Höchstens %1$d Abschnitte verwenden</string>
     <string name="settings_note_style_describe_button">Beschreiben und die KI das Formular ausfüllen lassen</string>
     <string name="settings_note_style_describe_title">Beschreibe deine Notiz</string>
@@ -139,4 +140,6 @@
     <string name="settings_backup_section_title">Backup</string>
     <string name="settings_about_section_title">Info</string>
     <string name="settings_about_footer">Offhand behält jede Aufnahme und Notiz auf diesem Gerät. Nichts wird irgendwohin hochgeladen.</string>
+    <string name="settings_note_style_editor_no_sections">Ohne Abschnitte wird die Notiz eine freie Zusammenfassung.</string>
+    <string name="settings_redeem_code">Code einlösen</string>
 </resources>

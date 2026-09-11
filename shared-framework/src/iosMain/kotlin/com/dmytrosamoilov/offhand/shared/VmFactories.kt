@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModelStore
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
+import com.dmytrosamoilov.offhand.core.data.domain.ProStore
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.feature.backup.presentation.BackupViewModel
 import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesViewModel
@@ -40,6 +41,10 @@ object SharedGraph {
     fun paywallViewModel(): PaywallViewModel = KoinPlatform.getKoin().get()
 
     fun proUpgradeGate(): ProUpgradeGate = KoinPlatform.getKoin().get()
+
+    fun refreshProStatus() {
+        KoinPlatform.getKoin().get<ProStore>().refresh()
+    }
 
     fun noteStyleEditor(styleId: Long): NoteStyleEditorHandle = NoteStyleEditorHandle(styleId)
 

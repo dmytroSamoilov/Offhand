@@ -11,7 +11,6 @@ enum class NoteStyleFieldError {
 }
 
 enum class NoteStyleSectionsError {
-    NONE,
     TOO_MANY,
 }
 
@@ -20,10 +19,9 @@ data class NoteStyleErrors(
     val noteKind: NoteStyleFieldError? = null,
     val sections: NoteStyleSectionsError? = null,
     val headings: Map<Int, NoteStyleFieldError> = emptyMap(),
-    val guidance: Map<Int, NoteStyleFieldError> = emptyMap(),
 ) {
     val isEmpty: Boolean
-        get() = name == null && noteKind == null && sections == null && headings.isEmpty() && guidance.isEmpty()
+        get() = name == null && noteKind == null && sections == null && headings.isEmpty()
 }
 
 sealed interface NoteStyleValidation {
@@ -36,8 +34,6 @@ object NoteStyleValidator {
     const val MAX_NAME_LENGTH = NoteStyleLimits.MAX_NAME_LENGTH
     const val MAX_KIND_LENGTH = NoteStyleLimits.MAX_KIND_LENGTH
     const val MAX_HEADING_LENGTH = NoteStyleLimits.MAX_HEADING_LENGTH
-    const val MAX_GUIDANCE_LENGTH = NoteStyleLimits.MAX_GUIDANCE_LENGTH
-    const val MIN_SECTIONS = NoteStyleLimits.MIN_SECTIONS
     const val MAX_SECTIONS = NoteStyleLimits.MAX_SECTIONS
 
     fun validate(style: CustomNoteStyle, existing: List<CustomNoteStyle>): NoteStyleValidation {
@@ -47,7 +43,6 @@ object NoteStyleValidator {
             noteKind = NoteStyleFieldError.TOO_LONG.takeIf { normalized.noteKind.length > MAX_KIND_LENGTH },
             sections = sectionsError(normalized.sections),
             headings = headingErrors(normalized.sections),
-            guidance = guidanceErrors(normalized.sections),
         )
         return if (errors.isEmpty) NoteStyleValidation.Valid(normalized) else NoteStyleValidation.Invalid(errors)
     }
@@ -71,11 +66,9 @@ object NoteStyleValidator {
         else -> null
     }
 
-    private fun sectionsError(sections: List<NoteStyleSection>): NoteStyleSectionsError? = when {
-        sections.size < MIN_SECTIONS -> NoteStyleSectionsError.NONE
-        sections.size > MAX_SECTIONS -> NoteStyleSectionsError.TOO_MANY
-        else -> null
-    }
+    // No sections is fine: the note then gets a single free-form summary.
+    private fun sectionsError(sections: List<NoteStyleSection>): NoteStyleSectionsError? =
+        NoteStyleSectionsError.TOO_MANY.takeIf { sections.size > MAX_SECTIONS }
 
     private fun headingErrors(sections: List<NoteStyleSection>): Map<Int, NoteStyleFieldError> =
         sections.withIndex().mapNotNull { (index, section) ->
@@ -89,11 +82,6 @@ object NoteStyleValidator {
             NoteStyleFieldError.DUPLICATE
         else -> null
     }
-
-    private fun guidanceErrors(sections: List<NoteStyleSection>): Map<Int, NoteStyleFieldError> =
-        sections.withIndex()
-            .filter { (_, section) -> section.guidance.length > MAX_GUIDANCE_LENGTH }
-            .associate { (index, _) -> index to NoteStyleFieldError.TOO_LONG }
 
     private fun String.collapseWhitespace(): String = trim().replace(WHITESPACE_RUNS, " ")
 

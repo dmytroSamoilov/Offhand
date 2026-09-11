@@ -37,7 +37,7 @@ class NoteStyleValidatorTest {
             name = "taken",
             noteKind = "k".repeat(NoteStyleValidator.MAX_KIND_LENGTH + 1),
             sections = listOf(
-                NoteStyleSection("", "g".repeat(NoteStyleValidator.MAX_GUIDANCE_LENGTH + 1), SectionFormat.BULLETS),
+                NoteStyleSection("", "g".repeat(5000), SectionFormat.BULLETS),
                 NoteStyleSection("h".repeat(NoteStyleValidator.MAX_HEADING_LENGTH + 1), "", SectionFormat.BULLETS),
             ),
         )
@@ -48,7 +48,6 @@ class NoteStyleValidatorTest {
         assertEquals(NoteStyleFieldError.TOO_LONG, errors.noteKind)
         assertEquals(NoteStyleFieldError.BLANK, errors.headings[0])
         assertEquals(NoteStyleFieldError.TOO_LONG, errors.headings[1])
-        assertEquals(NoteStyleFieldError.TOO_LONG, errors.guidance[0])
     }
 
     @Test
@@ -74,16 +73,13 @@ class NoteStyleValidatorTest {
     }
 
     @Test
-    fun `section count is bounded`() {
+    fun `a style without sections is valid and the count is bounded above`() {
         val none = valid.copy(sections = emptyList())
         val tooMany = valid.copy(
             sections = List(NoteStyleValidator.MAX_SECTIONS + 1) { NoteStyleSection("H$it", "", SectionFormat.BULLETS) },
         )
 
-        assertEquals(
-            NoteStyleSectionsError.NONE,
-            (NoteStyleValidator.validate(none, emptyList()) as NoteStyleValidation.Invalid).errors.sections,
-        )
+        assertTrue(NoteStyleValidator.validate(none, emptyList()) is NoteStyleValidation.Valid)
         assertEquals(
             NoteStyleSectionsError.TOO_MANY,
             (NoteStyleValidator.validate(tooMany, emptyList()) as NoteStyleValidation.Invalid).errors.sections,

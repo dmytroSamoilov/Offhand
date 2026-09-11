@@ -22,10 +22,10 @@ internal object NoteStyleDraftPrompt {
 
     private val DESIGN_RULES = """
         Rules for the design:
-        - Use between ${NoteStyleLimits.MIN_SECTIONS} and ${NoteStyleLimits.MAX_SECTIONS} sections, in the order they should appear in the note. Fewer clear sections beat many vague ones.
+        - Use between 1 and ${NoteStyleLimits.MAX_SECTIONS} sections, in the order they should appear in the note. Fewer clear sections beat many vague ones.
         - "heading": at most 4 words, a plain noun phrase, no numbering and no punctuation.
         - "guidance": one sentence that says what goes under the heading, written as an instruction that starts with a lowercase word, for example: each agreed task with who does it and by when.
-        - "format": "bullets" when the section lists separate items such as tasks, facts, decisions or questions, and "sentences" when it is narrative such as context, background or a summary.
+        - "format": "bullets" when the section lists separate items such as tasks, facts, decisions or questions, "sentences" when it is narrative such as context, background or a summary, and "free" when the shape should follow the content.
         - "name": a short label for the style, at most 4 words.
         - "kind": completes the sentence The note is ... and starts with a or an, for example: a sales call debrief.
         - Write everything in the same language the description is written in.
