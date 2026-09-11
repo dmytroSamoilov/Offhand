@@ -1,12 +1,10 @@
 package com.dmytrosamoilov.offhand.feature.recording.di
 
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleDrafter
-import com.dmytrosamoilov.offhand.core.data.domain.NoteStylePreviewer
 import com.dmytrosamoilov.offhand.feature.recording.domain.CalendarEventExtractor
 import com.dmytrosamoilov.offhand.feature.recording.domain.NoteStyleResolver
 import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinator
 import com.dmytrosamoilov.offhand.feature.recording.domain.SessionNoteStyleDrafter
-import com.dmytrosamoilov.offhand.feature.recording.domain.SessionNoteStylePreviewer
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.TranscriptStructurer
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteUseCase
@@ -47,7 +45,6 @@ val featureRecordingModule = module {
     single(recordingSessionScopeQualifier) { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
     singleOf(::NoteStyleResolver)
     singleOf(::TranscriptStructurer)
-    singleOf(::SessionNoteStylePreviewer) bind NoteStylePreviewer::class
     singleOf(::SessionNoteStyleDrafter) bind NoteStyleDrafter::class
     singleOf(::CalendarEventExtractor)
     singleOf(::PendingNotesCoordinator)

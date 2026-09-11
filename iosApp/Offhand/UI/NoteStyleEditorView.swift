@@ -5,7 +5,6 @@ struct NoteStyleEditorView: View {
     let styleId: Int64
     @Environment(\.dismiss) private var dismiss
     @State private var handle: NoteStyleEditorHandle?
-    @FocusState private var isEditing: Bool
     @State private var state = NoteStyleEditorUiState(
         isNew: true,
         name: "",
@@ -13,7 +12,6 @@ struct NoteStyleEditorView: View {
         language: .recording,
         sections: [],
         errors: NoteStyleErrors(name: nil, noteKind: nil, sections: nil, headings: [:]),
-        preview: nil,
         describe: nil,
         isSaved: false,
         isLocked: false
@@ -38,10 +36,6 @@ struct NoteStyleEditorView: View {
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button(String(localized: "Save")) { viewModel.onSaveRequested() }
-            }
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button(String(localized: "Done")) { isEditing = false }
             }
         }
         .sheet(isPresented: describeBinding) {
@@ -94,13 +88,11 @@ struct NoteStyleEditorView: View {
                 get: { state.name },
                 set: { viewModel.onNameChanged(name: $0) }
             ))
-            .focused($isEditing)
             errorText(state.errors.name, maxLength: NoteStyleLimits.shared.MAX_NAME_LENGTH)
             TextField(String(localized: "What kind of note is this?"), text: Binding(
                 get: { state.noteKind },
                 set: { viewModel.onNoteKindChanged(noteKind: $0) }
             ))
-            .focused($isEditing)
             errorText(state.errors.noteKind, maxLength: NoteStyleLimits.shared.MAX_KIND_LENGTH)
         } footer: {
             Text(String(localized: "Optional. Finishes the sentence “The note is …”."))
@@ -132,7 +124,6 @@ struct NoteStyleEditorView: View {
             }
             .disabled(state.sections.count >= Int(NoteStyleLimits.shared.MAX_SECTIONS))
         }
-        previewSection
     }
 
     private func sectionEditor(index: Int, section: SectionDraftUi) -> some View {
@@ -141,14 +132,12 @@ struct NoteStyleEditorView: View {
                 get: { section.heading },
                 set: { viewModel.onSectionHeadingChanged(index: Int32(index), heading: $0) }
             ))
-            .focused($isEditing)
             errorText(state.errors.headings[KotlinInt(int: Int32(index))], maxLength: NoteStyleLimits.shared.MAX_HEADING_LENGTH)
             TextField(String(localized: "What goes here"), text: Binding(
                 get: { section.guidance },
                 set: { viewModel.onSectionGuidanceChanged(index: Int32(index), guidance: $0) }
             ), axis: .vertical)
-            .lineLimit(2...5)
-            .focused($isEditing)
+            .lineLimit(2...Int(NoteStyleLimits.shared.GUIDANCE_VISIBLE_LINES))
             if section.guidance.count > Int(NoteStyleLimits.shared.GUIDANCE_WARNING_LENGTH) {
                 Text(String(localized: "Long instructions may fail to process. The AI on this device has limited memory, so use them at your own risk."))
                     .font(.footnote)
@@ -160,7 +149,7 @@ struct NoteStyleEditorView: View {
                 get: { section.format },
                 set: { viewModel.onSectionFormatChanged(index: Int32(index), format: $0) }
             )) {
-                Text(String(localized: "Short sentences")).tag(SectionFormat.sentences)
+                Text(String(localized: "Short")).tag(SectionFormat.sentences)
                 Text(String(localized: "Bullet points")).tag(SectionFormat.bullets)
                 Text(String(localized: "Free")).tag(SectionFormat.free)
             }
@@ -217,48 +206,6 @@ struct NoteStyleEditorView: View {
         case .tooLong: return String(format: String(localized: "Use at most %d characters"), maxLength)
         case .duplicate: return String(localized: "This name is already used")
         default: return ""
-        }
-    }
-
-    private var previewSection: some View {
-        Section {
-            Button(String(localized: "Try it on a sample")) {
-                viewModel.onPreviewRequested(sampleTranscript: String(localized: "Okay, quick debrief after the call with Maria from Northwind. They have about forty people in the field team and right now everyone sends photos over chat and someone retypes them into a spreadsheet on Monday. She said the main pain is losing details between the visit and the report. The budget is not decided yet, she wants to see a proper demo first. Her concern was that the team is not very technical. I promised to send the demo link by Thursday and she will bring in her operations lead, Tomas, for a second call in two weeks."))
-            }
-            .disabled(state.preview is StylePreviewUiRunning)
-            previewBody
-        } header: {
-            if state.preview != nil {
-                HStack {
-                    Text(String(localized: "Preview"))
-                    Spacer()
-                    Button { viewModel.onPreviewDismissed() } label: { Image(systemName: "xmark") }
-                        .buttonStyle(.borderless)
-                        .accessibilityLabel(String(localized: "Close preview"))
-                }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var previewBody: some View {
-        switch onEnum(of: state.preview) {
-        case .running:
-            HStack(spacing: 12) {
-                ProgressView()
-                Text(String(localized: "Writing a sample note…")).foregroundStyle(.secondary)
-            }
-        case .modelUnavailable:
-            Text(String(localized: "Download the AI model first to preview a style.")).foregroundStyle(.secondary)
-        case .failed:
-            Text(String(localized: "The preview could not be written. Try again.")).foregroundStyle(.secondary)
-        case .ready(let ready):
-            VStack(alignment: .leading, spacing: 8) {
-                Text(ready.title).font(.headline)
-                MarkdownBlocks(raw: ready.overview)
-            }
-        case .none:
-            EmptyView()
         }
     }
 
@@ -326,7 +273,7 @@ private struct DescribeStyleSheet: View {
                 }
             }
         case .modelUnavailable:
-            Section { Text(String(localized: "Download the AI model first to preview a style.")).foregroundStyle(.red) }
+            Section { Text(String(localized: "Download the AI model first to build a style.")).foregroundStyle(.red) }
         case .failed:
             Section { Text(String(localized: "The AI could not turn that into a style. Try describing it differently.")).foregroundStyle(.red) }
         default:

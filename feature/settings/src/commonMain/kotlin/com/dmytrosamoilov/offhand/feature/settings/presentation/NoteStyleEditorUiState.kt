@@ -11,7 +11,6 @@ data class NoteStyleEditorUiState(
     val language: NoteStyleLanguage = NoteStyleLanguage.RECORDING,
     val sections: List<SectionDraftUi> = listOf(SectionDraftUi()),
     val errors: NoteStyleErrors = NoteStyleErrors(),
-    val preview: StylePreviewUi? = null,
     val describe: DescribeStyleUi? = null,
     val isSaved: Boolean = false,
     val isLocked: Boolean = false,
@@ -34,10 +33,3 @@ data class SectionDraftUi(
     val guidance: String = "",
     val format: SectionFormat = SectionFormat.SENTENCES,
 )
-
-sealed interface StylePreviewUi {
-    data object Running : StylePreviewUi
-    data object ModelUnavailable : StylePreviewUi
-    data object Failed : StylePreviewUi
-    data class Ready(val title: String, val overview: String) : StylePreviewUi
-}

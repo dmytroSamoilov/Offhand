@@ -11,7 +11,10 @@ internal object NoteStylePrompt {
         EMPTY_SECTION_RULE,
     ).joinToString(LINE_BREAK)
 
-    fun polishStructureRule(spec: NoteStyleSpec): String = sectionPolishRule(spec.sections)
+    fun polishStructureRule(spec: NoteStyleSpec): String = listOf(
+        sectionPolishRule(spec.sections),
+        userInstructionsPolishRule(spec.userInstructions),
+    ).filter { it.isNotBlank() }.joinToString(LINE_BREAK)
 
     fun polishFieldRules(): String = listOf(
         FIELD_RULES_HEADER,
@@ -22,12 +25,21 @@ internal object NoteStylePrompt {
     fun structureLanguageRule(spec: NoteStyleSpec): String = when (spec.language) {
         NoteStyleLanguage.RECORDING -> RECORDING_LANGUAGE_RULE
         NoteStyleLanguage.ENGLISH -> ENGLISH_LANGUAGE_RULE
-    }
+    } + languageException(spec)
 
     fun polishLanguageRule(spec: NoteStyleSpec): String = when (spec.language) {
         NoteStyleLanguage.RECORDING -> DRAFT_LANGUAGE_RULE
         NoteStyleLanguage.ENGLISH -> ENGLISH_LANGUAGE_RULE
-    }
+    } + languageException(spec)
+
+    private fun languageException(spec: NoteStyleSpec): String =
+        if (spec.userInstructions.isEmpty()) "" else " $USER_LANGUAGE_EXCEPTION"
+
+    private fun userInstructionsPolishRule(instructions: List<SectionInstruction>): String =
+        instructions.joinToString(LINE_BREAK) { instruction ->
+            "- Under \"${instruction.heading}\" the draft follows these instructions; keep to them, " +
+                "even where they differ from the other rules: ${instruction.text}."
+        }
 
     fun markdownKind(kind: String): String = "$kind in Markdown, organised under section headings"
 
@@ -61,4 +73,6 @@ internal object NoteStylePrompt {
         "Write the title and the overview in the same language the draft is written in."
     private const val ENGLISH_LANGUAGE_RULE =
         "Write the title and the overview in English, whatever language the recording is spoken in."
+    private const val USER_LANGUAGE_EXCEPTION =
+        "Where a section's own instructions ask for another language, tone or form, that section follows its instructions instead."
 }

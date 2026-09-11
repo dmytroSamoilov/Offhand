@@ -55,7 +55,7 @@
     <string name="settings_note_style_editor_heading">Überschrift</string>
     <string name="settings_note_style_editor_guidance">Was gehört hierher</string>
     <string name="settings_note_style_editor_guidance_hint">jede vereinbarte Aufgabe mit Zuständigkeit und Termin</string>
-    <string name="settings_note_style_editor_format_sentences">Kurze Sätze</string>
+    <string name="settings_note_style_editor_format_sentences">Kurz</string>
     <string name="settings_note_style_editor_format_bullets">Stichpunkte</string>
     <string name="settings_note_style_editor_format_free">Frei</string>
     <string name="settings_note_style_editor_guidance_warning">Lange Anweisungen können fehlschlagen. Die KI auf diesem Gerät hat begrenzten Speicher, nutze sie auf eigenes Risiko.</string>
@@ -63,13 +63,7 @@
     <string name="settings_note_style_editor_remove_section">Abschnitt entfernen</string>
     <string name="settings_note_style_editor_move_up">Nach oben</string>
     <string name="settings_note_style_editor_move_down">Nach unten</string>
-    <string name="settings_note_style_editor_try">An einem Beispiel testen</string>
-    <string name="settings_note_style_editor_preview_title">Vorschau</string>
-    <string name="settings_note_style_editor_preview_dismiss">Vorschau schließen</string>
-    <string name="settings_note_style_editor_preview_running">Beispielnotiz wird geschrieben…</string>
-    <string name="settings_note_style_editor_preview_unavailable">Lade zuerst das KI-Modell herunter, um einen Stil auszuprobieren.</string>
-    <string name="settings_note_style_editor_preview_failed">Die Vorschau konnte nicht erstellt werden. Versuche es noch einmal.</string>
-    <string name="settings_note_style_sample_transcript">Okay, kurze Nachbesprechung nach dem Gespräch mit Maria von Northwind. Sie haben etwa vierzig Leute im Außendienst, und aktuell schickt jeder Fotos per Chat, und montags tippt jemand alles in eine Tabelle ab. Ihr größtes Problem sind die Details, die zwischen Besuch und Bericht verloren gehen. Das Budget steht noch nicht fest, sie will zuerst eine richtige Demo sehen. Ihre Sorge war, dass das Team nicht sehr technisch ist. Ich habe versprochen, den Demo-Link bis Donnerstag zu schicken, und sie holt ihren Betriebsleiter Tomas für ein zweites Gespräch in zwei Wochen dazu.</string>
+    <string name="settings_note_style_describe_unavailable">Lade zuerst das KI-Modell herunter, um einen Stil zu erstellen.</string>
     <string name="settings_note_style_error_blank">Dieses Feld ist erforderlich</string>
     <string name="settings_note_style_error_too_long">Höchstens %1$d Zeichen verwenden</string>
     <string name="settings_note_style_error_duplicate">Dieser Name wird bereits verwendet</string>

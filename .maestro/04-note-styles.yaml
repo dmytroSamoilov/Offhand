@@ -1,6 +1,6 @@
 # Runs after 01-smoke.yaml and relies on the note it created. Covers creating a
-# custom note style, previewing it on the sample, picking it as the default,
-# rewriting a note with it and deleting it again.
+# custom note style, picking it as the default, rewriting a note with it and
+# deleting it again.
 appId: com.dmytrosamoilov.offhand.uitest
 ---
 - launchApp
@@ -32,7 +32,7 @@ appId: com.dmytrosamoilov.offhand.uitest
           element: "Add section"
       - tapOn: "Add section"
       - scrollUntilVisible:
-          element: "Try it on a sample"
+          element: "Add section"
       - tapOn:
           text: "Heading"
           below: "Section 2"
@@ -41,17 +41,6 @@ appId: com.dmytrosamoilov.offhand.uitest
       - tapOn:
           text: "Bullet points"
           below: "Section 2"
-
-      # Preview runs the style through the (fake) model
-      - scrollUntilVisible:
-          element: "Try it on a sample"
-      - tapOn: "Try it on a sample"
-      - extendedWaitUntil:
-          visible: "Preview"
-          timeout: 10000
-      - scrollUntilVisible:
-          element: "Smoke test note"
-          timeout: 30000
       - tapOn: "Save"
 
       # The style is listed and can be chosen as the default
@@ -98,44 +87,43 @@ appId: com.dmytrosamoilov.offhand.uitest
       - assertVisible: "Built in"
       - tapOn: "New style"
 
-      # Fill the form; Done above the keyboard closes it so the next tap is
-      # not swallowed by the keyboard
+      # Fill the form; the editor has no keyboard Done button, a short drag on
+      # the form closes the keyboard so the next tap is not swallowed by it
       - tapOn: "Name"
       - inputText: "Sales debrief"
-      - tapOn: "Done"
+      - swipe:
+          start: "50%,35%"
+          end: "50%,45%"
       - tapOn: "What kind of note is this?"
       - inputText: "a sales call debrief"
-      - tapOn: "Done"
+      - swipe:
+          start: "50%,35%"
+          end: "50%,45%"
       - tapOn: "Heading"
       - inputText: "Customer"
-      - tapOn: "Done"
+      - swipe:
+          start: "50%,35%"
+          end: "50%,45%"
       - tapOn: "What goes here"
       - inputText: "who the customer is and their role"
-      - tapOn: "Done"
+      - swipe:
+          start: "50%,35%"
+          end: "50%,45%"
       - scrollUntilVisible:
           element: "Add section"
       - tapOn: "Add section"
       - scrollUntilVisible:
-          element: "Try it on a sample"
+          element: "Add section"
       - tapOn:
           text: "Heading"
           index: 1
       - inputText: "Next steps"
-      - tapOn: "Done"
+      - swipe:
+          start: "50%,35%"
+          end: "50%,45%"
       - tapOn:
           text: "Bullet points"
           index: 1
-
-      # Preview runs the style through the (fake) model
-      - scrollUntilVisible:
-          element: "Try it on a sample"
-      - tapOn: "Try it on a sample"
-      - extendedWaitUntil:
-          visible: "Preview"
-          timeout: 10000
-      - scrollUntilVisible:
-          element: "Smoke test note"
-          timeout: 30000
       - tapOn: "Save"
 
       # The style is listed and can be chosen as the default

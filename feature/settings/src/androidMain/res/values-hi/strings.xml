@@ -55,7 +55,7 @@
     <string name="settings_note_style_editor_heading">शीर्षक</string>
     <string name="settings_note_style_editor_guidance">यहाँ क्या आता है</string>
     <string name="settings_note_style_editor_guidance_hint">हर तय काम, कौन करेगा और कब तक</string>
-    <string name="settings_note_style_editor_format_sentences">छोटे वाक्य</string>
+    <string name="settings_note_style_editor_format_sentences">संक्षिप्त</string>
     <string name="settings_note_style_editor_format_bullets">बुलेट पॉइंट</string>
     <string name="settings_note_style_editor_format_free">मुक्त</string>
     <string name="settings_note_style_editor_guidance_warning">लंबे निर्देश प्रोसेस होने में विफल हो सकते हैं। इस डिवाइस के AI की मेमोरी सीमित है, इसलिए अपने जोखिम पर उपयोग करें।</string>
@@ -63,13 +63,7 @@
     <string name="settings_note_style_editor_remove_section">अनुभाग हटाएँ</string>
     <string name="settings_note_style_editor_move_up">ऊपर ले जाएँ</string>
     <string name="settings_note_style_editor_move_down">नीचे ले जाएँ</string>
-    <string name="settings_note_style_editor_try">एक नमूने पर आज़माएँ</string>
-    <string name="settings_note_style_editor_preview_title">पूर्वावलोकन</string>
-    <string name="settings_note_style_editor_preview_dismiss">पूर्वावलोकन बंद करें</string>
-    <string name="settings_note_style_editor_preview_running">नमूना नोट लिखा जा रहा है…</string>
-    <string name="settings_note_style_editor_preview_unavailable">किसी शैली का पूर्वावलोकन देखने के लिए पहले AI मॉडल डाउनलोड करें।</string>
-    <string name="settings_note_style_editor_preview_failed">पूर्वावलोकन नहीं लिखा जा सका। फिर कोशिश करें।</string>
-    <string name="settings_note_style_sample_transcript">ठीक है, Northwind की Maria से कॉल के बाद एक छोटी समीक्षा। उनकी फ़ील्ड टीम में लगभग चालीस लोग हैं और अभी सब चैट पर फ़ोटो भेजते हैं और सोमवार को कोई उन्हें स्प्रेडशीट में दोबारा टाइप करता है। उसने कहा कि सबसे बड़ी दिक्कत विज़िट और रिपोर्ट के बीच विवरण खो जाना है। बजट अभी तय नहीं है, वह पहले एक सही डेमो देखना चाहती है। उसकी चिंता यह थी कि टीम बहुत तकनीकी नहीं है। मैंने गुरुवार तक डेमो लिंक भेजने का वादा किया और वह दो हफ़्ते में दूसरी कॉल के लिए अपने ऑपरेशन्स प्रमुख Tomas को शामिल करेगी।</string>
+    <string name="settings_note_style_describe_unavailable">शैली बनाने के लिए पहले AI मॉडल डाउनलोड करें।</string>
     <string name="settings_note_style_error_blank">यह फ़ील्ड ज़रूरी है</string>
     <string name="settings_note_style_error_too_long">अधिकतम %1$d वर्ण इस्तेमाल करें</string>
     <string name="settings_note_style_error_duplicate">यह नाम पहले से इस्तेमाल में है</string>

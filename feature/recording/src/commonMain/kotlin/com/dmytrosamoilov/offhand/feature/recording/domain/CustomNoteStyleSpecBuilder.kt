@@ -26,8 +26,18 @@ internal object CustomNoteStyleSpecBuilder {
             sections = headings,
             overviewRule = overviewRule(kind, headings, effective),
             language = language,
+            userInstructions = userInstructions(effective, headings),
         )
     }
+
+    // A free section with guidance is the user's own slot: the model is told
+    // to follow it over every form, tone and language rule of ours.
+    private fun userInstructions(sections: List<NoteStyleSection>, headings: List<String>): List<SectionInstruction> =
+        sections.zip(headings)
+            .filter { (section, _) -> section.format == SectionFormat.FREE }
+            .mapNotNull { (section, heading) ->
+                section.guidance.toPromptText().takeIf { it.isNotBlank() }?.let { SectionInstruction(heading, it) }
+            }
 
     private fun overviewRule(
         kind: String,
@@ -39,16 +49,20 @@ internal object CustomNoteStyleSpecBuilder {
         append(". ")
         append(ONE_HEADING_RULE)
         sections.zip(headings).forEach { (section, heading) ->
-            append(" Under \"$heading\" ${formatRule(section.format)}")
-            section.guidance.toPromptText().takeIf { it.isNotBlank() }?.let { append(": $it") }
-            append(".")
+            append(" ${sectionRule(section, heading)}.")
         }
     }
 
-    private fun formatRule(format: SectionFormat): String = when (format) {
+    private fun sectionRule(section: NoteStyleSection, heading: String): String {
+        val guidance = section.guidance.toPromptText()
+        val rule = formatRule(section.format, hasGuidance = guidance.isNotBlank())
+        return "Under \"$heading\" $rule" + if (guidance.isBlank()) "" else ": $guidance"
+    }
+
+    private fun formatRule(format: SectionFormat, hasGuidance: Boolean): String = when (format) {
         SectionFormat.SENTENCES -> SENTENCES_RULE
         SectionFormat.BULLETS -> BULLETS_RULE
-        SectionFormat.FREE -> FREE_RULE
+        SectionFormat.FREE -> if (hasGuidance) INSTRUCTIONS_RULE else FREE_RULE
     }
 
     private fun NoteStyleSection.promptHeading(): String =
@@ -69,6 +83,8 @@ internal object CustomNoteStyleSpecBuilder {
     private const val SENTENCES_RULE = "write short plain sentences"
     private const val BULLETS_RULE = "write one \"- \" line per point"
     private const val FREE_RULE = "write it in whatever form fits the content best"
+    private const val INSTRUCTIONS_RULE =
+        "follow these instructions exactly, even where they differ from every other rule about form, tone or language"
     private val UNSAFE_CHARS = Regex("[\"{}\\\\`<>]")
     private val WHITESPACE = Regex("\\s+")
 }

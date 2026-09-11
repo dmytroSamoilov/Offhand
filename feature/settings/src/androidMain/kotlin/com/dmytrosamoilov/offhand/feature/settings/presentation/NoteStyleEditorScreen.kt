@@ -1,6 +1,5 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -25,7 +22,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,7 +36,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -51,7 +46,6 @@ import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLimits
 import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
 import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
-import com.dmytrosamoilov.offhand.core.designsystem.component.MarkdownText
 import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.feature.settings.R
@@ -135,11 +129,6 @@ private fun EditorContent(
         KindField(value = state.noteKind, error = state.errors.noteKind, onValueChange = viewModel::onNoteKindChanged)
         LanguageChoice(selected = state.language, onSelected = viewModel::onLanguageChanged)
         SectionsEditor(state = state, viewModel = viewModel)
-        PreviewBlock(
-            preview = state.preview,
-            onTry = viewModel::onPreviewRequested,
-            onDismiss = viewModel::onPreviewDismissed,
-        )
         Spacer(modifier = Modifier.height(24.dp))
     }
 }
@@ -302,6 +291,7 @@ private fun SectionCard(
                 placeholder = { Text(text = stringResource(R.string.settings_note_style_editor_guidance_hint)) },
                 supportingText = guidanceWarning(section.guidance),
                 minLines = 2,
+                maxLines = NoteStyleLimits.GUIDANCE_VISIBLE_LINES,
                 modifier = Modifier.fillMaxWidth(),
             )
             FormatChoice(selected = section.format, onSelected = { viewModel.onSectionFormatChanged(index, it) })
@@ -375,64 +365,5 @@ private fun guidanceWarning(guidance: String): (@Composable () -> Unit)? {
                 .background(MaterialTheme.extendedColors.warningContainer, MaterialTheme.shapes.small)
                 .padding(horizontal = 8.dp, vertical = 4.dp),
         )
-    }
-}
-
-@Composable
-private fun PreviewBlock(preview: StylePreviewUi?, onTry: (String) -> Unit, onDismiss: () -> Unit) {
-    val sample = stringResource(R.string.settings_note_style_sample_transcript)
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        OutlinedButton(onClick = { onTry(sample) }, enabled = preview !is StylePreviewUi.Running) {
-            Text(text = stringResource(R.string.settings_note_style_editor_try))
-        }
-        if (preview != null) {
-            PreviewCard(preview = preview, onDismiss = onDismiss)
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun PreviewCard(preview: StylePreviewUi, onDismiss: () -> Unit) {
-    val bringIntoView = remember { BringIntoViewRequester() }
-    LaunchedEffect(preview) { bringIntoView.bringIntoView() }
-    Card(modifier = Modifier.fillMaxWidth().bringIntoViewRequester(bringIntoView)) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = stringResource(R.string.settings_note_style_editor_preview_title),
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.weight(1f),
-                )
-                IconButton(onClick = onDismiss) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.settings_note_style_editor_preview_dismiss),
-                    )
-                }
-            }
-            PreviewBody(preview)
-        }
-    }
-}
-
-@Composable
-private fun PreviewBody(preview: StylePreviewUi) {
-    when (preview) {
-        StylePreviewUi.Running -> PreviewStatus(text = stringResource(R.string.settings_note_style_editor_preview_running), showProgress = true)
-        StylePreviewUi.ModelUnavailable -> PreviewStatus(text = stringResource(R.string.settings_note_style_editor_preview_unavailable))
-        StylePreviewUi.Failed -> PreviewStatus(text = stringResource(R.string.settings_note_style_editor_preview_failed))
-        is StylePreviewUi.Ready -> {
-            Text(text = preview.title, style = MaterialTheme.typography.titleMedium)
-            MarkdownText(markdown = preview.overview)
-        }
-    }
-}
-
-@Composable
-private fun PreviewStatus(text: String, showProgress: Boolean = false) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        if (showProgress) CircularProgressIndicator(modifier = Modifier.padding(2.dp).height(20.dp))
-        Text(text = text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

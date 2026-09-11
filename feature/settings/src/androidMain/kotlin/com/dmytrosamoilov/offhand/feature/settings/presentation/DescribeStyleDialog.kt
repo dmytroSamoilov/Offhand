@@ -75,7 +75,7 @@ private fun DescribeStatus(status: DescribeStatusUi) {
             StatusText(text = stringResource(R.string.settings_note_style_describe_running))
         }
         DescribeStatusUi.MODEL_UNAVAILABLE ->
-            StatusText(text = stringResource(R.string.settings_note_style_editor_preview_unavailable), isError = true)
+            StatusText(text = stringResource(R.string.settings_note_style_describe_unavailable), isError = true)
         DescribeStatusUi.FAILED ->
             StatusText(text = stringResource(R.string.settings_note_style_describe_failed), isError = true)
     }

@@ -55,7 +55,7 @@
     <string name="settings_note_style_editor_heading">Título</string>
     <string name="settings_note_style_editor_guidance">O que entra aqui</string>
     <string name="settings_note_style_editor_guidance_hint">cada tarefa combinada, com quem faz e até quando</string>
-    <string name="settings_note_style_editor_format_sentences">Frases curtas</string>
+    <string name="settings_note_style_editor_format_sentences">Curto</string>
     <string name="settings_note_style_editor_format_bullets">Tópicos</string>
     <string name="settings_note_style_editor_format_free">Livre</string>
     <string name="settings_note_style_editor_guidance_warning">Instruções longas podem falhar. A IA deste aparelho tem memória limitada, use por sua conta e risco.</string>
@@ -63,13 +63,7 @@
     <string name="settings_note_style_editor_remove_section">Remover seção</string>
     <string name="settings_note_style_editor_move_up">Mover para cima</string>
     <string name="settings_note_style_editor_move_down">Mover para baixo</string>
-    <string name="settings_note_style_editor_try">Testar com um exemplo</string>
-    <string name="settings_note_style_editor_preview_title">Prévia</string>
-    <string name="settings_note_style_editor_preview_dismiss">Fechar prévia</string>
-    <string name="settings_note_style_editor_preview_running">Escrevendo uma nota de exemplo…</string>
-    <string name="settings_note_style_editor_preview_unavailable">Baixe o modelo de IA primeiro para ver a prévia de um estilo.</string>
-    <string name="settings_note_style_editor_preview_failed">Não foi possível escrever a prévia. Tente de novo.</string>
-    <string name="settings_note_style_sample_transcript">Certo, resumo rápido depois da ligação com a Maria da Northwind. Eles têm cerca de quarenta pessoas na equipe de campo e hoje todo mundo manda fotos pelo chat e alguém redigita tudo numa planilha na segunda. Ela disse que a maior dor é perder detalhes entre a visita e o relatório. O orçamento ainda não está decidido, ela quer ver uma demonstração de verdade primeiro. A preocupação dela era que a equipe não é muito técnica. Prometi enviar o link da demonstração até quinta e ela vai trazer o líder de operações, Tomas, para uma segunda ligação em duas semanas.</string>
+    <string name="settings_note_style_describe_unavailable">Baixe o modelo de IA primeiro para criar um estilo.</string>
     <string name="settings_note_style_error_blank">Este campo é obrigatório</string>
     <string name="settings_note_style_error_too_long">Use no máximo %1$d caracteres</string>
     <string name="settings_note_style_error_duplicate">Este nome já está em uso</string>

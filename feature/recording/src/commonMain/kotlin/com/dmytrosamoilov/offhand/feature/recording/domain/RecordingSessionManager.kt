@@ -9,7 +9,6 @@ import com.dmytrosamoilov.offhand.core.audio.VadSnapshot
 import com.dmytrosamoilov.offhand.core.audio.WavCodec
 import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
-import com.dmytrosamoilov.offhand.core.data.domain.NoteStylePreview
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.core.security.closeQuietly
@@ -292,12 +291,6 @@ class RecordingSessionManager(
 
     private fun importedTitle(displayName: String): String =
         displayName.substringBeforeLast('.').trim().ifBlank { displayName }
-
-    internal suspend fun previewNoteStyle(spec: NoteStyleSpec, sampleTranscript: String): NoteStylePreview =
-        withProcessingLock {
-            val structured = transcriptStructurer.structure(listOf(sampleTranscript), spec) {}
-            NoteStylePreview(title = structured.title, overview = structured.overview)
-        }
 
     internal suspend fun <T> withProcessingLock(block: suspend () -> T): T = processingMutex.withLock { block() }
 

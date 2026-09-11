@@ -19,7 +19,6 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleValidator
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.DraftNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.GetCustomNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.PreviewNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SaveCustomNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SaveNoteStyleResult
 import kotlin.time.Clock
@@ -34,7 +33,6 @@ class NoteStyleEditorViewModel(
     private val styleId: Long,
     private val getCustomNoteStyle: GetCustomNoteStyleUseCase,
     private val saveCustomNoteStyle: SaveCustomNoteStyleUseCase,
-    private val previewNoteStyle: PreviewNoteStyleUseCase,
     private val draftNoteStyle: DraftNoteStyleUseCase,
     isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase,
     private val proUpgradeGate: ProUpgradeGate,
@@ -88,16 +86,6 @@ class NoteStyleEditorViewModel(
         copy(sections = moved, errors = NoteStyleErrors())
     }
 
-    fun onPreviewRequested(sampleTranscript: String) {
-        val style = validatedStyle() ?: return
-        mutableUiState.update { it.copy(preview = StylePreviewUi.Running) }
-        launchSafely(showLoading = false) {
-            mutableUiState.update { it.copy(preview = runPreview(style, sampleTranscript)) }
-        }
-    }
-
-    fun onPreviewDismissed() = edit { copy(preview = null) }
-
     fun onDescribeRequested() = edit { copy(describe = describe ?: DescribeStyleUi()) }
 
     fun onDescribeDismissed() = edit { copy(describe = null) }
@@ -126,7 +114,7 @@ class NoteStyleEditorViewModel(
     private fun applyDraft(description: String, draft: NoteStyleDraft?) {
         val status = mutableUiState.value.describe?.status
         when {
-            draft != null -> edit { withDraft(draft).copy(describe = null, errors = NoteStyleErrors(), preview = null) }
+            draft != null -> edit { withDraft(draft).copy(describe = null, errors = NoteStyleErrors()) }
             status == DescribeStatusUi.RUNNING ->
                 edit { copy(describe = DescribeStyleUi(description, DescribeStatusUi.MODEL_UNAVAILABLE)) }
         }
@@ -138,7 +126,7 @@ class NoteStyleEditorViewModel(
         sections = draft.sections.map { SectionDraftUi(it.heading, it.guidance, it.format) },
     )
 
-    // Free users build and try the style; saving is where the paywall sits,
+    // Free users build the style; saving is where the paywall sits,
     // and the draft survives it either way.
     fun onSaveRequested() {
         val style = validatedStyle() ?: return
@@ -149,14 +137,6 @@ class NoteStyleEditorViewModel(
                 is SaveNoteStyleResult.Invalid -> mutableUiState.update { it.copy(errors = result.errors) }
             }
         }
-    }
-
-    private suspend fun runPreview(style: CustomNoteStyle, sampleTranscript: String): StylePreviewUi = try {
-        previewNoteStyle(style, sampleTranscript)
-            ?.let { StylePreviewUi.Ready(title = it.title, overview = it.overview) }
-            ?: StylePreviewUi.ModelUnavailable
-    } catch (backendFailure: AiBackendException) {
-        StylePreviewUi.Failed
     }
 
     private fun validatedStyle(): CustomNoteStyle? =

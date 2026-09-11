@@ -55,7 +55,7 @@
     <string name="settings_note_style_editor_heading">Заголовок</string>
     <string name="settings_note_style_editor_guidance">Що сюди входить</string>
     <string name="settings_note_style_editor_guidance_hint">кожна домовленість: хто робить і до якого терміну</string>
-    <string name="settings_note_style_editor_format_sentences">Короткі речення</string>
+    <string name="settings_note_style_editor_format_sentences">Стисло</string>
     <string name="settings_note_style_editor_format_bullets">Списком</string>
     <string name="settings_note_style_editor_format_free">Вільно</string>
     <string name="settings_note_style_editor_guidance_warning">Довгі інструкції можуть не опрацюватися. ШІ на цьому пристрої має обмежену памʼять, використовуйте на власний ризик.</string>
@@ -63,13 +63,7 @@
     <string name="settings_note_style_editor_remove_section">Вилучити розділ</string>
     <string name="settings_note_style_editor_move_up">Вище</string>
     <string name="settings_note_style_editor_move_down">Нижче</string>
-    <string name="settings_note_style_editor_try">Перевірити на прикладі</string>
-    <string name="settings_note_style_editor_preview_title">Попередній перегляд</string>
-    <string name="settings_note_style_editor_preview_dismiss">Закрити попередній перегляд</string>
-    <string name="settings_note_style_editor_preview_running">Пишемо приклад нотатки…</string>
-    <string name="settings_note_style_editor_preview_unavailable">Щоб перевірити стиль, спочатку завантажте модель ШІ.</string>
-    <string name="settings_note_style_editor_preview_failed">Не вдалося написати приклад. Спробуйте ще раз.</string>
-    <string name="settings_note_style_sample_transcript">Отже, короткі підсумки після дзвінка з Марією з Northwind. У них близько сорока людей у польовій команді, і зараз усі надсилають фото в чат, а в понеділок хтось передруковує їх у таблицю. Вона сказала, що головний біль — деталі губляться між візитом і звітом. Бюджет ще не вирішено, спершу вона хоче побачити справжнє демо. Її хвилювало, що команда не дуже технічна. Я пообіцяв надіслати посилання на демо до четверга, а вона залучить свого керівника операцій Томаса до другого дзвінка за два тижні.</string>
+    <string name="settings_note_style_describe_unavailable">Щоб створити стиль, спочатку завантажте ШІ-модель.</string>
     <string name="settings_note_style_error_blank">Це поле обов’язкове</string>
     <string name="settings_note_style_error_too_long">Не більше %1$d символів</string>
     <string name="settings_note_style_error_duplicate">Така назва вже використовується</string>

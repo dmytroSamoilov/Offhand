@@ -4,7 +4,6 @@ import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleDraft
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleDraftException
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
-import com.dmytrosamoilov.offhand.core.data.domain.NoteStylePreview
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleSection
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
@@ -13,7 +12,6 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleFieldError
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.DraftNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.GetCustomNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.PreviewNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SaveCustomNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SaveNoteStyleResult
 import io.mockk.coEvery
@@ -41,7 +39,6 @@ class NoteStyleEditorViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private val getStyle: GetCustomNoteStyleUseCase = mockk()
     private val saveStyle: SaveCustomNoteStyleUseCase = mockk()
-    private val previewStyle: PreviewNoteStyleUseCase = mockk()
     private val draftStyle: DraftNoteStyleUseCase = mockk()
     private val isAvailable: IsCustomNoteStylesAvailableUseCase = mockk {
         every { this@mockk.invoke() } returns flowOf(true)
@@ -68,7 +65,7 @@ class NoteStyleEditorViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel(styleId: Long) = NoteStyleEditorViewModel(styleId, getStyle, saveStyle, previewStyle, draftStyle, isAvailable, gate)
+    private fun viewModel(styleId: Long) = NoteStyleEditorViewModel(styleId, getStyle, saveStyle, draftStyle, isAvailable, gate)
 
     @Test
     fun `new editor starts with one empty section`() {
@@ -131,36 +128,6 @@ class NoteStyleEditorViewModelTest {
 
         viewModel.onNameChanged("Named")
         assertEquals(null, viewModel.uiState.value.errors.name)
-    }
-
-    @Test
-    fun `preview validates locally and shows the written sample`() = runTest(dispatcher) {
-        coEvery { previewStyle(any(), "sample") } returns NoteStylePreview("Title", "## A\n- point")
-        val viewModel = viewModel(0L)
-
-        viewModel.onPreviewRequested("sample")
-        assertEquals(NoteStyleFieldError.BLANK, viewModel.uiState.value.errors.name)
-
-        viewModel.onNameChanged("Debrief")
-        viewModel.onSectionHeadingChanged(0, "A")
-        viewModel.onPreviewRequested("sample")
-        assertEquals(StylePreviewUi.Running, viewModel.uiState.value.preview)
-        advanceUntilIdle()
-
-        assertEquals(StylePreviewUi.Ready("Title", "## A\n- point"), viewModel.uiState.value.preview)
-    }
-
-    @Test
-    fun `preview without a downloaded model explains why`() = runTest(dispatcher) {
-        coEvery { previewStyle(any(), any()) } returns null
-        val viewModel = viewModel(0L)
-        viewModel.onNameChanged("Debrief")
-        viewModel.onSectionHeadingChanged(0, "A")
-
-        viewModel.onPreviewRequested("sample")
-        advanceUntilIdle()
-
-        assertEquals(StylePreviewUi.ModelUnavailable, viewModel.uiState.value.preview)
     }
 
     @Test

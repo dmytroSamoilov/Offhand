@@ -52,12 +52,44 @@ class CustomNoteStyleSpecBuilderTest {
     }
 
     @Test
-    fun `a free section carries no structure rule beyond its guidance`() {
-        val free = style.copy(sections = listOf(NoteStyleSection("Notes", "anything worth keeping", SectionFormat.FREE)))
+    fun `a free section without guidance carries no structure rule`() {
+        val free = style.copy(sections = listOf(NoteStyleSection("Notes", "", SectionFormat.FREE)))
 
-        val rule = CustomNoteStyleSpecBuilder.build(free).overviewRule
+        val spec = CustomNoteStyleSpecBuilder.build(free)
 
-        assertTrue(rule.contains("Under \"## Notes\" write it in whatever form fits the content best: anything worth keeping."))
+        assertTrue(spec.overviewRule.contains("Under \"## Notes\" write it in whatever form fits the content best."))
+        assertTrue(spec.userInstructions.isEmpty())
+        assertFalse(ModelPromptSet.Gemma4.structureNote(spec).contains("follows its instructions instead"))
+    }
+
+    @Test
+    fun `free guidance overrides the form and language rules in both prompts`() {
+        val free = style.copy(
+            sections = listOf(NoteStyleSection("Notes", "write it as a poem in French", SectionFormat.FREE)),
+        )
+
+        val spec = CustomNoteStyleSpecBuilder.build(free)
+        val structure = ModelPromptSet.Gemma4.structureNote(spec)
+        val polish = ModelPromptSet.Gemma4.polishNote(spec, thinkingEnabled = false)
+
+        assertEquals(listOf(SectionInstruction("## Notes", "write it as a poem in French")), spec.userInstructions)
+        assertTrue(
+            spec.overviewRule.contains(
+                "Under \"## Notes\" follow these instructions exactly, even where they differ from every other rule " +
+                    "about form, tone or language: write it as a poem in French.",
+            ),
+        )
+        assertTrue(structure.contains("in English, whatever language the recording is spoken in. Where a section's own instructions"))
+        assertTrue(polish.contains("Under \"## Notes\" the draft follows these instructions; keep to them, even where they differ from the other rules: write it as a poem in French."))
+        assertTrue(polish.contains("that section follows its instructions instead"))
+    }
+
+    @Test
+    fun `guidance on a sentences section stays a plain hint`() {
+        val spec = CustomNoteStyleSpecBuilder.build(style)
+
+        assertTrue(spec.userInstructions.isEmpty())
+        assertFalse(spec.overviewRule.contains("follow these instructions exactly"))
     }
 
     @Test

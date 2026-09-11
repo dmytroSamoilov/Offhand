@@ -55,7 +55,7 @@
     <string name="settings_note_style_editor_heading">Заголовок</string>
     <string name="settings_note_style_editor_guidance">Что сюда входит</string>
     <string name="settings_note_style_editor_guidance_hint">каждая договорённость: кто делает и к какому сроку</string>
-    <string name="settings_note_style_editor_format_sentences">Короткие предложения</string>
+    <string name="settings_note_style_editor_format_sentences">Кратко</string>
     <string name="settings_note_style_editor_format_bullets">Списком</string>
     <string name="settings_note_style_editor_format_free">Свободно</string>
     <string name="settings_note_style_editor_guidance_warning">Длинные инструкции могут не обработаться. У ИИ на этом устройстве ограниченная память, используйте на свой риск.</string>
@@ -63,13 +63,7 @@
     <string name="settings_note_style_editor_remove_section">Удалить раздел</string>
     <string name="settings_note_style_editor_move_up">Выше</string>
     <string name="settings_note_style_editor_move_down">Ниже</string>
-    <string name="settings_note_style_editor_try">Проверить на примере</string>
-    <string name="settings_note_style_editor_preview_title">Предпросмотр</string>
-    <string name="settings_note_style_editor_preview_dismiss">Закрыть предпросмотр</string>
-    <string name="settings_note_style_editor_preview_running">Пишем пример заметки…</string>
-    <string name="settings_note_style_editor_preview_unavailable">Чтобы проверить стиль, сначала скачайте модель ИИ.</string>
-    <string name="settings_note_style_editor_preview_failed">Не удалось написать пример. Попробуйте ещё раз.</string>
-    <string name="settings_note_style_sample_transcript">Итак, короткие итоги после звонка с Марией из Northwind. У них около сорока человек в полевой команде, и сейчас все отправляют фотографии в чат, а в понедельник кто-то перепечатывает их в таблицу. Она сказала, что главная боль — детали теряются между визитом и отчётом. Бюджет ещё не решён, сначала она хочет увидеть нормальное демо. Её беспокоило, что команда не очень техническая. Я пообещал прислать ссылку на демо к четвергу, а она подключит своего руководителя операций Томаса ко второму звонку через две недели.</string>
+    <string name="settings_note_style_describe_unavailable">Чтобы создать стиль, сначала скачайте ИИ-модель.</string>
     <string name="settings_note_style_error_blank">Это поле обязательно</string>
     <string name="settings_note_style_error_too_long">Не больше %1$d символов</string>
     <string name="settings_note_style_error_duplicate">Такое название уже используется</string>

@@ -56,7 +56,7 @@
     <string name="settings_note_style_editor_heading">Heading</string>
     <string name="settings_note_style_editor_guidance">What goes here</string>
     <string name="settings_note_style_editor_guidance_hint">each agreed task with who does it and by when</string>
-    <string name="settings_note_style_editor_format_sentences">Short sentences</string>
+    <string name="settings_note_style_editor_format_sentences">Short</string>
     <string name="settings_note_style_editor_format_bullets">Bullet points</string>
     <string name="settings_note_style_editor_format_free">Free</string>
     <string name="settings_note_style_editor_guidance_warning">Long instructions may fail to process. The AI on this device has limited memory, so use them at your own risk.</string>
@@ -64,13 +64,7 @@
     <string name="settings_note_style_editor_remove_section">Remove section</string>
     <string name="settings_note_style_editor_move_up">Move up</string>
     <string name="settings_note_style_editor_move_down">Move down</string>
-    <string name="settings_note_style_editor_try">Try it on a sample</string>
-    <string name="settings_note_style_editor_preview_title">Preview</string>
-    <string name="settings_note_style_editor_preview_dismiss">Close preview</string>
-    <string name="settings_note_style_editor_preview_running">Writing a sample note…</string>
-    <string name="settings_note_style_editor_preview_unavailable">Download the AI model first to preview a style.</string>
-    <string name="settings_note_style_editor_preview_failed">The preview could not be written. Try again.</string>
-    <string name="settings_note_style_sample_transcript">Okay, quick debrief after the call with Maria from Northwind. They have about forty people in the field team and right now everyone sends photos over chat and someone retypes them into a spreadsheet on Monday. She said the main pain is losing details between the visit and the report. The budget is not decided yet, she wants to see a proper demo first. Her concern was that the team is not very technical. I promised to send the demo link by Thursday and she will bring in her operations lead, Tomas, for a second call in two weeks.</string>
+    <string name="settings_note_style_describe_unavailable">Download the AI model first to build a style.</string>
     <string name="settings_note_style_error_blank">This field is required</string>
     <string name="settings_note_style_error_too_long">Use at most %1$d characters</string>
     <string name="settings_note_style_error_duplicate">This name is already used</string>
