@@ -127,5 +127,6 @@ class PaywallViewModelTest {
         restoreProPurchases = restoreProPurchases,
         observeProStatus = observeProStatus,
         proUpgradeGate = gate,
+        analyticsTracker = mockk(relaxed = true),
     )
 }

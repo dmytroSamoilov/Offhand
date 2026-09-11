@@ -95,6 +95,7 @@ val featureNotesModule = module {
             aiCoreDownloadStatus = get(),
             clearTranscriptionCheckpoint = get(),
             buildInfo = get(),
+            analyticsTracker = get(),
         )
     }
 }

@@ -111,6 +111,7 @@ class SettingsViewModelTest {
         setProOverride = setProOverride,
         proUpgradeGate = gate,
         buildInfo = BuildInfo(isDeveloperBuild = false, appVersion = "1", platform = "test"),
+        analyticsTracker = mockk(relaxed = true),
     )
 
     @Test

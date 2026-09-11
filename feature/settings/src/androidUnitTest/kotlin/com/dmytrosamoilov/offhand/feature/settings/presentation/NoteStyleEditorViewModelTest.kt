@@ -65,7 +65,7 @@ class NoteStyleEditorViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel(styleId: Long) = NoteStyleEditorViewModel(styleId, getStyle, saveStyle, draftStyle, isAvailable, gate)
+    private fun viewModel(styleId: Long) = NoteStyleEditorViewModel(styleId, getStyle, saveStyle, draftStyle, isAvailable, gate, mockk(relaxed = true))
 
     @Test
     fun `new editor starts with one empty section`() {

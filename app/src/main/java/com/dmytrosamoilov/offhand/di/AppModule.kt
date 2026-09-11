@@ -8,11 +8,13 @@ import com.dmytrosamoilov.offhand.core.ai.local.LiteRtLmManager
 import com.dmytrosamoilov.offhand.core.ai.local.LocalAiBackend
 import com.dmytrosamoilov.offhand.core.ai.local.WhisperSpeechToText
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsSink
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
 import com.dmytrosamoilov.offhand.root.RootViewModel
 import com.dmytrosamoilov.offhand.telemetry.TelemetryController
+import com.dmytrosamoilov.offhand.telemetry.FirebaseAnalyticsSink
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.bind
@@ -24,6 +26,7 @@ val appModule = module {
     singleOf(::LocalAiBackend) bind AiBackend::class
     singleOf(::WhisperSpeechToText) bind SpeechToText::class
     singleOf(::TelemetryController)
+    singleOf(::FirebaseAnalyticsSink) bind AnalyticsSink::class
     viewModel {
         RootViewModel(
             observeUserPreferences = get(),

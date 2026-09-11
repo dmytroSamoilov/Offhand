@@ -90,6 +90,7 @@ class OnboardingViewModelTest {
         setNotePreset = setNotePreset,
         completeOnboarding = completeOnboarding,
         stepPolicy = stepPolicy,
+        analyticsTracker = mockk(relaxed = true),
     )
 
     private fun capableViewModel(): OnboardingViewModel {

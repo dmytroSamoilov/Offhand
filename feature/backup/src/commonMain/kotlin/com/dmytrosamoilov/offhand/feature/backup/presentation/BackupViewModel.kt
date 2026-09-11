@@ -1,5 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.backup.presentation
 
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupException
@@ -17,6 +19,7 @@ import kotlinx.coroutines.launch
 class BackupViewModel(
     private val createBackup: CreateBackupUseCase,
     private val restoreBackup: RestoreBackupUseCase,
+    private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
     private val mutableUiState = MutableStateFlow(BackupUiState())
@@ -81,6 +84,7 @@ class BackupViewModel(
         val includeStyles = mutableUiState.value.includeStyles
         runOperation(BackupModeUi.BACKUP) { passphrase, report ->
             val summary = createBackup(file, passphrase, includeAudio, includeStyles, report)
+            analyticsTracker.track(AnalyticsEvents.backupCreated(summary.notes, includeAudio))
             BackupOperationUi.BackupCompleted(summary.notes, summary.folders, summary.audioBytes)
         }
     }
@@ -105,6 +109,7 @@ class BackupViewModel(
         mutableUiState.update { it.copy(isRestorePassphraseRequested = false) }
         runOperation(BackupModeUi.RESTORE) { passphrase, report ->
             val summary = restoreBackup(file, passphrase, report)
+            analyticsTracker.track(AnalyticsEvents.backupRestored(summary.notesRestored))
             BackupOperationUi.RestoreCompleted(
                 notesRestored = summary.notesRestored,
                 notesSkipped = summary.notesSkipped,

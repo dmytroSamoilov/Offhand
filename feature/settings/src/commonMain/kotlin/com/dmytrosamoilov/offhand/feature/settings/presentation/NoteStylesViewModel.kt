@@ -1,5 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.DeleteCustomNoteStyleUseCase
@@ -15,6 +17,7 @@ class NoteStylesViewModel(
     observeCustomNoteStyles: ObserveCustomNoteStylesUseCase,
     isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase,
     private val deleteCustomNoteStyle: DeleteCustomNoteStyleUseCase,
+    private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
     private val mutableUiState = MutableStateFlow(NoteStylesUiState())
@@ -46,6 +49,7 @@ class NoteStylesViewModel(
         mutableUiState.update { it.copy(pendingDeleteId = null) }
         launchSafely(showLoading = false) {
             deleteCustomNoteStyle(id)
+            analyticsTracker.track(AnalyticsEvents.noteStyleDeleted())
         }
     }
 }

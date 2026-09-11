@@ -13,6 +13,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleSection
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleErrors
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleValidation
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleValidator
@@ -36,12 +38,14 @@ class NoteStyleEditorViewModel(
     private val draftNoteStyle: DraftNoteStyleUseCase,
     isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase,
     private val proUpgradeGate: ProUpgradeGate,
+    private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
     private val mutableUiState = MutableStateFlow(NoteStyleEditorUiState(isNew = styleId == NEW_STYLE_ID))
     val uiState: StateFlow<NoteStyleEditorUiState> = mutableUiState.asStateFlow()
 
     private var createdAtEpochMs = Clock.System.now().toEpochMilliseconds()
+    private var isDescribed = false
 
     init {
         if (styleId != NEW_STYLE_ID) loadExisting()
@@ -114,7 +118,10 @@ class NoteStyleEditorViewModel(
     private fun applyDraft(description: String, draft: NoteStyleDraft?) {
         val status = mutableUiState.value.describe?.status
         when {
-            draft != null -> edit { withDraft(draft).copy(describe = null, errors = NoteStyleErrors()) }
+            draft != null -> {
+                isDescribed = true
+                edit { withDraft(draft).copy(describe = null, errors = NoteStyleErrors()) }
+            }
             status == DescribeStatusUi.RUNNING ->
                 edit { copy(describe = DescribeStyleUi(description, DescribeStatusUi.MODEL_UNAVAILABLE)) }
         }
@@ -133,10 +140,17 @@ class NoteStyleEditorViewModel(
         launchSafely(showLoading = false) {
             if (!proUpgradeGate.requirePro(ProFeature.CUSTOM_STYLES)) return@launchSafely
             when (val result = saveCustomNoteStyle(style)) {
-                is SaveNoteStyleResult.Saved -> mutableUiState.update { it.copy(isSaved = true) }
+                is SaveNoteStyleResult.Saved -> onStyleSaved(style)
                 is SaveNoteStyleResult.Invalid -> mutableUiState.update { it.copy(errors = result.errors) }
             }
         }
+    }
+
+    private fun onStyleSaved(style: CustomNoteStyle) {
+        if (mutableUiState.value.isNew) {
+            analyticsTracker.track(AnalyticsEvents.noteStyleCreated(style.sections.size, isDescribed))
+        }
+        mutableUiState.update { it.copy(isSaved = true) }
     }
 
     private fun validatedStyle(): CustomNoteStyle? =

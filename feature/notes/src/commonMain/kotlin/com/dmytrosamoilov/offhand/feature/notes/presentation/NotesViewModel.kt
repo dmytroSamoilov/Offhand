@@ -17,6 +17,9 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearTranscriptionCheckpointUseCase
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.NoteSection
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.FolderSaveResult
@@ -92,6 +95,7 @@ class NotesViewModel(
     aiCoreDownloadStatus: AiCoreDownloadStatus,
     private val clearTranscriptionCheckpoint: ClearTranscriptionCheckpointUseCase,
     buildInfo: BuildInfo,
+    private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
     private val mutableUiState =
@@ -253,6 +257,9 @@ class NotesViewModel(
                 is FolderSaveResult.Saved -> {
                     if (editor.folderId == null) selectedFolderId.value = result.folderId
                     mutableUiState.update { it.copy(folderEditor = null) }
+                    analyticsTracker.track(
+                        if (editor.folderId == null) AnalyticsEvents.folderCreated() else AnalyticsEvents.folderRenamed(),
+                    )
                 }
             }
         }
@@ -271,6 +278,7 @@ class NotesViewModel(
         mutableUiState.update { it.copy(pendingDeleteFolderId = null) }
         launchSafely(showLoading = false) {
             deleteFolder(folderId)
+            analyticsTracker.track(AnalyticsEvents.folderDeleted())
         }
     }
 
@@ -295,10 +303,13 @@ class NotesViewModel(
         mutableUiState.update { it.copy(moveToFolder = null) }
         launchSafely(showLoading = false) {
             moveNoteToFolder(target.noteId, folderId)
+            analyticsTracker.track(AnalyticsEvents.noteMoved())
         }
     }
 
+    // One event per search, when typing starts, never the text itself.
     fun onSearchQueryChanged(query: String) {
+        if (searchQuery.value.isBlank() && query.isNotBlank()) analyticsTracker.track(AnalyticsEvents.notesSearched())
         searchQuery.value = query
         mutableUiState.update { it.copy(searchQuery = query) }
     }
@@ -378,11 +389,13 @@ class NotesViewModel(
         mutableUiState.update { it.copy(isPresetSheetVisible = false) }
         launchSafely(showLoading = false) {
             if (style is NoteStyleRef.Custom && !proUpgradeGate.requirePro(ProFeature.CUSTOM_STYLES)) return@launchSafely
+            analyticsTracker.track(AnalyticsEvents.noteStyleChanged(style))
             recordingProcessController.restructureNote(note.id, style)
         }
     }
 
     fun onShareRequested() {
+        analyticsTracker.track(AnalyticsEvents.shareClicked())
         mutableUiState.update { it.copy(isShareDialogVisible = true) }
     }
 
@@ -416,6 +429,7 @@ class NotesViewModel(
         launchSafely {
             val share = prepareNoteShare(note, noteFormat, includeAudio)
             mutableUiState.update { it.copy(pendingShare = share.toUi(saveToDevice)) }
+            analyticsTracker.track(AnalyticsEvents.shareCompleted(noteFormat.analyticsFormat(), saveToDevice))
         }
     }
 
@@ -432,9 +446,15 @@ class NotesViewModel(
     fun onPlayPauseClicked() {
         if (mutableUiState.value.playback.isPlaying) {
             audioPlayer.pause()
+            analyticsTracker.track(AnalyticsEvents.notePaused())
         } else {
             audioPlayer.play()
+            analyticsTracker.track(AnalyticsEvents.notePlayed())
         }
+    }
+
+    fun onNoteCopied(section: NoteSection) {
+        analyticsTracker.track(AnalyticsEvents.noteCopied(section))
     }
 
     fun onSeekRequested(fraction: Float) {
@@ -487,6 +507,7 @@ class NotesViewModel(
             mutableUiState.update {
                 it.copy(selected = updated.toDetailUi(dateLabelFormatter, folders.value.namesById()), editor = null)
             }
+            analyticsTracker.track(AnalyticsEvents.noteEdited())
         }
     }
 
@@ -494,6 +515,7 @@ class NotesViewModel(
         val note = selectedNote ?: return
         launchSafely(showLoading = false) {
             if (!proUpgradeGate.requirePro(ProFeature.SMART_SUGGESTIONS)) return@launchSafely
+            analyticsTracker.track(AnalyticsEvents.suggestionsRequested())
             requestNoteSuggestions(note.id)
         }
     }
@@ -508,10 +530,14 @@ class NotesViewModel(
         val index = pendingSuggestionIndex
         pendingSuggestionIndex = null
         mutableUiState.update { it.copy(pendingCalendarEvent = null) }
-        if (isAdded && index != null) setSuggestionStatus(index, SuggestionStatus.ADDED)
+        if (isAdded && index != null) {
+            analyticsTracker.track(AnalyticsEvents.suggestionAdded())
+            setSuggestionStatus(index, SuggestionStatus.ADDED)
+        }
     }
 
     fun onSuggestionDismissed(index: Int) {
+        analyticsTracker.track(AnalyticsEvents.suggestionDismissed())
         setSuggestionStatus(index, SuggestionStatus.DISMISSED)
     }
 
@@ -576,6 +602,7 @@ class NotesViewModel(
                 selectedNote = null
             }
             deleteNote(noteId)
+            analyticsTracker.track(AnalyticsEvents.noteDeleted())
             if (isSelectedNote) {
                 mutableUiState.update { it.copy(selected = null, editor = null) }
             }
@@ -589,3 +616,7 @@ class NotesViewModel(
 }
 
 private fun NoteExportFormat?.isProFormat(): Boolean = this != null && this != NoteExportFormat.TEXT
+
+private fun NoteExportFormat?.analyticsFormat(): String = this?.name?.lowercase() ?: AUDIO_FORMAT
+
+private const val AUDIO_FORMAT = "audio"

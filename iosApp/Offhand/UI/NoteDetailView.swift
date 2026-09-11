@@ -24,6 +24,7 @@ struct NoteDetailView: View {
                         CollapsibleSection(
                             title: String(localized: "Overview"),
                             copyLabel: String(localized: "Copy overview"),
+                            onCopy: { viewModel.onNoteCopied(section: .overview) },
                             text: detail.body,
                             labelBackground: Brand.primaryContainer,
                             labelForeground: Brand.onPrimaryContainer,
@@ -38,6 +39,7 @@ struct NoteDetailView: View {
                         CollapsibleSection(
                             title: String(localized: "Transcript"),
                             copyLabel: String(localized: "Copy transcript"),
+                            onCopy: { viewModel.onNoteCopied(section: .transcript) },
                             text: detail.transcript,
                             labelBackground: Brand.tertiaryContainer,
                             labelForeground: Brand.onTertiaryContainer,
@@ -327,6 +329,7 @@ struct NoteDetailView: View {
 private struct CollapsibleSection: View {
     let title: String
     let copyLabel: String
+    let onCopy: () -> Void
     let text: String
     let labelBackground: Color
     let labelForeground: Color
@@ -341,6 +344,7 @@ private struct CollapsibleSection: View {
     init(
         title: String,
         copyLabel: String,
+        onCopy: @escaping () -> Void,
         text: String,
         labelBackground: Color,
         labelForeground: Color,
@@ -348,6 +352,7 @@ private struct CollapsibleSection: View {
     ) {
         self.title = title
         self.copyLabel = copyLabel
+        self.onCopy = onCopy
         self.text = text
         self.labelBackground = labelBackground
         self.labelForeground = labelForeground
@@ -388,6 +393,7 @@ private struct CollapsibleSection: View {
             Spacer()
             CopySectionButton(
                 text: text,
+                onCopy: onCopy,
                 accessibilityLabel: copyLabel,
                 background: labelBackground,
                 foreground: labelForeground
@@ -424,6 +430,7 @@ private struct CollapsibleSection: View {
 
 private struct CopySectionButton: View {
     let text: String
+    let onCopy: () -> Void
     let accessibilityLabel: String
     let background: Color
     let foreground: Color
@@ -432,6 +439,7 @@ private struct CopySectionButton: View {
     var body: some View {
         Button {
             SensitivePasteboard.copy(text)
+            onCopy()
             copiedAt = .now
         } label: {
             Image(systemName: copiedAt == nil ? "doc.on.doc" : "checkmark")

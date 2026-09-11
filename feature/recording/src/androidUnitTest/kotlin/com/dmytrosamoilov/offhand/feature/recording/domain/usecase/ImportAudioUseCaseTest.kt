@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
@@ -19,7 +20,8 @@ class ImportAudioUseCaseTest {
     private val gate: ProUpgradeGate = mockk()
     private val controller: RecordingProcessController = mockk()
     private val sessionManager: RecordingSessionManager = mockk()
-    private val useCase = ImportAudioUseCase(gate, controller, sessionManager)
+    private val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
+    private val useCase = ImportAudioUseCase(gate, controller, sessionManager, analyticsTracker)
     private val source = AudioImportSource(handle = "/cache/imports/a", displayName = "call.m4a")
     private val second = AudioImportSource(handle = "/cache/imports/b", displayName = "talk.mp3")
 

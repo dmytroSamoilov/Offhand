@@ -63,6 +63,7 @@ val featureSettingsModule = module {
             draftNoteStyle = get(),
             isCustomNoteStylesAvailable = get(),
             proUpgradeGate = get(),
+            analyticsTracker = get(),
         )
     }
 }

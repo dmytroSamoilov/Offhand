@@ -12,6 +12,9 @@ import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.TranscriptionCheckpoint
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.NoteSource
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.core.security.closeQuietly
 import com.dmytrosamoilov.offhand.core.security.writeChunk
@@ -71,6 +74,7 @@ class RecordingSessionManager(
     private val audioStore: EncryptedAudioStore,
     private val audioBackup: RecordingAudioBackup,
     private val audioDecoder: AudioDecoder,
+    private val analyticsTracker: AnalyticsTracker,
     private val scope: CoroutineScope,
 ) {
 
@@ -175,6 +179,7 @@ class RecordingSessionManager(
                     transcriptionMs = stored.transcriptionTimeMs,
                     progressOffset = RETRY_WHISPER_SHARE,
                     style = note.style,
+                    source = NoteSource.RETRY,
                 )
             }
         }
@@ -209,6 +214,7 @@ class RecordingSessionManager(
                     transcriptionMs = note.transcriptionTimeMs ?: 0,
                     progressOffset = 0f,
                     style = style,
+                    source = NoteSource.RESTYLE,
                 )
             }
         }
@@ -237,7 +243,7 @@ class RecordingSessionManager(
         val stored = transcribeStoredAudio(noteId, fileName, ResumePoint.START) { fraction ->
             updateProgress(noteId, IMPORT_DECODE_SHARE + fraction * (RETRY_WHISPER_SHARE - IMPORT_DECODE_SHARE))
         }
-        processNote(noteId, stored.texts, stored.transcriptionTimeMs, RETRY_WHISPER_SHARE, style)
+        processNote(noteId, stored.texts, stored.transcriptionTimeMs, RETRY_WHISPER_SHARE, style, NoteSource.IMPORT)
     }
 
     fun suggestEvents(noteId: Long) {
@@ -303,6 +309,7 @@ class RecordingSessionManager(
         mutableProcessingNoteIds.update { it - noteId }
         mutableNoteProgress.update { it - noteId }
         mutableEvents.emit(NoteProcessingEvent.ImportRejected(noteId, lastImportRejection))
+        analyticsTracker.track(AnalyticsEvents.audioImportRejected(lastImportRejection.name.lowercase()))
     }
 
     private fun AudioImportException.toRejection(): ImportRejection = when (this) {
@@ -605,6 +612,7 @@ class RecordingSessionManager(
         val chunkTranscripts = sortedTranscripts()
         val recordedTranscriptionMs = transcriptionTimeMs
         val style = sessionStyle
+        analyticsTracker.track(AnalyticsEvents.noteRecorded(recorder.vad.value.totalElapsedMs, style))
         mutableSession.value = RecordingSession(noteId = noteId)
         startProcessing(noteId, chunkTranscripts, recordedTranscriptionMs, style)
     }
@@ -623,7 +631,7 @@ class RecordingSessionManager(
                 return@launch
             }
             processingMutex.withLock {
-                processNote(noteId, chunkTranscripts, transcriptionMs, 0f, style)
+                processNote(noteId, chunkTranscripts, transcriptionMs, 0f, style, NoteSource.RECORDING)
             }
         }
     }
@@ -647,15 +655,20 @@ class RecordingSessionManager(
         transcriptionMs: Long,
         progressOffset: Float,
         style: NoteStyleRef,
+        source: NoteSource,
     ) {
         try {
-            val completed = structureNote(noteId, transcripts, transcriptionMs, progressOffset, style)
+            val completed = structureNote(noteId, transcripts, transcriptionMs, progressOffset, style, source)
             mutableNoteProgress.update { it - noteId }
-            if (completed) suggestEventsLocked(noteId)
+            if (completed) {
+                trackNoteReady(noteId, source)
+                suggestEventsLocked(noteId)
+            }
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (t: Throwable) {
             Logger.withTag(LOG_TAG).e(t) { "Processing note $noteId failed" }
+            analyticsTracker.track(AnalyticsEvents.noteFailed(source))
             if (failNote(noteId)) {
                 mutableEvents.emit(NoteProcessingEvent.Failed(noteId))
             }
@@ -665,16 +678,24 @@ class RecordingSessionManager(
         }
     }
 
+    private suspend fun trackNoteReady(noteId: Long, source: NoteSource) {
+        val note = getNote(noteId) ?: return
+        val processingMs = (note.transcriptionTimeMs ?: 0L) + (note.structuringTimeMs ?: 0L)
+        analyticsTracker.track(AnalyticsEvents.noteReady(source, note.durationMs, processingMs))
+    }
+
     private suspend fun structureNote(
         noteId: Long,
         transcripts: List<String>,
         transcriptionMs: Long,
         progressOffset: Float,
         style: NoteStyleRef,
+        source: NoteSource,
     ): Boolean {
         if (transcripts.isEmpty()) {
             failNote(noteId)
             mutableEvents.emit(NoteProcessingEvent.Failed(noteId))
+            analyticsTracker.track(AnalyticsEvents.noteFailed(source))
             return false
         }
         persistTranscript(noteId, transcripts, transcriptionMs)

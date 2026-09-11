@@ -10,6 +10,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveAppLockEnabledUseCase
@@ -54,6 +56,7 @@ class SettingsViewModel(
     private val setProOverride: SetProOverrideUseCase,
     private val proUpgradeGate: ProUpgradeGate,
     buildInfo: BuildInfo,
+    private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
     private val mutableUiState = MutableStateFlow(
@@ -87,6 +90,7 @@ class SettingsViewModel(
         launchSafely(showLoading = false) {
             if (style is NoteStyleRef.Custom && !proUpgradeGate.requirePro(ProFeature.CUSTOM_STYLES)) return@launchSafely
             setNoteStyle(style)
+            analyticsTracker.track(AnalyticsEvents.defaultStyleChanged(style))
         }
     }
 
@@ -98,7 +102,9 @@ class SettingsViewModel(
 
     fun onAppLockChanged(enabled: Boolean) {
         launchSafely(showLoading = false) {
-            setAppLockEnabled(enabled && appLockManager.isDeviceSecure)
+            val effective = enabled && appLockManager.isDeviceSecure
+            setAppLockEnabled(effective)
+            analyticsTracker.track(AnalyticsEvents.appLockToggled(effective))
         }
     }
 
@@ -107,6 +113,7 @@ class SettingsViewModel(
         launchSafely(showLoading = false) {
             if (enabled && !proUpgradeGate.requirePro(ProFeature.SMART_SUGGESTIONS)) return@launchSafely
             setSmartSuggestionsEnabled(enabled)
+            analyticsTracker.track(AnalyticsEvents.smartSuggestionsToggled(enabled))
         }
     }
 
@@ -114,6 +121,11 @@ class SettingsViewModel(
         launchSafely(showLoading = false) {
             proUpgradeGate.requirePro(ProFeature.GENERAL)
         }
+    }
+
+    // The redemption itself happens in the store; the app only counts the tap.
+    fun onRedeemCodeClicked() {
+        analyticsTracker.track(AnalyticsEvents.redeemCodeClicked())
     }
 
     fun onProOverrideSelected(override: ProOverride) {

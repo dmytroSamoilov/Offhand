@@ -110,6 +110,7 @@ fun SettingsScreen(
                 ProSection(
                     status = state.pro,
                     onUpgradeClick = viewModel::onUpgradeClicked,
+                    onRedeemCodeClick = viewModel::onRedeemCodeClicked,
                 )
                 NotesSection(
                     state = state,
@@ -245,22 +246,27 @@ private fun AppearanceSection(
 }
 
 @Composable
-private fun ProSection(status: ProStatusUi, onUpgradeClick: () -> Unit) {
+private fun ProSection(status: ProStatusUi, onUpgradeClick: () -> Unit, onRedeemCodeClick: () -> Unit) {
     when (status) {
         ProStatusUi.Free -> Column {
             UpgradeCard(onClick = onUpgradeClick)
-            RedeemCodeButton()
+            RedeemCodeButton(onClick = onRedeemCodeClick)
         }
-        else -> SubscriptionSection(status = status)
+        else -> SubscriptionSection(status = status, onRedeemCodeClick = onRedeemCodeClick)
     }
 }
 
 // Play has no in-app redemption sheet; the store's redeem page opens and the
 // foreground refresh picks the purchase up on return.
 @Composable
-private fun RedeemCodeButton() {
+private fun RedeemCodeButton(onClick: () -> Unit) {
     val context = LocalContext.current
-    TextButton(onClick = { openLink(context, PLAY_REDEEM_URL) }) {
+    TextButton(
+        onClick = {
+            onClick()
+            openLink(context, PLAY_REDEEM_URL)
+        },
+    ) {
         Text(text = stringResource(R.string.settings_redeem_code))
     }
 }
@@ -300,7 +306,7 @@ private fun UpgradeCard(onClick: () -> Unit) {
 }
 
 @Composable
-private fun SubscriptionSection(status: ProStatusUi) {
+private fun SubscriptionSection(status: ProStatusUi, onRedeemCodeClick: () -> Unit) {
     val context = LocalContext.current
     SettingsCard(title = stringResource(R.string.settings_subscription_title)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -321,7 +327,7 @@ private fun SubscriptionSection(status: ProStatusUi) {
                     Text(text = stringResource(R.string.settings_subscription_manage))
                 }
             }
-            RedeemCodeButton()
+            RedeemCodeButton(onClick = onRedeemCodeClick)
         }
     }
 }

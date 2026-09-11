@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain
 
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackend
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackendException
 import com.dmytrosamoilov.offhand.core.ai.api.AiResult
@@ -126,6 +127,7 @@ class RecordingSessionManagerTest {
         coEvery { this@mockk() } returns true
     }
     private val createImportedNote: CreateImportedNoteUseCase = mockk()
+    private val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
     private val audioDecoder: AudioDecoder = mockk(relaxed = true)
     private val audioStore: EncryptedAudioStore = mockk {
         every { newRecordingFileName() } returns "note-1.pcm.enc"
@@ -204,6 +206,7 @@ class RecordingSessionManagerTest {
         audioStore = audioStore,
         audioBackup = audioBackup,
         audioDecoder = audioDecoder,
+        analyticsTracker = analyticsTracker,
         scope = this,
     )
 

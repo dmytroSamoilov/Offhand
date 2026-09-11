@@ -78,6 +78,7 @@ val featureRecordingModule = module {
             audioStore = get(),
             audioBackup = get(),
             audioDecoder = get(),
+            analyticsTracker = get(),
             scope = get(recordingSessionScopeQualifier),
         )
     }

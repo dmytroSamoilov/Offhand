@@ -124,6 +124,7 @@ import com.dmytrosamoilov.offhand.core.ui.component.CustomNoteStyleIcon
 import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleCard
 import com.dmytrosamoilov.offhand.core.ui.component.toDomain
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.NoteSection
 import com.dmytrosamoilov.offhand.feature.notes.R
 import java.util.Locale
 import kotlinx.coroutines.launch
@@ -1384,6 +1385,7 @@ private fun NoteDetailPane(
             onPlayPause = viewModel::onPlayPauseClicked,
             onSeek = viewModel::onSeekRequested,
             onRetryTranscription = viewModel::onRetryTranscriptionRequested,
+            onCopied = viewModel::onNoteCopied,
             onRetranscribeRequested = viewModel::onRetranscribeRequested,
             onPresetRequested = viewModel::onPresetSheetRequested,
             onMoveToFolderRequested = viewModel::onMoveToFolderRequested,
@@ -1427,6 +1429,7 @@ private fun NoteDetail(
     onPlayPause: () -> Unit,
     onSeek: (Float) -> Unit,
     onRetryTranscription: () -> Unit,
+    onCopied: (NoteSection) -> Unit,
     onRetranscribeRequested: () -> Unit,
     onPresetRequested: () -> Unit,
     onMoveToFolderRequested: () -> Unit,
@@ -1459,6 +1462,7 @@ private fun NoteDetail(
             onPlayPause = onPlayPause,
             onSeek = onSeek,
             onRetryTranscription = onRetryTranscription,
+            onCopied = onCopied,
             modifier = Modifier.padding(innerPadding),
         )
     }
@@ -1651,6 +1655,7 @@ private fun NoteDetailContent(
     onPlayPause: () -> Unit,
     onSeek: (Float) -> Unit,
     onRetryTranscription: () -> Unit,
+    onCopied: (NoteSection) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -1735,6 +1740,7 @@ private fun NoteDetailContent(
                         text = note.body,
                         clipboardLabel = stringResource(R.string.notes_overview_heading),
                         contentDescription = stringResource(R.string.notes_copy_overview_description),
+                        onCopied = { onCopied(NoteSection.OVERVIEW) },
                     ),
                 ) {
                     MarkdownText(markdown = note.body)
@@ -1757,6 +1763,7 @@ private fun NoteDetailContent(
                         text = note.transcript,
                         clipboardLabel = stringResource(R.string.notes_transcript_heading),
                         contentDescription = stringResource(R.string.notes_copy_transcript_description),
+                        onCopied = { onCopied(NoteSection.TRANSCRIPT) },
                     ),
                 ) {
                     MarkdownText(markdown = note.transcript)
@@ -1771,10 +1778,12 @@ private fun rememberCopyAction(
     text: String,
     clipboardLabel: String,
     contentDescription: String,
+    onCopied: () -> Unit,
 ): CollapsibleCardAction {
     val clipboard = rememberSensitiveClipboard()
     val haptics = haptics()
     val copiedMessage = stringResource(R.string.notes_copied)
+    val currentOnCopied by rememberUpdatedState(onCopied)
     return remember(text, clipboardLabel, contentDescription, copiedMessage) {
         CollapsibleCardAction(
             icon = Icons.Filled.ContentCopy,
@@ -1782,6 +1791,7 @@ private fun rememberCopyAction(
             onClick = {
                 haptics.confirm()
                 clipboard.copy(clipboardLabel, text, copiedMessage)
+                currentOnCopied()
             },
         )
     }

@@ -42,6 +42,7 @@ struct OffhandApp: App {
                 audioDecoder: AudioDecoderImpl(),
                 noteDocuments: NoteDocumentBridgeImpl(),
                 proStore: StoreKitProStore(),
+                analytics: AnalyticsBridgeImpl(),
                 isDeveloperBuild: Self.isDeveloperBuild
             ),
             useSmokeFakes: Self.useSmokeFakes

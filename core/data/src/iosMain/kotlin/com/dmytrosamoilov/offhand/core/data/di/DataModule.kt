@@ -28,6 +28,7 @@ import com.dmytrosamoilov.offhand.core.data.database.iosDocumentsDirectory
 import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStylesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestionsRepository
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.data.domain.TranscriptionCheckpointRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatusCache
@@ -40,6 +41,7 @@ import com.dmytrosamoilov.offhand.core.data.preferences.DataStoreUserPreferences
 import com.dmytrosamoilov.offhand.core.data.repository.RoomCustomNoteStylesRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomFoldersRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomNoteSuggestionsRepository
+import com.dmytrosamoilov.offhand.core.data.repository.ConsentGatedAnalyticsTracker
 import com.dmytrosamoilov.offhand.core.data.repository.RoomTranscriptionCheckpointRepository
 import com.dmytrosamoilov.offhand.core.data.repository.DebugOverrideProStore
 import com.dmytrosamoilov.offhand.core.data.repository.ProUpgradeCoordinator
@@ -54,6 +56,8 @@ import platform.Foundation.NSFileManager
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import org.koin.dsl.module
 
 private const val DATABASE_NAME = "offhand-notes.db"
@@ -110,6 +114,9 @@ val coreDataModule = module {
     single<ProStatusCache> { DataStoreProStatusCache(get()) }
     singleOf(::StoreProStatusRepository) bind ProStatusRepository::class
     singleOf(::ProUpgradeCoordinator) bind ProUpgradeGate::class
+    single<AnalyticsTracker> {
+        ConsentGatedAnalyticsTracker(get(), get(), CoroutineScope(SupervisorJob() + Dispatchers.Default))
+    }
     single<DataStore<Preferences>> { createUserPreferencesDataStore() }
     single<UserPreferencesRepository> { DataStoreUserPreferencesRepository(get(), get()) }
 }

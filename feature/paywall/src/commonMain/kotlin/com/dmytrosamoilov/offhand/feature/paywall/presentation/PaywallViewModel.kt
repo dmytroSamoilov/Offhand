@@ -7,6 +7,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProOffer
 import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.LoadProOffersUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.ObserveProStatusUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.PurchaseProUseCase
@@ -23,6 +25,7 @@ class PaywallViewModel(
     private val restoreProPurchases: RestoreProPurchasesUseCase,
     observeProStatus: ObserveProStatusUseCase,
     private val proUpgradeGate: ProUpgradeGate,
+    private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
     private val mutableUiState = MutableStateFlow(PaywallUiState())
@@ -44,6 +47,7 @@ class PaywallViewModel(
         mutableUiState.update {
             it.copy(feature = feature, selectedPlan = ProPlan.YEARLY, message = null, isPurchasing = false)
         }
+        analyticsTracker.track(AnalyticsEvents.paywallShown(feature))
         loadOffers()
     }
 
@@ -58,12 +62,20 @@ class PaywallViewModel(
         if (state.isPurchasing || state.selectedOffer == null) return
         launchSafely(showLoading = false) {
             mutableUiState.update { it.copy(isPurchasing = true) }
+            analyticsTracker.track(AnalyticsEvents.purchaseStarted(state.selectedPlan))
             val outcome = purchasePro(state.selectedPlan)
+            if (outcome == PurchaseOutcome.PURCHASED) trackPurchase(state)
             mutableUiState.update { it.copy(isPurchasing = false, message = outcome.toMessage()) }
         }
     }
 
+    private fun trackPurchase(state: PaywallUiState) {
+        val trial = state.selectedOffer?.trialDays?.let { it > 0 } ?: false
+        analyticsTracker.track(AnalyticsEvents.purchaseCompleted(state.selectedPlan, trial))
+    }
+
     fun onRestoreClicked() {
+        analyticsTracker.track(AnalyticsEvents.restoreClicked())
         launchSafely(showLoading = false) {
             mutableUiState.update { it.copy(isPurchasing = true) }
             val restored = restoreProPurchases()
@@ -77,6 +89,8 @@ class PaywallViewModel(
     }
 
     fun onClosed() {
+        val state = mutableUiState.value
+        if (!state.isPro) analyticsTracker.track(AnalyticsEvents.paywallDismissed(state.feature))
         proUpgradeGate.onPaywallClosed()
     }
 

@@ -200,6 +200,7 @@ class NotesViewModelTest {
         aiCoreDownloadStatus = AiCoreDownloadStatus(modelManager, speechToText),
         clearTranscriptionCheckpoint = mockk(relaxed = true),
         buildInfo = BuildInfo(isDeveloperBuild = true),
+        analyticsTracker = mockk(relaxed = true),
     )
 
     @Test

@@ -5,6 +5,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
 import com.dmytrosamoilov.offhand.core.ai.api.di.coreAiApiModule
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsSink
 import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
 import com.dmytrosamoilov.offhand.core.data.di.PLATFORM_PRO_STORE
 import com.dmytrosamoilov.offhand.core.data.di.coreDataModule
@@ -52,6 +53,7 @@ class IosPlatformDeps(
     val audioDecoder: IosAudioDecoderBridge,
     val noteDocuments: IosNoteDocumentBridge,
     val proStore: IosProStoreBridge,
+    val analytics: IosAnalyticsBridge,
     val isDeveloperBuild: Boolean,
 )
 
@@ -90,6 +92,7 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
     single<NotePdfRenderer> { IosNotePdfRenderer(deps.noteDocuments) }
     single<AppIconProvider> { IosAppIconProvider(deps.noteDocuments) }
     single<ProStore>(named(PLATFORM_PRO_STORE)) { IosProStore(deps.proStore) }
+    single<AnalyticsSink> { IosAnalyticsSink(deps.analytics) }
     single { deps.gemmaEngine }
     single { deps.whisperEngine }
     single { IosFileDownloader() }
