@@ -130,7 +130,7 @@ Every solution you implement MUST be secure by default. Before finishing any cha
 - Sensitive data in `SharedPreferences` → use `EncryptedSharedPreferences` (Jetpack Security) or `DataStore` with encryption. Plaintext `SharedPreferences` is forbidden for anything sensitive.
 - Tokens on disk → Android Keystore-backed keys only. Never store private keys in files or prefs.
 - Do not put sensitive data in `Intent` extras that cross app boundaries, clipboard, notifications, or URL query strings.
-- Screenshots and screen recording are allowed on both platforms (owner decision 2026-09-14): no `FLAG_SECURE` on Android and no capture reaction on iOS. The iOS `PrivacyShield` only covers the app-switcher snapshot. Do not bring the blocking back.
+- Screenshots and screen recording are allowed on both platforms (owner decision 2026-09-14): no `FLAG_SECURE` on Android and no capture reaction or app-switcher cover on iOS (the former `PrivacyShield` is gone). Do not bring the blocking back.
 
 ### Networking
 - HTTPS only. `android:usesCleartextTraffic="false"` and a restrictive `network_security_config.xml`. Never add a custom `TrustManager`/`HostnameVerifier` that accepts all certs — if SSL fails, fix the cert, don't bypass.

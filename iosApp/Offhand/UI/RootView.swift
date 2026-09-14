@@ -29,7 +29,6 @@ struct RootView: View {
                     .onAppear { viewModel.onReady() }
             }
         }
-        .privacyShielded()
         // Any shared ViewModel that calls ProUpgradeGate.requirePro() raises this
         // cover; closing it resumes that call with the store's answer.
         .fullScreenCover(isPresented: $isPaywallPresented, onDismiss: { AppViewModels.paywall.onClosed() }) {
