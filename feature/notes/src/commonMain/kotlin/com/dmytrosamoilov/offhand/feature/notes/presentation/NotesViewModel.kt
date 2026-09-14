@@ -3,28 +3,62 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
+import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.Note
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
+import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
+import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearTranscriptionCheckpointUseCase
+import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.NoteSection
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.FolderSaveResult
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCalendarSuggestionsAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.ImportRejection
+import com.dmytrosamoilov.offhand.feature.recording.domain.NoteProcessingEvent
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RequestNoteSuggestionsUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -32,7 +66,15 @@ class NotesViewModel(
     private val recordingProcessController: RecordingProcessController,
     private val dateLabelFormatter: DateLabelFormatter,
     observeNotes: ObserveNotesUseCase,
+    observeFolders: ObserveFoldersUseCase,
+    private val searchNotes: SearchNotesUseCase,
+    private val createFolder: CreateFolderUseCase,
+    private val renameFolder: RenameFolderUseCase,
+    private val deleteFolder: DeleteFolderUseCase,
+    private val moveNoteToFolder: MoveNoteToFolderUseCase,
     observeDeveloperOptions: ObserveDeveloperOptionsUseCase,
+    observeCustomNoteStyles: ObserveCustomNoteStylesUseCase,
+    isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase,
     private val getNote: GetNoteUseCase,
     private val updateNote: UpdateNoteUseCase,
     private val deleteNote: DeleteNoteUseCase,
@@ -42,24 +84,54 @@ class NotesViewModel(
     private val markReviewAttempt: MarkReviewAttemptUseCase,
     val reviewLauncher: InAppReviewLauncher,
     private val audioPlayer: AudioPlayer,
-    sessionManager: RecordingSessionManager,
+    private val observeNoteSuggestions: ObserveNoteSuggestionsUseCase,
+    private val requestNoteSuggestions: RequestNoteSuggestionsUseCase,
+    private val updateSuggestionStatus: UpdateSuggestionStatusUseCase,
+    private val isCalendarSuggestionsAvailable: IsCalendarSuggestionsAvailableUseCase,
+    isDocumentExportAvailable: IsDocumentExportAvailableUseCase,
+    private val isSmartSuggestionsEnabled: IsSmartSuggestionsEnabledUseCase,
+    private val proUpgradeGate: ProUpgradeGate,
+    private val sessionManager: RecordingSessionManager,
     aiCoreDownloadStatus: AiCoreDownloadStatus,
+    private val clearTranscriptionCheckpoint: ClearTranscriptionCheckpointUseCase,
+    buildInfo: BuildInfo,
+    private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
-    private val mutableUiState = MutableStateFlow(NotesUiState())
+    private val mutableUiState =
+        MutableStateFlow(NotesUiState(isRetranscribeAvailable = buildInfo.isDeveloperBuild))
     val uiState: StateFlow<NotesUiState> = mutableUiState.asStateFlow()
 
     private val mutableReviewRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val reviewRequests: SharedFlow<Unit> = mutableReviewRequests.asSharedFlow()
 
     private var selectedNote: Note? = null
+    private var noteSuggestions: NoteSuggestions? = null
+    private var pendingSuggestionIndex: Int? = null
+    private val selectedNoteId = MutableStateFlow<Long?>(null)
+    private val allNotes = MutableStateFlow<List<Note>>(emptyList())
+    private val folders = MutableStateFlow<List<Folder>>(emptyList())
+    private val selectedFolderId = MutableStateFlow<Long?>(null)
+    private val searchQuery = MutableStateFlow("")
 
     init {
         viewModelScope.launch {
             observeNotes().collect { notes ->
-                mutableUiState.update { it.copy(sections = notes.toSectionsUi(dateLabelFormatter)) }
+                allNotes.value = notes
                 refreshSelected(notes)
             }
+        }
+        viewModelScope.launch {
+            observeFolders().collect { latest ->
+                folders.value = latest
+                if (selectedFolderId.value != null && latest.none { it.id == selectedFolderId.value }) {
+                    selectedFolderId.value = null
+                }
+            }
+        }
+        viewModelScope.launch {
+            combine(allNotes, folders, selectedFolderId, searchQuery, ::listContent)
+                .collect { content -> mutableUiState.update { content(it) } }
         }
         viewModelScope.launch {
             audioPlayer.state.collect { playback ->
@@ -72,8 +144,32 @@ class NotesViewModel(
             }
         }
         viewModelScope.launch {
+            combine(observeCustomNoteStyles(), isCustomNoteStylesAvailable()) { styles, unlocked ->
+                styles.map { style -> style.toOptionUi() } to unlocked
+            }.collect { (styles, unlocked) ->
+                mutableUiState.update { it.copy(customStyles = styles, isCustomStylesUnlocked = unlocked) }
+            }
+        }
+        viewModelScope.launch {
             sessionManager.noteProgress.collect { progress ->
                 mutableUiState.update { it.copy(noteProgress = progress) }
+            }
+        }
+        viewModelScope.launch {
+            sessionManager.events.collect { event ->
+                if (event is NoteProcessingEvent.ImportRejected) {
+                    mutableUiState.update { it.copy(importMessage = event.reason.toMessageUi()) }
+                }
+            }
+        }
+        viewModelScope.launch {
+            isDocumentExportAvailable().collect { unlocked ->
+                mutableUiState.update { it.copy(isDocumentExportUnlocked = unlocked) }
+            }
+        }
+        viewModelScope.launch {
+            observeSmartSuggestions().collect { suggestions ->
+                mutableUiState.update { it.copy(smartSuggestions = suggestions) }
             }
         }
         viewModelScope.launch {
@@ -83,14 +179,150 @@ class NotesViewModel(
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun observeSmartSuggestions(): Flow<SmartSuggestionsUi?> = selectedNoteId.flatMapLatest { noteId ->
+        if (noteId == null) return@flatMapLatest flowOf(null)
+        combine(
+            observeNoteSuggestions(noteId),
+            sessionManager.suggestingNoteIds.map { noteId in it },
+            isCalendarSuggestionsAvailable(),
+            isSmartSuggestionsEnabled(),
+            allNotes.map { notes -> notes.firstOrNull { it.id == noteId }?.status },
+        ) { suggestions: NoteSuggestions?, isSuggesting: Boolean, unlocked: Boolean, enabled: Boolean, status: NoteStatus? ->
+            noteSuggestions = suggestions
+            suggestions.toSmartSuggestionsUi(isSuggesting, unlocked, enabled, status)
+        }
+    }
+
+    // The Settings toggle hides the section for everyone; a free user who has
+    // it on (a lapsed purchase) sees the locked card that leads to the paywall.
+    private fun NoteSuggestions?.toSmartSuggestionsUi(
+        isSuggesting: Boolean,
+        unlocked: Boolean,
+        enabled: Boolean,
+        status: NoteStatus?,
+    ): SmartSuggestionsUi? = when {
+        !enabled || status != NoteStatus.READY -> null
+        !unlocked -> SmartSuggestionsUi.Locked
+        isSuggesting -> SmartSuggestionsUi.Loading
+        this == null -> SmartSuggestionsUi.NotRun
+        else -> toUi(dateLabelFormatter)
+    }
+
+    private fun listContent(
+        notes: List<Note>,
+        folders: List<Folder>,
+        folderId: Long?,
+        query: String,
+    ): (NotesUiState) -> NotesUiState {
+        val inFolder = if (folderId == null) notes else notes.filter { it.folderId == folderId }
+        val sections = searchNotes(inFolder, query).toSectionsUi(dateLabelFormatter, folders.namesById())
+        val foldersUi = folders.toFoldersUi(notes)
+        return { state -> state.copy(sections = sections, folders = foldersUi, selectedFolderId = folderId) }
+    }
+
+    private fun List<Folder>.namesById(): Map<Long, String> = associate { it.id to it.name }
+
+    fun onFolderSelected(folderId: Long?) {
+        selectedFolderId.value = folderId
+    }
+
+    fun onNewFolderRequested() {
+        mutableUiState.update { it.copy(folderEditor = FolderEditorUi(folderId = null, name = "")) }
+    }
+
+    fun onRenameFolderRequested(folderId: Long) {
+        val folder = folders.value.firstOrNull { it.id == folderId } ?: return
+        mutableUiState.update { it.copy(folderEditor = FolderEditorUi(folderId = folderId, name = folder.name)) }
+    }
+
+    fun onFolderNameChanged(name: String) {
+        mutableUiState.update { state ->
+            state.copy(folderEditor = state.folderEditor?.copy(name = name, error = null))
+        }
+    }
+
+    fun onFolderEditorDismissed() {
+        mutableUiState.update { it.copy(folderEditor = null) }
+    }
+
+    fun onFolderEditorConfirmed() {
+        val editor = mutableUiState.value.folderEditor ?: return
+        launchSafely(showLoading = false) {
+            val result = editor.folderId?.let { renameFolder(it, editor.name) } ?: createFolder(editor.name)
+            when (result) {
+                is FolderSaveResult.Rejected -> mutableUiState.update { state ->
+                    state.copy(folderEditor = state.folderEditor?.copy(error = result.error.toUi()))
+                }
+                is FolderSaveResult.Saved -> {
+                    if (editor.folderId == null) selectedFolderId.value = result.folderId
+                    mutableUiState.update { it.copy(folderEditor = null) }
+                    analyticsTracker.track(
+                        if (editor.folderId == null) AnalyticsEvents.folderCreated() else AnalyticsEvents.folderRenamed(),
+                    )
+                }
+            }
+        }
+    }
+
+    fun onDeleteFolderRequested(folderId: Long) {
+        mutableUiState.update { it.copy(pendingDeleteFolderId = folderId) }
+    }
+
+    fun onDeleteFolderDismissed() {
+        mutableUiState.update { it.copy(pendingDeleteFolderId = null) }
+    }
+
+    fun onDeleteFolderConfirmed() {
+        val folderId = mutableUiState.value.pendingDeleteFolderId ?: return
+        mutableUiState.update { it.copy(pendingDeleteFolderId = null) }
+        launchSafely(showLoading = false) {
+            deleteFolder(folderId)
+            analyticsTracker.track(AnalyticsEvents.folderDeleted())
+        }
+    }
+
+    fun onMoveToFolderRequested() {
+        val note = selectedNote ?: return
+        onMoveToFolderRequested(note.id)
+    }
+
+    fun onMoveToFolderRequested(noteId: Long) {
+        val note = allNotes.value.firstOrNull { it.id == noteId } ?: selectedNote?.takeIf { it.id == noteId } ?: return
+        mutableUiState.update {
+            it.copy(moveToFolder = MoveToFolderUi(noteId = note.id, currentFolderId = note.folderId))
+        }
+    }
+
+    fun onMoveToFolderDismissed() {
+        mutableUiState.update { it.copy(moveToFolder = null) }
+    }
+
+    fun onMoveToFolder(folderId: Long?) {
+        val target = mutableUiState.value.moveToFolder ?: return
+        mutableUiState.update { it.copy(moveToFolder = null) }
+        launchSafely(showLoading = false) {
+            moveNoteToFolder(target.noteId, folderId)
+            analyticsTracker.track(AnalyticsEvents.noteMoved())
+        }
+    }
+
+    // One event per search, when typing starts, never the text itself.
+    fun onSearchQueryChanged(query: String) {
+        if (searchQuery.value.isBlank() && query.isNotBlank()) analyticsTracker.track(AnalyticsEvents.notesSearched())
+        searchQuery.value = query
+        mutableUiState.update { it.copy(searchQuery = query) }
+    }
+
     fun onNoteSelected(id: Long) {
         launchSafely(showLoading = false) {
             val note = getNote(id) ?: return@launchSafely
             selectedNote = note
+            selectedNoteId.value = note.id
             loadAudio(note)
             mutableUiState.update {
                 it.copy(
-                    selected = note.toDetailUi(dateLabelFormatter),
+                    selected = note.toDetailUi(dateLabelFormatter, folders.value.namesById()),
                     editor = null,
                     pendingDeleteNoteId = null,
                 )
@@ -120,13 +352,15 @@ class NotesViewModel(
             if (state.editor != null) {
                 state
             } else {
-                state.copy(selected = refreshed.toDetailUi(dateLabelFormatter))
+                state.copy(selected = refreshed.toDetailUi(dateLabelFormatter, folders.value.namesById()))
             }
         }
     }
 
     fun onDetailClosed() {
         selectedNote = null
+        selectedNoteId.value = null
+        pendingSuggestionIndex = null
         audioPlayer.reset()
         mutableUiState.update {
             it.copy(
@@ -135,7 +369,9 @@ class NotesViewModel(
                 pendingDeleteNoteId = null,
                 isShareDialogVisible = false,
                 isPresetSheetVisible = false,
+                moveToFolder = null,
                 pendingShare = null,
+                pendingCalendarEvent = null,
             )
         }
     }
@@ -148,13 +384,18 @@ class NotesViewModel(
         mutableUiState.update { it.copy(isPresetSheetVisible = false) }
     }
 
-    fun onPresetSelected(preset: NotePreset) {
+    fun onStyleSelected(style: NoteStyleRef) {
         val note = selectedNote ?: return
         mutableUiState.update { it.copy(isPresetSheetVisible = false) }
-        recordingProcessController.restructureNote(note.id, preset)
+        launchSafely(showLoading = false) {
+            if (style is NoteStyleRef.Custom && !proUpgradeGate.requirePro(ProFeature.CUSTOM_STYLES)) return@launchSafely
+            analyticsTracker.track(AnalyticsEvents.noteStyleChanged(style))
+            recordingProcessController.restructureNote(note.id, style)
+        }
     }
 
     fun onShareRequested() {
+        analyticsTracker.track(AnalyticsEvents.shareClicked())
         mutableUiState.update { it.copy(isShareDialogVisible = true) }
     }
 
@@ -162,13 +403,33 @@ class NotesViewModel(
         mutableUiState.update { it.copy(isShareDialogVisible = false) }
     }
 
-    fun onShareConfirmed(includeNote: Boolean, includeAudio: Boolean) {
+    fun onShareConfirmed(noteFormat: NoteExportFormat?, includeAudio: Boolean) {
+        share(noteFormat, includeAudio, saveToDevice = false)
+    }
+
+    // Save to device goes through the system file picker, which takes one file.
+    fun onSaveToDeviceConfirmed(noteFormat: NoteExportFormat?, includeAudio: Boolean) {
+        share(noteFormat, includeAudio, saveToDevice = true)
+    }
+
+    // PDF and Word are the Pro formats. The sheet closes before the gate is
+    // asked: a modal sheet would otherwise sit above the paywall on both
+    // platforms, so a declined upgrade lands back on the note.
+    private fun share(noteFormat: NoteExportFormat?, includeAudio: Boolean, saveToDevice: Boolean) {
         val note = selectedNote ?: return
-        if (!includeNote && !includeAudio) return
+        if (noteFormat == null && !includeAudio) return
         mutableUiState.update { it.copy(isShareDialogVisible = false) }
+        launchSafely(showLoading = false) {
+            if (noteFormat.isProFormat() && !proUpgradeGate.requirePro(ProFeature.DOCUMENT_EXPORT)) return@launchSafely
+            prepareShare(note, noteFormat, includeAudio, saveToDevice)
+        }
+    }
+
+    private fun prepareShare(note: Note, noteFormat: NoteExportFormat?, includeAudio: Boolean, saveToDevice: Boolean) {
         launchSafely {
-            val share = prepareNoteShare(note, includeNote, includeAudio)
-            mutableUiState.update { it.copy(pendingShare = share.toUi()) }
+            val share = prepareNoteShare(note, noteFormat, includeAudio)
+            mutableUiState.update { it.copy(pendingShare = share.toUi(saveToDevice)) }
+            analyticsTracker.track(AnalyticsEvents.shareCompleted(noteFormat.analyticsFormat(), saveToDevice))
         }
     }
 
@@ -185,9 +446,15 @@ class NotesViewModel(
     fun onPlayPauseClicked() {
         if (mutableUiState.value.playback.isPlaying) {
             audioPlayer.pause()
+            analyticsTracker.track(AnalyticsEvents.notePaused())
         } else {
             audioPlayer.play()
+            analyticsTracker.track(AnalyticsEvents.notePlayed())
         }
+    }
+
+    fun onNoteCopied(section: NoteSection) {
+        analyticsTracker.track(AnalyticsEvents.noteCopied(section))
     }
 
     fun onSeekRequested(fraction: Float) {
@@ -238,9 +505,57 @@ class NotesViewModel(
             updateNote(updated)
             selectedNote = updated
             mutableUiState.update {
-                it.copy(selected = updated.toDetailUi(dateLabelFormatter), editor = null)
+                it.copy(selected = updated.toDetailUi(dateLabelFormatter, folders.value.namesById()), editor = null)
             }
+            analyticsTracker.track(AnalyticsEvents.noteEdited())
         }
+    }
+
+    fun onSuggestionsRequested() {
+        val note = selectedNote ?: return
+        launchSafely(showLoading = false) {
+            if (!proUpgradeGate.requirePro(ProFeature.SMART_SUGGESTIONS)) return@launchSafely
+            analyticsTracker.track(AnalyticsEvents.suggestionsRequested())
+            requestNoteSuggestions(note.id)
+        }
+    }
+
+    fun onSuggestionAddRequested(index: Int) {
+        val event = noteSuggestions?.events?.getOrNull(index)?.event ?: return
+        pendingSuggestionIndex = index
+        mutableUiState.update { it.copy(pendingCalendarEvent = event) }
+    }
+
+    fun onCalendarEventLaunched(isAdded: Boolean) {
+        val index = pendingSuggestionIndex
+        pendingSuggestionIndex = null
+        mutableUiState.update { it.copy(pendingCalendarEvent = null) }
+        if (isAdded && index != null) {
+            analyticsTracker.track(AnalyticsEvents.suggestionAdded())
+            setSuggestionStatus(index, SuggestionStatus.ADDED)
+        }
+    }
+
+    fun onSuggestionDismissed(index: Int) {
+        analyticsTracker.track(AnalyticsEvents.suggestionDismissed())
+        setSuggestionStatus(index, SuggestionStatus.DISMISSED)
+    }
+
+    private fun setSuggestionStatus(index: Int, status: SuggestionStatus) {
+        val noteId = noteSuggestions?.noteId ?: return
+        launchSafely(showLoading = false) {
+            updateSuggestionStatus(noteId, index, status)
+        }
+    }
+
+    fun onImportMessageDismissed() {
+        mutableUiState.update { it.copy(importMessage = null) }
+    }
+
+    private fun ImportRejection.toMessageUi(): ImportMessageUi = when (this) {
+        ImportRejection.UNSUPPORTED -> ImportMessageUi.UNSUPPORTED
+        ImportRejection.TOO_LONG -> ImportMessageUi.TOO_LONG
+        ImportRejection.UNREADABLE -> ImportMessageUi.UNREADABLE
     }
 
     fun onRetryTranscriptionRequested() {
@@ -257,9 +572,16 @@ class NotesViewModel(
         mutableUiState.update { it.copy(isRetranscribeConfirmationVisible = false) }
     }
 
+    // A deliberate re-transcription starts from the beginning; only an
+    // interrupted one continues from its checkpoint.
     fun onRetranscribeConfirmed() {
         mutableUiState.update { it.copy(isRetranscribeConfirmationVisible = false) }
-        onRetryTranscriptionRequested()
+        val note = selectedNote ?: return
+        val audioFileName = note.audioFileName ?: return
+        launchSafely(showLoading = false) {
+            clearTranscriptionCheckpoint(note.id)
+            recordingProcessController.retryNote(note.id, audioFileName)
+        }
     }
 
     fun onDeleteRequested(id: Long) {
@@ -280,6 +602,7 @@ class NotesViewModel(
                 selectedNote = null
             }
             deleteNote(noteId)
+            analyticsTracker.track(AnalyticsEvents.noteDeleted())
             if (isSelectedNote) {
                 mutableUiState.update { it.copy(selected = null, editor = null) }
             }
@@ -291,3 +614,9 @@ class NotesViewModel(
         super.onCleared()
     }
 }
+
+private fun NoteExportFormat?.isProFormat(): Boolean = this != null && this != NoteExportFormat.TEXT
+
+private fun NoteExportFormat?.analyticsFormat(): String = this?.name?.lowercase() ?: AUDIO_FORMAT
+
+private const val AUDIO_FORMAT = "audio"

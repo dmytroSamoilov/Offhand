@@ -5,11 +5,13 @@ import UserNotifications
 struct RootView: View {
     private let viewModel = AppViewModels.root
     private let sessionManager = SharedGraph.shared.sessionManager()
+    private let proUpgradeGate = SharedGraph.shared.proUpgradeGate()
     @State private var activityController = NoteActivityController()
     @State private var finishCoordinator = NoteFinishCoordinator()
     @State private var activeNoteId: Int64?
     @State private var phase: IosRootPhase = .loading
     @State private var selectedTab = 0
+    @State private var isPaywallPresented = false
     @ObservedObject private var notifications = NoteNotifications.shared
     @Environment(\.scenePhase) private var scenePhase
 
@@ -27,10 +29,19 @@ struct RootView: View {
                     .onAppear { viewModel.onReady() }
             }
         }
-        .privacyShielded()
+        // Any shared ViewModel that calls ProUpgradeGate.requirePro() raises this
+        // cover; closing it resumes that call with the store's answer.
+        .fullScreenCover(isPresented: $isPaywallPresented, onDismiss: { AppViewModels.paywall.onClosed() }) {
+            PaywallView()
+        }
         .task {
             for await newPhase in viewModel.phase {
                 phase = newPhase
+            }
+        }
+        .task {
+            for await feature in proUpgradeGate.requestedFeature {
+                isPaywallPresented = feature != nil
             }
         }
         .task { await observeSession() }
@@ -61,6 +72,9 @@ struct RootView: View {
             case .background:
                 handleBackgrounded()
             case .active:
+                // A code redeemed in the App Store app lands as a transaction;
+                // re-reading on activation shows it without a restart.
+                SharedGraph.shared.refreshProStatus()
                 finishCoordinator.appBecameActive()
                 // Only the come-back reminder is stale on activation; note-ready
                 // notifications must survive it.
@@ -141,12 +155,14 @@ struct RootView: View {
             case .failed(let failed):
                 eventNoteId = failed.noteId
                 notifications.noteFailed(noteId: failed.noteId)
+            case .importRejected:
+                continue
             }
             guard eventNoteId == activeNoteId else { continue }
             switch onEnum(of: event) {
             case .completed:
                 activityController.finished()
-            case .failed:
+            case .failed, .importRejected:
                 activityController.cancelled()
             }
             activeNoteId = nil
@@ -167,6 +183,7 @@ struct RootView: View {
         let hasPendingWork = !sessionManager.processingNoteIds.value.isEmpty || session.phase == .draining
         if hasPendingWork {
             finishCoordinator.appEnteredBackgroundWhileProcessing()
+            finishCoordinator.appEnteredBackgroundWithPendingWork()
         } else {
             releaseModelIfIdle()
         }

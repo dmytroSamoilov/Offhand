@@ -9,6 +9,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -19,11 +24,19 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.dmytrosamoilov.offhand.feature.backup.presentation.BackupScreen
 import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesScreen
+import com.dmytrosamoilov.offhand.feature.paywall.presentation.PaywallHost
 import com.dmytrosamoilov.offhand.feature.recording.presentation.RecordingSheetHost
 import com.dmytrosamoilov.offhand.feature.settings.presentation.AboutSupportScreen
+import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStyleEditorScreen
+import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStylesScreen
 import com.dmytrosamoilov.offhand.feature.settings.presentation.SettingsScreen
 
+// The tabs carry test tags exposed as resource ids: the Settings screen has a
+// "Notes" card whose title would otherwise match the tab text in Maestro.
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun OffhandApp(
     requestedNoteId: Long?,
@@ -41,6 +54,7 @@ fun OffhandApp(
     }
 
     NavigationSuiteScaffold(
+        modifier = Modifier.semantics { testTagsAsResourceId = true },
         navigationSuiteItems = {
             TopLevelDestination.entries.forEach { destination ->
                 val selected = currentDestination?.hierarchy
@@ -48,6 +62,7 @@ fun OffhandApp(
                 item(
                     selected = selected,
                     onClick = { navController.navigateToTopLevel(destination.route) },
+                    modifier = Modifier.testTag(destination.testTag),
                     icon = {
                         Icon(
                             imageVector = destination.icon,
@@ -74,10 +89,28 @@ fun OffhandApp(
                 composable<SettingsRoute> {
                     SettingsScreen(
                         onAboutSupportClick = { navController.navigate(AboutSupportRoute) },
+                        onBackupClick = { navController.navigate(BackupRoute) },
+                        onNoteStylesClick = { navController.navigate(NoteStylesRoute) },
+                    )
+                }
+                composable<NoteStylesRoute> {
+                    NoteStylesScreen(
+                        onBack = { navController.navigateUp() },
+                        onCreateStyle = { navController.navigate(NoteStyleEditorRoute(styleId = 0L)) },
+                        onEditStyle = { styleId -> navController.navigate(NoteStyleEditorRoute(styleId)) },
+                    )
+                }
+                composable<NoteStyleEditorRoute> { entry ->
+                    NoteStyleEditorScreen(
+                        styleId = entry.toRoute<NoteStyleEditorRoute>().styleId,
+                        onBack = { navController.navigateUp() },
                     )
                 }
                 composable<AboutSupportRoute> {
                     AboutSupportScreen(onBack = { navController.navigateUp() })
+                }
+                composable<BackupRoute> {
+                    BackupScreen(onBack = { navController.navigateUp() })
                 }
             }
         }
@@ -87,6 +120,7 @@ fun OffhandApp(
         isVisible = isRecordingSheetVisible,
         onVisibilityChange = { isRecordingSheetVisible = it },
     )
+    PaywallHost()
 }
 
 private fun NavController.navigateToTopLevel(route: Any) {

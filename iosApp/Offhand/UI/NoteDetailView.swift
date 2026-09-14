@@ -23,15 +23,26 @@ struct NoteDetailView: View {
                     } else {
                         CollapsibleSection(
                             title: String(localized: "Overview"),
+                            copyLabel: String(localized: "Copy overview"),
+                            onCopy: { viewModel.onNoteCopied(section: .overview) },
                             text: detail.body,
+                            labelBackground: Brand.primaryContainer,
+                            labelForeground: Brand.onPrimaryContainer,
                             initiallyExpanded: true
                         )
                         .id(detail.id)
+                        if let suggestions = state.smartSuggestions {
+                            SmartSuggestionsSection(viewModel: viewModel, suggestions: suggestions)
+                        }
                     }
                     if !detail.transcript.isEmpty {
                         CollapsibleSection(
                             title: String(localized: "Transcript"),
+                            copyLabel: String(localized: "Copy transcript"),
+                            onCopy: { viewModel.onNoteCopied(section: .transcript) },
                             text: detail.transcript,
+                            labelBackground: Brand.tertiaryContainer,
+                            labelForeground: Brand.onTertiaryContainer,
                             initiallyExpanded: detail.status != .ready
                         )
                         .id(detail.id)
@@ -43,11 +54,21 @@ struct NoteDetailView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .task(id: processingHapticsKey) { await runProcessingHaptics() }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
-                Button { viewModel.onEditStarted() } label: { Image(systemName: "pencil") }
                 Button { viewModel.onShareRequested() } label: { Image(systemName: "square.and.arrow.up") }
                 Menu {
+                    Button {
+                        viewModel.onEditStarted()
+                    } label: {
+                        Label(String(localized: "Edit note"), systemImage: "pencil")
+                    }
+                    Button {
+                        viewModel.onMoveToFolderRequested()
+                    } label: {
+                        Label(String(localized: "Move to folder"), systemImage: "folder")
+                    }
                     if !detail.transcript.isEmpty {
                         Button {
                             viewModel.onPresetSheetRequested()
@@ -55,7 +76,7 @@ struct NoteDetailView: View {
                             Label(String(localized: "Change note style"), systemImage: "slider.horizontal.3")
                         }
                     }
-                    if detail.hasAudio {
+                    if detail.hasAudio && state.isRetranscribeAvailable {
                         Button {
                             viewModel.onRetranscribeRequested()
                         } label: {
@@ -70,6 +91,7 @@ struct NoteDetailView: View {
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }
+                .accessibilityLabel(String(localized: "More actions"))
             }
         }
         .confirmationDialog(
@@ -82,27 +104,35 @@ struct NoteDetailView: View {
         } message: {
             Text(String(localized: "The recording will be transcribed and summarized again, replacing the current title, overview and transcript. The audio recording itself is kept."))
         }
-        .confirmationDialog(
-            String(localized: "Share note"),
-            isPresented: shareBinding,
-            titleVisibility: .visible
-        ) {
-            Button(String(localized: "Note text")) { viewModel.onShareConfirmed(includeNote: true, includeAudio: false) }
-            if detail.hasAudio {
-                Button(String(localized: "Audio")) { viewModel.onShareConfirmed(includeNote: false, includeAudio: true) }
-                Button(String(localized: "Note and audio")) { viewModel.onShareConfirmed(includeNote: true, includeAudio: true) }
-            }
-            Button(String(localized: "Cancel"), role: .cancel) { viewModel.onShareDismissed() }
+        .sheet(isPresented: shareBinding) {
+            ShareNoteSheet(
+                viewModel: viewModel,
+                hasAudio: detail.hasAudio,
+                isDocumentExportUnlocked: state.isDocumentExportUnlocked
+            )
+            .presentationDetents([.fraction(0.72), .large])
         }
         .sheet(isPresented: editorBinding) {
             if let editor = state.editor {
                 NoteEditorView(viewModel: viewModel, editor: editor)
             }
         }
+        .sheet(item: pendingEventBinding) { pending in
+            CalendarEventEditor(suggestion: pending.suggestion) { saved in
+                viewModel.onCalendarEventLaunched(isAdded: saved)
+            }
+            .ignoresSafeArea()
+        }
         .sheet(isPresented: presetBinding) {
-            NoteStyleSheet(viewModel: viewModel, current: detail.preset)
+            NoteStyleSheet(
+                viewModel: viewModel,
+                current: detail.style,
+                customStyles: state.customStyles,
+                isCustomStylesUnlocked: state.isCustomStylesUnlocked
+            )
                 .presentationDetents([.medium, .large])
         }
+
         .sheet(isPresented: shareItemsBinding) {
             ActivityShareSheet(items: shareItems, onComplete: dismissShare)
         }
@@ -145,13 +175,26 @@ struct NoteDetailView: View {
             .foregroundStyle(Brand.onPrimaryContainer)
     }
 
+    private var processingHapticsKey: String { "\(detail.id)-\(detail.status)" }
+
+    private func runProcessingHaptics() async {
+        guard detail.status == .processing else { return }
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(2.5))
+            guard !Task.isCancelled else { return }
+            Haptics.tap()
+        }
+    }
+
     private var metadataLine: String {
-        guard detail.wordCount > 0 else { return detail.createdAt }
-        let words = String.localizedStringWithFormat(
-            String(localized: "%d words"),
-            Int(detail.wordCount)
-        )
-        return "\(detail.createdAt) · \(words)"
+        var parts = [detail.createdAt]
+        if detail.wordCount > 0 {
+            parts.append(String.localizedStringWithFormat(String(localized: "%d words"), Int(detail.wordCount)))
+        }
+        if let folder = detail.folderName {
+            parts.append(folder)
+        }
+        return parts.joined(separator: " · ")
     }
 
     private var processingCard: some View {
@@ -203,6 +246,7 @@ struct NoteDetailView: View {
     private var playbackCard: some View {
         HStack(spacing: 14) {
             Button {
+                Haptics.confirm()
                 viewModel.onPlayPauseClicked()
             } label: {
                 Image(systemName: state.playback.isPlaying ? "pause.circle.fill" : "play.circle.fill")
@@ -247,6 +291,13 @@ struct NoteDetailView: View {
         )
     }
 
+    private var pendingEventBinding: Binding<PendingCalendarEvent?> {
+        Binding(
+            get: { state.pendingCalendarEvent.map { PendingCalendarEvent(suggestion: $0) } },
+            set: { pending in if pending == nil { viewModel.onCalendarEventLaunched(isAdded: false) } }
+        )
+    }
+
     private var presetBinding: Binding<Bool> {
         Binding(
             get: { state.isPresetSheetVisible },
@@ -277,52 +328,138 @@ struct NoteDetailView: View {
 
 private struct CollapsibleSection: View {
     let title: String
+    let copyLabel: String
+    let onCopy: () -> Void
     let text: String
+    let labelBackground: Color
+    let labelForeground: Color
     @State private var isExpanded: Bool
+    @State private var contentHeight: CGFloat = 0
 
-    init(title: String, text: String, initiallyExpanded: Bool) {
+    private static let collapsedMaxHeight: CGFloat = 168
+    private static let fadeHeight: CGFloat = 56
+    static let pillHeight: CGFloat = 32
+    private let cardBackground = Color(.secondarySystemGroupedBackground)
+
+    init(
+        title: String,
+        copyLabel: String,
+        onCopy: @escaping () -> Void,
+        text: String,
+        labelBackground: Color,
+        labelForeground: Color,
+        initiallyExpanded: Bool
+    ) {
         self.title = title
+        self.copyLabel = copyLabel
+        self.onCopy = onCopy
         self.text = text
+        self.labelBackground = labelBackground
+        self.labelForeground = labelForeground
         _isExpanded = State(initialValue: initiallyExpanded)
     }
 
+    private var isOverflowing: Bool { contentHeight > Self.collapsedMaxHeight }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 7) {
-            Button {
-                withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
-            } label: {
-                HStack {
-                    Text(title)
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-                    Spacer()
-                    Image(systemName: "chevron.down")
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader
+            sectionContent
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(cardBackground, in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private var sectionHeader: some View {
+        HStack(spacing: 8) {
+            Text(title)
+                .font(.footnote.weight(.semibold))
+                .padding(.horizontal, 14)
+                .frame(height: Self.pillHeight)
+                .background(labelBackground, in: Capsule())
+                .foregroundStyle(labelForeground)
+            if isOverflowing {
+                Button(action: toggle) {
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                        .rotationEffect(.degrees(isExpanded ? 0 : -90))
+                        .frame(width: Self.pillHeight, height: Self.pillHeight)
+                        .background(labelBackground, in: Circle())
+                        .foregroundStyle(labelForeground)
                 }
-                .padding(.leading, 16)
-                .padding(.trailing, 4)
-                .contentShape(Rectangle())
+                .buttonStyle(.plain)
+                .accessibilityLabel(isExpanded ? String(localized: "Show less") : String(localized: "Show more"))
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(title)
-            if isExpanded {
-                MarkdownBlocks(raw: text)
-                    .textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(
-                        Color(.secondarySystemGroupedBackground),
-                        in: RoundedRectangle(cornerRadius: 12)
-                    )
+            Spacer()
+            CopySectionButton(
+                text: text,
+                onCopy: onCopy,
+                accessibilityLabel: copyLabel,
+                background: labelBackground,
+                foreground: labelForeground
+            )
+        }
+    }
+
+    private var sectionContent: some View {
+        ZStack(alignment: .bottom) {
+            MarkdownBlocks(raw: text)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
+                .frame(maxHeight: isExpanded ? nil : Self.collapsedMaxHeight, alignment: .top)
+                .clipped()
+            if !isExpanded && isOverflowing {
+                LinearGradient(
+                    colors: [cardBackground.opacity(0), cardBackground],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: Self.fadeHeight)
+                .allowsHitTesting(false)
             }
+        }
+    }
+
+    private func toggle() {
+        Haptics.tap()
+        withAnimation(.easeInOut(duration: 0.3)) { isExpanded.toggle() }
+    }
+}
+
+private struct CopySectionButton: View {
+    let text: String
+    let onCopy: () -> Void
+    let accessibilityLabel: String
+    let background: Color
+    let foreground: Color
+    @State private var copiedAt: Date?
+
+    var body: some View {
+        Button {
+            SensitivePasteboard.copy(text)
+            onCopy()
+            copiedAt = .now
+        } label: {
+            Image(systemName: copiedAt == nil ? "doc.on.doc" : "checkmark")
+                .font(.caption.weight(.semibold))
+                .frame(width: CollapsibleSection.pillHeight, height: CollapsibleSection.pillHeight)
+                .background(background, in: Circle())
+                .foregroundStyle(foreground)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityLabel)
+        .sensoryFeedback(.success, trigger: copiedAt) { _, new in new != nil }
+        .task(id: copiedAt) {
+            guard copiedAt != nil else { return }
+            try? await Task.sleep(for: .seconds(1.5))
+            copiedAt = nil
         }
     }
 }
 
-private struct MarkdownBlocks: View {
+struct MarkdownBlocks: View {
     let raw: String
 
     var body: some View {
@@ -390,75 +527,82 @@ private struct MarkdownBlocks: View {
     }
 }
 
-private struct NoteStyleSheet: View {
-    let viewModel: NotesViewModel
-    let current: NotePreset
-
-    private struct StyleOption {
-        let preset: NotePreset
-        let label: String
-        let details: String
-        let symbol: String
-    }
-
-    private var options: [StyleOption] {
-        [
-            StyleOption(
-                preset: .summary,
-                label: String(localized: "Summary"),
-                details: String(localized: "A clean write-up of what was said, without repetition or filler."),
-                symbol: "doc.plaintext"
-            ),
-            StyleOption(
-                preset: .meeting,
-                label: String(localized: "Meeting notes"),
-                details: String(localized: "Discussion, decisions, action items and open questions."),
-                symbol: "person.3"
-            ),
-            StyleOption(
-                preset: .visit,
-                label: String(localized: "Visit report"),
-                details: String(localized: "Who the visit was about, observations, what was done and follow-ups."),
-                symbol: "list.clipboard"
-            ),
-            StyleOption(
-                preset: .legal,
-                label: String(localized: "Legal note"),
-                details: String(localized: "Matter, facts stated, instructions, advice given and next steps."),
-                symbol: "building.columns"
-            ),
-        ]
-    }
+struct MoveToFolderSheet: View {
+    let folders: [FolderUi]
+    let currentFolderId: Int64?
+    let onMove: (Int64?) -> Void
+    let onCancel: () -> Void
 
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    ForEach(options, id: \.symbol) { option in
-                        HStack(spacing: 12) {
-                            Image(systemName: option.symbol)
-                                .foregroundStyle(Brand.primary)
-                                .frame(width: 28)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(option.label)
-                                    .font(.body)
-                                    .foregroundStyle(Color.primary)
-                                Text(option.details)
-                                    .font(.caption)
-                                    .foregroundStyle(Color.secondary)
+                folderRow(title: String(localized: "No folder"), isSelected: currentFolderId == nil) { onMove(nil) }
+                ForEach(folders, id: \.id) { folder in
+                    folderRow(title: folder.name, isSelected: folder.id == currentFolderId) { onMove(folder.id) }
+                }
+            }
+            .navigationTitle(String(localized: "Move to folder"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(String(localized: "Cancel"), action: onCancel)
+                }
+            }
+        }
+    }
+
+    private func folderRow(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        HStack {
+            Text(title).foregroundStyle(Color.primary)
+            Spacer()
+            if isSelected {
+                Image(systemName: "checkmark")
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Brand.primary)
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture(perform: action)
+    }
+}
+
+private struct NoteStyleSheet: View {
+    let viewModel: NotesViewModel
+    let current: NoteStyleRef
+    let customStyles: [NoteStyleOptionUi]
+    let isCustomStylesUnlocked: Bool
+
+    var body: some View {
+        NavigationStack {
+            List {
+                if !customStyles.isEmpty {
+                    Section(String(localized: "Your styles")) {
+                        ForEach(customStyles, id: \.id) { style in
+                            StyleOptionRow(
+                                title: style.name,
+                                details: style.description_,
+                                symbol: NoteStyleLabels.customSymbol,
+                                isSelected: current.customId == style.id,
+                                showProBadge: !isCustomStylesUnlocked
+                            ) {
+                                viewModel.onStyleSelected(style: NoteStyleRefCustom(id: style.id))
                             }
-                            Spacer()
-                            if option.preset == current {
-                                Image(systemName: "checkmark")
-                                    .fontWeight(.semibold)
-                                    .foregroundStyle(Brand.primary)
-                            }
-                        }
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            viewModel.onPresetSelected(preset: option.preset)
                         }
                     }
+                }
+                Section {
+                    ForEach([NotePreset.summary, .meeting, .visit, .legal], id: \.self) { preset in
+                        StyleOptionRow(
+                            title: NoteStyleLabels.label(for: preset),
+                            details: NoteStyleLabels.details(for: preset),
+                            symbol: NoteStyleLabels.symbol(for: preset),
+                            isSelected: current.builtInPreset == preset
+                        ) {
+                            viewModel.onStyleSelected(style: NoteStyleRefBuiltIn(preset: preset))
+                        }
+                    }
+                } header: {
+                    Text(String(localized: "Built in"))
                 } footer: {
                     Text(String(localized: "The recording is kept. The title and overview are written again from the transcript in the style you pick."))
                 }

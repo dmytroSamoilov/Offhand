@@ -14,6 +14,10 @@ data class NoteShareLabels(
     val date: String,
     val overview: String,
     val transcript: String,
+    val recorded: String,
+    val duration: String,
+    val createdWith: String,
+    val exported: String,
 )
 
 object NoteShareFormatter {

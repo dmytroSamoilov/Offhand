@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="onboarding_incompatible_title">Устройство не поддерживается</string>
-    <string name="onboarding_incompatible_body">Offhand запускает большую модель ИИ прямо на вашем телефоне, поэтому ничего из записанного не покидает устройство. Это устройство не соответствует минимальным требованиям.</string>
+    <string name="onboarding_incompatible_title">Этот телефон не может запустить Offhand</string>
+    <string name="onboarding_incompatible_body">Offhand запускает ИИ полностью на вашем телефоне, поэтому ничего никогда не загружается. Этот телефон не соответствует минимальным требованиям.</string>
     <string name="onboarding_incompatible_ram_label">Память (RAM):</string>
     <string name="onboarding_incompatible_ram_value">%1$s ГБ — нужно %2$s ГБ</string>
     <string name="onboarding_incompatible_cores_label">Ядра процессора:</string>
     <string name="onboarding_incompatible_cores_value">%1$d — нужно %2$d</string>
 
     <string name="onboarding_privacy_title">Приватность по умолчанию</string>
-    <string name="onboarding_privacy_body">Всё, что вы записываете, остаётся на этом телефоне. Записи, расшифровки и заметки шифруются на этом устройстве, а обрабатывающий их ИИ работает прямо здесь — ничего никогда не загружается в сеть.</string>
+    <string name="onboarding_privacy_body">Всё остаётся на вашем телефоне. Записи, расшифровки и заметки зашифрованы, а ИИ, который их обрабатывает, работает прямо на устройстве. Ничего никогда не загружается.</string>
     <string name="onboarding_continue">Продолжить</string>
 
     <string name="onboarding_note_style_title">Как вы будете использовать Offhand?</string>
@@ -24,18 +24,18 @@
     <string name="onboarding_lock_enable_label">Требовать разблокировку при открытии Offhand</string>
     <string name="onboarding_lock_enable_description">Это можно изменить в любой момент в настройках.</string>
 
-    <string name="onboarding_download_title">Настройте свой личный ИИ</string>
-    <string name="onboarding_download_body">Offhand расшифровывает голосовые заметки и кратко излагает их суть с помощью ИИ, который работает полностью на вашем телефоне. Для начала нужно один раз скачать его модели ИИ.</string>
+    <string name="onboarding_download_title">Настройте ИИ на устройстве</string>
+    <string name="onboarding_download_body">Offhand расшифровывает и обобщает голосовые заметки с помощью ИИ, который работает полностью на вашем телефоне. Для начала нужна однократная загрузка.</string>
     <string name="onboarding_download_size">Разовое скачивание · около %1$s ГБ</string>
     <string name="onboarding_download_background_hint">Скачивание продолжается в фоне — можно сразу начинать запись. Мы сообщим, когда всё будет готово.</string>
     <string name="onboarding_download_wifi_hint">Совет: подключитесь к Wi‑Fi, чтобы сэкономить мобильный трафик.</string>
-    <string name="onboarding_notification_download_channel_name">Скачивание моделей</string>
-    <string name="onboarding_notification_status_channel_name">Статус модели</string>
-    <string name="onboarding_notification_downloading_title">Скачивание моделей ИИ</string>
-    <string name="onboarding_notification_downloading_text">Offhand настраивает ИИ на устройстве</string>
-    <string name="onboarding_notification_ready_title">Ваши модели ИИ готовы</string>
-    <string name="onboarding_notification_ready_text">Расшифровка и обзоры теперь выполняются полностью на этом устройстве.</string>
-    <string name="onboarding_notification_failed_title">Скачивание модели не завершилось</string>
+    <string name="onboarding_notification_download_channel_name">Загрузки ИИ на устройстве</string>
+    <string name="onboarding_notification_status_channel_name">Состояние ИИ на устройстве</string>
+    <string name="onboarding_notification_downloading_title">Скачать ИИ на устройстве</string>
+    <string name="onboarding_notification_downloading_text">Настраиваем ИИ на устройстве</string>
+    <string name="onboarding_notification_ready_title">ИИ на устройстве готов</string>
+    <string name="onboarding_notification_ready_text">Расшифровка и заметки теперь работают полностью на вашем телефоне.</string>
+    <string name="onboarding_notification_failed_title">Загрузка ИИ на устройстве не завершилась</string>
     <string name="onboarding_notification_failed_text">Проверьте подключение. Offhand возобновит скачивание, когда вы запишете следующую заметку.</string>
 
     <string name="onboarding_consent_title">Помочь улучшить Offhand?</string>

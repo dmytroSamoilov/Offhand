@@ -32,7 +32,7 @@ class AboutSupportViewModel(
     init {
         mutableUiState.update {
             it.copy(
-                isDeveloperSectionVisible = buildInfo.isDebugBuild,
+                isDeveloperSectionVisible = buildInfo.isDeveloperBuild,
                 model = it.model.copy(
                     displayName = modelManager.model.displayName,
                     sizeGb = formatGb(modelManager.model.sizeInBytes),

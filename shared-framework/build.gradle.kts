@@ -22,6 +22,8 @@ kotlin {
             export(project(":feature:onboarding"))
             export(project(":feature:recording"))
             export(project(":feature:settings"))
+            export(project(":feature:backup"))
+            export(project(":feature:paywall"))
             xcFramework.add(this)
         }
     }
@@ -37,6 +39,9 @@ kotlin {
             api(project(":feature:onboarding"))
             api(project(":feature:recording"))
             api(project(":feature:settings"))
+            api(project(":feature:backup"))
+            api(project(":feature:paywall"))
+            implementation(project(":testing:fakes"))
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
         }

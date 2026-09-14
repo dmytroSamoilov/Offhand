@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="onboarding_incompatible_title">डिवाइस समर्थित नहीं है</string>
-    <string name="onboarding_incompatible_body">Offhand एक बड़ा AI मॉडल सीधे आपके फ़ोन पर चलाता है, इसलिए आपकी रिकॉर्ड की गई कोई भी चीज़ डिवाइस से बाहर नहीं जाती। यह डिवाइस न्यूनतम ज़रूरतें पूरी नहीं करता।</string>
+    <string name="onboarding_incompatible_title">यह फ़ोन Offhand नहीं चला सकता</string>
+    <string name="onboarding_incompatible_body">Offhand अपना ऑन-डिवाइस AI पूरी तरह आपके फ़ोन पर चलाता है, इसलिए कुछ भी कभी अपलोड नहीं होता। यह फ़ोन न्यूनतम आवश्यकताएँ पूरी नहीं करता।</string>
     <string name="onboarding_incompatible_ram_label">मेमोरी (RAM):</string>
     <string name="onboarding_incompatible_ram_value">%1$s GB — %2$s GB चाहिए</string>
     <string name="onboarding_incompatible_cores_label">CPU कोर:</string>
     <string name="onboarding_incompatible_cores_value">%1$d — %2$d चाहिए</string>
 
     <string name="onboarding_privacy_title">शुरू से ही निजी</string>
-    <string name="onboarding_privacy_body">आप जो भी रिकॉर्ड करते हैं, वह इसी फ़ोन पर रहता है। रिकॉर्डिंग, ट्रांसक्रिप्ट और नोट्स इसी डिवाइस पर एन्क्रिप्ट होते हैं, और इन्हें प्रोसेस करने वाला AI यहीं चलता है — कुछ भी कभी अपलोड नहीं होता।</string>
+    <string name="onboarding_privacy_body">सब कुछ आपके फ़ोन पर ही रहता है। रिकॉर्डिंग, ट्रांसक्रिप्ट और नोट्स एन्क्रिप्टेड हैं, और उन्हें प्रोसेस करने वाला ऑन-डिवाइस AI वहीं चलता है। कुछ भी कभी अपलोड नहीं होता।</string>
     <string name="onboarding_continue">जारी रखें</string>
 
     <string name="onboarding_note_style_title">आप Offhand का इस्तेमाल कैसे करेंगे?</string>
@@ -24,18 +24,18 @@
     <string name="onboarding_lock_enable_label">Offhand खोलने के लिए अनलॉक ज़रूरी करें</string>
     <string name="onboarding_lock_enable_description">इसे आप कभी भी सेटिंग्स में बदल सकते हैं।</string>
 
-    <string name="onboarding_download_title">अपना निजी AI सेट करें</string>
-    <string name="onboarding_download_body">Offhand वॉयस नोट्स को ऐसे AI से ट्रांसक्राइब और सारांशित करता है जो पूरी तरह आपके फ़ोन पर चलता है। शुरू करने के लिए, इसके AI मॉडल का एक बार डाउनलोड ज़रूरी है।</string>
+    <string name="onboarding_download_title">अपना ऑन-डिवाइस AI सेट करें</string>
+    <string name="onboarding_download_body">Offhand वॉइस नोट्स को ऐसे ऑन-डिवाइस AI से ट्रांसक्राइब और सारांशित करता है जो पूरी तरह आपके फ़ोन पर चलता है। शुरू करने के लिए एक बार डाउनलोड ज़रूरी है।</string>
     <string name="onboarding_download_size">एक बार का डाउनलोड · लगभग %1$s GB</string>
     <string name="onboarding_download_background_hint">डाउनलोड बैकग्राउंड में चलता रहता है — आप तुरंत रिकॉर्डिंग शुरू कर सकते हैं। सब तैयार होते ही हम आपको सूचित करेंगे।</string>
     <string name="onboarding_download_wifi_hint">सुझाव: मोबाइल डेटा बचाने के लिए Wi‑Fi से कनेक्ट करें।</string>
-    <string name="onboarding_notification_download_channel_name">मॉडल डाउनलोड</string>
-    <string name="onboarding_notification_status_channel_name">मॉडल स्थिति</string>
-    <string name="onboarding_notification_downloading_title">AI मॉडल डाउनलोड हो रहे हैं</string>
-    <string name="onboarding_notification_downloading_text">Offhand ऑन-डिवाइस AI सेट कर रहा है</string>
-    <string name="onboarding_notification_ready_title">आपके AI मॉडल तैयार हैं</string>
-    <string name="onboarding_notification_ready_text">ट्रांसक्रिप्शन और सारांश अब पूरी तरह इसी डिवाइस पर चलते हैं।</string>
-    <string name="onboarding_notification_failed_title">मॉडल डाउनलोड पूरा नहीं हुआ</string>
+    <string name="onboarding_notification_download_channel_name">ऑन-डिवाइस AI डाउनलोड</string>
+    <string name="onboarding_notification_status_channel_name">ऑन-डिवाइस AI की स्थिति</string>
+    <string name="onboarding_notification_downloading_title">ऑन-डिवाइस AI डाउनलोड करें</string>
+    <string name="onboarding_notification_downloading_text">आपका ऑन-डिवाइस AI सेट हो रहा है</string>
+    <string name="onboarding_notification_ready_title">आपका ऑन-डिवाइस AI तैयार है</string>
+    <string name="onboarding_notification_ready_text">ट्रांसक्रिप्शन और नोट्स अब पूरी तरह आपके फ़ोन पर चलते हैं।</string>
+    <string name="onboarding_notification_failed_title">ऑन-डिवाइस AI डाउनलोड पूरा नहीं हुआ</string>
     <string name="onboarding_notification_failed_text">अपना कनेक्शन जांचें। अगली बार नोट रिकॉर्ड करने पर Offhand डाउनलोड फिर शुरू कर देगा।</string>
 
     <string name="onboarding_consent_title">Offhand को बेहतर बनाने में मदद करेंगे?</string>

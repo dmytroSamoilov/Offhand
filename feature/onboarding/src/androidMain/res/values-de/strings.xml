@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="onboarding_incompatible_title">Gerät nicht unterstützt</string>
-    <string name="onboarding_incompatible_body">Offhand führt ein großes KI-Modell direkt auf deinem Smartphone aus, damit nichts von dem, was du aufnimmst, jemals das Gerät verlässt. Dieses Gerät erfüllt die Mindestanforderungen nicht.</string>
+    <string name="onboarding_incompatible_title">Dieses Handy kann Offhand nicht ausführen</string>
+    <string name="onboarding_incompatible_body">Offhand lässt seine KI komplett auf deinem Handy laufen, deshalb wird nie etwas hochgeladen. Dieses Handy erfüllt die Mindestanforderungen nicht.</string>
     <string name="onboarding_incompatible_ram_label">Arbeitsspeicher (RAM):</string>
     <string name="onboarding_incompatible_ram_value">%1$s GB — benötigt %2$s GB</string>
     <string name="onboarding_incompatible_cores_label">CPU-Kerne:</string>
     <string name="onboarding_incompatible_cores_value">%1$d — benötigt %2$d</string>
 
     <string name="onboarding_privacy_title">Privat von Grund auf</string>
-    <string name="onboarding_privacy_body">Alles, was du aufnimmst, bleibt auf diesem Smartphone. Aufnahmen, Transkripte und Notizen werden auf diesem Gerät verschlüsselt, und die KI, die sie verarbeitet, läuft genau hier — nichts wird jemals hochgeladen.</string>
+    <string name="onboarding_privacy_body">Alles bleibt auf deinem Handy. Aufnahmen, Transkripte und Notizen sind verschlüsselt, und die KI, die sie verarbeitet, läuft direkt auf dem Gerät. Nichts wird jemals hochgeladen.</string>
     <string name="onboarding_continue">Weiter</string>
 
     <string name="onboarding_note_style_title">Wie wirst du Offhand nutzen?</string>
@@ -24,18 +24,18 @@
     <string name="onboarding_lock_enable_label">Entsperren beim Öffnen von Offhand verlangen</string>
     <string name="onboarding_lock_enable_description">Du kannst das jederzeit in den Einstellungen ändern.</string>
 
-    <string name="onboarding_download_title">Richte deine private KI ein</string>
-    <string name="onboarding_download_body">Offhand transkribiert und fasst Sprachnotizen mit KI zusammen, die vollständig auf deinem Smartphone läuft. Zum Start ist ein einmaliger Download der KI-Modelle nötig.</string>
+    <string name="onboarding_download_title">Richte deine KI auf dem Gerät ein</string>
+    <string name="onboarding_download_body">Offhand transkribiert und fasst Sprachnotizen mit KI zusammen, die komplett auf deinem Handy läuft. Zum Start ist ein einmaliger Download nötig.</string>
     <string name="onboarding_download_size">Einmaliger Download · etwa %1$s GB</string>
     <string name="onboarding_download_background_hint">Der Download läuft im Hintergrund weiter — du kannst sofort mit dem Aufnehmen beginnen. Wir benachrichtigen dich, sobald alles bereit ist.</string>
     <string name="onboarding_download_wifi_hint">Tipp: Verbinde dich mit WLAN, um mobile Daten zu sparen.</string>
-    <string name="onboarding_notification_download_channel_name">Modell-Downloads</string>
-    <string name="onboarding_notification_status_channel_name">Modellstatus</string>
-    <string name="onboarding_notification_downloading_title">KI-Modelle werden heruntergeladen</string>
-    <string name="onboarding_notification_downloading_text">Offhand richtet die On-Device-KI ein</string>
-    <string name="onboarding_notification_ready_title">Deine KI-Modelle sind bereit</string>
-    <string name="onboarding_notification_ready_text">Transkription und Zusammenfassungen laufen jetzt vollständig auf diesem Gerät.</string>
-    <string name="onboarding_notification_failed_title">Modell-Download nicht abgeschlossen</string>
+    <string name="onboarding_notification_download_channel_name">Downloads der KI auf dem Gerät</string>
+    <string name="onboarding_notification_status_channel_name">Status der KI auf dem Gerät</string>
+    <string name="onboarding_notification_downloading_title">KI auf dem Gerät herunterladen</string>
+    <string name="onboarding_notification_downloading_text">Deine KI auf dem Gerät wird eingerichtet</string>
+    <string name="onboarding_notification_ready_title">Deine KI auf dem Gerät ist bereit</string>
+    <string name="onboarding_notification_ready_text">Transkription und Notizen laufen jetzt komplett auf deinem Handy.</string>
+    <string name="onboarding_notification_failed_title">Download der KI auf dem Gerät nicht abgeschlossen</string>
     <string name="onboarding_notification_failed_text">Prüfe deine Verbindung. Offhand setzt den Download fort, wenn du deine nächste Notiz aufnimmst.</string>
 
     <string name="onboarding_consent_title">Hilfst du mit, Offhand zu verbessern?</string>

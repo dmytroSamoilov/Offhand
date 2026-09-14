@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="paywall_tagline">Aproveite mais cada gravação.</string>
+    <string name="paywall_free_private">Privado por padrão</string>
+    <string name="paywall_free_offline">Totalmente offline</string>
+    <string name="paywall_free_no_ads">Sem anúncios, sem conta</string>
+    <string name="paywall_free_unlimited">Notas e gravações ilimitadas</string>
+    <string name="paywall_free_backup">Backup criptografado, busca e pastas</string>
+    <string name="paywall_pro_styles">Notas no seu formato</string>
+    <string name="paywall_pro_export">Compartilhe documentos caprichados</string>
+    <string name="paywall_pro_suggestions">Nunca perca um follow-up</string>
+    <string name="paywall_pro_import">Transforme qualquer gravação em nota</string>
+    <string name="paywall_pro_more">Novos recursos Pro são incluídos assim que saem</string>
+    <string name="paywall_plan_yearly">Anual</string>
+    <string name="paywall_plan_yearly_price">%1$s / ano</string>
+    <string name="paywall_plan_yearly_renews">Renova todo ano</string>
+    <string name="paywall_plan_lifetime">Vitalício</string>
+    <string name="paywall_plan_lifetime_hint">Pague uma vez, use para sempre</string>
+    <string name="paywall_cta_trial">Começar teste grátis</string>
+    <string name="paywall_cta_subscribe">Assinar</string>
+    <string name="paywall_cta_lifetime">Comprar vitalício</string>
+    <string name="paywall_yearly_disclosure">%1$s por ano, renovado automaticamente. Cancele quando quiser na conta da loja.</string>
+    <string name="paywall_restore">Restaurar compras</string>
+    <string name="paywall_terms">Termos</string>
+    <string name="paywall_privacy">Privacidade</string>
+    <string name="paywall_offers_unavailable">Não foi possível carregar os preços. Verifique sua conexão e tente de novo.</string>
+    <string name="paywall_retry">Tentar de novo</string>
+    <string name="paywall_message_failed">A compra não foi concluída e nada foi cobrado.</string>
+    <string name="paywall_message_pending">Seu pagamento ainda está sendo processado. O Pro será liberado assim que concluir.</string>
+    <string name="paywall_message_restore_nothing">Nenhuma compra anterior foi encontrada para esta conta da loja.</string>
+    <string name="paywall_message_dismiss">OK</string>
+    <string name="paywall_success_title">Você agora tem o Offhand Pro</string>
+    <string name="paywall_success_body">Obrigado por apoiar um app independente e privado.</string>
+    <string name="paywall_close">Fechar</string>
+    <string name="paywall_no_browser">Nenhum navegador encontrado para abrir o link.</string>
+    <string name="paywall_context_tagline">Parte do Offhand Pro. Aproveite mais cada gravação.</string>
+    <string name="paywall_context_styles">Salve seu próprio estilo de nota</string>
+    <string name="paywall_context_export">Compartilhe esta nota em PDF ou Word</string>
+    <string name="paywall_context_suggestions">Encontre datas e tarefas nas suas notas</string>
+    <string name="paywall_context_import">Transforme suas gravações em notas</string>
+    <string name="paywall_pro_styles_hint">Seus títulos, suas seções, sempre</string>
+    <string name="paywall_pro_export_hint">PDF e Word, prontos para clientes, e-mail e impressão</string>
+    <string name="paywall_pro_suggestions_hint">Datas e tarefas direto na sua agenda</string>
+    <string name="paywall_pro_import_hint">Memos de voz, ligações e arquivos de outros apps</string>
+    <string name="paywall_plan_yearly_monthly">Cerca de %1$s por mês</string>
+    <string name="paywall_plan_best_value">Melhor valor</string>
+    <string name="paywall_no_charge">Nada é cobrado hoje</string>
+    <string name="paywall_privacy_note">O pagamento passa pelo Google Play. O Offhand nunca vê seu cartão e suas notas nunca saem do seu celular.</string>
+    <string name="paywall_continue_free">Continuar com a versão grátis</string>
+    <string name="paywall_success_continue">O que você começou já está a caminho.</string>
+    <plurals name="paywall_plan_trial">
+        <item quantity="one">%d dia de teste grátis</item>
+        <item quantity="other">%d dias de teste grátis</item>
+    </plurals>
+    <plurals name="paywall_trial_disclosure">
+        <item quantity="one">%1$d dia grátis, depois %2$s por ano. Cancele quando quiser na conta da loja.</item>
+        <item quantity="other">%1$d dias grátis, depois %2$s por ano. Cancele quando quiser na conta da loja.</item>
+    </plurals>
+    <plurals name="paywall_cta_trial_days">
+        <item quantity="one">Começar %d dia de teste grátis</item>
+        <item quantity="other">Começar %d dias de teste grátis</item>
+    </plurals>
+    <plurals name="paywall_plan_lifetime_vs_yearly">
+        <item quantity="one">Menos de %d ano do plano anual</item>
+        <item quantity="other">Menos de %d anos do plano anual</item>
+    </plurals>
+</resources>

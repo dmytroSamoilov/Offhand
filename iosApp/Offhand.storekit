@@ -1,0 +1,78 @@
+{
+  "identifier" : "9A2F5C1E-6B3D-4E8A-9C71-0F2D8B4A6E11",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "59.99",
+      "familyShareable" : false,
+      "internalID" : "1F3C8A2B-7D4E-4B6A-8C9D-2E5F7A1B3C4D",
+      "localizations" : [
+        {
+          "description" : "Every Pro feature, paid once.",
+          "displayName" : "Offhand Pro Lifetime",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "offhand_pro_lifetime",
+      "referenceName" : "Offhand Pro Lifetime",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "0",
+    "_developerTeamID" : "",
+    "_failTransactionsEnabled" : false,
+    "_lastSynced" : 0,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "5B7E9C2D-1A4F-4C8B-9E6D-3F2A7B8C1D5E",
+      "localizations" : [
+
+      ],
+      "name" : "Offhand Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "24.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "7C1D3E5F-2B4A-4D6C-8E9F-1A3B5C7D9E2F",
+          "introductoryOffer" : {
+            "internalID" : "8D2E4F6A-3C5B-4E7D-9F1A-2B4C6D8E1F3A",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P2W"
+          },
+          "localizations" : [
+            {
+              "description" : "Every Pro feature, renewed yearly.",
+              "displayName" : "Offhand Pro Yearly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "offhand_pro_yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Offhand Pro Yearly",
+          "subscriptionGroupID" : "5B7E9C2D-1A4F-4C8B-9E6D-3F2A7B8C1D5E",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

@@ -1,0 +1,108 @@
+# Smoke flow for the uitest flavor / scheme: the AI engines, the model
+# download, the device gate and the microphone are canned fakes, so this runs
+# on any emulator or simulator. Run with `maestro test .maestro/smoke.yaml`.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+# Onboarding
+- tapOn: "Continue"
+- tapOn: "Continue"
+- runFlow:
+    when:
+      visible: "Continue without a lock"
+    commands:
+      - tapOn: "Continue without a lock"
+- runFlow:
+    when:
+      visible: "Lock Offhand?"
+    commands:
+      - runFlow:
+          when:
+            platform: Android
+          commands:
+            - tapOn: "Require unlock to open Offhand"
+      - runFlow:
+          when:
+            platform: iOS
+          commands:
+            - tapOn: "Require unlock to open Offhand"
+      - tapOn: "Continue"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Share anonymous reports"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Share usage & stability reports"
+- tapOn: "Continue"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Continue"
+      # Maestro may auto-accept the system alert before this tap lands.
+      - tapOn:
+          text: "^Allow$"
+          optional: true
+- tapOn: "Continue"
+- assertVisible: "Notes"
+
+# Record a note through the fake microphone and engines
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Start a new recording"
+      - runFlow:
+          when:
+            visible: "Start recording"
+          commands:
+            - tapOn: "Start recording"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Record a note"
+- extendedWaitUntil:
+    visible: "00:(0[4-9]|[1-5][0-9])"
+    timeout: 15000
+- tapOn: "Save note"
+- tapOn: "Done"
+- extendedWaitUntil:
+    visible: "Smoke test note"
+    timeout: 30000
+
+# Search highlights the matching note
+- tapOn: "Search notes"
+- inputText: "budget"
+- assertVisible: "Smoke test note"
+- assertVisible: ".*quarterly budget.*"
+
+# Detail renders both sections (debug builds show a fake in-app review first)
+- tapOn: "Smoke test note"
+- runFlow:
+    when:
+      visible: "In-app review · dev build"
+    commands:
+      - tapOn: "COUNT ATTEMPT"
+- assertVisible: "Overview"
+- scrollUntilVisible:
+    element: "Transcript"
+    direction: DOWN
+- assertVisible: "Transcript"
+
+# Going back must not hand focus to the search field (regression: keyboard popped up)
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+      - assertVisible: "Smoke test note"
+      - assertNotVisible: "Cancel search"

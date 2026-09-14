@@ -33,3 +33,51 @@ internal val MIGRATION_5_6 = object : Migration(5, 6) {
         connection.execSQL("ALTER TABLE notes ADD COLUMN preset TEXT NOT NULL DEFAULT 'SUMMARY'")
     }
 }
+
+internal val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS folders (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "name TEXT NOT NULL, " +
+                "createdAtEpochMs INTEGER NOT NULL)",
+        )
+        connection.execSQL("ALTER TABLE notes ADD COLUMN folderId INTEGER")
+    }
+}
+
+internal val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS note_styles (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "name TEXT NOT NULL, " +
+                "noteKind TEXT NOT NULL, " +
+                "language TEXT NOT NULL, " +
+                "sectionsJson TEXT NOT NULL, " +
+                "createdAtEpochMs INTEGER NOT NULL)",
+        )
+        connection.execSQL("ALTER TABLE notes ADD COLUMN customStyleId INTEGER")
+    }
+}
+
+internal val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS note_suggestions (" +
+                "noteId INTEGER PRIMARY KEY NOT NULL, " +
+                "eventsJson TEXT NOT NULL)",
+        )
+    }
+}
+
+internal val MIGRATION_9_10 = object : Migration(9, 10) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS transcription_checkpoints (" +
+                "noteId INTEGER PRIMARY KEY NOT NULL, " +
+                "transcribedBytes INTEGER NOT NULL, " +
+                "transcriptionTimeMs INTEGER NOT NULL)",
+        )
+    }
+}

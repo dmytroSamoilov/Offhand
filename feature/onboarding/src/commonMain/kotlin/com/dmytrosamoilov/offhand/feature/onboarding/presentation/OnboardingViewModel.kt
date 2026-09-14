@@ -1,5 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.onboarding.presentation
 
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
@@ -26,6 +28,7 @@ class OnboardingViewModel(
     private val setNotePreset: SetNotePresetUseCase,
     private val completeOnboarding: CompleteOnboardingUseCase,
     private val stepPolicy: OnboardingStepPolicy,
+    private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
     private val mutableUiState = MutableStateFlow(OnboardingUiState())
@@ -78,6 +81,7 @@ class OnboardingViewModel(
         launchSafely {
             modelDownloadController.start()
             completeOnboarding()
+            analyticsTracker.track(AnalyticsEvents.onboardingCompleted())
         }
     }
 

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="backup_title">Sichern &amp; wiederherstellen</string>
+    <string name="backup_back_description">Zurück</string>
+    <string name="backup_create_title">Sicherung</string>
+    <string name="backup_create_body">Speichere eine verschlüsselte Kopie deiner Notizen, Ordner und Aufnahmen in einer Datei. Zum Wiederherstellen brauchst du die Passphrase — sie lässt sich nicht wiederherstellen.</string>
+    <string name="backup_passphrase_label">Passphrase</string>
+    <string name="backup_passphrase_confirm_label">Passphrase wiederholen</string>
+    <string name="backup_passphrase_too_short">Mindestens %1$d Zeichen.</string>
+    <string name="backup_passphrase_mismatch">Die Passphrasen stimmen nicht überein.</string>
+    <string name="backup_include_audio_label">Audioaufnahmen einschließen</string>
+    <string name="backup_include_audio_description">Aufnahmen machen die Datei deutlich größer.</string>
+    <string name="backup_include_styles_label">Notizstile einschließen</string>
+    <string name="backup_include_styles_description">Deine eigenen Notizstile wandern mit den Notizen mit.</string>
+    <string name="backup_restore_title">Wiederherstellen</string>
+    <string name="backup_restore_body">Notizen und Ordner aus einer Sicherungsdatei hinzufügen. Vorhandene Notizen bleiben erhalten, Duplikate werden übersprungen.</string>
+    <string name="backup_restore_button">Sicherungsdatei wählen</string>
+    <string name="backup_restore_dialog_title">Passphrase der Sicherung eingeben</string>
+    <string name="backup_restore_dialog_confirm">Wiederherstellen</string>
+    <string name="backup_cancel">Abbrechen</string>
+    <string name="backup_ok">OK</string>
+    <string name="backup_progress_backup">Sicherung läuft</string>
+    <string name="backup_progress_restore">Wiederherstellung läuft</string>
+    <string name="backup_done_backup_title">Sicherung gespeichert</string>
+    <string name="backup_done_backup_body">%1$d Notizen und %2$d Ordner wurden gespeichert.</string>
+    <string name="backup_done_restore_title">Wiederherstellung abgeschlossen</string>
+    <string name="backup_done_restore_body">%1$d Notizen wiederhergestellt, %2$d als Duplikate übersprungen. Ordner: %3$d erstellt, %4$d wiederverwendet.</string>
+    <string name="backup_failed_backup_title">Sicherung fehlgeschlagen</string>
+    <string name="backup_failed_restore_title">Wiederherstellung fehlgeschlagen</string>
+    <string name="backup_error_wrong_passphrase">Diese Passphrase öffnet diese Sicherung nicht.</string>
+    <string name="backup_error_corrupt">Diese Datei ist keine lesbare Offhand-Sicherung.</string>
+    <string name="backup_error_unsupported">Diese Sicherung stammt aus einer neueren Offhand-Version.</string>
+    <string name="backup_error_io">Die Datei konnte nicht gelesen oder geschrieben werden.</string>
+    <string name="backup_start_button">Sichern</string>
+    <string name="backup_step_passphrase_title">Passphrase festlegen</string>
+    <string name="backup_warning">Bewahre diese Passphrase sicher auf. Geht sie verloren, können weder du noch wir die Notizen aus dieser Sicherung wiederherstellen.</string>
+    <string name="backup_continue">Weiter</string>
+    <string name="backup_step_options_title">Sicherungsoptionen</string>
+    <string name="backup_file_name_label">Dateiname</string>
+    <string name="backup_save_button">Sicherung speichern</string>
+    <string name="backup_done">Fertig</string>
+</resources>

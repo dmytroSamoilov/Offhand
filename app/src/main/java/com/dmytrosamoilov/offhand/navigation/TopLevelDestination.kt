@@ -20,6 +20,15 @@ data object SettingsRoute
 @Serializable
 data object AboutSupportRoute
 
+@Serializable
+data object BackupRoute
+
+@Serializable
+data object NoteStylesRoute
+
+@Serializable
+data class NoteStyleEditorRoute(val styleId: Long)
+
 enum class TopLevelDestination(
     @param:StringRes val labelRes: Int,
     val icon: ImageVector,
@@ -27,4 +36,8 @@ enum class TopLevelDestination(
 ) {
     NOTES(R.string.destination_notes, Icons.AutoMirrored.Filled.Notes, NotesRoute),
     SETTINGS(R.string.destination_settings, Icons.Filled.Settings, SettingsGraphRoute),
+    ;
+
+    val testTag: String
+        get() = "tab_${name.lowercase()}"
 }

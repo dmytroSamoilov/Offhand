@@ -34,4 +34,11 @@ sealed interface NoteProcessingEvent {
 
     data class Completed(override val noteId: Long) : NoteProcessingEvent
     data class Failed(override val noteId: Long) : NoteProcessingEvent
+    data class ImportRejected(override val noteId: Long, val reason: ImportRejection) : NoteProcessingEvent
+}
+
+enum class ImportRejection {
+    UNSUPPORTED,
+    TOO_LONG,
+    UNREADABLE,
 }

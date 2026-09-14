@@ -68,6 +68,7 @@ import com.dmytrosamoilov.offhand.core.ui.component.toDomain
 import com.dmytrosamoilov.offhand.core.ui.component.toUi
 import com.dmytrosamoilov.offhand.feature.onboarding.R
 import org.koin.androidx.compose.koinViewModel
+import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 
 @Composable
 fun OnboardingScreen(
@@ -332,6 +333,7 @@ private fun AppLockStep(
     isAppLockEnabled: Boolean,
     onAppLockToggled: (Boolean) -> Unit,
 ) {
+    val haptics = haptics()
     Icon(
         imageVector = Icons.Filled.Lock,
         contentDescription = null,
@@ -348,7 +350,10 @@ private fun AppLockStep(
             .toggleable(
                 value = isAppLockEnabled,
                 role = Role.Switch,
-                onValueChange = onAppLockToggled,
+                onValueChange = { isOn ->
+                    haptics.toggle(isOn)
+                    onAppLockToggled(isOn)
+                },
             ),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant),
@@ -381,6 +386,7 @@ private fun TelemetryConsentStep(
     isTelemetryEnabled: Boolean,
     onTelemetryToggled: (Boolean) -> Unit,
 ) {
+    val haptics = haptics()
     StepTitle(text = stringResource(R.string.onboarding_consent_title))
     StepBody(text = stringResource(R.string.onboarding_consent_body))
     Spacer(modifier = Modifier.height(28.dp))
@@ -390,7 +396,10 @@ private fun TelemetryConsentStep(
             .toggleable(
                 value = isTelemetryEnabled,
                 role = Role.Switch,
-                onValueChange = onTelemetryToggled,
+                onValueChange = { isOn ->
+                    haptics.toggle(isOn)
+                    onTelemetryToggled(isOn)
+                },
             ),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant),

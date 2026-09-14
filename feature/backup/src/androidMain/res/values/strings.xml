@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="backup_title">Backup &amp; restore</string>
+    <string name="backup_back_description">Back</string>
+    <string name="backup_create_title">Backup</string>
+    <string name="backup_create_body">Save an encrypted copy of your notes, folders and recordings to a file. You will need the passphrase to restore it, and it cannot be recovered.</string>
+    <string name="backup_passphrase_label">Passphrase</string>
+    <string name="backup_passphrase_confirm_label">Repeat passphrase</string>
+    <string name="backup_passphrase_too_short">Use at least %1$d characters.</string>
+    <string name="backup_passphrase_mismatch">The passphrases do not match.</string>
+    <string name="backup_include_audio_label">Include audio recordings</string>
+    <string name="backup_include_audio_description">Recordings make the file much larger.</string>
+    <string name="backup_include_styles_label">Include note styles</string>
+    <string name="backup_include_styles_description">Your custom note styles travel with the notes.</string>
+    <string name="backup_restore_title">Restore</string>
+    <string name="backup_restore_body">Add notes and folders from a backup file. Notes already on this phone are kept and duplicates are skipped.</string>
+    <string name="backup_restore_button">Choose a backup file</string>
+    <string name="backup_restore_dialog_title">Enter the backup passphrase</string>
+    <string name="backup_restore_dialog_confirm">Restore</string>
+    <string name="backup_cancel">Cancel</string>
+    <string name="backup_ok">OK</string>
+    <string name="backup_progress_backup">Backing up</string>
+    <string name="backup_progress_restore">Restoring</string>
+    <string name="backup_done_backup_title">Backup saved</string>
+    <string name="backup_done_backup_body">%1$d notes and %2$d folders were saved.</string>
+    <string name="backup_done_restore_title">Restore complete</string>
+    <string name="backup_done_restore_body">%1$d notes restored, %2$d skipped as duplicates. Folders: %3$d created, %4$d reused.</string>
+    <string name="backup_failed_backup_title">Backup failed</string>
+    <string name="backup_failed_restore_title">Restore failed</string>
+    <string name="backup_error_wrong_passphrase">That passphrase does not open this backup.</string>
+    <string name="backup_error_corrupt">This file is not a readable Offhand backup.</string>
+    <string name="backup_error_unsupported">This backup was made with a newer version of Offhand.</string>
+    <string name="backup_error_io">The file could not be read or written.</string>
+    <string name="backup_progress_percent" translatable="false">%1$d%%</string>
+    <string name="backup_start_button">Back up</string>
+    <string name="backup_step_passphrase_title">Set a passphrase</string>
+    <string name="backup_warning">Keep this passphrase safe. If you lose it, neither you nor we can recover the notes in this backup.</string>
+    <string name="backup_continue">Continue</string>
+    <string name="backup_step_options_title">Backup options</string>
+    <string name="backup_file_name_label">File name</string>
+    <string name="backup_save_button">Save backup</string>
+    <string name="backup_done">Done</string>
+</resources>

@@ -15,4 +15,6 @@ interface NotesRepository {
     suspend fun updateNote(note: Note)
 
     suspend fun deleteNote(id: Long)
+
+    suspend fun moveNoteToFolder(noteId: Long, folderId: Long?)
 }

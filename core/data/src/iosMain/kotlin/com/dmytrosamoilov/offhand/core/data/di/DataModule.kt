@@ -12,15 +12,41 @@ import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_2_3
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_3_4
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_4_5
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_5_6
+import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_6_7
+import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_7_8
+import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_8_9
+import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_9_10
+import com.dmytrosamoilov.offhand.core.data.database.FolderDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteDao
+import com.dmytrosamoilov.offhand.core.data.database.NoteStyleDao
+import com.dmytrosamoilov.offhand.core.data.database.NoteSuggestionsDao
+import com.dmytrosamoilov.offhand.core.data.database.TranscriptionCheckpointDao
 import com.dmytrosamoilov.offhand.core.data.database.NotesDatabase
 import com.dmytrosamoilov.offhand.core.data.database.applyCompleteUnlessOpenProtection
 import com.dmytrosamoilov.offhand.core.data.database.createProtectedDatabaseDirectory
 import com.dmytrosamoilov.offhand.core.data.database.iosDocumentsDirectory
+import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStylesRepository
+import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
+import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestionsRepository
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import com.dmytrosamoilov.offhand.core.data.domain.TranscriptionCheckpointRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProStatusCache
+import com.dmytrosamoilov.offhand.core.data.domain.ProStatusRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProStore
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
+import com.dmytrosamoilov.offhand.core.data.preferences.DataStoreProStatusCache
 import com.dmytrosamoilov.offhand.core.data.preferences.DataStoreUserPreferencesRepository
+import com.dmytrosamoilov.offhand.core.data.repository.RoomCustomNoteStylesRepository
+import com.dmytrosamoilov.offhand.core.data.repository.RoomFoldersRepository
+import com.dmytrosamoilov.offhand.core.data.repository.RoomNoteSuggestionsRepository
+import com.dmytrosamoilov.offhand.core.data.repository.ConsentGatedAnalyticsTracker
+import com.dmytrosamoilov.offhand.core.data.repository.RoomTranscriptionCheckpointRepository
+import com.dmytrosamoilov.offhand.core.data.repository.DebugOverrideProStore
+import com.dmytrosamoilov.offhand.core.data.repository.ProUpgradeCoordinator
 import com.dmytrosamoilov.offhand.core.data.repository.RoomNotesRepository
+import com.dmytrosamoilov.offhand.core.data.repository.StoreProStatusRepository
 import com.dmytrosamoilov.offhand.core.security.excludeFromBackup
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +54,10 @@ import kotlinx.coroutines.IO
 import okio.Path.Companion.toPath
 import platform.Foundation.NSFileManager
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.qualifier.named
 import org.koin.dsl.bind
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import org.koin.dsl.module
 
 private const val DATABASE_NAME = "offhand-notes.db"
@@ -45,6 +74,10 @@ private fun createNotesDatabase(): NotesDatabase {
             MIGRATION_3_4,
             MIGRATION_4_5,
             MIGRATION_5_6,
+            MIGRATION_6_7,
+            MIGRATION_7_8,
+            MIGRATION_8_9,
+            MIGRATION_9_10,
         )
         .build()
     applyCompleteUnlessOpenProtection(databasePath)
@@ -68,8 +101,22 @@ private fun createUserPreferencesDataStore(): DataStore<Preferences> {
 val coreDataModule = module {
     single { createNotesDatabase() }
     factory<NoteDao> { get<NotesDatabase>().noteDao() }
+    factory<FolderDao> { get<NotesDatabase>().folderDao() }
+    factory<NoteStyleDao> { get<NotesDatabase>().noteStyleDao() }
+    factory<NoteSuggestionsDao> { get<NotesDatabase>().noteSuggestionsDao() }
+    factory<TranscriptionCheckpointDao> { get<NotesDatabase>().transcriptionCheckpointDao() }
     singleOf(::RoomNotesRepository) bind NotesRepository::class
-    single<UserPreferencesRepository> {
-        DataStoreUserPreferencesRepository(createUserPreferencesDataStore(), get())
+    singleOf(::RoomFoldersRepository) bind FoldersRepository::class
+    singleOf(::RoomCustomNoteStylesRepository) bind CustomNoteStylesRepository::class
+    singleOf(::RoomNoteSuggestionsRepository) bind NoteSuggestionsRepository::class
+    singleOf(::RoomTranscriptionCheckpointRepository) bind TranscriptionCheckpointRepository::class
+    single<ProStore> { DebugOverrideProStore(get(named(PLATFORM_PRO_STORE)), get()) }
+    single<ProStatusCache> { DataStoreProStatusCache(get()) }
+    singleOf(::StoreProStatusRepository) bind ProStatusRepository::class
+    singleOf(::ProUpgradeCoordinator) bind ProUpgradeGate::class
+    single<AnalyticsTracker> {
+        ConsentGatedAnalyticsTracker(get(), get(), CoroutineScope(SupervisorJob() + Dispatchers.Default))
     }
+    single<DataStore<Preferences>> { createUserPreferencesDataStore() }
+    single<UserPreferencesRepository> { DataStoreUserPreferencesRepository(get(), get()) }
 }

@@ -12,7 +12,8 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.designsystem.R as DesignR
 import com.dmytrosamoilov.offhand.feature.recording.R
 import com.dmytrosamoilov.offhand.feature.recording.domain.NoteProcessingEvent
@@ -58,11 +59,13 @@ class RecordingService : Service(), KoinComponent {
             ACTION_STOP -> sessionManager.stop()
             ACTION_RETRY_NOTE -> startNoteRetry(intent)
             ACTION_RESTRUCTURE_NOTE -> startNoteRestructure(intent)
+            ACTION_IMPORT_AUDIO -> startAudioImport(intent)
+            ACTION_SUGGEST_EVENTS -> startEventSuggestions(intent)
         }
         // Note processing survives a system kill through intent redelivery;
         // a live microphone session cannot be resumed, so it never redelivers.
         return when (intent?.action) {
-            ACTION_RETRY_NOTE, ACTION_RESTRUCTURE_NOTE -> START_REDELIVER_INTENT
+            ACTION_RETRY_NOTE, ACTION_RESTRUCTURE_NOTE, ACTION_IMPORT_AUDIO, ACTION_SUGGEST_EVENTS -> START_REDELIVER_INTENT
             else -> START_NOT_STICKY
         }
     }
@@ -79,9 +82,26 @@ class RecordingService : Service(), KoinComponent {
     private fun startNoteRestructure(intent: Intent) {
         val noteId = intent.getLongExtra(EXTRA_RETRY_NOTE_ID, -1L)
         if (noteId <= 0) return
-        val preset = NotePreset.fromName(intent.getStringExtra(EXTRA_PRESET))
+        val style = NoteStyleRef.fromStorageKey(intent.getStringExtra(EXTRA_STYLE))
         startForeground(processingNotification(), processingForegroundType())
-        sessionManager.restructureNote(noteId, preset)
+        sessionManager.restructureNote(noteId, style)
+        observeSession()
+    }
+
+    private fun startAudioImport(intent: Intent) {
+        val path = intent.getStringExtra(EXTRA_IMPORT_PATH)
+        val name = intent.getStringExtra(EXTRA_IMPORT_NAME)
+        if (path.isNullOrBlank() || name.isNullOrBlank()) return
+        startForeground(processingNotification(), processingForegroundType())
+        sessionManager.importAudio(AudioImportSource(handle = path, displayName = name))
+        observeSession()
+    }
+
+    private fun startEventSuggestions(intent: Intent) {
+        val noteId = intent.getLongExtra(EXTRA_RETRY_NOTE_ID, -1L)
+        if (noteId <= 0) return
+        startForeground(processingNotification(), processingForegroundType())
+        sessionManager.suggestEvents(noteId)
         observeSession()
     }
 
@@ -132,6 +152,7 @@ class RecordingService : Service(), KoinComponent {
 
     private fun notifyProcessingFinished(event: NoteProcessingEvent) {
         val notification = when (event) {
+            is NoteProcessingEvent.ImportRejected -> return
             is NoteProcessingEvent.Completed -> noteFinishedNotification(
                 noteId = event.noteId,
                 title = getString(R.string.recording_notification_ready_title),
@@ -305,14 +326,20 @@ class RecordingService : Service(), KoinComponent {
             "com.dmytrosamoilov.offhand.action.RESUME_RECORDING"
         private const val ACTION_RETRY_NOTE =
             "com.dmytrosamoilov.offhand.action.RETRY_NOTE"
+        private const val ACTION_IMPORT_AUDIO =
+            "com.dmytrosamoilov.offhand.action.IMPORT_AUDIO"
+        private const val EXTRA_IMPORT_PATH = "com.dmytrosamoilov.offhand.extra.IMPORT_PATH"
+        private const val EXTRA_IMPORT_NAME = "com.dmytrosamoilov.offhand.extra.IMPORT_NAME"
         private const val ACTION_RESTRUCTURE_NOTE =
             "com.dmytrosamoilov.offhand.action.RESTRUCTURE_NOTE"
+        private const val ACTION_SUGGEST_EVENTS =
+            "com.dmytrosamoilov.offhand.action.SUGGEST_EVENTS"
         private const val EXTRA_RETRY_NOTE_ID =
             "com.dmytrosamoilov.offhand.extra.RETRY_NOTE_ID"
         private const val EXTRA_RETRY_AUDIO_FILE =
             "com.dmytrosamoilov.offhand.extra.RETRY_AUDIO_FILE"
-        private const val EXTRA_PRESET =
-            "com.dmytrosamoilov.offhand.extra.NOTE_PRESET"
+        private const val EXTRA_STYLE =
+            "com.dmytrosamoilov.offhand.extra.NOTE_STYLE"
 
         fun start(context: Context) {
             context.startForegroundService(serviceIntent(context, ACTION_START))
@@ -330,11 +357,25 @@ class RecordingService : Service(), KoinComponent {
             )
         }
 
-        fun restructureNote(context: Context, noteId: Long, preset: NotePreset) {
+        fun restructureNote(context: Context, noteId: Long, style: NoteStyleRef) {
             context.startForegroundService(
                 serviceIntent(context, ACTION_RESTRUCTURE_NOTE)
                     .putExtra(EXTRA_RETRY_NOTE_ID, noteId)
-                    .putExtra(EXTRA_PRESET, preset.name),
+                    .putExtra(EXTRA_STYLE, style.storageKey()),
+            )
+        }
+
+        fun suggestEvents(context: Context, noteId: Long) {
+            context.startForegroundService(
+                serviceIntent(context, ACTION_SUGGEST_EVENTS).putExtra(EXTRA_RETRY_NOTE_ID, noteId),
+            )
+        }
+
+        fun importAudio(context: Context, source: AudioImportSource) {
+            context.startForegroundService(
+                serviceIntent(context, ACTION_IMPORT_AUDIO)
+                    .putExtra(EXTRA_IMPORT_PATH, source.handle)
+                    .putExtra(EXTRA_IMPORT_NAME, source.displayName),
             )
         }
 

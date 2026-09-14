@@ -2,7 +2,8 @@ package com.dmytrosamoilov.offhand.feature.recording.service
 
 import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import timber.log.Timber
 
@@ -18,8 +19,16 @@ class RecordingProcessControllerImpl(
         RecordingService.retryNote(context, noteId, audioFileName)
     }
 
-    override fun restructureNote(noteId: Long, preset: NotePreset): Boolean = startServiceCall(noteId) {
-        RecordingService.restructureNote(context, noteId, preset)
+    override fun restructureNote(noteId: Long, style: NoteStyleRef): Boolean = startServiceCall(noteId) {
+        RecordingService.restructureNote(context, noteId, style)
+    }
+
+    override fun importAudio(source: AudioImportSource): Boolean = startServiceCall(IMPORT_NOTE_ID) {
+        RecordingService.importAudio(context, source)
+    }
+
+    override fun suggestEvents(noteId: Long): Boolean = startServiceCall(noteId) {
+        RecordingService.suggestEvents(context, noteId)
     }
 
     private fun startServiceCall(noteId: Long, start: () -> Unit): Boolean = try {
@@ -32,5 +41,6 @@ class RecordingProcessControllerImpl(
 
     private companion object {
         const val LOG_TAG = "RecordingProcess"
+        const val IMPORT_NOTE_ID = 0L
     }
 }

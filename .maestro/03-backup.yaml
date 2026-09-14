@@ -1,0 +1,71 @@
+# Relies on the notes created by the earlier flows. Android drives the system
+# document picker end to end; on iOS the Files picker is out of reach, so the
+# flow stops once the backup has been written and the sheet reports it.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Settings"
+      - scrollUntilVisible:
+          element: "Backup & restore"
+          direction: DOWN
+      - tapOn: "Backup & restore"
+      - tapOn: "Back up"
+      - assertVisible: ".*neither you nor we can recover.*"
+      - tapOn: "Passphrase"
+      - inputText: "smoke-test-passphrase"
+      - tapOn: "Repeat passphrase"
+      - inputText: "smoke-test-passphrase"
+      - hideKeyboard
+      - tapOn: "Continue"
+      - assertVisible: "Offhand backup.*"
+      - tapOn: "Save backup"
+      - tapOn:
+          text: "(?i)save"
+      - extendedWaitUntil:
+          visible: "Backup saved"
+          timeout: 60000
+      - assertVisible: ".*notes and .*folders were saved."
+      - tapOn: "Done"
+      - tapOn: "Choose a backup file"
+      - tapOn:
+          text: "Offhand backup.*"
+      - assertVisible: "Enter the backup passphrase"
+      - inputText: "smoke-test-passphrase"
+      - tapOn: "Restore"
+      - extendedWaitUntil:
+          visible: "Restore complete"
+          timeout: 60000
+      - assertVisible: ".*skipped as duplicates.*"
+      - tapOn: "OK"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Settings"
+      - tapOn: "Backup & restore"
+      - tapOn: "Back up"
+      - assertVisible: ".*neither you nor we can recover.*"
+      - tapOn: "Passphrase"
+      - inputText: "smoke-test-passphrase"
+      - tapOn: "Repeat passphrase"
+      - inputText: "smoke-test-passphrase"
+      - tapOn: "Continue"
+      - assertVisible: "Offhand backup.*"
+      - tapOn: "Save backup"
+      # The Files export picker is out-of-process, so Maestro cannot read its
+      # buttons; "Cancel" is the only label it exposes. Tap the picker's Save
+      # button by position instead, which stores the file under On My iPhone.
+      - extendedWaitUntil:
+          visible: "Cancel"
+          timeout: 60000
+      - tapOn:
+          point: "88%,12%"
+      - extendedWaitUntil:
+          visible: "Backup saved"
+          timeout: 30000
+      - assertVisible: ".*notes and .*folders were saved."
+      - tapOn: "Done"

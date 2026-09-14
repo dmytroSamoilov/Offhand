@@ -1,0 +1,174 @@
+# Runs after 01-smoke.yaml and relies on the note it created. Covers creating a
+# custom note style, picking it as the default, rewriting a note with it and
+# deleting it again.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- assertVisible: "Smoke test note"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Settings"
+      - tapOn: "Manage note styles"
+      - assertVisible: "Built in"
+      - tapOn: "New style"
+
+      # Fill the form: name, kind, two sections. The keyboard is closed after
+      # every field so the next tap does not land on it.
+      - tapOn: "Name"
+      - inputText: "Sales debrief"
+      - hideKeyboard
+      - tapOn: "What kind of note is this?"
+      - inputText: "a sales call debrief"
+      - hideKeyboard
+      - tapOn: "Heading"
+      - inputText: "Customer"
+      - hideKeyboard
+      - tapOn: "What goes here"
+      - inputText: "who the customer is and their role"
+      - hideKeyboard
+      - scrollUntilVisible:
+          element: "Add section"
+      - tapOn: "Add section"
+      - scrollUntilVisible:
+          element: "Add section"
+      - tapOn:
+          text: "Heading"
+          below: "Section 2"
+      - inputText: "Next steps"
+      - hideKeyboard
+      - tapOn:
+          text: "Bullet points"
+          below: "Section 2"
+      - tapOn: "Save"
+
+      # The style is listed and can be chosen as the default
+      - assertVisible: "Sales debrief"
+      - assertVisible: "Customer, Next steps"
+      - back
+      - tapOn: "Default note style"
+      - tapOn: "Sales debrief"
+
+      # Rewrite the existing note with it
+      - tapOn:
+          id: "tab_notes"
+      - tapOn: "Smoke test note"
+      - runFlow:
+          when:
+            visible: "In-app review · dev build"
+          commands:
+            - tapOn: "COUNT ATTEMPT"
+      - tapOn: "More actions"
+      - tapOn: "Change note style"
+      - assertVisible: "Your styles"
+      - tapOn: "Sales debrief"
+      - extendedWaitUntil:
+          visible: "Overview"
+          timeout: 60000
+      - back
+
+      # Delete the style; the note survives
+      - tapOn: "Settings"
+      - tapOn: "Manage note styles"
+      - tapOn: "Delete style"
+      - tapOn: "Delete"
+      - assertNotVisible: "Sales debrief"
+      - back
+      - tapOn:
+          id: "tab_notes"
+      - assertVisible: "Smoke test note"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Settings"
+      - tapOn: "Manage note styles"
+      - assertVisible: "Built in"
+      - tapOn: "New style"
+
+      # Fill the form; the editor has no keyboard Done button, a short drag on
+      # the form closes the keyboard so the next tap is not swallowed by it
+      - tapOn: "Name"
+      - inputText: "Sales debrief"
+      - swipe:
+          start: "50%,35%"
+          end: "50%,45%"
+      - tapOn: "What kind of note is this?"
+      - inputText: "a sales call debrief"
+      - swipe:
+          start: "50%,35%"
+          end: "50%,45%"
+      - tapOn: "Heading"
+      - inputText: "Customer"
+      - swipe:
+          start: "50%,35%"
+          end: "50%,45%"
+      - tapOn: "What goes here"
+      - inputText: "who the customer is and their role"
+      - swipe:
+          start: "50%,35%"
+          end: "50%,45%"
+      - scrollUntilVisible:
+          element: "Add section"
+      - tapOn: "Add section"
+      - scrollUntilVisible:
+          element: "Add section"
+      - tapOn:
+          text: "Heading"
+          index: 1
+      - inputText: "Next steps"
+      - swipe:
+          start: "50%,35%"
+          end: "50%,45%"
+      - tapOn:
+          text: "Bullet points"
+          index: 1
+      - tapOn: "Save"
+
+      # The style is listed and can be chosen as the default
+      - assertVisible: "Sales debrief"
+      - assertVisible: "Customer, Next steps"
+      - swipe:
+          start: "1%,50%"
+          end: "70%,50%"
+      - tapOn: "Default note style"
+      - scrollUntilVisible:
+          element: "Sales debrief"
+      - tapOn: "Sales debrief"
+      - assertVisible: "Sales debrief"
+
+      # Rewrite the existing note with it; the Settings form has a "Notes"
+      # section header, so the tab is the second match
+      - tapOn:
+          text: "Notes"
+          index: 1
+      - tapOn: "Smoke test note"
+      - tapOn: "More actions"
+      - tapOn: "Change note style"
+      - scrollUntilVisible:
+          element: "Your styles"
+      - tapOn: "Sales debrief"
+      - extendedWaitUntil:
+          visible: "Overview"
+          timeout: 60000
+      - swipe:
+          start: "1%,50%"
+          end: "70%,50%"
+
+      # Delete the style; the note survives
+      - tapOn: "Settings"
+      - tapOn: "Manage note styles"
+      - swipe:
+          from: "Sales debrief"
+          direction: LEFT
+      - tapOn: "Delete style"
+      - tapOn: "Delete"
+      - assertNotVisible: "Sales debrief"
+      - swipe:
+          start: "1%,50%"
+          end: "70%,50%"
+      - tapOn:
+          text: "Notes"
+          index: 1
+      - assertVisible: "Smoke test note"

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="recording_idle_hint">Tippe zum Aufnehmen. Alles wird direkt auf diesem Gerät transkribiert und strukturiert.</string>
+    <string name="recording_idle_hint">Tippe, um aufzunehmen. Alles wird auf deinem Handy transkribiert und strukturiert.</string>
     <string name="recording_start_description">Aufnahme starten</string>
     <string name="recording_stop_description">Aufnahme stoppen</string>
     <string name="recording_pause_description">Aufnahme pausieren</string>
@@ -24,18 +24,18 @@
     <string name="recording_notification_channel_name">Aufnahme</string>
     <string name="recording_notification_recording_title">Aufnahme läuft</string>
     <string name="recording_notification_paused_title">Aufnahme pausiert</string>
-    <string name="recording_notification_recording_text">Audio wird nur auf diesem Gerät verarbeitet</string>
+    <string name="recording_notification_recording_text">Audio bleibt auf deinem Handy</string>
     <string name="recording_notification_paused_text">Bisher aufgenommen: %1$s</string>
     <string name="recording_notification_action_pause">Pausieren</string>
     <string name="recording_notification_action_resume">Fortsetzen</string>
     <string name="recording_notification_action_stop">Stoppen</string>
     <string name="recording_notification_processing_title">Deine Notiz wird erstellt</string>
-    <string name="recording_notification_processing_text">Wird auf dem Gerät transkribiert und strukturiert</string>
+    <string name="recording_notification_processing_text">Wird auf deinem Handy transkribiert und strukturiert</string>
     <string name="recording_notification_notes_channel_name">Fertige Notizen</string>
     <string name="recording_notification_ready_title">Deine Notiz ist fertig</string>
     <string name="recording_notification_ready_text">Tippe, um die fertige Notiz zu öffnen.</string>
     <string name="recording_default_note_title">Aufnahme %1$d</string>
     <string name="recording_untitled_note_title">Sprachnotiz</string>
-    <string name="recording_notification_note_failed_title">KI-Transkription fehlgeschlagen</string>
+    <string name="recording_notification_note_failed_title">Transkription fehlgeschlagen</string>
     <string name="recording_notification_note_failed_text">Die Aufnahme ist gespeichert. Tippe, um sie zu öffnen.</string>
 </resources>

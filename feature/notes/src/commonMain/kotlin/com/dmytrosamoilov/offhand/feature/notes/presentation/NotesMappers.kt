@@ -4,11 +4,20 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
 import com.dmytrosamoilov.offhand.core.common.DurationFormatter
+import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
+import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
+import com.dmytrosamoilov.offhand.core.data.domain.SuggestedEvent
+import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlaybackState
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
+import com.dmytrosamoilov.offhand.feature.notes.domain.FolderNameError
+import com.dmytrosamoilov.offhand.feature.notes.domain.NoteSearchResult
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareBundle
+import com.dmytrosamoilov.offhand.feature.notes.domain.NoteTextCleaner
+import com.dmytrosamoilov.offhand.feature.notes.domain.TextMatch
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -19,42 +28,56 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 
-private val MARKDOWN_TOKENS = Regex("[#*>`_\\[\\]]")
 private val WHITESPACE_RUNS = Regex("\\s+")
-private const val PREVIEW_MAX_CHARS = 220
 
-internal fun List<Note>.toSectionsUi(dateLabelFormatter: DateLabelFormatter): List<NotesSectionUi> {
+internal fun List<NoteSearchResult>.toSectionsUi(
+    dateLabelFormatter: DateLabelFormatter,
+    folderNames: Map<Long, String> = emptyMap(),
+): List<NotesSectionUi> {
     val zone = TimeZone.currentSystemDefault()
     val today = Clock.System.now().toLocalDateTime(zone).date
-    return groupBy { Instant.fromEpochMilliseconds(it.createdAtEpochMs).toLocalDateTime(zone).date }
-        .map { (date, notes) ->
+    return groupBy { Instant.fromEpochMilliseconds(it.note.createdAtEpochMs).toLocalDateTime(zone).date }
+        .map { (date, results) ->
             NotesSectionUi(
                 dayLabel = date.toDayLabel(today, dateLabelFormatter),
-                notes = notes.map { it.toCardUi(zone, today, dateLabelFormatter) },
+                notes = results.map { it.toCardUi(zone, today, dateLabelFormatter, folderNames) },
             )
         }
 }
 
-private fun Note.toCardUi(
+internal fun List<Folder>.toFoldersUi(notes: List<Note>): List<FolderUi> {
+    val counts = notes.groupingBy { it.folderId }.eachCount()
+    return map { folder -> FolderUi(id = folder.id, name = folder.name, noteCount = counts[folder.id] ?: 0) }
+}
+
+internal fun FolderNameError.toUi(): FolderNameErrorUi = when (this) {
+    FolderNameError.BLANK -> FolderNameErrorUi.BLANK
+    FolderNameError.TOO_LONG -> FolderNameErrorUi.TOO_LONG
+    FolderNameError.DUPLICATE -> FolderNameErrorUi.DUPLICATE
+}
+
+private fun NoteSearchResult.toCardUi(
     zone: TimeZone,
     today: LocalDate,
     dateLabelFormatter: DateLabelFormatter,
+    folderNames: Map<Long, String>,
 ): NoteCardUi {
-    val createdAt = Instant.fromEpochMilliseconds(createdAtEpochMs).toLocalDateTime(zone)
+    val createdAt = Instant.fromEpochMilliseconds(note.createdAtEpochMs).toLocalDateTime(zone)
     return NoteCardUi(
-        id = id,
-        title = title,
+        id = note.id,
+        title = note.title,
         dayLabel = createdAt.date.toDayLabel(today, dateLabelFormatter),
         time = dateLabelFormatter.time(createdAt),
-        preview = body
-            .replace(MARKDOWN_TOKENS, " ")
-            .replace(WHITESPACE_RUNS, " ")
-            .trim()
-            .take(PREVIEW_MAX_CHARS),
-        durationText = durationMs?.let(::formatClock),
-        status = status.toUi(),
+        preview = snippet ?: NoteTextCleaner.preview(note.body),
+        durationText = note.durationMs?.let(::formatClock),
+        status = note.status.toUi(),
+        titleHighlights = titleMatches.map(TextMatch::toUi),
+        previewHighlights = snippetMatches.map(TextMatch::toUi),
+        folderName = note.folderId?.let(folderNames::get),
     )
 }
+
+private fun TextMatch.toUi(): TextRangeUi = TextRangeUi(start = start, end = end)
 
 private fun LocalDate.toDayLabel(
     today: LocalDate,
@@ -68,7 +91,10 @@ private fun LocalDate.toDayLabel(
 private fun countWords(text: String): Int =
     text.split(WHITESPACE_RUNS).count { it.isNotBlank() }
 
-internal fun Note.toDetailUi(dateLabelFormatter: DateLabelFormatter): NoteDetailUi = NoteDetailUi(
+internal fun Note.toDetailUi(
+    dateLabelFormatter: DateLabelFormatter,
+    folderNames: Map<Long, String> = emptyMap(),
+): NoteDetailUi = NoteDetailUi(
     id = id,
     title = title,
     body = body,
@@ -78,7 +104,9 @@ internal fun Note.toDetailUi(dateLabelFormatter: DateLabelFormatter): NoteDetail
     hasAudio = audioFileName != null,
     metrics = toMetricsUi(),
     status = status.toUi(),
-    preset = preset,
+    style = style,
+    folderId = folderId,
+    folderName = folderId?.let(folderNames::get),
 )
 
 private fun Note.createdAtLocalDateTime(): LocalDateTime =
@@ -96,9 +124,10 @@ internal fun AiCoreDownloadState.toPreparationUi(): ModelPreparationUi? = when (
     is AiCoreDownloadState.Idle -> null
 }
 
-internal fun NoteShareBundle.toUi(): NoteShareUi = NoteShareUi(
+internal fun NoteShareBundle.toUi(saveToDevice: Boolean): NoteShareUi = NoteShareUi(
     filePaths = filePaths,
     mimeType = mimeType,
+    saveToDevice = saveToDevice,
 )
 
 internal fun AudioPlaybackState.toUi(): AudioPlaybackUi = AudioPlaybackUi(
@@ -134,5 +163,30 @@ private fun Note.toMetricsUi(): NoteMetricsUi? {
         transcriptionTime = DurationFormatter.format(transcription),
         structuringTime = DurationFormatter.format(structuring),
         hardwareBackend = backend,
+    )
+}
+
+internal fun CustomNoteStyle.toOptionUi(): NoteStyleOptionUi = NoteStyleOptionUi(
+    id = id,
+    name = name,
+    description = sections.joinToString(separator = ", ") { it.heading },
+)
+
+internal fun NoteSuggestions.toUi(formatter: DateLabelFormatter): SmartSuggestionsUi {
+    val visible = events.withIndex().filter { it.value.status != SuggestionStatus.DISMISSED }
+    if (visible.isEmpty()) return SmartSuggestionsUi.Empty
+    return SmartSuggestionsUi.Ready(visible.map { (index, suggested) -> suggested.toUi(index, formatter) })
+}
+
+private fun SuggestedEvent.toUi(index: Int, formatter: DateLabelFormatter): CalendarEventUi {
+    val start = Instant.fromEpochMilliseconds(event.startEpochMs).toLocalDateTime(TimeZone.currentSystemDefault())
+    return CalendarEventUi(
+        index = index,
+        title = event.title,
+        whenText = if (event.isAllDay) formatter.day(start.date) else formatter.dateTime(start),
+        isAllDay = event.isAllDay,
+        location = event.location,
+        details = event.details,
+        isAdded = status == SuggestionStatus.ADDED,
     )
 }

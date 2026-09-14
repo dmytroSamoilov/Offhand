@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,14 +18,13 @@ fun MarkdownText(
     markdown: String,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        markdown.lines()
-            .map(String::trimEnd)
-            .filter(String::isNotBlank)
-            .forEach { line -> MarkdownLine(line) }
+    SelectionContainer(modifier = modifier) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            markdown.lines()
+                .map(String::trimEnd)
+                .filter(String::isNotBlank)
+                .forEach { line -> MarkdownLine(line) }
+        }
     }
 }
 

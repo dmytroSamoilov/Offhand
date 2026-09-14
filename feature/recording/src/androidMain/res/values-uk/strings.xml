@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="recording_idle_hint">Торкніться, щоб записати. Усе розшифровується та структурується прямо на цьому пристрої.</string>
+    <string name="recording_idle_hint">Торкніться, щоб записати. Усе розшифровується й структурується на вашому телефоні.</string>
     <string name="recording_start_description">Почати запис</string>
     <string name="recording_stop_description">Зупинити запис</string>
     <string name="recording_pause_description">Призупинити запис</string>
@@ -24,18 +24,18 @@
     <string name="recording_notification_channel_name">Запис</string>
     <string name="recording_notification_recording_title">Триває запис</string>
     <string name="recording_notification_paused_title">Запис призупинено</string>
-    <string name="recording_notification_recording_text">Звук обробляється лише на цьому пристрої</string>
+    <string name="recording_notification_recording_text">Аудіо залишається на вашому телефоні</string>
     <string name="recording_notification_paused_text">Записано: %1$s</string>
     <string name="recording_notification_action_pause">Пауза</string>
     <string name="recording_notification_action_resume">Продовжити</string>
     <string name="recording_notification_action_stop">Стоп</string>
     <string name="recording_notification_processing_title">Створюємо вашу нотатку</string>
-    <string name="recording_notification_processing_text">Розшифровка та структурування на пристрої</string>
+    <string name="recording_notification_processing_text">Розшифровуємо й структуруємо на вашому телефоні</string>
     <string name="recording_notification_notes_channel_name">Готові нотатки</string>
     <string name="recording_notification_ready_title">Ваша нотатка готова</string>
     <string name="recording_notification_ready_text">Торкніться, щоб відкрити готову нотатку.</string>
     <string name="recording_default_note_title">Запис %1$d</string>
     <string name="recording_untitled_note_title">Голосова нотатка</string>
-    <string name="recording_notification_note_failed_title">Не вдалося розшифрувати за допомогою ШІ</string>
+    <string name="recording_notification_note_failed_title">Розшифровка не вдалася</string>
     <string name="recording_notification_note_failed_text">Запис збережено. Торкніться, щоб відкрити його.</string>
 </resources>

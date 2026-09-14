@@ -44,7 +44,7 @@ struct LockScreenView: View {
             Text(String(localized: "Offhand is locked"))
                 .font(.title.bold())
                 .multilineTextAlignment(.center)
-            Text(String(localized: "Your notes stay locked until this device confirms it's you."))
+            Text(String(localized: "Your notes stay locked until your iPhone confirms it's you."))
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

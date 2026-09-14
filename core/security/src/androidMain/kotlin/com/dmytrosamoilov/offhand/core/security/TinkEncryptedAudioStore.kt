@@ -8,6 +8,7 @@ import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.file.StandardOpenOption
 import java.util.UUID
@@ -65,7 +66,10 @@ class TinkEncryptedAudioStore(
     override fun sizeOf(fileName: String): Long = fileFor(fileName).length()
 
     override fun pcmSizeOf(fileName: String): Long =
-        openSeekableForRead(fileName).use { it.size() }
+        openSeekableForRead(fileName).use { channel ->
+            channel.read(ByteBuffer.allocate(1))
+            channel.size()
+        }
 
     override fun deleteUnreferenced(referencedFileNames: Set<String>, minAgeMs: Long): Int {
         val cutoffMs = System.currentTimeMillis() - minAgeMs

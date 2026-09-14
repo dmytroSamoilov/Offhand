@@ -3,6 +3,7 @@ package com.dmytrosamoilov.offhand.core.ui.component
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.FactCheck
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.Groups
@@ -30,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.designsystem.component.ProBadge
 import com.dmytrosamoilov.offhand.core.designsystem.component.RoundedCheckbox
 import com.dmytrosamoilov.offhand.core.ui.R
 
@@ -81,6 +84,26 @@ fun NotePresetOptionCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    NoteStyleCard(
+        title = stringResource(option.labelRes),
+        description = stringResource(option.descriptionRes),
+        icon = option.icon,
+        isSelected = isSelected,
+        onClick = onClick,
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun NoteStyleCard(
+    title: String,
+    description: String,
+    icon: ImageVector,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    showProBadge: Boolean = false,
+) {
     val containerColor by animateColorAsState(
         targetValue = if (isSelected) {
             MaterialTheme.colorScheme.secondaryContainer
@@ -109,20 +132,23 @@ fun NotePresetOptionCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = option.icon,
+                imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp),
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    if (showProBadge) ProBadge()
+                }
                 Text(
-                    text = stringResource(option.labelRes),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    text = stringResource(option.descriptionRes),
+                    text = description,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -132,3 +158,6 @@ fun NotePresetOptionCard(
         }
     }
 }
+
+val CustomNoteStyleIcon: ImageVector
+    get() = Icons.Filled.EditNote

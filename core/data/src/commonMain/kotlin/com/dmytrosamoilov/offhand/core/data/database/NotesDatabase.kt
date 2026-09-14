@@ -5,10 +5,28 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 
-@Database(entities = [NoteEntity::class], version = 6, exportSchema = false)
+@Database(
+    entities = [
+        NoteEntity::class,
+        FolderEntity::class,
+        NoteStyleEntity::class,
+        NoteSuggestionsEntity::class,
+        TranscriptionCheckpointEntity::class,
+    ],
+    version = 10,
+    exportSchema = false,
+)
 @ConstructedBy(NotesDatabaseConstructor::class)
 internal abstract class NotesDatabase : RoomDatabase() {
     abstract fun noteDao(): NoteDao
+
+    abstract fun folderDao(): FolderDao
+
+    abstract fun noteStyleDao(): NoteStyleDao
+
+    abstract fun noteSuggestionsDao(): NoteSuggestionsDao
+
+    abstract fun transcriptionCheckpointDao(): TranscriptionCheckpointDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT", "KotlinNoActualForExpect")

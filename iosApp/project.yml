@@ -9,6 +9,7 @@ configs:
   Release-dev: release
   Debug-prod: debug
   Release-prod: release
+  Debug-uitest: debug
 settings:
   configs:
     Debug-dev:
@@ -21,6 +22,12 @@ settings:
       APP_DISPLAY_NAME: Offhand Dev
       APP_ICON_NAME: AppIcon-dev
       FIREBASE_CONFIG_DIR: dev
+    Debug-uitest:
+      APP_ID_SUFFIX: .uitest
+      APP_DISPLAY_NAME: Offhand UI Test
+      APP_ICON_NAME: AppIcon-dev
+      FIREBASE_CONFIG_DIR: uitest
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG UI_TEST
     Debug-prod: &prod
       APP_ID_SUFFIX: ""
       APP_DISPLAY_NAME: Offhand
@@ -153,6 +160,7 @@ schemes:
         Offhand: all
     run:
       config: Debug-dev
+      storeKitConfiguration: Offhand.storekit
     test:
       config: Debug-dev
     profile:
@@ -175,3 +183,18 @@ schemes:
       config: Debug-prod
     archive:
       config: Release-prod
+  Offhand-uitest:
+    build:
+      targets:
+        Offhand: all
+    run:
+      config: Debug-uitest
+      storeKitConfiguration: Offhand.storekit
+    test:
+      config: Debug-uitest
+    profile:
+      config: Debug-uitest
+    analyze:
+      config: Debug-uitest
+    archive:
+      config: Debug-uitest
