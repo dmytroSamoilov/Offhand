@@ -78,7 +78,7 @@ struct ShareNoteSheet: View {
     }
 
     private var footerText: String {
-        String(localized: "Please keep in mind that shared copies are no longer encrypted once they leave this device.")
+        String(localized: "Please keep in mind that shared copies are no longer encrypted once they leave your iPhone.")
     }
 
     private func formatRow(_ option: NoteExportFormat) -> some View {

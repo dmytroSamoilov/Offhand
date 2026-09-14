@@ -7,23 +7,23 @@
     <string name="settings_acceleration_cpu_description">Funciona en todos los dispositivos compatibles</string>
     <string name="settings_acceleration_gpu">GPU</string>
     <string name="settings_acceleration_gpu_description">Mucho más rápido en dispositivos Snapdragon</string>
-    <string name="settings_acceleration_note">La GPU no está disponible en dispositivos Pixel (Tensor). Cambiar esto recarga el motor de IA en el próximo uso.</string>
+    <string name="settings_acceleration_note">La GPU no está disponible en dispositivos Pixel (Tensor). Cambiar esto recarga la IA en el dispositivo en el próximo uso.</string>
 
-    <string name="settings_model_title">Modelo de IA</string>
+    <string name="settings_model_title">IA en el dispositivo</string>
     <string name="settings_model_picker_auto">Automático</string>
-    <string name="settings_model_picker_auto_description">El mejor modelo para la memoria de este dispositivo</string>
-    <string name="settings_model_picker_note">Cambiar de modelo recarga el motor de IA en el próximo uso. Los modelos ya descargados permanecen en el dispositivo.</string>
+    <string name="settings_model_picker_auto_description">El mejor modelo para la memoria de este teléfono</string>
+    <string name="settings_model_picker_note">Cambiar de modelo recarga la IA en el dispositivo en el próximo uso. Los modelos descargados se quedan en tu teléfono.</string>
     <string name="settings_model_status_not_downloaded">No descargado</string>
     <string name="settings_model_status_downloading">Descargando… %1$d%%</string>
-    <string name="settings_model_status_loading">Preparando el motor…</string>
-    <string name="settings_model_status_ready">Listo · guardado en este dispositivo</string>
-    <string name="settings_model_status_error">Algo ha salido mal con el modelo</string>
-    <string name="settings_model_download">Descargar modelo</string>
+    <string name="settings_model_status_loading">Preparando la IA en el dispositivo…</string>
+    <string name="settings_model_status_ready">Lista · guardada en tu teléfono</string>
+    <string name="settings_model_status_error">Algo ha fallado con la IA en el dispositivo</string>
+    <string name="settings_model_download">Descargar IA en el dispositivo</string>
     <string name="settings_model_retry">Reintentar</string>
-    <string name="settings_model_delete">Eliminar modelo</string>
-    <string name="settings_delete_model_dialog_title">¿Eliminar el modelo de IA?</string>
-    <string name="settings_delete_model_dialog_body">No se podrá grabar hasta que el modelo se descargue de nuevo. Tus notas no se ven afectadas.</string>
-    <string name="settings_delete_model_dialog_confirm">Eliminar</string>
+    <string name="settings_model_delete">Quitar IA en el dispositivo</string>
+    <string name="settings_delete_model_dialog_title">¿Quitar la IA en el dispositivo?</string>
+    <string name="settings_delete_model_dialog_body">La grabación no funcionará hasta que la IA en el dispositivo se descargue de nuevo. Tus notas no se ven afectadas.</string>
+    <string name="settings_delete_model_dialog_confirm">Quitar</string>
     <string name="settings_delete_model_dialog_cancel">Cancelar</string>
 
     <string name="settings_note_style_title">Estilo de nota predeterminado</string>
@@ -58,12 +58,12 @@
     <string name="settings_note_style_editor_format_sentences">Breve</string>
     <string name="settings_note_style_editor_format_bullets">Viñetas</string>
     <string name="settings_note_style_editor_format_free">Libre</string>
-    <string name="settings_note_style_editor_guidance_warning">Las instrucciones largas pueden fallar. La IA de este dispositivo tiene memoria limitada, úsalas bajo tu responsabilidad.</string>
+    <string name="settings_note_style_editor_guidance_warning">Las instrucciones largas pueden fallar. La IA en el dispositivo tiene memoria limitada, úsalas bajo tu responsabilidad.</string>
     <string name="settings_note_style_editor_add_section">Añadir sección</string>
     <string name="settings_note_style_editor_remove_section">Quitar sección</string>
     <string name="settings_note_style_editor_move_up">Subir</string>
     <string name="settings_note_style_editor_move_down">Bajar</string>
-    <string name="settings_note_style_describe_unavailable">Descarga primero el modelo de IA para crear un estilo.</string>
+    <string name="settings_note_style_describe_unavailable">Configura primero la IA en el dispositivo para crear un estilo.</string>
     <string name="settings_note_style_error_blank">Este campo es obligatorio</string>
     <string name="settings_note_style_error_too_long">Usa como máximo %1$d caracteres</string>
     <string name="settings_note_style_error_duplicate">Este nombre ya está en uso</string>
@@ -92,7 +92,7 @@
     <string name="settings_feature_request_description">¿Echas algo en falta? Cuéntale al desarrollador qué debería hacer la app.</string>
     <string name="settings_feature_request_subject">[%1$s] solicitud de función</string>
     <string name="settings_feature_request_body">¡Hola! Me gustaría sugerir una función:\n\n\n\n—\nLos datos de abajo se añadieron automáticamente. Describen mi dispositivo y la versión de la app, y ayudan al desarrollador a entender mi sugerencia en contexto. Déjalos si no te importa compartirlos.\nDispositivo: %1$s %2$s (%3$s)\nRAM: %4$s\nVersión de la app: %5$s\nAndroid: %6$s (API %7$d)</string>
-    <string name="settings_feature_request_no_email_app">No se ha encontrado ninguna app de correo en este dispositivo</string>
+    <string name="settings_feature_request_no_email_app">No se ha encontrado ninguna app de correo en este teléfono</string>
 
     <string name="settings_about_support_title">Acerca de y soporte</string>
     <string name="settings_about_support_subtitle">Versión %1$s · comentarios, privacidad y avisos legales</string>
@@ -106,7 +106,7 @@
 
     <string name="settings_developer_title">Desarrollador</string>
     <string name="settings_developer_label">Opciones de desarrollador</string>
-    <string name="settings_developer_description">Muestra la gestión del modelo, la aceleración y los diagnósticos de procesamiento.</string>
+    <string name="settings_developer_description">Mostrar gestión de la IA en el dispositivo, aceleración y diagnósticos de procesamiento.</string>
     <string name="settings_backup_title">Copia de seguridad</string>
     <string name="settings_backup_subtitle">Lleva tus notas a un teléfono nuevo o guarda una copia</string>
     <string name="settings_import_audio_title">Importar audio</string>
@@ -134,7 +134,7 @@
     <string name="settings_notes_title">Notas</string>
     <string name="settings_backup_section_title">Copia de seguridad</string>
     <string name="settings_about_section_title">Acerca de</string>
-    <string name="settings_about_footer">Offhand guarda cada grabación y nota en este dispositivo. No se sube nada a ningún sitio.</string>
+    <string name="settings_about_footer">Todo se queda en tu teléfono. Nunca se sube nada.</string>
     <string name="settings_note_style_editor_no_sections">Sin secciones, la nota es un resumen libre.</string>
     <string name="settings_redeem_code">Canjear un código</string>
 </resources>

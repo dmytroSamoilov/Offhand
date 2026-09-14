@@ -139,7 +139,7 @@ struct NoteStyleEditorView: View {
             ), axis: .vertical)
             .lineLimit(2...Int(NoteStyleLimits.shared.GUIDANCE_VISIBLE_LINES))
             if section.guidance.count > Int(NoteStyleLimits.shared.GUIDANCE_WARNING_LENGTH) {
-                Text(String(localized: "Long instructions may fail to process. The AI on this device has limited memory, so use them at your own risk."))
+                Text(String(localized: "Long instructions may fail to process. The on-device AI has limited memory, so use them at your own risk."))
                     .font(.footnote)
                     .foregroundStyle(Brand.onWarningContainer)
                     .padding(8)
@@ -273,7 +273,7 @@ private struct DescribeStyleSheet: View {
                 }
             }
         case .modelUnavailable:
-            Section { Text(String(localized: "Download the AI model first to build a style.")).foregroundStyle(.red) }
+            Section { Text(String(localized: "Set up the on-device AI first to build a style.")).foregroundStyle(.red) }
         case .failed:
             Section { Text(String(localized: "The AI could not turn that into a style. Try describing it differently.")).foregroundStyle(.red) }
         default:

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="onboarding_incompatible_title">Aparelho não compatível</string>
-    <string name="onboarding_incompatible_body">O Offhand executa um grande modelo de IA diretamente no seu telefone, então nada do que você grava sai do aparelho. Este aparelho não atende aos requisitos mínimos.</string>
+    <string name="onboarding_incompatible_title">Este celular não consegue rodar o Offhand</string>
+    <string name="onboarding_incompatible_body">O Offhand roda sua IA inteiramente no seu celular, então nada é enviado, nunca. Este celular não atende aos requisitos mínimos.</string>
     <string name="onboarding_incompatible_ram_label">Memória (RAM):</string>
     <string name="onboarding_incompatible_ram_value">%1$s GB — precisa de %2$s GB</string>
     <string name="onboarding_incompatible_cores_label">Núcleos de CPU:</string>
     <string name="onboarding_incompatible_cores_value">%1$d — precisa de %2$d</string>
 
     <string name="onboarding_privacy_title">Privado por design</string>
-    <string name="onboarding_privacy_body">Tudo o que você grava fica neste telefone. Gravações, transcrições e notas são criptografadas neste aparelho, e a IA que as processa roda bem aqui — nada é enviado para lugar nenhum.</string>
+    <string name="onboarding_privacy_body">Tudo fica no seu celular. Gravações, transcrições e notas são criptografadas, e a IA que as processa roda ali mesmo. Nada é enviado, nunca.</string>
     <string name="onboarding_continue">Continuar</string>
 
     <string name="onboarding_note_style_title">Como você vai usar o Offhand?</string>
@@ -24,18 +24,18 @@
     <string name="onboarding_lock_enable_label">Exigir desbloqueio para abrir o Offhand</string>
     <string name="onboarding_lock_enable_description">Você pode mudar isso a qualquer momento nas Configurações.</string>
 
-    <string name="onboarding_download_title">Configure sua IA privada</string>
-    <string name="onboarding_download_body">O Offhand transcreve e resume notas de voz com IA que roda inteiramente no seu telefone. Para começar, ele precisa de um download único dos modelos de IA.</string>
+    <string name="onboarding_download_title">Configure sua IA no dispositivo</string>
+    <string name="onboarding_download_body">O Offhand transcreve e resume notas de voz com IA que roda inteiramente no seu celular. Para começar, é preciso um download único.</string>
     <string name="onboarding_download_size">Download único · cerca de %1$s GB</string>
     <string name="onboarding_download_background_hint">O download continua em segundo plano — você já pode começar a gravar. Vamos avisar quando tudo estiver pronto.</string>
     <string name="onboarding_download_wifi_hint">Dica: conecte-se ao Wi‑Fi para economizar dados móveis.</string>
-    <string name="onboarding_notification_download_channel_name">Downloads de modelos</string>
-    <string name="onboarding_notification_status_channel_name">Status do modelo</string>
-    <string name="onboarding_notification_downloading_title">Baixando modelos de IA</string>
-    <string name="onboarding_notification_downloading_text">O Offhand está configurando a IA no aparelho</string>
-    <string name="onboarding_notification_ready_title">Seus modelos de IA estão prontos</string>
-    <string name="onboarding_notification_ready_text">Transcrição e resumos agora rodam totalmente neste aparelho.</string>
-    <string name="onboarding_notification_failed_title">O download do modelo não terminou</string>
+    <string name="onboarding_notification_download_channel_name">Downloads da IA no dispositivo</string>
+    <string name="onboarding_notification_status_channel_name">Status da IA no dispositivo</string>
+    <string name="onboarding_notification_downloading_title">Baixar IA no dispositivo</string>
+    <string name="onboarding_notification_downloading_text">Configurando sua IA no dispositivo</string>
+    <string name="onboarding_notification_ready_title">Sua IA no dispositivo está pronta</string>
+    <string name="onboarding_notification_ready_text">Transcrição e notas agora rodam inteiramente no seu celular.</string>
+    <string name="onboarding_notification_failed_title">O download da IA no dispositivo não terminou</string>
     <string name="onboarding_notification_failed_text">Verifique sua conexão. O Offhand vai retomar o download quando você gravar sua próxima nota.</string>
 
     <string name="onboarding_consent_title">Quer ajudar a melhorar o Offhand?</string>

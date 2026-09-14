@@ -2,8 +2,8 @@
 <resources>
     <string name="notes_title">नोट्स</string>
     <string name="notes_empty_state">अभी कोई नोट नहीं है। पहला नोट रिकॉर्ड करने के लिए माइक्रोफ़ोन बटन दबाएं।</string>
-    <string name="notes_model_banner_title">आपका AI कोर तैयार हो रहा है</string>
-    <string name="notes_model_banner_subtitle">ऑन-डिवाइस मॉडल बैकग्राउंड में डाउनलोड हो रहा है</string>
+    <string name="notes_model_banner_title">आपका ऑन-डिवाइस AI सेट हो रहा है</string>
+    <string name="notes_model_banner_subtitle">बैकग्राउंड में डाउनलोड हो रहा है</string>
     <string name="notes_day_today">आज</string>
     <string name="notes_day_yesterday">कल</string>
     <plurals name="notes_word_count">
@@ -16,7 +16,7 @@
     <string name="notes_play_description">रिकॉर्डिंग चलाएं</string>
     <string name="notes_pause_description">प्लेबैक रोकें</string>
     <string name="notes_processing_title">प्रोसेस हो रहा है…</string>
-    <string name="notes_processing_preview">इसी डिवाइस पर ट्रांसक्रिप्ट और सारांश तैयार हो रहा है। आप रिकॉर्डिंग अभी भी चला सकते हैं।</string>
+    <string name="notes_processing_preview">आपके फ़ोन पर ट्रांसक्राइब और सारांश तैयार हो रहा है। आप रिकॉर्डिंग अभी चला सकते हैं।</string>
     <string name="notes_processing_transcribing">ट्रांसक्रिप्ट प्रोसेस हो रहा है… यह यहां अपने-आप दिखेगा।</string>
     <string name="notes_processing_structuring">अवलोकन बन रहा है… ट्रांसक्रिप्ट पहले से नीचे मौजूद है।</string>
     <string name="notes_recording_fallback_title">रिकॉर्डिंग</string>
@@ -33,7 +33,7 @@
     <string name="notes_edit_save_description">बदलाव सहेजें</string>
     <string name="notes_edit_cancel_description">बदलाव न रखें</string>
     <string name="notes_delete_dialog_title">यह नोट हटाएं?</string>
-    <string name="notes_delete_dialog_body">नोट इस डिवाइस से हमेशा के लिए हट जाएगा। इसे वापस नहीं लाया जा सकता।</string>
+    <string name="notes_delete_dialog_body">नोट आपके फ़ोन से स्थायी रूप से हटा दिया जाएगा। इसे पूर्ववत नहीं किया जा सकता।</string>
     <string name="notes_delete_dialog_confirm">हटाएं</string>
     <string name="notes_delete_dialog_cancel">रद्द करें</string>
     <string name="notes_retranscribe_description">दोबारा ट्रांसक्राइब करें</string>
@@ -42,7 +42,7 @@
     <string name="notes_badge_encrypted">एन्क्रिप्टेड</string>
     <string name="notes_more_actions_description">और कार्रवाइयां</string>
     <string name="notes_share_dialog_title">आप क्या शेयर करना चाहते हैं?</string>
-    <string name="notes_share_dialog_body">ध्यान रखें: शेयर की गई कॉपियां इस डिवाइस से बाहर जाते ही एन्क्रिप्टेड नहीं रहतीं।</string>
+    <string name="notes_share_dialog_body">ध्यान रखें कि साझा की गई कॉपियाँ आपके फ़ोन से बाहर जाते ही एन्क्रिप्टेड नहीं रहतीं।</string>
     <string name="notes_share_dialog_confirm">शेयर करें</string>
     <string name="notes_share_tab_text">टेक्स्ट फ़ाइल</string>
     <string name="notes_share_tab_audio">ऑडियो फ़ाइल</string>
@@ -90,7 +90,7 @@
     <string name="notes_calendar_sheet_title">कैलेंडर इवेंट</string>
     <string name="notes_calendar_add">कैलेंडर में जोड़ें</string>
     <string name="notes_calendar_all_day">पूरा दिन</string>
-    <string name="notes_calendar_no_app">इस डिवाइस पर कोई कैलेंडर ऐप नहीं मिला।</string>
+    <string name="notes_calendar_no_app">इस फ़ोन पर कोई कैलेंडर ऐप नहीं मिला।</string>
     <string name="notes_suggestions_heading">स्मार्ट सुझाव</string>
     <string name="notes_suggestions_find">सुझाव खोजें</string>
     <string name="notes_suggestions_loading">तारीखें और अपॉइंटमेंट खोजे जा रहे हैं…</string>

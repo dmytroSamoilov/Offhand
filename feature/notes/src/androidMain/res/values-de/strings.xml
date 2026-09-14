@@ -2,8 +2,8 @@
 <resources>
     <string name="notes_title">Notizen</string>
     <string name="notes_empty_state">Noch keine Notizen. Tippe auf das Mikrofon, um deine erste aufzunehmen.</string>
-    <string name="notes_model_banner_title">Dein KI-Kern wird vorbereitet</string>
-    <string name="notes_model_banner_subtitle">Das On-Device-Modell wird im Hintergrund heruntergeladen</string>
+    <string name="notes_model_banner_title">Deine KI auf dem Gerät wird eingerichtet</string>
+    <string name="notes_model_banner_subtitle">Wird im Hintergrund heruntergeladen</string>
     <string name="notes_day_today">Heute</string>
     <string name="notes_day_yesterday">Gestern</string>
     <plurals name="notes_word_count">
@@ -16,7 +16,7 @@
     <string name="notes_play_description">Aufnahme abspielen</string>
     <string name="notes_pause_description">Wiedergabe pausieren</string>
     <string name="notes_processing_title">Wird verarbeitet…</string>
-    <string name="notes_processing_preview">Wird auf diesem Gerät transkribiert und zusammengefasst. Du kannst die Aufnahme schon abspielen.</string>
+    <string name="notes_processing_preview">Wird auf deinem Handy transkribiert und zusammengefasst. Du kannst die Aufnahme schon abspielen.</string>
     <string name="notes_processing_transcribing">Das Transkript wird verarbeitet… Es erscheint hier automatisch.</string>
     <string name="notes_processing_structuring">Die Übersicht wird erstellt… Das Transkript steht schon unten.</string>
     <string name="notes_recording_fallback_title">Aufnahme</string>
@@ -33,7 +33,7 @@
     <string name="notes_edit_save_description">Änderungen speichern</string>
     <string name="notes_edit_cancel_description">Änderungen verwerfen</string>
     <string name="notes_delete_dialog_title">Diese Notiz löschen?</string>
-    <string name="notes_delete_dialog_body">Die Notiz wird dauerhaft von diesem Gerät entfernt. Das kann nicht rückgängig gemacht werden.</string>
+    <string name="notes_delete_dialog_body">Die Notiz wird dauerhaft von deinem Handy entfernt. Das lässt sich nicht rückgängig machen.</string>
     <string name="notes_delete_dialog_confirm">Löschen</string>
     <string name="notes_delete_dialog_cancel">Abbrechen</string>
     <string name="notes_retranscribe_description">Neu transkribieren</string>
@@ -42,7 +42,7 @@
     <string name="notes_badge_encrypted">Verschlüsselt</string>
     <string name="notes_more_actions_description">Weitere Aktionen</string>
     <string name="notes_share_dialog_title">Was möchtest du teilen?</string>
-    <string name="notes_share_dialog_body">Bedenke: Geteilte Kopien sind nicht mehr verschlüsselt, sobald sie dieses Gerät verlassen.</string>
+    <string name="notes_share_dialog_body">Bedenke, dass geteilte Kopien nicht mehr verschlüsselt sind, sobald sie dein Handy verlassen.</string>
     <string name="notes_share_dialog_confirm">Teilen</string>
     <string name="notes_share_tab_text">Textdatei</string>
     <string name="notes_share_tab_audio">Audiodatei</string>
@@ -90,7 +90,7 @@
     <string name="notes_calendar_sheet_title">Kalendertermine</string>
     <string name="notes_calendar_add">Zum Kalender hinzufügen</string>
     <string name="notes_calendar_all_day">Ganztägig</string>
-    <string name="notes_calendar_no_app">Auf diesem Gerät wurde keine Kalender-App gefunden.</string>
+    <string name="notes_calendar_no_app">Auf diesem Handy wurde keine Kalender-App gefunden.</string>
     <string name="notes_suggestions_heading">Smarte Vorschläge</string>
     <string name="notes_suggestions_find">Vorschläge finden</string>
     <string name="notes_suggestions_loading">Suche nach Daten und Terminen…</string>

@@ -7,22 +7,22 @@
     <string name="settings_acceleration_cpu_description">Работает на любом поддерживаемом устройстве</string>
     <string name="settings_acceleration_gpu">GPU</string>
     <string name="settings_acceleration_gpu_description">Заметно быстрее на устройствах со Snapdragon</string>
-    <string name="settings_acceleration_note">GPU недоступен на устройствах Pixel (Tensor). После изменения движок ИИ перезагрузится при следующем использовании.</string>
+    <string name="settings_acceleration_note">На устройствах Pixel (Tensor) GPU недоступен. Изменение перезагрузит ИИ на устройстве при следующем использовании.</string>
 
-    <string name="settings_model_title">Модель ИИ</string>
+    <string name="settings_model_title">ИИ на устройстве</string>
     <string name="settings_model_picker_auto">Автоматически</string>
-    <string name="settings_model_picker_auto_description">Лучшая модель для памяти этого устройства</string>
-    <string name="settings_model_picker_note">После смены модели движок ИИ перезагрузится при следующем использовании. Уже скачанные модели остаются на устройстве.</string>
+    <string name="settings_model_picker_auto_description">Лучшая модель для памяти этого телефона</string>
+    <string name="settings_model_picker_note">Смена модели перезагрузит ИИ на устройстве при следующем использовании. Загруженные модели остаются на вашем телефоне.</string>
     <string name="settings_model_status_not_downloaded">Не скачана</string>
     <string name="settings_model_status_downloading">Скачивание… %1$d%%</string>
-    <string name="settings_model_status_loading">Подготовка движка…</string>
-    <string name="settings_model_status_ready">Готова · хранится на этом устройстве</string>
-    <string name="settings_model_status_error">С моделью что-то пошло не так</string>
-    <string name="settings_model_download">Скачать модель</string>
+    <string name="settings_model_status_loading">Подготавливаем ИИ на устройстве…</string>
+    <string name="settings_model_status_ready">Готов · хранится на вашем телефоне</string>
+    <string name="settings_model_status_error">С ИИ на устройстве что-то пошло не так</string>
+    <string name="settings_model_download">Скачать ИИ на устройстве</string>
     <string name="settings_model_retry">Повторить</string>
-    <string name="settings_model_delete">Удалить модель</string>
-    <string name="settings_delete_model_dialog_title">Удалить модель ИИ?</string>
-    <string name="settings_delete_model_dialog_body">Запись не будет работать, пока модель не будет скачана снова. Ваши заметки не пострадают.</string>
+    <string name="settings_model_delete">Удалить ИИ на устройстве</string>
+    <string name="settings_delete_model_dialog_title">Удалить ИИ на устройстве?</string>
+    <string name="settings_delete_model_dialog_body">Запись не будет работать, пока ИИ на устройстве не будет загружен снова. Ваши заметки не пострадают.</string>
     <string name="settings_delete_model_dialog_confirm">Удалить</string>
     <string name="settings_delete_model_dialog_cancel">Отмена</string>
 
@@ -58,12 +58,12 @@
     <string name="settings_note_style_editor_format_sentences">Кратко</string>
     <string name="settings_note_style_editor_format_bullets">Списком</string>
     <string name="settings_note_style_editor_format_free">Свободно</string>
-    <string name="settings_note_style_editor_guidance_warning">Длинные инструкции могут не обработаться. У ИИ на этом устройстве ограниченная память, используйте на свой риск.</string>
+    <string name="settings_note_style_editor_guidance_warning">Длинные инструкции могут не обработаться. У ИИ на устройстве мало памяти, используйте их на свой риск.</string>
     <string name="settings_note_style_editor_add_section">Добавить раздел</string>
     <string name="settings_note_style_editor_remove_section">Удалить раздел</string>
     <string name="settings_note_style_editor_move_up">Выше</string>
     <string name="settings_note_style_editor_move_down">Ниже</string>
-    <string name="settings_note_style_describe_unavailable">Чтобы создать стиль, сначала скачайте ИИ-модель.</string>
+    <string name="settings_note_style_describe_unavailable">Чтобы создать стиль, сначала настройте ИИ на устройстве.</string>
     <string name="settings_note_style_error_blank">Это поле обязательно</string>
     <string name="settings_note_style_error_too_long">Не больше %1$d символов</string>
     <string name="settings_note_style_error_duplicate">Такое название уже используется</string>
@@ -92,7 +92,7 @@
     <string name="settings_feature_request_description">Чего-то не хватает? Расскажите разработчику, что приложение должно уметь.</string>
     <string name="settings_feature_request_subject">[%1$s] предложение функции</string>
     <string name="settings_feature_request_body">Здравствуйте! Хочу предложить функцию:\n\n\n\n—\nДанные ниже добавлены автоматически. Они описывают моё устройство и версию приложения и помогают разработчику понять контекст предложения. Пожалуйста, оставьте их, если не против ими поделиться.\nУстройство: %1$s %2$s (%3$s)\nRAM: %4$s\nВерсия приложения: %5$s\nAndroid: %6$s (API %7$d)</string>
-    <string name="settings_feature_request_no_email_app">На этом устройстве не найдено почтовое приложение</string>
+    <string name="settings_feature_request_no_email_app">На этом телефоне не найдено почтовое приложение</string>
 
     <string name="settings_about_support_title">О приложении и поддержка</string>
     <string name="settings_about_support_subtitle">Версия %1$s · обратная связь, конфиденциальность и правовая информация</string>
@@ -106,7 +106,7 @@
 
     <string name="settings_developer_title">Разработчик</string>
     <string name="settings_developer_label">Параметры разработчика</string>
-    <string name="settings_developer_description">Показывает управление моделями, ускорение и диагностику обработки.</string>
+    <string name="settings_developer_description">Показывать управление ИИ на устройстве, ускорение и диагностику обработки.</string>
     <string name="settings_backup_title">Резервная копия</string>
     <string name="settings_backup_subtitle">Перенесите заметки на новый телефон или сохраните копию</string>
     <string name="settings_import_audio_title">Импорт аудио</string>
@@ -135,7 +135,7 @@
     <string name="settings_notes_title">Заметки</string>
     <string name="settings_backup_section_title">Резервная копия</string>
     <string name="settings_about_section_title">О приложении</string>
-    <string name="settings_about_footer">Offhand хранит каждую запись и заметку на этом устройстве. Ничего никуда не загружается.</string>
+    <string name="settings_about_footer">Всё остаётся на вашем телефоне. Ничего никогда не загружается.</string>
     <string name="settings_note_style_editor_no_sections">Без разделов заметка становится свободным резюме.</string>
     <string name="settings_redeem_code">Ввести промокод</string>
 </resources>

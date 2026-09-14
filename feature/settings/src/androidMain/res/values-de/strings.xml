@@ -7,23 +7,23 @@
     <string name="settings_acceleration_cpu_description">Funktioniert auf jedem unterstützten Gerät</string>
     <string name="settings_acceleration_gpu">GPU</string>
     <string name="settings_acceleration_gpu_description">Deutlich schneller auf Snapdragon-Geräten</string>
-    <string name="settings_acceleration_note">GPU ist auf Pixel-Geräten (Tensor) nicht verfügbar. Eine Änderung lädt die KI-Engine bei der nächsten Nutzung neu.</string>
+    <string name="settings_acceleration_note">Auf Pixel-Geräten (Tensor) ist keine GPU verfügbar. Eine Änderung lädt die KI auf dem Gerät bei der nächsten Nutzung neu.</string>
 
-    <string name="settings_model_title">KI-Modell</string>
+    <string name="settings_model_title">KI auf dem Gerät</string>
     <string name="settings_model_picker_auto">Automatisch</string>
-    <string name="settings_model_picker_auto_description">Bestes Modell für den Speicher dieses Geräts</string>
-    <string name="settings_model_picker_note">Ein Modellwechsel lädt die KI-Engine bei der nächsten Nutzung neu. Bereits heruntergeladene Modelle bleiben auf dem Gerät.</string>
+    <string name="settings_model_picker_auto_description">Bestes Modell für den Speicher dieses Handys</string>
+    <string name="settings_model_picker_note">Ein Modellwechsel lädt die KI auf dem Gerät bei der nächsten Nutzung neu. Heruntergeladene Modelle bleiben auf deinem Handy.</string>
     <string name="settings_model_status_not_downloaded">Nicht heruntergeladen</string>
     <string name="settings_model_status_downloading">Wird heruntergeladen… %1$d%%</string>
-    <string name="settings_model_status_loading">Engine wird vorbereitet…</string>
-    <string name="settings_model_status_ready">Bereit · auf diesem Gerät gespeichert</string>
-    <string name="settings_model_status_error">Mit dem Modell ist etwas schiefgelaufen</string>
-    <string name="settings_model_download">Modell herunterladen</string>
+    <string name="settings_model_status_loading">KI auf dem Gerät wird vorbereitet…</string>
+    <string name="settings_model_status_ready">Bereit · auf deinem Handy gespeichert</string>
+    <string name="settings_model_status_error">Mit der KI auf dem Gerät ist etwas schiefgelaufen</string>
+    <string name="settings_model_download">KI auf dem Gerät herunterladen</string>
     <string name="settings_model_retry">Erneut versuchen</string>
-    <string name="settings_model_delete">Modell löschen</string>
-    <string name="settings_delete_model_dialog_title">KI-Modell löschen?</string>
-    <string name="settings_delete_model_dialog_body">Aufnehmen funktioniert erst wieder, wenn das Modell erneut heruntergeladen wurde. Deine Notizen sind nicht betroffen.</string>
-    <string name="settings_delete_model_dialog_confirm">Löschen</string>
+    <string name="settings_model_delete">KI auf dem Gerät entfernen</string>
+    <string name="settings_delete_model_dialog_title">KI auf dem Gerät entfernen?</string>
+    <string name="settings_delete_model_dialog_body">Aufnahmen funktionieren erst wieder, wenn die KI auf dem Gerät erneut heruntergeladen ist. Deine Notizen bleiben unberührt.</string>
+    <string name="settings_delete_model_dialog_confirm">Entfernen</string>
     <string name="settings_delete_model_dialog_cancel">Abbrechen</string>
 
     <string name="settings_note_style_title">Standard-Notizstil</string>
@@ -58,12 +58,12 @@
     <string name="settings_note_style_editor_format_sentences">Kurz</string>
     <string name="settings_note_style_editor_format_bullets">Stichpunkte</string>
     <string name="settings_note_style_editor_format_free">Frei</string>
-    <string name="settings_note_style_editor_guidance_warning">Lange Anweisungen können fehlschlagen. Die KI auf diesem Gerät hat begrenzten Speicher, nutze sie auf eigenes Risiko.</string>
+    <string name="settings_note_style_editor_guidance_warning">Lange Anweisungen können fehlschlagen. Die KI auf dem Gerät hat wenig Speicher, nutze sie auf eigene Gefahr.</string>
     <string name="settings_note_style_editor_add_section">Abschnitt hinzufügen</string>
     <string name="settings_note_style_editor_remove_section">Abschnitt entfernen</string>
     <string name="settings_note_style_editor_move_up">Nach oben</string>
     <string name="settings_note_style_editor_move_down">Nach unten</string>
-    <string name="settings_note_style_describe_unavailable">Lade zuerst das KI-Modell herunter, um einen Stil zu erstellen.</string>
+    <string name="settings_note_style_describe_unavailable">Richte zuerst die KI auf dem Gerät ein, um einen Stil zu erstellen.</string>
     <string name="settings_note_style_error_blank">Dieses Feld ist erforderlich</string>
     <string name="settings_note_style_error_too_long">Höchstens %1$d Zeichen verwenden</string>
     <string name="settings_note_style_error_duplicate">Dieser Name wird bereits verwendet</string>
@@ -92,7 +92,7 @@
     <string name="settings_feature_request_description">Fehlt dir etwas? Sag dem Entwickler, was die App als Nächstes können soll.</string>
     <string name="settings_feature_request_subject">[%1$s] Funktionswunsch</string>
     <string name="settings_feature_request_body">Hallo! Ich möchte eine Funktion vorschlagen:\n\n\n\n—\nDie Angaben unten wurden automatisch hinzugefügt. Sie beschreiben mein Gerät und meine App-Version und helfen dem Entwickler, meinen Vorschlag einzuordnen. Bitte lass sie stehen, wenn du sie teilen magst.\nGerät: %1$s %2$s (%3$s)\nRAM: %4$s\nApp-Version: %5$s\nAndroid: %6$s (API %7$d)</string>
-    <string name="settings_feature_request_no_email_app">Keine E-Mail-App auf diesem Gerät gefunden</string>
+    <string name="settings_feature_request_no_email_app">Auf diesem Handy wurde keine E-Mail-App gefunden</string>
 
     <string name="settings_about_support_title">Über &amp; Support</string>
     <string name="settings_about_support_subtitle">Version %1$s · Feedback, Datenschutz und Rechtliches</string>
@@ -106,7 +106,7 @@
 
     <string name="settings_developer_title">Entwickler</string>
     <string name="settings_developer_label">Entwickleroptionen</string>
-    <string name="settings_developer_description">Zeigt Modellverwaltung, Beschleunigung und Verarbeitungs-Diagnosen.</string>
+    <string name="settings_developer_description">Verwaltung der KI auf dem Gerät, Beschleunigung und Verarbeitungsdiagnose anzeigen.</string>
     <string name="settings_backup_title">Sichern &amp; wiederherstellen</string>
     <string name="settings_backup_subtitle">Notizen auf ein neues Handy übertragen oder eine Kopie behalten</string>
     <string name="settings_import_audio_title">Audio importieren</string>
@@ -133,7 +133,7 @@
     <string name="settings_notes_title">Notizen</string>
     <string name="settings_backup_section_title">Backup</string>
     <string name="settings_about_section_title">Info</string>
-    <string name="settings_about_footer">Offhand behält jede Aufnahme und Notiz auf diesem Gerät. Nichts wird irgendwohin hochgeladen.</string>
+    <string name="settings_about_footer">Alles bleibt auf deinem Handy. Nichts wird jemals hochgeladen.</string>
     <string name="settings_note_style_editor_no_sections">Ohne Abschnitte wird die Notiz eine freie Zusammenfassung.</string>
     <string name="settings_redeem_code">Code einlösen</string>
 </resources>

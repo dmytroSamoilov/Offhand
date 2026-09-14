@@ -28,14 +28,14 @@ struct AboutSupportView: View {
         .navigationTitle(String(localized: "About & Support"))
         .navigationBarTitleDisplayMode(.inline)
         .confirmationDialog(
-            String(localized: "Delete the AI model?"),
+            String(localized: "Remove the on-device AI?"),
             isPresented: deleteBinding,
             titleVisibility: .visible
         ) {
-            Button(String(localized: "Delete"), role: .destructive) { viewModel.onDeleteModelConfirmed() }
+            Button(String(localized: "Remove"), role: .destructive) { viewModel.onDeleteModelConfirmed() }
             Button(String(localized: "Cancel"), role: .cancel) { viewModel.onDeleteModelDismissed() }
         } message: {
-            Text(String(localized: "Your notes are kept. Offhand will need to download the model again before it can process a new recording."))
+            Text(String(localized: "Your notes are kept. Offhand will need to download the on-device AI again before it can process a new recording."))
         }
         .task {
             for await newState in viewModel.uiState {
@@ -53,7 +53,7 @@ struct AboutSupportView: View {
             )
             modelStatusRow
             if state.model.status == .error {
-                Text(String(localized: "Something went wrong with the model"))
+                Text(String(localized: "Something went wrong with the on-device AI"))
                     .font(.footnote)
                     .foregroundStyle(.red)
             }
@@ -65,7 +65,7 @@ struct AboutSupportView: View {
         } header: {
             Text(String(localized: "On-device AI"))
         } footer: {
-            Text(String(localized: "The model runs entirely on this iPhone. Deleting it frees the space but pauses processing until it is downloaded again."))
+            Text(String(localized: "The on-device AI runs entirely on your iPhone. Removing it frees the space but pauses processing until it is downloaded again."))
         }
     }
 
@@ -73,7 +73,7 @@ struct AboutSupportView: View {
     private var modelStatusRow: some View {
         switch state.model.status {
         case .ready:
-            Button(String(localized: "Delete model"), role: .destructive) {
+            Button(String(localized: "Remove on-device AI"), role: .destructive) {
                 viewModel.onDeleteModelRequested()
             }
         case .downloading:
@@ -89,7 +89,7 @@ struct AboutSupportView: View {
         case .loading:
             LabeledContent(String(localized: "Status"), value: String(localized: "Loading"))
         case .notDownloaded, .error:
-            Button(String(localized: "Download model")) { viewModel.onDownloadModel() }
+            Button(String(localized: "Download on-device AI")) { viewModel.onDownloadModel() }
         default:
             EmptyView()
         }

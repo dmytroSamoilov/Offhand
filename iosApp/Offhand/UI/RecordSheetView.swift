@@ -97,7 +97,7 @@ struct RecordSheetView: View {
                 .foregroundStyle(Brand.teal)
             Text(String(localized: "Note saved"))
                 .font(.title3.weight(.semibold))
-            Text(String(localized: "It will keep processing on this device. You can close this."))
+            Text(String(localized: "It will keep processing on your iPhone. You can close this."))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -126,7 +126,7 @@ struct RecordSheetView: View {
                         .background(Brand.primary, in: Circle())
                 }
                 .buttonStyle(.plain)
-                Text(String(localized: "Everything stays on this device."))
+                Text(String(localized: "Everything stays on your iPhone. Nothing is uploaded, ever."))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -141,7 +141,7 @@ struct RecordSheetView: View {
             Text(String(localized: "Offhand needs the microphone"))
                 .font(.title3.weight(.semibold))
                 .multilineTextAlignment(.center)
-            Text(String(localized: "Turn on microphone access to record a note. Audio still never leaves this device."))
+            Text(String(localized: "Turn on microphone access to record a note. Audio still never leaves your iPhone."))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

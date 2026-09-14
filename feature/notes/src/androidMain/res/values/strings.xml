@@ -2,8 +2,8 @@
 <resources>
     <string name="notes_title">Notes</string>
     <string name="notes_empty_state">No notes yet. Tap the microphone button to record your first one.</string>
-    <string name="notes_model_banner_title">Preparing your AI core</string>
-    <string name="notes_model_banner_subtitle">Downloading the on-device model in the background</string>
+    <string name="notes_model_banner_title">Setting up your on-device AI</string>
+    <string name="notes_model_banner_subtitle">Downloading in the background</string>
     <string name="notes_model_banner_percent" translatable="false">%1$d%%</string>
     <string name="notes_day_today">Today</string>
     <string name="notes_day_yesterday">Yesterday</string>
@@ -20,7 +20,7 @@
     <string name="notes_pause_description">Pause playback</string>
     <string name="notes_playback_position" translatable="false">%1$s / %2$s</string>
     <string name="notes_processing_title">Processing…</string>
-    <string name="notes_processing_preview">Transcribing and summarizing on this device. You can play the recording already.</string>
+    <string name="notes_processing_preview">Transcribing and summarizing on your phone. You can play the recording already.</string>
     <string name="notes_processing_transcribing">Processing the transcript… It will appear here automatically.</string>
     <string name="notes_processing_structuring">Creating the overview… The transcript is already below.</string>
     <string name="notes_recording_fallback_title">Recording</string>
@@ -37,7 +37,7 @@
     <string name="notes_edit_save_description">Save changes</string>
     <string name="notes_edit_cancel_description">Discard changes</string>
     <string name="notes_delete_dialog_title">Delete this note?</string>
-    <string name="notes_delete_dialog_body">The note will be permanently removed from this device. This cannot be undone.</string>
+    <string name="notes_delete_dialog_body">The note will be permanently removed from your phone. This cannot be undone.</string>
     <string name="notes_delete_dialog_confirm">Delete</string>
     <string name="notes_delete_dialog_cancel">Cancel</string>
     <string name="notes_retranscribe_description">Re-transcribe</string>
@@ -47,7 +47,7 @@
     <string name="notes_badge_encrypted">Encrypted</string>
     <string name="notes_more_actions_description">More actions</string>
     <string name="notes_share_dialog_title">What would you like to share?</string>
-    <string name="notes_share_dialog_body">Please keep in mind that shared copies are no longer encrypted once they leave this device.</string>
+    <string name="notes_share_dialog_body">Please keep in mind that shared copies are no longer encrypted once they leave your phone.</string>
     <string name="notes_share_dialog_confirm">Share</string>
     <string name="notes_share_tab_text">Text file</string>
     <string name="notes_share_tab_audio">Audio file</string>
@@ -103,7 +103,7 @@
     <string name="notes_calendar_sheet_title">Calendar events</string>
     <string name="notes_calendar_add">Add to calendar</string>
     <string name="notes_calendar_all_day">All day</string>
-    <string name="notes_calendar_no_app">No calendar app was found on this device.</string>
+    <string name="notes_calendar_no_app">No calendar app was found on this phone.</string>
     <string name="notes_suggestions_heading">Smart suggestions</string>
     <string name="notes_suggestions_find">Find suggestions</string>
     <string name="notes_suggestions_loading">Looking for dates and appointments…</string>

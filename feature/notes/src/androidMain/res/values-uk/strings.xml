@@ -2,8 +2,8 @@
 <resources>
     <string name="notes_title">Нотатки</string>
     <string name="notes_empty_state">Нотаток поки немає. Натисніть кнопку мікрофона, щоб записати першу.</string>
-    <string name="notes_model_banner_title">Готуємо ваше ядро ШІ</string>
-    <string name="notes_model_banner_subtitle">Модель для роботи на пристрої завантажується у фоні</string>
+    <string name="notes_model_banner_title">Налаштовуємо ШІ на пристрої</string>
+    <string name="notes_model_banner_subtitle">Завантажується у фоні</string>
     <string name="notes_day_today">Сьогодні</string>
     <string name="notes_day_yesterday">Вчора</string>
     <plurals name="notes_word_count">
@@ -18,7 +18,7 @@
     <string name="notes_play_description">Відтворити запис</string>
     <string name="notes_pause_description">Призупинити відтворення</string>
     <string name="notes_processing_title">Обробка…</string>
-    <string name="notes_processing_preview">Розшифровка та створення огляду тривають на цьому пристрої. Запис уже можна прослухати.</string>
+    <string name="notes_processing_preview">Розшифровуємо й узагальнюємо на вашому телефоні. Запис уже можна прослухати.</string>
     <string name="notes_processing_transcribing">Триває розшифровка… Вона зʼявиться тут автоматично.</string>
     <string name="notes_processing_structuring">Створюємо огляд… Розшифровка вже нижче.</string>
     <string name="notes_recording_fallback_title">Запис</string>
@@ -35,7 +35,7 @@
     <string name="notes_edit_save_description">Зберегти зміни</string>
     <string name="notes_edit_cancel_description">Відхилити зміни</string>
     <string name="notes_delete_dialog_title">Видалити цю нотатку?</string>
-    <string name="notes_delete_dialog_body">Нотатку буде назавжди видалено з цього пристрою. Це неможливо скасувати.</string>
+    <string name="notes_delete_dialog_body">Нотатку буде назавжди видалено з вашого телефона. Це не можна скасувати.</string>
     <string name="notes_delete_dialog_confirm">Видалити</string>
     <string name="notes_delete_dialog_cancel">Скасувати</string>
     <string name="notes_retranscribe_description">Розшифрувати заново</string>
@@ -44,7 +44,7 @@
     <string name="notes_badge_encrypted">Зашифрована</string>
     <string name="notes_more_actions_description">Інші дії</string>
     <string name="notes_share_dialog_title">Чим поділитися?</string>
-    <string name="notes_share_dialog_body">Майте на увазі: надіслані копії більше не зашифровані, щойно залишають цей пристрій.</string>
+    <string name="notes_share_dialog_body">Памʼятайте: надіслані копії більше не зашифровані, щойно вони залишають ваш телефон.</string>
     <string name="notes_share_dialog_confirm">Поділитися</string>
     <string name="notes_share_tab_text">Текстовий файл</string>
     <string name="notes_share_tab_audio">Аудіофайл</string>
@@ -92,7 +92,7 @@
     <string name="notes_calendar_sheet_title">Події календаря</string>
     <string name="notes_calendar_add">Додати до календаря</string>
     <string name="notes_calendar_all_day">Увесь день</string>
-    <string name="notes_calendar_no_app">На цьому пристрої не знайдено застосунку календаря.</string>
+    <string name="notes_calendar_no_app">На цьому телефоні не знайдено застосунок календаря.</string>
     <string name="notes_suggestions_heading">Розумні підказки</string>
     <string name="notes_suggestions_find">Знайти підказки</string>
     <string name="notes_suggestions_loading">Шукаємо дати й зустрічі…</string>

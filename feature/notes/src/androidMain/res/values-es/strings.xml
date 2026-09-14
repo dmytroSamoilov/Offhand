@@ -2,8 +2,8 @@
 <resources>
     <string name="notes_title">Notas</string>
     <string name="notes_empty_state">Aún no hay notas. Toca el botón del micrófono para grabar la primera.</string>
-    <string name="notes_model_banner_title">Preparando tu núcleo de IA</string>
-    <string name="notes_model_banner_subtitle">Descargando el modelo en el dispositivo en segundo plano</string>
+    <string name="notes_model_banner_title">Configurando tu IA en el dispositivo</string>
+    <string name="notes_model_banner_subtitle">Descargando en segundo plano</string>
     <string name="notes_day_today">Hoy</string>
     <string name="notes_day_yesterday">Ayer</string>
     <plurals name="notes_word_count">
@@ -17,7 +17,7 @@
     <string name="notes_play_description">Reproducir grabación</string>
     <string name="notes_pause_description">Pausar reproducción</string>
     <string name="notes_processing_title">Procesando…</string>
-    <string name="notes_processing_preview">Transcribiendo y resumiendo en este dispositivo. Ya puedes reproducir la grabación.</string>
+    <string name="notes_processing_preview">Transcribiendo y resumiendo en tu teléfono. Ya puedes reproducir la grabación.</string>
     <string name="notes_processing_transcribing">Procesando la transcripción… Aparecerá aquí automáticamente.</string>
     <string name="notes_processing_structuring">Creando la visión general… La transcripción ya está abajo.</string>
     <string name="notes_recording_fallback_title">Grabación</string>
@@ -34,7 +34,7 @@
     <string name="notes_edit_save_description">Guardar cambios</string>
     <string name="notes_edit_cancel_description">Descartar cambios</string>
     <string name="notes_delete_dialog_title">¿Eliminar esta nota?</string>
-    <string name="notes_delete_dialog_body">La nota se eliminará de forma permanente de este dispositivo. Esto no se puede deshacer.</string>
+    <string name="notes_delete_dialog_body">La nota se eliminará permanentemente de tu teléfono. Esto no se puede deshacer.</string>
     <string name="notes_delete_dialog_confirm">Eliminar</string>
     <string name="notes_delete_dialog_cancel">Cancelar</string>
     <string name="notes_retranscribe_description">Volver a transcribir</string>
@@ -43,7 +43,7 @@
     <string name="notes_badge_encrypted">Cifrada</string>
     <string name="notes_more_actions_description">Más acciones</string>
     <string name="notes_share_dialog_title">¿Qué quieres compartir?</string>
-    <string name="notes_share_dialog_body">Ten en cuenta que las copias compartidas dejan de estar cifradas cuando salen de este dispositivo.</string>
+    <string name="notes_share_dialog_body">Ten en cuenta que las copias compartidas dejan de estar cifradas en cuanto salen de tu teléfono.</string>
     <string name="notes_share_dialog_confirm">Compartir</string>
     <string name="notes_share_tab_text">Archivo de texto</string>
     <string name="notes_share_tab_audio">Archivo de audio</string>
@@ -91,7 +91,7 @@
     <string name="notes_calendar_sheet_title">Eventos de calendario</string>
     <string name="notes_calendar_add">Añadir al calendario</string>
     <string name="notes_calendar_all_day">Todo el día</string>
-    <string name="notes_calendar_no_app">No se encontró ninguna app de calendario en este dispositivo.</string>
+    <string name="notes_calendar_no_app">No se ha encontrado ninguna app de calendario en este teléfono.</string>
     <string name="notes_suggestions_heading">Sugerencias inteligentes</string>
     <string name="notes_suggestions_find">Buscar sugerencias</string>
     <string name="notes_suggestions_loading">Buscando fechas y citas…</string>

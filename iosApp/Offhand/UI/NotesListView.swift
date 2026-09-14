@@ -362,7 +362,7 @@ private struct ModelPreparationBanner: View {
         HStack(spacing: 12) {
             ProgressView()
             VStack(alignment: .leading, spacing: 2) {
-                Text(String(localized: "Preparing on-device AI"))
+                Text(String(localized: "Setting up your on-device AI"))
                     .font(.subheadline.weight(.semibold))
                 Text(String(localized: "New notes start processing once this finishes."))
                     .font(.caption)

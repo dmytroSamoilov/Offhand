@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="onboarding_incompatible_title">Device not supported</string>
-    <string name="onboarding_incompatible_body">Offhand runs a large AI model directly on your phone, so nothing you record ever leaves the device. This device does not meet the minimum requirements.</string>
+    <string name="onboarding_incompatible_title">This phone can\'t run Offhand</string>
+    <string name="onboarding_incompatible_body">Offhand runs its on-device AI entirely on your phone, so nothing is uploaded, ever. This phone does not meet the minimum requirements.</string>
     <string name="onboarding_incompatible_ram_label">Memory (RAM):</string>
     <string name="onboarding_incompatible_ram_value">%1$s GB — needs %2$s GB</string>
     <string name="onboarding_incompatible_cores_label">CPU cores:</string>
     <string name="onboarding_incompatible_cores_value">%1$d — needs %2$d</string>
 
     <string name="onboarding_privacy_title">Private by design</string>
-    <string name="onboarding_privacy_body">Everything you record stays on this phone. Recordings, transcripts, and notes are encrypted on this device, and the AI that processes them runs right here — nothing is ever uploaded.</string>
+    <string name="onboarding_privacy_body">Everything stays on your phone. Recordings, transcripts and notes are encrypted, and the on-device AI that processes them runs right there. Nothing is uploaded, ever.</string>
     <string name="onboarding_continue">Continue</string>
 
     <string name="onboarding_note_style_title">How will you use Offhand?</string>
@@ -24,18 +24,18 @@
     <string name="onboarding_lock_enable_label">Require unlock to open Offhand</string>
     <string name="onboarding_lock_enable_description">You can change this any time in Settings.</string>
 
-    <string name="onboarding_download_title">Set up your private AI</string>
-    <string name="onboarding_download_body">Offhand transcribes and summarizes voice notes with AI that runs entirely on your phone. To get started, it needs a one-time download of its AI models.</string>
+    <string name="onboarding_download_title">Set up your on-device AI</string>
+    <string name="onboarding_download_body">Offhand transcribes and summarizes voice notes with on-device AI that runs entirely on your phone. To get started, it needs a one-time download.</string>
     <string name="onboarding_download_size">One-time download · about %1$s GB</string>
     <string name="onboarding_download_background_hint">The download continues in the background — you can start recording right away. We\'ll notify you when everything is ready.</string>
     <string name="onboarding_download_wifi_hint">Tip: connect to Wi‑Fi to save mobile data.</string>
-    <string name="onboarding_notification_download_channel_name">Model downloads</string>
-    <string name="onboarding_notification_status_channel_name">Model status</string>
-    <string name="onboarding_notification_downloading_title">Downloading AI models</string>
-    <string name="onboarding_notification_downloading_text">Offhand is setting up on-device AI</string>
-    <string name="onboarding_notification_ready_title">Your AI models are ready</string>
-    <string name="onboarding_notification_ready_text">Transcription and summaries now run fully on this device.</string>
-    <string name="onboarding_notification_failed_title">Model download didn\'t finish</string>
+    <string name="onboarding_notification_download_channel_name">On-device AI downloads</string>
+    <string name="onboarding_notification_status_channel_name">On-device AI status</string>
+    <string name="onboarding_notification_downloading_title">Download on-device AI</string>
+    <string name="onboarding_notification_downloading_text">Setting up your on-device AI</string>
+    <string name="onboarding_notification_ready_title">Your on-device AI is ready</string>
+    <string name="onboarding_notification_ready_text">Transcription and notes now run entirely on your phone.</string>
+    <string name="onboarding_notification_failed_title">On-device AI download didn\'t finish</string>
     <string name="onboarding_notification_failed_text">Check your connection. Offhand will resume the download when you record your next note.</string>
 
     <string name="onboarding_consent_title">Help improve Offhand?</string>

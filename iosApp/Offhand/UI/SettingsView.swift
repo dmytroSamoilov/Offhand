@@ -112,7 +112,7 @@ struct SettingsView: View {
                 } header: {
                     Text(String(localized: "About"))
                 } footer: {
-                    Text(String(localized: "Offhand keeps every recording and note on this device. Nothing is uploaded anywhere."))
+                    Text(String(localized: "Everything stays on your iPhone. Nothing is uploaded, ever."))
                 }
                 if let override = state.proOverride {
                     proOverrideSection(override)

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="recording_idle_hint">Toca para grabar. Todo se transcribe y estructura directamente en este dispositivo.</string>
+    <string name="recording_idle_hint">Toca para grabar. Todo se transcribe y estructura en tu teléfono.</string>
     <string name="recording_start_description">Iniciar grabación</string>
     <string name="recording_stop_description">Detener grabación</string>
     <string name="recording_pause_description">Pausar grabación</string>
@@ -24,18 +24,18 @@
     <string name="recording_notification_channel_name">Grabación</string>
     <string name="recording_notification_recording_title">Grabación en curso</string>
     <string name="recording_notification_paused_title">Grabación en pausa</string>
-    <string name="recording_notification_recording_text">El audio se procesa solo en este dispositivo</string>
+    <string name="recording_notification_recording_text">El audio se queda en tu teléfono</string>
     <string name="recording_notification_paused_text">Grabado hasta ahora: %1$s</string>
     <string name="recording_notification_action_pause">Pausar</string>
     <string name="recording_notification_action_resume">Reanudar</string>
     <string name="recording_notification_action_stop">Detener</string>
     <string name="recording_notification_processing_title">Creando tu nota</string>
-    <string name="recording_notification_processing_text">Transcribiendo y estructurando en el dispositivo</string>
+    <string name="recording_notification_processing_text">Transcribiendo y estructurando en tu teléfono</string>
     <string name="recording_notification_notes_channel_name">Notas terminadas</string>
     <string name="recording_notification_ready_title">Tu nota está lista</string>
     <string name="recording_notification_ready_text">Toca para abrir la nota terminada.</string>
     <string name="recording_default_note_title">Grabación %1$d</string>
     <string name="recording_untitled_note_title">Nota de voz</string>
-    <string name="recording_notification_note_failed_title">Ha fallado la transcripción con IA</string>
+    <string name="recording_notification_note_failed_title">La transcripción ha fallado</string>
     <string name="recording_notification_note_failed_text">La grabación está guardada. Toca para abrirla.</string>
 </resources>

@@ -32,7 +32,7 @@ final class NoteFinishCoordinator {
         let request = BGContinuedProcessingTaskRequest(
             identifier: identifier,
             title: String(localized: "Preparing your note"),
-            subtitle: String(localized: "Transcribing and structuring on this device")
+            subtitle: String(localized: "Transcribing and structuring on your iPhone")
         )
         request.strategy = .queue
         do {
