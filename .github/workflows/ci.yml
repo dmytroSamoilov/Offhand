@@ -120,6 +120,12 @@ jobs:
     timeout-minutes: 60
     env:
       MAESTRO_VERSION: 2.10.0
+      # LiteRT-LM keeps prebuilt Android/iOS libraries in Git LFS next to its
+      # sources, and one of the 0.16.0 objects is gone from the remote, so a
+      # fresh SwiftPM checkout dies on `git lfs pull`. The iOS binary comes
+      # from the release zip the package points at, so the LFS files are not
+      # needed: check them out as pointers.
+      GIT_LFS_SKIP_SMUDGE: "1"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -133,8 +139,8 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # LiteRT-LM keeps its prebuilt binaries in Git LFS; without the LFS
-      # filter SwiftPM cannot check the package's pinned revision out.
+      # The LFS filter still has to be installed for the pointer checkout to
+      # succeed (see GIT_LFS_SKIP_SMUDGE above).
       - name: Install tools
         run: |
           brew install xcodegen git-lfs

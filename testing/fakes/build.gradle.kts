@@ -13,6 +13,7 @@ kotlin {
             implementation(project(":core:audio"))
             implementation(project(":core:data"))
             implementation(project(":core:device"))
+            implementation(project(":feature:notes"))
             implementation(project(":feature:recording"))
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)

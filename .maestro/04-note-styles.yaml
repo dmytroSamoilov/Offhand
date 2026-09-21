@@ -88,27 +88,33 @@ appId: com.dmytrosamoilov.offhand.uitest
       - tapOn: "New style"
 
       # Fill the form; the editor has no keyboard Done button, a short drag on
-      # the form closes the keyboard so the next tap is not swallowed by it
+      # the form closes the keyboard so the next tap is not swallowed by it.
+      # The drag starts near the top of the form: starting on the focused
+      # field selects text instead of scrolling and leaves the keyboard up.
       - tapOn: "Name"
       - inputText: "Sales debrief"
       - swipe:
-          start: "50%,35%"
-          end: "50%,45%"
+          start: "50%,15%"
+          end: "50%,25%"
+      - waitForAnimationToEnd
       - tapOn: "What kind of note is this?"
       - inputText: "a sales call debrief"
       - swipe:
-          start: "50%,35%"
-          end: "50%,45%"
+          start: "50%,15%"
+          end: "50%,25%"
+      - waitForAnimationToEnd
       - tapOn: "Heading"
       - inputText: "Customer"
       - swipe:
-          start: "50%,35%"
-          end: "50%,45%"
+          start: "50%,15%"
+          end: "50%,25%"
+      - waitForAnimationToEnd
       - tapOn: "What goes here"
       - inputText: "who the customer is and their role"
       - swipe:
-          start: "50%,35%"
-          end: "50%,45%"
+          start: "50%,15%"
+          end: "50%,25%"
+      - waitForAnimationToEnd
       - scrollUntilVisible:
           element: "Add section"
       - tapOn: "Add section"
@@ -119,8 +125,9 @@ appId: com.dmytrosamoilov.offhand.uitest
           index: 1
       - inputText: "Next steps"
       - swipe:
-          start: "50%,35%"
-          end: "50%,45%"
+          start: "50%,15%"
+          end: "50%,25%"
+      - waitForAnimationToEnd
       - tapOn:
           text: "Bullet points"
           index: 1

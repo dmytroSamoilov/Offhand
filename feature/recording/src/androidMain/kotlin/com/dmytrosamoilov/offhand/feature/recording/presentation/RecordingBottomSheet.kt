@@ -134,6 +134,9 @@ private fun RecordingBottomSheet(
             onDismiss()
         }
     }
+    LaunchedEffect(state.phase) {
+        sheetState.expand()
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
