@@ -106,13 +106,15 @@ struct PaywallView: View {
                 Button(String(localized: "Try again")) { viewModel.onRetryOffers() }
             }
         } else {
-            HStack(alignment: .top, spacing: 12) {
+            HStack(spacing: 12) {
                 ForEach(state.offers, id: \.plan) { offer in
                     PlanCard(offer: offer, isSelected: offer.plan == state.selectedPlan) {
                         viewModel.onPlanSelected(plan: offer.plan)
                     }
                 }
             }
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.top, PlanCard.badgeOverhang)
         }
     }
 
@@ -310,34 +312,44 @@ private struct ComparisonTable: View {
 }
 
 private struct PlanCard: View {
+    static let badgeOverhang: CGFloat = 10
+
     let offer: ProOfferUi
     let isSelected: Bool
     let action: () -> Void
 
+    // Both cards share one row structure and the tallest card's height, and
+    // the "Best value" badge rides the top edge so it never competes with the
+    // title or the checkmark for the card's width.
     var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 6) {
-                    Text(title).font(.subheadline.weight(.semibold)).lineLimit(1).minimumScaleFactor(0.8)
-                    if offer.plan == .lifetime { bestValueBadge }
+                    Text(title).font(.subheadline.weight(.semibold)).lineLimit(1)
                     Spacer(minLength: 0)
-                    if isSelected {
-                        Image(systemName: "checkmark").font(.footnote.weight(.bold)).foregroundStyle(Brand.primary)
-                    }
+                    Image(systemName: "checkmark")
+                        .font(.footnote.weight(.bold))
+                        .foregroundStyle(Brand.primary)
+                        .opacity(isSelected ? 1 : 0)
                 }
-                Text(price).font(.headline)
+                Text(price).font(.headline).fixedSize(horizontal: false, vertical: true)
                 Text(hint).font(.caption).foregroundStyle(.secondary)
                 if let second = secondHint {
                     Text(second).font(.caption).foregroundStyle(.secondary)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(14)
             .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .strokeBorder(isSelected ? Brand.primary : Color(.systemGray4), lineWidth: isSelected ? 2 : 1)
             )
+            .overlay(alignment: .top) {
+                if offer.plan == .lifetime {
+                    bestValueBadge.offset(y: -Self.badgeOverhang)
+                }
+            }
         }
         .buttonStyle(.plain)
         .foregroundStyle(.primary)
@@ -349,9 +361,10 @@ private struct PlanCard: View {
             .lineLimit(1)
             .fixedSize()
             .foregroundStyle(Brand.proGold)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(Brand.proGold.opacity(0.18), in: RoundedRectangle(cornerRadius: 6))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(Brand.proGold.opacity(0.18), in: Capsule())
+            .background(Color(.secondarySystemGroupedBackground), in: Capsule())
     }
 
     private var title: String {

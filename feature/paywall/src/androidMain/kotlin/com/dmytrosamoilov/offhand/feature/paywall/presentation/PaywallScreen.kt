@@ -9,6 +9,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -242,13 +245,16 @@ private fun PlanSection(state: PaywallUiState, onPlanSelected: (ProPlan) -> Unit
             CircularProgressIndicator()
         }
         state.offers.isEmpty() -> OffersUnavailable(onRetry = onRetry)
-        else -> Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+        else -> Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = BADGE_OVERHANG).height(IntrinsicSize.Max),
+        ) {
             state.offers.forEach { offer ->
                 PlanCard(
                     offer = offer,
                     isSelected = offer.plan == state.selectedPlan,
                     onClick = { onPlanSelected(offer.plan) },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
                 )
             }
         }
@@ -268,21 +274,29 @@ private fun OffersUnavailable(onRetry: () -> Unit) {
     }
 }
 
+// Both cards share one row structure and the tallest card's height, and the
+// "Best value" badge rides the top edge so it never competes with the title
+// or the checkmark for the card's width.
 @Composable
 private fun PlanCard(offer: ProOfferUi, isSelected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val outline = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-    Card(
-        border = BorderStroke(if (isSelected) 2.dp else 1.dp, outline),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        modifier = modifier.selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick),
-    ) {
-        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            PlanCardTitle(offer = offer, isSelected = isSelected)
-            Text(text = offer.priceLabel(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(text = offer.hintLabel(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            offer.secondHintLabel()?.let { hint ->
-                Text(text = hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Box(modifier = modifier) {
+        Card(
+            border = BorderStroke(if (isSelected) 2.dp else 1.dp, outline),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            modifier = Modifier.fillMaxSize().selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick),
+        ) {
+            Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                PlanCardTitle(offer = offer, isSelected = isSelected)
+                Text(text = offer.priceLabel(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(text = offer.hintLabel(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                offer.secondHintLabel()?.let { hint ->
+                    Text(text = hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
+        }
+        if (offer.plan == ProPlan.LIFETIME) {
+            BestValueBadge(modifier = Modifier.align(Alignment.TopCenter).offset(y = -BADGE_OVERHANG))
         }
     }
 }
@@ -290,31 +304,36 @@ private fun PlanCard(offer: ProOfferUi, isSelected: Boolean, onClick: () -> Unit
 @Composable
 private fun PlanCardTitle(offer: ProOfferUi, isSelected: Boolean) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(text = stringResource(offer.plan.titleRes()), style = MaterialTheme.typography.titleSmall)
-        if (offer.plan == ProPlan.LIFETIME) BestValueBadge()
+        Text(text = stringResource(offer.plan.titleRes()), style = MaterialTheme.typography.titleSmall, maxLines = 1)
         Spacer(modifier = Modifier.weight(1f))
-        if (isSelected) {
-            Icon(
-                imageVector = Icons.Filled.Check,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp),
-            )
+        Box(modifier = Modifier.size(18.dp)) {
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun BestValueBadge() {
-    Surface(color = ProGold.copy(alpha = 0.18f), shape = RoundedCornerShape(6.dp)) {
-        Text(
-            text = stringResource(R.string.paywall_plan_best_value),
-            style = MaterialTheme.typography.labelSmall,
-            color = ProGold,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-        )
-    }
+private fun BestValueBadge(modifier: Modifier = Modifier) {
+    val shape = RoundedCornerShape(50)
+    Text(
+        text = stringResource(R.string.paywall_plan_best_value),
+        style = MaterialTheme.typography.labelSmall,
+        color = ProGold,
+        maxLines = 1,
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surface, shape)
+            .background(ProGold.copy(alpha = 0.18f), shape)
+            .padding(horizontal = 8.dp, vertical = 3.dp),
+    )
 }
+
+private val BADGE_OVERHANG = 10.dp
 
 @Composable
 private fun LegalRow(isEnabled: Boolean, onRestore: () -> Unit) {

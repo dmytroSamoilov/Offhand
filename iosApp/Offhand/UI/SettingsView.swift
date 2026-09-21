@@ -269,7 +269,7 @@ struct SettingsView: View {
                     }
                 }
                 if case .lifetime = onEnum(of: state.pro) {} else {
-                    Link(String(localized: "Manage subscription"), destination: URL(string: "https://apps.apple.com/account/subscriptions")!)
+                    Button(String(localized: "Manage subscription")) { SubscriptionManagement.present() }
                 }
                 Button(String(localized: "Redeem a code")) {
                     viewModel.onRedeemCodeClicked()

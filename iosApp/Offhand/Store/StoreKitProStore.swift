@@ -133,10 +133,24 @@ final class StoreKitProStore: IosProStoreBridge {
 // Transaction.updates like any purchase.
 enum OfferCodeRedemption {
     static func present() {
-        let scene = UIApplication.shared.connectedScenes
+        guard let scene = UIWindowScene.foregroundActive else { return }
+        Task { try? await AppStore.presentOfferCodeRedeemSheet(in: scene) }
+    }
+}
+
+// Apple's in-app subscription management sheet, where the user can cancel
+// without leaving the app, which App Review expects to be reachable.
+enum SubscriptionManagement {
+    static func present() {
+        guard let scene = UIWindowScene.foregroundActive else { return }
+        Task { try? await AppStore.showManageSubscriptions(in: scene) }
+    }
+}
+
+private extension UIWindowScene {
+    static var foregroundActive: UIWindowScene? {
+        UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .first { $0.activationState == .foregroundActive }
-        guard let scene else { return }
-        Task { try? await AppStore.presentOfferCodeRedeemSheet(in: scene) }
     }
 }
