@@ -3,15 +3,7 @@
 [![Release](https://img.shields.io/github/v/release/dmytroSamoilov/Offhand?include_prereleases&label=release)](https://github.com/dmytroSamoilov/Offhand/releases)
 ![Status](https://img.shields.io/badge/status-stable-release)
 
-<p>
-  <a href="https://apps.apple.com/app/offhand-private-voice-notes/id6803641617">
-    <img src="https://toolbox.marketingtools.apple.com/api/badges/download-on-the-app-store/black/en-us?size=250x83" alt="Download on the App Store" height="48">
-  </a>
-  &nbsp;
-  <a href="https://play.google.com/store/apps/details?id=com.dmytrosamoilov.offhand&hl=en">
-    <img src="https://play.google/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="72">
-  </a>
-</p>
+<p><a href="https://apps.apple.com/app/offhand-private-voice-notes/id6803641617"><img src="https://toolbox.marketingtools.apple.com/api/badges/download-on-the-app-store/black/en-us?size=250x83" alt="Download on the App Store" height="54" align="middle"></a>&nbsp;&nbsp;<a href="https://play.google.com/store/apps/details?id=com.dmytrosamoilov.offhand&hl=en"><img src="https://play.google/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="72" align="middle"></a></p>
 
 > **Latest release: [Offhand 1.3.0](https://github.com/dmytroSamoilov/Offhand/releases/latest)** —
 > search and folders, encrypted backup & restore with the recordings, transcriptions
