@@ -6,6 +6,10 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareLabelsProvider
 import com.dmytrosamoilov.offhand.feature.notes.domain.ShareCacheDirectoryProvider
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.AndroidAppIconProvider
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.AndroidNotePdfRenderer
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.AppIconProvider
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NotePdfRenderer
 import com.dmytrosamoilov.offhand.feature.notes.domain.review.AndroidAppInstallInfoProvider
 import com.dmytrosamoilov.offhand.feature.notes.domain.review.AppInstallInfoProvider
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.AndroidPrepareNoteShareUseCase
@@ -27,10 +31,12 @@ val featureNotesAndroidModule = module {
     singleOf(::PlayInAppReviewLauncher)
     singleOf(::FakeInAppReviewLauncher)
     single<InAppReviewLauncher> {
-        if (get<BuildInfo>().isDebugBuild) get<FakeInAppReviewLauncher>() else get<PlayInAppReviewLauncher>()
+        if (get<BuildInfo>().isDeveloperBuild) get<FakeInAppReviewLauncher>() else get<PlayInAppReviewLauncher>()
     }
     singleOf(::NoteShareLabelsProviderImpl) bind NoteShareLabelsProvider::class
     singleOf(::ShareCacheDirectoryProviderImpl) bind ShareCacheDirectoryProvider::class
     factoryOf(::AndroidPrepareNoteShareUseCase) bind PrepareNoteShareUseCase::class
+    singleOf(::AndroidAppIconProvider) bind AppIconProvider::class
+    singleOf(::AndroidNotePdfRenderer) bind NotePdfRenderer::class
     factoryOf(::AndroidAudioPlayer) bind AudioPlayer::class
 }

@@ -1,9 +1,10 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.data.domain.Note
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
+import com.dmytrosamoilov.offhand.core.data.domain.TranscriptionCheckpoint
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
@@ -31,6 +32,9 @@ class ResumeInterruptedNotesUseCaseTest {
         every { activeRecordingNoteId } returns MutableStateFlow(null)
     }
     private val failNote: FailNoteUseCase = mockk()
+    private val getTranscriptionCheckpoint: GetTranscriptionCheckpointUseCase = mockk {
+        coEvery { this@mockk.invoke(any()) } returns null
+    }
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase = mockk()
     private val audioStore: EncryptedAudioStore = mockk {
         every { pcmSizeOf(any()) } returns 0L
@@ -41,6 +45,7 @@ class ResumeInterruptedNotesUseCaseTest {
         notesRepository = notesRepository,
         sessionManager = sessionManager,
         failNote = failNote,
+        getTranscriptionCheckpoint = getTranscriptionCheckpoint,
         isAiCoreDownloaded = isAiCoreDownloaded,
         audioStore = audioStore,
     )
@@ -95,8 +100,21 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify { recordingProcessController.restructureNote(1, NotePreset.DEFAULT) }
+        verify { recordingProcessController.restructureNote(1, NoteStyleRef.DEFAULT) }
         verify(exactly = 0) { recordingProcessController.retryNote(any(), any()) }
+    }
+
+    @Test
+    fun `stuck note with a checkpoint continues transcribing instead of restructuring`() = runTest {
+        coEvery { getTranscriptionCheckpoint(1) } returns TranscriptionCheckpoint(1, 928_000L, 3_000L)
+        every { notesRepository.observeNotes() } returns flowOf(
+            listOf(note(1, NoteStatus.PROCESSING, transcript = "first windows")),
+        )
+
+        useCase()
+
+        verify { recordingProcessController.retryNote(1, "note-1.pcm.enc") }
+        verify(exactly = 0) { recordingProcessController.restructureNote(any(), any()) }
     }
 
     @Test
@@ -109,7 +127,7 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify { recordingProcessController.restructureNote(1, NotePreset.DEFAULT) }
+        verify { recordingProcessController.restructureNote(1, NoteStyleRef.DEFAULT) }
         coVerify(exactly = 0) { failNote(any()) }
     }
 
@@ -159,7 +177,7 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify { recordingProcessController.restructureNote(3, NotePreset.DEFAULT) }
+        verify { recordingProcessController.restructureNote(3, NoteStyleRef.DEFAULT) }
         coVerify(exactly = 0) { notesRepository.deleteNote(any()) }
     }
 
@@ -202,7 +220,7 @@ class ResumeInterruptedNotesUseCaseTest {
                 withArg { updated -> assertEquals(10_000L, updated.durationMs) },
             )
         }
-        verify { recordingProcessController.restructureNote(3, NotePreset.DEFAULT) }
+        verify { recordingProcessController.restructureNote(3, NoteStyleRef.DEFAULT) }
     }
 
     @Test
@@ -214,7 +232,7 @@ class ResumeInterruptedNotesUseCaseTest {
         useCase()
 
         coVerify(exactly = 0) { notesRepository.updateNote(any()) }
-        verify { recordingProcessController.restructureNote(1, NotePreset.DEFAULT) }
+        verify { recordingProcessController.restructureNote(1, NoteStyleRef.DEFAULT) }
     }
 
     @Test
@@ -271,6 +289,6 @@ class ResumeInterruptedNotesUseCaseTest {
 
         useCase()
 
-        verify { sessionManager.restructureNote(1, NotePreset.DEFAULT) }
+        verify { sessionManager.restructureNote(1, NoteStyleRef.DEFAULT) }
     }
 }

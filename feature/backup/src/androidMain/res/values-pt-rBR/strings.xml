@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="backup_title">Backup e restauração</string>
+    <string name="backup_back_description">Voltar</string>
+    <string name="backup_create_title">Backup</string>
+    <string name="backup_create_body">Salve uma cópia criptografada das suas notas, pastas e gravações em um arquivo. Você precisará da frase secreta para restaurá-la e ela não pode ser recuperada.</string>
+    <string name="backup_passphrase_label">Frase secreta</string>
+    <string name="backup_passphrase_confirm_label">Repita a frase secreta</string>
+    <string name="backup_passphrase_too_short">Use pelo menos %1$d caracteres.</string>
+    <string name="backup_passphrase_mismatch">As frases secretas não coincidem.</string>
+    <string name="backup_include_audio_label">Incluir gravações de áudio</string>
+    <string name="backup_include_audio_description">As gravações deixam o arquivo muito maior.</string>
+    <string name="backup_include_styles_label">Incluir estilos de nota</string>
+    <string name="backup_include_styles_description">Seus estilos de nota próprios acompanham as notas.</string>
+    <string name="backup_restore_title">Restaurar</string>
+    <string name="backup_restore_body">Adicione notas e pastas de um arquivo de backup. As notas já neste telefone são mantidas e as duplicadas são ignoradas.</string>
+    <string name="backup_restore_button">Escolher um arquivo de backup</string>
+    <string name="backup_restore_dialog_title">Digite a frase secreta do backup</string>
+    <string name="backup_restore_dialog_confirm">Restaurar</string>
+    <string name="backup_cancel">Cancelar</string>
+    <string name="backup_ok">OK</string>
+    <string name="backup_progress_backup">Fazendo backup</string>
+    <string name="backup_progress_restore">Restaurando</string>
+    <string name="backup_done_backup_title">Backup salvo</string>
+    <string name="backup_done_backup_body">%1$d notas e %2$d pastas foram salvas.</string>
+    <string name="backup_done_restore_title">Restauração concluída</string>
+    <string name="backup_done_restore_body">%1$d notas restauradas, %2$d ignoradas como duplicadas. Pastas: %3$d criadas, %4$d reutilizadas.</string>
+    <string name="backup_failed_backup_title">O backup falhou</string>
+    <string name="backup_failed_restore_title">A restauração falhou</string>
+    <string name="backup_error_wrong_passphrase">Essa frase secreta não abre este backup.</string>
+    <string name="backup_error_corrupt">Este arquivo não é um backup do Offhand legível.</string>
+    <string name="backup_error_unsupported">Este backup foi feito com uma versão mais nova do Offhand.</string>
+    <string name="backup_error_io">Não foi possível ler ou gravar o arquivo.</string>
+    <string name="backup_start_button">Fazer backup</string>
+    <string name="backup_step_passphrase_title">Defina uma frase secreta</string>
+    <string name="backup_warning">Guarde bem esta frase secreta. Se ela for perdida, nem você nem nós poderemos recuperar as notas deste backup.</string>
+    <string name="backup_continue">Continuar</string>
+    <string name="backup_step_options_title">Opções do backup</string>
+    <string name="backup_file_name_label">Nome do arquivo</string>
+    <string name="backup_save_button">Salvar backup</string>
+    <string name="backup_done">Concluído</string>
+</resources>

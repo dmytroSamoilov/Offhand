@@ -10,8 +10,18 @@ data class UserPreferences(
     val developerOptions: Boolean,
     val savedRecordingsCount: Int,
     val reviewPrompt: ReviewPromptState,
-    val notePreset: NotePreset,
+    val noteStyle: NoteStyleRef,
+    val proOverride: ProOverride,
+    val smartSuggestionsEnabled: Boolean,
 )
+
+// Debug builds only: lets a dev install walk the free and the Pro paths
+// without a store purchase.
+enum class ProOverride {
+    STORE,
+    FREE,
+    PRO,
+}
 
 data class ReviewPromptState(
     val burstStartedAtMs: Long = 0L,
@@ -33,9 +43,13 @@ interface UserPreferencesRepository {
 
     suspend fun setDeveloperOptions(enabled: Boolean)
 
-    suspend fun setNotePreset(preset: NotePreset)
+    suspend fun setNoteStyle(style: NoteStyleRef)
 
     suspend fun incrementSavedRecordingsCount()
 
     suspend fun setReviewPromptState(state: ReviewPromptState)
+
+    suspend fun setProOverride(override: ProOverride)
+
+    suspend fun setSmartSuggestionsEnabled(enabled: Boolean)
 }

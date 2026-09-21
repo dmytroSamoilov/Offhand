@@ -9,17 +9,22 @@ import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.di.coreAiApiModule
 import com.dmytrosamoilov.offhand.core.ai.local.di.coreAiLocalModule
 import com.dmytrosamoilov.offhand.core.audio.di.coreAudioModule
+import com.dmytrosamoilov.offhand.core.data.billing.ForegroundActivityHolder
 import com.dmytrosamoilov.offhand.core.data.di.coreDataModule
+import com.dmytrosamoilov.offhand.core.data.domain.ProStore
 import com.dmytrosamoilov.offhand.core.device.di.coreDeviceModule
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.di.coreSecurityModule
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import com.dmytrosamoilov.offhand.di.FlavorModules
 import com.dmytrosamoilov.offhand.di.appModule
+import com.dmytrosamoilov.offhand.feature.backup.di.featureBackupModule
 import com.dmytrosamoilov.offhand.feature.notes.di.featureNotesAndroidModule
 import com.dmytrosamoilov.offhand.feature.notes.di.featureNotesModule
 import com.dmytrosamoilov.offhand.feature.onboarding.di.featureOnboardingAndroidModule
 import com.dmytrosamoilov.offhand.feature.onboarding.di.featureOnboardingModule
+import com.dmytrosamoilov.offhand.feature.paywall.di.featurePaywallModule
 import com.dmytrosamoilov.offhand.feature.recording.di.featureRecordingAndroidModule
 import com.dmytrosamoilov.offhand.feature.recording.di.featureRecordingModule
 import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinator
@@ -42,26 +47,31 @@ class OffhandApplication : Application(), KoinComponent {
     private lateinit var sessionManager: RecordingSessionManager
     private lateinit var appLockManager: AppLockManager
     private lateinit var modelManager: ModelManager
+    private lateinit var proStore: ProStore
 
     override fun onCreate() {
         super.onCreate()
         startKoin {
             androidContext(this@OffhandApplication)
             modules(
-                coreAiApiModule,
-                coreAiLocalModule,
-                coreAudioModule,
-                coreDeviceModule,
-                coreSecurityModule,
-                coreDataModule,
-                featureNotesModule,
-                featureNotesAndroidModule,
-                featureOnboardingModule,
-                featureOnboardingAndroidModule,
-                featureRecordingModule,
-                featureRecordingAndroidModule,
-                featureSettingsModule,
-                appModule,
+                listOf(
+                    coreAiApiModule,
+                    coreAiLocalModule,
+                    coreAudioModule,
+                    coreDeviceModule,
+                    coreSecurityModule,
+                    coreDataModule,
+                    featureNotesModule,
+                    featureNotesAndroidModule,
+                    featureOnboardingModule,
+                    featureOnboardingAndroidModule,
+                    featureRecordingModule,
+                    featureRecordingAndroidModule,
+                    featureSettingsModule,
+                    featureBackupModule,
+                    featurePaywallModule,
+                    appModule,
+                ) + FlavorModules.overrides,
             )
         }
         telemetryController = get()
@@ -69,6 +79,8 @@ class OffhandApplication : Application(), KoinComponent {
         sessionManager = get()
         appLockManager = get()
         modelManager = get()
+        proStore = get()
+        registerActivityLifecycleCallbacks(get<ForegroundActivityHolder>())
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         } else {
@@ -83,8 +95,14 @@ class OffhandApplication : Application(), KoinComponent {
     // Re-lock on the way to the background, except mid-recording: replacing the
     // content with the lock screen tears down the record sheet and strands the
     // live capture. The recording service keeps the audio alive regardless.
+    // Coming back to the foreground also re-reads the store, so a code
+    // redeemed in the Play Store app shows up without a restart.
     private fun observeForegroundForLock() {
         ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onStart(owner: LifecycleOwner) {
+                proStore.refresh()
+            }
+
             override fun onStop(owner: LifecycleOwner) {
                 if (sessionManager.session.value.phase != SessionPhase.RECORDING) {
                     appLockManager.markLocked()

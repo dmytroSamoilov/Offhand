@@ -102,7 +102,7 @@ struct OnboardingView: View {
             StepCard(
                 icon: "lock.shield.fill",
                 title: String(localized: "Private by design"),
-                message: String(localized: "Recordings are transcribed and organized entirely on this iPhone. Nothing ever leaves your device.")
+                message: String(localized: "Everything stays on your iPhone. Recordings, transcripts and notes are encrypted, and the on-device AI that processes them runs right there. Nothing is uploaded, ever.")
             )
         case .noteStyle:
             StepCard(
@@ -168,8 +168,8 @@ struct OnboardingView: View {
         case .modelDownload:
             StepCard(
                 icon: "arrow.down.circle.fill",
-                title: String(localized: "Set up your private AI"),
-                message: String(localized: "Offhand transcribes and summarizes voice notes with AI that runs entirely on your iPhone. To get started, it needs a one-time download of its AI models."),
+                title: String(localized: "Set up your on-device AI"),
+                message: String(localized: "Offhand transcribes and summarizes voice notes with on-device AI that runs entirely on your iPhone. To get started, it needs a one-time download."),
                 content: {
                     VStack(spacing: 16) {
                         DownloadSizeBadge(sizeGb: state.downloadSizeGb)
@@ -247,8 +247,8 @@ struct OnboardingView: View {
         StepCard(
             icon: "iphone.slash",
             iconTint: .orange,
-            title: String(localized: "This device can't run Offhand"),
-            message: String(localized: "Offhand needs more memory to run its on-device AI models."),
+            title: String(localized: "This iPhone can't run Offhand"),
+            message: String(localized: "Offhand needs more memory to run its on-device AI."),
             content: {
                 if let specs = state.deviceSpecs {
                     VStack(alignment: .leading, spacing: 12) {
@@ -372,6 +372,8 @@ private struct ToggleCard: View {
                 RoundedRectangle(cornerRadius: 12)
                     .strokeBorder(Color(.systemGray4), lineWidth: 1)
             )
+            .contentShape(Rectangle())
+            .onTapGesture { isOn.toggle() }
     }
 }
 
@@ -393,58 +395,47 @@ private struct DownloadSizeBadge: View {
 }
 
 struct NotePresetPicker: View {
-    let selected: NotePreset
+    let selected: NotePreset?
     let onSelect: (NotePreset) -> Void
-
-    private let options: [(NotePreset, String, String, String)] = [
-        (
-            .summary,
-            String(localized: "Summary"),
-            String(localized: "A clean write-up of what was said, without repetition or filler."),
-            "doc.plaintext"
-        ),
-        (
-            .meeting,
-            String(localized: "Meeting notes"),
-            String(localized: "Discussion, decisions, action items and open questions."),
-            "person.3"
-        ),
-        (
-            .visit,
-            String(localized: "Visit report"),
-            String(localized: "Who the visit was about, observations, what was done and follow-ups."),
-            "list.clipboard"
-        ),
-        (
-            .legal,
-            String(localized: "Legal note"),
-            String(localized: "Matter, facts stated, instructions, advice given and next steps."),
-            "building.columns"
-        ),
-    ]
 
     var body: some View {
         VStack(spacing: 10) {
-            ForEach(options, id: \.1) { option in
-                presetCard(option)
+            ForEach([NotePreset.summary, .meeting, .visit, .legal], id: \.self) { preset in
+                PresetCard(
+                    title: NoteStyleLabels.label(for: preset),
+                    details: NoteStyleLabels.details(for: preset),
+                    symbol: NoteStyleLabels.symbol(for: preset),
+                    isSelected: selected == preset
+                ) {
+                    onSelect(preset)
+                }
             }
         }
         .animation(.easeInOut(duration: 0.15), value: selected)
     }
+}
 
-    private func presetCard(_ option: (NotePreset, String, String, String)) -> some View {
-        let isSelected = selected == option.0
-        return Button {
-            onSelect(option.0)
-        } label: {
+struct PresetCard: View {
+    let title: String
+    let details: String
+    let symbol: String
+    let isSelected: Bool
+    var showProBadge = false
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
             HStack(spacing: 16) {
-                Image(systemName: option.3)
+                Image(systemName: symbol)
                     .foregroundStyle(Brand.primary)
                     .frame(width: 24)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(option.1)
-                        .foregroundStyle(Brand.onSurface)
-                    Text(option.2)
+                    HStack(spacing: 6) {
+                        Text(title)
+                            .foregroundStyle(Brand.onSurface)
+                        if showProBadge { ProBadge() }
+                    }
+                    Text(details)
                         .font(.caption)
                         .foregroundStyle(Brand.onSurfaceVariant)
                         .multilineTextAlignment(.leading)

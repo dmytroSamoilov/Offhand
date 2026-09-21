@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="paywall_tagline">Получайте больше от каждой записи.</string>
+    <string name="paywall_free_private">Приватность по умолчанию</string>
+    <string name="paywall_free_offline">Полностью офлайн</string>
+    <string name="paywall_free_no_ads">Без рекламы и без аккаунта</string>
+    <string name="paywall_free_unlimited">Неограниченно заметок и записей</string>
+    <string name="paywall_free_backup">Зашифрованная резервная копия, поиск и папки</string>
+    <string name="paywall_pro_styles">Заметки в вашем формате</string>
+    <string name="paywall_pro_export">Аккуратные документы</string>
+    <string name="paywall_pro_suggestions">Не пропускайте follow-up</string>
+    <string name="paywall_pro_import">Любая запись становится заметкой</string>
+    <string name="paywall_pro_more">Новые функции Pro включены сразу после выхода</string>
+    <string name="paywall_plan_yearly">Год</string>
+    <string name="paywall_plan_yearly_price">%1$s / год</string>
+    <string name="paywall_plan_yearly_renews">Продлевается каждый год</string>
+    <string name="paywall_plan_lifetime">Навсегда</string>
+    <string name="paywall_plan_lifetime_hint">Один платёж, навсегда</string>
+    <string name="paywall_cta_trial">Попробовать бесплатно</string>
+    <string name="paywall_cta_subscribe">Оформить подписку</string>
+    <string name="paywall_cta_lifetime">Купить навсегда</string>
+    <string name="paywall_yearly_disclosure">%1$s в год, продлевается автоматически. Отменить можно в любой момент в аккаунте магазина.</string>
+    <string name="paywall_restore">Восстановить покупки</string>
+    <string name="paywall_terms">Условия</string>
+    <string name="paywall_privacy">Конфиденциальность</string>
+    <string name="paywall_offers_unavailable">Не удалось загрузить цены. Проверьте подключение и попробуйте снова.</string>
+    <string name="paywall_retry">Повторить</string>
+    <string name="paywall_message_failed">Покупка не завершилась, деньги не списаны.</string>
+    <string name="paywall_message_pending">Платёж ещё обрабатывается. Pro откроется, как только он завершится.</string>
+    <string name="paywall_message_restore_nothing">Для этого аккаунта магазина покупок не найдено.</string>
+    <string name="paywall_message_dismiss">ОК</string>
+    <string name="paywall_success_title">У вас Offhand Pro</string>
+    <string name="paywall_success_body">Спасибо, что поддерживаете независимое приватное приложение.</string>
+    <string name="paywall_close">Закрыть</string>
+    <string name="paywall_no_browser">Не найден браузер, чтобы открыть ссылку.</string>
+    <string name="paywall_context_tagline">Часть Offhand Pro. Получайте больше от каждой записи.</string>
+    <string name="paywall_context_styles">Сохранить свой стиль заметок</string>
+    <string name="paywall_context_export">Поделиться заметкой в PDF или Word</string>
+    <string name="paywall_context_suggestions">Найти даты и задачи в заметках</string>
+    <string name="paywall_context_import">Превратить записи в заметки</string>
+    <string name="paywall_pro_styles_hint">Ваши заголовки, ваши разделы, каждый раз</string>
+    <string name="paywall_pro_export_hint">PDF и Word, готовые для клиентов, почты и печати</string>
+    <string name="paywall_pro_suggestions_hint">Даты и задачи сразу в календарь</string>
+    <string name="paywall_pro_import_hint">Голосовые заметки, звонки и файлы из других приложений</string>
+    <string name="paywall_plan_yearly_monthly">Около %1$s в месяц</string>
+    <string name="paywall_plan_best_value">Выгоднее всего</string>
+    <string name="paywall_no_charge">Сегодня ничего не списывается</string>
+    <string name="paywall_privacy_note">Оплата проходит через Google Play. Offhand не видит вашу карту, а заметки не покидают телефон.</string>
+    <string name="paywall_continue_free">Продолжить с бесплатной версией</string>
+    <string name="paywall_success_continue">То, что вы начали, уже выполняется.</string>
+    <plurals name="paywall_plan_trial">
+        <item quantity="one">%d день бесплатно</item>
+        <item quantity="few">%d дня бесплатно</item>
+        <item quantity="many">%d дней бесплатно</item>
+        <item quantity="other">%d дня бесплатно</item>
+    </plurals>
+    <plurals name="paywall_trial_disclosure">
+        <item quantity="one">%1$d день бесплатно, затем %2$s в год. Отменить можно в любой момент в аккаунте магазина.</item>
+        <item quantity="few">%1$d дня бесплатно, затем %2$s в год. Отменить можно в любой момент в аккаунте магазина.</item>
+        <item quantity="many">%1$d дней бесплатно, затем %2$s в год. Отменить можно в любой момент в аккаунте магазина.</item>
+        <item quantity="other">%1$d дня бесплатно, затем %2$s в год. Отменить можно в любой момент в аккаунте магазина.</item>
+    </plurals>
+    <plurals name="paywall_cta_trial_days">
+        <item quantity="one">Начать %d день бесплатно</item>
+        <item quantity="few">Начать %d дня бесплатно</item>
+        <item quantity="many">Начать %d дней бесплатно</item>
+        <item quantity="other">Начать %d дня бесплатно</item>
+    </plurals>
+    <plurals name="paywall_plan_lifetime_vs_yearly">
+        <item quantity="one">Меньше %d года годовой подписки</item>
+        <item quantity="few">Меньше %d лет годовой подписки</item>
+        <item quantity="many">Меньше %d лет годовой подписки</item>
+        <item quantity="other">Меньше %d лет годовой подписки</item>
+    </plurals>
+</resources>

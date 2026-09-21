@@ -1,0 +1,82 @@
+# Runs after 01-smoke.yaml and relies on the note it created. Covers creating a
+# folder, moving a note into it, filtering by folder, renaming and deleting.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- assertVisible: "Smoke test note"
+
+# Create a folder; it becomes the selected filter and is empty
+- tapOn: "New folder"
+- inputText: "Work"
+- tapOn: "Save"
+- assertVisible: "No notes in this folder yet."
+- tapOn: "All notes"
+
+# Move the note into it from the detail menu
+- tapOn: "Smoke test note"
+- runFlow:
+    when:
+      visible: "In-app review · dev build"
+    commands:
+      - tapOn: "COUNT ATTEMPT"
+- tapOn: "More actions"
+- tapOn: "Move to folder"
+- tapOn: "Work"
+- assertVisible: "Overview"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: "1%,50%"
+          end: "70%,50%"
+
+# The folder filter now shows the note
+- tapOn: "Work"
+- assertVisible: "Smoke test note"
+
+# Rename: Android opens the menu by tapping the selected chip, iOS by long press
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Work"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - longPressOn: "Work"
+- tapOn: "Rename folder"
+- eraseText
+- inputText: "Clients"
+- tapOn: "Save"
+- assertVisible: "Clients"
+
+# Delete: the note survives and is back under All notes
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Clients"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - longPressOn: "Clients"
+- tapOn: "Delete folder"
+- tapOn: "Delete"
+- assertNotVisible: "Clients"
+- assertVisible: "Smoke test note"
+
+# Leading swipe on a card opens the same move sheet
+- swipe:
+    from: "Smoke test note"
+    direction: RIGHT
+- assertVisible: "Move to folder"
+- tapOn: "No folder"
+- assertVisible: "Smoke test note"

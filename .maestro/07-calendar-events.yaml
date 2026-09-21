@@ -1,0 +1,120 @@
+# Runs after 01-smoke.yaml. The fake model answers the calendar prompt with two
+# canned events right after the note is structured; the flow checks the Smart
+# suggestions section, dismisses one card, hands the other to the system
+# calendar editor, and checks that both states survive a relaunch.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- assertVisible: "Smoke test note"
+# Suggestions are off by default; the smoke note was processed without them,
+# so after switching them on the section offers "Find suggestions"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Settings"
+      - scrollUntilVisible:
+          element:
+            text: "Show smart suggestions"
+          direction: DOWN
+      - tapOn: "Show smart suggestions"
+      - tapOn:
+          id: "tab_notes"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Settings"
+      - tapOn: "Show smart suggestions"
+      - tapOn:
+          text: "Notes"
+          index: 1
+- tapOn: "Smoke test note"
+- runFlow:
+    when:
+      visible: "In-app review · dev build"
+    commands:
+      - tapOn: "COUNT ATTEMPT"
+# iOS shows the real App Store rating prompt on this open
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- scrollUntilVisible:
+    element:
+      text: "Find suggestions"
+    direction: DOWN
+- tapOn: "Find suggestions"
+- extendedWaitUntil:
+    visible: "Budget review with Anna"
+    timeout: 30000
+# Centre the cards so their buttons sit clear of the floating tab bar
+- scrollUntilVisible:
+    element:
+      text: "Dismiss suggestion"
+    direction: DOWN
+    centerElement: true
+- assertVisible: "Budget review with Anna"
+- assertVisible: "Send quarterly report"
+# Dismiss the first card; the all-day one slides into its place
+- tapOn:
+    text: "Dismiss suggestion"
+    index: 0
+- assertNotVisible: "Budget review with Anna"
+- assertVisible: ".*All day"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Add to calendar"
+      # The calendar app's insert screen takes over; its first-run screens vary,
+      # so relaunching Offhand is the only reliable way back
+      - extendedWaitUntil:
+          notVisible: "Add to calendar"
+          timeout: 15000
+      - launchApp
+      - assertVisible: "Smoke test note"
+      - tapOn: "Smoke test note"
+      - runFlow:
+          when:
+            visible: "In-app review · dev build"
+          commands:
+            - tapOn: "COUNT ATTEMPT"
+      - scrollUntilVisible:
+          element:
+            text: "Send quarterly report"
+          direction: DOWN
+          centerElement: true
+      - assertVisible: "Added"
+      - assertNotVisible: "Budget review with Anna"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Add to calendar"
+      - extendedWaitUntil:
+          visible: "New Event"
+          timeout: 15000
+      - assertVisible: "Send quarterly report"
+      # The editor's close button sits top-left and is not labelled for Maestro
+      - tapOn:
+          point: "9%,12%"
+      # The "Discard Changes" popover is not exposed to accessibility either
+      - extendedWaitUntil:
+          notVisible: "New Event"
+          timeout: 5000
+      - tapOn:
+          point: "32%,24%"
+      - extendedWaitUntil:
+          visible: "Add to calendar"
+          timeout: 5000
+      - launchApp
+      - tapOn: "Smoke test note"
+      - runFlow:
+          when:
+            visible: "In-app review · dev build"
+          commands:
+            - tapOn: "COUNT ATTEMPT"
+      - assertVisible: "Send quarterly report"
+      - assertNotVisible: "Budget review with Anna"

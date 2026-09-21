@@ -1,0 +1,72 @@
+# Runs after 01-smoke.yaml. Expects an audio file named import-sample.* in the
+# device's Download folder (Android) or in the simulator's "On My iPhone"
+# storage (iOS; CI copies it into the LocalStorage file provider) and covers
+# importing it from Settings through the system file picker into a new note.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- assertVisible: "Smoke test note"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Settings"
+      - scrollUntilVisible:
+          element:
+            text: "Import audio"
+          direction: DOWN
+      - tapOn: "Import audio"
+      - tapOn:
+          text: "import-sample.*"
+      - extendedWaitUntil:
+          visible: "Import started"
+          timeout: 10000
+      - assertVisible: "1 file is being imported.*"
+      - tapOn: "OK"
+      - tapOn:
+          id: "tab_notes"
+      # The fake engines finish the import within seconds, so the placeholder
+      # named after the file may already be gone; wait for the second note
+      - extendedWaitUntil:
+          visible:
+            text: "Smoke test note"
+            index: 1
+          timeout: 90000
+      - assertNotVisible: "import-sample"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Settings"
+      - tapOn: "Import audio"
+      # The document picker runs out of process and is invisible to Maestro,
+      # and it reopens in whatever folder it showed last, so it is driven by
+      # position through its search: search field, name, the "On My iPhone"
+      # scope chip, the first (only) result tile, then Open
+      - extendedWaitUntil:
+          visible: "Cancel"
+          timeout: 10000
+      - tapOn:
+          point: "50%,19%"
+      - inputText: "import-sample"
+      - tapOn:
+          point: "73%,25%"
+      - tapOn:
+          point: "18%,41%"
+      - tapOn:
+          point: "87%,13%"
+      - extendedWaitUntil:
+          visible: "Import started"
+          timeout: 10000
+      - assertVisible: "1 file is being imported.*"
+      - tapOn: "OK"
+      # The Settings form has a "Notes" section header, so the tab is index 1
+      - tapOn:
+          text: "Notes"
+          index: 1
+      - extendedWaitUntil:
+          visible:
+            text: "Smoke test note"
+            index: 1
+          timeout: 90000
+      - assertNotVisible: "import-sample"

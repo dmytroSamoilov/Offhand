@@ -1,0 +1,13 @@
+# The flows build on each other (01-smoke creates the note the others open),
+# and Maestro otherwise runs a folder in file-system order.
+executionOrder:
+  continueOnFailure: true
+  flowsOrder:
+    - 01-smoke
+    - 02-folders
+    - 03-backup
+    - 04-note-styles
+    - 05-describe-style
+    - 06-import-audio
+    - 07-calendar-events
+    - 08-paywall

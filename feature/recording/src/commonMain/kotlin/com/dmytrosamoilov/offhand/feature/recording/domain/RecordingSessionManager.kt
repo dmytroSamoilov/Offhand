@@ -7,19 +7,34 @@ import com.dmytrosamoilov.offhand.core.ai.api.TranscriptionResult
 import com.dmytrosamoilov.offhand.core.audio.AudioChunk
 import com.dmytrosamoilov.offhand.core.audio.VadSnapshot
 import com.dmytrosamoilov.offhand.core.audio.WavCodec
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
+import com.dmytrosamoilov.offhand.core.data.domain.Note
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.TranscriptionCheckpoint
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.NoteSource
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
+import com.dmytrosamoilov.offhand.core.security.closeQuietly
+import com.dmytrosamoilov.offhand.core.security.writeChunk
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ClearTranscriptionCheckpointUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CompleteNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateImportedNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateRecordingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
-import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNotePresetUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetTranscriptionCheckpointUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsCalendarSuggestionsAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteRecordedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteTranscriptUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveTranscriptionCheckpointUseCase
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -39,6 +54,7 @@ class RecordingSessionManager(
     private val speechToText: SpeechToText,
     private val transcriptStructurer: TranscriptStructurer,
     private val createRecordingNote: CreateRecordingNoteUseCase,
+    private val createImportedNote: CreateImportedNoteUseCase,
     private val markNoteRecorded: MarkNoteRecordedUseCase,
     private val discardNote: DiscardNoteUseCase,
     private val completeNote: CompleteNoteUseCase,
@@ -46,11 +62,19 @@ class RecordingSessionManager(
     private val markNoteProcessing: MarkNoteProcessingUseCase,
     private val registerSavedRecording: RegisterSavedRecordingUseCase,
     private val saveNoteTranscript: SaveNoteTranscriptUseCase,
+    private val getTranscriptionCheckpoint: GetTranscriptionCheckpointUseCase,
+    private val saveTranscriptionCheckpoint: SaveTranscriptionCheckpointUseCase,
+    private val clearTranscriptionCheckpoint: ClearTranscriptionCheckpointUseCase,
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
-    private val getNotePreset: GetNotePresetUseCase,
+    private val getNoteStyle: GetNoteStyleUseCase,
     private val getNote: GetNoteUseCase,
+    private val calendarEventExtractor: CalendarEventExtractor,
+    private val saveNoteSuggestions: SaveNoteSuggestionsUseCase,
+    private val isCalendarSuggestionsAvailable: IsCalendarSuggestionsAvailableUseCase,
     private val audioStore: EncryptedAudioStore,
     private val audioBackup: RecordingAudioBackup,
+    private val audioDecoder: AudioDecoder,
+    private val analyticsTracker: AnalyticsTracker,
     private val scope: CoroutineScope,
 ) {
 
@@ -62,6 +86,9 @@ class RecordingSessionManager(
 
     private val mutableProcessingNoteIds = MutableStateFlow<Set<Long>>(emptySet())
     val processingNoteIds: StateFlow<Set<Long>> = mutableProcessingNoteIds.asStateFlow()
+
+    private val mutableSuggestingNoteIds = MutableStateFlow<Set<Long>>(emptySet())
+    val suggestingNoteIds: StateFlow<Set<Long>> = mutableSuggestingNoteIds.asStateFlow()
 
     private val mutableNoteProgress = MutableStateFlow<Map<Long, Int>>(emptyMap())
     val noteProgress: StateFlow<Map<Long, Int>> = mutableNoteProgress.asStateFlow()
@@ -78,17 +105,19 @@ class RecordingSessionManager(
 
     private val transcripts = mutableMapOf<Int, String>()
     private var transcriptionTimeMs = 0L
+    private var recordedBytes = 0L
 
     private var audioFileName: String? = null
 
     private var isDiscardRequested = false
 
-    private var sessionPreset = NotePreset.DEFAULT
+    private var sessionStyle: NoteStyleRef = NoteStyleRef.DEFAULT
 
     fun start() {
         if (mutableSession.value.phase.isActive()) return
         transcripts.clear()
         transcriptionTimeMs = 0
+        recordedBytes = 0
         isDiscardRequested = false
         recorder.resetVad()
         mutableSession.value = RecordingSession(phase = SessionPhase.RECORDING)
@@ -120,9 +149,12 @@ class RecordingSessionManager(
         recorder.stop()
     }
 
+    // The saved note id survives the drain so a sheet that missed the
+    // conflated update still learns the note was saved; opening or closing
+    // the sheet clears it.
     fun resetToIdle() {
         val phase = mutableSession.value.phase
-        if (phase == SessionPhase.FAILED) {
+        if (phase == SessionPhase.FAILED || phase == SessionPhase.IDLE) {
             mutableSession.value = RecordingSession()
         }
     }
@@ -138,7 +170,7 @@ class RecordingSessionManager(
                     return@withLock
                 }
                 updateProgress(noteId, 0f)
-                val stored = transcribeStoredAudio(audioFileName) { fraction ->
+                val stored = transcribeStoredAudio(noteId, audioFileName, resumePoint(note)) { fraction ->
                     updateProgress(noteId, fraction * RETRY_WHISPER_SHARE)
                 }
                 processNote(
@@ -146,13 +178,26 @@ class RecordingSessionManager(
                     transcripts = stored.texts,
                     transcriptionMs = stored.transcriptionTimeMs,
                     progressOffset = RETRY_WHISPER_SHARE,
-                    preset = note.preset,
+                    style = note.style,
+                    source = NoteSource.RETRY,
                 )
             }
         }
     }
 
-    fun restructureNote(noteId: Long, preset: NotePreset) {
+    // A checkpoint means the stored audio was only partly transcribed: the
+    // finished windows sit in the note's transcript and only the rest is read.
+    private suspend fun resumePoint(note: Note): ResumePoint {
+        val checkpoint = getTranscriptionCheckpoint(note.id) ?: return ResumePoint.START
+        Logger.withTag(LOG_TAG).i { "Resuming transcription of note ${note.id} from ${checkpoint.transcribedBytes} bytes" }
+        return ResumePoint(
+            skipBytes = checkpoint.transcribedBytes,
+            texts = transcriptStructurer.splitStoredTranscript(note.transcript),
+            transcriptionTimeMs = checkpoint.transcriptionTimeMs,
+        )
+    }
+
+    fun restructureNote(noteId: Long, style: NoteStyleRef) {
         if (noteId in mutableProcessingNoteIds.value) return
         mutableProcessingNoteIds.update { it + noteId }
         scope.launch {
@@ -168,24 +213,133 @@ class RecordingSessionManager(
                     transcripts = transcriptStructurer.splitStoredTranscript(note.transcript),
                     transcriptionMs = note.transcriptionTimeMs ?: 0,
                     progressOffset = 0f,
-                    preset = preset,
+                    style = style,
+                    source = NoteSource.RESTYLE,
                 )
             }
         }
     }
 
+    fun importAudio(source: AudioImportSource) {
+        scope.launch {
+            processingMutex.withLock { importLocked(source) }
+        }
+    }
+
+    private suspend fun importLocked(source: AudioImportSource) {
+        val fileName = audioStore.newRecordingFileName()
+        val style = getNoteStyle()
+        val noteId = createImportedNote(importedTitle(source.displayName), fileName, style)
+        mutableProcessingNoteIds.update { it + noteId }
+        updateProgress(noteId, 0f)
+        val decoded = decodeImport(source, fileName) { fraction ->
+            updateProgress(noteId, fraction * IMPORT_DECODE_SHARE)
+        }
+        if (decoded == null) {
+            rejectImport(noteId, fileName, source)
+            return
+        }
+        markNoteRecorded(noteId, decoded.durationMs, fileName)
+        val stored = transcribeStoredAudio(noteId, fileName, ResumePoint.START) { fraction ->
+            updateProgress(noteId, IMPORT_DECODE_SHARE + fraction * (RETRY_WHISPER_SHARE - IMPORT_DECODE_SHARE))
+        }
+        processNote(noteId, stored.texts, stored.transcriptionTimeMs, RETRY_WHISPER_SHARE, style, NoteSource.IMPORT)
+    }
+
+    fun suggestEvents(noteId: Long) {
+        if (noteId in mutableProcessingNoteIds.value) return
+        mutableProcessingNoteIds.update { it + noteId }
+        scope.launch {
+            processingMutex.withLock {
+                try {
+                    suggestEventsLocked(noteId)
+                } finally {
+                    mutableProcessingNoteIds.update { it - noteId }
+                }
+            }
+        }
+    }
+
+    // Still under the processing lock and still counted as processing, so the
+    // foreground service outlives the extraction and no retry can interleave.
+    private suspend fun suggestEventsLocked(noteId: Long) {
+        mutableSuggestingNoteIds.update { it + noteId }
+        try {
+            val note = getNote(noteId)?.takeIf { it.status == NoteStatus.READY } ?: return
+            if (!isCalendarSuggestionsAvailable() || !isAiCoreDownloaded()) return
+            saveNoteSuggestions(noteId, calendarEventExtractor.extract(note))
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (t: Throwable) {
+            Logger.withTag(LOG_TAG).w(t) { "Calendar suggestions failed for note $noteId" }
+        } finally {
+            mutableSuggestingNoteIds.update { it - noteId }
+        }
+    }
+
+    private var lastImportRejection: ImportRejection = ImportRejection.UNREADABLE
+
+    private suspend fun decodeImport(
+        source: AudioImportSource,
+        fileName: String,
+        onProgress: (Float) -> Unit,
+    ): DecodedAudio? {
+        val stream = audioStore.openForWrite(fileName)
+        return try {
+            audioDecoder.decode(source, onPcm = { bytes, length -> stream.writeChunk(bytes, length) }, onProgress = onProgress)
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (rejected: AudioImportException) {
+            Logger.withTag(LOG_TAG).w { "Import rejected: ${rejected.message}" }
+            lastImportRejection = rejected.toRejection()
+            null
+        } catch (t: Throwable) {
+            Logger.withTag(LOG_TAG).e(t) { "Import decoding failed" }
+            lastImportRejection = ImportRejection.UNREADABLE
+            null
+        } finally {
+            stream.closeQuietly()
+            audioDecoder.discard(source)
+        }
+    }
+
+    private suspend fun rejectImport(noteId: Long, fileName: String, source: AudioImportSource) {
+        runCatching { discardNote(noteId) }
+        runCatching { audioStore.delete(fileName) }
+        mutableProcessingNoteIds.update { it - noteId }
+        mutableNoteProgress.update { it - noteId }
+        mutableEvents.emit(NoteProcessingEvent.ImportRejected(noteId, lastImportRejection))
+        analyticsTracker.track(AnalyticsEvents.audioImportRejected(lastImportRejection.name.lowercase()))
+    }
+
+    private fun AudioImportException.toRejection(): ImportRejection = when (this) {
+        is AudioImportException.Unsupported -> ImportRejection.UNSUPPORTED
+        is AudioImportException.TooLong -> ImportRejection.TOO_LONG
+        is AudioImportException.Unreadable -> ImportRejection.UNREADABLE
+    }
+
+    private fun importedTitle(displayName: String): String =
+        displayName.substringBeforeLast('.').trim().ifBlank { displayName }
+
+    internal suspend fun <T> withProcessingLock(block: suspend () -> T): T = processingMutex.withLock { block() }
+
+    // The checkpoint survives a failure on purpose: "Try again" then continues
+    // where the transcription stopped instead of starting over.
     private suspend fun transcribeStoredAudio(
+        noteId: Long,
         audioFileName: String,
+        resumePoint: ResumePoint,
         onProgress: (Float) -> Unit,
     ): StoredTranscription = try {
         speechToText.prepare()
         val approxTotalBytes = audioStore.sizeOf(audioFileName).coerceAtLeast(1L)
         if (audioBackup.openRead(audioFileName)) {
             try {
-                transcribePcmWindows(approxTotalBytes, onProgress)
+                skipTranscribedAudio(resumePoint.skipBytes)
+                transcribePcmWindows(noteId, approxTotalBytes, resumePoint, onProgress)
             } finally {
                 audioBackup.closeRead()
-            }
+            }.also { clearTranscriptionCheckpoint(noteId) }
         } else {
             StoredTranscription(texts = emptyList(), transcriptionTimeMs = 0)
         }
@@ -198,33 +352,55 @@ class RecordingSessionManager(
         speechToText.release()
     }
 
+    private fun skipTranscribedAudio(bytes: Long) {
+        if (bytes <= 0L) return
+        val scratch = ByteArray(SKIP_BUFFER_BYTES)
+        var remaining = bytes
+        while (remaining > 0L) {
+            val read = audioBackup.readChunk(scratch, 0, minOf(scratch.size.toLong(), remaining).toInt())
+            if (read <= 0) return
+            remaining -= read
+        }
+    }
+
     private suspend fun transcribePcmWindows(
+        noteId: Long,
         approxTotalBytes: Long,
+        resumePoint: ResumePoint,
         onProgress: (Float) -> Unit,
     ): StoredTranscription {
         val window = ByteArray((RETRY_CHUNK_MS * BYTES_PER_MS).toInt())
-        val texts = mutableListOf<String>()
-        var totalTimeMs = 0L
-        var bytesRead = 0L
+        val texts = resumePoint.texts.toMutableList()
+        var totalTimeMs = resumePoint.transcriptionTimeMs
+        var bytesRead = resumePoint.skipBytes
         while (true) {
             val read = readWindow(window)
             if (read <= 0) break
             bytesRead += read
-            val wav = WavCodec.wrap(
-                pcm = window.copyOfRange(0, read),
-                sampleRate = AudioRecorder.SAMPLE_RATE,
-                channels = 1,
-                bitsPerSample = 16,
-            )
-            transcribeWindow(wav)?.let { result ->
+            transcribeWindow(wrapWindow(window, read))?.let { result ->
                 totalTimeMs += result.processingTimeMs
                 result.text.trim().takeIf { it.isNotBlank() }?.let(texts::add)
             }
+            checkpoint(noteId, bytesRead, texts, totalTimeMs)
             onProgress((bytesRead.toFloat() / approxTotalBytes).coerceAtMost(1f))
             if (read < window.size) break
         }
         onProgress(1f)
         return StoredTranscription(texts = texts, transcriptionTimeMs = totalTimeMs)
+    }
+
+    private fun wrapWindow(window: ByteArray, read: Int): ByteArray = WavCodec.wrap(
+        pcm = window.copyOfRange(0, read),
+        sampleRate = AudioRecorder.SAMPLE_RATE,
+        channels = 1,
+        bitsPerSample = 16,
+    )
+
+    // Every finished window is written down, so an interrupted transcription
+    // continues from the last window instead of starting over.
+    private suspend fun checkpoint(noteId: Long, transcribedBytes: Long, texts: List<String>, transcriptionTimeMs: Long) {
+        persistTranscript(noteId, texts, transcriptionTimeMs)
+        saveTranscriptionCheckpoint(TranscriptionCheckpoint(noteId, transcribedBytes, transcriptionTimeMs))
     }
 
     private suspend fun transcribeWindow(wav: ByteArray): TranscriptionResult? = try {
@@ -254,13 +430,23 @@ class RecordingSessionManager(
         mutableNoteProgress.update { it + (noteId to percent) }
     }
 
+    private data class ResumePoint(
+        val skipBytes: Long,
+        val texts: List<String>,
+        val transcriptionTimeMs: Long,
+    ) {
+        companion object {
+            val START = ResumePoint(skipBytes = 0L, texts = emptyList(), transcriptionTimeMs = 0L)
+        }
+    }
+
     private data class StoredTranscription(
         val texts: List<String>,
         val transcriptionTimeMs: Long,
     )
 
     private suspend fun runSession() {
-        sessionPreset = getNotePreset()
+        sessionStyle = getNoteStyle()
         openAudioBackup()
         mutableActiveRecordingNoteId.value = createSessionNote()
         val queue = Channel<AudioChunk>(Channel.UNLIMITED)
@@ -280,7 +466,7 @@ class RecordingSessionManager(
     }
 
     private suspend fun createSessionNote(): Long? = try {
-        createRecordingNote(audioFileName, sessionPreset)
+        createRecordingNote(audioFileName, sessionStyle)
     } catch (cancellation: CancellationException) {
         throw cancellation
     } catch (t: Throwable) {
@@ -306,7 +492,7 @@ class RecordingSessionManager(
         when {
             chunkTranscripts.isNotEmpty() -> {
                 markNoteRecorded(noteId, recorder.vad.value.totalElapsedMs, audioFileName) ?: return
-                startProcessing(noteId, chunkTranscripts, transcriptionTimeMs, sessionPreset)
+                startProcessing(noteId, chunkTranscripts, transcriptionTimeMs, sessionStyle)
             }
             audioFileName != null -> {
                 markNoteRecorded(noteId, recorder.vad.value.totalElapsedMs, audioFileName)
@@ -373,8 +559,10 @@ class RecordingSessionManager(
     }
 
     private suspend fun transcribeChunk(chunk: AudioChunk) {
+        recordedBytes += chunk.durationMs * BYTES_PER_MS
         if (chunk.speechMs < MIN_CHUNK_SPEECH_MS) {
             updateChunk(chunk.id) { it.copy(state = ChunkState.DONE) }
+            checkpointSession()
             return
         }
         updateChunk(chunk.id) { it.copy(state = ChunkState.TRANSCRIBING) }
@@ -385,6 +573,7 @@ class RecordingSessionManager(
             mutableSession.update { it.copy(transcriptionTimeMs = transcriptionTimeMs) }
             updateChunk(chunk.id) { it.copy(state = ChunkState.DONE) }
             persistSessionTranscript()
+            checkpointSession()
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (t: Throwable) {
@@ -396,6 +585,13 @@ class RecordingSessionManager(
     private suspend fun persistSessionTranscript() {
         val noteId = mutableActiveRecordingNoteId.value ?: return
         persistTranscript(noteId, sortedTranscripts(), transcriptionTimeMs)
+    }
+
+    // A recording killed mid-way resumes from the last finished chunk, so the
+    // audio after it is still transcribed instead of silently dropped.
+    private suspend fun checkpointSession() {
+        val noteId = mutableActiveRecordingNoteId.value ?: return
+        saveTranscriptionCheckpoint(TranscriptionCheckpoint(noteId, recordedBytes, transcriptionTimeMs))
     }
 
     private fun sortedTranscripts(): List<String> =
@@ -411,19 +607,21 @@ class RecordingSessionManager(
             return
         }
         mutableActiveRecordingNoteId.value = null
+        clearTranscriptionCheckpoint(noteId)
         registerSavedRecording()
         val chunkTranscripts = sortedTranscripts()
         val recordedTranscriptionMs = transcriptionTimeMs
-        val preset = sessionPreset
-        mutableSession.value = RecordingSession()
-        startProcessing(noteId, chunkTranscripts, recordedTranscriptionMs, preset)
+        val style = sessionStyle
+        analyticsTracker.track(AnalyticsEvents.noteRecorded(recorder.vad.value.totalElapsedMs, style))
+        mutableSession.value = RecordingSession(noteId = noteId)
+        startProcessing(noteId, chunkTranscripts, recordedTranscriptionMs, style)
     }
 
     private fun startProcessing(
         noteId: Long,
         chunkTranscripts: List<String>,
         transcriptionMs: Long,
-        preset: NotePreset,
+        style: NoteStyleRef,
     ) {
         mutableProcessingNoteIds.update { it + noteId }
         scope.launch {
@@ -433,7 +631,7 @@ class RecordingSessionManager(
                 return@launch
             }
             processingMutex.withLock {
-                processNote(noteId, chunkTranscripts, transcriptionMs, 0f, preset)
+                processNote(noteId, chunkTranscripts, transcriptionMs, 0f, style, NoteSource.RECORDING)
             }
         }
     }
@@ -456,41 +654,21 @@ class RecordingSessionManager(
         transcripts: List<String>,
         transcriptionMs: Long,
         progressOffset: Float,
-        preset: NotePreset,
+        style: NoteStyleRef,
+        source: NoteSource,
     ) {
         try {
-            if (transcripts.isEmpty()) {
-                failNote(noteId)
-                mutableEvents.emit(NoteProcessingEvent.Failed(noteId))
-                return
-            }
-            persistTranscript(noteId, transcripts, transcriptionMs)
-            val structured = try {
-                transcriptStructurer.structure(transcripts, preset) { fraction ->
-                    updateProgress(noteId, progressOffset + fraction * (1f - progressOffset))
-                }
-            } catch (backendFailure: AiBackendException) {
-                Logger.withTag(LOG_TAG)
-                    .w(backendFailure) { "Structuring unavailable for note $noteId, keeping transcript" }
-                transcriptStructurer.transcriptOnly(transcripts)
-            }
-            val stillExists = completeNote(
-                noteId = noteId,
-                title = structured.title,
-                body = structured.overview,
-                transcript = structured.transcript,
-                transcriptionTimeMs = transcriptionMs,
-                structuringTimeMs = structured.structuringTimeMs,
-                hardwareBackend = structured.hardwareBackend.name,
-                preset = preset,
-            )
-            if (stillExists) {
-                mutableEvents.emit(NoteProcessingEvent.Completed(noteId))
+            val completed = structureNote(noteId, transcripts, transcriptionMs, progressOffset, style, source)
+            mutableNoteProgress.update { it - noteId }
+            if (completed) {
+                trackNoteReady(noteId, source)
+                suggestEventsLocked(noteId)
             }
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (t: Throwable) {
             Logger.withTag(LOG_TAG).e(t) { "Processing note $noteId failed" }
+            analyticsTracker.track(AnalyticsEvents.noteFailed(source))
             if (failNote(noteId)) {
                 mutableEvents.emit(NoteProcessingEvent.Failed(noteId))
             }
@@ -498,6 +676,60 @@ class RecordingSessionManager(
             mutableProcessingNoteIds.update { it - noteId }
             mutableNoteProgress.update { it - noteId }
         }
+    }
+
+    private suspend fun trackNoteReady(noteId: Long, source: NoteSource) {
+        val note = getNote(noteId) ?: return
+        val processingMs = (note.transcriptionTimeMs ?: 0L) + (note.structuringTimeMs ?: 0L)
+        analyticsTracker.track(AnalyticsEvents.noteReady(source, note.durationMs, processingMs))
+    }
+
+    private suspend fun structureNote(
+        noteId: Long,
+        transcripts: List<String>,
+        transcriptionMs: Long,
+        progressOffset: Float,
+        style: NoteStyleRef,
+        source: NoteSource,
+    ): Boolean {
+        if (transcripts.isEmpty()) {
+            failNote(noteId)
+            mutableEvents.emit(NoteProcessingEvent.Failed(noteId))
+            analyticsTracker.track(AnalyticsEvents.noteFailed(source))
+            return false
+        }
+        persistTranscript(noteId, transcripts, transcriptionMs)
+        val structured = structureOrKeepTranscript(noteId, transcripts, progressOffset, style)
+        val stillExists = completeNote(
+            noteId = noteId,
+            title = structured.title,
+            body = structured.overview,
+            transcript = structured.transcript,
+            transcriptionTimeMs = transcriptionMs,
+            structuringTimeMs = structured.structuringTimeMs,
+            hardwareBackend = structured.hardwareBackend.name,
+            style = structured.style,
+        )
+        if (stillExists) {
+            clearTranscriptionCheckpoint(noteId)
+            mutableEvents.emit(NoteProcessingEvent.Completed(noteId))
+        }
+        return stillExists
+    }
+
+    private suspend fun structureOrKeepTranscript(
+        noteId: Long,
+        transcripts: List<String>,
+        progressOffset: Float,
+        style: NoteStyleRef,
+    ): StructuredNote = try {
+        transcriptStructurer.structure(transcripts, style) { fraction ->
+            updateProgress(noteId, progressOffset + fraction * (1f - progressOffset))
+        }
+    } catch (backendFailure: AiBackendException) {
+        Logger.withTag(LOG_TAG)
+            .w(backendFailure) { "Structuring unavailable for note $noteId, keeping transcript" }
+        transcriptStructurer.transcriptOnly(transcripts, style)
     }
 
     private fun addChunk(chunk: AudioChunk) {
@@ -525,6 +757,8 @@ class RecordingSessionManager(
         const val RETRY_CHUNK_MS = 29_000L
         const val BYTES_PER_MS = AudioRecorder.SAMPLE_RATE * 2 / 1000L
         const val RETRY_WHISPER_SHARE = 0.6f
+        const val IMPORT_DECODE_SHARE = 0.15f
         const val MIN_CHUNK_SPEECH_MS = 1_000L
+        const val SKIP_BUFFER_BYTES = 64 * 1024
     }
 }

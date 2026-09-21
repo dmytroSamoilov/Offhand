@@ -79,13 +79,13 @@ class AboutSupportViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel(isDebugBuild: Boolean = true) = AboutSupportViewModel(
+    private fun viewModel(isDeveloperBuild: Boolean = true) = AboutSupportViewModel(
         modelManager = modelManager,
         observeTelemetryConsent = observeTelemetryConsent,
         setTelemetryConsent = setTelemetryConsent,
         observeDeveloperOptions = observeDeveloperOptions,
         setDeveloperOptions = setDeveloperOptions,
-        buildInfo = BuildInfo(isDebugBuild = isDebugBuild),
+        buildInfo = BuildInfo(isDeveloperBuild = isDeveloperBuild),
     )
 
     @Test
@@ -171,7 +171,7 @@ class AboutSupportViewModelTest {
 
     @Test
     fun `developer section is visible on debug builds`() = runTest(dispatcher) {
-        val viewModel = viewModel(isDebugBuild = true)
+        val viewModel = viewModel(isDeveloperBuild = true)
         dispatcher.scheduler.advanceUntilIdle()
 
         assertTrue(viewModel.uiState.value.isDeveloperSectionVisible)
@@ -179,7 +179,7 @@ class AboutSupportViewModelTest {
 
     @Test
     fun `developer section is hidden on release builds`() = runTest(dispatcher) {
-        val viewModel = viewModel(isDebugBuild = false)
+        val viewModel = viewModel(isDeveloperBuild = false)
         dispatcher.scheduler.advanceUntilIdle()
 
         assertFalse(viewModel.uiState.value.isDeveloperSectionVisible)

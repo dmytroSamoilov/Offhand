@@ -12,7 +12,8 @@ data class Note(
     val audioFileName: String? = null,
     val durationMs: Long? = null,
     val status: NoteStatus = NoteStatus.READY,
-    val preset: NotePreset = NotePreset.DEFAULT,
+    val style: NoteStyleRef = NoteStyleRef.DEFAULT,
+    val folderId: Long? = null,
 )
 
 enum class NoteStatus {

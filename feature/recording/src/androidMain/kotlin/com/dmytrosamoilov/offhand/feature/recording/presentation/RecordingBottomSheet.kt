@@ -69,6 +69,7 @@ import com.dmytrosamoilov.offhand.core.designsystem.component.CookieShape
 import com.dmytrosamoilov.offhand.core.designsystem.component.MorphingLoadingIndicator
 import com.dmytrosamoilov.offhand.feature.recording.R
 import org.koin.androidx.compose.koinViewModel
+import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 
 @Composable
 fun RecordingSheetHost(
@@ -108,17 +109,21 @@ private fun RecordingBottomSheet(
         skipPartiallyExpanded = true,
         confirmValueChange = { target -> target != SheetValue.Hidden || !isCapturing },
     )
-    var isNoteSaved by rememberSaveable { mutableStateOf(false) }
+    var wasNoteSaved by rememberSaveable { mutableStateOf(false) }
     var wasSessionActive by rememberSaveable { mutableStateOf(false) }
+    // Read the saved id in the same composition that sees the phase go idle,
+    // otherwise a single conflated update reads as a finished, unsaved session.
+    val isNoteSaved = wasNoteSaved || state.savedNoteId != null
     val isSessionFinished = wasSessionActive && !isNoteSaved &&
         state.phase == RecordingPhaseUi.IDLE
 
     LaunchedEffect(Unit) { viewModel.onSheetOpened() }
     LaunchedEffect(state.savedNoteId) {
         if (state.savedNoteId != null) {
-            isNoteSaved = true
+            wasNoteSaved = true
         }
     }
+    val haptics = haptics()
     LaunchedEffect(state.phase) {
         if (state.phase.isSessionActive()) {
             wasSessionActive = true
@@ -128,6 +133,9 @@ private fun RecordingBottomSheet(
         if (isSessionFinished) {
             onDismiss()
         }
+    }
+    LaunchedEffect(state.phase) {
+        sheetState.expand()
     }
 
     ModalBottomSheet(
@@ -149,10 +157,20 @@ private fun RecordingBottomSheet(
                 )
                 state.phase == RecordingPhaseUi.RECORDING -> RecordingContent(
                     state = state,
-                    onPauseClick = viewModel::onPauseRecording,
-                    onResumeClick = viewModel::onResumeRecording,
-                    onStopClick = viewModel::onStopRecording,
+                    onPauseClick = {
+                        haptics.tick()
+                        viewModel.onPauseRecording()
+                    },
+                    onResumeClick = {
+                        haptics.tick()
+                        viewModel.onResumeRecording()
+                    },
+                    onStopClick = {
+                        haptics.confirm()
+                        viewModel.onStopRecording()
+                    },
                     onDiscardConfirmed = {
+                        haptics.reject()
                         viewModel.onDiscardRecording()
                         onDismiss()
                     },

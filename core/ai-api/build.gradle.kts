@@ -18,6 +18,9 @@ kotlin {
         androidMain.dependencies {
             api(libs.coroutines.android)
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
         getByName("androidUnitTest").dependencies {
             implementation(libs.junit)
             implementation(libs.coroutines.test)

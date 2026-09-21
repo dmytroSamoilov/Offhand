@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="backup_title">Copia de seguridad</string>
+    <string name="backup_back_description">Atrás</string>
+    <string name="backup_create_title">Copia de seguridad</string>
+    <string name="backup_create_body">Guarda una copia cifrada de tus notas, carpetas y grabaciones en un archivo. Necesitarás la contraseña para restaurarla y no se puede recuperar.</string>
+    <string name="backup_passphrase_label">Contraseña</string>
+    <string name="backup_passphrase_confirm_label">Repite la contraseña</string>
+    <string name="backup_passphrase_too_short">Usa al menos %1$d caracteres.</string>
+    <string name="backup_passphrase_mismatch">Las contraseñas no coinciden.</string>
+    <string name="backup_include_audio_label">Incluir grabaciones de audio</string>
+    <string name="backup_include_audio_description">Las grabaciones hacen el archivo mucho más grande.</string>
+    <string name="backup_include_styles_label">Incluir estilos de nota</string>
+    <string name="backup_include_styles_description">Tus estilos de nota propios viajan con las notas.</string>
+    <string name="backup_restore_title">Restaurar</string>
+    <string name="backup_restore_body">Añade notas y carpetas desde un archivo de copia. Las notas que ya están en este teléfono se conservan y los duplicados se omiten.</string>
+    <string name="backup_restore_button">Elegir un archivo de copia</string>
+    <string name="backup_restore_dialog_title">Introduce la contraseña de la copia</string>
+    <string name="backup_restore_dialog_confirm">Restaurar</string>
+    <string name="backup_cancel">Cancelar</string>
+    <string name="backup_ok">Aceptar</string>
+    <string name="backup_progress_backup">Creando copia</string>
+    <string name="backup_progress_restore">Restaurando</string>
+    <string name="backup_done_backup_title">Copia guardada</string>
+    <string name="backup_done_backup_body">Se guardaron %1$d notas y %2$d carpetas.</string>
+    <string name="backup_done_restore_title">Restauración completada</string>
+    <string name="backup_done_restore_body">%1$d notas restauradas, %2$d omitidas por duplicadas. Carpetas: %3$d creadas, %4$d reutilizadas.</string>
+    <string name="backup_failed_backup_title">La copia falló</string>
+    <string name="backup_failed_restore_title">La restauración falló</string>
+    <string name="backup_error_wrong_passphrase">Esa contraseña no abre esta copia.</string>
+    <string name="backup_error_corrupt">Este archivo no es una copia de Offhand legible.</string>
+    <string name="backup_error_unsupported">Esta copia se creó con una versión más reciente de Offhand.</string>
+    <string name="backup_error_io">No se pudo leer o escribir el archivo.</string>
+    <string name="backup_start_button">Crear copia</string>
+    <string name="backup_step_passphrase_title">Establece una contraseña</string>
+    <string name="backup_warning">Guarda bien esta contraseña. Si la pierdes, ni tú ni nosotros podremos recuperar las notas de esta copia.</string>
+    <string name="backup_continue">Continuar</string>
+    <string name="backup_step_options_title">Opciones de la copia</string>
+    <string name="backup_file_name_label">Nombre del archivo</string>
+    <string name="backup_save_button">Guardar copia</string>
+    <string name="backup_done">Listo</string>
+</resources>

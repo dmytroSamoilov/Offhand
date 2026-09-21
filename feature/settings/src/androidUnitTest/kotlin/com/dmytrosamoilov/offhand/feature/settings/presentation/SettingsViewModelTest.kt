@@ -1,13 +1,34 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
+import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleSection
+import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
+import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
+import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNotePresetUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOverrideUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStatusUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNotePresetUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -15,11 +36,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -31,19 +54,37 @@ class SettingsViewModelTest {
 
     private val setDynamicColor: SetDynamicColorUseCase = mockk(relaxed = true)
     private val observeDynamicColor: ObserveDynamicColorUseCase = mockk()
-    private val setNotePreset: SetNotePresetUseCase = mockk(relaxed = true)
-    private val observeNotePreset: ObserveNotePresetUseCase = mockk()
+    private val setNoteStyle: SetNoteStyleUseCase = mockk(relaxed = true)
+    private val observeNoteStyle: ObserveNoteStyleUseCase = mockk()
+    private val observeCustomNoteStyles: ObserveCustomNoteStylesUseCase = mockk()
+    private val isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase = mockk()
     private val setAppLockEnabled: SetAppLockEnabledUseCase = mockk(relaxed = true)
     private val observeAppLockEnabled: ObserveAppLockEnabledUseCase = mockk()
     private val appLockManager: AppLockManager = mockk()
+    private val importAudio: ImportAudioUseCase = mockk()
+    private val isAudioImportAvailable: IsAudioImportAvailableUseCase = mockk()
+    private val observeSmartSuggestionsEnabled: ObserveSmartSuggestionsEnabledUseCase = mockk()
+    private val setSmartSuggestionsEnabled: SetSmartSuggestionsEnabledUseCase = mockk(relaxed = true)
+    private val observeProStatus: ObserveProStatusUseCase = mockk()
+    private val observeProOverride: ObserveProOverrideUseCase = mockk()
+    private val setProOverride: SetProOverrideUseCase = mockk(relaxed = true)
+    private val gate: ProUpgradeGate = mockk()
 
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         every { observeDynamicColor() } returns flowOf(true)
-        every { observeNotePreset() } returns flowOf(NotePreset.MEETING)
+        every { observeNoteStyle() } returns flowOf(NoteStyleRef.BuiltIn(NotePreset.MEETING))
+        every { observeCustomNoteStyles() } returns flowOf(emptyList())
+        every { isCustomNoteStylesAvailable() } returns flowOf(true)
         every { observeAppLockEnabled() } returns flowOf(true)
         every { appLockManager.isDeviceSecure } returns true
+        every { isAudioImportAvailable() } returns flowOf(true)
+        coEvery { importAudio(any()) } returns ImportAudioResult.STARTED
+        every { observeSmartSuggestionsEnabled() } returns flowOf(false)
+        every { observeProStatus() } returns flowOf(ProStatus.LIFETIME)
+        every { observeProOverride() } returns flowOf(ProOverride.STORE)
+        coEvery { gate.requirePro(any()) } returns true
     }
 
     @After
@@ -54,11 +95,23 @@ class SettingsViewModelTest {
     private fun viewModel() = SettingsViewModel(
         observeDynamicColor = observeDynamicColor,
         setDynamicColor = setDynamicColor,
-        observeNotePreset = observeNotePreset,
-        setNotePreset = setNotePreset,
+        observeNoteStyle = observeNoteStyle,
+        setNoteStyle = setNoteStyle,
+        observeCustomNoteStyles = observeCustomNoteStyles,
+        isCustomNoteStylesAvailable = isCustomNoteStylesAvailable,
         observeAppLockEnabled = observeAppLockEnabled,
         setAppLockEnabled = setAppLockEnabled,
         appLockManager = appLockManager,
+        importAudio = importAudio,
+        isAudioImportAvailable = isAudioImportAvailable,
+        observeSmartSuggestionsEnabled = observeSmartSuggestionsEnabled,
+        setSmartSuggestionsEnabled = setSmartSuggestionsEnabled,
+        observeProStatus = observeProStatus,
+        observeProOverride = observeProOverride,
+        setProOverride = setProOverride,
+        proUpgradeGate = gate,
+        buildInfo = BuildInfo(isDeveloperBuild = false, appVersion = "1", platform = "test"),
+        analyticsTracker = mockk(relaxed = true),
     )
 
     @Test
@@ -66,7 +119,7 @@ class SettingsViewModelTest {
         val viewModel = viewModel()
         dispatcher.scheduler.advanceUntilIdle()
 
-        assertEquals(NotePreset.MEETING, viewModel.uiState.value.notePreset)
+        assertEquals(NoteStyleRef.BuiltIn(NotePreset.MEETING), viewModel.uiState.value.noteStyle)
         assertTrue(viewModel.uiState.value.isDynamicColorEnabled)
     }
 
@@ -75,10 +128,10 @@ class SettingsViewModelTest {
         val viewModel = viewModel()
         dispatcher.scheduler.advanceUntilIdle()
 
-        viewModel.onNotePresetSelected(NotePreset.VISIT)
+        viewModel.onNoteStyleSelected(NoteStyleRef.BuiltIn(NotePreset.VISIT))
         dispatcher.scheduler.advanceUntilIdle()
 
-        coVerify { setNotePreset(NotePreset.VISIT) }
+        coVerify { setNoteStyle(NoteStyleRef.BuiltIn(NotePreset.VISIT)) }
     }
 
     @Test
@@ -115,5 +168,109 @@ class SettingsViewModelTest {
 
         assertEquals(false, viewModel.uiState.value.isDeviceSecure)
         coVerify { setAppLockEnabled(false) }
+    }
+
+    @Test
+    fun `custom styles stay listed while locked and selecting one goes through the paywall`() = runTest(dispatcher) {
+        every { observeCustomNoteStyles() } returns flowOf(listOf(customStyle))
+        every { isCustomNoteStylesAvailable() } returns flowOf(false)
+        coEvery { gate.requirePro(any()) } returns false
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        assertEquals(listOf("Debrief"), viewModel.uiState.value.customStyles.map { it.name })
+        assertFalse(viewModel.uiState.value.isCustomStylesUnlocked)
+
+        viewModel.onNoteStyleSelected(NoteStyleRef.Custom(1))
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { setNoteStyle(any()) }
+    }
+
+    @Test
+    fun `switching smart suggestions on asks the paywall first`() = runTest(dispatcher) {
+        coEvery { gate.requirePro(any()) } returns false
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.onSmartSuggestionsChanged(true)
+        advanceUntilIdle()
+        coVerify(exactly = 0) { setSmartSuggestionsEnabled(any()) }
+
+        viewModel.onSmartSuggestionsChanged(false)
+        advanceUntilIdle()
+        coVerify { setSmartSuggestionsEnabled(false) }
+    }
+
+    @Test
+    fun `the import picker opens only after the paywall passes`() = runTest(dispatcher) {
+        coEvery { gate.requirePro(any()) } returns false
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.onImportAudioClicked()
+        advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.isImportPickerRequested)
+
+        coEvery { gate.requirePro(any()) } returns true
+        viewModel.onImportAudioClicked()
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isImportPickerRequested)
+        viewModel.onImportPickerOpened()
+        assertFalse(viewModel.uiState.value.isImportPickerRequested)
+    }
+
+    @Test
+    fun `custom styles are listed once unlocked`() = runTest(dispatcher) {
+        every { observeCustomNoteStyles() } returns flowOf(listOf(customStyle))
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        assertEquals(listOf("Debrief"), viewModel.uiState.value.customStyles.map { it.name })
+    }
+
+    private val customStyle = CustomNoteStyle(
+        id = 1,
+        name = "Debrief",
+        noteKind = "",
+        language = NoteStyleLanguage.RECORDING,
+        sections = listOf(NoteStyleSection("Customer", "", SectionFormat.SENTENCES)),
+        createdAtEpochMs = 0,
+    )
+
+    @Test
+    fun `importing several files starts each one and reports the count`() = runTest {
+        val viewModel = viewModel()
+        val sources = listOf(AudioImportSource("/a", "a.m4a"), AudioImportSource("/b", "b.mp3"))
+
+        viewModel.onAudioImportSelected(sources, unreadableCount = 0)
+        advanceUntilIdle()
+
+        assertEquals(ImportNoticeUi.Started(2), viewModel.uiState.value.importNotice)
+        coVerify { importAudio(sources) }
+        viewModel.onImportNoticeDismissed()
+        assertEquals(null, viewModel.uiState.value.importNotice)
+    }
+
+    @Test
+    fun `a declined paywall starts nothing and shows no started notice`() = runTest {
+        coEvery { importAudio(any()) } returns ImportAudioResult.LOCKED
+        val viewModel = viewModel()
+
+        viewModel.onAudioImportSelected(listOf(AudioImportSource("/a", "a.m4a")), unreadableCount = 0)
+        advanceUntilIdle()
+
+        assertEquals(null, viewModel.uiState.value.importNotice)
+    }
+
+    @Test
+    fun `unreadable files are reported when nothing was locked`() = runTest {
+        val viewModel = viewModel()
+
+        viewModel.onAudioImportSelected(listOf(AudioImportSource("/a", "a.m4a")), unreadableCount = 1)
+        advanceUntilIdle()
+
+        assertEquals(ImportNoticeUi.Unreadable, viewModel.uiState.value.importNotice)
+        coVerify(exactly = 1) { importAudio(any()) }
     }
 }

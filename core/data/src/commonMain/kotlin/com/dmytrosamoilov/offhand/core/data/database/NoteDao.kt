@@ -26,4 +26,13 @@ internal interface NoteDao {
 
     @Query("DELETE FROM notes WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("UPDATE notes SET folderId = :folderId WHERE id = :noteId")
+    suspend fun moveToFolder(noteId: Long, folderId: Long?)
+
+    @Query("UPDATE notes SET folderId = NULL WHERE folderId = :folderId")
+    suspend fun clearFolder(folderId: Long)
+
+    @Query("UPDATE notes SET customStyleId = NULL WHERE customStyleId = :styleId")
+    suspend fun clearCustomStyle(styleId: Long)
 }

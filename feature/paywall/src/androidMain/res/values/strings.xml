@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="paywall_title" translatable="false">Offhand Pro</string>
+    <string name="paywall_column_free" translatable="false">Offhand</string>
+    <string name="paywall_column_pro" translatable="false">Pro</string>
+    <string name="paywall_not_included" translatable="false">–</string>
+    <string name="paywall_tagline">Get more out of every recording.</string>
+    <string name="paywall_free_private">Private by design</string>
+    <string name="paywall_free_offline">Fully offline</string>
+    <string name="paywall_free_no_ads">No ads, no account</string>
+    <string name="paywall_free_unlimited">Unlimited notes and recordings</string>
+    <string name="paywall_free_backup">Encrypted backup, search and folders</string>
+    <string name="paywall_pro_styles">Notes in your format</string>
+    <string name="paywall_pro_export">Share polished documents</string>
+    <string name="paywall_pro_suggestions">Never miss a follow-up</string>
+    <string name="paywall_pro_import">Turn any recording into a note</string>
+    <string name="paywall_pro_more">New Pro features are included as they ship</string>
+    <string name="paywall_plan_yearly">Yearly</string>
+    <string name="paywall_plan_yearly_price">%1$s / year</string>
+    <string name="paywall_plan_yearly_renews">Renews every year</string>
+    <string name="paywall_plan_lifetime">Lifetime</string>
+    <string name="paywall_plan_lifetime_hint">Pay once, keep forever</string>
+    <string name="paywall_cta_trial">Start free trial</string>
+    <string name="paywall_cta_subscribe">Subscribe</string>
+    <string name="paywall_cta_lifetime">Buy lifetime</string>
+    <string name="paywall_yearly_disclosure">%1$s per year, renews automatically. Cancel anytime in your store account.</string>
+    <string name="paywall_restore">Restore purchases</string>
+    <string name="paywall_terms">Terms</string>
+    <string name="paywall_privacy">Privacy</string>
+    <string name="paywall_offers_unavailable">Prices could not be loaded. Check your connection and try again.</string>
+    <string name="paywall_retry">Try again</string>
+    <string name="paywall_message_failed">The purchase did not go through and nothing was charged.</string>
+    <string name="paywall_message_pending">Your payment is still being processed. Pro unlocks as soon as it completes.</string>
+    <string name="paywall_message_restore_nothing">No earlier purchase was found for this store account.</string>
+    <string name="paywall_message_dismiss">OK</string>
+    <string name="paywall_success_title">You\'re on Offhand Pro</string>
+    <string name="paywall_success_body">Thank you for supporting an independent, private app.</string>
+    <string name="paywall_close">Close</string>
+    <string name="paywall_no_browser">No browser found to open the link.</string>
+    <string name="paywall_context_tagline">Part of Offhand Pro. Get more out of every recording.</string>
+    <string name="paywall_context_styles">Save your own note style</string>
+    <string name="paywall_context_export">Share this note as PDF or Word</string>
+    <string name="paywall_context_suggestions">Find dates and to-dos in your notes</string>
+    <string name="paywall_context_import">Turn your recordings into notes</string>
+    <string name="paywall_pro_styles_hint">Your headings, your sections, every time</string>
+    <string name="paywall_pro_export_hint">PDF and Word, ready for clients, email and print</string>
+    <string name="paywall_pro_suggestions_hint">Dates and to-dos straight into your calendar</string>
+    <string name="paywall_pro_import_hint">Voice memos, calls and files from other apps</string>
+    <string name="paywall_plan_yearly_monthly">About %1$s a month</string>
+    <string name="paywall_plan_best_value">Best value</string>
+    <string name="paywall_no_charge">No charge today</string>
+    <string name="paywall_privacy_note">Payments go through Google Play. Offhand never sees your card, and your notes never leave your phone.</string>
+    <string name="paywall_continue_free">Continue with the free version</string>
+    <string name="paywall_success_continue">What you started is on its way.</string>
+    <plurals name="paywall_plan_trial">
+        <item quantity="one">%d-day free trial</item>
+        <item quantity="other">%d-day free trial</item>
+    </plurals>
+    <plurals name="paywall_trial_disclosure">
+        <item quantity="one">Free for %1$d day, then %2$s per year. Cancel anytime in your store account.</item>
+        <item quantity="other">Free for %1$d days, then %2$s per year. Cancel anytime in your store account.</item>
+    </plurals>
+    <plurals name="paywall_cta_trial_days">
+        <item quantity="one">Start %d-day free trial</item>
+        <item quantity="other">Start %d-day free trial</item>
+    </plurals>
+    <plurals name="paywall_plan_lifetime_vs_yearly">
+        <item quantity="one">Less than %d year of yearly</item>
+        <item quantity="other">Less than %d years of yearly</item>
+    </plurals>
+</resources>

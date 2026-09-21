@@ -64,8 +64,9 @@ That is the point of this repo being public:
 
 ## Building
 
-Two product flavors: `production` (`com.dmytrosamoilov.offhand`) and `dev`
-(`com.dmytrosamoilov.offhand.dev`, "Offhand Dev" label) — they install side by side.
+Three product flavors that install side by side: `production` (`com.dmytrosamoilov.offhand`),
+`dev` (`com.dmytrosamoilov.offhand.dev`, "Offhand Dev" label) and `uitest`
+(`com.dmytrosamoilov.offhand.uitest`, "Offhand UI Test" — see [Testing](#testing)).
 
 1. Clone and open in Android Studio (or use `./gradlew assembleDevDebug`). The models
    (Whisper + Gemma) are ungated on Hugging Face — no account or token needed; the app
@@ -77,6 +78,94 @@ Two product flavors: `production` (`com.dmytrosamoilov.offhand`) and `dev`
 ```
 ./gradlew assembleDebug testDebugUnitTest lintDebug :app:lintDevDebug
 ```
+
+## Testing
+
+### Unit tests
+
+```
+./gradlew testDebugUnitTest
+```
+
+Tests that need no Android or MockK live in `commonTest` and also run on the
+Kotlin/Native iOS target, which catches K/N-only differences (regex classes, stdlib)
+that the JVM run cannot:
+
+```
+./gradlew :core:ai-api:iosSimulatorArm64Test :core:audio:iosSimulatorArm64Test \
+  :core:common:iosSimulatorArm64Test :core:device:iosSimulatorArm64Test \
+  :feature:notes:iosSimulatorArm64Test :feature:recording:iosSimulatorArm64Test
+```
+
+### Smoke tests (Maestro)
+
+The `uitest` flavor (Android) and the `Offhand-uitest` scheme (iOS) are the normal app
+with the AI swapped for fakes from `:testing:fakes`: the model manager reports the model
+as downloaded, speech-to-text returns canned sentences, the note structurer returns a
+fixed note titled "Smoke test note", and the microphone is a tone generator. So the
+whole record → note flow runs on any emulator or simulator, with no 2.4 GB download,
+no real audio, and no device gate. Nothing else is faked — onboarding, the encrypted
+database, the recording pipeline, list, search and detail are all real.
+
+The [Maestro](https://maestro.mobile.dev) flows in `.maestro/` drive both platforms
+and cover:
+
+1. Fresh install and onboarding (app lock and telemetry consent switched off)
+2. Recording through the fake microphone, saving, closing the sheet
+3. The processed note appearing in the list
+4. Search for "budget" with the highlighted snippet
+5. Opening the note and rendering the Overview and Transcript sections
+6. Folders: create, move the note in (menu and leading swipe), filter by folder, rename, delete
+7. Returning from a note leaves the search field unfocused (Android)
+8. Backup and restore through the system file picker, including the passphrase prompt (Android only; the iOS picker is not scriptable)
+9. Custom note styles: create one with two sections, pick it as the default, rewrite a note with it, delete it
+10. Building a note style from a plain-text description; the fake model answers the drafting prompt with a canned two-section style
+11. Importing an audio file from Settings through the system picker into a new note (needs `.maestro/assets/import-sample.m4a` in the device's Download folder on Android or in the simulator's "On My iPhone" storage on iOS, see below)
+12. Smart suggestions: switching them on in Settings, asking for them on the finished note; the fake model answers with two canned calendar events, one is dismissed, the other is handed to the system calendar's event editor, and both states survive a relaunch
+13. The Pro paywall: the debug override in Settings plays a free user, crowns appear, the paywall opens from the Upgrade card and from Import audio, a simulated purchase unlocks the app and the import picker that was waiting behind the paywall opens on its own
+
+The flows assume a phone-sized screen; on tablets and unfolded foldables the app switches
+to its two-pane layout and the steps no longer line up.
+
+Playback, editing, sharing, deleting, settings and model quality are not covered.
+
+**Install Maestro** (the plain `maestro` formula is an unrelated app — use the tap):
+
+```
+brew trust mobile-dev-inc/tap && brew install mobile-dev-inc/tap/maestro
+```
+
+**Android**, with an emulator running or a device connected:
+
+```
+./gradlew assembleUitestDebug
+adb install -r app/build/outputs/apk/uitest/debug/app-uitest-debug.apk
+adb push .maestro/assets/import-sample.m4a /sdcard/Download/import-sample.m4a
+maestro test .maestro/
+```
+
+**iOS**, with a booted simulator: build the `Offhand-uitest` scheme (Xcode, or
+`xcodebuild -scheme Offhand-uitest -destination 'id=<simulator udid>'`), install the
+`.app` with `xcrun simctl install booted <path>`, then:
+
+```
+xcrun simctl privacy booted grant microphone com.dmytrosamoilov.offhand.uitest
+maestro test .maestro/
+```
+
+With several devices connected, add `--device <id>` before `test`. A failed run leaves
+screenshots and a UI hierarchy dump under `~/.maestro/tests/<timestamp>/`.
+
+Two platform quirks the flow already handles: the Android record sheet starts recording
+by itself when opened, and iOS toggles only react to taps on the switch, so the
+onboarding toggle cards accept a tap anywhere on the row.
+
+### Continuous integration
+
+`.github/workflows/ci.yml` runs on every push and pull request: Android build, unit
+tests and lint; the shared tests on the iOS simulator target; and the smoke flow on an
+Android emulator (Ubuntu, KVM) and on an iOS simulator (macOS). Maestro artifacts are
+attached to failed runs.
 
 ## Architecture
 
@@ -98,6 +187,8 @@ implementations:
 :feature:recording      recording UI, foreground service, AI pipeline
 :feature:notes          list / detail / edit, adaptive two-pane
 :feature:settings       acceleration tier, model management, privacy
+:feature:backup         passphrase-encrypted backup and restore of notes, folders and audio
+:testing:fakes          canned AI, model, device and microphone for smoke tests
 ```
 
 Three layers inside each feature (domain → data → presentation), use cases wrapping

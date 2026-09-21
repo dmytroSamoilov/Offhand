@@ -15,6 +15,10 @@ kotlin {
             implementation(project(":core:data"))
             implementation(project(":core:security"))
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.datetime)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
         }
         androidMain.dependencies {
             implementation(libs.androidx.core.ktx)

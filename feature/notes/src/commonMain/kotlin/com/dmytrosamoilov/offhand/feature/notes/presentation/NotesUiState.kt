@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.CalendarEventSuggestion
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 
 data class NotesUiState(
     val sections: List<NotesSectionUi> = emptyList(),
@@ -15,11 +16,78 @@ data class NotesUiState(
     val isDeveloperMode: Boolean = false,
     val noteProgress: Map<Long, Int> = emptyMap(),
     val modelPreparation: ModelPreparationUi? = null,
+    val searchQuery: String = "",
+    val folders: List<FolderUi> = emptyList(),
+    val selectedFolderId: Long? = null,
+    val folderEditor: FolderEditorUi? = null,
+    val pendingDeleteFolderId: Long? = null,
+    val moveToFolder: MoveToFolderUi? = null,
+    val customStyles: List<NoteStyleOptionUi> = emptyList(),
+    val importMessage: ImportMessageUi? = null,
+    val smartSuggestions: SmartSuggestionsUi? = null,
+    val isDocumentExportUnlocked: Boolean = false,
+    val isCustomStylesUnlocked: Boolean = false,
+    val pendingCalendarEvent: CalendarEventSuggestion? = null,
+    val isRetranscribeAvailable: Boolean = false,
 )
+
+sealed interface SmartSuggestionsUi {
+    data object Locked : SmartSuggestionsUi
+    data object Loading : SmartSuggestionsUi
+    data object NotRun : SmartSuggestionsUi
+    data object Empty : SmartSuggestionsUi
+    data class Ready(val events: List<CalendarEventUi>) : SmartSuggestionsUi
+}
+
+data class CalendarEventUi(
+    val index: Int,
+    val title: String,
+    val whenText: String,
+    val isAllDay: Boolean,
+    val location: String,
+    val details: String,
+    val isAdded: Boolean,
+)
+
+enum class ImportMessageUi {
+    UNSUPPORTED,
+    TOO_LONG,
+    UNREADABLE,
+}
+
+data class NoteStyleOptionUi(
+    val id: Long,
+    val name: String,
+    val description: String,
+)
+
+data class MoveToFolderUi(
+    val noteId: Long,
+    val currentFolderId: Long?,
+)
+
+data class FolderUi(
+    val id: Long,
+    val name: String,
+    val noteCount: Int,
+)
+
+data class FolderEditorUi(
+    val folderId: Long?,
+    val name: String,
+    val error: FolderNameErrorUi? = null,
+)
+
+enum class FolderNameErrorUi {
+    BLANK,
+    TOO_LONG,
+    DUPLICATE,
+}
 
 data class NoteShareUi(
     val filePaths: List<String>,
     val mimeType: String,
+    val saveToDevice: Boolean = false,
 )
 
 data class ModelPreparationUi(
@@ -45,6 +113,14 @@ data class NoteCardUi(
     val preview: String,
     val durationText: String?,
     val status: NoteStatusUi,
+    val titleHighlights: List<TextRangeUi> = emptyList(),
+    val previewHighlights: List<TextRangeUi> = emptyList(),
+    val folderName: String? = null,
+)
+
+data class TextRangeUi(
+    val start: Int,
+    val end: Int,
 )
 
 data class NoteDetailUi(
@@ -57,7 +133,9 @@ data class NoteDetailUi(
     val hasAudio: Boolean,
     val metrics: NoteMetricsUi?,
     val status: NoteStatusUi,
-    val preset: NotePreset,
+    val style: NoteStyleRef,
+    val folderId: Long? = null,
+    val folderName: String? = null,
 )
 
 enum class NoteStatusUi {

@@ -24,6 +24,8 @@ class IosAppLockManager : AppLockManager {
     }
 
     override fun markLocked() {
-        mutableLockState.value = AppLockState.LOCKED
+        if (isDeviceSecure) {
+            mutableLockState.value = AppLockState.LOCKED
+        }
     }
 }

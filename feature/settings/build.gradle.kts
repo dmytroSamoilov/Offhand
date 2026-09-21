@@ -12,6 +12,7 @@ kotlin {
             implementation(project(":core:ai-api"))
             implementation(project(":core:data"))
             implementation(project(":core:security"))
+            implementation(project(":feature:recording"))
         }
         androidMain.dependencies {
             implementation(libs.androidx.core.ktx)

@@ -28,6 +28,7 @@ sqlite = "2.5.1"
 datastore = "1.1.1"
 okio = "3.16.0"
 playReview = "2.0.2"
+playBilling = "8.0.0"
 sqlcipher = "4.6.1"
 biometric = "1.1.0"
 fragmentKtx = "1.8.5"
@@ -40,6 +41,7 @@ firebaseBom = "34.3.0"
 kermit = "2.1.0"
 
 [libraries]
+play-billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "playBilling" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }

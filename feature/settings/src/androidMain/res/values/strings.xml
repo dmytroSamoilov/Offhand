@@ -7,28 +7,75 @@
     <string name="settings_acceleration_cpu_description">Works on every supported device</string>
     <string name="settings_acceleration_gpu">GPU</string>
     <string name="settings_acceleration_gpu_description">Much faster on Snapdragon devices</string>
-    <string name="settings_acceleration_note">GPU is not available on Pixel (Tensor) devices. Changing this reloads the AI engine on next use.</string>
+    <string name="settings_acceleration_note">GPU is not available on Pixel (Tensor) devices. Changing this reloads the on-device AI on next use.</string>
 
-    <string name="settings_model_title">AI model</string>
+    <string name="settings_model_title">On-device AI</string>
     <string name="settings_model_name" translatable="false">%1$s · %2$s GB</string>
     <string name="settings_model_picker_auto">Automatic</string>
-    <string name="settings_model_picker_auto_description">Best model for this device\'s memory</string>
-    <string name="settings_model_picker_note">Switching models reloads the AI engine on next use. Already downloaded models stay on the device.</string>
+    <string name="settings_model_picker_auto_description">Best model for this phone\'s memory</string>
+    <string name="settings_model_picker_note">Switching models reloads the on-device AI on next use. Downloaded models stay on your phone.</string>
     <string name="settings_model_status_not_downloaded">Not downloaded</string>
     <string name="settings_model_status_downloading">Downloading… %1$d%%</string>
-    <string name="settings_model_status_loading">Preparing the engine…</string>
-    <string name="settings_model_status_ready">Ready · stored on this device</string>
-    <string name="settings_model_status_error">Something went wrong with the model</string>
-    <string name="settings_model_download">Download model</string>
+    <string name="settings_model_status_loading">Preparing the on-device AI…</string>
+    <string name="settings_model_status_ready">Ready · stored on your phone</string>
+    <string name="settings_model_status_error">Something went wrong with the on-device AI</string>
+    <string name="settings_model_download">Download on-device AI</string>
     <string name="settings_model_retry">Retry</string>
-    <string name="settings_model_delete">Delete model</string>
-    <string name="settings_delete_model_dialog_title">Delete the AI model?</string>
-    <string name="settings_delete_model_dialog_body">Recording will not work until the model is downloaded again. Your notes are not affected.</string>
-    <string name="settings_delete_model_dialog_confirm">Delete</string>
+    <string name="settings_model_delete">Remove on-device AI</string>
+    <string name="settings_delete_model_dialog_title">Remove the on-device AI?</string>
+    <string name="settings_delete_model_dialog_body">Recording will not work until the on-device AI is downloaded again. Your notes are not affected.</string>
+    <string name="settings_delete_model_dialog_confirm">Remove</string>
     <string name="settings_delete_model_dialog_cancel">Cancel</string>
 
-    <string name="settings_note_style_title">Note style</string>
+    <string name="settings_note_style_title">Default note style</string>
     <string name="settings_note_style_note">Applies to new recordings. You can restyle an existing note from the note screen.</string>
+    <string name="settings_note_styles_manage">Manage note styles</string>
+    <string name="settings_note_styles_manage_subtitle">Create your own headings and format</string>
+    <string name="settings_note_styles_title">Note styles</string>
+    <string name="settings_note_styles_built_in">Built in</string>
+    <string name="settings_note_styles_custom">Your styles</string>
+    <string name="settings_note_styles_empty">No custom styles yet. Create one to give the AI your own headings.</string>
+    <string name="settings_note_styles_new">New style</string>
+    <string name="settings_note_styles_delete">Delete style</string>
+    <string name="settings_note_styles_delete_dialog_title">Delete this style?</string>
+    <string name="settings_note_styles_delete_dialog_body">Notes written with it are kept. They switch to the Summary style the next time they are rewritten.</string>
+    <string name="settings_note_styles_delete_dialog_confirm">Delete</string>
+    <string name="settings_note_style_editor_new_title">New note style</string>
+    <string name="settings_note_style_editor_edit_title">Edit note style</string>
+    <string name="settings_note_style_editor_back">Back</string>
+    <string name="settings_note_style_editor_save">Save</string>
+    <string name="settings_note_style_editor_name">Name</string>
+    <string name="settings_note_style_editor_kind">What kind of note is this?</string>
+    <string name="settings_note_style_editor_kind_hint">a sales call debrief</string>
+    <string name="settings_note_style_editor_kind_help">Optional. Finishes the sentence “The note is …”.</string>
+    <string name="settings_note_style_editor_language">Language of the note</string>
+    <string name="settings_note_style_editor_language_recording">Same as the recording</string>
+    <string name="settings_note_style_editor_language_english">Always English</string>
+    <string name="settings_note_style_editor_sections">Sections</string>
+    <string name="settings_note_style_editor_section_title">Section %1$d</string>
+    <string name="settings_note_style_editor_heading">Heading</string>
+    <string name="settings_note_style_editor_guidance">What goes here</string>
+    <string name="settings_note_style_editor_guidance_hint">each agreed task with who does it and by when</string>
+    <string name="settings_note_style_editor_format_sentences">Short</string>
+    <string name="settings_note_style_editor_format_bullets">Bullet points</string>
+    <string name="settings_note_style_editor_format_free">Free</string>
+    <string name="settings_note_style_editor_guidance_warning">Long instructions may fail to process. The on-device AI has limited memory, so use them at your own risk.</string>
+    <string name="settings_note_style_editor_add_section">Add section</string>
+    <string name="settings_note_style_editor_remove_section">Remove section</string>
+    <string name="settings_note_style_editor_move_up">Move up</string>
+    <string name="settings_note_style_editor_move_down">Move down</string>
+    <string name="settings_note_style_describe_unavailable">Set up the on-device AI first to build a style.</string>
+    <string name="settings_note_style_error_blank">This field is required</string>
+    <string name="settings_note_style_error_too_long">Use at most %1$d characters</string>
+    <string name="settings_note_style_error_duplicate">This name is already used</string>
+    <string name="settings_note_style_error_sections_too_many">Use at most %1$d sections</string>
+    <string name="settings_note_style_describe_button">Describe it and let the AI fill the form</string>
+    <string name="settings_note_style_describe_title">Describe your note</string>
+    <string name="settings_note_style_describe_body">Say what the recording is about and what the finished note should contain. The AI proposes the sections; you can change everything afterwards.</string>
+    <string name="settings_note_style_describe_hint">For example: I coach football teams. After each training I record what we practised, what went well, what each player should work on and what to plan next time.</string>
+    <string name="settings_note_style_describe_build">Build the style</string>
+    <string name="settings_note_style_describe_running">Thinking about your sections…</string>
+    <string name="settings_note_style_describe_failed">The AI could not turn that into a style. Try describing it differently.</string>
 
     <string name="settings_security_title">Security</string>
     <string name="settings_app_lock_label">Require unlock to open Offhand</string>
@@ -46,7 +93,7 @@
     <string name="settings_feature_request_description">Missing something? Tell the developer what the app should do next.</string>
     <string name="settings_feature_request_subject">[%1$s] feature request</string>
     <string name="settings_feature_request_body">Hi! I\'d like to suggest a feature:\n\n\n\n—\nThe details below were added automatically. They describe my device and app version, which helps the developer understand my suggestion in context. Please leave them in if you don\'t mind sharing them.\nDevice: %1$s %2$s (%3$s)\nRAM: %4$s\nApp version: %5$s\nAndroid: %6$s (API %7$d)</string>
-    <string name="settings_feature_request_no_email_app">No email app found on this device</string>
+    <string name="settings_feature_request_no_email_app">No email app found on this phone</string>
 
     <string name="settings_about_support_title">About &amp; support</string>
     <string name="settings_about_support_subtitle">Version %1$s · feedback, privacy and legal</string>
@@ -60,5 +107,39 @@
 
     <string name="settings_developer_title">Developer</string>
     <string name="settings_developer_label">Developer options</string>
-    <string name="settings_developer_description">Show model management, acceleration and processing diagnostics.</string>
+    <string name="settings_developer_description">Show on-device AI management, acceleration and processing diagnostics.</string>
+    <string name="settings_backup_title">Backup &amp; restore</string>
+    <string name="settings_backup_subtitle">Move your notes to a new phone or keep a copy</string>
+    <string name="settings_import_audio_title">Import audio</string>
+    <string name="settings_import_audio_subtitle">Turn audio files into notes. Pick one or several at once</string>
+    <string name="settings_import_unreadable">Some of the files could not be read.</string>
+    <string name="settings_import_dismiss">OK</string>
+    <string name="settings_import_started_title">Import started</string>
+    <plurals name="settings_import_started">
+        <item quantity="one">%d file is being imported. The note is created in the background and will show up in your notes list as soon as it is ready.</item>
+        <item quantity="other">%d files are being imported. The notes are created in the background and will show up in your notes list as soon as they are ready.</item>
+    </plurals>
+    <string name="settings_pro_title" translatable="false">Offhand Pro</string>
+    <string name="settings_pro_override_label" translatable="false">Pro status override</string>
+    <string name="settings_pro_override_store" translatable="false">Store</string>
+    <string name="settings_pro_override_free" translatable="false">Free</string>
+    <string name="settings_pro_override_pro" translatable="false">Pro</string>
+    <string name="settings_pro_upgrade_subtitle">Custom styles, PDF and Word export, smart suggestions and audio import</string>
+    <string name="settings_pro_upgrade">Upgrade</string>
+    <string name="settings_subscription_title">Subscription</string>
+    <string name="settings_subscription_lifetime">Lifetime, yours forever</string>
+    <string name="settings_subscription_trial">Free trial</string>
+    <string name="settings_subscription_trial_until">Free trial until %1$s</string>
+    <string name="settings_subscription_yearly">Yearly</string>
+    <string name="settings_subscription_yearly_renews">Yearly, renews on %1$s</string>
+    <string name="settings_subscription_manage">Manage subscription</string>
+    <string name="settings_smart_suggestions_title">Smart suggestions</string>
+    <string name="settings_smart_suggestions_label">Show smart suggestions</string>
+    <string name="settings_smart_suggestions_description">Find calendar events and to-dos in every new note. Adds a few seconds of processing.</string>
+    <string name="settings_notes_title">Notes</string>
+    <string name="settings_backup_section_title">Backup</string>
+    <string name="settings_about_section_title">About</string>
+    <string name="settings_about_footer">Everything stays on your phone. Nothing is uploaded, ever.</string>
+    <string name="settings_note_style_editor_no_sections">Without sections the note is one free-form summary.</string>
+    <string name="settings_redeem_code">Redeem a code</string>
 </resources>

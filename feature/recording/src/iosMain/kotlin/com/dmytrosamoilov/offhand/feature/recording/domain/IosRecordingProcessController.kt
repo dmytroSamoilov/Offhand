@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain
 
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 
 class IosRecordingProcessController(
@@ -16,8 +17,18 @@ class IosRecordingProcessController(
         return true
     }
 
-    override fun restructureNote(noteId: Long, preset: NotePreset): Boolean {
-        sessionManager.restructureNote(noteId, preset)
+    override fun restructureNote(noteId: Long, style: NoteStyleRef): Boolean {
+        sessionManager.restructureNote(noteId, style)
+        return true
+    }
+
+    override fun importAudio(source: AudioImportSource): Boolean {
+        sessionManager.importAudio(source)
+        return true
+    }
+
+    override fun suggestEvents(noteId: Long): Boolean {
+        sessionManager.suggestEvents(noteId)
         return true
     }
 }

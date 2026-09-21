@@ -2,8 +2,8 @@
 <resources>
     <string name="notes_title">Notes</string>
     <string name="notes_empty_state">No notes yet. Tap the microphone button to record your first one.</string>
-    <string name="notes_model_banner_title">Preparing your AI core</string>
-    <string name="notes_model_banner_subtitle">Downloading the on-device model in the background</string>
+    <string name="notes_model_banner_title">Setting up your on-device AI</string>
+    <string name="notes_model_banner_subtitle">Downloading in the background</string>
     <string name="notes_model_banner_percent" translatable="false">%1$d%%</string>
     <string name="notes_day_today">Today</string>
     <string name="notes_day_yesterday">Yesterday</string>
@@ -20,7 +20,7 @@
     <string name="notes_pause_description">Pause playback</string>
     <string name="notes_playback_position" translatable="false">%1$s / %2$s</string>
     <string name="notes_processing_title">Processing…</string>
-    <string name="notes_processing_preview">Transcribing and summarizing on this device. You can play the recording already.</string>
+    <string name="notes_processing_preview">Transcribing and summarizing on your phone. You can play the recording already.</string>
     <string name="notes_processing_transcribing">Processing the transcript… It will appear here automatically.</string>
     <string name="notes_processing_structuring">Creating the overview… The transcript is already below.</string>
     <string name="notes_recording_fallback_title">Recording</string>
@@ -37,7 +37,7 @@
     <string name="notes_edit_save_description">Save changes</string>
     <string name="notes_edit_cancel_description">Discard changes</string>
     <string name="notes_delete_dialog_title">Delete this note?</string>
-    <string name="notes_delete_dialog_body">The note will be permanently removed from this device. This cannot be undone.</string>
+    <string name="notes_delete_dialog_body">The note will be permanently removed from your phone. This cannot be undone.</string>
     <string name="notes_delete_dialog_confirm">Delete</string>
     <string name="notes_delete_dialog_cancel">Cancel</string>
     <string name="notes_retranscribe_description">Re-transcribe</string>
@@ -47,11 +47,25 @@
     <string name="notes_badge_encrypted">Encrypted</string>
     <string name="notes_more_actions_description">More actions</string>
     <string name="notes_share_dialog_title">What would you like to share?</string>
-    <string name="notes_share_dialog_body">Please keep in mind that shared copies are no longer encrypted once they leave this device.</string>
-    <string name="notes_share_option_note">Include note</string>
-    <string name="notes_share_option_audio">Include audio</string>
+    <string name="notes_share_dialog_body">Please keep in mind that shared copies are no longer encrypted once they leave your phone.</string>
     <string name="notes_share_dialog_confirm">Share</string>
+    <string name="notes_share_tab_text">Text file</string>
+    <string name="notes_share_tab_audio">Audio file</string>
+    <string name="notes_share_audio_format">WAV file</string>
+    <string name="notes_share_audio_details">The recording is shared as an uncompressed WAV file, 16 kHz mono. Every player and transcription tool opens it.</string>
+    <string name="notes_share_format_text_hint" translatable="false">.txt</string>
+    <string name="notes_share_format_pdf_hint" translatable="false">.pdf</string>
+    <string name="notes_share_format_docx_hint" translatable="false">.docx</string>
+    <string name="notes_share_audio_hint" translatable="false">.wav</string>
+    <string name="notes_share_save">Save</string>
     <string name="notes_share_date_label">Date</string>
+    <string name="notes_share_format_text">Text file</string>
+    <string name="notes_share_format_pdf">PDF file</string>
+    <string name="notes_share_format_docx">Word file</string>
+    <string name="notes_share_recorded_label">Recorded</string>
+    <string name="notes_share_duration_label">Duration</string>
+    <string name="notes_share_created_with">Created with Offhand</string>
+    <string name="notes_share_exported_label">Exported</string>
     <string name="notes_preset_description">Change note style</string>
     <string name="notes_fake_review_title" translatable="false">In-app review · dev build</string>
     <string name="notes_fake_review_body" translatable="false">Google Play would show its rating dialog here. Rules: %1$d recording(s) · install age %2$d min · attempt gap %3$d min · burst window %4$d min · cooldown %5$d min. Tapping outside counts the attempt, like the real dialog.</string>
@@ -59,4 +73,42 @@
     <string name="notes_fake_review_failure" translatable="false">Simulate failure</string>
     <string name="notes_preset_sheet_title">Rewrite this note as</string>
     <string name="notes_preset_sheet_body">The recording is kept. The title and overview are written again from the transcript in the style you pick.</string>
+    <string name="notes_copy_overview_description">Copy overview</string>
+    <string name="notes_copy_transcript_description">Copy transcript</string>
+    <string name="notes_copied">Copied</string>
+    <string name="notes_search_placeholder">Search notes</string>
+    <string name="notes_search_clear_description">Clear search</string>
+    <string name="notes_search_empty_state">No notes match your search.</string>
+    <string name="notes_search_cancel_description">Cancel search</string>
+    <string name="notes_folder_all">All notes</string>
+    <string name="notes_folder_new">New folder</string>
+    <string name="notes_folder_options_description">Folder options</string>
+    <string name="notes_folder_rename">Rename folder</string>
+    <string name="notes_folder_delete">Delete folder</string>
+    <string name="notes_folder_name_label">Folder name</string>
+    <string name="notes_folder_save">Save</string>
+    <string name="notes_folder_error_blank">Enter a folder name.</string>
+    <string name="notes_folder_error_too_long">Use at most %1$d characters.</string>
+    <string name="notes_folder_error_duplicate">A folder with this name already exists.</string>
+    <string name="notes_folder_delete_dialog_title">Delete this folder?</string>
+    <string name="notes_folder_delete_dialog_body">Its notes are kept and go back to All notes.</string>
+    <string name="notes_folder_empty_state">No notes in this folder yet.</string>
+    <string name="notes_move_to_folder">Move to folder</string>
+    <string name="notes_folder_none">No folder</string>
+    <string name="notes_import_error_title">Could not import this file</string>
+    <string name="notes_import_error_unsupported">This audio format is not supported.</string>
+    <string name="notes_import_error_too_long">Recordings longer than 2 hours cannot be imported.</string>
+    <string name="notes_import_error_unreadable">The file could not be read.</string>
+    <string name="notes_import_error_dismiss">OK</string>
+    <string name="notes_calendar_sheet_title">Calendar events</string>
+    <string name="notes_calendar_add">Add to calendar</string>
+    <string name="notes_calendar_all_day">All day</string>
+    <string name="notes_calendar_no_app">No calendar app was found on this phone.</string>
+    <string name="notes_suggestions_heading">Smart suggestions</string>
+    <string name="notes_suggestions_find">Find suggestions</string>
+    <string name="notes_suggestions_loading">Looking for dates and appointments…</string>
+    <string name="notes_suggestions_empty">No suggestions for this note.</string>
+    <string name="notes_suggestions_added">Added</string>
+    <string name="notes_suggestions_dismiss">Dismiss suggestion</string>
+    <string name="notes_suggestions_locked">Offhand Pro finds calendar events and to-dos in your notes.</string>
 </resources>

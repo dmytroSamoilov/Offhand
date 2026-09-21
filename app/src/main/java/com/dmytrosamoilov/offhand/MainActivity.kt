@@ -1,8 +1,9 @@
 package com.dmytrosamoilov.offhand
 
 import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,10 +13,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.core.content.IntentCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
+import com.dmytrosamoilov.offhand.feature.notes.R as NotesR
+import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportIntake
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
 import com.dmytrosamoilov.offhand.feature.recording.service.RecordingService
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import com.dmytrosamoilov.offhand.root.RootScreen
 import com.dmytrosamoilov.offhand.root.RootViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -23,17 +32,14 @@ import org.koin.androidx.compose.koinViewModel
 class MainActivity : FragmentActivity() {
 
     private var requestedNoteId by mutableStateOf<Long?>(null)
+    private val importIntake: AudioImportIntake by inject()
+    private val importAudio: ImportAudioUseCase by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (!BuildConfig.DEBUG) {
-            window.setFlags(
-                WindowManager.LayoutParams.FLAG_SECURE,
-                WindowManager.LayoutParams.FLAG_SECURE,
-            )
-        }
         enableEdgeToEdge()
         consumeNoteIdExtra(intent)
+        consumeSharedAudio(intent)
         setContent {
             val viewModel: RootViewModel = koinViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -55,6 +61,7 @@ class MainActivity : FragmentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         consumeNoteIdExtra(intent)
+        consumeSharedAudio(intent)
     }
 
     private fun consumeNoteIdExtra(intent: Intent?) {
@@ -65,7 +72,31 @@ class MainActivity : FragmentActivity() {
         }
     }
 
+    private fun consumeSharedAudio(intent: Intent?) {
+        if (intent?.type?.startsWith(AUDIO_MIME_PREFIX) != true) return
+        val uris = sharedAudioUris(intent)
+        intent.removeExtra(Intent.EXTRA_STREAM)
+        if (uris.isEmpty()) return
+        lifecycleScope.launch {
+            val sources = uris.map { uri -> importIntake.stage(uri) }
+            if (importAudio(sources.filterNotNull()) == ImportAudioResult.LOCKED) importIntake.discard(sources.filterNotNull())
+            if (sources.any { it == null }) showToast(NotesR.string.notes_import_error_unreadable)
+        }
+    }
+
+    private fun sharedAudioUris(intent: Intent): List<Uri> = when (intent.action) {
+        Intent.ACTION_SEND -> listOfNotNull(IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java))
+        Intent.ACTION_SEND_MULTIPLE ->
+            IntentCompat.getParcelableArrayListExtra(intent, Intent.EXTRA_STREAM, Uri::class.java).orEmpty()
+        else -> emptyList()
+    }
+
+    private fun showToast(message: Int) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
     private companion object {
         const val NO_NOTE_ID = -1L
+        const val AUDIO_MIME_PREFIX = "audio/"
     }
 }

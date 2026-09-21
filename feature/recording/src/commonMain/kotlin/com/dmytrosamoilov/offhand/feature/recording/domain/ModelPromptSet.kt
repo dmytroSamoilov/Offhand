@@ -1,38 +1,37 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain
 
 import com.dmytrosamoilov.offhand.core.ai.api.ModelFamily
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 
 internal sealed class ModelPromptSet {
 
-    abstract fun structureNote(preset: NotePreset): String
+    abstract fun structureNote(spec: NoteStyleSpec): String
 
-    abstract fun polishNote(preset: NotePreset, thinkingEnabled: Boolean): String
+    abstract fun polishNote(spec: NoteStyleSpec, thinkingEnabled: Boolean): String
 
     data object Gemma4 : ModelPromptSet() {
 
-        override fun structureNote(preset: NotePreset): String = listOf(
+        override fun structureNote(spec: NoteStyleSpec): String = listOf(
             TRANSCRIPT_INTRO,
             OUTPUT_SHAPE_INTRO,
             NOTE_JSON_SHAPE,
-            NotePresetPrompt.fieldRules(preset),
+            NoteStylePrompt.fieldRules(spec),
             NOTE_JSON_RULES,
-            NOTE_FACTUALITY_RULES,
+            "$NOTE_FACTUALITY_RULES ${NoteStylePrompt.structureLanguageRule(spec)}",
         ).joinToString(LINE_BREAK)
 
-        override fun polishNote(preset: NotePreset, thinkingEnabled: Boolean): String = listOfNotNull(
-            "$POLISH_INTRO_PREFIX${NotePresetPrompt.noteKind(preset)}.",
+        override fun polishNote(spec: NoteStyleSpec, thinkingEnabled: Boolean): String = listOfNotNull(
+            "$POLISH_INTRO_PREFIX${spec.kind}.",
             POLISH_CONTEXT,
             POLISH_TASKS_HEADER,
             POLISH_DEDUPE_RULE,
             POLISH_PROOFREAD_RULE,
-            NotePresetPrompt.polishStructureRule(preset),
+            NoteStylePrompt.polishStructureRule(spec),
             POLISH_THINKING_RULE.takeIf { thinkingEnabled },
             if (thinkingEnabled) POLISH_OUTPUT_INTRO else OUTPUT_SHAPE_INTRO,
             NOTE_JSON_SHAPE,
-            NotePresetPrompt.polishFieldRules(),
+            NoteStylePrompt.polishFieldRules(),
             if (thinkingEnabled) POLISH_JSON_RULES else NOTE_JSON_RULES,
-            POLISH_FACTUALITY_RULES,
+            "$POLISH_FACTUALITY_RULES ${NoteStylePrompt.polishLanguageRule(spec)}",
         ).joinToString(LINE_BREAK)
     }
 
@@ -65,7 +64,7 @@ private val NOTE_JSON_RULES = """
 """.trimIndent()
 
 private const val NOTE_FACTUALITY_RULES =
-    "Very important: only mention facts and numbers that are explicitly said in the recording — never invent or guess anything. Never add dates, years, or times that are not explicitly spoken. Write the title and the overview in the same language the recording is spoken in."
+    "Very important: only mention facts and numbers that are explicitly said in the recording — never invent or guess anything. Never add dates, years, or times that are not explicitly spoken."
 
 private const val POLISH_INTRO_PREFIX = "You will receive the draft of one note. The note is "
 
@@ -101,4 +100,4 @@ private val POLISH_JSON_RULES = """
 """.trimIndent()
 
 private const val POLISH_FACTUALITY_RULES =
-    "Very important: keep every name, number, amount, date and decision exactly as written in the draft, and never add anything the draft does not say. Write the title and the overview in the same language the draft is written in."
+    "Very important: keep every name, number, amount, date and decision exactly as written in the draft, and never add anything the draft does not say."

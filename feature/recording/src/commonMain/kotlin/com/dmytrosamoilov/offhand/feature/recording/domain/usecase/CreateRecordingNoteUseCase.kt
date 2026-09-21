@@ -3,8 +3,8 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.data.domain.Note
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.feature.recording.domain.DefaultNoteTitleProvider
 import kotlin.time.Clock
@@ -16,7 +16,7 @@ class CreateRecordingNoteUseCase(
 ) {
     suspend operator fun invoke(
         audioFileName: String?,
-        preset: NotePreset,
+        style: NoteStyleRef,
     ): Long =
         notesRepository.createNote(
             Note(
@@ -31,7 +31,7 @@ class CreateRecordingNoteUseCase(
                 audioFileName = audioFileName,
                 durationMs = null,
                 status = NoteStatus.RECORDING,
-                preset = preset,
+                style = style,
             ),
         )
 }
