@@ -3,14 +3,26 @@
 [![Release](https://img.shields.io/github/v/release/dmytroSamoilov/Offhand?include_prereleases&label=release)](https://github.com/dmytroSamoilov/Offhand/releases)
 ![Status](https://img.shields.io/badge/status-stable-release)
 
-> **Latest release: [Offhand 1.2.2](https://github.com/dmytroSamoilov/Offhand/releases/latest)** —
-> Offhand comes to iPhone and iPad, six new languages, recording that survives
-> switching apps, and the faster, more resilient processing engine from 1.2.0. See the
+<p>
+  <a href="https://apps.apple.com/app/offhand-private-voice-notes/id6803641617">
+    <img src="https://toolbox.marketingtools.apple.com/api/badges/download-on-the-app-store/black/en-us?size=250x83" alt="Download on the App Store" height="48">
+  </a>
+  &nbsp;
+  <a href="https://play.google.com/store/apps/details?id=com.dmytrosamoilov.offhand&hl=en">
+    <img src="https://play.google/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="72">
+  </a>
+</p>
+
+> **Latest release: [Offhand 1.3.0](https://github.com/dmytroSamoilov/Offhand/releases/latest)** —
+> search and folders, encrypted backup & restore with the recordings, transcriptions
+> that continue where they stopped, a better Summary style, and the first paid tier,
+> Offhand Pro: your own note styles, PDF and Word export, smart calendar suggestions and
+> audio file import. See [What's new in 1.3](#whats-new-in-13) and the
 > [releases page](https://github.com/dmytroSamoilov/Offhand/releases) for the full history.
 
-Private voice notes with on-device AI. Offhand records voice memos, meetings, and
-dictations and turns them into structured, readable notes — **entirely on device**. No
-audio, transcript, or note ever leaves your phone.
+Private voice notes with on-device AI, for Android and iPhone. Offhand records voice
+memos, meetings, and dictations and turns them into structured, readable notes —
+**entirely on device**. No audio, transcript, or note ever leaves your phone.
 
 Record → on-device speech-to-text → on-device LLM structures the transcript into a
 Markdown note with an AI-generated title → stored encrypted → read, edit, share, delete.
@@ -18,6 +30,39 @@ Markdown note with an AI-generated title → stored encrypted → read, edit, sh
 Built for anyone whose spoken thoughts are nobody else's business: executives capturing
 meeting debriefs, doctors dictating patient notes, consultants and lawyers with
 confidentiality obligations — or just your own ideas on a walk.
+
+## What's new in 1.3
+
+- **Search and folders** — full-text search across titles, overviews and transcripts with
+  highlighted snippets; notes can be filed into folders, moved from the menu or with a
+  swipe, and filtered by folder.
+- **Backup & restore** — one passphrase-encrypted `.offhand` file with notes, folders,
+  custom styles and the original recordings (AES-256-GCM, PBKDF2-derived key). Restore
+  merges into the existing library and skips duplicates.
+- **Copy any section** — Overview and Transcript each have their own copy button.
+- **Better Summary notes** — the default style now produces main topics, key decisions,
+  action items and an overview instead of a prose recap. Every style is sectioned.
+- **Transcription that survives interruptions** — progress is checkpointed after every
+  window, so a note killed by the system (or a failed run) continues from where it
+  stopped instead of starting over. iOS finishes notes in the background with
+  `BGContinuedProcessingTask` on iOS 26.
+- **App lock** — biometric or device-credential lock, offered during onboarding and in
+  Settings; an active recording carries across app switches without re-locking.
+- **Offhand Pro** — the first paid tier, yearly with a 14-day free trial or a one-time
+  lifetime purchase. Pro unlocks:
+  - **Note styles** — your own styles built from headings, per-section guidance and a
+    format (short, bullets, free), or described in plain words and drafted by the
+    on-device model. Styles are forms, not free prompts, so the output shape stays fixed.
+  - **PDF and Word export** — a note goes out as PDF or DOCX, written on device, next to
+    the existing text and audio sharing.
+  - **Smart suggestions** — the model finds dates and meetings in a note and offers
+    them as calendar events; you review each one in the system calendar editor before
+    anything is saved. Off by default.
+  - **Audio import** — pick audio files (up to two hours each) or share them into the
+    app; each becomes a note through the same on-device pipeline.
+  - Everything stays visible and tappable while free; the paywall opens on the action,
+    never unprompted. Payments go through Google Play and the App Store directly — no
+    payment SDK, no account, no server.
 
 ## How it works
 
@@ -31,14 +76,25 @@ confidentiality obligations — or just your own ideas on a walk.
 - **Recording**: 16 kHz PCM16 with RMS-based voice-activity detection, chunked at natural
   silence boundaries inside a `microphone` foreground service.
 - **Structuring**: the merged transcript is rewritten into detail-preserving Markdown
-  (headings, lists, action items) — not a lossy summary. Long recordings are structured in
-  ~2,500-token segments so they fit the model's 4,096-token context window.
-- **Encryption**: notes live in a SQLCipher-encrypted Room database. The passphrase is
-  random, wrapped by an AES-256-GCM key in the Android Keystore, and — on devices with a
-  lockscreen — bound to user authentication (fingerprint or device credential via
-  `BiometricPrompt`).
-- **Adaptive UI**: Jetpack Compose + Material 3 adaptive components. Bottom bar on phones,
-  navigation rail and list-detail two-pane on tablets and foldables.
+  sections (headings, lists, action items) according to the chosen note style — not a
+  lossy summary. Long recordings are structured in segments sized to the model's
+  4,096-token context window and merged afterwards, with duplicate statements removed.
+  Small on-device models truncate, miscount and bend JSON, so every step has a parser
+  that recovers what it can and a fallback that never loses the transcript.
+- **Checkpoints**: transcription progress is stored after every 29-second window; an
+  interrupted note resumes from the last checkpoint on the next launch or background run.
+- **Encryption on Android**: notes live in a SQLCipher-encrypted Room database. The
+  passphrase is random, wrapped by an AES-256-GCM key in the Android Keystore, and — on
+  devices with a lockscreen — bound to user authentication (fingerprint or device
+  credential via `BiometricPrompt`). Recordings are stored through Tink streaming AEAD.
+- **Encryption on iOS**: the database and the recordings use the system's
+  complete-unless-open data protection (`NSFileProtectionCompleteUnlessOpen`), so they
+  are unreadable while the device is locked and never leave the app sandbox; backups
+  use CryptoKit with the same file format as Android.
+- **UI**: Jetpack Compose + Material 3 adaptive components on Android (bottom bar on
+  phones, navigation rail and list-detail two-pane on tablets and foldables); SwiftUI on
+  iOS. The domain, data and ViewModel layers are shared Kotlin Multiplatform code, so
+  both apps run the same pipeline, parsers and business rules.
 
 ## Verify the privacy claims yourself
 
@@ -46,20 +102,33 @@ That is the point of this repo being public:
 
 - **Network access** — the only outbound traffic in the codebase is the one-time model
   download over HTTPS:
-  [`ModelDownloader.kt`](core/ai-local/src/main/kotlin/com/dmytrosamoilov/offhand/core/ai/local/ModelDownloader.kt).
-- **Telemetry is off by default and opt-in** — Crashlytics and Analytics auto-collection
-  are disabled in the [manifest](app/src/main/AndroidManifest.xml) and only activated when
-  you consent:
-  [`TelemetryController.kt`](app/src/main/java/com/dmytrosamoilov/offhand/telemetry/TelemetryController.kt).
-  Crash reports and usage statistics never contain note content.
+  [`ModelDownloader.kt`](core/ai-local/src/main/kotlin/com/dmytrosamoilov/offhand/core/ai/local/ModelDownloader.kt)
+  on Android and
+  [`IosFileDownloader.kt`](shared-framework/src/iosMain/kotlin/com/dmytrosamoilov/offhand/shared/IosFileDownloader.kt)
+  on iOS.
+- **Telemetry is off by default and opt-in** — Firebase never initialises on its own:
+  the provider is removed from the [manifest](app/src/main/AndroidManifest.xml) and
+  Crashlytics and Analytics are only configured after you consent, in
+  [`TelemetryController.kt`](app/src/main/java/com/dmytrosamoilov/offhand/telemetry/TelemetryController.kt)
+  and [`TelemetryController.swift`](iosApp/Offhand/Telemetry/TelemetryController.swift).
+  Crash reports and usage statistics never contain note content, titles, folder names or
+  search queries; the full list of events is in
+  [`AnalyticsEvents.kt`](core/data/src/commonMain/kotlin/com/dmytrosamoilov/offhand/core/data/domain/analytics/AnalyticsEvents.kt).
 - **Encryption at rest** — SQLCipher database and Keystore-wrapped keys in
-  [`core/security`](core/security) and [`core/data`](core/data).
-- **No screenshots, no backups** — `FLAG_SECURE` blocks screen capture;
-  `allowBackup="false"` keeps notes out of cloud backups.
+  [`core/security`](core/security) and [`core/data`](core/data); file protection on iOS
+  in the same modules' `iosMain` sources.
+- **Backups are yours** — `allowBackup="false"` keeps notes out of Android cloud
+  backups; the only backup is the passphrase-encrypted file you export yourself
+  ([`feature/backup`](feature/backup)). Screenshots and screen recording are allowed.
+- **Payments stay with the stores** — Play Billing and StoreKit 2 are called directly
+  ([`PlayProStore.kt`](core/data/src/androidMain/kotlin/com/dmytrosamoilov/offhand/core/data/billing/PlayProStore.kt),
+  [`StoreKitProStore.swift`](iosApp/Offhand/Store/StoreKitProStore.swift)); there is no
+  third-party billing SDK, no account and no server that learns what you bought.
 
 ## Requirements
 
 - Android 12+ (minSdk 31), **5+ GB RAM and 4+ CPU cores** (checked at first launch)
+- iPhone or iPad on iOS 18 or later
 - ~3 GB free storage for the one-time model downloads (Whisper + Gemma)
 
 ## Building
@@ -78,6 +147,35 @@ Three product flavors that install side by side: `production` (`com.dmytrosamoil
 ```
 ./gradlew assembleDebug testDebugUnitTest lintDebug :app:lintDevDebug
 ```
+
+### iOS
+
+The iOS app lives in `iosApp/` and links the shared Kotlin code as an XCFramework.
+Schemes mirror the Android flavors: `Offhand-dev`, `Offhand-prod` and `Offhand-uitest`.
+
+1. Install [XcodeGen](https://github.com/yonaskolb/XcodeGen) and Git LFS, then build the
+   shared framework and fetch the speech-to-text frameworks:
+
+   ```
+   ./gradlew :shared-framework:assembleOffhandSharedReleaseXCFramework
+   iosApp/Tools/fetch-frameworks.sh
+   ```
+
+2. Generate the project and build:
+
+   ```
+   cd iosApp && xcodegen generate
+   GIT_LFS_SKIP_SMUDGE=1 xcodebuild build -project Offhand.xcodeproj -scheme Offhand-dev \
+     -destination 'generic/platform=iOS Simulator' ARCHS=arm64
+   ```
+
+   `GIT_LFS_SKIP_SMUDGE=1` is needed for a fresh package checkout: LiteRT-LM keeps
+   prebuilt libraries in Git LFS next to its sources and the iOS binary comes from a
+   release archive instead, so the LFS files are left as pointers.
+
+3. Optional — Firebase telemetry needs your own `GoogleService-Info.plist` under
+   `iosApp/Firebase/dev/` or `iosApp/Firebase/prod/`; without it the build warns and
+   telemetry stays off.
 
 ## Testing
 
@@ -181,18 +279,23 @@ implementations:
 :core:audio             AudioRecord streaming + VAD chunking
 :core:ai-api            AI abstractions — no LiteRT dependency
 :core:ai-local          LiteRT-LM engine, Whisper STT, model download, catalog
-:core:security          Keystore passphrase wrapping, app lock
-:core:data              encrypted Room notes + DataStore preferences
+:core:security          Keystore passphrase wrapping, encrypted audio store, app lock
+:core:data              encrypted Room notes, folders, checkpoints, Pro status, billing, analytics events
 :feature:onboarding     device check → model download → consent
-:feature:recording      recording UI, foreground service, AI pipeline
-:feature:notes          list / detail / edit, adaptive two-pane
-:feature:settings       acceleration tier, model management, privacy
-:feature:backup         passphrase-encrypted backup and restore of notes, folders and audio
-:testing:fakes          canned AI, model, device and microphone for smoke tests
+:feature:recording      recording UI, foreground service, AI pipeline, note styles, calendar suggestions
+:feature:notes          list / search / folders / detail / edit, export to text, PDF and DOCX
+:feature:settings       note styles, default style, backup, import, subscription, privacy
+:feature:backup         passphrase-encrypted backup and restore of notes, folders, styles and audio
+:feature:paywall        Offhand Pro paywall and purchase flow
+:shared-framework       Kotlin Multiplatform framework consumed by the iOS app
+:testing:fakes          canned AI, model, device, microphone and store for smoke tests
 ```
 
 Three layers inside each feature (domain → data → presentation), use cases wrapping
-repositories, StateFlow-only ViewModels, mappers between domain and UI models.
+repositories, StateFlow-only ViewModels, mappers between domain and UI models. Feature
+and core modules are Kotlin Multiplatform: `commonMain` holds the logic, `androidMain`
+the Compose UI and Android services, `iosMain` the platform bridges the SwiftUI app
+calls through `shared-framework`.
 
 ## License
 
