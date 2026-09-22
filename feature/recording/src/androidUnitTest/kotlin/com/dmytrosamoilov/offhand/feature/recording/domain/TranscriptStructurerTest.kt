@@ -14,6 +14,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -376,6 +377,15 @@ class TranscriptStructurerTest {
     @Test
     fun `short transcript is a single segment`() {
         assertEquals(1, structurer.splitIntoSegments("short one", 2_500).size)
+    }
+
+    @Test
+    fun `a prompt that fills the window fails before splitting`() {
+        val error = assertThrows(IllegalStateException::class.java) {
+            structurer.splitIntoSegments("word ".repeat(4_000), -1_830)
+        }
+
+        assertTrue(error.message.orEmpty().contains("-1830"))
     }
 
     @Test
