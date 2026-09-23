@@ -23,6 +23,23 @@ Built for anyone whose spoken thoughts are nobody else's business: executives ca
 meeting debriefs, doctors dictating patient notes, consultants and lawyers with
 confidentiality obligations — or just your own ideas on a walk.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/01-record.png" width="180" alt="Recording a voice note with a live waveform"><br><sub>Records &amp; transcribes, 100% offline</sub></td>
+    <td align="center"><img src="docs/screenshots/02-summary-note.png" width="180" alt="A Summary note with main topics, key decisions and action items"><br><sub>Structured notes, not summaries</sub></td>
+    <td align="center"><img src="docs/screenshots/03-search-folders.png" width="180" alt="Full-text search with highlighted matches and a folder filter"><br><sub>Search everything, sort with folders</sub></td>
+    <td align="center"><img src="docs/screenshots/04-backup.png" width="180" alt="Setting a passphrase for an encrypted backup"><br><sub>One encrypted backup, yours to keep</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/05-describe-style.png" width="180" alt="A custom note style drafted from a plain-language description"><br><sub>Describe a style, get a form (Pro)</sub></td>
+    <td align="center"><img src="docs/screenshots/06-import-audio.png" width="180" alt="Importing an audio file from Files"><br><sub>Turn any recording into a note (Pro)</sub></td>
+    <td align="center"><img src="docs/screenshots/07-export-word.png" width="180" alt="Share sheet with the Word file format selected"><br><sub>Share it as Word or PDF (Pro)</sub></td>
+    <td align="center"><img src="docs/screenshots/08-private-by-design.png" width="180" alt="Onboarding step: Private by design"><br><sub>No cloud. No account. Open source.</sub></td>
+  </tr>
+</table>
+
 ## What's new in 1.3
 
 - **Search and folders** — full-text search across titles, overviews and transcripts with
