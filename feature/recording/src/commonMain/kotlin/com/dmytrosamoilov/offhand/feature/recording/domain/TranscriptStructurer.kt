@@ -232,6 +232,7 @@ class TranscriptStructurer(
     }
 
     internal fun splitIntoSegments(transcript: String, tokenBudget: Int): List<String> {
+        check(tokenBudget >= MIN_SEGMENT_TOKENS) { "The note style prompt leaves $tokenBudget tokens for the transcript" }
         if (TokenEstimator.approxText(transcript) <= tokenBudget) return listOf(transcript)
 
         val segments = mutableListOf<String>()
@@ -317,6 +318,7 @@ class TranscriptStructurer(
         // truncated or summarised it away instead of deduplicating it.
         const val MIN_POLISH_RETAIN = 0.3f
         const val OVERSIZED_PARAGRAPH_CHARS_PER_TOKEN = 2
+        const val MIN_SEGMENT_TOKENS = 64
         const val MAX_TITLE_CHARS = 80
         const val TITLE_MAX_WORDS = 8
         const val PARAGRAPH_SEPARATOR = "\n\n"
