@@ -63,6 +63,11 @@ object SharedGraph {
     fun startModelDownload() {
         KoinPlatform.getKoin().get<ModelDownloadController>().start()
     }
+
+    // Called from the app delegate when iOS wakes the app for a background download.
+    fun handleBackgroundDownloadEvents(identifier: String, completion: () -> Unit) {
+        KoinPlatform.getKoin().get<IosFileDownloader>().handleBackgroundEvents(identifier, completion)
+    }
 }
 
 class NoteStyleEditorHandle(styleId: Long) {

@@ -32,6 +32,7 @@ import com.dmytrosamoilov.offhand.feature.settings.di.featureSettingsModule
 import com.dmytrosamoilov.offhand.testing.fakes.smokeFakesModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.context.startKoin
@@ -143,11 +144,14 @@ class IosModelDownloadController(
     private val scope: CoroutineScope,
 ) : ModelDownloadController {
 
+    private var run: Job? = null
+
     // Speech first, matching Android: it is the smaller download and the one the
     // very first recording needs, and finishing it before the LLM keeps
     // ModelState.Ready a truthful signal that everything is on disk.
     override fun start() {
-        scope.launch {
+        if (run?.isActive == true) return
+        run = scope.launch {
             runCatching { speechToText.prepare() }
             runCatching { modelManager.ensureModelAvailable() }
         }

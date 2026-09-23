@@ -50,13 +50,11 @@ struct NotesListView: View {
             )
             .presentationDetents([.medium, .large])
         }
-        .confirmationDialog(
-            String(localized: "Delete this note?"),
-            isPresented: deleteBinding,
-            titleVisibility: .visible
-        ) {
+        .alert(String(localized: "Delete this note?"), isPresented: deleteBinding) {
             Button(String(localized: "Delete"), role: .destructive) { viewModel.onDeleteConfirmed() }
             Button(String(localized: "Cancel"), role: .cancel) { viewModel.onDeleteDismissed() }
+        } message: {
+            Text(String(localized: "The note will be permanently removed from your iPhone. This cannot be undone."))
         }
         .confirmationDialog(
             String(localized: "Delete this folder?"),

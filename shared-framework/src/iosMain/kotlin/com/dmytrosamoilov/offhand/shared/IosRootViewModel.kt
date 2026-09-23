@@ -68,10 +68,13 @@ class IosRootViewModel(
         appLockManager.markLocked()
     }
 
+    // Runs on every return to the foreground, so a download that the system
+    // dropped while the app was away is picked up again without a relaunch.
     fun onReady() {
         launchSafely(showLoading = false) {
             if (phase.value != IosRootPhase.READY) return@launchSafely
             resumeInterruptedNotes()
+            startModelDownloadIfMissing()
         }
     }
 
@@ -88,9 +91,13 @@ class IosRootViewModel(
     private fun resumeModelDownloadWhenReady() {
         launchSafely(showLoading = false) {
             phase.first { it == IosRootPhase.READY }
-            if (!modelManager.isModelDownloaded()) {
-                modelDownloadController.start()
-            }
+            startModelDownloadIfMissing()
+        }
+    }
+
+    private suspend fun startModelDownloadIfMissing() {
+        if (!modelManager.isModelDownloaded()) {
+            modelDownloadController.start()
         }
     }
 

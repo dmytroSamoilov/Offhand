@@ -6,7 +6,9 @@ struct RootView: View {
     private let viewModel = AppViewModels.root
     private let sessionManager = SharedGraph.shared.sessionManager()
     private let proUpgradeGate = SharedGraph.shared.proUpgradeGate()
+    private let aiCoreDownloadStatus = SharedGraph.shared.aiCoreDownloadStatus()
     @State private var activityController = NoteActivityController()
+    @State private var downloadActivityController = AiCoreDownloadActivityController()
     @State private var finishCoordinator = NoteFinishCoordinator()
     @State private var activeNoteId: Int64?
     @State private var phase: IosRootPhase = .loading
@@ -48,6 +50,7 @@ struct RootView: View {
         .task { await observeProcessingIds() }
         .task { await observeProgress() }
         .task { await observeProcessingEvents() }
+        .task { await observeAiCoreDownload() }
         .onAppear {
             finishCoordinator.onLegacyExpired = { [activityController] in
                 activityController.suspendedWithPendingWork()
@@ -175,6 +178,24 @@ struct RootView: View {
                   sessionManager.session.value.phase != .recording,
                   let percent = progress[KotlinLong(value: noteId)] else { continue }
             activityController.processingProgressed(percent: percent.intValue)
+        }
+    }
+
+    // Idle after downloading means the run ended; the LLM downloads last, so its
+    // file on disk tells success from a drop the next foreground will resume.
+    private func observeAiCoreDownload() async {
+        var wasDownloading = false
+        for await state in aiCoreDownloadStatus.state {
+            switch onEnum(of: state) {
+            case .downloading(let downloading):
+                wasDownloading = true
+                downloadActivityController.progressed(percent: Int(downloading.progressPercent))
+            case .idle:
+                guard wasDownloading else { continue }
+                wasDownloading = false
+                let isReady = (try? await SharedGraph.shared.modelManager().isModelDownloaded())?.boolValue ?? false
+                downloadActivityController.finished(isReady: isReady)
+            }
         }
     }
 

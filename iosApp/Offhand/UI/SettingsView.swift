@@ -317,6 +317,7 @@ struct SettingsView: View {
                     .labelsHidden()
                     .allowsHitTesting(false)
             }
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }

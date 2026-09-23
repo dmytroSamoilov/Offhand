@@ -12,41 +12,41 @@ struct NoteDetailView: View {
             VStack(alignment: .leading, spacing: 16) {
                 header
                 trustBadges
+                // The recording is playable as soon as it is on disk, like on
+                // Android; only the overview waits for processing.
+                if detail.hasAudio && state.playback.isAvailable {
+                    playbackCard
+                }
                 if detail.status == .processing {
                     processingCard
+                } else if detail.status == .failed {
+                    failedCard
                 } else {
-                    if detail.hasAudio && state.playback.isAvailable {
-                        playbackCard
+                    CollapsibleSection(
+                        title: String(localized: "Overview"),
+                        copyLabel: String(localized: "Copy overview"),
+                        onCopy: { viewModel.onNoteCopied(section: .overview) },
+                        text: detail.body,
+                        labelBackground: Brand.primaryContainer,
+                        labelForeground: Brand.onPrimaryContainer,
+                        initiallyExpanded: true
+                    )
+                    .id(detail.id)
+                    if let suggestions = state.smartSuggestions {
+                        SmartSuggestionsSection(viewModel: viewModel, suggestions: suggestions)
                     }
-                    if detail.status == .failed {
-                        failedCard
-                    } else {
-                        CollapsibleSection(
-                            title: String(localized: "Overview"),
-                            copyLabel: String(localized: "Copy overview"),
-                            onCopy: { viewModel.onNoteCopied(section: .overview) },
-                            text: detail.body,
-                            labelBackground: Brand.primaryContainer,
-                            labelForeground: Brand.onPrimaryContainer,
-                            initiallyExpanded: true
-                        )
-                        .id(detail.id)
-                        if let suggestions = state.smartSuggestions {
-                            SmartSuggestionsSection(viewModel: viewModel, suggestions: suggestions)
-                        }
-                    }
-                    if !detail.transcript.isEmpty {
-                        CollapsibleSection(
-                            title: String(localized: "Transcript"),
-                            copyLabel: String(localized: "Copy transcript"),
-                            onCopy: { viewModel.onNoteCopied(section: .transcript) },
-                            text: detail.transcript,
-                            labelBackground: Brand.tertiaryContainer,
-                            labelForeground: Brand.onTertiaryContainer,
-                            initiallyExpanded: detail.status != .ready
-                        )
-                        .id(detail.id)
-                    }
+                }
+                if !detail.transcript.isEmpty {
+                    CollapsibleSection(
+                        title: String(localized: "Transcript"),
+                        copyLabel: String(localized: "Copy transcript"),
+                        onCopy: { viewModel.onNoteCopied(section: .transcript) },
+                        text: detail.transcript,
+                        labelBackground: Brand.tertiaryContainer,
+                        labelForeground: Brand.onTertiaryContainer,
+                        initiallyExpanded: detail.status != .ready
+                    )
+                    .id(detail.id)
                 }
             }
             .padding()
