@@ -170,7 +170,7 @@ struct SettingsView: View {
             allowsMultipleSelection: true
         ) { result in
             guard case .success(let urls) = result else { return }
-            let staged = urls.map(stageAudio)
+            let staged = urls.map(AudioFileStaging.stage)
             viewModel.onAudioImportSelected(
                 sources: staged.compactMap { $0 },
                 unreadableCount: Int32(staged.filter { $0 == nil }.count)
@@ -180,7 +180,7 @@ struct SettingsView: View {
             Button(String(localized: "OK")) { viewModel.onImportNoticeDismissed() }
         } message: {
             if let notice = state.importNotice {
-                Text(importNoticeMessage(notice))
+                Text(ImportNoticeText.message(notice))
             }
         }
         .task {
@@ -191,19 +191,6 @@ struct SettingsView: View {
         }
     }
 
-    // The picker's grant is tied to this view, while decoding runs later on
-    // the session's scope, so the file is copied into tmp first; the decoder
-    // deletes the copy when it is done.
-    private func stageAudio(_ url: URL) -> AudioImportSource? {
-        let accessed = url.startAccessingSecurityScopedResource()
-        defer { if accessed { url.stopAccessingSecurityScopedResource() } }
-        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("imports", isDirectory: true)
-        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let copy = directory.appendingPathComponent(UUID().uuidString).appendingPathExtension(url.pathExtension)
-        guard (try? FileManager.default.copyItem(at: url, to: copy)) != nil else { return nil }
-        return AudioImportSource(handle: copy.path, displayName: url.lastPathComponent)
-    }
-
     private var importNoticeBinding: Binding<Bool> {
         Binding(
             get: { state.importNotice != nil },
@@ -212,22 +199,7 @@ struct SettingsView: View {
     }
 
     private var importNoticeTitle: String {
-        if case .started = onEnum(of: state.importNotice) {
-            return String(localized: "Import started")
-        }
-        return String(localized: "Import audio")
-    }
-
-    private func importNoticeMessage(_ notice: ImportNoticeUi) -> String {
-        switch onEnum(of: notice) {
-        case .started(let started):
-            return String.localizedStringWithFormat(
-                String(localized: "%d files are being imported. The notes are created in the background and will show up in your notes list as soon as they are ready."),
-                started.fileCount
-            )
-        case .unreadable:
-            return String(localized: "Some of the files could not be read.")
-        }
+        ImportNoticeText.title(state.importNotice)
     }
 
     private var appVersion: String {

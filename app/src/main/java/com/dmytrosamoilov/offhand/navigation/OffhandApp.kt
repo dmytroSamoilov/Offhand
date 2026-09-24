@@ -33,6 +33,7 @@ import com.dmytrosamoilov.offhand.feature.settings.presentation.AboutSupportScre
 import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStyleEditorScreen
 import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStylesScreen
 import com.dmytrosamoilov.offhand.feature.settings.presentation.SettingsScreen
+import com.dmytrosamoilov.offhand.feature.settings.presentation.SharedAudioImportHost
 
 // The tabs carry test tags exposed as resource ids: the Settings screen has a
 // "Notes" card whose title would otherwise match the tab text in Maestro.
@@ -120,6 +121,7 @@ fun OffhandApp(
         isVisible = isRecordingSheetVisible,
         onVisibilityChange = { isRecordingSheetVisible = it },
     )
+    SharedAudioImportHost()
     PaywallHost()
 }
 

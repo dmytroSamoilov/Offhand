@@ -16,6 +16,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCa
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetTranscriptionCheckpointUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardStagedAudioUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
@@ -91,6 +92,7 @@ val featureRecordingModule = module {
     factoryOf(::GetNoteStyleUseCase)
     factoryOf(::GetNoteUseCase)
     factoryOf(::GetTranscriptionCheckpointUseCase)
+    factoryOf(::DiscardStagedAudioUseCase)
     factoryOf(::ImportAudioUseCase)
     factoryOf(::IsAudioImportAvailableUseCase)
     factoryOf(::IsAiCoreDownloadedUseCase)

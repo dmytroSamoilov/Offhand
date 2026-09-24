@@ -26,6 +26,7 @@ import com.dmytrosamoilov.offhand.feature.recording.di.featureRecordingModule
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.AppIconProvider
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.NotePdfRenderer
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioDecoder
+import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportStaging
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioRecorder
 import com.dmytrosamoilov.offhand.feature.recording.domain.DefaultNoteTitleProvider
 import com.dmytrosamoilov.offhand.feature.settings.di.featureSettingsModule
@@ -90,6 +91,7 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
     single { BuildInfo(isDeveloperBuild = deps.isDeveloperBuild, appVersion = deps.appVersion, platform = "ios") }
     single<BackupCrypto> { IosBackupCrypto(deps.backupCrypto) }
     single<AudioDecoder> { IosAudioDecoder(deps.audioDecoder) }
+    single<AudioImportStaging> { IosAudioImportStaging() }
     single<NotePdfRenderer> { IosNotePdfRenderer(deps.noteDocuments) }
     single<AppIconProvider> { IosAppIconProvider(deps.noteDocuments) }
     single<ProStore>(named(PLATFORM_PRO_STORE)) { IosProStore(deps.proStore) }

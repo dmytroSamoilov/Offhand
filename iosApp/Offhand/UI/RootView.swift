@@ -7,6 +7,8 @@ struct RootView: View {
     private let sessionManager = SharedGraph.shared.sessionManager()
     private let proUpgradeGate = SharedGraph.shared.proUpgradeGate()
     private let aiCoreDownloadStatus = SharedGraph.shared.aiCoreDownloadStatus()
+    private let sharedAudioImport = AppViewModels.sharedAudioImport
+    @State private var sharedImportState = SharedAudioImportUiState(pendingSources: [], pendingUnreadableCount: 0, notice: nil)
     @State private var activityController = NoteActivityController()
     @State private var downloadActivityController = AiCoreDownloadActivityController()
     @State private var finishCoordinator = NoteFinishCoordinator()
@@ -51,6 +53,35 @@ struct RootView: View {
         .task { await observeProgress() }
         .task { await observeProcessingEvents() }
         .task { await observeAiCoreDownload() }
+        .task {
+            for await newState in sharedAudioImport.uiState {
+                sharedImportState = newState
+            }
+        }
+        // Audio shared from another app lands here as a file URL (see
+        // CFBundleDocumentTypes); the share sheet gave no hint that import is
+        // Pro, so a free user is asked before the paywall.
+        .onOpenURL { url in
+            guard url.isFileURL else { return }
+            let staged = AudioFileStaging.stage(url)
+            sharedAudioImport.onSharedAudioReceived(
+                sources: [staged].compactMap { $0 },
+                unreadableCount: staged == nil ? 1 : 0
+            )
+        }
+        .alert(String(localized: "Import with Offhand Pro"), isPresented: proImportBinding) {
+            Button(String(localized: "Upgrade")) { sharedAudioImport.onUpgradeClicked() }
+            Button(String(localized: "Cancel"), role: .cancel) { sharedAudioImport.onImportDeclined() }
+        } message: {
+            Text(String(localized: "Turning recordings from other apps into notes is part of Offhand Pro. Upgrade to import the shared audio."))
+        }
+        .alert(sharedImportNoticeTitle, isPresented: sharedImportNoticeBinding) {
+            Button(String(localized: "OK")) { sharedAudioImport.onNoticeDismissed() }
+        } message: {
+            if let notice = sharedImportState.notice {
+                Text(ImportNoticeText.message(notice))
+            }
+        }
         .onAppear {
             finishCoordinator.onLegacyExpired = { [activityController] in
                 activityController.suspendedWithPendingWork()
@@ -197,6 +228,24 @@ struct RootView: View {
                 downloadActivityController.finished(isReady: isReady)
             }
         }
+    }
+
+    private var proImportBinding: Binding<Bool> {
+        Binding(
+            get: { phase == .ready && sharedImportState.isProDialogShown },
+            set: { isShown in if !isShown { sharedAudioImport.onImportDeclined() } }
+        )
+    }
+
+    private var sharedImportNoticeBinding: Binding<Bool> {
+        Binding(
+            get: { phase == .ready && sharedImportState.notice != nil },
+            set: { isShown in if !isShown { sharedAudioImport.onNoticeDismissed() } }
+        )
+    }
+
+    private var sharedImportNoticeTitle: String {
+        ImportNoticeText.title(sharedImportState.notice)
     }
 
     private func handleBackgrounded() {

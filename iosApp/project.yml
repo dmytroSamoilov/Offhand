@@ -11,6 +11,11 @@ configs:
   Release-prod: release
   Debug-uitest: debug
 settings:
+  # Project-wide so the app and the widget extension can never disagree; bump
+  # here and regenerate, the App Store rejects an extension on another build.
+  base:
+    MARKETING_VERSION: "1.3.1"
+    CURRENT_PROJECT_VERSION: "23"
   configs:
     Debug-dev:
       APP_ID_SUFFIX: .dev
@@ -82,8 +87,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.dmytrosamoilov.offhand$(APP_ID_SUFFIX)
         ASSETCATALOG_COMPILER_APPICON_NAME: $(APP_ICON_NAME)
-        MARKETING_VERSION: "1.2.2"
-        CURRENT_PROJECT_VERSION: "17"
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
         SWIFT_VERSION: "5.9"
         IPHONEOS_DEPLOYMENT_TARGET: "18.0"
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -102,17 +106,22 @@ targets:
       path: Offhand/Info.plist
       properties:
         CFBundleDisplayName: $(APP_DISPLAY_NAME)
+        # Lists Offhand in the share sheet and "Open in" for audio files; iOS
+        # hands the copy in Documents/Inbox to RootView.onOpenURL.
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Audio
+            LSHandlerRank: Alternate
+            LSItemContentTypes: [public.audio]
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen: {}
-        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
-        # iPad multitasking requires all four, and opting out via
-        # UIRequiresFullScreen is deprecated.
-        UISupportedInterfaceOrientations~ipad:
-          - UIInterfaceOrientationPortrait
-          - UIInterfaceOrientationPortraitUpsideDown
+        # All four on every device, as set in Xcode; iPad multitasking needs
+        # all four anyway, and opting out via UIRequiresFullScreen is deprecated.
+        UISupportedInterfaceOrientations:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
         UIBackgroundModes: [audio, processing]
         BGTaskSchedulerPermittedIdentifiers:
           - $(PRODUCT_BUNDLE_IDENTIFIER).finish.*
@@ -122,6 +131,9 @@ targets:
         # back to the passcode.
         NSFaceIDUsageDescription: "Offhand uses Face ID so only you can open your notes."
         ITSAppUsesNonExemptEncryption: false
+        # Required alongside CFBundleDocumentTypes (ITMS-90737); shared audio is
+        # copied into tmp and decoded from there, never edited where it lives.
+        LSSupportsOpeningDocumentsInPlace: false
         # Off until the stored consent says otherwise, so nothing is collected
         # before the user has answered.
         FirebaseCrashlyticsCollectionEnabled: false
@@ -136,8 +148,6 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.dmytrosamoilov.offhand$(APP_ID_SUFFIX).widgets
-        MARKETING_VERSION: "1.2.2"
-        CURRENT_PROJECT_VERSION: "17"
         SWIFT_VERSION: "5.9"
         IPHONEOS_DEPLOYMENT_TARGET: "18.0"
         TARGETED_DEVICE_FAMILY: "1,2"

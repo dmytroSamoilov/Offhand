@@ -113,6 +113,9 @@
     <string name="settings_import_audio_subtitle">Превратите аудиофайлы в заметки. Выберите один или несколько сразу</string>
     <string name="settings_import_unreadable">Некоторые файлы не удалось прочитать.</string>
     <string name="settings_import_dismiss">ОК</string>
+    <string name="settings_import_pro_title">Импорт с Offhand Pro</string>
+    <string name="settings_import_pro_body">Превращение записей из других приложений в заметки входит в Offhand Pro. Перейдите на Pro, чтобы импортировать полученное аудио.</string>
+    <string name="settings_import_pro_cancel">Отмена</string>
     <string name="settings_import_started_title">Импорт начат</string>
     <plurals name="settings_import_started">
         <item quantity="one">Импортируется %d файл. Заметка создаётся в фоне и появится в списке заметок, как только будет готова.</item>

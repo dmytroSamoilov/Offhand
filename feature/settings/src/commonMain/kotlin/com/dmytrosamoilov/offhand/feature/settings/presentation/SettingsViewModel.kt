@@ -152,18 +152,12 @@ class SettingsViewModel(
         if (sources.isEmpty() && unreadableCount == 0) return
         launchSafely(showLoading = false) {
             val result = importAudio(sources)
-            val notice = importNotice(
+            val notice = importNoticeOf(
                 hasUnreadable = unreadableCount > 0,
                 startedCount = if (result == ImportAudioResult.STARTED) sources.size else 0,
             )
             mutableUiState.update { it.copy(importNotice = notice) }
         }
-    }
-
-    private fun importNotice(hasUnreadable: Boolean, startedCount: Int): ImportNoticeUi? = when {
-        hasUnreadable -> ImportNoticeUi.Unreadable
-        startedCount > 0 -> ImportNoticeUi.Started(startedCount)
-        else -> null
     }
 
     fun onImportNoticeDismissed() {

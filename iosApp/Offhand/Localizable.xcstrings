@@ -4480,6 +4480,46 @@
         }
       }
     },
+    "Import with Offhand Pro" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importieren mit Offhand Pro"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importar con Offhand Pro"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro के साथ इंपोर्ट करें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importar com o Offhand Pro"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Импорт с Offhand Pro"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Імпорт з Offhand Pro"
+          }
+        }
+      }
+    },
     "Include audio recordings" : {
       "localizations" : {
         "de" : {
@@ -12197,6 +12237,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Перетворити записи на нотатки"
+          }
+        }
+      }
+    },
+    "Turning recordings from other apps into notes is part of Offhand Pro. Upgrade to import the shared audio." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahmen aus anderen Apps in Notizen zu verwandeln ist Teil von Offhand Pro. Führe ein Upgrade durch, um das geteilte Audio zu importieren."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Convertir grabaciones de otras apps en notas forma parte de Offhand Pro. Pásate a Pro para importar el audio compartido."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "दूसरे ऐप्स की रिकॉर्डिंग को नोट्स में बदलना Offhand Pro का हिस्सा है। साझा किया गया ऑडियो इंपोर्ट करने के लिए अपग्रेड करें।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transformar gravações de outros apps em notas faz parte do Offhand Pro. Faça upgrade para importar o áudio compartilhado."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Превращение записей из других приложений в заметки входит в Offhand Pro. Перейдите на Pro, чтобы импортировать полученное аудио."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перетворення записів з інших застосунків на нотатки входить до Offhand Pro. Перейдіть на Pro, щоб імпортувати отримане аудіо."
           }
         }
       }

@@ -5,6 +5,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.AndroidAudioRecorder
 import com.dmytrosamoilov.offhand.feature.recording.domain.AndroidRecordingAudioBackup
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioDecoder
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportIntake
+import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportStaging
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioRecorder
 import com.dmytrosamoilov.offhand.feature.recording.domain.DefaultNoteTitleProvider
 import com.dmytrosamoilov.offhand.feature.recording.domain.MediaCodecAudioDecoder
@@ -21,5 +22,5 @@ val featureRecordingAndroidModule = module {
     singleOf(::AndroidAudioRecorder) bind AudioRecorder::class
     singleOf(::AndroidRecordingAudioBackup) bind RecordingAudioBackup::class
     singleOf(::MediaCodecAudioDecoder) bind AudioDecoder::class
-    singleOf(::AudioImportIntake)
+    singleOf(::AudioImportIntake) bind AudioImportStaging::class
 }

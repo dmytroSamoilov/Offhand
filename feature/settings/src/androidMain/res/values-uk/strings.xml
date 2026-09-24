@@ -113,6 +113,9 @@
     <string name="settings_import_audio_subtitle">Перетворюйте аудіофайли на нотатки. Виберіть один або кілька одразу</string>
     <string name="settings_import_unreadable">Деякі файли не вдалося прочитати.</string>
     <string name="settings_import_dismiss">ОК</string>
+    <string name="settings_import_pro_title">Імпорт з Offhand Pro</string>
+    <string name="settings_import_pro_body">Перетворення записів з інших застосунків на нотатки входить до Offhand Pro. Перейдіть на Pro, щоб імпортувати отримане аудіо.</string>
+    <string name="settings_import_pro_cancel">Скасувати</string>
     <string name="settings_import_started_title">Імпорт розпочато</string>
     <plurals name="settings_import_started">
         <item quantity="one">Імпортується %d файл. Нотатка створюється у фоні й зʼявиться у списку нотаток, щойно буде готова.</item>

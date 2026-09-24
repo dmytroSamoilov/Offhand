@@ -25,6 +25,7 @@ import com.dmytrosamoilov.offhand.feature.settings.presentation.AboutSupportView
 import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStyleEditorViewModel
 import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStylesViewModel
 import com.dmytrosamoilov.offhand.feature.settings.presentation.SettingsViewModel
+import com.dmytrosamoilov.offhand.feature.settings.presentation.SharedAudioImportViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
@@ -53,6 +54,7 @@ val featureSettingsModule = module {
     factoryOf(::SetSmartSuggestionsEnabledUseCase)
     factoryOf(::SetTelemetryConsentUseCase)
     viewModelOf(::SettingsViewModel)
+    viewModelOf(::SharedAudioImportViewModel)
     viewModelOf(::AboutSupportViewModel)
     viewModelOf(::NoteStylesViewModel)
     viewModel { parameters ->

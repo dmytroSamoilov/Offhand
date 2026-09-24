@@ -381,7 +381,7 @@ private fun ProOverride.labelRes(): Int = when (this) {
 }
 
 @Composable
-private fun ImportNotice(notice: ImportNoticeUi?, onDismiss: () -> Unit) {
+internal fun ImportNotice(notice: ImportNoticeUi?, onDismiss: () -> Unit) {
     when (notice) {
         null -> Unit
         is ImportNoticeUi.Started -> ImportNoticeDialog(
