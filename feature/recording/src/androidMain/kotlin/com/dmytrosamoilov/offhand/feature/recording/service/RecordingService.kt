@@ -51,7 +51,7 @@ class RecordingService : Service(), KoinComponent {
                     recordingNotification(),
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE,
                 )
-                sessionManager.start()
+                sessionManager.start(intent.folderIdExtra())
                 observeSession()
             }
             ACTION_PAUSE -> sessionManager.pause()
@@ -69,6 +69,9 @@ class RecordingService : Service(), KoinComponent {
             else -> START_NOT_STICKY
         }
     }
+
+    private fun Intent.folderIdExtra(): Long? =
+        getLongExtra(EXTRA_FOLDER_ID, NO_FOLDER_ID).takeIf { it != NO_FOLDER_ID }
 
     private fun startNoteRetry(intent: Intent) {
         val noteId = intent.getLongExtra(EXTRA_RETRY_NOTE_ID, -1L)
@@ -340,9 +343,14 @@ class RecordingService : Service(), KoinComponent {
             "com.dmytrosamoilov.offhand.extra.RETRY_AUDIO_FILE"
         private const val EXTRA_STYLE =
             "com.dmytrosamoilov.offhand.extra.NOTE_STYLE"
+        private const val EXTRA_FOLDER_ID =
+            "com.dmytrosamoilov.offhand.extra.FOLDER_ID"
+        private const val NO_FOLDER_ID = -1L
 
-        fun start(context: Context) {
-            context.startForegroundService(serviceIntent(context, ACTION_START))
+        fun start(context: Context, folderId: Long?) {
+            val intent = serviceIntent(context, ACTION_START)
+            folderId?.let { intent.putExtra(EXTRA_FOLDER_ID, it) }
+            context.startForegroundService(intent)
         }
 
         fun stop(context: Context) {

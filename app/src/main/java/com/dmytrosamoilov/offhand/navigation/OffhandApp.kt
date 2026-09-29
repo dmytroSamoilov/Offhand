@@ -47,6 +47,7 @@ fun OffhandApp(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
     var isRecordingSheetVisible by rememberSaveable { mutableStateOf(false) }
+    var recordingFolderId by rememberSaveable { mutableStateOf<Long?>(null) }
 
     LaunchedEffect(requestedNoteId) {
         if (requestedNoteId != null) {
@@ -83,7 +84,10 @@ fun OffhandApp(
                 NotesScreen(
                     requestedNoteId = requestedNoteId,
                     onRequestedNoteConsumed = onRequestedNoteConsumed,
-                    onNewRecording = { isRecordingSheetVisible = true },
+                    onNewRecording = { folderId ->
+                        recordingFolderId = folderId
+                        isRecordingSheetVisible = true
+                    },
                 )
             }
             navigation<SettingsGraphRoute>(startDestination = SettingsRoute) {
@@ -119,6 +123,7 @@ fun OffhandApp(
 
     RecordingSheetHost(
         isVisible = isRecordingSheetVisible,
+        folderId = recordingFolderId,
         onVisibilityChange = { isRecordingSheetVisible = it },
     )
     SharedAudioImportHost()

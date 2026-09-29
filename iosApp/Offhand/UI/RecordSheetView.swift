@@ -5,6 +5,7 @@ import UIKit
 
 struct RecordSheetView: View {
     var autoStart = false
+    var folderId: Int64?
     @Environment(\.dismiss) private var dismiss
     private let viewModel = AppViewModels.recording
     @State private var state = RecordingUiState(
@@ -234,7 +235,7 @@ struct RecordSheetView: View {
             Text(state.failureMessage ?? String(localized: "Recording failed"))
                 .multilineTextAlignment(.center)
             Button(String(localized: "Try again")) {
-                viewModel.onStartRecording()
+                viewModel.onStartRecording(folderId: folderId.map { KotlinLong(value: $0) })
             }
             .buttonStyle(.borderedProminent)
             .tint(Brand.primary)
@@ -246,7 +247,7 @@ struct RecordSheetView: View {
             Task { @MainActor in
                 isPermissionDenied = !granted
                 guard granted else { return }
-                viewModel.onStartRecording()
+                viewModel.onStartRecording(folderId: folderId.map { KotlinLong(value: $0) })
             }
         }
     }

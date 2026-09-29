@@ -174,7 +174,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.CalendarEventSuggestion
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun NotesScreen(
-    onNewRecording: () -> Unit,
+    onNewRecording: (folderId: Long?) -> Unit,
     requestedNoteId: Long?,
     onRequestedNoteConsumed: () -> Unit,
     modifier: Modifier = Modifier,
@@ -268,7 +268,7 @@ fun NotesScreen(
                         },
                         onDeleteRequested = viewModel::onDeleteRequested,
                         onMoveRequested = viewModel::onMoveToFolderRequested,
-                        onNewRecording = onNewRecording,
+                        onNewRecording = { onNewRecording(state.selectedFolderId) },
                     )
                 }
             },

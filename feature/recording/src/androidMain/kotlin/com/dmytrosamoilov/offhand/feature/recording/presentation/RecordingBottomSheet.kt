@@ -74,6 +74,7 @@ import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 @Composable
 fun RecordingSheetHost(
     isVisible: Boolean,
+    folderId: Long?,
     onVisibilityChange: (Boolean) -> Unit,
     viewModel: RecordingViewModel = koinViewModel(),
 ) {
@@ -89,6 +90,7 @@ fun RecordingSheetHost(
         RecordingBottomSheet(
             state = state,
             viewModel = viewModel,
+            folderId = folderId,
             onDismiss = {
                 viewModel.onSheetClosed()
                 onVisibilityChange(false)
@@ -102,6 +104,7 @@ fun RecordingSheetHost(
 private fun RecordingBottomSheet(
     state: RecordingUiState,
     viewModel: RecordingViewModel,
+    folderId: Long?,
     onDismiss: () -> Unit,
 ) {
     val isCapturing by rememberUpdatedState(state.phase == RecordingPhaseUi.RECORDING)
@@ -153,7 +156,7 @@ private fun RecordingBottomSheet(
                 isNoteSaved -> SavedContent(onDone = onDismiss)
                 isSessionFinished -> Unit
                 state.phase == RecordingPhaseUi.IDLE -> IdleContent(
-                    onRecordClick = viewModel::onStartRecording,
+                    onRecordClick = { viewModel.onStartRecording(folderId) },
                 )
                 state.phase == RecordingPhaseUi.RECORDING -> RecordingContent(
                     state = state,
@@ -181,7 +184,7 @@ private fun RecordingBottomSheet(
                 )
                 else -> FailedContent(
                     message = state.failureMessage,
-                    onRetry = viewModel::onStartRecording,
+                    onRetry = { viewModel.onStartRecording(folderId) },
                 )
             }
         }
