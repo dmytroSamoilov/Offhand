@@ -73,6 +73,8 @@ appId: com.dmytrosamoilov.offhand.uitest
       - assertVisible: "Start 14-day free trial"
       - tapOn: "Close"
       - assertNotVisible: "Start 14-day free trial"
+      - scrollUntilVisible:
+          element: "Import audio"
       - tapOn: "Import audio"
       - assertVisible: "Turn your recordings into notes"
       - tapOn: "Start 14-day free trial"
@@ -80,7 +82,9 @@ appId: com.dmytrosamoilov.offhand.uitest
           visible: "Cancel"
           timeout: 10000
       - tapOn: "Cancel"
-      - assertVisible: "Lifetime, yours forever"
+      - scrollUntilVisible:
+          element: "Lifetime, yours forever"
+          direction: UP
       - tapOn: "Lifetime, yours forever"
       - assertVisible: "Everything in the Pro column is yours."
       - assertNotVisible: "Start 14-day free trial"

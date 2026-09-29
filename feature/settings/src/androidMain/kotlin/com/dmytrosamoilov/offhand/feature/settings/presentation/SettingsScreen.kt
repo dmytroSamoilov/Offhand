@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -22,8 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -41,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -52,7 +48,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
-import com.dmytrosamoilov.offhand.core.designsystem.component.ProBadge
 import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleChoice
@@ -159,7 +154,6 @@ private fun NotesSection(
             subtitle = stringResource(R.string.settings_note_styles_manage_subtitle),
             onClick = onManageClick,
         )
-        Spacer(modifier = Modifier.height(8.dp))
         SwitchRow(
             label = stringResource(R.string.settings_smart_suggestions_label),
             description = stringResource(R.string.settings_smart_suggestions_description),
@@ -188,10 +182,10 @@ private fun NotesSection(
 private fun DefaultStyleRow(label: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
+            .acrossCardPadding()
             .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
-            .padding(vertical = 8.dp, horizontal = 4.dp),
+            .settingsRowPadding(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -247,28 +241,37 @@ private fun AppearanceSection(
 
 @Composable
 private fun ProSection(status: ProStatusUi, onProCardClick: () -> Unit, onRedeemCodeClick: () -> Unit) {
-    when (status) {
-        ProStatusUi.Free -> Column {
-            UpgradeCard(onClick = onProCardClick)
-            RedeemCodeButton(onClick = onRedeemCodeClick)
+    val context = LocalContext.current
+    SettingsCard(title = stringResource(R.string.settings_subscription_title)) {
+        if (status == ProStatusUi.Free) {
+            UpgradeRow(onClick = onProCardClick)
+        } else {
+            PlanRow(status = status, onClick = onProCardClick)
         }
-        else -> SubscriptionSection(status = status, onPlanClick = onProCardClick, onRedeemCodeClick = onRedeemCodeClick)
+        if (status is ProStatusUi.Yearly || status is ProStatusUi.Trial) {
+            SettingsLinkRow(
+                title = stringResource(R.string.settings_subscription_manage),
+                subtitle = null,
+                onClick = { openSubscriptionManagement(context) },
+            )
+        }
+        RedeemCodeRow(onClick = onRedeemCodeClick)
     }
 }
 
 // Play has no in-app redemption sheet; the store's redeem page opens and the
 // foreground refresh picks the purchase up on return.
 @Composable
-private fun RedeemCodeButton(onClick: () -> Unit) {
+private fun RedeemCodeRow(onClick: () -> Unit) {
     val context = LocalContext.current
-    TextButton(
+    SettingsLinkRow(
+        title = stringResource(R.string.settings_redeem_code),
+        subtitle = null,
         onClick = {
             onClick()
             openLink(context, PLAY_REDEEM_URL)
         },
-    ) {
-        Text(text = stringResource(R.string.settings_redeem_code))
-    }
+    )
 }
 
 private fun openLink(context: Context, url: String) {
@@ -278,66 +281,50 @@ private fun openLink(context: Context, url: String) {
 private const val PLAY_REDEEM_URL = "https://play.google.com/redeem"
 
 @Composable
-private fun UpgradeCard(onClick: () -> Unit) {
-    Card(
+private fun UpgradeRow(onClick: () -> Unit) {
+    ProRow(
+        subtitle = stringResource(R.string.settings_pro_upgrade_subtitle),
         onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            ProCrown(size = 28.dp)
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = stringResource(R.string.settings_pro_title), style = MaterialTheme.typography.titleMedium)
-                Text(
-                    text = stringResource(R.string.settings_pro_upgrade_subtitle),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
-                )
-            }
-            Button(onClick = onClick) { Text(text = stringResource(R.string.settings_pro_upgrade)) }
-        }
-    }
+        trailing = { Button(onClick = onClick) { Text(text = stringResource(R.string.settings_pro_upgrade)) } },
+    )
 }
 
 @Composable
-private fun SubscriptionSection(status: ProStatusUi, onPlanClick: () -> Unit, onRedeemCodeClick: () -> Unit) {
-    val context = LocalContext.current
-    SettingsCard(title = stringResource(R.string.settings_subscription_title)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().clickable(onClick = onPlanClick).padding(vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            ProCrown(size = 24.dp)
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = stringResource(R.string.settings_pro_title), style = MaterialTheme.typography.bodyLarge)
-                Text(
-                    text = status.statusLabel(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+private fun PlanRow(status: ProStatusUi, onClick: () -> Unit) {
+    ProRow(
+        subtitle = status.statusLabel(),
+        onClick = onClick,
+        trailing = {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        },
+    )
+}
+
+@Composable
+private fun ProRow(subtitle: String, onClick: () -> Unit, trailing: @Composable () -> Unit) {
+    Row(
+        modifier = Modifier
+            .acrossCardPadding()
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .settingsRowPadding(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        ProCrown(size = 24.dp)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = stringResource(R.string.settings_pro_title), style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Row {
-            if (status != ProStatusUi.Lifetime) {
-                TextButton(onClick = { openSubscriptionManagement(context) }) {
-                    Text(text = stringResource(R.string.settings_subscription_manage))
-                }
-            }
-            RedeemCodeButton(onClick = onRedeemCodeClick)
-        }
+        trailing()
     }
 }
 
@@ -366,10 +353,10 @@ private fun ProOverrideSection(selected: ProOverride, onSelected: (ProOverride) 
     SettingsCard(title = stringResource(R.string.settings_developer_title)) {
         Text(
             text = stringResource(R.string.settings_pro_override_label),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(top = 12.dp, bottom = 8.dp),
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
             ProOverride.entries.forEachIndexed { index, option ->
                 SegmentedButton(
                     selected = option == selected,
@@ -446,11 +433,6 @@ private fun AboutSection(onClick: () -> Unit) {
             subtitle = stringResource(R.string.settings_about_support_subtitle, appVersion(context)),
             onClick = onClick,
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = stringResource(R.string.settings_about_footer),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        SettingsNote(text = stringResource(R.string.settings_about_footer))
     }
 }
