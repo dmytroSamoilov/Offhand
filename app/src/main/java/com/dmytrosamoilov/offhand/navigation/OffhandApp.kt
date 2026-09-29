@@ -48,6 +48,7 @@ fun OffhandApp(
     val currentDestination = backStackEntry?.destination
     var isRecordingSheetVisible by rememberSaveable { mutableStateOf(false) }
     var recordingFolderId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var recordedNoteId by rememberSaveable { mutableStateOf<Long?>(null) }
 
     LaunchedEffect(requestedNoteId) {
         if (requestedNoteId != null) {
@@ -82,8 +83,11 @@ fun OffhandApp(
         ) {
             composable<NotesRoute> {
                 NotesScreen(
-                    requestedNoteId = requestedNoteId,
-                    onRequestedNoteConsumed = onRequestedNoteConsumed,
+                    requestedNoteId = requestedNoteId ?: recordedNoteId,
+                    onRequestedNoteConsumed = {
+                        recordedNoteId = null
+                        onRequestedNoteConsumed()
+                    },
                     onNewRecording = { folderId ->
                         recordingFolderId = folderId
                         isRecordingSheetVisible = true
@@ -125,6 +129,7 @@ fun OffhandApp(
         isVisible = isRecordingSheetVisible,
         folderId = recordingFolderId,
         onVisibilityChange = { isRecordingSheetVisible = it },
+        onNoteSaved = { noteId -> recordedNoteId = noteId },
     )
     SharedAudioImportHost()
     PaywallHost()

@@ -33,13 +33,14 @@ struct NotesListView: View {
         isRetranscribeAvailable: false
     )
     @State private var recordSheetRequest: RecordSheetRequest?
+    @State private var recordedNoteId: Int64?
     @State private var searchQuery = ""
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
         layout
-        .sheet(item: $recordSheetRequest) { request in
-            RecordSheetView(autoStart: true, folderId: request.folderId)
+        .sheet(item: $recordSheetRequest, onDismiss: openRecordedNote) { request in
+            RecordSheetView(autoStart: true, folderId: request.folderId) { recordedNoteId = $0 }
         }
         .sheet(isPresented: moveToFolderBinding) {
             MoveToFolderSheet(
@@ -259,6 +260,12 @@ struct NotesListView: View {
         case .duplicate: return String(localized: "A folder with this name already exists.")
         default: return ""
         }
+    }
+
+    private func openRecordedNote() {
+        guard let noteId = recordedNoteId else { return }
+        recordedNoteId = nil
+        viewModel.onNoteSelected(id: noteId)
     }
 
     private var recordButton: some View {

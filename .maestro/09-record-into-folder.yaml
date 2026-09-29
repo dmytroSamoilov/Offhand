@@ -32,7 +32,24 @@ appId: com.dmytrosamoilov.offhand.uitest
     visible: "00:(0[4-9]|[1-5][0-9])"
     timeout: 15000
 - tapOn: "Save note"
-- tapOn: "Done"
+
+# Saving opens the new note; wait for processing, then go back to the list
+- extendedWaitUntil:
+    visible: "Overview"
+    timeout: 30000
+- assertVisible: "Smoke test note"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: "1%,50%"
+          end: "70%,50%"
 
 # The folder filter is still selected and now holds the new note
 - extendedWaitUntil:

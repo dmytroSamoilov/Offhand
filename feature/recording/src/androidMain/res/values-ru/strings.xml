@@ -16,9 +16,6 @@
     <string name="recording_stage_finishing">Сохраняем вашу запись…</string>
     <string name="recording_processing_hint">Это окно можно закрыть — заметка появится в списке, когда будет готова.</string>
     <string name="recording_external_mic_generic">Внешний микрофон</string>
-    <string name="recording_saved_title">Запись сохранена</string>
-    <string name="recording_saved_body">Ваша заметка обрабатывается. Это окно можно закрыть — мы сообщим, когда расшифровка будет готова.</string>
-    <string name="recording_saved_done_button">Готово</string>
     <string name="recording_failed_title">Что-то пошло не так</string>
     <string name="recording_try_again_button">Повторить</string>
     <string name="recording_notification_channel_name">Запись</string>

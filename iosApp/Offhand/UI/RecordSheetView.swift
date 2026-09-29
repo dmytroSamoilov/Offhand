@@ -6,6 +6,7 @@ import UIKit
 struct RecordSheetView: View {
     var autoStart = false
     var folderId: Int64?
+    var onNoteSaved: (Int64) -> Void = { _ in }
     @Environment(\.dismiss) private var dismiss
     private let viewModel = AppViewModels.recording
     @State private var state = RecordingUiState(
@@ -30,9 +31,7 @@ struct RecordSheetView: View {
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
-            if hasSavedNote {
-                savedContent
-            } else {
+            if !hasSavedNote {
                 switch state.phase {
                 case .idle:
                     idleContent
@@ -58,7 +57,11 @@ struct RecordSheetView: View {
         }
         .onDisappear { viewModel.onSheetClosed() }
         .onChange(of: state.savedNoteId) {
-            if state.savedNoteId != nil { hasSavedNote = true }
+            // An id seen before this sheet's own session started belongs to the previous one.
+            guard wasSessionActive, !hasSavedNote, let noteId = state.savedNoteId?.int64Value else { return }
+            hasSavedNote = true
+            onNoteSaved(noteId)
+            dismiss()
         }
         .onChange(of: state.phase) {
             switch state.phase {
@@ -88,24 +91,6 @@ struct RecordSheetView: View {
             for await newState in viewModel.uiState {
                 state = newState
             }
-        }
-    }
-
-    private var savedContent: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 56))
-                .foregroundStyle(Brand.teal)
-            Text(String(localized: "Note saved"))
-                .font(.title3.weight(.semibold))
-            Text(String(localized: "It will keep processing on your iPhone. You can close this."))
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            Button(String(localized: "Done")) { dismiss() }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .tint(Brand.primary)
         }
     }
 

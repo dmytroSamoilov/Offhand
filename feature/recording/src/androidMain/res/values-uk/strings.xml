@@ -16,9 +16,6 @@
     <string name="recording_stage_finishing">Зберігаємо ваш запис…</string>
     <string name="recording_processing_hint">Це вікно можна закрити — нотатка зʼявиться у списку, коли буде готова.</string>
     <string name="recording_external_mic_generic">Зовнішній мікрофон</string>
-    <string name="recording_saved_title">Запис збережено</string>
-    <string name="recording_saved_body">Ваша нотатка обробляється. Це вікно можна закрити — ми повідомимо, коли розшифровка буде готова.</string>
-    <string name="recording_saved_done_button">Готово</string>
     <string name="recording_failed_title">Щось пішло не так</string>
     <string name="recording_try_again_button">Повторити</string>
     <string name="recording_notification_channel_name">Запис</string>

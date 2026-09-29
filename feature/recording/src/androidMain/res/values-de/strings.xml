@@ -16,9 +16,6 @@
     <string name="recording_stage_finishing">Deine Aufnahme wird gespeichert…</string>
     <string name="recording_processing_hint">Du kannst das hier schließen — die Notiz erscheint in deiner Liste, sobald sie fertig ist.</string>
     <string name="recording_external_mic_generic">Externes Mikrofon</string>
-    <string name="recording_saved_title">Aufnahme gespeichert</string>
-    <string name="recording_saved_body">Deine Notiz wird verarbeitet. Du kannst das hier schließen — wir benachrichtigen dich, sobald die Transkription fertig ist.</string>
-    <string name="recording_saved_done_button">Fertig</string>
     <string name="recording_failed_title">Etwas ist schiefgelaufen</string>
     <string name="recording_try_again_button">Erneut versuchen</string>
     <string name="recording_notification_channel_name">Aufnahme</string>
