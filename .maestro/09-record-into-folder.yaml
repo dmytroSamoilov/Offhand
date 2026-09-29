@@ -1,0 +1,58 @@
+# Runs after 01-smoke.yaml. Recording while a folder is open files the new
+# note into that folder: the folder starts empty, so the note showing up under
+# its filter proves the assignment.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- assertVisible: "Notes"
+
+# A new folder becomes the selected filter and is empty
+- tapOn: "New folder"
+- inputText: "Calls"
+- tapOn: "Save"
+- assertVisible: "No notes in this folder yet."
+
+# Record through the fake microphone while the folder is open
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Start a new recording"
+      - runFlow:
+          when:
+            visible: "Start recording"
+          commands:
+            - tapOn: "Start recording"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Record a note"
+- extendedWaitUntil:
+    visible: "00:(0[4-9]|[1-5][0-9])"
+    timeout: 15000
+- tapOn: "Save note"
+
+# Saving opens the new note; wait for processing, then go back to the list
+- extendedWaitUntil:
+    visible: "Overview"
+    timeout: 30000
+- assertVisible: "Smoke test note"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: "1%,50%"
+          end: "70%,50%"
+
+# The folder filter is still selected and now holds the new note
+- extendedWaitUntil:
+    visible: "Smoke test note"
+    timeout: 30000
+- assertNotVisible: "No notes in this folder yet."

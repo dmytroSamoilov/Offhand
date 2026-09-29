@@ -155,12 +155,7 @@ private fun AccelerationSection(
             isSelected = selected == BackendOptionUi.GPU,
             onClick = { onSelected(BackendOptionUi.GPU) },
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = stringResource(R.string.settings_acceleration_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        SettingsNote(text = stringResource(R.string.settings_acceleration_note))
     }
 }
 
@@ -192,13 +187,7 @@ private fun ModelSection(
                 onClick = { onModelSelected(option.id) },
             )
         }
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = stringResource(R.string.settings_model_picker_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(modifier = Modifier.height(12.dp))
+        SettingsNote(text = stringResource(R.string.settings_model_picker_note))
         Text(
             text = stringResource(R.string.settings_model_name, model.displayName, model.sizeGb),
             style = MaterialTheme.typography.bodyLarge,
@@ -291,14 +280,11 @@ private fun PrivacySection(
 private fun FeedbackSection() {
     val context = LocalContext.current
     SettingsCard(title = stringResource(R.string.settings_feedback_title)) {
-        Text(
-            text = stringResource(R.string.settings_feature_request_description),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        SettingsLinkRow(
+            title = stringResource(R.string.settings_feature_request_label),
+            subtitle = stringResource(R.string.settings_feature_request_description),
+            onClick = { sendFeatureRequest(context) },
         )
-        TextButton(onClick = { sendFeatureRequest(context) }) {
-            Text(text = stringResource(R.string.settings_feature_request_label))
-        }
     }
 }
 
@@ -321,19 +307,17 @@ private fun DeveloperSection(
 private fun AboutSection() {
     val context = LocalContext.current
     SettingsCard(title = stringResource(R.string.settings_about_title)) {
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = stringResource(R.string.settings_about_version, appVersion(context)),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        SettingsNote(text = stringResource(R.string.settings_about_version, appVersion(context)))
+        SettingsLinkRow(
+            title = stringResource(R.string.settings_about_terms),
+            subtitle = null,
+            onClick = { openLink(context, LegalLinks.TERMS) },
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        TextButton(onClick = { openLink(context, LegalLinks.TERMS) }) {
-            Text(text = stringResource(R.string.settings_about_terms))
-        }
-        TextButton(onClick = { openLink(context, LegalLinks.PRIVACY_POLICY) }) {
-            Text(text = stringResource(R.string.settings_about_privacy))
-        }
+        SettingsLinkRow(
+            title = stringResource(R.string.settings_about_privacy),
+            subtitle = null,
+            onClick = { openLink(context, LegalLinks.PRIVACY_POLICY) },
+        )
     }
 }
 

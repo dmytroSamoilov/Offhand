@@ -47,10 +47,12 @@ fun OffhandApp(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
     var isRecordingSheetVisible by rememberSaveable { mutableStateOf(false) }
+    var recordingFolderId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var recordedNoteId by rememberSaveable { mutableStateOf<Long?>(null) }
 
     LaunchedEffect(requestedNoteId) {
         if (requestedNoteId != null) {
-            navController.navigateToTopLevel(NotesRoute)
+            navController.navigateToTopLevel(NotesGraphRoute)
         }
     }
 
@@ -77,14 +79,26 @@ fun OffhandApp(
     ) {
         NavHost(
             navController = navController,
-            startDestination = NotesRoute,
+            startDestination = NotesGraphRoute,
         ) {
-            composable<NotesRoute> {
-                NotesScreen(
-                    requestedNoteId = requestedNoteId,
-                    onRequestedNoteConsumed = onRequestedNoteConsumed,
-                    onNewRecording = { isRecordingSheetVisible = true },
-                )
+            navigation<NotesGraphRoute>(startDestination = NotesRoute) {
+                composable<NotesRoute> {
+                    NotesScreen(
+                        requestedNoteId = requestedNoteId ?: recordedNoteId,
+                        onRequestedNoteConsumed = {
+                            recordedNoteId = null
+                            onRequestedNoteConsumed()
+                        },
+                        onCreateNoteStyle = { navController.navigate(NewNoteStyleFromNoteRoute) },
+                        onNewRecording = { folderId ->
+                            recordingFolderId = folderId
+                            isRecordingSheetVisible = true
+                        },
+                    )
+                }
+                composable<NewNoteStyleFromNoteRoute> {
+                    NoteStyleEditorScreen(styleId = 0L, onBack = { navController.navigateUp() })
+                }
             }
             navigation<SettingsGraphRoute>(startDestination = SettingsRoute) {
                 composable<SettingsRoute> {
@@ -119,7 +133,9 @@ fun OffhandApp(
 
     RecordingSheetHost(
         isVisible = isRecordingSheetVisible,
+        folderId = recordingFolderId,
         onVisibilityChange = { isRecordingSheetVisible = it },
+        onNoteSaved = { noteId -> recordedNoteId = noteId },
     )
     SharedAudioImportHost()
     PaywallHost()

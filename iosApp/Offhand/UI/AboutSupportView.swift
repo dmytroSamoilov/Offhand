@@ -25,7 +25,7 @@ struct AboutSupportView: View {
                 developerSection
             }
         }
-        .navigationTitle(String(localized: "About & Support"))
+        .navigationTitle(String(localized: "About & support"))
         .navigationBarTitleDisplayMode(.inline)
         .confirmationDialog(
             String(localized: "Remove the on-device AI?"),

@@ -70,8 +70,8 @@ fun PaywallScreen(viewModel: PaywallViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) { viewModel.onOpened() }
-    LaunchedEffect(state.isPro) {
-        if (state.isPro) {
+    LaunchedEffect(state.isPro, state.mode) {
+        if (state.isPro && state.mode == PaywallMode.OFFER) {
             delay(SUCCESS_DISMISS_MS)
             viewModel.onClosed()
         }
@@ -79,10 +79,11 @@ fun PaywallScreen(viewModel: PaywallViewModel = koinViewModel()) {
     BackHandler(onBack = viewModel::onClosed)
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
-        if (state.isPro) {
-            SuccessContent(feature = state.feature)
-        } else {
-            PaywallContent(state = state, viewModel = viewModel)
+        when {
+            state.mode == PaywallMode.OPENING -> Unit
+            state.mode == PaywallMode.BENEFITS -> BenefitsContent(onClose = viewModel::onClosed)
+            state.isPro -> SuccessContent(feature = state.feature)
+            else -> PaywallContent(state = state, viewModel = viewModel)
         }
     }
     state.message?.let { message ->
@@ -107,6 +108,40 @@ private fun PaywallContent(state: PaywallUiState, viewModel: PaywallViewModel) {
             LegalRow(isEnabled = !state.isPurchasing, onRestore = viewModel::onRestoreClicked)
         }
         BottomActions(state = state, onPurchase = viewModel::onPurchaseClicked, onContinueFree = viewModel::onClosed)
+    }
+}
+
+@Composable
+private fun BenefitsContent(onClose: () -> Unit) {
+    Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
+        CloseRow(onClose = onClose)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                ProCrown(size = 48.dp)
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = stringResource(R.string.paywall_success_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.paywall_benefits_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            ComparisonTable(highlighted = ProFeature.GENERAL)
+        }
     }
 }
 

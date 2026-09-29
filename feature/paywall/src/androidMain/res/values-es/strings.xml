@@ -64,4 +64,5 @@
         <item quantity="one">Menos de %d año del plan anual</item>
         <item quantity="other">Menos de %d años del plan anual</item>
     </plurals>
+    <string name="paywall_benefits_body">Todo lo de la columna Pro es tuyo.</string>
 </resources>

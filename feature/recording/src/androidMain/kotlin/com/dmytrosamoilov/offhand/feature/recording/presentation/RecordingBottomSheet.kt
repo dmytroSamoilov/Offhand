@@ -24,7 +24,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.HeadsetMic
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Pause
@@ -74,7 +73,9 @@ import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 @Composable
 fun RecordingSheetHost(
     isVisible: Boolean,
+    folderId: Long?,
     onVisibilityChange: (Boolean) -> Unit,
+    onNoteSaved: (noteId: Long) -> Unit,
     viewModel: RecordingViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -89,9 +90,15 @@ fun RecordingSheetHost(
         RecordingBottomSheet(
             state = state,
             viewModel = viewModel,
+            folderId = folderId,
             onDismiss = {
                 viewModel.onSheetClosed()
                 onVisibilityChange(false)
+            },
+            onNoteSaved = { noteId ->
+                viewModel.onSheetClosed()
+                onVisibilityChange(false)
+                onNoteSaved(noteId)
             },
         )
     }
@@ -102,25 +109,28 @@ fun RecordingSheetHost(
 private fun RecordingBottomSheet(
     state: RecordingUiState,
     viewModel: RecordingViewModel,
+    folderId: Long?,
     onDismiss: () -> Unit,
+    onNoteSaved: (noteId: Long) -> Unit,
 ) {
     val isCapturing by rememberUpdatedState(state.phase == RecordingPhaseUi.RECORDING)
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
         confirmValueChange = { target -> target != SheetValue.Hidden || !isCapturing },
     )
-    var wasNoteSaved by rememberSaveable { mutableStateOf(false) }
     var wasSessionActive by rememberSaveable { mutableStateOf(false) }
     // Read the saved id in the same composition that sees the phase go idle,
     // otherwise a single conflated update reads as a finished, unsaved session.
-    val isNoteSaved = wasNoteSaved || state.savedNoteId != null
-    val isSessionFinished = wasSessionActive && !isNoteSaved &&
+    // A sheet that has not seen its own session start may still be handed the
+    // previous session's id, so only an id from this sheet's session counts.
+    val savedNoteId = state.savedNoteId?.takeIf { wasSessionActive }
+    val isSessionFinished = wasSessionActive && savedNoteId == null &&
         state.phase == RecordingPhaseUi.IDLE
 
     LaunchedEffect(Unit) { viewModel.onSheetOpened() }
-    LaunchedEffect(state.savedNoteId) {
-        if (state.savedNoteId != null) {
-            wasNoteSaved = true
+    LaunchedEffect(savedNoteId) {
+        if (savedNoteId != null) {
+            onNoteSaved(savedNoteId)
         }
     }
     val haptics = haptics()
@@ -150,10 +160,9 @@ private fun RecordingBottomSheet(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             when {
-                isNoteSaved -> SavedContent(onDone = onDismiss)
-                isSessionFinished -> Unit
+                savedNoteId != null || isSessionFinished -> Unit
                 state.phase == RecordingPhaseUi.IDLE -> IdleContent(
-                    onRecordClick = viewModel::onStartRecording,
+                    onRecordClick = { viewModel.onStartRecording(folderId) },
                 )
                 state.phase == RecordingPhaseUi.RECORDING -> RecordingContent(
                     state = state,
@@ -181,7 +190,7 @@ private fun RecordingBottomSheet(
                 )
                 else -> FailedContent(
                     message = state.failureMessage,
-                    onRetry = viewModel::onStartRecording,
+                    onRetry = { viewModel.onStartRecording(folderId) },
                 )
             }
         }
@@ -190,33 +199,6 @@ private fun RecordingBottomSheet(
 
 private fun RecordingPhaseUi.isSessionActive(): Boolean =
     this == RecordingPhaseUi.RECORDING || this == RecordingPhaseUi.FINISHING_TRANSCRIPTION
-
-@Composable
-private fun SavedContent(onDone: () -> Unit) {
-    Icon(
-        imageVector = Icons.Filled.CheckCircle,
-        contentDescription = null,
-        tint = MaterialTheme.colorScheme.tertiary,
-        modifier = Modifier.size(64.dp),
-    )
-    Spacer(modifier = Modifier.height(16.dp))
-    Text(
-        text = stringResource(R.string.recording_saved_title),
-        style = MaterialTheme.typography.headlineSmall,
-        textAlign = TextAlign.Center,
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-    Text(
-        text = stringResource(R.string.recording_saved_body),
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center,
-    )
-    Spacer(modifier = Modifier.height(24.dp))
-    Button(onClick = onDone) {
-        Text(text = stringResource(R.string.recording_saved_done_button))
-    }
-}
 
 @Composable
 private fun IdleContent(onRecordClick: () -> Unit) {

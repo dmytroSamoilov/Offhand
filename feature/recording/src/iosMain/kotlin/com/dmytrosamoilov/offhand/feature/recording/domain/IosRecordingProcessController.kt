@@ -8,8 +8,8 @@ class IosRecordingProcessController(
     private val sessionManager: RecordingSessionManager,
 ) : RecordingProcessController {
 
-    override fun startRecording() {
-        sessionManager.start()
+    override fun startRecording(folderId: Long?) {
+        sessionManager.start(folderId)
     }
 
     override fun retryNote(noteId: Long, audioFileName: String): Boolean {

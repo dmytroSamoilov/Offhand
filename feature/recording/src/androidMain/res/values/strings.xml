@@ -17,9 +17,6 @@
     <string name="recording_stage_finishing">Saving your recording…</string>
     <string name="recording_processing_hint">You can close this — the note will appear in your list once it is ready.</string>
     <string name="recording_external_mic_generic">External microphone</string>
-    <string name="recording_saved_title">Recording saved</string>
-    <string name="recording_saved_body">Your note is being processed. You can close this — we\'ll notify you once the transcription is ready.</string>
-    <string name="recording_saved_done_button">Done</string>
     <string name="recording_failed_title">Something went wrong</string>
     <string name="recording_try_again_button">Try again</string>
     <string name="recording_notification_channel_name">Recording</string>

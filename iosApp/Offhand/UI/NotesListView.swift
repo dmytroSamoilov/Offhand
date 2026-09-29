@@ -32,14 +32,15 @@ struct NotesListView: View {
         pendingCalendarEvent: nil,
         isRetranscribeAvailable: false
     )
-    @State private var isRecordSheetVisible = false
+    @State private var recordSheetRequest: RecordSheetRequest?
+    @State private var recordedNoteId: Int64?
     @State private var searchQuery = ""
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
         layout
-        .sheet(isPresented: $isRecordSheetVisible) {
-            RecordSheetView(autoStart: true)
+        .sheet(item: $recordSheetRequest, onDismiss: openRecordedNote) { request in
+            RecordSheetView(autoStart: true, folderId: request.folderId) { recordedNoteId = $0 }
         }
         .sheet(isPresented: moveToFolderBinding) {
             MoveToFolderSheet(
@@ -261,10 +262,16 @@ struct NotesListView: View {
         }
     }
 
+    private func openRecordedNote() {
+        guard let noteId = recordedNoteId else { return }
+        recordedNoteId = nil
+        viewModel.onNoteSelected(id: noteId)
+    }
+
     private var recordButton: some View {
         Button {
             Haptics.confirm()
-            isRecordSheetVisible = true
+            recordSheetRequest = RecordSheetRequest(folderId: state.selectedFolderId?.int64Value)
         } label: {
             Image(systemName: "mic.fill")
                 .font(.title2)
@@ -441,4 +448,9 @@ private struct NoteCardRow: View {
         }
         return attributed
     }
+}
+
+private struct RecordSheetRequest: Identifiable {
+    let id = UUID()
+    let folderId: Int64?
 }

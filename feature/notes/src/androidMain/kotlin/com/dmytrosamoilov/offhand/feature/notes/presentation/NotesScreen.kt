@@ -174,7 +174,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.CalendarEventSuggestion
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun NotesScreen(
-    onNewRecording: () -> Unit,
+    onNewRecording: (folderId: Long?) -> Unit,
+    onCreateNoteStyle: () -> Unit,
     requestedNoteId: Long?,
     onRequestedNoteConsumed: () -> Unit,
     modifier: Modifier = Modifier,
@@ -217,6 +218,25 @@ fun NotesScreen(
             if (reviewLauncher.launch(activity)) {
                 viewModel.onReviewAttemptSucceeded()
             }
+        }
+    }
+
+    // The style sheet closes before the editor opens: navigating away under an
+    // open sheet leaves the editor without keyboard focus. The sheet comes back
+    // when the editor returns here, with the new style listed.
+    var isNewStyleRequested by remember { mutableStateOf(false) }
+    var reopensStyleSheet by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        if (reopensStyleSheet) {
+            reopensStyleSheet = false
+            viewModel.onPresetSheetRequested()
+        }
+    }
+    LaunchedEffect(isNewStyleRequested) {
+        if (isNewStyleRequested) {
+            isNewStyleRequested = false
+            reopensStyleSheet = true
+            onCreateNoteStyle()
         }
     }
 
@@ -268,7 +288,7 @@ fun NotesScreen(
                         },
                         onDeleteRequested = viewModel::onDeleteRequested,
                         onMoveRequested = viewModel::onMoveToFolderRequested,
-                        onNewRecording = onNewRecording,
+                        onNewRecording = { onNewRecording(state.selectedFolderId) },
                     )
                 }
             },
@@ -344,6 +364,10 @@ fun NotesScreen(
             isCustomStylesUnlocked = state.isCustomStylesUnlocked,
             onSelected = viewModel::onStyleSelected,
             onDismiss = viewModel::onPresetSheetDismissed,
+            onCreateStyle = {
+                viewModel.onPresetSheetDismissed()
+                isNewStyleRequested = true
+            },
         )
     }
 }
@@ -355,6 +379,7 @@ private fun NoteStyleSheet(
     isCustomStylesUnlocked: Boolean,
     onSelected: (NoteStyleRef) -> Unit,
     onDismiss: () -> Unit,
+    onCreateStyle: () -> Unit,
 ) {
     NoteStylePickerSheet(
         title = stringResource(R.string.notes_preset_sheet_title),
@@ -364,6 +389,7 @@ private fun NoteStyleSheet(
         isCustomStylesUnlocked = isCustomStylesUnlocked,
         onSelected = onSelected,
         onDismiss = onDismiss,
+        onCreateStyle = onCreateStyle,
     )
 }
 

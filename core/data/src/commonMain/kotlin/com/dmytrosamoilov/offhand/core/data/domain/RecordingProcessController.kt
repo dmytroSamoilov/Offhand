@@ -2,7 +2,7 @@ package com.dmytrosamoilov.offhand.core.data.domain
 
 interface RecordingProcessController {
 
-    fun startRecording()
+    fun startRecording(folderId: Long?)
 
     fun retryNote(noteId: Long, audioFileName: String): Boolean
 

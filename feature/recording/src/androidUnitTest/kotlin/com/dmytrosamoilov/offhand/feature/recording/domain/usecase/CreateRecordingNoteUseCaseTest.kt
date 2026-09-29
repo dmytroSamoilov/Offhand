@@ -26,7 +26,7 @@ class CreateRecordingNoteUseCaseTest {
         every { defaultNoteTitleProvider.titleFor(4) } returns "Recording 4"
         coEvery { notesRepository.createNote(any()) } returns 42L
 
-        val noteId = useCase("audio.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.MEETING))
+        val noteId = useCase("audio.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.MEETING), folderId = 5L)
 
         assertEquals(42L, noteId)
         coVerify {
@@ -37,21 +37,27 @@ class CreateRecordingNoteUseCaseTest {
                     assertEquals("audio.pcm.enc", note.audioFileName)
                     assertNull(note.durationMs)
                     assertEquals(NoteStyleRef.BuiltIn(NotePreset.MEETING), note.style)
+                    assertEquals(5L, note.folderId)
                 },
             )
         }
     }
 
     @Test
-    fun `first recording is titled Recording 1`() = runTest {
+    fun `first recording outside a folder is titled Recording 1 and has no folder`() = runTest {
         coEvery { notesRepository.countNotes() } returns 0
         every { defaultNoteTitleProvider.titleFor(1) } returns "Recording 1"
         coEvery { notesRepository.createNote(any()) } returns 1L
 
-        useCase(null, NoteStyleRef.BuiltIn(NotePreset.SUMMARY))
+        useCase(null, NoteStyleRef.BuiltIn(NotePreset.SUMMARY), folderId = null)
 
         coVerify {
-            notesRepository.createNote(withArg { note -> assertEquals("Recording 1", note.title) })
+            notesRepository.createNote(
+                withArg { note ->
+                    assertEquals("Recording 1", note.title)
+                    assertNull(note.folderId)
+                },
+            )
         }
     }
 }

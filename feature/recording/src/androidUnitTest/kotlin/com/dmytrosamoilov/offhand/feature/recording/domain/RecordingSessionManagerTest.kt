@@ -219,7 +219,7 @@ class RecordingSessionManagerTest {
             sttResult("first part of the meeting"),
             sttResult("second part of the meeting"),
         )
-        coEvery { createRecordingNote("note-1.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.SUMMARY)) } returns 42L
+        coEvery { createRecordingNote("note-1.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.SUMMARY), FOLDER_ID) } returns 42L
         coEvery { markNoteRecorded(42L, any(), "note-1.pcm.enc") } returns storedNote(42L)
         coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(BuiltInNoteStyles.spec(NotePreset.SUMMARY)), any()) } returns AiResult(
             text = """{"title": "Meeting notes", "overview": "- first\n- second"}""",
@@ -235,7 +235,7 @@ class RecordingSessionManagerTest {
         val manager = manager()
         manager.events.onEach { events += it }.launchIn(this)
         testScheduler.runCurrent()
-        manager.start()
+        manager.start(folderId = FOLDER_ID)
         testScheduler.advanceUntilIdle()
 
         assertEquals(SessionPhase.IDLE, manager.session.value.phase)
@@ -272,7 +272,7 @@ class RecordingSessionManagerTest {
         justRun { recorder.resetVad() }
         coEvery { speechToText.transcribe(any()) } returns
             sttResult("only good chunk") andThenThrows IllegalStateException("engine hiccup")
-        coEvery { createRecordingNote(any(), any()) } returns 7L
+        coEvery { createRecordingNote(any(), any(), any()) } returns 7L
         coEvery { markNoteRecorded(7L, any(), any()) } returns storedNote(7L)
         coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(BuiltInNoteStyles.spec(NotePreset.SUMMARY)), any()) } returns AiResult(
             text = """{"title": "Partial notes", "overview": "- good chunk content"}""",
@@ -285,7 +285,7 @@ class RecordingSessionManagerTest {
         coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
 
         val manager = manager()
-        manager.start()
+        manager.start(folderId = null)
         testScheduler.advanceUntilIdle()
 
         assertEquals(SessionPhase.IDLE, manager.session.value.phase)
@@ -313,7 +313,7 @@ class RecordingSessionManagerTest {
         justRun { recorder.resume() }
 
         val manager = manager()
-        manager.start()
+        manager.start(folderId = null)
         testScheduler.runCurrent()
         assertEquals(SessionPhase.RECORDING, manager.session.value.phase)
 
@@ -439,10 +439,10 @@ class RecordingSessionManagerTest {
         justRun { recorder.resetVad() }
         justRun { recorder.stop() }
         justRun { audioStore.delete("note-1.pcm.enc") }
-        coEvery { createRecordingNote("note-1.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.SUMMARY)) } returns 5L
+        coEvery { createRecordingNote("note-1.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.SUMMARY), null) } returns 5L
 
         val manager = manager()
-        manager.start()
+        manager.start(folderId = null)
         testScheduler.runCurrent()
         assertEquals(SessionPhase.RECORDING, manager.session.value.phase)
 
@@ -464,7 +464,7 @@ class RecordingSessionManagerTest {
         every { recorder.recordStream(pcmSink = any()) } returns flowOf(chunk(1))
         justRun { recorder.resetVad() }
         coEvery { speechToText.transcribe(any()) } returns sttResult("   ")
-        coEvery { createRecordingNote(any(), any()) } returns 9L
+        coEvery { createRecordingNote(any(), any(), any()) } returns 9L
         coEvery { markNoteRecorded(9L, any(), any()) } returns storedNote(9L)
         coEvery { failNote(9L) } returns true
         val events = mutableListOf<NoteProcessingEvent>()
@@ -472,7 +472,7 @@ class RecordingSessionManagerTest {
         val manager = manager()
         manager.events.onEach { events += it }.launchIn(this)
         testScheduler.runCurrent()
-        manager.start()
+        manager.start(folderId = null)
         testScheduler.advanceUntilIdle()
 
         assertEquals(SessionPhase.IDLE, manager.session.value.phase)
@@ -488,7 +488,7 @@ class RecordingSessionManagerTest {
             flowOf(chunk(1), chunk(2, speechMs = 0L))
         justRun { recorder.resetVad() }
         coEvery { speechToText.transcribe(any()) } returns sttResult("spoken content")
-        coEvery { createRecordingNote(any(), any()) } returns 11L
+        coEvery { createRecordingNote(any(), any(), any()) } returns 11L
         coEvery { markNoteRecorded(11L, any(), any()) } returns storedNote(11L)
         coEvery { aiBackend.processText(any(), any()) } returns AiResult(
             text = """{"title": "Spoken", "overview": "- content"}""",
@@ -500,7 +500,7 @@ class RecordingSessionManagerTest {
         coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
 
         val manager = manager()
-        manager.start()
+        manager.start(folderId = null)
         testScheduler.advanceUntilIdle()
 
         coVerify(exactly = 1) { speechToText.transcribe(any()) }
@@ -525,7 +525,7 @@ class RecordingSessionManagerTest {
         justRun { recorder.resetVad() }
         coEvery { speechToText.transcribe(any()) } returns
             sttResult("budget approved for next quarter")
-        coEvery { createRecordingNote(any(), any()) } returns 13L
+        coEvery { createRecordingNote(any(), any(), any()) } returns 13L
         coEvery { markNoteRecorded(13L, any(), any()) } returns storedNote(13L)
         coEvery { aiBackend.processText(any(), any()) } throws
             AiBackendException("engine could not load")
@@ -535,7 +535,7 @@ class RecordingSessionManagerTest {
         val manager = manager()
         manager.events.onEach { events += it }.launchIn(this)
         testScheduler.runCurrent()
-        manager.start()
+        manager.start(folderId = null)
         testScheduler.advanceUntilIdle()
 
         assertEquals(listOf<NoteProcessingEvent>(NoteProcessingEvent.Completed(13L)), events)
@@ -698,5 +698,9 @@ class RecordingSessionManagerTest {
         coVerify(exactly = 0) { calendarEventExtractor.extract(any()) }
         coVerify(exactly = 0) { saveNoteSuggestions(any(), any()) }
         assertTrue(manager.processingNoteIds.value.isEmpty())
+    }
+
+    private companion object {
+        const val FOLDER_ID = 3L
     }
 }

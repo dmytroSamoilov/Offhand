@@ -39,9 +39,9 @@ class RecordingViewModel(
         viewModelScope.launch { collectWaveform() }
     }
 
-    fun onStartRecording() {
+    fun onStartRecording(folderId: Long?) {
         waveform.value = emptyList()
-        recordingProcessController.startRecording()
+        recordingProcessController.startRecording(folderId)
     }
 
     fun onPauseRecording() {

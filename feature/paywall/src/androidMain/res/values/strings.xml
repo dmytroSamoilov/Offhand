@@ -68,4 +68,5 @@
         <item quantity="one">Less than %d year of yearly</item>
         <item quantity="other">Less than %d years of yearly</item>
     </plurals>
+    <string name="paywall_benefits_body">Everything in the Pro column is yours.</string>
 </resources>

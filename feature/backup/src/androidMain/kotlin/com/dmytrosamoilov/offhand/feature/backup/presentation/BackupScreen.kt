@@ -131,7 +131,7 @@ private fun BackupTopBar(onBack: () -> Unit) {
 private fun SectionCard(title: String, body: String, content: @Composable () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(text = title, style = MaterialTheme.typography.titleMedium)
