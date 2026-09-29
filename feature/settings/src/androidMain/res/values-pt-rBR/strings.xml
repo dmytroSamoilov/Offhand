@@ -113,6 +113,9 @@
     <string name="settings_import_audio_subtitle">Transforme arquivos de áudio em notas. Escolha um ou vários de uma vez</string>
     <string name="settings_import_unreadable">Alguns dos arquivos não puderam ser lidos.</string>
     <string name="settings_import_dismiss">OK</string>
+    <string name="settings_import_pro_title">Importar com o Offhand Pro</string>
+    <string name="settings_import_pro_body">Transformar gravações de outros apps em notas faz parte do Offhand Pro. Faça upgrade para importar o áudio compartilhado.</string>
+    <string name="settings_import_pro_cancel">Cancelar</string>
     <string name="settings_import_started_title">Importação iniciada</string>
     <plurals name="settings_import_started">
         <item quantity="one">%d arquivo está sendo importado. A nota é criada em segundo plano e aparecerá na sua lista de notas assim que estiver pronta.</item>

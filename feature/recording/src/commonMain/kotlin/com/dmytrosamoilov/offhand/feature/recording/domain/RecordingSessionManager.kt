@@ -113,8 +113,11 @@ class RecordingSessionManager(
 
     private var sessionStyle: NoteStyleRef = NoteStyleRef.DEFAULT
 
-    fun start() {
+    private var sessionFolderId: Long? = null
+
+    fun start(folderId: Long?) {
         if (mutableSession.value.phase.isActive()) return
+        sessionFolderId = folderId
         transcripts.clear()
         transcriptionTimeMs = 0
         recordedBytes = 0
@@ -466,7 +469,7 @@ class RecordingSessionManager(
     }
 
     private suspend fun createSessionNote(): Long? = try {
-        createRecordingNote(audioFileName, sessionStyle)
+        createRecordingNote(audioFileName, sessionStyle, sessionFolderId)
     } catch (cancellation: CancellationException) {
         throw cancellation
     } catch (t: Throwable) {

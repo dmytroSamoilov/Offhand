@@ -64,4 +64,5 @@
         <item quantity="one">Weniger als %d Jahr im Jahresabo</item>
         <item quantity="other">Weniger als %d Jahre im Jahresabo</item>
     </plurals>
+    <string name="paywall_benefits_body">Alles in der Pro-Spalte gehört dir.</string>
 </resources>

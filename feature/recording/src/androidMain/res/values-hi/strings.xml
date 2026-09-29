@@ -16,9 +16,6 @@
     <string name="recording_stage_finishing">आपकी रिकॉर्डिंग सहेजी जा रही है…</string>
     <string name="recording_processing_hint">आप इसे बंद कर सकते हैं — नोट तैयार होते ही आपकी सूची में दिखेगा।</string>
     <string name="recording_external_mic_generic">बाहरी माइक्रोफ़ोन</string>
-    <string name="recording_saved_title">रिकॉर्डिंग सहेजी गई</string>
-    <string name="recording_saved_body">आपका नोट प्रोसेस हो रहा है। आप इसे बंद कर सकते हैं — ट्रांसक्रिप्शन तैयार होते ही हम आपको सूचित करेंगे।</string>
-    <string name="recording_saved_done_button">हो गया</string>
     <string name="recording_failed_title">कुछ गड़बड़ हो गई</string>
     <string name="recording_try_again_button">फिर से कोशिश करें</string>
     <string name="recording_notification_channel_name">रिकॉर्डिंग</string>

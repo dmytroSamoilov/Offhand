@@ -26,6 +26,10 @@ internal class ProUpgradeCoordinator(
         return isPro()
     }
 
+    override fun showBenefits() {
+        requested.value = ProFeature.GENERAL
+    }
+
     override fun onPaywallClosed() {
         requested.value = null
         closedCount.update { it + 1 }

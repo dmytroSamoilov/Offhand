@@ -11,8 +11,8 @@ class RecordingProcessControllerImpl(
     private val context: Context,
 ) : RecordingProcessController {
 
-    override fun startRecording() {
-        RecordingService.start(context)
+    override fun startRecording(folderId: Long?) {
+        RecordingService.start(context, folderId)
     }
 
     override fun retryNote(noteId: Long, audioFileName: String): Boolean = startServiceCall(noteId) {

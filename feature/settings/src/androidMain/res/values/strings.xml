@@ -114,6 +114,9 @@
     <string name="settings_import_audio_subtitle">Turn audio files into notes. Pick one or several at once</string>
     <string name="settings_import_unreadable">Some of the files could not be read.</string>
     <string name="settings_import_dismiss">OK</string>
+    <string name="settings_import_pro_title">Import with Offhand Pro</string>
+    <string name="settings_import_pro_body">Turning recordings from other apps into notes is part of Offhand Pro. Upgrade to import the shared audio.</string>
+    <string name="settings_import_pro_cancel">Cancel</string>
     <string name="settings_import_started_title">Import started</string>
     <plurals name="settings_import_started">
         <item quantity="one">%d file is being imported. The note is created in the background and will show up in your notes list as soon as it is ready.</item>

@@ -18,6 +18,7 @@ import com.dmytrosamoilov.offhand.feature.settings.presentation.AboutSupportView
 import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStyleEditorViewModel
 import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStylesViewModel
 import com.dmytrosamoilov.offhand.feature.settings.presentation.SettingsViewModel
+import com.dmytrosamoilov.offhand.feature.settings.presentation.SharedAudioImportViewModel
 import org.koin.core.parameter.parametersOf
 import org.koin.mp.KoinPlatform
 
@@ -32,6 +33,8 @@ object SharedGraph {
     fun onboardingViewModel(): OnboardingViewModel = KoinPlatform.getKoin().get()
 
     fun settingsViewModel(): SettingsViewModel = KoinPlatform.getKoin().get()
+
+    fun sharedAudioImportViewModel(): SharedAudioImportViewModel = KoinPlatform.getKoin().get()
 
     fun aboutSupportViewModel(): AboutSupportViewModel = KoinPlatform.getKoin().get()
 
@@ -62,6 +65,11 @@ object SharedGraph {
 
     fun startModelDownload() {
         KoinPlatform.getKoin().get<ModelDownloadController>().start()
+    }
+
+    // Called from the app delegate when iOS wakes the app for a background download.
+    fun handleBackgroundDownloadEvents(identifier: String, completion: () -> Unit) {
+        KoinPlatform.getKoin().get<IosFileDownloader>().handleBackgroundEvents(identifier, completion)
     }
 }
 

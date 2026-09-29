@@ -10,11 +10,16 @@ data class PaywallUiState(
     val isLoadingOffers: Boolean = true,
     val isPurchasing: Boolean = false,
     val isPro: Boolean = false,
+    val mode: PaywallMode = PaywallMode.OPENING,
     val message: PaywallMessageUi? = null,
 ) {
     val selectedOffer: ProOfferUi?
         get() = offers.firstOrNull { it.plan == selectedPlan }
 }
+
+// OPENING until the status is read, then OFFER for a free user (prices and a
+// purchase) or BENEFITS for a subscriber (what the plan includes).
+enum class PaywallMode { OPENING, OFFER, BENEFITS }
 
 // yearsOfYearly: how many yearly terms the lifetime price equals, rounded up;
 // null when the store gave no comparable amounts.

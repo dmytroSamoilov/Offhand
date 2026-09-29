@@ -64,4 +64,5 @@
         <item quantity="one">वार्षिक के %d साल से भी कम</item>
         <item quantity="other">वार्षिक के %d साल से भी कम</item>
     </plurals>
+    <string name="paywall_benefits_body">Pro कॉलम की हर सुविधा आपकी है।</string>
 </resources>

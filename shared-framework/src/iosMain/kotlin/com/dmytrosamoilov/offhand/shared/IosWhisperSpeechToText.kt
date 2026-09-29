@@ -63,6 +63,7 @@ class IosWhisperSpeechToText(
         }
         val totalBytes = whisperFiles.sumOf { it.sizeInBytes }
         var completedBytes = whisperFiles.filter(::isComplete).sumOf { it.sizeInBytes }
+        mutableDownloadState.value = SpeechModelState.Downloading(completedBytes, totalBytes)
         missing.forEach { file ->
             val downloaded = downloader.download(file.downloadUrl, pathFor(file)) { done, _ ->
                 mutableDownloadState.value =

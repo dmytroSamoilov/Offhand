@@ -113,6 +113,9 @@
     <string name="settings_import_audio_subtitle">ऑडियो फ़ाइलों को नोट्स में बदलें। एक या कई फ़ाइलें एक साथ चुनें</string>
     <string name="settings_import_unreadable">कुछ फ़ाइलें पढ़ी नहीं जा सकीं।</string>
     <string name="settings_import_dismiss">ठीक है</string>
+    <string name="settings_import_pro_title">Offhand Pro के साथ इंपोर्ट करें</string>
+    <string name="settings_import_pro_body">दूसरे ऐप्स की रिकॉर्डिंग को नोट्स में बदलना Offhand Pro का हिस्सा है। साझा किया गया ऑडियो इंपोर्ट करने के लिए अपग्रेड करें।</string>
+    <string name="settings_import_pro_cancel">रद्द करें</string>
     <string name="settings_import_started_title">इंपोर्ट शुरू हुआ</string>
     <plurals name="settings_import_started">
         <item quantity="one">%d फ़ाइल इंपोर्ट हो रही है। नोट बैकग्राउंड में बनता है और तैयार होते ही आपकी नोट्स सूची में दिखेगा।</item>

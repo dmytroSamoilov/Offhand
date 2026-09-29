@@ -2,21 +2,32 @@ package com.dmytrosamoilov.offhand.core.ui.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.designsystem.component.ProBadge
 import com.dmytrosamoilov.offhand.core.ui.R
 
 data class NoteStyleChoice(
@@ -37,6 +48,7 @@ fun NoteStylePickerSheet(
     isCustomStylesUnlocked: Boolean,
     onSelected: (NoteStyleRef) -> Unit,
     onDismiss: () -> Unit,
+    onCreateStyle: (() -> Unit)? = null,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
@@ -69,6 +81,22 @@ fun NoteStylePickerSheet(
             NotePresetOption.entries.forEach { option ->
                 val style = NoteStyleRef.BuiltIn(option.toDomain())
                 NotePresetOptionCard(option = option, isSelected = selected == style, onClick = { onSelected(style) })
+            }
+            onCreateStyle?.let { CreateStyleButton(isCustomStylesUnlocked = isCustomStylesUnlocked, onClick = it) }
+        }
+    }
+}
+
+@Composable
+private fun CreateStyleButton(isCustomStylesUnlocked: Boolean, onClick: () -> Unit) {
+    OutlinedButton(onClick = onClick, modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(imageVector = Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+            Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
+            Text(text = stringResource(R.string.core_ui_styles_create_button))
+            if (!isCustomStylesUnlocked) {
+                Spacer(modifier = Modifier.width(6.dp))
+                ProBadge()
             }
         }
     }

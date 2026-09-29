@@ -14,7 +14,7 @@ import kotlinx.coroutines.withContext
 // decoder deletes that copy once the encrypted recording exists.
 class AudioImportIntake(
     private val context: Context,
-) {
+) : AudioImportStaging {
 
     suspend fun stage(uri: Uri): AudioImportSource? = withContext(Dispatchers.IO) {
         val displayName = displayNameOf(uri)
@@ -33,7 +33,7 @@ class AudioImportIntake(
 
     // Staged copies that never reached the decoder, such as a share that
     // ended at a declined paywall.
-    suspend fun discard(sources: List<AudioImportSource>) = withContext(Dispatchers.IO) {
+    override suspend fun discard(sources: List<AudioImportSource>) = withContext(Dispatchers.IO) {
         sources.forEach { source -> File(source.handle).delete() }
     }
 

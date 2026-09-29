@@ -6,6 +6,7 @@ import WidgetKit
 struct OffhandWidgetsBundle: WidgetBundle {
     var body: some Widget {
         NoteActivityWidget()
+        AiCoreDownloadActivityWidget()
     }
 }
 
@@ -137,6 +138,134 @@ private struct LockScreenActivityView: View {
             }
             Spacer()
             TrailingStatus(state: state)
+                .font(.title3.monospacedDigit())
+        }
+        .foregroundStyle(.white)
+    }
+}
+
+struct AiCoreDownloadActivityWidget: Widget {
+    var body: some WidgetConfiguration {
+        ActivityConfiguration(for: AiCoreDownloadActivityAttributes.self) { context in
+            DownloadLockScreenView(state: context.state, isStale: context.isStale)
+                .padding()
+                .activityBackgroundTint(Color.black.opacity(0.55))
+                .activitySystemActionForegroundColor(.white)
+        } dynamicIsland: { context in
+            DynamicIsland {
+                DynamicIslandExpandedRegion(.leading) {
+                    DownloadGlyph(state: context.state)
+                        .font(.title2)
+                }
+                DynamicIslandExpandedRegion(.trailing) {
+                    DownloadTrailing(state: context.state)
+                        .font(.title3.monospacedDigit())
+                }
+                DynamicIslandExpandedRegion(.bottom) {
+                    DownloadExpandedBottom(state: context.state, isStale: context.isStale)
+                }
+            } compactLeading: {
+                DownloadGlyph(state: context.state)
+            } compactTrailing: {
+                DownloadTrailing(state: context.state)
+                    .frame(maxWidth: 60)
+            } minimal: {
+                DownloadGlyph(state: context.state)
+            }
+        }
+    }
+}
+
+private struct DownloadGlyph: View {
+    let state: AiCoreDownloadActivityAttributes.ContentState
+
+    var body: some View {
+        switch state.phase {
+        case .downloading:
+            Image(systemName: "arrow.down.circle.fill").foregroundStyle(.blue)
+        case .ready:
+            Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+        case .paused:
+            Image(systemName: "pause.circle.fill").foregroundStyle(.orange)
+        }
+    }
+}
+
+private struct DownloadTrailing: View {
+    let state: AiCoreDownloadActivityAttributes.ContentState
+
+    var body: some View {
+        switch state.phase {
+        case .downloading:
+            Text("\(state.progressPercent)%")
+        case .ready:
+            Text(String(localized: "Done"))
+        case .paused:
+            EmptyView()
+        }
+    }
+}
+
+private struct DownloadTitle: View {
+    let state: AiCoreDownloadActivityAttributes.ContentState
+
+    var body: some View {
+        switch state.phase {
+        case .downloading:
+            Text(String(localized: "Setting up your on-device AI"))
+        case .ready:
+            Text(String(localized: "Your on-device AI is ready"))
+        case .paused:
+            Text(String(localized: "Open Offhand to finish setting up your on-device AI"))
+        }
+    }
+}
+
+private struct DownloadProgressBar: View {
+    let state: AiCoreDownloadActivityAttributes.ContentState
+    let isStale: Bool
+
+    var body: some View {
+        if state.phase == .downloading {
+            ProgressView(value: Double(state.progressPercent), total: 100)
+                .tint(.blue)
+            if isStale {
+                Text(String(localized: "Continuing in the background"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
+private struct DownloadExpandedBottom: View {
+    let state: AiCoreDownloadActivityAttributes.ContentState
+    let isStale: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            DownloadTitle(state: state)
+                .font(.subheadline)
+            DownloadProgressBar(state: state, isStale: isStale)
+        }
+    }
+}
+
+private struct DownloadLockScreenView: View {
+    let state: AiCoreDownloadActivityAttributes.ContentState
+    let isStale: Bool
+
+    var body: some View {
+        HStack(spacing: 12) {
+            DownloadGlyph(state: state)
+                .font(.title2)
+            VStack(alignment: .leading, spacing: 4) {
+                DownloadTitle(state: state)
+                    .font(.headline)
+                DownloadProgressBar(state: state, isStale: isStale)
+            }
+            Spacer()
+            DownloadTrailing(state: state)
                 .font(.title3.monospacedDigit())
         }
         .foregroundStyle(.white)

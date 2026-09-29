@@ -72,4 +72,5 @@
         <item quantity="many">Меньше %d лет годовой подписки</item>
         <item quantity="other">Меньше %d лет годовой подписки</item>
     </plurals>
+    <string name="paywall_benefits_body">Всё из колонки Pro уже ваше.</string>
 </resources>

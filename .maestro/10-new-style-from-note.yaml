@@ -1,0 +1,60 @@
+# Runs after 01-smoke.yaml and relies on the note it created. The change-style
+# sheet of a note leads to the style editor, and saving returns to the sheet
+# with the new style listed, ready to pick.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- tapOn: "Smoke test note"
+- runFlow:
+    when:
+      visible: "In-app review · dev build"
+    commands:
+      - tapOn: "COUNT ATTEMPT"
+- tapOn: "More actions"
+- tapOn: "Change note style"
+- scrollUntilVisible:
+    element: "Create a new style"
+- tapOn: "Create a new style"
+- assertVisible: "New note style"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Name"
+      - inputText: "Call recap"
+      - hideKeyboard
+      - tapOn: "What kind of note is this?"
+      - inputText: "a short call recap"
+      - hideKeyboard
+      - tapOn: "Heading"
+      - inputText: "Decisions"
+      - hideKeyboard
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Name"
+      - inputText: "Call recap"
+      - swipe:
+          start: "50%,15%"
+          end: "50%,25%"
+      - waitForAnimationToEnd
+      - tapOn: "What kind of note is this?"
+      - inputText: "a short call recap"
+      - swipe:
+          start: "50%,15%"
+          end: "50%,25%"
+      - waitForAnimationToEnd
+      - tapOn: "Heading"
+      - inputText: "Decisions"
+      - swipe:
+          start: "50%,15%"
+          end: "50%,25%"
+      - waitForAnimationToEnd
+- tapOn: "Save"
+
+# Back on the note with the sheet open again and the new style on top
+- extendedWaitUntil:
+    visible: "Your styles"
+    timeout: 10000
+- assertVisible: "Call recap"

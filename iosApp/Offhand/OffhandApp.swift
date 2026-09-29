@@ -3,6 +3,7 @@ import SwiftUI
 
 @main
 struct OffhandApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     #if UI_TEST
     private static let useSmokeFakes = true
     #else
@@ -54,5 +55,17 @@ struct OffhandApp: App {
         WindowGroup {
             RootView()
         }
+    }
+}
+
+// The on-device AI downloads on a background URLSession; iOS wakes the app
+// through this hook when that session has events to deliver.
+final class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(
+        _ application: UIApplication,
+        handleEventsForBackgroundURLSession identifier: String,
+        completionHandler: @escaping () -> Void
+    ) {
+        SharedGraph.shared.handleBackgroundDownloadEvents(identifier: identifier, completion: completionHandler)
     }
 }

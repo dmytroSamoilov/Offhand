@@ -2,7 +2,6 @@ package com.dmytrosamoilov.offhand
 
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -18,22 +17,22 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
-import com.dmytrosamoilov.offhand.feature.notes.R as NotesR
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportIntake
-import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
-import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
 import com.dmytrosamoilov.offhand.feature.recording.service.RecordingService
+import com.dmytrosamoilov.offhand.feature.settings.presentation.SharedAudioImportViewModel
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import com.dmytrosamoilov.offhand.root.RootScreen
 import com.dmytrosamoilov.offhand.root.RootViewModel
 import org.koin.androidx.compose.koinViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : FragmentActivity() {
 
     private var requestedNoteId by mutableStateOf<Long?>(null)
     private val importIntake: AudioImportIntake by inject()
-    private val importAudio: ImportAudioUseCase by inject()
+    // Activity-scoped so the dialog host inside RootScreen observes the same instance.
+    private val sharedAudioImport: SharedAudioImportViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,9 +77,11 @@ class MainActivity : FragmentActivity() {
         intent.removeExtra(Intent.EXTRA_STREAM)
         if (uris.isEmpty()) return
         lifecycleScope.launch {
-            val sources = uris.map { uri -> importIntake.stage(uri) }
-            if (importAudio(sources.filterNotNull()) == ImportAudioResult.LOCKED) importIntake.discard(sources.filterNotNull())
-            if (sources.any { it == null }) showToast(NotesR.string.notes_import_error_unreadable)
+            val staged = uris.map { uri -> importIntake.stage(uri) }
+            sharedAudioImport.onSharedAudioReceived(
+                sources = staged.filterNotNull(),
+                unreadableCount = staged.count { it == null },
+            )
         }
     }
 
@@ -89,10 +90,6 @@ class MainActivity : FragmentActivity() {
         Intent.ACTION_SEND_MULTIPLE ->
             IntentCompat.getParcelableArrayListExtra(intent, Intent.EXTRA_STREAM, Uri::class.java).orEmpty()
         else -> emptyList()
-    }
-
-    private fun showToast(message: Int) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
     private companion object {

@@ -26,12 +26,14 @@ import com.dmytrosamoilov.offhand.feature.recording.di.featureRecordingModule
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.AppIconProvider
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.NotePdfRenderer
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioDecoder
+import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportStaging
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioRecorder
 import com.dmytrosamoilov.offhand.feature.recording.domain.DefaultNoteTitleProvider
 import com.dmytrosamoilov.offhand.feature.settings.di.featureSettingsModule
 import com.dmytrosamoilov.offhand.testing.fakes.smokeFakesModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.context.startKoin
@@ -89,6 +91,7 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
     single { BuildInfo(isDeveloperBuild = deps.isDeveloperBuild, appVersion = deps.appVersion, platform = "ios") }
     single<BackupCrypto> { IosBackupCrypto(deps.backupCrypto) }
     single<AudioDecoder> { IosAudioDecoder(deps.audioDecoder) }
+    single<AudioImportStaging> { IosAudioImportStaging() }
     single<NotePdfRenderer> { IosNotePdfRenderer(deps.noteDocuments) }
     single<AppIconProvider> { IosAppIconProvider(deps.noteDocuments) }
     single<ProStore>(named(PLATFORM_PRO_STORE)) { IosProStore(deps.proStore) }
@@ -143,11 +146,14 @@ class IosModelDownloadController(
     private val scope: CoroutineScope,
 ) : ModelDownloadController {
 
+    private var run: Job? = null
+
     // Speech first, matching Android: it is the smaller download and the one the
     // very first recording needs, and finishing it before the LLM keeps
     // ModelState.Ready a truthful signal that everything is on disk.
     override fun start() {
-        scope.launch {
+        if (run?.isActive == true) return
+        run = scope.launch {
             runCatching { speechToText.prepare() }
             runCatching { modelManager.ensureModelAvailable() }
         }

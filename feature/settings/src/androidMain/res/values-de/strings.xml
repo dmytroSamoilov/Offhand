@@ -113,6 +113,9 @@
     <string name="settings_import_audio_subtitle">Mache aus Audiodateien Notizen. Wähle eine oder mehrere auf einmal</string>
     <string name="settings_import_unreadable">Einige der Dateien konnten nicht gelesen werden.</string>
     <string name="settings_import_dismiss">OK</string>
+    <string name="settings_import_pro_title">Importieren mit Offhand Pro</string>
+    <string name="settings_import_pro_body">Aufnahmen aus anderen Apps in Notizen zu verwandeln ist Teil von Offhand Pro. Führe ein Upgrade durch, um das geteilte Audio zu importieren.</string>
+    <string name="settings_import_pro_cancel">Abbrechen</string>
     <string name="settings_import_started_title">Import gestartet</string>
     <plurals name="settings_import_started">
         <item quantity="one">%d Datei wird importiert. Die Notiz wird im Hintergrund erstellt und erscheint in deiner Notizenliste, sobald sie fertig ist.</item>

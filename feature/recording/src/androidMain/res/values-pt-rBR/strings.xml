@@ -16,9 +16,6 @@
     <string name="recording_stage_finishing">Salvando sua gravação…</string>
     <string name="recording_processing_hint">Você pode fechar isto — a nota vai aparecer na sua lista quando estiver pronta.</string>
     <string name="recording_external_mic_generic">Microfone externo</string>
-    <string name="recording_saved_title">Gravação salva</string>
-    <string name="recording_saved_body">Sua nota está sendo processada. Você pode fechar isto — vamos avisar quando a transcrição estiver pronta.</string>
-    <string name="recording_saved_done_button">Concluído</string>
     <string name="recording_failed_title">Algo deu errado</string>
     <string name="recording_try_again_button">Tentar novamente</string>
     <string name="recording_notification_channel_name">Gravação</string>

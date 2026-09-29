@@ -28,16 +28,11 @@ struct SettingsView: View {
             Form {
                 proSection
                 Section(String(localized: "Notes")) {
-                    Button {
+                    SettingsActionRow(
+                        title: String(localized: "Default note style"),
+                        value: NoteStyleLabels.label(for: state.noteStyle, customStyles: state.customStyles)
+                    ) {
                         isPresetPickerVisible = true
-                    } label: {
-                        HStack {
-                            Text(String(localized: "Default note style"))
-                                .foregroundStyle(.primary)
-                            Spacer()
-                            Text(NoteStyleLabels.label(for: state.noteStyle, customStyles: state.customStyles))
-                                .foregroundStyle(.secondary)
-                        }
                     }
                     NavigationLink {
                         NoteStylesView()
@@ -49,22 +44,26 @@ struct SettingsView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
-                    smartSuggestionsToggle
+                    SettingsSwitchRow(
+                        title: String(localized: "Show smart suggestions"),
+                        subtitle: String(localized: "Find calendar events and to-dos in every new note. Adds a few seconds of processing."),
+                        isOn: state.isSmartSuggestionsEnabled,
+                        showsProBadge: !state.isSmartSuggestionsUnlocked
+                    ) {
+                        viewModel.onSmartSuggestionsChanged(enabled: !state.isSmartSuggestionsEnabled)
+                    }
                 }
-                Section {
-                    Toggle(String(localized: "Require unlock to open Offhand"), isOn: Binding(
-                        get: { state.isAppLockEnabled && state.isDeviceSecure },
-                        set: { viewModel.onAppLockChanged(enabled: $0) }
-                    ))
-                    .disabled(!state.isDeviceSecure)
-                } header: {
-                    Text(String(localized: "Security"))
-                } footer: {
-                    Text(
-                        state.isDeviceSecure
+                Section(String(localized: "Security")) {
+                    SettingsSwitchRow(
+                        title: String(localized: "Require unlock to open Offhand"),
+                        subtitle: state.isDeviceSecure
                             ? String(localized: "Ask for Face ID, Touch ID, or your passcode every time Offhand opens.")
-                            : String(localized: "Set a passcode on this iPhone to use this.")
-                    )
+                            : String(localized: "Set a passcode on this iPhone to use this."),
+                        isOn: state.isAppLockEnabled && state.isDeviceSecure
+                    ) {
+                        viewModel.onAppLockChanged(enabled: !state.isAppLockEnabled)
+                    }
+                    .disabled(!state.isDeviceSecure)
                 }
                 Section {
                     NavigationLink {
@@ -77,18 +76,12 @@ struct SettingsView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
-                    Button {
+                    SettingsActionRow(
+                        title: String(localized: "Import audio"),
+                        subtitle: String(localized: "Turn audio files into notes. Pick one or several at once"),
+                        showsProBadge: !state.isAudioImportUnlocked
+                    ) {
                         viewModel.onImportAudioClicked()
-                    } label: {
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack(spacing: 6) {
-                                Text(String(localized: "Import audio")).foregroundStyle(.primary)
-                                if !state.isAudioImportUnlocked { ProBadge() }
-                            }
-                            Text(String(localized: "Turn audio files into notes. Pick one or several at once"))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
                     }
                 } header: {
                     Text(String(localized: "Backup"))
@@ -98,7 +91,7 @@ struct SettingsView: View {
                         AboutSupportView()
                     } label: {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(String(localized: "About & Support"))
+                            Text(String(localized: "About & support"))
                             Text(
                                 String(
                                     format: String(localized: "Version %@ · feedback, privacy and legal"),
@@ -170,7 +163,7 @@ struct SettingsView: View {
             allowsMultipleSelection: true
         ) { result in
             guard case .success(let urls) = result else { return }
-            let staged = urls.map(stageAudio)
+            let staged = urls.map(AudioFileStaging.stage)
             viewModel.onAudioImportSelected(
                 sources: staged.compactMap { $0 },
                 unreadableCount: Int32(staged.filter { $0 == nil }.count)
@@ -180,7 +173,7 @@ struct SettingsView: View {
             Button(String(localized: "OK")) { viewModel.onImportNoticeDismissed() }
         } message: {
             if let notice = state.importNotice {
-                Text(importNoticeMessage(notice))
+                Text(ImportNoticeText.message(notice))
             }
         }
         .task {
@@ -191,19 +184,6 @@ struct SettingsView: View {
         }
     }
 
-    // The picker's grant is tied to this view, while decoding runs later on
-    // the session's scope, so the file is copied into tmp first; the decoder
-    // deletes the copy when it is done.
-    private func stageAudio(_ url: URL) -> AudioImportSource? {
-        let accessed = url.startAccessingSecurityScopedResource()
-        defer { if accessed { url.stopAccessingSecurityScopedResource() } }
-        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("imports", isDirectory: true)
-        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let copy = directory.appendingPathComponent(UUID().uuidString).appendingPathExtension(url.pathExtension)
-        guard (try? FileManager.default.copyItem(at: url, to: copy)) != nil else { return nil }
-        return AudioImportSource(handle: copy.path, displayName: url.lastPathComponent)
-    }
-
     private var importNoticeBinding: Binding<Bool> {
         Binding(
             get: { state.importNotice != nil },
@@ -212,66 +192,65 @@ struct SettingsView: View {
     }
 
     private var importNoticeTitle: String {
-        if case .started = onEnum(of: state.importNotice) {
-            return String(localized: "Import started")
-        }
-        return String(localized: "Import audio")
-    }
-
-    private func importNoticeMessage(_ notice: ImportNoticeUi) -> String {
-        switch onEnum(of: notice) {
-        case .started(let started):
-            return String.localizedStringWithFormat(
-                String(localized: "%d files are being imported. The notes are created in the background and will show up in your notes list as soon as they are ready."),
-                started.fileCount
-            )
-        case .unreadable:
-            return String(localized: "Some of the files could not be read.")
-        }
+        ImportNoticeText.title(state.importNotice)
     }
 
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
 
-    // Free users get the upgrade card on top; subscribers get the status and
-    // the store's own management page, where cancellation lives.
+    // One Subscription section in both states: free users get the upgrade row,
+    // subscribers the plan and the store's own management page, where
+    // cancellation lives.
     @ViewBuilder
     private var proSection: some View {
         if case .free = onEnum(of: state.pro) {
-            Section {
+            Section(String(localized: "Subscription")) {
                 HStack(spacing: 12) {
-                    ProCrown(size: 28)
+                    ProCrown(size: 24)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(String(localized: "Offhand Pro")).font(.headline)
+                        Text(String(localized: "Offhand Pro"))
                         Text(String(localized: "Custom styles, PDF and Word export, smart suggestions and audio import"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                     Spacer()
-                    Button(String(localized: "Upgrade")) { viewModel.onUpgradeClicked() }
+                    Button(String(localized: "Upgrade")) { viewModel.onProCardClicked() }
                         .buttonStyle(.borderedProminent)
                 }
                 .padding(.vertical, 4)
-                .listRowBackground(Brand.primaryContainer)
-                Button(String(localized: "Redeem a code")) {
+                .contentShape(Rectangle())
+                .onTapGesture { viewModel.onProCardClicked() }
+                SettingsActionRow(title: String(localized: "Redeem a code")) {
                     viewModel.onRedeemCodeClicked()
                     OfferCodeRedemption.present()
                 }
             }
         } else {
             Section(String(localized: "Subscription")) {
-                HStack(spacing: 12) {
-                    ProCrown(size: 24)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(String(localized: "Offhand Pro"))
-                        Text(proStatusLabel).font(.caption).foregroundStyle(.secondary)
+                Button {
+                    viewModel.onProCardClicked()
+                } label: {
+                    HStack(spacing: 12) {
+                        ProCrown(size: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(String(localized: "Offhand Pro"))
+                            Text(proStatusLabel).font(.caption).foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                if case .lifetime = onEnum(of: state.pro) {} else {
+                    SettingsActionRow(title: String(localized: "Manage subscription")) {
+                        SubscriptionManagement.present()
                     }
                 }
-                if case .lifetime = onEnum(of: state.pro) {} else {
-                    Button(String(localized: "Manage subscription")) { SubscriptionManagement.present() }
-                }
-                Button(String(localized: "Redeem a code")) {
+                SettingsActionRow(title: String(localized: "Redeem a code")) {
                     viewModel.onRedeemCodeClicked()
                     OfferCodeRedemption.present()
                 }
@@ -294,31 +273,6 @@ struct SettingsView: View {
 
     private func formatDate(_ epochMs: Int64) -> String {
         Date(timeIntervalSince1970: TimeInterval(epochMs) / 1000).formatted(date: .abbreviated, time: .omitted)
-    }
-
-    // The whole row flips the switch, like the Android row; a plain Toggle
-    // only reacts to the switch itself.
-    private var smartSuggestionsToggle: some View {
-        Button {
-            viewModel.onSmartSuggestionsChanged(enabled: !state.isSmartSuggestionsEnabled)
-        } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 6) {
-                        Text(String(localized: "Show smart suggestions")).foregroundStyle(.primary)
-                        if !state.isSmartSuggestionsUnlocked { ProBadge() }
-                    }
-                    Text(String(localized: "Find calendar events and to-dos in every new note. Adds a few seconds of processing."))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
-                Toggle("", isOn: .constant(state.isSmartSuggestionsEnabled))
-                    .labelsHidden()
-                    .allowsHitTesting(false)
-            }
-        }
-        .buttonStyle(.plain)
     }
 
     private func proOverrideSection(_ override: ProOverride) -> some View {
@@ -355,5 +309,71 @@ private struct CustomStyleCard: View {
             showProBadge: showProBadge,
             action: onSelect
         )
+    }
+}
+
+// A tappable Settings row that looks like a navigation row: primary text, an
+// optional grey subtitle or trailing value, and the same chevron. A plain
+// Button in a Form tints its label with the accent colour instead.
+private struct SettingsActionRow: View {
+    let title: String
+    var subtitle: String?
+    var value: String?
+    var showsProBadge = false
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Text(title)
+                        if showsProBadge { ProBadge() }
+                    }
+                    if let subtitle {
+                        Text(subtitle).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                Spacer()
+                if let value {
+                    Text(value).foregroundStyle(.secondary)
+                }
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// The whole row flips the switch, like the Android row; a plain Toggle only
+// reacts to the switch itself.
+private struct SettingsSwitchRow: View {
+    let title: String
+    let subtitle: String
+    let isOn: Bool
+    var showsProBadge = false
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Text(title)
+                        if showsProBadge { ProBadge() }
+                    }
+                    Text(subtitle).font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Toggle("", isOn: .constant(isOn))
+                    .labelsHidden()
+                    .allowsHitTesting(false)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }

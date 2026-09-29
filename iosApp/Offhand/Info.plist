@@ -10,6 +10,19 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>$(APP_DISPLAY_NAME)</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Audio</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.audio</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -31,6 +44,8 @@
 	<key>GOOGLE_ADS_ON_DEVICE_CONVERSION_EVENT_DATA_ENABLED</key>
 	<false/>
 	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<false/>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Offhand uses Face ID so only you can open your notes.</string>

@@ -17,6 +17,7 @@ class CreateRecordingNoteUseCase(
     suspend operator fun invoke(
         audioFileName: String?,
         style: NoteStyleRef,
+        folderId: Long?,
     ): Long =
         notesRepository.createNote(
             Note(
@@ -32,6 +33,7 @@ class CreateRecordingNoteUseCase(
                 durationMs = null,
                 status = NoteStatus.RECORDING,
                 style = style,
+                folderId = folderId,
             ),
         )
 }

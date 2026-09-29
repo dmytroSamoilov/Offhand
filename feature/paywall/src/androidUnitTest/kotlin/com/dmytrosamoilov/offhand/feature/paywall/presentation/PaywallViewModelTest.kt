@@ -76,6 +76,28 @@ class PaywallViewModelTest {
     }
 
     @Test
+    fun `opening as a subscriber shows the benefits and loads no offers`() = runTest {
+        every { gate.requestedFeature } returns MutableStateFlow(ProFeature.GENERAL)
+        status.value = ProStatus.LIFETIME
+        val viewModel = createViewModel()
+
+        viewModel.onOpened()
+
+        assertEquals(PaywallMode.BENEFITS, viewModel.uiState.value.mode)
+        coVerify(exactly = 1) { loadProOffers() }
+    }
+
+    @Test
+    fun `opening as a free user shows the paywall`() = runTest {
+        every { gate.requestedFeature } returns MutableStateFlow(ProFeature.GENERAL)
+        val viewModel = createViewModel()
+
+        viewModel.onOpened()
+
+        assertEquals(PaywallMode.OFFER, viewModel.uiState.value.mode)
+    }
+
+    @Test
     fun `purchase reflects the store status and keeps no message`() = runTest {
         coEvery { purchasePro(ProPlan.LIFETIME) } coAnswers {
             status.value = ProStatus.LIFETIME

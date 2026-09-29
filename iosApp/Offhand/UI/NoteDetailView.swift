@@ -6,47 +6,49 @@ struct NoteDetailView: View {
     let detail: NoteDetailUi
     let state: NotesUiState
     @State private var shareItems: [URL] = []
+    @State private var isNewStyleRequested = false
+    @State private var isNewStyleEditorVisible = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 header
                 trustBadges
+                // The recording is playable as soon as it is on disk, like on
+                // Android; only the overview waits for processing.
+                if detail.hasAudio && state.playback.isAvailable {
+                    playbackCard
+                }
                 if detail.status == .processing {
                     processingCard
+                } else if detail.status == .failed {
+                    failedCard
                 } else {
-                    if detail.hasAudio && state.playback.isAvailable {
-                        playbackCard
+                    CollapsibleSection(
+                        title: String(localized: "Overview"),
+                        copyLabel: String(localized: "Copy overview"),
+                        onCopy: { viewModel.onNoteCopied(section: .overview) },
+                        text: detail.body,
+                        labelBackground: Brand.primaryContainer,
+                        labelForeground: Brand.onPrimaryContainer,
+                        initiallyExpanded: true
+                    )
+                    .id(detail.id)
+                    if let suggestions = state.smartSuggestions {
+                        SmartSuggestionsSection(viewModel: viewModel, suggestions: suggestions)
                     }
-                    if detail.status == .failed {
-                        failedCard
-                    } else {
-                        CollapsibleSection(
-                            title: String(localized: "Overview"),
-                            copyLabel: String(localized: "Copy overview"),
-                            onCopy: { viewModel.onNoteCopied(section: .overview) },
-                            text: detail.body,
-                            labelBackground: Brand.primaryContainer,
-                            labelForeground: Brand.onPrimaryContainer,
-                            initiallyExpanded: true
-                        )
-                        .id(detail.id)
-                        if let suggestions = state.smartSuggestions {
-                            SmartSuggestionsSection(viewModel: viewModel, suggestions: suggestions)
-                        }
-                    }
-                    if !detail.transcript.isEmpty {
-                        CollapsibleSection(
-                            title: String(localized: "Transcript"),
-                            copyLabel: String(localized: "Copy transcript"),
-                            onCopy: { viewModel.onNoteCopied(section: .transcript) },
-                            text: detail.transcript,
-                            labelBackground: Brand.tertiaryContainer,
-                            labelForeground: Brand.onTertiaryContainer,
-                            initiallyExpanded: detail.status != .ready
-                        )
-                        .id(detail.id)
-                    }
+                }
+                if !detail.transcript.isEmpty {
+                    CollapsibleSection(
+                        title: String(localized: "Transcript"),
+                        copyLabel: String(localized: "Copy transcript"),
+                        onCopy: { viewModel.onNoteCopied(section: .transcript) },
+                        text: detail.transcript,
+                        labelBackground: Brand.tertiaryContainer,
+                        labelForeground: Brand.onTertiaryContainer,
+                        initiallyExpanded: detail.status != .ready
+                    )
+                    .id(detail.id)
                 }
             }
             .padding()
@@ -123,14 +125,26 @@ struct NoteDetailView: View {
             }
             .ignoresSafeArea()
         }
-        .sheet(isPresented: presetBinding) {
+        // The editor is pushed here rather than inside the sheet: its Save can open
+        // the paywall, and a sheet cannot present another modal.
+        .sheet(isPresented: presetBinding, onDismiss: openRequestedStyleEditor) {
             NoteStyleSheet(
                 viewModel: viewModel,
                 current: detail.style,
                 customStyles: state.customStyles,
-                isCustomStylesUnlocked: state.isCustomStylesUnlocked
+                isCustomStylesUnlocked: state.isCustomStylesUnlocked,
+                onCreateStyle: {
+                    isNewStyleRequested = true
+                    viewModel.onPresetSheetDismissed()
+                }
             )
                 .presentationDetents([.medium, .large])
+        }
+        .navigationDestination(isPresented: $isNewStyleEditorVisible) {
+            NoteStyleEditorView(styleId: 0)
+        }
+        .onChange(of: isNewStyleEditorVisible) {
+            if !isNewStyleEditorVisible { viewModel.onPresetSheetRequested() }
         }
 
         .sheet(isPresented: shareItemsBinding) {
@@ -296,6 +310,12 @@ struct NoteDetailView: View {
             get: { state.pendingCalendarEvent.map { PendingCalendarEvent(suggestion: $0) } },
             set: { pending in if pending == nil { viewModel.onCalendarEventLaunched(isAdded: false) } }
         )
+    }
+
+    private func openRequestedStyleEditor() {
+        guard isNewStyleRequested else { return }
+        isNewStyleRequested = false
+        isNewStyleEditorVisible = true
     }
 
     private var presetBinding: Binding<Bool> {
@@ -571,6 +591,7 @@ private struct NoteStyleSheet: View {
     let current: NoteStyleRef
     let customStyles: [NoteStyleOptionUi]
     let isCustomStylesUnlocked: Bool
+    let onCreateStyle: () -> Void
 
     var body: some View {
         NavigationStack {
@@ -605,6 +626,16 @@ private struct NoteStyleSheet: View {
                     Text(String(localized: "Built in"))
                 } footer: {
                     Text(String(localized: "The recording is kept. The title and overview are written again from the transcript in the style you pick."))
+                }
+                Section {
+                    Button(action: onCreateStyle) {
+                        HStack(spacing: 6) {
+                            Label(String(localized: "Create a new style"), systemImage: "plus")
+                            if !isCustomStylesUnlocked {
+                                ProBadge()
+                            }
+                        }
+                    }
                 }
             }
             .navigationTitle(String(localized: "Rewrite this note as"))
