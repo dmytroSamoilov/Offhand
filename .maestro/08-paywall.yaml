@@ -2,7 +2,8 @@
 # override in Settings plays the free user: crowns appear, the paywall opens
 # from the Upgrade card and from Import audio, a simulated purchase flips the
 # override to Pro, and the import picker that was waiting behind the paywall
-# opens on its own.
+# opens on its own. Tapping the plan row as a subscriber shows what Pro
+# includes, without prices.
 appId: com.dmytrosamoilov.offhand.uitest
 ---
 - launchApp
@@ -46,6 +47,11 @@ appId: com.dmytrosamoilov.offhand.uitest
             text: "Subscription"
           direction: UP
       - assertVisible: "Lifetime, yours forever"
+      - tapOn: "Lifetime, yours forever"
+      - assertVisible: "Everything in the Pro column is yours."
+      - assertNotVisible: "Start 14-day free trial"
+      - tapOn: "Close"
+      - assertVisible: "Lifetime, yours forever"
       - scrollUntilVisible:
           element:
             text: "Store"
@@ -75,6 +81,23 @@ appId: com.dmytrosamoilov.offhand.uitest
           timeout: 10000
       - tapOn: "Cancel"
       - assertVisible: "Lifetime, yours forever"
+      - tapOn: "Lifetime, yours forever"
+      - assertVisible: "Everything in the Pro column is yours."
+      - assertNotVisible: "Start 14-day free trial"
+      - tapOn: "Close"
+      - assertVisible: "Lifetime, yours forever"
       - scrollUntilVisible:
           element: "Pro status override"
       - tapOn: "Store"
+
+# A fresh launch as a subscriber: the first paywall of the process must show
+# the benefits, not the purchase success screen that closes itself.
+- launchApp
+- tapOn: "Settings"
+- scrollUntilVisible:
+    element: "Lifetime, yours forever"
+    direction: UP
+- tapOn: "Lifetime, yours forever"
+- assertVisible: "Everything in the Pro column is yours."
+- tapOn: "Close"
+- assertVisible: "Lifetime, yours forever"

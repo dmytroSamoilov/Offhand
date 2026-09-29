@@ -117,10 +117,8 @@ class SettingsViewModel(
         }
     }
 
-    fun onUpgradeClicked() {
-        launchSafely(showLoading = false) {
-            proUpgradeGate.requirePro(ProFeature.GENERAL)
-        }
+    fun onProCardClicked() {
+        proUpgradeGate.showBenefits()
     }
 
     // The redemption itself happens in the store; the app only counts the tap.

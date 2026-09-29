@@ -10,6 +10,7 @@ struct PaywallView: View {
         isLoadingOffers: true,
         isPurchasing: false,
         isPro: false,
+        mode: .opening,
         message: nil
     )
 
@@ -17,10 +18,13 @@ struct PaywallView: View {
 
     var body: some View {
         Group {
-            if state.isPro {
-                successContent
-            } else {
-                paywallContent
+            switch state.mode {
+            case .opening:
+                Color.clear
+            case .benefits:
+                benefitsContent
+            case .offer:
+                if state.isPro { successContent } else { paywallContent }
             }
         }
         .background(Color(.systemGroupedBackground))
@@ -31,7 +35,7 @@ struct PaywallView: View {
         }
         .onAppear { viewModel.onOpened() }
         .onChange(of: state.isPro) {
-            guard state.isPro else { return }
+            guard state.isPro, state.mode == .offer else { return }
             Task {
                 try? await Task.sleep(for: Self.successDismissDelay)
                 viewModel.onClosed()
@@ -58,6 +62,30 @@ struct PaywallView: View {
                 .padding(.bottom, 8)
             }
             bottomActions
+        }
+    }
+
+    private var benefitsContent: some View {
+        VStack(spacing: 0) {
+            closeRow
+            ScrollView {
+                VStack(spacing: 16) {
+                    VStack(spacing: 6) {
+                        ProCrown(size: 48)
+                        Text(String(localized: "You're on Offhand Pro"))
+                            .font(.title2.bold())
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 4)
+                        Text(String(localized: "Everything in the Pro column is yours."))
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    ComparisonTable(highlighted: .general)
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+            }
         }
     }
 

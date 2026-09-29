@@ -16,6 +16,7 @@ import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.RestoreProPurch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -23,7 +24,7 @@ class PaywallViewModel(
     private val loadProOffers: LoadProOffersUseCase,
     private val purchasePro: PurchaseProUseCase,
     private val restoreProPurchases: RestoreProPurchasesUseCase,
-    observeProStatus: ObserveProStatusUseCase,
+    private val observeProStatus: ObserveProStatusUseCase,
     private val proUpgradeGate: ProUpgradeGate,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
@@ -41,14 +42,27 @@ class PaywallViewModel(
     }
 
     // The same instance serves every presentation, so a reopened paywall
-    // starts from a clean slate and fresh prices.
+    // starts from a clean slate and fresh prices. The status is read here
+    // rather than taken from the collected state, which a first presentation
+    // may not have received yet.
     fun onOpened() {
         val feature = proUpgradeGate.requestedFeature.value ?: ProFeature.GENERAL
         mutableUiState.update {
-            it.copy(feature = feature, selectedPlan = ProPlan.YEARLY, message = null, isPurchasing = false)
+            it.copy(
+                feature = feature,
+                selectedPlan = ProPlan.YEARLY,
+                message = null,
+                isPurchasing = false,
+                mode = PaywallMode.OPENING,
+            )
         }
-        analyticsTracker.track(AnalyticsEvents.paywallShown(feature))
-        loadOffers()
+        launchSafely(showLoading = false) {
+            val isPro = observeProStatus().first().isPro
+            mutableUiState.update { it.copy(isPro = isPro, mode = if (isPro) PaywallMode.BENEFITS else PaywallMode.OFFER) }
+            if (isPro) return@launchSafely
+            analyticsTracker.track(AnalyticsEvents.paywallShown(feature))
+            loadOffers()
+        }
     }
 
     fun onRetryOffers() = loadOffers()

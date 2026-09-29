@@ -3557,6 +3557,46 @@
         }
       }
     },
+    "Everything in the Pro column is yours." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles in der Pro-Spalte gehört dir."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo lo de la columna Pro es tuyo."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro कॉलम की हर सुविधा आपकी है।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tudo na coluna Pro é seu."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Всё из колонки Pro уже ваше."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Усе з колонки Pro вже ваше."
+          }
+        }
+      }
+    },
     "Everything stays on this device." : {
       "extractionState" : "stale",
       "localizations" : {

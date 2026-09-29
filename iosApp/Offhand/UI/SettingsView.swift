@@ -221,10 +221,12 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                     Spacer()
-                    Button(String(localized: "Upgrade")) { viewModel.onUpgradeClicked() }
+                    Button(String(localized: "Upgrade")) { viewModel.onProCardClicked() }
                         .buttonStyle(.borderedProminent)
                 }
                 .padding(.vertical, 4)
+                .contentShape(Rectangle())
+                .onTapGesture { viewModel.onProCardClicked() }
                 .listRowBackground(Brand.primaryContainer)
                 Button(String(localized: "Redeem a code")) {
                     viewModel.onRedeemCodeClicked()
@@ -233,13 +235,23 @@ struct SettingsView: View {
             }
         } else {
             Section(String(localized: "Subscription")) {
-                HStack(spacing: 12) {
-                    ProCrown(size: 24)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(String(localized: "Offhand Pro"))
-                        Text(proStatusLabel).font(.caption).foregroundStyle(.secondary)
+                Button {
+                    viewModel.onProCardClicked()
+                } label: {
+                    HStack(spacing: 12) {
+                        ProCrown(size: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(String(localized: "Offhand Pro"))
+                            Text(proStatusLabel).font(.caption).foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.tertiary)
                     }
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
                 if case .lifetime = onEnum(of: state.pro) {} else {
                     Button(String(localized: "Manage subscription")) { SubscriptionManagement.present() }
                 }

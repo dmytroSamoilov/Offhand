@@ -109,7 +109,7 @@ fun SettingsScreen(
             ) {
                 ProSection(
                     status = state.pro,
-                    onUpgradeClick = viewModel::onUpgradeClicked,
+                    onProCardClick = viewModel::onProCardClicked,
                     onRedeemCodeClick = viewModel::onRedeemCodeClicked,
                 )
                 NotesSection(
@@ -246,13 +246,13 @@ private fun AppearanceSection(
 }
 
 @Composable
-private fun ProSection(status: ProStatusUi, onUpgradeClick: () -> Unit, onRedeemCodeClick: () -> Unit) {
+private fun ProSection(status: ProStatusUi, onProCardClick: () -> Unit, onRedeemCodeClick: () -> Unit) {
     when (status) {
         ProStatusUi.Free -> Column {
-            UpgradeCard(onClick = onUpgradeClick)
+            UpgradeCard(onClick = onProCardClick)
             RedeemCodeButton(onClick = onRedeemCodeClick)
         }
-        else -> SubscriptionSection(status = status, onRedeemCodeClick = onRedeemCodeClick)
+        else -> SubscriptionSection(status = status, onPlanClick = onProCardClick, onRedeemCodeClick = onRedeemCodeClick)
     }
 }
 
@@ -306,10 +306,14 @@ private fun UpgradeCard(onClick: () -> Unit) {
 }
 
 @Composable
-private fun SubscriptionSection(status: ProStatusUi, onRedeemCodeClick: () -> Unit) {
+private fun SubscriptionSection(status: ProStatusUi, onPlanClick: () -> Unit, onRedeemCodeClick: () -> Unit) {
     val context = LocalContext.current
     SettingsCard(title = stringResource(R.string.settings_subscription_title)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().clickable(onClick = onPlanClick).padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             ProCrown(size = 24.dp)
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = stringResource(R.string.settings_pro_title), style = MaterialTheme.typography.bodyLarge)
@@ -319,6 +323,11 @@ private fun SubscriptionSection(status: ProStatusUi, onRedeemCodeClick: () -> Un
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row {
