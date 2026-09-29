@@ -9,7 +9,13 @@ import com.dmytrosamoilov.offhand.R
 import kotlinx.serialization.Serializable
 
 @Serializable
+data object NotesGraphRoute
+
+@Serializable
 data object NotesRoute
+
+@Serializable
+data object NewNoteStyleFromNoteRoute
 
 @Serializable
 data object SettingsGraphRoute
@@ -34,7 +40,7 @@ enum class TopLevelDestination(
     val icon: ImageVector,
     val route: Any,
 ) {
-    NOTES(R.string.destination_notes, Icons.AutoMirrored.Filled.Notes, NotesRoute),
+    NOTES(R.string.destination_notes, Icons.AutoMirrored.Filled.Notes, NotesGraphRoute),
     SETTINGS(R.string.destination_settings, Icons.Filled.Settings, SettingsGraphRoute),
     ;
 
