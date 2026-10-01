@@ -42,10 +42,10 @@ settings:
 packages:
   LiteRTLM:
     url: https://github.com/google-ai-edge/LiteRT-LM
-    exactVersion: 0.16.0
+    exactVersion: 0.17.1
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk
-    from: 12.18.0
+    from: 12.19.2
 targets:
   Offhand:
     type: application

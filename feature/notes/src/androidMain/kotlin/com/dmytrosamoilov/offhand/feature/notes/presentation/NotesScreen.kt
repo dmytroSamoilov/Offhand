@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import com.dmytrosamoilov.offhand.core.ui.component.label
 import androidx.compose.ui.zIndex
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.graphicsLayer
@@ -134,7 +135,6 @@ import com.dmytrosamoilov.offhand.core.ui.component.toDomain
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.NoteSection
 import com.dmytrosamoilov.offhand.feature.notes.R
-import java.util.Locale
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
@@ -1846,6 +1846,7 @@ private fun NoteDetailContent(
         }
         Text(text = note.detailTitle(), style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(4.dp))
+        val locale = LocalConfiguration.current.locales[0]
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             MetadataText(text = note.createdAt)
             if (note.wordCount > 0) {
@@ -1854,7 +1855,7 @@ private fun NoteDetailContent(
                     text = pluralStringResource(
                         R.plurals.notes_word_count,
                         note.wordCount,
-                        String.format(Locale.getDefault(), "%,d", note.wordCount),
+                        String.format(locale, "%,d", note.wordCount),
                     ),
                 )
             }
