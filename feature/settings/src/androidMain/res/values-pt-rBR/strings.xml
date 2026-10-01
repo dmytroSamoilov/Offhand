@@ -26,21 +26,16 @@
     <string name="settings_delete_model_dialog_confirm">Remover</string>
     <string name="settings_delete_model_dialog_cancel">Cancelar</string>
 
-    <string name="settings_note_style_title">Estilo de nota padrão</string>
-    <string name="settings_note_style_note">Vale para novas gravações. Você pode mudar o estilo de uma nota existente na tela da nota.</string>
-    <string name="settings_note_styles_manage">Gerenciar estilos de nota</string>
-    <string name="settings_note_styles_manage_subtitle">Crie seus próprios títulos e formato</string>
-    <string name="settings_note_styles_title">Estilos de nota</string>
-    <string name="settings_note_styles_built_in">Integrados</string>
-    <string name="settings_note_styles_custom">Seus estilos</string>
-    <string name="settings_note_styles_empty">Nenhum estilo próprio ainda. Crie um para dar à IA seus próprios títulos.</string>
-    <string name="settings_note_styles_new">Novo estilo</string>
+    <string name="settings_note_style_note">O estilo selecionado é usado nas novas gravações. Você pode mudar o estilo de qualquer nota na própria nota.</string>
+    <string name="settings_note_styles_default_value">Padrão: %1$s</string>
+    <string name="settings_note_styles_title">Estilos de resumo</string>
+    <string name="settings_note_styles_edit">Editar</string>
     <string name="settings_note_styles_delete">Excluir estilo</string>
     <string name="settings_note_styles_delete_dialog_title">Excluir este estilo?</string>
     <string name="settings_note_styles_delete_dialog_body">As notas escritas com ele são mantidas. Elas passam para o estilo Resumo na próxima vez que forem reescritas.</string>
     <string name="settings_note_styles_delete_dialog_confirm">Excluir</string>
-    <string name="settings_note_style_editor_new_title">Novo estilo de nota</string>
-    <string name="settings_note_style_editor_edit_title">Editar estilo de nota</string>
+    <string name="settings_note_style_editor_new_title">Novo estilo de resumo</string>
+    <string name="settings_note_style_editor_edit_title">Editar estilo de resumo</string>
     <string name="settings_note_style_editor_back">Voltar</string>
     <string name="settings_note_style_editor_save">Salvar</string>
     <string name="settings_note_style_editor_name">Nome</string>

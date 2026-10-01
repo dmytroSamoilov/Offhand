@@ -62,6 +62,7 @@ val featureSettingsModule = module {
             styleId = parameters.get(),
             getCustomNoteStyle = get(),
             saveCustomNoteStyle = get(),
+            deleteCustomNoteStyle = get(),
             draftNoteStyle = get(),
             isCustomNoteStylesAvailable = get(),
             proUpgradeGate = get(),

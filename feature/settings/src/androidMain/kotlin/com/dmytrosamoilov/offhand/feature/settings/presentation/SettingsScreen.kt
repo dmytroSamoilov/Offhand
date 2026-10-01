@@ -51,7 +51,6 @@ import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleChoice
-import com.dmytrosamoilov.offhand.core.ui.component.NoteStylePickerSheet
 import com.dmytrosamoilov.offhand.core.ui.component.label
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportIntake
 import com.dmytrosamoilov.offhand.feature.settings.R
@@ -109,8 +108,7 @@ fun SettingsScreen(
                 )
                 NotesSection(
                     state = state,
-                    onStyleSelected = viewModel::onNoteStyleSelected,
-                    onManageClick = onNoteStylesClick,
+                    onStylesClick = onNoteStylesClick,
                     onSmartSuggestionsChanged = viewModel::onSmartSuggestionsChanged,
                 )
                 SecuritySection(
@@ -136,23 +134,20 @@ fun SettingsScreen(
     }
 }
 
-// Mirrors the iOS form: one Notes group with the default style, the style
-// manager and the suggestions switch.
+// Mirrors the iOS form: one Notes group with the Summary styles screen (which
+// also holds the default choice) and the suggestions switch.
 @Composable
 private fun NotesSection(
     state: SettingsUiState,
-    onStyleSelected: (NoteStyleRef) -> Unit,
-    onManageClick: () -> Unit,
+    onStylesClick: () -> Unit,
     onSmartSuggestionsChanged: (Boolean) -> Unit,
 ) {
-    var isPickerVisible by remember { mutableStateOf(false) }
     val choices = state.customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) }
     SettingsCard(title = stringResource(R.string.settings_notes_title)) {
-        DefaultStyleRow(label = state.noteStyle.label(choices), onClick = { isPickerVisible = true })
         SettingsLinkRow(
-            title = stringResource(R.string.settings_note_styles_manage),
-            subtitle = stringResource(R.string.settings_note_styles_manage_subtitle),
-            onClick = onManageClick,
+            title = stringResource(R.string.settings_note_styles_title),
+            subtitle = stringResource(R.string.settings_note_styles_default_value, state.noteStyle.label(choices)),
+            onClick = onStylesClick,
         )
         SwitchRow(
             label = stringResource(R.string.settings_smart_suggestions_label),
@@ -160,45 +155,6 @@ private fun NotesSection(
             checked = state.isSmartSuggestionsEnabled,
             onCheckedChange = onSmartSuggestionsChanged,
             showProBadge = !state.isSmartSuggestionsUnlocked,
-        )
-    }
-    if (isPickerVisible) {
-        NoteStylePickerSheet(
-            title = stringResource(R.string.settings_note_style_title),
-            body = stringResource(R.string.settings_note_style_note),
-            selected = state.noteStyle,
-            customStyles = choices,
-            isCustomStylesUnlocked = state.isCustomStylesUnlocked,
-            onSelected = { style ->
-                isPickerVisible = false
-                onStyleSelected(style)
-            },
-            onDismiss = { isPickerVisible = false },
-        )
-    }
-}
-
-@Composable
-private fun DefaultStyleRow(label: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .acrossCardPadding()
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .settingsRowPadding(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = stringResource(R.string.settings_note_style_title),
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f),
-        )
-        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(modifier = Modifier.width(4.dp))
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

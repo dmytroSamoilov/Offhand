@@ -77,7 +77,7 @@ appId: com.dmytrosamoilov.offhand.uitest
 
 # Saving opens the new note; wait for processing, then go back to the list
 - extendedWaitUntil:
-    visible: "Overview"
+    visible: "Summary"
     timeout: 30000
 - assertVisible: "Smoke test note"
 - runFlow:
@@ -109,7 +109,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       visible: "In-app review · dev build"
     commands:
       - tapOn: "COUNT ATTEMPT"
-- assertVisible: "Overview"
+- assertVisible: "Summary"
 - scrollUntilVisible:
     element: "Transcript"
     direction: DOWN

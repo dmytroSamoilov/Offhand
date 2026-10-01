@@ -21,7 +21,10 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsFolderStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ReorderFoldersUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SetFolderStyleUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
@@ -88,6 +91,11 @@ class NotesViewModelTest {
     private val renameFolder: RenameFolderUseCase = mockk(relaxed = true)
     private val deleteFolder: DeleteFolderUseCase = mockk(relaxed = true)
     private val moveNoteToFolder: MoveNoteToFolderUseCase = mockk(relaxed = true)
+    private val setFolderStyle: SetFolderStyleUseCase = mockk(relaxed = true)
+    private val reorderFolders: ReorderFoldersUseCase = mockk(relaxed = true)
+    private val isFolderStylesAvailable: IsFolderStylesAvailableUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
     private val observeCustomNoteStyles: ObserveCustomNoteStylesUseCase = mockk {
         every { this@mockk.invoke() } returns flowOf(emptyList())
     }
@@ -177,6 +185,9 @@ class NotesViewModelTest {
         renameFolder = renameFolder,
         deleteFolder = deleteFolder,
         moveNoteToFolder = moveNoteToFolder,
+        setFolderStyle = setFolderStyle,
+        reorderFolders = reorderFolders,
+        isFolderStylesAvailable = isFolderStylesAvailable,
         observeDeveloperOptions = observeDeveloperOptions,
         observeCustomNoteStyles = observeCustomNoteStyles,
         isCustomNoteStylesAvailable = isCustomNoteStylesAvailable,
@@ -199,6 +210,7 @@ class NotesViewModelTest {
         sessionManager = sessionManager,
         aiCoreDownloadStatus = AiCoreDownloadStatus(modelManager, speechToText),
         clearTranscriptionCheckpoint = mockk(relaxed = true),
+        resumeInterruptedNotes = mockk(relaxed = true),
         buildInfo = BuildInfo(isDeveloperBuild = true),
         analyticsTracker = mockk(relaxed = true),
     )

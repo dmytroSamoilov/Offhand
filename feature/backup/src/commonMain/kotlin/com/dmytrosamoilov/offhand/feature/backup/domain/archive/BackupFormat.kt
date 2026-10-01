@@ -2,7 +2,7 @@ package com.dmytrosamoilov.offhand.feature.backup.domain.archive
 
 internal object BackupFormat {
     val MAGIC: ByteArray = "OFHB".encodeToByteArray()
-    const val VERSION = 2
+    const val VERSION = 3
     const val MIN_SUPPORTED_VERSION = 1
     const val SALT_BYTES = 16
     const val NONCE_PREFIX_BYTES = 8

@@ -13,4 +13,6 @@
     <string name="core_ui_styles_custom_header">Ваши стили</string>
     <string name="core_ui_styles_built_in_header">Встроенные</string>
     <string name="core_ui_styles_create_button">Создать новый стиль</string>
+    <string name="core_ui_styles_default_option">По умолчанию</string>
+    <string name="core_ui_styles_default_option_description">Стиль, выбранный в настройках</string>
 </resources>

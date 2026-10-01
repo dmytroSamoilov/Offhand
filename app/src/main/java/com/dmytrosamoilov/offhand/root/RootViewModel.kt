@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
+import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.AppLockState
 import com.dmytrosamoilov.offhand.core.security.DatabasePassphraseProvider
@@ -15,6 +16,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
@@ -28,6 +31,7 @@ class RootViewModel(
     private val resumeInterruptedNotes: Lazy<ResumeInterruptedNotesUseCase>,
     private val sweepOrphanedRecordings: Lazy<SweepOrphanedRecordingsUseCase>,
     private val clearShareCache: ClearShareCacheUseCase,
+    private val appForegroundState: AppForegroundState,
 ) : BaseViewModel() {
 
     val uiState: StateFlow<RootUiState> = combine(
@@ -51,6 +55,7 @@ class RootViewModel(
     init {
         skipLockForFirstRun(observeUserPreferences)
         resumeInterruptedNotesWhenReady()
+        resumeInterruptedNotesOnReturn()
         resumeModelDownloadWhenReady()
     }
 
@@ -73,6 +78,17 @@ class RootViewModel(
             resumeInterruptedNotes.value.invoke()
             sweepOrphanedRecordings.value.invoke()
             clearShareCache()
+        }
+    }
+
+    // A note the system paused while the app was away continues on the way back
+    // in, without waiting for the next process start.
+    private fun resumeInterruptedNotesOnReturn() {
+        launchSafely(showLoading = false) {
+            uiState.first { it.phase == RootPhase.READY }
+            appForegroundState.isInForeground.drop(1).filter { it }.collect {
+                resumeInterruptedNotes.value.invoke()
+            }
         }
     }
 

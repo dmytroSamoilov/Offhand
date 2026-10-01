@@ -10,9 +10,9 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: Android
     commands:
       - tapOn: "Settings"
-      - tapOn: "Manage note styles"
+      - tapOn: "Summary styles"
       - assertVisible: "Built in"
-      - tapOn: "New style"
+      - tapOn: "Create a new style"
 
       # Fill the form: name, kind, two sections. The keyboard is closed after
       # every field so the next tap does not land on it.
@@ -46,9 +46,9 @@ appId: com.dmytrosamoilov.offhand.uitest
       # The style is listed and can be chosen as the default
       - assertVisible: "Sales debrief"
       - assertVisible: "Customer, Next steps"
-      - back
-      - tapOn: "Default note style"
+      # Picking the row makes it the default for new recordings
       - tapOn: "Sales debrief"
+      - back
 
       # Rewrite the existing note with it
       - tapOn:
@@ -60,17 +60,21 @@ appId: com.dmytrosamoilov.offhand.uitest
           commands:
             - tapOn: "COUNT ATTEMPT"
       - tapOn: "More actions"
-      - tapOn: "Change note style"
+      - tapOn: "Change summary style"
       - assertVisible: "Your styles"
       - tapOn: "Sales debrief"
       - extendedWaitUntil:
-          visible: "Overview"
+          visible: "Summary"
           timeout: 60000
       - back
 
       # Delete the style; the note survives
       - tapOn: "Settings"
-      - tapOn: "Manage note styles"
+      - tapOn: "Summary styles"
+      - tapOn: "Edit"
+      - scrollUntilVisible:
+          element: "Delete style"
+          direction: DOWN
       - tapOn: "Delete style"
       - tapOn: "Delete"
       - assertNotVisible: "Sales debrief"
@@ -83,9 +87,9 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - tapOn: "Settings"
-      - tapOn: "Manage note styles"
+      - tapOn: "Summary styles"
       - assertVisible: "Built in"
-      - tapOn: "New style"
+      - tapOn: "Create a new style"
 
       # Fill the form; the editor has no keyboard Done button, a short drag on
       # the form closes the keyboard so the next tap is not swallowed by it.
@@ -139,11 +143,12 @@ appId: com.dmytrosamoilov.offhand.uitest
       - swipe:
           start: "1%,50%"
           end: "70%,50%"
-      - tapOn: "Default note style"
-      - scrollUntilVisible:
-          element: "Sales debrief"
+      - tapOn: "Summary styles"
       - tapOn: "Sales debrief"
       - assertVisible: "Sales debrief"
+      - swipe:
+          start: "1%,50%"
+          end: "70%,50%"
 
       # Rewrite the existing note with it; the Settings form has a "Notes"
       # section header, so the tab is the second match
@@ -152,12 +157,12 @@ appId: com.dmytrosamoilov.offhand.uitest
           index: 1
       - tapOn: "Smoke test note"
       - tapOn: "More actions"
-      - tapOn: "Change note style"
+      - tapOn: "Change summary style"
       - scrollUntilVisible:
           element: "Your styles"
       - tapOn: "Sales debrief"
       - extendedWaitUntil:
-          visible: "Overview"
+          visible: "Summary"
           timeout: 60000
       - swipe:
           start: "1%,50%"
@@ -165,10 +170,11 @@ appId: com.dmytrosamoilov.offhand.uitest
 
       # Delete the style; the note survives
       - tapOn: "Settings"
-      - tapOn: "Manage note styles"
-      - swipe:
-          from: "Sales debrief"
-          direction: LEFT
+      - tapOn: "Summary styles"
+      - tapOn: "Edit"
+      - scrollUntilVisible:
+          element: "Delete style"
+          direction: DOWN
       - tapOn: "Delete style"
       - tapOn: "Delete"
       - assertNotVisible: "Sales debrief"

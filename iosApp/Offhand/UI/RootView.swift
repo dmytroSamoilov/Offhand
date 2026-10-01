@@ -1,6 +1,5 @@
 import OffhandShared
 import SwiftUI
-import UserNotifications
 
 struct RootView: View {
     private let viewModel = AppViewModels.root
@@ -83,7 +82,7 @@ struct RootView: View {
             }
         }
         .onAppear {
-            finishCoordinator.onLegacyExpired = { [activityController] in
+            NoteFinishCoordinator.onExpired = { [activityController] in
                 activityController.suspendedWithPendingWork()
             }
             notifications.register()
@@ -112,8 +111,7 @@ struct RootView: View {
                 finishCoordinator.appBecameActive()
                 // Only the come-back reminder is stale on activation; note-ready
                 // notifications must survive it.
-                UNUserNotificationCenter.current()
-                    .removePendingNotificationRequests(withIdentifiers: ["note-pending"])
+                notifications.clearKeepOpenReminder()
                 viewModel.onReady()
             default:
                 break
@@ -189,6 +187,9 @@ struct RootView: View {
             case .failed(let failed):
                 eventNoteId = failed.noteId
                 notifications.noteFailed(noteId: failed.noteId)
+            case .interrupted(let interrupted):
+                eventNoteId = interrupted.noteId
+                notifications.notePaused(noteId: interrupted.noteId)
             case .importRejected:
                 continue
             }
@@ -196,7 +197,7 @@ struct RootView: View {
             switch onEnum(of: event) {
             case .completed:
                 activityController.finished()
-            case .failed, .importRejected:
+            case .failed, .interrupted, .importRejected:
                 activityController.cancelled()
             }
             activeNoteId = nil
@@ -252,6 +253,7 @@ struct RootView: View {
         let session = sessionManager.session.value
         let hasPendingWork = !sessionManager.processingNoteIds.value.isEmpty || session.phase == .draining
         if hasPendingWork {
+            notifications.remindToKeepOpen()
             finishCoordinator.appEnteredBackgroundWhileProcessing()
             finishCoordinator.appEnteredBackgroundWithPendingWork()
         } else {

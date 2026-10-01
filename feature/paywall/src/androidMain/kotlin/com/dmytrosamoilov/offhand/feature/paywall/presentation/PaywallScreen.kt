@@ -187,6 +187,7 @@ private val comparisonRows = listOf(
     ComparisonRow(R.string.paywall_pro_export, R.string.paywall_pro_export_hint, ProFeature.DOCUMENT_EXPORT),
     ComparisonRow(R.string.paywall_pro_suggestions, R.string.paywall_pro_suggestions_hint, ProFeature.SMART_SUGGESTIONS),
     ComparisonRow(R.string.paywall_pro_import, R.string.paywall_pro_import_hint, ProFeature.AUDIO_IMPORT),
+    ComparisonRow(R.string.paywall_pro_folders, R.string.paywall_pro_folders_hint, ProFeature.FOLDER_STYLES),
 )
 
 @Composable
@@ -492,6 +493,7 @@ private fun ProFeature.headlineRes(): Int = when (this) {
     ProFeature.DOCUMENT_EXPORT -> R.string.paywall_context_export
     ProFeature.SMART_SUGGESTIONS -> R.string.paywall_context_suggestions
     ProFeature.AUDIO_IMPORT -> R.string.paywall_context_import
+    ProFeature.FOLDER_STYLES -> R.string.paywall_context_folder_styles
 }
 
 private fun openLink(context: Context, url: String) {

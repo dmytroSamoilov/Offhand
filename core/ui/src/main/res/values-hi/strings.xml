@@ -13,4 +13,6 @@
     <string name="core_ui_styles_custom_header">आपकी शैलियाँ</string>
     <string name="core_ui_styles_built_in_header">पहले से मौजूद</string>
     <string name="core_ui_styles_create_button">नई शैली बनाएँ</string>
+    <string name="core_ui_styles_default_option">डिफ़ॉल्ट</string>
+    <string name="core_ui_styles_default_option_description">सेटिंग्स में चुना गया स्टाइल</string>
 </resources>

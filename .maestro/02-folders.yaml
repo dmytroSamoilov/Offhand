@@ -10,9 +10,24 @@ appId: com.dmytrosamoilov.offhand.uitest
 - inputText: "Work"
 - tapOn: "Save"
 - assertVisible: "No notes in this folder yet."
+
+# Give the folder its own summary style (Pro; the uitest store is Pro): the
+# selected chip opens the menu on Android, a long press does on iOS
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Work"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - longPressOn: "Work"
+- tapOn: "Summary style.*"
+- tapOn: "Meeting notes"
 - tapOn: "All notes"
 
-# Move the note into it from the detail menu
+# Move the note into it from the detail menu; the folder style rewrites it
 - tapOn: "Smoke test note"
 - runFlow:
     when:
@@ -22,7 +37,9 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "More actions"
 - tapOn: "Move to folder"
 - tapOn: "Work"
-- assertVisible: "Overview"
+- extendedWaitUntil:
+    visible: "Summary"
+    timeout: 30000
 - runFlow:
     when:
       platform: Android

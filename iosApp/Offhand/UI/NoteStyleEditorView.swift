@@ -14,7 +14,9 @@ struct NoteStyleEditorView: View {
         errors: NoteStyleErrors(name: nil, noteKind: nil, sections: nil, headings: [:]),
         describe: nil,
         isSaved: false,
-        isLocked: false
+        isLocked: false,
+        isDeleteRequested: false,
+        isDeleted: false
     )
 
     // The ViewModel is created on first appearance, not in init: SwiftUI builds
@@ -31,7 +33,7 @@ struct NoteStyleEditorView: View {
             }
         }
         .scrollDismissesKeyboard(.immediately)
-        .navigationTitle(state.isNew ? String(localized: "New note style") : String(localized: "Edit note style"))
+        .navigationTitle(state.isNew ? String(localized: "New summary style") : String(localized: "Edit summary style"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
@@ -46,6 +48,15 @@ struct NoteStyleEditorView: View {
         .onChange(of: state.isSaved) {
             if state.isSaved { dismiss() }
         }
+        .onChange(of: state.isDeleted) {
+            if state.isDeleted { dismiss() }
+        }
+        .alert(String(localized: "Delete this style?"), isPresented: deleteBinding) {
+            Button(String(localized: "Delete"), role: .destructive) { viewModel.onDeleteConfirmed() }
+            Button(String(localized: "Cancel"), role: .cancel) { viewModel.onDeleteDismissed() }
+        } message: {
+            Text(String(localized: "Notes written with it are kept. They switch to the Summary style the next time they are rewritten."))
+        }
         .onDisappear {
             handle?.close()
             handle = nil
@@ -56,6 +67,13 @@ struct NoteStyleEditorView: View {
                 state = newState
             }
         }
+    }
+
+    private var deleteBinding: Binding<Bool> {
+        Binding(
+            get: { state.isDeleteRequested },
+            set: { isShown in if !isShown { viewModel.onDeleteDismissed() } }
+        )
     }
 
     private func openHandle() -> NoteStyleEditorHandle {
@@ -123,6 +141,13 @@ struct NoteStyleEditorView: View {
                 Label(String(localized: "Add section"), systemImage: "plus")
             }
             .disabled(state.sections.count >= Int(NoteStyleLimits.shared.MAX_SECTIONS))
+        }
+        if !state.isNew {
+            Section {
+                Button(String(localized: "Delete style"), role: .destructive) {
+                    viewModel.onDeleteRequested()
+                }
+            }
         }
     }
 

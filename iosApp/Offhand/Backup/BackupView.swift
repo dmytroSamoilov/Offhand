@@ -200,7 +200,7 @@ private struct BackupSheet: View {
                     get: { state.includeAudio },
                     set: { viewModel.onIncludeAudioChanged(enabled: $0) }
                 ))
-                Toggle(String(localized: "Include note styles"), isOn: Binding(
+                Toggle(String(localized: "Include summary styles"), isOn: Binding(
                     get: { state.includeStyles },
                     set: { viewModel.onIncludeStylesChanged(enabled: $0) }
                 ))

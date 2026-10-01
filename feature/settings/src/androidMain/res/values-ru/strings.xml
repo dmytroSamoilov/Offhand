@@ -26,21 +26,16 @@
     <string name="settings_delete_model_dialog_confirm">Удалить</string>
     <string name="settings_delete_model_dialog_cancel">Отмена</string>
 
-    <string name="settings_note_style_title">Стиль заметок по умолчанию</string>
-    <string name="settings_note_style_note">Применяется к новым записям. Стиль существующей заметки можно изменить на её экране.</string>
-    <string name="settings_note_styles_manage">Управление стилями заметок</string>
-    <string name="settings_note_styles_manage_subtitle">Создайте свои заголовки и формат</string>
-    <string name="settings_note_styles_title">Стили заметок</string>
-    <string name="settings_note_styles_built_in">Встроенные</string>
-    <string name="settings_note_styles_custom">Ваши стили</string>
-    <string name="settings_note_styles_empty">Своих стилей пока нет. Создайте стиль, чтобы задать ИИ свои заголовки.</string>
-    <string name="settings_note_styles_new">Новый стиль</string>
+    <string name="settings_note_style_note">Выбранный стиль используется для новых записей. Стиль любой заметки можно изменить в самой заметке.</string>
+    <string name="settings_note_styles_default_value">По умолчанию: %1$s</string>
+    <string name="settings_note_styles_title">Стили резюме</string>
+    <string name="settings_note_styles_edit">Изменить</string>
     <string name="settings_note_styles_delete">Удалить стиль</string>
     <string name="settings_note_styles_delete_dialog_title">Удалить этот стиль?</string>
     <string name="settings_note_styles_delete_dialog_body">Заметки, написанные в нём, сохранятся. При следующем переписывании они перейдут в стиль «Конспект».</string>
     <string name="settings_note_styles_delete_dialog_confirm">Удалить</string>
-    <string name="settings_note_style_editor_new_title">Новый стиль заметки</string>
-    <string name="settings_note_style_editor_edit_title">Изменить стиль заметки</string>
+    <string name="settings_note_style_editor_new_title">Новый стиль резюме</string>
+    <string name="settings_note_style_editor_edit_title">Изменить стиль резюме</string>
     <string name="settings_note_style_editor_back">Назад</string>
     <string name="settings_note_style_editor_save">Сохранить</string>
     <string name="settings_note_style_editor_name">Название</string>

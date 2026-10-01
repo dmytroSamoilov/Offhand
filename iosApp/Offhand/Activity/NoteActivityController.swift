@@ -66,7 +66,7 @@ final class NoteActivityController {
 
     func suspendedWithPendingWork() {
         endActivity(
-            finalPhase: .openApp,
+            finalPhase: .pausedBySystem,
             dismissalPolicy: .after(Date().addingTimeInterval(15 * 60))
         )
     }

@@ -18,6 +18,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleErrors
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleValidation
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleValidator
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.DeleteCustomNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.DraftNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.GetCustomNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
@@ -35,6 +36,7 @@ class NoteStyleEditorViewModel(
     private val styleId: Long,
     private val getCustomNoteStyle: GetCustomNoteStyleUseCase,
     private val saveCustomNoteStyle: SaveCustomNoteStyleUseCase,
+    private val deleteCustomNoteStyle: DeleteCustomNoteStyleUseCase,
     private val draftNoteStyle: DraftNoteStyleUseCase,
     isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase,
     private val proUpgradeGate: ProUpgradeGate,
@@ -143,6 +145,25 @@ class NoteStyleEditorViewModel(
                 is SaveNoteStyleResult.Saved -> onStyleSaved(style)
                 is SaveNoteStyleResult.Invalid -> mutableUiState.update { it.copy(errors = result.errors) }
             }
+        }
+    }
+
+    // Deleting lives in the editor, so the list stays a plain picker.
+    fun onDeleteRequested() {
+        if (mutableUiState.value.isNew) return
+        mutableUiState.update { it.copy(isDeleteRequested = true) }
+    }
+
+    fun onDeleteDismissed() {
+        mutableUiState.update { it.copy(isDeleteRequested = false) }
+    }
+
+    fun onDeleteConfirmed() {
+        mutableUiState.update { it.copy(isDeleteRequested = false) }
+        launchSafely(showLoading = false) {
+            deleteCustomNoteStyle(styleId)
+            analyticsTracker.track(AnalyticsEvents.noteStyleDeleted())
+            mutableUiState.update { it.copy(isDeleted = true) }
         }
     }
 

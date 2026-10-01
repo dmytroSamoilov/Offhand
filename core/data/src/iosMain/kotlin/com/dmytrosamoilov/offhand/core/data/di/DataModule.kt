@@ -15,6 +15,7 @@ import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_5_6
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_6_7
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_7_8
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_8_9
+import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_10_11
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_9_10
 import com.dmytrosamoilov.offhand.core.data.database.FolderDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteDao
@@ -78,6 +79,7 @@ private fun createNotesDatabase(): NotesDatabase {
             MIGRATION_7_8,
             MIGRATION_8_9,
             MIGRATION_9_10,
+            MIGRATION_10_11,
         )
         .build()
     applyCompleteUnlessOpenProtection(databasePath)

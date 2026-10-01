@@ -13,9 +13,11 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateImporte
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateRecordingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetFolderStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetTranscriptionCheckpointUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.InterruptNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardStagedAudioUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
@@ -64,6 +66,7 @@ val featureRecordingModule = module {
             discardNote = get(),
             completeNote = get(),
             failNote = get(),
+            interruptNote = get(),
             markNoteProcessing = get(),
             registerSavedRecording = get(),
             saveNoteTranscript = get(),
@@ -80,6 +83,7 @@ val featureRecordingModule = module {
             audioBackup = get(),
             audioDecoder = get(),
             analyticsTracker = get(),
+            appForegroundState = get(),
             scope = get(recordingSessionScopeQualifier),
         )
     }
@@ -89,6 +93,8 @@ val featureRecordingModule = module {
     factoryOf(::CreateRecordingNoteUseCase)
     factoryOf(::DiscardNoteUseCase)
     factoryOf(::FailNoteUseCase)
+    factoryOf(::InterruptNoteUseCase)
+    factoryOf(::GetFolderStyleUseCase)
     factoryOf(::GetNoteStyleUseCase)
     factoryOf(::GetNoteUseCase)
     factoryOf(::GetTranscriptionCheckpointUseCase)

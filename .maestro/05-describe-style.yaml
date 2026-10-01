@@ -10,8 +10,8 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: Android
     commands:
       - tapOn: "Settings"
-      - tapOn: "Manage note styles"
-      - tapOn: "New style"
+      - tapOn: "Summary styles"
+      - tapOn: "Create a new style"
       - tapOn: "Describe it and let the AI fill the form"
       - tapOn: "For example.*"
       - inputText: "After each sales call I want the customer, their needs and the agreed next steps"
@@ -36,8 +36,8 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - tapOn: "Settings"
-      - tapOn: "Manage note styles"
-      - tapOn: "New style"
+      - tapOn: "Summary styles"
+      - tapOn: "Create a new style"
       - tapOn: "Describe it and let the AI fill the form"
       - tapOn: "For example.*"
       - inputText: "After each sales call I want the customer, their needs and the agreed next steps"

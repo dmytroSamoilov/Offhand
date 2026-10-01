@@ -4,7 +4,6 @@ import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
-import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
@@ -13,7 +12,6 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
@@ -23,7 +21,6 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStat
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
@@ -41,9 +38,7 @@ class SettingsViewModel(
     observeDynamicColor: ObserveDynamicColorUseCase,
     private val setDynamicColor: SetDynamicColorUseCase,
     observeNoteStyle: ObserveNoteStyleUseCase,
-    private val setNoteStyle: SetNoteStyleUseCase,
     observeCustomNoteStyles: ObserveCustomNoteStylesUseCase,
-    isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase,
     observeAppLockEnabled: ObserveAppLockEnabledUseCase,
     private val setAppLockEnabled: SetAppLockEnabledUseCase,
     private val appLockManager: AppLockManager,
@@ -69,7 +64,6 @@ class SettingsViewModel(
         collect(observeNoteStyle()) { style -> copy(noteStyle = style) }
         collect(observeAppLockEnabled()) { enabled -> copy(isAppLockEnabled = enabled) }
         collect(observeCustomNoteStyles()) { styles -> copy(customStyles = styles.map { it.toOptionUi() }) }
-        collect(isCustomNoteStylesAvailable()) { unlocked -> copy(isCustomStylesUnlocked = unlocked) }
         collect(isAudioImportAvailable()) { unlocked -> copy(isAudioImportUnlocked = unlocked) }
         collect(observeSmartSuggestionsEnabled()) { enabled -> copy(isSmartSuggestionsEnabled = enabled) }
         collect(observeProStatus()) { status -> copy(pro = status.toUi(), isSmartSuggestionsUnlocked = status.isPro) }
@@ -84,14 +78,6 @@ class SettingsViewModel(
     // backgrounded, and neither change notifies the app.
     fun onScreenShown() {
         mutableUiState.update { it.copy(isDeviceSecure = appLockManager.isDeviceSecure) }
-    }
-
-    fun onNoteStyleSelected(style: NoteStyleRef) {
-        launchSafely(showLoading = false) {
-            if (style is NoteStyleRef.Custom && !proUpgradeGate.requirePro(ProFeature.CUSTOM_STYLES)) return@launchSafely
-            setNoteStyle(style)
-            analyticsTracker.track(AnalyticsEvents.defaultStyleChanged(style))
-        }
     }
 
     fun onDynamicColorChanged(enabled: Boolean) {

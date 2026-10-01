@@ -24,6 +24,8 @@ object AnalyticsEvents {
 
     fun noteFailed(source: NoteSource): AnalyticsEvent = event("note_failed", "source" to source.label())
 
+    fun noteInterrupted(source: NoteSource): AnalyticsEvent = event("note_interrupted", "source" to source.label())
+
     fun audioImportStarted(files: Int): AnalyticsEvent = event("audio_import_started", "files" to files.toLong())
 
     fun audioImportRejected(reason: String): AnalyticsEvent = event("audio_import_rejected", "reason" to reason)
@@ -59,6 +61,11 @@ object AnalyticsEvents {
     fun folderRenamed(): AnalyticsEvent = event("folder_renamed")
 
     fun folderDeleted(): AnalyticsEvent = event("folder_deleted")
+
+    fun folderStyleChanged(style: NoteStyleRef?): AnalyticsEvent =
+        event("folder_style_changed", "style" to (style?.analyticsName() ?: DEFAULT_STYLE_NAME))
+
+    fun foldersReordered(): AnalyticsEvent = event("folders_reordered")
 
     fun defaultStyleChanged(style: NoteStyleRef): AnalyticsEvent =
         event("default_style_changed", "style" to style.analyticsName())
@@ -101,6 +108,8 @@ object AnalyticsEvents {
 
     fun notesSearched(): AnalyticsEvent = event("notes_searched")
 
+    fun reviewRequested(): AnalyticsEvent = event("review_requested")
+
     private fun event(name: String, vararg params: Pair<String, Any>): AnalyticsEvent = AnalyticsEvent(name, params.toMap())
 
     private fun seconds(millis: Long?): Long = (millis ?: 0L) / MS_PER_SECOND
@@ -118,3 +127,4 @@ fun NoteStyleRef.analyticsName(): String = when (this) {
 }
 
 private const val CUSTOM_STYLE_NAME = "custom"
+private const val DEFAULT_STYLE_NAME = "default"

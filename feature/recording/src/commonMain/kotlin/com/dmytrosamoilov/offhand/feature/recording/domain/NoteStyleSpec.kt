@@ -10,6 +10,8 @@ internal data class NoteStyleSpec(
     val overviewRule: String,
     val language: NoteStyleLanguage,
     val userInstructions: List<SectionInstruction> = emptyList(),
+    val listSections: List<String> = emptyList(),
+    val proseSections: List<String> = emptyList(),
 )
 
 internal data class SectionInstruction(

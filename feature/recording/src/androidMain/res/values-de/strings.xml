@@ -27,12 +27,14 @@
     <string name="recording_notification_action_resume">Fortsetzen</string>
     <string name="recording_notification_action_stop">Stoppen</string>
     <string name="recording_notification_processing_title">Deine Notiz wird erstellt</string>
-    <string name="recording_notification_processing_text">Wird auf deinem Handy transkribiert und strukturiert</string>
+    <string name="recording_notification_processing_text">Aus deiner Aufnahme wird eine Notiz</string>
     <string name="recording_notification_notes_channel_name">Fertige Notizen</string>
     <string name="recording_notification_ready_title">Deine Notiz ist fertig</string>
-    <string name="recording_notification_ready_text">Tippe, um die fertige Notiz zu öffnen.</string>
+    <string name="recording_notification_ready_text">Tippe, um sie zu lesen.</string>
     <string name="recording_default_note_title">Aufnahme %1$d</string>
     <string name="recording_untitled_note_title">Sprachnotiz</string>
-    <string name="recording_notification_note_failed_title">Transkription fehlgeschlagen</string>
-    <string name="recording_notification_note_failed_text">Die Aufnahme ist gespeichert. Tippe, um sie zu öffnen.</string>
+    <string name="recording_notification_note_failed_title">Deine Notiz wurde nicht fertig</string>
+    <string name="recording_notification_note_failed_text">Die Aufnahme ist gespeichert. Tippe, um sie zu öffnen und es erneut zu versuchen.</string>
+    <string name="recording_notification_note_paused_title">Deine Notiz ist pausiert</string>
+    <string name="recording_notification_note_paused_text">Öffne Offhand, dann wird sie fertig.</string>
 </resources>

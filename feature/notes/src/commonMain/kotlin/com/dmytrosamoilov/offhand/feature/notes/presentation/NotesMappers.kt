@@ -47,7 +47,7 @@ internal fun List<NoteSearchResult>.toSectionsUi(
 
 internal fun List<Folder>.toFoldersUi(notes: List<Note>): List<FolderUi> {
     val counts = notes.groupingBy { it.folderId }.eachCount()
-    return map { folder -> FolderUi(id = folder.id, name = folder.name, noteCount = counts[folder.id] ?: 0) }
+    return map { folder -> FolderUi(id = folder.id, name = folder.name, noteCount = counts[folder.id] ?: 0, style = folder.style) }
 }
 
 internal fun FolderNameError.toUi(): FolderNameErrorUi = when (this) {
@@ -115,6 +115,7 @@ private fun Note.createdAtLocalDateTime(): LocalDateTime =
 private fun NoteStatus.toUi(): NoteStatusUi = when (this) {
     NoteStatus.RECORDING -> NoteStatusUi.PROCESSING
     NoteStatus.PROCESSING -> NoteStatusUi.PROCESSING
+    NoteStatus.INTERRUPTED -> NoteStatusUi.INTERRUPTED
     NoteStatus.READY -> NoteStatusUi.READY
     NoteStatus.FAILED -> NoteStatusUi.FAILED
 }

@@ -15,6 +15,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
+import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.designsystem.R as DesignR
 import com.dmytrosamoilov.offhand.feature.onboarding.R
 import kotlin.coroutines.cancellation.CancellationException
@@ -37,6 +38,7 @@ class ModelDownloadService : Service(), KoinComponent {
     private val modelManager: ModelManager by inject()
     private val speechToText: SpeechToText by inject()
     private val aiCoreDownloadStatus: AiCoreDownloadStatus by inject()
+    private val appForegroundState: AppForegroundState by inject()
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var downloadJob: Job? = null
@@ -117,6 +119,7 @@ class ModelDownloadService : Service(), KoinComponent {
     }
 
     private fun notifyFinished(isSuccess: Boolean) {
+        if (appForegroundState.isInForeground.value) return
         val notification = NotificationCompat.Builder(this, STATUS_CHANNEL_ID)
             .setSmallIcon(DesignR.drawable.ic_app_notification)
             .setContentTitle(

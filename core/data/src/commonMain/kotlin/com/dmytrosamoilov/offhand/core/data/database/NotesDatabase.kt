@@ -13,7 +13,7 @@ import androidx.room.RoomDatabaseConstructor
         NoteSuggestionsEntity::class,
         TranscriptionCheckpointEntity::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = false,
 )
 @ConstructedBy(NotesDatabaseConstructor::class)

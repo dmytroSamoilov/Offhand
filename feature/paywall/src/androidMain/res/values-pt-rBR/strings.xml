@@ -10,6 +10,7 @@
     <string name="paywall_pro_export">Compartilhe documentos caprichados</string>
     <string name="paywall_pro_suggestions">Nunca perca um follow-up</string>
     <string name="paywall_pro_import">Transforme qualquer gravação em nota</string>
+    <string name="paywall_pro_folders">Pastas que conhecem o próprio estilo</string>
     <string name="paywall_pro_more">Novos recursos Pro são incluídos assim que saem</string>
     <string name="paywall_plan_yearly">Anual</string>
     <string name="paywall_plan_yearly_price">%1$s / ano</string>
@@ -34,14 +35,16 @@
     <string name="paywall_close">Fechar</string>
     <string name="paywall_no_browser">Nenhum navegador encontrado para abrir o link.</string>
     <string name="paywall_context_tagline">Parte do Offhand Pro. Aproveite mais cada gravação.</string>
-    <string name="paywall_context_styles">Salve seu próprio estilo de nota</string>
+    <string name="paywall_context_styles">Salve seu próprio estilo de resumo</string>
     <string name="paywall_context_export">Compartilhe esta nota em PDF ou Word</string>
     <string name="paywall_context_suggestions">Encontre datas e tarefas nas suas notas</string>
     <string name="paywall_context_import">Transforme suas gravações em notas</string>
+    <string name="paywall_context_folder_styles">Dê a esta pasta o próprio estilo de resumo</string>
     <string name="paywall_pro_styles_hint">Seus títulos, suas seções, sempre</string>
     <string name="paywall_pro_export_hint">PDF e Word, prontos para clientes, e-mail e impressão</string>
     <string name="paywall_pro_suggestions_hint">Datas e tarefas direto na sua agenda</string>
     <string name="paywall_pro_import_hint">Memos de voz, ligações e arquivos de outros apps</string>
+    <string name="paywall_pro_folders_hint">Cada pasta com seu próprio estilo de resumo</string>
     <string name="paywall_plan_yearly_monthly">Cerca de %1$s por mês</string>
     <string name="paywall_plan_best_value">Melhor valor</string>
     <string name="paywall_no_charge">Nada é cobrado hoje</string>

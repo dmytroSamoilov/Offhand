@@ -24,6 +24,8 @@ struct NotesListView: View {
         folderEditor: nil,
         pendingDeleteFolderId: nil,
         moveToFolder: nil,
+        folderStylePicker: nil,
+        isFolderStylesUnlocked: false,
         customStyles: [],
         importMessage: nil,
         smartSuggestions: nil,
@@ -41,6 +43,12 @@ struct NotesListView: View {
         layout
         .sheet(item: $recordSheetRequest, onDismiss: openRecordedNote) { request in
             RecordSheetView(autoStart: true, folderId: request.folderId) { recordedNoteId = $0 }
+        }
+        .sheet(isPresented: folderStyleBinding) {
+            if let picker = state.folderStylePicker {
+                FolderStyleSheet(viewModel: viewModel, picker: picker, state: state)
+                    .presentationDetents([.medium, .large])
+            }
         }
         .sheet(isPresented: moveToFolderBinding) {
             MoveToFolderSheet(
@@ -127,14 +135,25 @@ struct NotesListView: View {
 
     private var notesList: some View {
         List {
+            if !state.noteProgress.isEmpty {
+                Section {
+                    KeepOpenBanner()
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                }
+            }
             Section {
                 FolderChips(
                     folders: state.folders,
                     selectedFolderId: state.selectedFolderId?.int64Value,
+                    customStyles: state.customStyles,
+                    isFolderStylesUnlocked: state.isFolderStylesUnlocked,
                     onSelect: { viewModel.onFolderSelected(folderId: $0.map { KotlinLong(value: $0) }) },
                     onNew: { viewModel.onNewFolderRequested() },
                     onRename: { viewModel.onRenameFolderRequested(folderId: $0) },
-                    onDelete: { viewModel.onDeleteFolderRequested(folderId: $0) }
+                    onDelete: { viewModel.onDeleteFolderRequested(folderId: $0) },
+                    onStyle: { viewModel.onFolderStyleRequested(folderId: $0) },
+                    onMove: { viewModel.onFolderMoved(fromIndex: Int32($0), toIndex: Int32($1)) }
                 )
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
@@ -231,6 +250,13 @@ struct NotesListView: View {
         )
     }
 
+    private var folderStyleBinding: Binding<Bool> {
+        Binding(
+            get: { state.folderStylePicker != nil },
+            set: { isShown in if !isShown { viewModel.onFolderStyleDismissed() } }
+        )
+    }
+
     private var deleteFolderBinding: Binding<Bool> {
         Binding(
             get: { state.pendingDeleteFolderId != nil },
@@ -294,13 +320,19 @@ struct NotesListView: View {
     }
 }
 
+// Chips can be picked up and dropped onto another chip to change the order;
+// a long press without moving still opens the menu.
 private struct FolderChips: View {
     let folders: [FolderUi]
     let selectedFolderId: Int64?
+    let customStyles: [NoteStyleOptionUi]
+    let isFolderStylesUnlocked: Bool
     let onSelect: (Int64?) -> Void
     let onNew: () -> Void
     let onRename: (Int64) -> Void
     let onDelete: (Int64) -> Void
+    let onStyle: (Int64) -> Void
+    let onMove: (Int, Int) -> Void
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -308,11 +340,16 @@ private struct FolderChips: View {
                 FolderChip(title: String(localized: "All notes"), isSelected: selectedFolderId == nil) {
                     onSelect(nil)
                 }
-                ForEach(folders, id: \.id) { folder in
+                ForEach(Array(folders.enumerated()), id: \.element.id) { index, folder in
                     FolderChip(title: folder.name, isSelected: folder.id == selectedFolderId) {
                         onSelect(folder.id)
                     }
                     .contextMenu {
+                        Button {
+                            onStyle(folder.id)
+                        } label: {
+                            Label(styleMenuTitle(for: folder), systemImage: "gearshape")
+                        }
                         Button {
                             onRename(folder.id)
                         } label: {
@@ -323,6 +360,14 @@ private struct FolderChips: View {
                         } label: {
                             Label(String(localized: "Delete folder"), systemImage: "trash")
                         }
+                    }
+                    .draggable(String(folder.id))
+                    .dropDestination(for: String.self) { dropped, _ in
+                        guard let id = dropped.first.flatMap(Int64.init),
+                              let from = folders.firstIndex(where: { $0.id == id }),
+                              from != index else { return false }
+                        onMove(from, index)
+                        return true
                     }
                 }
                 Button(action: onNew) {
@@ -337,6 +382,47 @@ private struct FolderChips: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 4)
+        }
+    }
+
+    private func styleMenuTitle(for folder: FolderUi) -> String {
+        let label = folder.style.map(styleLabel) ?? String(localized: "Default")
+        let title = isFolderStylesUnlocked
+            ? String(localized: "Summary style")
+            : String(localized: "Summary style (Pro)")
+        return "\(title) · \(label)"
+    }
+
+    private func styleLabel(_ style: NoteStyleRef) -> String {
+        if let preset = style.builtInPreset { return NoteStyleLabels.label(for: preset) }
+        return customStyles.first { $0.id == style.customId }?.name ?? NoteStyleLabels.label(for: .summary)
+    }
+}
+
+// Picks the style new recordings in a folder get and notes moved into it
+// are rewritten in; "Default" follows Settings.
+private struct FolderStyleSheet: View {
+    let viewModel: NotesViewModel
+    let picker: FolderStylePickerUi
+    let state: NotesUiState
+
+    var body: some View {
+        NavigationStack {
+            NoteStyleList(
+                current: picker.style,
+                customStyles: state.customStyles.map { NoteStyleChoice(id: $0.id, name: $0.name, details: $0.description_) },
+                isCustomStylesUnlocked: state.isFolderStylesUnlocked,
+                footer: String(localized: "New recordings in this folder use it, and notes moved here are rewritten in it."),
+                onSelect: { viewModel.onFolderStyleSelected(style: $0) },
+                onDefaultSelected: { viewModel.onFolderStyleSelected(style: nil) }
+            )
+            .navigationTitle(String(format: String(localized: "Summary style for %@"), picker.folderName))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(String(localized: "Cancel")) { viewModel.onFolderStyleDismissed() }
+                }
+            }
         }
     }
 }
@@ -401,9 +487,16 @@ private struct NoteCardRow: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
+            } else if note.status == .interrupted {
+                Label(
+                    String(localized: "Paused. Open the note to continue."),
+                    systemImage: "pause.circle"
+                )
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
             } else if note.status == .failed {
                 Label(
-                    String(localized: "We were unable to create an overview and transcript for this note."),
+                    String(localized: "We were unable to create a summary and transcript for this note."),
                     systemImage: "exclamationmark.triangle"
                 )
                 .font(.subheadline)
@@ -453,4 +546,37 @@ private struct NoteCardRow: View {
 private struct RecordSheetRequest: Identifiable {
     let id = UUID()
     let folderId: Int64?
+}
+
+// iOS stops the on-device AI as soon as the app leaves the foreground, so a
+// note in progress is only finished while Offhand stays in front.
+struct KeepOpenBanner: View {
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            ProgressView()
+            VStack(alignment: .leading, spacing: 2) {
+                Text(String(localized: "Preparing your note"))
+                    .font(.subheadline.weight(.semibold))
+                Text(String(localized: "Keep Offhand open until your note is ready."))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(Brand.primaryContainer, in: RoundedRectangle(cornerRadius: 12))
+        .foregroundStyle(Brand.onPrimaryContainer)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+struct KeepOpenHint: View {
+    var body: some View {
+        Label(
+            String(localized: "Keep Offhand open until your note is ready."),
+            systemImage: "iphone"
+        )
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+    }
 }

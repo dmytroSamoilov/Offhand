@@ -26,21 +26,16 @@
     <string name="settings_delete_model_dialog_confirm">Entfernen</string>
     <string name="settings_delete_model_dialog_cancel">Abbrechen</string>
 
-    <string name="settings_note_style_title">Standard-Notizstil</string>
-    <string name="settings_note_style_note">Gilt für neue Aufnahmen. Eine vorhandene Notiz kannst du direkt auf dem Notiz-Bildschirm umformulieren lassen.</string>
-    <string name="settings_note_styles_manage">Notizstile verwalten</string>
-    <string name="settings_note_styles_manage_subtitle">Eigene Überschriften und Formate anlegen</string>
-    <string name="settings_note_styles_title">Notizstile</string>
-    <string name="settings_note_styles_built_in">Integriert</string>
-    <string name="settings_note_styles_custom">Deine Stile</string>
-    <string name="settings_note_styles_empty">Noch keine eigenen Stile. Lege einen an, um der KI deine eigenen Überschriften vorzugeben.</string>
-    <string name="settings_note_styles_new">Neuer Stil</string>
+    <string name="settings_note_style_note">Der gewählte Stil gilt für neue Aufnahmen. Den Stil einer Notiz kannst du jederzeit in der Notiz selbst ändern.</string>
+    <string name="settings_note_styles_default_value">Standard: %1$s</string>
+    <string name="settings_note_styles_title">Zusammenfassungsstile</string>
+    <string name="settings_note_styles_edit">Bearbeiten</string>
     <string name="settings_note_styles_delete">Stil löschen</string>
     <string name="settings_note_styles_delete_dialog_title">Diesen Stil löschen?</string>
     <string name="settings_note_styles_delete_dialog_body">Damit geschriebene Notizen bleiben erhalten. Beim nächsten Umschreiben wechseln sie zum Stil „Zusammenfassung“.</string>
     <string name="settings_note_styles_delete_dialog_confirm">Löschen</string>
-    <string name="settings_note_style_editor_new_title">Neuer Notizstil</string>
-    <string name="settings_note_style_editor_edit_title">Notizstil bearbeiten</string>
+    <string name="settings_note_style_editor_new_title">Neuer Zusammenfassungsstil</string>
+    <string name="settings_note_style_editor_edit_title">Zusammenfassungsstil bearbeiten</string>
     <string name="settings_note_style_editor_back">Zurück</string>
     <string name="settings_note_style_editor_save">Speichern</string>
     <string name="settings_note_style_editor_name">Name</string>

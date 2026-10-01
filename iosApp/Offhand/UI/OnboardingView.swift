@@ -163,7 +163,7 @@ struct OnboardingView: View {
             StepCard(
                 icon: "bell.badge.fill",
                 title: String(localized: "Know when notes are ready"),
-                message: String(localized: "Notes keep preparing while Offhand is in the background. Allow notifications and Offhand will tell you the moment a note is ready to read.")
+                message: String(localized: "Allow notifications and Offhand will tell you when a note is ready, or when it needs you to come back.")
             )
         case .modelDownload:
             StepCard(
@@ -404,7 +404,6 @@ struct NotePresetPicker: View {
                 PresetCard(
                     title: NoteStyleLabels.label(for: preset),
                     details: NoteStyleLabels.details(for: preset),
-                    symbol: NoteStyleLabels.symbol(for: preset),
                     isSelected: selected == preset
                 ) {
                     onSelect(preset)
@@ -418,7 +417,6 @@ struct NotePresetPicker: View {
 struct PresetCard: View {
     let title: String
     let details: String
-    let symbol: String
     let isSelected: Bool
     var showProBadge = false
     let action: () -> Void
@@ -426,9 +424,6 @@ struct PresetCard: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 16) {
-                Image(systemName: symbol)
-                    .foregroundStyle(Brand.primary)
-                    .frame(width: 24)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
                         Text(title)

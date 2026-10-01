@@ -7,6 +7,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.TranscriptionResult
 import com.dmytrosamoilov.offhand.core.audio.AudioChunk
 import com.dmytrosamoilov.offhand.core.audio.VadSnapshot
 import com.dmytrosamoilov.offhand.core.audio.WavCodec
+import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
@@ -27,6 +28,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCa
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetTranscriptionCheckpointUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.InterruptNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsCalendarSuggestionsAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
@@ -44,6 +46,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -59,6 +62,7 @@ class RecordingSessionManager(
     private val discardNote: DiscardNoteUseCase,
     private val completeNote: CompleteNoteUseCase,
     private val failNote: FailNoteUseCase,
+    private val interruptNote: InterruptNoteUseCase,
     private val markNoteProcessing: MarkNoteProcessingUseCase,
     private val registerSavedRecording: RegisterSavedRecordingUseCase,
     private val saveNoteTranscript: SaveNoteTranscriptUseCase,
@@ -75,6 +79,7 @@ class RecordingSessionManager(
     private val audioBackup: RecordingAudioBackup,
     private val audioDecoder: AudioDecoder,
     private val analyticsTracker: AnalyticsTracker,
+    private val appForegroundState: AppForegroundState,
     private val scope: CoroutineScope,
 ) {
 
@@ -98,6 +103,11 @@ class RecordingSessionManager(
 
     private val mutableActiveRecordingNoteId = MutableStateFlow<Long?>(null)
     val activeRecordingNoteId: StateFlow<Long?> = mutableActiveRecordingNoteId.asStateFlow()
+
+    // Notes whose processing spanned a stretch in the background: iOS denies the
+    // AI engines to an app that left the foreground, and the failure that causes
+    // may only surface after the user comes back.
+    private val backgroundedNoteIds = MutableStateFlow<Set<Long>>(emptySet())
 
     val vad: StateFlow<VadSnapshot> = recorder.vad
 
@@ -163,8 +173,7 @@ class RecordingSessionManager(
     }
 
     fun retryNote(noteId: Long, audioFileName: String) {
-        if (noteId in mutableProcessingNoteIds.value) return
-        mutableProcessingNoteIds.update { it + noteId }
+        if (!claimProcessing(noteId)) return
         scope.launch {
             processingMutex.withLock {
                 val note = markNoteProcessing(noteId)
@@ -172,18 +181,20 @@ class RecordingSessionManager(
                     mutableProcessingNoteIds.update { it - noteId }
                     return@withLock
                 }
-                updateProgress(noteId, 0f)
-                val stored = transcribeStoredAudio(noteId, audioFileName, resumePoint(note)) { fraction ->
-                    updateProgress(noteId, fraction * RETRY_WHISPER_SHARE)
+                trackingForeground(noteId) {
+                    updateProgress(noteId, 0f)
+                    val stored = transcribeStoredAudio(noteId, audioFileName, resumePoint(note)) { fraction ->
+                        updateProgress(noteId, fraction * RETRY_WHISPER_SHARE)
+                    }
+                    processNote(
+                        noteId = noteId,
+                        transcripts = stored.texts,
+                        transcriptionMs = stored.transcriptionTimeMs,
+                        progressOffset = RETRY_WHISPER_SHARE,
+                        style = note.style,
+                        source = NoteSource.RETRY,
+                    )
                 }
-                processNote(
-                    noteId = noteId,
-                    transcripts = stored.texts,
-                    transcriptionMs = stored.transcriptionTimeMs,
-                    progressOffset = RETRY_WHISPER_SHARE,
-                    style = note.style,
-                    source = NoteSource.RETRY,
-                )
             }
         }
     }
@@ -201,8 +212,7 @@ class RecordingSessionManager(
     }
 
     fun restructureNote(noteId: Long, style: NoteStyleRef) {
-        if (noteId in mutableProcessingNoteIds.value) return
-        mutableProcessingNoteIds.update { it + noteId }
+        if (!claimProcessing(noteId)) return
         scope.launch {
             processingMutex.withLock {
                 val note = getNote(noteId)?.takeIf { it.transcript.isNotBlank() }
@@ -210,15 +220,17 @@ class RecordingSessionManager(
                     mutableProcessingNoteIds.update { it - noteId }
                     return@withLock
                 }
-                updateProgress(noteId, 0f)
-                processNote(
-                    noteId = noteId,
-                    transcripts = transcriptStructurer.splitStoredTranscript(note.transcript),
-                    transcriptionMs = note.transcriptionTimeMs ?: 0,
-                    progressOffset = 0f,
-                    style = style,
-                    source = NoteSource.RESTYLE,
-                )
+                trackingForeground(noteId) {
+                    updateProgress(noteId, 0f)
+                    processNote(
+                        noteId = noteId,
+                        transcripts = transcriptStructurer.splitStoredTranscript(note.transcript),
+                        transcriptionMs = note.transcriptionTimeMs ?: 0,
+                        progressOffset = 0f,
+                        style = style,
+                        source = NoteSource.RESTYLE,
+                    )
+                }
             }
         }
     }
@@ -243,15 +255,16 @@ class RecordingSessionManager(
             return
         }
         markNoteRecorded(noteId, decoded.durationMs, fileName)
-        val stored = transcribeStoredAudio(noteId, fileName, ResumePoint.START) { fraction ->
-            updateProgress(noteId, IMPORT_DECODE_SHARE + fraction * (RETRY_WHISPER_SHARE - IMPORT_DECODE_SHARE))
+        trackingForeground(noteId) {
+            val stored = transcribeStoredAudio(noteId, fileName, ResumePoint.START) { fraction ->
+                updateProgress(noteId, IMPORT_DECODE_SHARE + fraction * (RETRY_WHISPER_SHARE - IMPORT_DECODE_SHARE))
+            }
+            processNote(noteId, stored.texts, stored.transcriptionTimeMs, RETRY_WHISPER_SHARE, style, NoteSource.IMPORT)
         }
-        processNote(noteId, stored.texts, stored.transcriptionTimeMs, RETRY_WHISPER_SHARE, style, NoteSource.IMPORT)
     }
 
     fun suggestEvents(noteId: Long) {
-        if (noteId in mutableProcessingNoteIds.value) return
-        mutableProcessingNoteIds.update { it + noteId }
+        if (!claimProcessing(noteId)) return
         scope.launch {
             processingMutex.withLock {
                 try {
@@ -325,6 +338,11 @@ class RecordingSessionManager(
         displayName.substringBeforeLast('.').trim().ifBlank { displayName }
 
     internal suspend fun <T> withProcessingLock(block: suspend () -> T): T = processingMutex.withLock { block() }
+
+    // Two callers can ask for the same note at once (a foreground return and an
+    // interruption event), so the check and the claim are one atomic update.
+    private fun claimProcessing(noteId: Long): Boolean =
+        noteId !in mutableProcessingNoteIds.getAndUpdate { it + noteId }
 
     // The checkpoint survives a failure on purpose: "Try again" then continues
     // where the transcription stopped instead of starting over.
@@ -449,7 +467,7 @@ class RecordingSessionManager(
     )
 
     private suspend fun runSession() {
-        sessionStyle = getNoteStyle()
+        sessionStyle = getNoteStyle(sessionFolderId)
         openAudioBackup()
         mutableActiveRecordingNoteId.value = createSessionNote()
         val queue = Channel<AudioChunk>(Channel.UNLIMITED)
@@ -615,9 +633,14 @@ class RecordingSessionManager(
         val chunkTranscripts = sortedTranscripts()
         val recordedTranscriptionMs = transcriptionTimeMs
         val style = sessionStyle
+        val storedAudio = audioFileName.takeIf { mutableSession.value.chunks.any { it.state == ChunkState.FAILED } }
         analyticsTracker.track(AnalyticsEvents.noteRecorded(recorder.vad.value.totalElapsedMs, style))
         mutableSession.value = RecordingSession(noteId = noteId)
-        startProcessing(noteId, chunkTranscripts, recordedTranscriptionMs, style)
+        if (storedAudio != null) {
+            retryNote(noteId, storedAudio)
+        } else {
+            startProcessing(noteId, chunkTranscripts, recordedTranscriptionMs, style)
+        }
     }
 
     private fun startProcessing(
@@ -634,7 +657,9 @@ class RecordingSessionManager(
                 return@launch
             }
             processingMutex.withLock {
-                processNote(noteId, chunkTranscripts, transcriptionMs, 0f, style, NoteSource.RECORDING)
+                trackingForeground(noteId) {
+                    processNote(noteId, chunkTranscripts, transcriptionMs, 0f, style, NoteSource.RECORDING)
+                }
             }
         }
     }
@@ -660,24 +685,53 @@ class RecordingSessionManager(
         style: NoteStyleRef,
         source: NoteSource,
     ) {
-        try {
-            val completed = structureNote(noteId, transcripts, transcriptionMs, progressOffset, style, source)
-            mutableNoteProgress.update { it - noteId }
-            if (completed) {
-                trackNoteReady(noteId, source)
-                suggestEventsLocked(noteId)
-            }
+        val outcome = try {
+            structureNote(noteId, transcripts, transcriptionMs, progressOffset, style, source)
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (t: Throwable) {
             Logger.withTag(LOG_TAG).e(t) { "Processing note $noteId failed" }
-            analyticsTracker.track(AnalyticsEvents.noteFailed(source))
-            if (failNote(noteId)) {
-                mutableEvents.emit(NoteProcessingEvent.Failed(noteId))
-            }
+            StructureOutcome.FAILED
         } finally {
             mutableProcessingNoteIds.update { it - noteId }
             mutableNoteProgress.update { it - noteId }
+        }
+        // Reported only once the note no longer counts as processing, so a
+        // listener that resumes it right away is not turned down as a duplicate.
+        if (outcome == StructureOutcome.FAILED) settleFailure(noteId, source)
+    }
+
+    // A failure while the app was away is the system's doing, not the
+    // recording's: the note is parked instead of failed and continues from its
+    // checkpoint on the next return to the foreground.
+    private suspend fun settleFailure(noteId: Long, source: NoteSource) {
+        if (wasBackgrounded(noteId)) {
+            analyticsTracker.track(AnalyticsEvents.noteInterrupted(source))
+            if (interruptNote(noteId)) mutableEvents.emit(NoteProcessingEvent.Interrupted(noteId))
+        } else {
+            analyticsTracker.track(AnalyticsEvents.noteFailed(source))
+            if (failNote(noteId)) mutableEvents.emit(NoteProcessingEvent.Failed(noteId))
+        }
+    }
+
+    private fun wasBackgrounded(noteId: Long): Boolean {
+        val wasAway = noteId in backgroundedNoteIds.getAndUpdate { it - noteId }
+        return wasAway || !appForegroundState.isInForeground.value
+    }
+
+    // Watches the app leave the foreground while the note is being worked on;
+    // the watcher lives only as long as that work.
+    private suspend fun <T> trackingForeground(noteId: Long, block: suspend () -> T): T {
+        val watcher = scope.launch {
+            appForegroundState.isInForeground.collect { inForeground ->
+                if (!inForeground) backgroundedNoteIds.update { it + noteId }
+            }
+        }
+        return try {
+            block()
+        } finally {
+            watcher.cancel()
+            backgroundedNoteIds.update { it - noteId }
         }
     }
 
@@ -694,13 +748,8 @@ class RecordingSessionManager(
         progressOffset: Float,
         style: NoteStyleRef,
         source: NoteSource,
-    ): Boolean {
-        if (transcripts.isEmpty()) {
-            failNote(noteId)
-            mutableEvents.emit(NoteProcessingEvent.Failed(noteId))
-            analyticsTracker.track(AnalyticsEvents.noteFailed(source))
-            return false
-        }
+    ): StructureOutcome {
+        if (transcripts.isEmpty()) return StructureOutcome.FAILED
         persistTranscript(noteId, transcripts, transcriptionMs)
         val structured = structureOrKeepTranscript(noteId, transcripts, progressOffset, style)
         val stillExists = completeNote(
@@ -713,11 +762,19 @@ class RecordingSessionManager(
             hardwareBackend = structured.hardwareBackend.name,
             style = structured.style,
         )
-        if (stillExists) {
-            clearTranscriptionCheckpoint(noteId)
-            mutableEvents.emit(NoteProcessingEvent.Completed(noteId))
-        }
-        return stillExists
+        if (!stillExists) return StructureOutcome.NOTE_GONE
+        clearTranscriptionCheckpoint(noteId)
+        mutableNoteProgress.update { it - noteId }
+        mutableEvents.emit(NoteProcessingEvent.Completed(noteId))
+        trackNoteReady(noteId, source)
+        suggestEventsLocked(noteId)
+        return StructureOutcome.COMPLETED
+    }
+
+    private enum class StructureOutcome {
+        COMPLETED,
+        NOTE_GONE,
+        FAILED,
     }
 
     private suspend fun structureOrKeepTranscript(

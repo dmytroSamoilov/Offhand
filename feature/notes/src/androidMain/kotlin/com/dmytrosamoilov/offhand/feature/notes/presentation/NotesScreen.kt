@@ -26,6 +26,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import com.dmytrosamoilov.offhand.core.ui.component.label
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -46,6 +54,7 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.WarningAmber
@@ -120,7 +129,6 @@ import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleChoice
 import com.dmytrosamoilov.offhand.core.ui.component.NoteStylePickerSheet
-import com.dmytrosamoilov.offhand.core.ui.component.CustomNoteStyleIcon
 import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleCard
 import com.dmytrosamoilov.offhand.core.ui.component.toDomain
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
@@ -278,6 +286,10 @@ fun NotesScreen(
                         onNewFolder = viewModel::onNewFolderRequested,
                         onRenameFolder = viewModel::onRenameFolderRequested,
                         onDeleteFolder = viewModel::onDeleteFolderRequested,
+                        onFolderStyle = viewModel::onFolderStyleRequested,
+                        onFolderMoved = viewModel::onFolderMoved,
+                        isFolderStylesUnlocked = state.isFolderStylesUnlocked,
+                        customStyles = state.customStyles,
                         modelPreparation = state.modelPreparation,
                         onNoteClick = { id ->
                             focusManager.clearFocus()
@@ -332,6 +344,19 @@ fun NotesScreen(
             currentFolderId = target.currentFolderId,
             onMove = viewModel::onMoveToFolder,
             onDismiss = viewModel::onMoveToFolderDismissed,
+        )
+    }
+
+    state.folderStylePicker?.let { picker ->
+        NoteStylePickerSheet(
+            title = stringResource(R.string.notes_folder_style_title, picker.folderName),
+            body = stringResource(R.string.notes_folder_style_body),
+            selected = picker.style,
+            customStyles = state.customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) },
+            isCustomStylesUnlocked = state.isFolderStylesUnlocked,
+            onSelected = viewModel::onFolderStyleSelected,
+            onDismiss = viewModel::onFolderStyleDismissed,
+            onDefaultSelected = { viewModel.onFolderStyleSelected(null) },
         )
     }
 
@@ -477,7 +502,7 @@ private fun ShareActions(onShare: () -> Unit, onSaveToDevice: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         OutlinedButton(onClick = onSaveToDevice, modifier = Modifier.weight(1f)) {
-            Text(text = stringResource(R.string.notes_share_save), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(text = stringResource(R.string.notes_share_download), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         Button(onClick = onShare, modifier = Modifier.weight(1f)) {
             Text(text = stringResource(R.string.notes_share_dialog_confirm), maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -656,6 +681,10 @@ private fun NotesListPane(
     onNewFolder: () -> Unit,
     onRenameFolder: (Long) -> Unit,
     onDeleteFolder: (Long) -> Unit,
+    onFolderStyle: (Long) -> Unit,
+    onFolderMoved: (Int, Int) -> Unit,
+    isFolderStylesUnlocked: Boolean,
+    customStyles: List<NoteStyleOptionUi>,
     modelPreparation: ModelPreparationUi?,
     onNoteClick: (Long) -> Unit,
     onDeleteRequested: (Long) -> Unit,
@@ -729,6 +758,10 @@ private fun NotesListPane(
                             onNewFolder = onNewFolder,
                             onRenameFolder = onRenameFolder,
                             onDeleteFolder = onDeleteFolder,
+                            onFolderStyle = onFolderStyle,
+                            onFolderMoved = onFolderMoved,
+                            isFolderStylesUnlocked = isFolderStylesUnlocked,
+                            styleChoices = customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) },
                         )
                     }
                     if (sections.isEmpty()) {
@@ -766,6 +799,8 @@ private fun emptyMessageRes(searchQuery: String, selectedFolderId: Long?): Int =
     else -> R.string.notes_empty_state
 }
 
+// A long press picks a chip up; dragging it over another folder swaps them
+// at once and the new order is saved when the chip is dropped.
 @Composable
 private fun FolderChips(
     folders: List<FolderUi>,
@@ -774,9 +809,18 @@ private fun FolderChips(
     onNewFolder: () -> Unit,
     onRenameFolder: (Long) -> Unit,
     onDeleteFolder: (Long) -> Unit,
+    onFolderStyle: (Long) -> Unit,
+    onFolderMoved: (Int, Int) -> Unit,
+    isFolderStylesUnlocked: Boolean,
+    styleChoices: List<NoteStyleChoice>,
 ) {
+    val listState = rememberLazyListState()
+    val drag = remember { FolderDragState() }
+    val currentFolders by rememberUpdatedState(folders)
+    val spacingPx = with(LocalDensity.current) { CHIP_SPACING.roundToPx() }
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        state = listState,
+        horizontalArrangement = Arrangement.spacedBy(CHIP_SPACING),
         contentPadding = PaddingValues(vertical = 4.dp),
     ) {
         item(key = ALL_NOTES_CHIP_KEY) {
@@ -787,20 +831,79 @@ private fun FolderChips(
             )
         }
         items(folders, key = { it.id }) { folder ->
+            val isDragging = drag.draggingId == folder.id
             FolderChip(
                 folder = folder,
                 isSelected = folder.id == selectedFolderId,
+                styleLabel = folder.style?.label(styleChoices),
+                isFolderStylesUnlocked = isFolderStylesUnlocked,
                 onSelected = { onFolderSelected(folder.id) },
                 onRename = { onRenameFolder(folder.id) },
                 onDelete = { onDeleteFolder(folder.id) },
+                onStyle = { onFolderStyle(folder.id) },
+                modifier = Modifier
+                    .animateItem()
+                    .zIndex(if (isDragging) 1f else 0f)
+                    .graphicsLayer { translationX = if (isDragging) drag.offset else 0f }
+                    .pointerInput(folder.id) {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = { drag.start(folder.id) },
+                            onDragEnd = { drag.end() },
+                            onDragCancel = { drag.end() },
+                            onDrag = { change, amount ->
+                                change.consume()
+                                drag.offset += amount.x
+                                drag.swapIfCrossed(listState, currentFolders, folder.id, spacingPx, onFolderMoved)
+                            },
+                        )
+                    },
             )
         }
         item(key = NEW_FOLDER_CHIP_KEY) { NewFolderChip(onClick = onNewFolder) }
     }
 }
 
+private class FolderDragState {
+    var draggingId: Long? by mutableStateOf(null)
+    var offset: Float by mutableFloatStateOf(0f)
+
+    fun start(id: Long) {
+        draggingId = id
+        offset = 0f
+    }
+
+    fun end() {
+        draggingId = null
+        offset = 0f
+    }
+
+    // The dragged chip's visual centre decides which neighbour it has crossed;
+    // after a swap the offset is corrected by that neighbour's width so the
+    // chip stays under the finger.
+    fun swapIfCrossed(
+        listState: LazyListState,
+        folders: List<FolderUi>,
+        draggedId: Long,
+        spacingPx: Int,
+        onMoved: (Int, Int) -> Unit,
+    ) {
+        val items = listState.layoutInfo.visibleItemsInfo
+        val dragged = items.firstOrNull { it.key == draggedId } ?: return
+        val centre = dragged.offset + offset + dragged.size / 2f
+        val target = items.firstOrNull { item ->
+            item.key != draggedId && item.key is Long && centre >= item.offset && centre <= item.offset + item.size
+        } ?: return
+        val from = folders.indexOfFirst { it.id == draggedId }
+        val to = folders.indexOfFirst { it.id == target.key }
+        if (from < 0 || to < 0 || from == to) return
+        offset += (target.size + spacingPx) * if (to > from) -1 else 1
+        onMoved(from, to)
+    }
+}
+
 private const val ALL_NOTES_CHIP_KEY = "all-notes"
 private const val NEW_FOLDER_CHIP_KEY = "new-folder"
+private val CHIP_SPACING = 8.dp
 
 @Composable
 private fun NewFolderChip(onClick: () -> Unit) {
@@ -817,12 +920,16 @@ private fun NewFolderChip(onClick: () -> Unit) {
 private fun FolderChip(
     folder: FolderUi,
     isSelected: Boolean,
+    styleLabel: String?,
+    isFolderStylesUnlocked: Boolean,
     onSelected: () -> Unit,
     onRename: () -> Unit,
     onDelete: () -> Unit,
+    onStyle: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
-    Box {
+    Box(modifier = modifier) {
         FilterChip(
             selected = isSelected,
             onClick = { if (isSelected) isMenuExpanded = true else onSelected() },
@@ -835,9 +942,12 @@ private fun FolderChip(
         )
         FolderChipMenu(
             expanded = isMenuExpanded,
+            styleLabel = styleLabel ?: stringResource(R.string.notes_folder_style_default),
+            isFolderStylesUnlocked = isFolderStylesUnlocked,
             onDismiss = { isMenuExpanded = false },
             onRename = onRename,
             onDelete = onDelete,
+            onStyle = onStyle,
         )
     }
 }
@@ -854,11 +964,34 @@ private fun FolderOptionsIcon() {
 @Composable
 private fun FolderChipMenu(
     expanded: Boolean,
+    styleLabel: String,
+    isFolderStylesUnlocked: Boolean,
     onDismiss: () -> Unit,
     onRename: () -> Unit,
     onDelete: () -> Unit,
+    onStyle: () -> Unit,
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        DropdownMenuItem(
+            text = {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(text = stringResource(R.string.notes_folder_style))
+                        if (!isFolderStylesUnlocked) ProBadge()
+                    }
+                    Text(
+                        text = styleLabel,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            },
+            leadingIcon = { Icon(imageVector = Icons.Filled.Settings, contentDescription = null) },
+            onClick = {
+                onDismiss()
+                onStyle()
+            },
+        )
         DropdownMenuItem(
             text = { Text(text = stringResource(R.string.notes_folder_rename)) },
             leadingIcon = { Icon(imageVector = Icons.Filled.Edit, contentDescription = null) },
@@ -1354,6 +1487,11 @@ private fun NoteCardIcon(status: NoteStatusUi) {
                 contentDescription = null,
                 tint = MaterialTheme.extendedColors.onWarningContainer,
             )
+            NoteStatusUi.INTERRUPTED -> Icon(
+                imageVector = Icons.Filled.Pause,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onTertiaryContainer,
+            )
         }
     }
 }
@@ -1362,6 +1500,7 @@ private fun NoteCardIcon(status: NoteStatusUi) {
 private fun NoteCardUi.cardTitle(): String = when (status) {
     NoteStatusUi.PROCESSING -> title.ifBlank { stringResource(R.string.notes_processing_title) }
     NoteStatusUi.FAILED -> title.ifBlank { stringResource(R.string.notes_recording_fallback_title) }
+    NoteStatusUi.INTERRUPTED -> title.ifBlank { stringResource(R.string.notes_recording_fallback_title) }
     NoteStatusUi.READY -> title
 }
 
@@ -1369,6 +1508,7 @@ private fun NoteCardUi.cardTitle(): String = when (status) {
 private fun NoteCardUi.cardPreview(): AnnotatedString = when (status) {
     NoteStatusUi.PROCESSING -> AnnotatedString(stringResource(R.string.notes_processing_preview))
     NoteStatusUi.FAILED -> AnnotatedString(stringResource(R.string.notes_failed_description))
+    NoteStatusUi.INTERRUPTED -> AnnotatedString(stringResource(R.string.notes_interrupted_preview))
     NoteStatusUi.READY -> preview.highlighted(previewHighlights)
 }
 
@@ -1411,6 +1551,7 @@ private fun NoteDetailPane(
             onPlayPause = viewModel::onPlayPauseClicked,
             onSeek = viewModel::onSeekRequested,
             onRetryTranscription = viewModel::onRetryTranscriptionRequested,
+            onResumeProcessing = viewModel::onResumeProcessingRequested,
             onCopied = viewModel::onNoteCopied,
             onRetranscribeRequested = viewModel::onRetranscribeRequested,
             onPresetRequested = viewModel::onPresetSheetRequested,
@@ -1455,6 +1596,7 @@ private fun NoteDetail(
     onPlayPause: () -> Unit,
     onSeek: (Float) -> Unit,
     onRetryTranscription: () -> Unit,
+    onResumeProcessing: () -> Unit,
     onCopied: (NoteSection) -> Unit,
     onRetranscribeRequested: () -> Unit,
     onPresetRequested: () -> Unit,
@@ -1488,6 +1630,8 @@ private fun NoteDetail(
             onPlayPause = onPlayPause,
             onSeek = onSeek,
             onRetryTranscription = onRetryTranscription,
+            onResumeProcessing = onResumeProcessing,
+            onPresetRequested = onPresetRequested,
             onCopied = onCopied,
             modifier = Modifier.padding(innerPadding),
         )
@@ -1681,6 +1825,8 @@ private fun NoteDetailContent(
     onPlayPause: () -> Unit,
     onSeek: (Float) -> Unit,
     onRetryTranscription: () -> Unit,
+    onResumeProcessing: () -> Unit,
+    onPresetRequested: () -> Unit,
     onCopied: (NoteSection) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -1756,17 +1902,21 @@ private fun NoteDetailContent(
                 hasAudio = note.hasAudio,
                 onRetryTranscription = onRetryTranscription,
             )
+            NoteStatusUi.INTERRUPTED -> InterruptedDetailCard(onResume = onResumeProcessing)
             NoteStatusUi.READY -> key(note.id) {
                 CollapsibleCard(
-                    title = stringResource(R.string.notes_overview_heading),
+                    title = stringResource(R.string.notes_summary_heading),
                     labelContainerColor = MaterialTheme.colorScheme.primaryContainer,
                     labelContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     initiallyExpanded = true,
-                    action = rememberCopyAction(
-                        text = note.body,
-                        clipboardLabel = stringResource(R.string.notes_overview_heading),
-                        contentDescription = stringResource(R.string.notes_copy_overview_description),
-                        onCopied = { onCopied(NoteSection.OVERVIEW) },
+                    actions = listOfNotNull(
+                        restyleAction(onPresetRequested).takeIf { note.transcript.isNotBlank() },
+                        rememberCopyAction(
+                            text = note.body,
+                            clipboardLabel = stringResource(R.string.notes_summary_heading),
+                            contentDescription = stringResource(R.string.notes_copy_summary_description),
+                            onCopied = { onCopied(NoteSection.OVERVIEW) },
+                        ),
                     ),
                 ) {
                     MarkdownText(markdown = note.body)
@@ -1785,11 +1935,13 @@ private fun NoteDetailContent(
                     labelContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     labelContentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                     initiallyExpanded = note.status != NoteStatusUi.READY,
-                    action = rememberCopyAction(
+                    actions = listOf(
+                        rememberCopyAction(
                         text = note.transcript,
                         clipboardLabel = stringResource(R.string.notes_transcript_heading),
                         contentDescription = stringResource(R.string.notes_copy_transcript_description),
                         onCopied = { onCopied(NoteSection.TRANSCRIPT) },
+                        ),
                     ),
                 ) {
                     MarkdownText(markdown = note.transcript)
@@ -1798,6 +1950,13 @@ private fun NoteDetailContent(
         }
     }
 }
+
+@Composable
+private fun restyleAction(onClick: () -> Unit): CollapsibleCardAction = CollapsibleCardAction(
+    icon = Icons.Filled.Settings,
+    contentDescription = stringResource(R.string.notes_preset_description),
+    onClick = onClick,
+)
 
 @Composable
 private fun rememberCopyAction(
@@ -1871,6 +2030,7 @@ private fun TrustBadge(icon: ImageVector, label: String) {
 private fun NoteDetailUi.detailTitle(): String = when (status) {
     NoteStatusUi.PROCESSING -> title.ifBlank { stringResource(R.string.notes_processing_title) }
     NoteStatusUi.FAILED -> title.ifBlank { stringResource(R.string.notes_recording_fallback_title) }
+    NoteStatusUi.INTERRUPTED -> title.ifBlank { stringResource(R.string.notes_recording_fallback_title) }
     NoteStatusUi.READY -> title
 }
 
@@ -1890,7 +2050,7 @@ private fun FailedDetailCard(
             Text(
                 text = stringResource(
                     if (hasTranscript) {
-                        R.string.notes_failed_overview_description
+                        R.string.notes_failed_summary_description
                     } else {
                         R.string.notes_failed_description
                     },
@@ -1904,6 +2064,29 @@ private fun FailedDetailCard(
                 Button(onClick = onRetryTranscription) {
                     Text(text = stringResource(R.string.notes_try_again_button))
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InterruptedDetailCard(onResume: () -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = stringResource(R.string.notes_interrupted_description),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = onResume) {
+                Text(text = stringResource(R.string.notes_continue_button))
             }
         }
     }

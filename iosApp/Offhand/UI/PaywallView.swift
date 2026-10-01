@@ -214,10 +214,11 @@ private enum PaywallCopy {
     static func headline(for feature: ProFeature) -> String {
         switch feature {
         case .general: return String(localized: "Offhand Pro")
-        case .customStyles: return String(localized: "Save your own note style")
+        case .customStyles: return String(localized: "Save your own summary style")
         case .documentExport: return String(localized: "Share this note as PDF or Word")
         case .smartSuggestions: return String(localized: "Find dates and to-dos in your notes")
         case .audioImport: return String(localized: "Turn your recordings into notes")
+        case .folderStyles: return String(localized: "Give this folder its own summary style")
         }
     }
 
@@ -267,6 +268,7 @@ private struct ComparisonTable: View {
             Row(id: 6, title: String(localized: "Share polished documents"), hint: String(localized: "PDF and Word, ready for clients, email and print"), feature: .documentExport),
             Row(id: 7, title: String(localized: "Never miss a follow-up"), hint: String(localized: "Dates and to-dos straight into your calendar"), feature: .smartSuggestions),
             Row(id: 8, title: String(localized: "Turn any recording into a note"), hint: String(localized: "Voice memos, calls and files from other apps"), feature: .audioImport),
+            Row(id: 9, title: String(localized: "Folders that know their style"), hint: String(localized: "Each folder with its own summary style"), feature: .folderStyles),
         ]
     }
 

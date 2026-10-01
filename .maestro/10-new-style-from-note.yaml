@@ -11,11 +11,11 @@ appId: com.dmytrosamoilov.offhand.uitest
     commands:
       - tapOn: "COUNT ATTEMPT"
 - tapOn: "More actions"
-- tapOn: "Change note style"
+- tapOn: "Change summary style"
 - scrollUntilVisible:
     element: "Create a new style"
 - tapOn: "Create a new style"
-- assertVisible: "New note style"
+- assertVisible: "New summary style"
 - runFlow:
     when:
       platform: Android

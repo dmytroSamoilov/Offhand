@@ -1,6 +1,8 @@
 package com.dmytrosamoilov.offhand.core.ui.component
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,19 +38,20 @@ data class NoteStyleChoice(
     val description: String,
 )
 
-// One picker for the default style (Settings) and the restyle sheet (note):
-// the user's own styles come first, the built-in ones after them.
+// The restyle sheet: the same list the Summary styles screen shows, inside a
+// bottom sheet.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteStylePickerSheet(
     title: String,
     body: String?,
-    selected: NoteStyleRef,
+    selected: NoteStyleRef?,
     customStyles: List<NoteStyleChoice>,
     isCustomStylesUnlocked: Boolean,
     onSelected: (NoteStyleRef) -> Unit,
     onDismiss: () -> Unit,
     onCreateStyle: (() -> Unit)? = null,
+    onDefaultSelected: (() -> Unit)? = null,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
@@ -64,26 +67,58 @@ fun NoteStylePickerSheet(
             body?.let {
                 Text(text = it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            if (customStyles.isNotEmpty()) {
-                PickerHeader(text = stringResource(R.string.core_ui_styles_custom_header))
-                customStyles.forEach { style ->
-                    NoteStyleCard(
-                        title = style.name,
-                        description = style.description,
-                        icon = CustomNoteStyleIcon,
-                        isSelected = selected == NoteStyleRef.Custom(style.id),
-                        onClick = { onSelected(NoteStyleRef.Custom(style.id)) },
-                        showProBadge = !isCustomStylesUnlocked,
-                    )
-                }
-                PickerHeader(text = stringResource(R.string.core_ui_styles_built_in_header))
-            }
-            NotePresetOption.entries.forEach { option ->
-                val style = NoteStyleRef.BuiltIn(option.toDomain())
-                NotePresetOptionCard(option = option, isSelected = selected == style, onClick = { onSelected(style) })
-            }
-            onCreateStyle?.let { CreateStyleButton(isCustomStylesUnlocked = isCustomStylesUnlocked, onClick = it) }
+            NoteStyleList(
+                selected = selected,
+                customStyles = customStyles,
+                isCustomStylesUnlocked = isCustomStylesUnlocked,
+                onSelected = onSelected,
+                onCreateStyle = onCreateStyle,
+                onDefaultSelected = onDefaultSelected,
+            )
         }
+    }
+}
+
+// One list for every place a style is picked: "Create a new style" first,
+// then the user's own styles, then the built-in ones. The styles screen adds
+// an Edit action to the custom rows; a folder's picker adds a "Default" row
+// on top, selected when the folder has no style of its own (selected == null).
+@Composable
+fun ColumnScope.NoteStyleList(
+    selected: NoteStyleRef?,
+    customStyles: List<NoteStyleChoice>,
+    isCustomStylesUnlocked: Boolean,
+    onSelected: (NoteStyleRef) -> Unit,
+    onCreateStyle: (() -> Unit)?,
+    onDefaultSelected: (() -> Unit)? = null,
+    customStyleActions: @Composable RowScope.(NoteStyleChoice) -> Unit = {},
+) {
+    onCreateStyle?.let { CreateStyleButton(isCustomStylesUnlocked = isCustomStylesUnlocked, onClick = it) }
+    onDefaultSelected?.let {
+        NoteStyleCard(
+            title = stringResource(R.string.core_ui_styles_default_option),
+            description = stringResource(R.string.core_ui_styles_default_option_description),
+            isSelected = selected == null,
+            onClick = it,
+        )
+    }
+    if (customStyles.isNotEmpty()) {
+        PickerHeader(text = stringResource(R.string.core_ui_styles_custom_header))
+        customStyles.forEach { style ->
+            NoteStyleCard(
+                title = style.name,
+                description = style.description,
+                isSelected = selected == NoteStyleRef.Custom(style.id),
+                onClick = { onSelected(NoteStyleRef.Custom(style.id)) },
+                showProBadge = !isCustomStylesUnlocked,
+                trailingActions = { customStyleActions(style) },
+            )
+        }
+    }
+    PickerHeader(text = stringResource(R.string.core_ui_styles_built_in_header))
+    NotePresetOption.entries.forEach { option ->
+        val style = NoteStyleRef.BuiltIn(option.toDomain())
+        NotePresetOptionCard(option = option, isSelected = selected == style, onClick = { onSelected(style) })
     }
 }
 

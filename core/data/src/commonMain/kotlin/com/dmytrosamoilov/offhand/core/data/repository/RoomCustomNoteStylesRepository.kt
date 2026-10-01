@@ -1,10 +1,12 @@
 package com.dmytrosamoilov.offhand.core.data.repository
 
+import com.dmytrosamoilov.offhand.core.data.database.FolderDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteStyleDao
 import com.dmytrosamoilov.offhand.core.data.database.toDomain
 import com.dmytrosamoilov.offhand.core.data.database.toEntity
 import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStylesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -12,6 +14,7 @@ import kotlinx.coroutines.flow.map
 internal class RoomCustomNoteStylesRepository(
     private val noteStyleDao: NoteStyleDao,
     private val noteDao: NoteDao,
+    private val folderDao: FolderDao,
 ) : CustomNoteStylesRepository {
 
     override fun observeStyles(): Flow<List<CustomNoteStyle>> =
@@ -26,6 +29,7 @@ internal class RoomCustomNoteStylesRepository(
 
     override suspend fun deleteStyle(id: Long) {
         noteDao.clearCustomStyle(id)
+        folderDao.clearStyle(NoteStyleRef.Custom(id).storageKey())
         noteStyleDao.deleteById(id)
     }
 }

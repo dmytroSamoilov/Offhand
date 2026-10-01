@@ -8,7 +8,7 @@ struct NoteActivityAttributes: ActivityAttributes {
             case paused
             case processing
             case finished
-            case openApp
+            case pausedBySystem
         }
 
         var phase: Phase
