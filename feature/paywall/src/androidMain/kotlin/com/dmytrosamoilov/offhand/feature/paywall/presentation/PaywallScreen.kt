@@ -99,7 +99,7 @@ private fun PaywallContent(state: PaywallUiState, viewModel: PaywallViewModel) {
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Header(feature = state.feature)
@@ -119,7 +119,7 @@ private fun BenefitsContent(onClose: () -> Unit) {
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 16.dp)
                 .padding(bottom = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -147,7 +147,7 @@ private fun BenefitsContent(onClose: () -> Unit) {
 
 @Composable
 private fun CloseRow(onClose: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), horizontalArrangement = Arrangement.End) {
+    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.End) {
         IconButton(onClick = onClose) {
             Icon(imageVector = Icons.Filled.Close, contentDescription = stringResource(R.string.paywall_close))
         }
@@ -388,8 +388,9 @@ private fun LegalRow(isEnabled: Boolean, onRestore: () -> Unit) {
 @Composable
 private fun BottomActions(state: PaywallUiState, onPurchase: () -> Unit, onContinueFree: () -> Unit) {
     val offer = state.selectedOffer
+    HorizontalDivider()
     Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {

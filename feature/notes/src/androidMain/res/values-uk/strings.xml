@@ -63,7 +63,6 @@
     <string name="notes_share_created_with">Створено в Offhand</string>
     <string name="notes_share_exported_label">Експортовано</string>
     <string name="notes_preset_description">Змінити стиль резюме</string>
-    <string name="notes_preset_sheet_title">Переписати цю нотатку як</string>
     <string name="notes_preset_sheet_body">Запис зберігається. Назву й резюме буде написано заново за розшифровкою у вибраному стилі.</string>
     <string name="notes_copy_summary_description">Скопіювати резюме</string>
     <string name="notes_copy_transcript_description">Скопіювати розшифровку</string>
@@ -88,7 +87,7 @@
     <string name="notes_folder_error_duplicate">Папка з такою назвою вже існує.</string>
     <string name="notes_folder_delete_dialog_title">Видалити цю папку?</string>
     <string name="notes_folder_delete_dialog_body">Нотатки з неї збережуться й повернуться до «Усі нотатки».</string>
-    <string name="notes_folder_empty_state">У цій папці ще немає нотаток.</string>
+    <string name="notes_folder_empty_state">У цій папці немає нотаток.</string>
     <string name="notes_move_to_folder">Перемістити в папку</string>
     <string name="notes_folder_none">Без папки</string>
     <string name="notes_import_error_title">Не вдалося імпортувати цей файл</string>

@@ -103,9 +103,9 @@
     <string name="settings_developer_label">Параметри розробника</string>
     <string name="settings_developer_description">Показувати керування ШІ на пристрої, прискорення та діагностику обробки.</string>
     <string name="settings_backup_title">Резервна копія</string>
-    <string name="settings_backup_subtitle">Перенесіть нотатки на новий телефон або збережіть копію</string>
+    <string name="settings_backup_subtitle">Перенесіть нотатки на новий телефон або збережіть копію.</string>
     <string name="settings_import_audio_title">Імпорт аудіо</string>
-    <string name="settings_import_audio_subtitle">Перетворюйте аудіофайли на нотатки. Виберіть один або кілька одразу</string>
+    <string name="settings_import_audio_subtitle">Перетворюйте аудіофайли на нотатки. Виберіть один або кілька одразу.</string>
     <string name="settings_import_unreadable">Деякі файли не вдалося прочитати.</string>
     <string name="settings_import_dismiss">ОК</string>
     <string name="settings_import_pro_title">Імпорт з Offhand Pro</string>

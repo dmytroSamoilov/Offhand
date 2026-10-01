@@ -93,11 +93,10 @@ struct NoteStyleEditorView: View {
                     Image(systemName: "sparkles")
                     Text(String(localized: "Describe it and let the AI fill the form"))
                 }
-                .font(.headline)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity, minHeight: 32)
+                .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+            .controlSize(.large)
             .listRowInsets(EdgeInsets())
             .listRowBackground(Color.clear)
         }

@@ -103,9 +103,9 @@
     <string name="settings_developer_label">Параметры разработчика</string>
     <string name="settings_developer_description">Показывать управление ИИ на устройстве, ускорение и диагностику обработки.</string>
     <string name="settings_backup_title">Резервная копия</string>
-    <string name="settings_backup_subtitle">Перенесите заметки на новый телефон или сохраните копию</string>
+    <string name="settings_backup_subtitle">Перенесите заметки на новый телефон или сохраните копию.</string>
     <string name="settings_import_audio_title">Импорт аудио</string>
-    <string name="settings_import_audio_subtitle">Превратите аудиофайлы в заметки. Выберите один или несколько сразу</string>
+    <string name="settings_import_audio_subtitle">Превратите аудиофайлы в заметки. Выберите один или несколько сразу.</string>
     <string name="settings_import_unreadable">Некоторые файлы не удалось прочитать.</string>
     <string name="settings_import_dismiss">ОК</string>
     <string name="settings_import_pro_title">Импорт с Offhand Pro</string>

@@ -9,20 +9,11 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "New folder"
 - inputText: "Work"
 - tapOn: "Save"
-- assertVisible: "No notes in this folder yet."
+- assertVisible: "No notes in this folder."
 
-# Give the folder its own summary style (Pro; the uitest store is Pro): the
-# selected chip opens the menu on Android, a long press does on iOS
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - tapOn: "Work"
-- runFlow:
-    when:
-      platform: iOS
-    commands:
-      - longPressOn: "Work"
+# Give the folder its own summary style (Pro; the uitest store is Pro):
+# tapping the selected chip opens the folder menu on both platforms
+- tapOn: "Work"
 - tapOn: "Summary style.*"
 - tapOn: "Meeting notes"
 - tapOn: "All notes"
@@ -57,17 +48,8 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "Work"
 - assertVisible: "Smoke test note"
 
-# Rename: Android opens the menu by tapping the selected chip, iOS by long press
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - tapOn: "Work"
-- runFlow:
-    when:
-      platform: iOS
-    commands:
-      - longPressOn: "Work"
+# Rename: tapping the selected chip opens the menu
+- tapOn: "Work"
 - tapOn: "Rename folder"
 - eraseText
 - inputText: "Clients"
@@ -75,16 +57,7 @@ appId: com.dmytrosamoilov.offhand.uitest
 - assertVisible: "Clients"
 
 # Delete: the note survives and is back under All notes
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - tapOn: "Clients"
-- runFlow:
-    when:
-      platform: iOS
-    commands:
-      - longPressOn: "Clients"
+- tapOn: "Clients"
 - tapOn: "Delete folder"
 - tapOn: "Delete"
 - assertNotVisible: "Clients"

@@ -61,7 +61,6 @@
     <string name="notes_share_created_with">Erstellt mit Offhand</string>
     <string name="notes_share_exported_label">Exportiert</string>
     <string name="notes_preset_description">Zusammenfassungsstil ändern</string>
-    <string name="notes_preset_sheet_title">Diese Notiz neu schreiben als</string>
     <string name="notes_preset_sheet_body">Die Aufnahme bleibt erhalten. Titel und Zusammenfassung werden aus dem Transkript neu geschrieben — im Stil, den du wählst.</string>
     <string name="notes_copy_summary_description">Zusammenfassung kopieren</string>
     <string name="notes_copy_transcript_description">Transkript kopieren</string>
@@ -86,7 +85,7 @@
     <string name="notes_folder_error_duplicate">Ein Ordner mit diesem Namen existiert bereits.</string>
     <string name="notes_folder_delete_dialog_title">Diesen Ordner löschen?</string>
     <string name="notes_folder_delete_dialog_body">Die Notizen bleiben erhalten und landen wieder unter „Alle Notizen“.</string>
-    <string name="notes_folder_empty_state">Noch keine Notizen in diesem Ordner.</string>
+    <string name="notes_folder_empty_state">Keine Notizen in diesem Ordner.</string>
     <string name="notes_move_to_folder">In Ordner verschieben</string>
     <string name="notes_folder_none">Kein Ordner</string>
     <string name="notes_import_error_title">Diese Datei konnte nicht importiert werden</string>

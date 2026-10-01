@@ -62,7 +62,6 @@
     <string name="notes_share_created_with">Creado con Offhand</string>
     <string name="notes_share_exported_label">Exportado</string>
     <string name="notes_preset_description">Cambiar estilo de resumen</string>
-    <string name="notes_preset_sheet_title">Reescribir esta nota como</string>
     <string name="notes_preset_sheet_body">La grabación se conserva. El título y el resumen se escriben de nuevo a partir de la transcripción, en el estilo que elijas.</string>
     <string name="notes_copy_summary_description">Copiar resumen</string>
     <string name="notes_copy_transcript_description">Copiar transcripción</string>
@@ -87,7 +86,7 @@
     <string name="notes_folder_error_duplicate">Ya existe una carpeta con este nombre.</string>
     <string name="notes_folder_delete_dialog_title">¿Eliminar esta carpeta?</string>
     <string name="notes_folder_delete_dialog_body">Sus notas se conservan y vuelven a Todas las notas.</string>
-    <string name="notes_folder_empty_state">Aún no hay notas en esta carpeta.</string>
+    <string name="notes_folder_empty_state">No hay notas en esta carpeta.</string>
     <string name="notes_move_to_folder">Mover a carpeta</string>
     <string name="notes_folder_none">Sin carpeta</string>
     <string name="notes_import_error_title">No se pudo importar este archivo</string>

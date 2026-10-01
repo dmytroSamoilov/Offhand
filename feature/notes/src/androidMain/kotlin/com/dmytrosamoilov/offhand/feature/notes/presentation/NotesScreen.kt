@@ -57,7 +57,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -108,6 +107,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -248,6 +249,24 @@ fun NotesScreen(
         }
     }
 
+    // The folder picker takes the same detour through the editor and comes
+    // back for the folder it was opened for.
+    var newStyleFolderId by remember { mutableStateOf<Long?>(null) }
+    var reopensFolderPickerId by rememberSaveable { mutableStateOf<Long?>(null) }
+    LaunchedEffect(Unit) {
+        reopensFolderPickerId?.let { folderId ->
+            reopensFolderPickerId = null
+            viewModel.onFolderStyleRequested(folderId)
+        }
+    }
+    LaunchedEffect(newStyleFolderId) {
+        newStyleFolderId?.let { folderId ->
+            newStyleFolderId = null
+            reopensFolderPickerId = folderId
+            onCreateNoteStyle()
+        }
+    }
+
     LaunchedEffect(requestedNoteId) {
         if (requestedNoteId != null) {
             viewModel.onNoteSelected(requestedNoteId)
@@ -357,6 +376,10 @@ fun NotesScreen(
             onSelected = viewModel::onFolderStyleSelected,
             onDismiss = viewModel::onFolderStyleDismissed,
             onDefaultSelected = { viewModel.onFolderStyleSelected(null) },
+            onCreateStyle = {
+                viewModel.onFolderStyleDismissed()
+                newStyleFolderId = picker.folderId
+            },
         )
     }
 
@@ -407,7 +430,7 @@ private fun NoteStyleSheet(
     onCreateStyle: () -> Unit,
 ) {
     NoteStylePickerSheet(
-        title = stringResource(R.string.notes_preset_sheet_title),
+        title = stringResource(R.string.notes_preset_description),
         body = stringResource(R.string.notes_preset_sheet_body),
         selected = selected,
         customStyles = customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) },
@@ -1097,7 +1120,10 @@ private fun DeleteFolderDialog(
         text = { Text(text = stringResource(R.string.notes_folder_delete_dialog_body)) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text(text = stringResource(R.string.notes_delete_dialog_confirm))
+                Text(
+                    text = stringResource(R.string.notes_delete_dialog_confirm),
+                    color = MaterialTheme.colorScheme.error,
+                )
             }
         },
         dismissButton = {
@@ -1227,11 +1253,14 @@ private fun searchFieldColors(): TextFieldColors {
 
 @Composable
 private fun CancelSearchButton(onClick: () -> Unit) {
-    IconButton(onClick = onClick, modifier = Modifier.padding(start = 4.dp)) {
-        Icon(
-            imageVector = Icons.Filled.Close,
-            contentDescription = stringResource(R.string.notes_search_cancel_description),
-        )
+    val description = stringResource(R.string.notes_search_cancel_description)
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier
+            .padding(start = 4.dp)
+            .semantics { contentDescription = description },
+    ) {
+        Text(text = stringResource(R.string.notes_delete_dialog_cancel))
     }
 }
 
@@ -1320,7 +1349,7 @@ private fun SectionHeader(dayLabel: NoteDayLabelUi) {
         text = dayLabel.text(),
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 4.dp, top = 4.dp),
+        modifier = Modifier.padding(top = 4.dp),
     )
 }
 
@@ -1777,7 +1806,7 @@ private fun PresetMenuItem(onClick: () -> Unit) {
     DropdownMenuItem(
         text = { Text(text = stringResource(R.string.notes_preset_description)) },
         leadingIcon = {
-            Icon(imageVector = Icons.Filled.Tune, contentDescription = null)
+            Icon(imageVector = Icons.Filled.Settings, contentDescription = null)
         },
         onClick = onClick,
     )
@@ -2253,7 +2282,10 @@ private fun DeleteConfirmationDialog(
         text = { Text(text = stringResource(R.string.notes_delete_dialog_body)) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text(text = stringResource(R.string.notes_delete_dialog_confirm))
+                Text(
+                    text = stringResource(R.string.notes_delete_dialog_confirm),
+                    color = MaterialTheme.colorScheme.error,
+                )
             }
         },
         dismissButton = {

@@ -364,7 +364,7 @@ private struct ToggleCard: View {
 
     var body: some View {
         Toggle(label, isOn: $isOn)
-            .tint(Brand.primary)
+            .tint(Brand.toggle)
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
             .background(Brand.surface, in: RoundedRectangle(cornerRadius: 12))

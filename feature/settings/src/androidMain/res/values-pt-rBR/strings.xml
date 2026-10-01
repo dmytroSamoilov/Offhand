@@ -103,9 +103,9 @@
     <string name="settings_developer_label">Opções de desenvolvedor</string>
     <string name="settings_developer_description">Mostrar gerenciamento da IA no dispositivo, aceleração e diagnósticos de processamento.</string>
     <string name="settings_backup_title">Backup e restauração</string>
-    <string name="settings_backup_subtitle">Leve suas notas para um novo telefone ou guarde uma cópia</string>
+    <string name="settings_backup_subtitle">Leve suas notas para um novo telefone ou guarde uma cópia.</string>
     <string name="settings_import_audio_title">Importar áudio</string>
-    <string name="settings_import_audio_subtitle">Transforme arquivos de áudio em notas. Escolha um ou vários de uma vez</string>
+    <string name="settings_import_audio_subtitle">Transforme arquivos de áudio em notas. Escolha um ou vários de uma vez.</string>
     <string name="settings_import_unreadable">Alguns dos arquivos não puderam ser lidos.</string>
     <string name="settings_import_dismiss">OK</string>
     <string name="settings_import_pro_title">Importar com o Offhand Pro</string>

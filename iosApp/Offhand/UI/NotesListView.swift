@@ -37,6 +37,8 @@ struct NotesListView: View {
     @State private var recordSheetRequest: RecordSheetRequest?
     @State private var recordedNoteId: Int64?
     @State private var searchQuery = ""
+    @State private var newStyleFolderId: Int64?
+    @State private var folderStyleEditorFolderId: Int64?
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
@@ -44,10 +46,20 @@ struct NotesListView: View {
         .sheet(item: $recordSheetRequest, onDismiss: openRecordedNote) { request in
             RecordSheetView(autoStart: true, folderId: request.folderId) { recordedNoteId = $0 }
         }
-        .sheet(isPresented: folderStyleBinding) {
+        // Like the note's restyle sheet, the folder picker closes before the
+        // editor is pushed and comes back for the same folder on return.
+        .sheet(isPresented: folderStyleBinding, onDismiss: openRequestedFolderStyleEditor) {
             if let picker = state.folderStylePicker {
-                FolderStyleSheet(viewModel: viewModel, picker: picker, state: state)
-                    .presentationDetents([.medium, .large])
+                FolderStyleSheet(
+                    viewModel: viewModel,
+                    picker: picker,
+                    state: state,
+                    onCreateStyle: {
+                        newStyleFolderId = picker.folderId
+                        viewModel.onFolderStyleDismissed()
+                    }
+                )
+                .presentationDetents([.medium, .large])
             }
         }
         .sheet(isPresented: moveToFolderBinding) {
@@ -107,7 +119,9 @@ struct NotesListView: View {
     private var layout: some View {
         if horizontalSizeClass == .regular {
             NavigationSplitView {
-                notesList
+                NavigationStack {
+                    notesList
+                }
             } detail: {
                 NavigationStack {
                     if let detail = state.selected {
@@ -146,7 +160,6 @@ struct NotesListView: View {
                 FolderChips(
                     folders: state.folders,
                     selectedFolderId: state.selectedFolderId?.int64Value,
-                    customStyles: state.customStyles,
                     isFolderStylesUnlocked: state.isFolderStylesUnlocked,
                     onSelect: { viewModel.onFolderSelected(folderId: $0.map { KotlinLong(value: $0) }) },
                     onNew: { viewModel.onNewFolderRequested() },
@@ -167,6 +180,7 @@ struct NotesListView: View {
                             NoteCardRow(note: note, progress: state.noteProgress[KotlinLong(value: note.id)]?.intValue)
                         }
                         .buttonStyle(.plain)
+                        .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
                         .swipeActions(edge: .leading, allowsFullSwipe: true) {
                             Button {
                                 Haptics.confirm()
@@ -199,6 +213,12 @@ struct NotesListView: View {
                 ModelPreparationBanner(percent: Int(preparation.progressPercent))
             }
         }
+        .navigationDestination(isPresented: folderStyleEditorBinding) {
+            NoteStyleEditorView(styleId: 0)
+        }
+        .onChange(of: folderStyleEditorFolderId) { previous, current in
+            if let previous, current == nil { viewModel.onFolderStyleRequested(folderId: previous) }
+        }
         .navigationTitle(String(localized: "Notes"))
         .overlay(alignment: .center) {
             if state.sections.isEmpty {
@@ -206,7 +226,7 @@ struct NotesListView: View {
                     ContentUnavailableView.search(text: searchQuery)
                 } else if state.selectedFolderId != nil {
                     ContentUnavailableView(
-                        String(localized: "No notes in this folder yet."),
+                        String(localized: "No notes in this folder."),
                         systemImage: "folder"
                     )
                 } else {
@@ -247,6 +267,19 @@ struct NotesListView: View {
         Binding(
             get: { state.moveToFolder != nil },
             set: { isShown in if !isShown { viewModel.onMoveToFolderDismissed() } }
+        )
+    }
+
+    private func openRequestedFolderStyleEditor() {
+        guard let folderId = newStyleFolderId else { return }
+        newStyleFolderId = nil
+        folderStyleEditorFolderId = folderId
+    }
+
+    private var folderStyleEditorBinding: Binding<Bool> {
+        Binding(
+            get: { folderStyleEditorFolderId != nil },
+            set: { isShown in if !isShown { folderStyleEditorFolderId = nil } }
         )
     }
 
@@ -301,7 +334,7 @@ struct NotesListView: View {
         } label: {
             Image(systemName: "mic.fill")
                 .font(.title2)
-                .foregroundStyle(.white)
+                .foregroundStyle(Brand.onPrimary)
                 .frame(width: 60, height: 60)
                 .background(Brand.primary, in: Circle())
                 .shadow(color: .black.opacity(0.25), radius: 10, y: 4)
@@ -321,11 +354,10 @@ struct NotesListView: View {
 }
 
 // Chips can be picked up and dropped onto another chip to change the order;
-// a long press without moving still opens the menu.
+// a long press without moving opens the same menu as a tap on the selected chip.
 private struct FolderChips: View {
     let folders: [FolderUi]
     let selectedFolderId: Int64?
-    let customStyles: [NoteStyleOptionUi]
     let isFolderStylesUnlocked: Bool
     let onSelect: (Int64?) -> Void
     let onNew: () -> Void
@@ -341,26 +373,8 @@ private struct FolderChips: View {
                     onSelect(nil)
                 }
                 ForEach(Array(folders.enumerated()), id: \.element.id) { index, folder in
-                    FolderChip(title: folder.name, isSelected: folder.id == selectedFolderId) {
-                        onSelect(folder.id)
-                    }
-                    .contextMenu {
-                        Button {
-                            onStyle(folder.id)
-                        } label: {
-                            Label(styleMenuTitle(for: folder), systemImage: "gearshape")
-                        }
-                        Button {
-                            onRename(folder.id)
-                        } label: {
-                            Label(String(localized: "Rename folder"), systemImage: "pencil")
-                        }
-                        Button(role: .destructive) {
-                            onDelete(folder.id)
-                        } label: {
-                            Label(String(localized: "Delete folder"), systemImage: "trash")
-                        }
-                    }
+                    folderChip(folder)
+                    .contextMenu { folderMenuItems(folder) }
                     .draggable(String(folder.id))
                     .dropDestination(for: String.self) { dropped, _ in
                         guard let id = dropped.first.flatMap(Int64.init),
@@ -380,22 +394,51 @@ private struct FolderChips: View {
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.horizontal, 16)
             .padding(.vertical, 4)
         }
     }
 
-    private func styleMenuTitle(for folder: FolderUi) -> String {
-        let label = folder.style.map(styleLabel) ?? String(localized: "Default")
-        let title = isFolderStylesUnlocked
-            ? String(localized: "Summary style")
-            : String(localized: "Summary style (Pro)")
-        return "\(title) · \(label)"
+    // Like Android, the selected chip carries the three dots and a tap on it
+    // opens the folder menu; a tap on any other chip selects it.
+    @ViewBuilder
+    private func folderChip(_ folder: FolderUi) -> some View {
+        if folder.id == selectedFolderId {
+            Menu {
+                folderMenuItems(folder)
+            } label: {
+                FolderChipLabel(title: folder.name, isSelected: true, showsOptions: true)
+            }
+            .buttonStyle(.plain)
+        } else {
+            FolderChip(title: folder.name, isSelected: false) { onSelect(folder.id) }
+        }
     }
 
-    private func styleLabel(_ style: NoteStyleRef) -> String {
-        if let preset = style.builtInPreset { return NoteStyleLabels.label(for: preset) }
-        return customStyles.first { $0.id == style.customId }?.name ?? NoteStyleLabels.label(for: .summary)
+    @ViewBuilder
+    private func folderMenuItems(_ folder: FolderUi) -> some View {
+        Button {
+            onStyle(folder.id)
+        } label: {
+            Label(styleMenuTitle, systemImage: "gearshape")
+        }
+        Button {
+            onRename(folder.id)
+        } label: {
+            Label(String(localized: "Rename folder"), systemImage: "pencil")
+        }
+        Divider()
+        Button(role: .destructive) {
+            onDelete(folder.id)
+        } label: {
+            Label(String(localized: "Delete folder"), systemImage: "trash")
+        }
+        .tint(.red)
+    }
+
+    private var styleMenuTitle: String {
+        isFolderStylesUnlocked
+            ? String(localized: "Summary style")
+            : String(localized: "Summary style (Pro)")
     }
 }
 
@@ -405,6 +448,7 @@ private struct FolderStyleSheet: View {
     let viewModel: NotesViewModel
     let picker: FolderStylePickerUi
     let state: NotesUiState
+    let onCreateStyle: () -> Void
 
     var body: some View {
         NavigationStack {
@@ -414,6 +458,7 @@ private struct FolderStyleSheet: View {
                 isCustomStylesUnlocked: state.isFolderStylesUnlocked,
                 footer: String(localized: "New recordings in this folder use it, and notes moved here are rewritten in it."),
                 onSelect: { viewModel.onFolderStyleSelected(style: $0) },
+                onCreateStyle: onCreateStyle,
                 onDefaultSelected: { viewModel.onFolderStyleSelected(style: nil) }
             )
             .navigationTitle(String(format: String(localized: "Summary style for %@"), picker.folderName))
@@ -434,15 +479,33 @@ private struct FolderChip: View {
 
     var body: some View {
         Button(action: action) {
+            FolderChipLabel(title: title, isSelected: isSelected, showsOptions: false)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct FolderChipLabel: View {
+    let title: String
+    let isSelected: Bool
+    let showsOptions: Bool
+
+    var body: some View {
+        HStack(spacing: 6) {
             Text(title)
                 .font(.subheadline.weight(.medium))
                 .lineLimit(1)
-                .padding(.horizontal, 14)
-                .frame(height: 32)
-                .background(isSelected ? Brand.primaryContainer : Color(.secondarySystemGroupedBackground), in: Capsule())
-                .foregroundStyle(isSelected ? Brand.onPrimaryContainer : Color.primary)
+            if showsOptions {
+                Image(systemName: "ellipsis")
+                    .font(.subheadline.weight(.semibold))
+                    .rotationEffect(.degrees(90))
+                    .accessibilityLabel(String(localized: "Folder options"))
+            }
         }
-        .buttonStyle(.plain)
+        .padding(.horizontal, 14)
+        .frame(height: 32)
+        .background(isSelected ? Brand.primaryContainer : Color(.secondarySystemGroupedBackground), in: Capsule())
+        .foregroundStyle(isSelected ? Brand.onPrimaryContainer : Color.primary)
     }
 }
 
@@ -564,7 +627,7 @@ struct KeepOpenBanner: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Brand.primaryContainer, in: RoundedRectangle(cornerRadius: 12))
+        .background(Brand.primaryContainer, in: RoundedRectangle(cornerRadius: Brand.cardRadius))
         .foregroundStyle(Brand.onPrimaryContainer)
         .accessibilityElement(children: .combine)
     }

@@ -74,7 +74,6 @@
     <string name="notes_fake_review_body" translatable="false">Google Play would show its rating dialog here. Rules: %1$d recording(s) · install age %2$d min · attempt gap %3$d min · burst window %4$d min · cooldown %5$d min. Tapping outside counts the attempt, like the real dialog.</string>
     <string name="notes_fake_review_success" translatable="false">Count attempt</string>
     <string name="notes_fake_review_failure" translatable="false">Simulate failure</string>
-    <string name="notes_preset_sheet_title">Rewrite this note as</string>
     <string name="notes_preset_sheet_body">The recording is kept. The title and summary are written again from the transcript in the style you pick.</string>
     <string name="notes_copy_summary_description">Copy summary</string>
     <string name="notes_copy_transcript_description">Copy transcript</string>
@@ -99,7 +98,7 @@
     <string name="notes_folder_error_duplicate">A folder with this name already exists.</string>
     <string name="notes_folder_delete_dialog_title">Delete this folder?</string>
     <string name="notes_folder_delete_dialog_body">Its notes are kept and go back to All notes.</string>
-    <string name="notes_folder_empty_state">No notes in this folder yet.</string>
+    <string name="notes_folder_empty_state">No notes in this folder.</string>
     <string name="notes_move_to_folder">Move to folder</string>
     <string name="notes_folder_none">No folder</string>
     <string name="notes_import_error_title">Could not import this file</string>

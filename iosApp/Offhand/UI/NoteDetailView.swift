@@ -57,6 +57,7 @@ struct NoteDetailView: View {
             .padding()
         }
         .background(Color(.systemGroupedBackground))
+        .modifier(SoftTopEdge())
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .task(id: processingHapticsKey) { await runProcessingHaptics() }
@@ -78,7 +79,7 @@ struct NoteDetailView: View {
                         Button {
                             viewModel.onPresetSheetRequested()
                         } label: {
-                            Label(String(localized: "Change summary style"), systemImage: "slider.horizontal.3")
+                            Label(String(localized: "Change summary style"), systemImage: "gearshape")
                         }
                     }
                     if detail.hasAudio && state.isRetranscribeAvailable {
@@ -232,7 +233,7 @@ struct NoteDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
     }
 
     private var interruptedCard: some View {
@@ -250,7 +251,7 @@ struct NoteDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
     }
 
     private var processingStage: String {
@@ -278,7 +279,7 @@ struct NoteDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
     }
 
     private var playbackCard: some View {
@@ -312,7 +313,7 @@ struct NoteDetailView: View {
             }
         }
         .padding()
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
     }
 
     private var shareBinding: Binding<Bool> {
@@ -415,7 +416,7 @@ private struct CollapsibleSection: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(cardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .background(cardBackground, in: RoundedRectangle(cornerRadius: Brand.cardRadius))
     }
 
     private var sectionHeader: some View {
@@ -641,7 +642,7 @@ private struct NoteStyleSheet: View {
                 onSelect: { viewModel.onStyleSelected(style: $0) },
                 onCreateStyle: onCreateStyle
             )
-            .navigationTitle(String(localized: "Rewrite this note as"))
+            .navigationTitle(String(localized: "Change summary style"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -705,4 +706,16 @@ private struct ActivityShareSheet: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+// The toolbar has no title, so without this the header scrolls under the
+// glass buttons with nothing between them.
+private struct SoftTopEdge: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.scrollEdgeEffectStyle(.soft, for: .top)
+        } else {
+            content
+        }
+    }
 }

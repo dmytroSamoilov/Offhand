@@ -215,8 +215,9 @@ private fun ProSection(status: ProStatusUi, onProCardClick: () -> Unit, onRedeem
     }
 }
 
-// Play has no in-app redemption sheet; the store's redeem page opens and the
-// foreground refresh picks the purchase up on return.
+// Play has no in-app redemption sheet; the redeem page opens inside the Play
+// Store app (the web page refuses subscription codes) and the foreground
+// refresh picks the purchase up on return.
 @Composable
 private fun RedeemCodeRow(onClick: () -> Unit) {
     val context = LocalContext.current
@@ -225,7 +226,7 @@ private fun RedeemCodeRow(onClick: () -> Unit) {
         subtitle = null,
         onClick = {
             onClick()
-            openLink(context, PLAY_REDEEM_URL)
+            openInPlayStore(context, PLAY_REDEEM_URL)
         },
     )
 }
@@ -234,7 +235,13 @@ private fun openLink(context: Context, url: String) {
     runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
 }
 
+private fun openInPlayStore(context: Context, url: String) {
+    val intent = Intent(Intent.ACTION_VIEW, url.toUri()).setPackage(PLAY_STORE_PACKAGE)
+    runCatching { context.startActivity(intent) }.onFailure { openLink(context, url) }
+}
+
 private const val PLAY_REDEEM_URL = "https://play.google.com/redeem"
+private const val PLAY_STORE_PACKAGE = "com.android.vending"
 
 @Composable
 private fun UpgradeRow(onClick: () -> Unit) {
@@ -271,9 +278,11 @@ private fun ProRow(subtitle: String, onClick: () -> Unit, trailing: @Composable 
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        ProCrown(size = 24.dp)
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = stringResource(R.string.settings_pro_title), style = MaterialTheme.typography.bodyLarge)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(text = stringResource(R.string.settings_pro_title), style = MaterialTheme.typography.bodyLarge)
+                ProCrown(size = 20.dp)
+            }
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
@@ -301,7 +310,7 @@ private fun formatDate(epochMs: Long): String =
 // Play's subscription center for this product; Play requires an in-app way
 // to reach it and it is where cancellation lives.
 private fun openSubscriptionManagement(context: Context) {
-    openLink(context, "https://play.google.com/store/account/subscriptions?sku=offhand_pro&package=${context.packageName}")
+    openInPlayStore(context, "https://play.google.com/store/account/subscriptions?sku=offhand_pro&package=${context.packageName}")
 }
 
 @Composable

@@ -121,8 +121,9 @@ struct ShareNoteSheet: View {
             Text(String(localized: "Share")).frame(maxWidth: .infinity)
         }
         .buttonStyle(.borderedProminent)
+        .controlSize(.large)
         .padding()
-        .background(.bar)
+        .background(Color(.systemGroupedBackground))
     }
 
     private func isLocked(_ option: NoteExportFormat) -> Bool {

@@ -68,14 +68,14 @@ struct SettingsView: View {
                     } label: {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(String(localized: "Backup & restore"))
-                            Text(String(localized: "Move your notes to a new iPhone or keep a copy"))
+                            Text(String(localized: "Move your notes to a new iPhone or keep a copy."))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
                     SettingsActionRow(
                         title: String(localized: "Import audio"),
-                        subtitle: String(localized: "Turn audio files into notes. Pick one or several at once"),
+                        subtitle: String(localized: "Turn audio files into notes. Pick one or several at once."),
                         showsProBadge: !state.isAudioImportUnlocked
                     ) {
                         viewModel.onImportAudioClicked()
@@ -169,9 +169,11 @@ struct SettingsView: View {
         if case .free = onEnum(of: state.pro) {
             Section(String(localized: "Subscription")) {
                 HStack(spacing: 12) {
-                    ProCrown(size: 24)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(String(localized: "Offhand Pro"))
+                        HStack(spacing: 8) {
+                            Text(String(localized: "Offhand Pro"))
+                            ProCrown(size: 20)
+                        }
                         Text(String(localized: "Custom styles, PDF and Word export, smart suggestions and audio import"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -194,9 +196,11 @@ struct SettingsView: View {
                     viewModel.onProCardClicked()
                 } label: {
                     HStack(spacing: 12) {
-                        ProCrown(size: 24)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(String(localized: "Offhand Pro"))
+                            HStack(spacing: 8) {
+                                Text(String(localized: "Offhand Pro"))
+                                ProCrown(size: 20)
+                            }
                             Text(proStatusLabel).font(.caption).foregroundStyle(.secondary)
                         }
                         Spacer()
@@ -313,6 +317,7 @@ private struct SettingsSwitchRow: View {
                 }
                 Spacer()
                 Toggle("", isOn: .constant(isOn))
+                    .tint(Brand.toggle)
                     .labelsHidden()
                     .allowsHitTesting(false)
             }

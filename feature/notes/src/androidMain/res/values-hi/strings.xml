@@ -61,7 +61,6 @@
     <string name="notes_share_created_with">Offhand से बनाया गया</string>
     <string name="notes_share_exported_label">एक्सपोर्ट किया गया</string>
     <string name="notes_preset_description">सारांश शैली बदलें</string>
-    <string name="notes_preset_sheet_title">इस नोट को इस रूप में फिर से लिखें</string>
     <string name="notes_preset_sheet_body">रिकॉर्डिंग सुरक्षित रहती है। आपकी चुनी शैली में ट्रांसक्रिप्ट से शीर्षक और सारांश दोबारा लिखे जाते हैं।</string>
     <string name="notes_copy_summary_description">सारांश कॉपी करें</string>
     <string name="notes_copy_transcript_description">ट्रांसक्रिप्ट कॉपी करें</string>
@@ -86,7 +85,7 @@
     <string name="notes_folder_error_duplicate">इस नाम का फ़ोल्डर पहले से मौजूद है।</string>
     <string name="notes_folder_delete_dialog_title">यह फ़ोल्डर हटाएं?</string>
     <string name="notes_folder_delete_dialog_body">इसके नोट्स सुरक्षित रहेंगे और सभी नोट्स में वापस आ जाएंगे।</string>
-    <string name="notes_folder_empty_state">इस फ़ोल्डर में अभी कोई नोट नहीं है।</string>
+    <string name="notes_folder_empty_state">इस फ़ोल्डर में कोई नोट नहीं है।</string>
     <string name="notes_move_to_folder">फ़ोल्डर में ले जाएं</string>
     <string name="notes_folder_none">कोई फ़ोल्डर नहीं</string>
     <string name="notes_import_error_title">यह फ़ाइल आयात नहीं हो सकी</string>

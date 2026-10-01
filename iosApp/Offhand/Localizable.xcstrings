@@ -4846,6 +4846,46 @@
         }
       }
     },
+    "Folder options" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordneroptionen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opciones de carpeta"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "फ़ोल्डर विकल्प"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opções da pasta"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Параметры папки"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Параметри папки"
+          }
+        }
+      }
+    },
     "For example: I coach football teams. After each training I record what we practised, what went well, what each player should work on and what to plan next time." : {
       "localizations" : {
         "de" : {
@@ -6681,42 +6721,42 @@
         }
       }
     },
-    "Move your notes to a new iPhone or keep a copy" : {
+    "Move your notes to a new iPhone or keep a copy." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notizen auf ein neues iPhone übertragen oder eine Kopie behalten"
+            "value" : "Notizen auf ein neues iPhone übertragen oder eine Kopie behalten."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lleva tus notas a un iPhone nuevo o guarda una copia"
+            "value" : "Lleva tus notas a un iPhone nuevo o guarda una copia."
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "अपने नोट्स नए iPhone पर ले जाएं या एक कॉपी रखें"
+            "value" : "अपने नोट्स नए iPhone पर ले जाएं या एक कॉपी रखें।"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Leve suas notas para um novo iPhone ou guarde uma cópia"
+            "value" : "Leve suas notas para um novo iPhone ou guarde uma cópia."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Перенесите заметки на новый iPhone или сохраните копию"
+            "value" : "Перенесите заметки на новый iPhone или сохраните копию."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Перенесіть нотатки на новий iPhone або збережіть копію"
+            "value" : "Перенесіть нотатки на новий iPhone або збережіть копію."
           }
         }
       }
@@ -7161,42 +7201,42 @@
         }
       }
     },
-    "No notes in this folder yet." : {
+    "No notes in this folder." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Noch keine Notizen in diesem Ordner."
+            "value" : "Keine Notizen in diesem Ordner."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aún no hay notas en esta carpeta."
+            "value" : "No hay notas en esta carpeta."
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "इस फ़ोल्डर में अभी कोई नोट नहीं है।"
+            "value" : "इस फ़ोल्डर में कोई नोट नहीं है।"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ainda não há notas nesta pasta."
+            "value" : "Não há notas nesta pasta."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "В этой папке пока нет заметок."
+            "value" : "В этой папке нет заметок."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "У цій папці ще немає нотаток."
+            "value" : "У цій папці немає нотаток."
           }
         }
       }
@@ -8216,7 +8256,7 @@
         }
       }
     },
-    "Payments go through the App Store. Offhand never sees your card, and your notes never leave your phone." : {
+    "Payments go through the App Store. Offhand never sees your card, and your notes never leave your iPhone." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -9638,46 +9678,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Відновити запис"
-          }
-        }
-      }
-    },
-    "Rewrite this note as" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diese Notiz neu schreiben als"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reescribir esta nota como"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "इस नोट को इस रूप में फिर से लिखें"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reescrever esta nota como"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Переписать эту заметку как"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Переписати цю нотатку як"
           }
         }
       }
@@ -12668,83 +12668,42 @@
         }
       }
     },
-    "Turn audio files into notes. Pick one or several at once" : {
+    "Turn audio files into notes. Pick one or several at once." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mache aus Audiodateien Notizen. Wähle eine oder mehrere auf einmal"
+            "value" : "Mache aus Audiodateien Notizen. Wähle eine oder mehrere auf einmal."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Convierte archivos de audio en notas. Elige uno o varios a la vez"
+            "value" : "Convierte archivos de audio en notas. Elige uno o varios a la vez."
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ऑडियो फ़ाइलों को नोट्स में बदलें। एक या कई फ़ाइलें एक साथ चुनें"
+            "value" : "ऑडियो फ़ाइलों को नोट्स में बदलें। एक या कई फ़ाइलें एक साथ चुनें।"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transforme arquivos de áudio em notas. Escolha um ou vários de uma vez"
+            "value" : "Transforme arquivos de áudio em notas. Escolha um ou vários de uma vez."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Превратите аудиофайлы в заметки. Выберите один или несколько сразу"
+            "value" : "Превратите аудиофайлы в заметки. Выберите один или несколько сразу."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Перетворюйте аудіофайли на нотатки. Виберіть один або кілька одразу"
-          }
-        }
-      }
-    },
-    "Turn on microphone access to record a note. Audio still never leaves this device." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktiviere den Mikrofonzugriff, um eine Notiz aufzunehmen. Audio verlässt dieses Gerät trotzdem nie."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Activa el acceso al micrófono para grabar una nota. Aun así, el audio nunca sale de este dispositivo."
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "नोट रिकॉर्ड करने के लिए माइक्रोफ़ोन की अनुमति चालू करें। ऑडियो फिर भी कभी इस डिवाइस से बाहर नहीं जाता।"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ative o acesso ao microfone para gravar uma nota. Mesmo assim, o áudio nunca sai deste aparelho."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Включите доступ к микрофону, чтобы записать заметку. Звук всё равно никогда не покидает это устройство."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Увімкніть доступ до мікрофона, щоб записати нотатку. Звук усе одно ніколи не залишає цей пристрій."
+            "value" : "Перетворюйте аудіофайли на нотатки. Виберіть один або кілька одразу."
           }
         }
       }
