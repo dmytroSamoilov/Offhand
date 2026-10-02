@@ -140,7 +140,13 @@ class CreateBackupUseCase(
 
 internal fun NoteStatus.isSettled(): Boolean = this == NoteStatus.READY || this == NoteStatus.FAILED
 
-internal fun Folder.toBackup(): BackupFolder = BackupFolder(id = id, name = name, createdAtEpochMs = createdAtEpochMs)
+internal fun Folder.toBackup(): BackupFolder = BackupFolder(
+    id = id,
+    name = name,
+    createdAtEpochMs = createdAtEpochMs,
+    styleKey = style?.storageKey(),
+    position = position,
+)
 
 internal fun Note.toBackup(includeAudio: Boolean, includeStyles: Boolean): BackupNote = BackupNote(
     id = id,

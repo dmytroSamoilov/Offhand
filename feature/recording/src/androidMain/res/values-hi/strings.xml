@@ -27,12 +27,14 @@
     <string name="recording_notification_action_resume">जारी रखें</string>
     <string name="recording_notification_action_stop">बंद करें</string>
     <string name="recording_notification_processing_title">आपका नोट बन रहा है</string>
-    <string name="recording_notification_processing_text">आपके फ़ोन पर ट्रांसक्राइब और व्यवस्थित हो रहा है</string>
+    <string name="recording_notification_processing_text">आपकी रिकॉर्डिंग को नोट में बदला जा रहा है</string>
     <string name="recording_notification_notes_channel_name">तैयार नोट्स</string>
     <string name="recording_notification_ready_title">आपका नोट तैयार है</string>
-    <string name="recording_notification_ready_text">तैयार नोट खोलने के लिए टैप करें।</string>
+    <string name="recording_notification_ready_text">पढ़ने के लिए टैप करें।</string>
     <string name="recording_default_note_title">रिकॉर्डिंग %1$d</string>
     <string name="recording_untitled_note_title">वॉयस नोट</string>
-    <string name="recording_notification_note_failed_title">ट्रांसक्रिप्शन विफल</string>
-    <string name="recording_notification_note_failed_text">रिकॉर्डिंग सहेज ली गई है। खोलने के लिए टैप करें।</string>
+    <string name="recording_notification_note_failed_title">आपका नोट पूरा नहीं हुआ</string>
+    <string name="recording_notification_note_failed_text">रिकॉर्डिंग सहेज ली गई है। खोलने और फिर से कोशिश करने के लिए टैप करें।</string>
+    <string name="recording_notification_note_paused_title">आपका नोट रुका हुआ है</string>
+    <string name="recording_notification_note_paused_text">Offhand खोलें, यह पूरा हो जाएगा।</string>
 </resources>

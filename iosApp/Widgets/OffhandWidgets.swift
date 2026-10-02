@@ -50,13 +50,13 @@ private struct PhaseGlyph: View {
         case .recording:
             Image(systemName: "mic.fill").foregroundStyle(.red)
         case .paused:
-            Image(systemName: "pause.fill").foregroundStyle(.orange)
+            Image(systemName: "pause.fill").foregroundStyle(.blue)
         case .processing:
             Image(systemName: "waveform").foregroundStyle(.blue)
         case .finished:
             Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-        case .openApp:
-            Image(systemName: "exclamationmark.circle.fill").foregroundStyle(.orange)
+        case .pausedBySystem:
+            Image(systemName: "pause.circle.fill").foregroundStyle(.blue)
         }
     }
 }
@@ -79,7 +79,7 @@ private struct TrailingStatus: View {
             }
         case .finished:
             Text(String(localized: "Done"))
-        case .openApp:
+        case .pausedBySystem:
             EmptyView()
         }
     }
@@ -104,9 +104,14 @@ private struct ExpandedBottom: View {
         case .finished:
             Text(String(localized: "Your note is ready"))
                 .font(.subheadline)
-        case .openApp:
-            Text(String(localized: "Open Offhand to finish preparing your note"))
-                .font(.subheadline)
+        case .pausedBySystem:
+            VStack(alignment: .leading, spacing: 2) {
+                Text(String(localized: "Your note is paused"))
+                    .font(.subheadline)
+                Text(String(localized: "Open Offhand to finish it"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 }
@@ -131,9 +136,12 @@ private struct LockScreenActivityView: View {
                 case .finished:
                     Text(String(localized: "Your note is ready"))
                         .font(.headline)
-                case .openApp:
-                    Text(String(localized: "Open Offhand to finish preparing your note"))
+                case .pausedBySystem:
+                    Text(String(localized: "Your note is paused"))
                         .font(.headline)
+                    Text(String(localized: "Open Offhand to finish it"))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
             }
             Spacer()
@@ -186,7 +194,7 @@ private struct DownloadGlyph: View {
         case .ready:
             Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
         case .paused:
-            Image(systemName: "pause.circle.fill").foregroundStyle(.orange)
+            Image(systemName: "pause.circle.fill").foregroundStyle(.blue)
         }
     }
 }

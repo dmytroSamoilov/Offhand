@@ -21,6 +21,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -64,8 +66,11 @@ fun NoteStyleEditorScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(state.isSaved) {
-        if (state.isSaved) onBack()
+    LaunchedEffect(state.isSaved, state.isDeleted) {
+        if (state.isSaved || state.isDeleted) onBack()
+    }
+    if (state.isDeleteRequested) {
+        DeleteStyleDialog(onConfirm = viewModel::onDeleteConfirmed, onDismiss = viewModel::onDeleteDismissed)
     }
 
     state.describe?.let { describe ->
@@ -129,8 +134,39 @@ private fun EditorContent(
         KindField(value = state.noteKind, error = state.errors.noteKind, onValueChange = viewModel::onNoteKindChanged)
         LanguageChoice(selected = state.language, onSelected = viewModel::onLanguageChanged)
         SectionsEditor(state = state, viewModel = viewModel)
+        if (!state.isNew) DeleteStyleButton(onClick = viewModel::onDeleteRequested)
         Spacer(modifier = Modifier.height(24.dp))
     }
+}
+
+@Composable
+private fun DeleteStyleButton(onClick: () -> Unit) {
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+    ) {
+        Text(text = stringResource(R.string.settings_note_styles_delete))
+    }
+}
+
+@Composable
+private fun DeleteStyleDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.settings_note_styles_delete_dialog_title)) },
+        text = { Text(text = stringResource(R.string.settings_note_styles_delete_dialog_body)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(text = stringResource(R.string.settings_note_styles_delete_dialog_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.settings_delete_model_dialog_cancel))
+            }
+        },
+    )
 }
 
 @Composable

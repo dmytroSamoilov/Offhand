@@ -156,7 +156,7 @@ class TranscriptStructurer(
         normalizeOverview(parts.mapNotNull { it.overview.ifBlank { null } }, spec)
 
     private fun normalizeOverview(overviews: List<String>, spec: NoteStyleSpec): String =
-        NoteSectionMerger.merge(overviews, spec.sections)
+        NoteSectionMerger.merge(overviews, spec.sections, spec.proseSections)
 
     private fun parseNoteJson(raw: String): ParsedNote {
         val cleaned = ModelResponseCleaner.stripThinking(raw)

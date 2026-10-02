@@ -14,6 +14,7 @@
     <string name="paywall_pro_export">Share polished documents</string>
     <string name="paywall_pro_suggestions">Never miss a follow-up</string>
     <string name="paywall_pro_import">Turn any recording into a note</string>
+    <string name="paywall_pro_folders">Folders that know their style</string>
     <string name="paywall_pro_more">New Pro features are included as they ship</string>
     <string name="paywall_plan_yearly">Yearly</string>
     <string name="paywall_plan_yearly_price">%1$s / year</string>
@@ -38,14 +39,16 @@
     <string name="paywall_close">Close</string>
     <string name="paywall_no_browser">No browser found to open the link.</string>
     <string name="paywall_context_tagline">Part of Offhand Pro. Get more out of every recording.</string>
-    <string name="paywall_context_styles">Save your own note style</string>
+    <string name="paywall_context_styles">Save your own summary style</string>
     <string name="paywall_context_export">Share this note as PDF or Word</string>
     <string name="paywall_context_suggestions">Find dates and to-dos in your notes</string>
     <string name="paywall_context_import">Turn your recordings into notes</string>
+    <string name="paywall_context_folder_styles">Give this folder its own summary style</string>
     <string name="paywall_pro_styles_hint">Your headings, your sections, every time</string>
     <string name="paywall_pro_export_hint">PDF and Word, ready for clients, email and print</string>
     <string name="paywall_pro_suggestions_hint">Dates and to-dos straight into your calendar</string>
     <string name="paywall_pro_import_hint">Voice memos, calls and files from other apps</string>
+    <string name="paywall_pro_folders_hint">Each folder with its own summary style</string>
     <string name="paywall_plan_yearly_monthly">About %1$s a month</string>
     <string name="paywall_plan_best_value">Best value</string>
     <string name="paywall_no_charge">No charge today</string>

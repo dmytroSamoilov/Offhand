@@ -21,13 +21,16 @@ struct NoteDetailView: View {
                 }
                 if detail.status == .processing {
                     processingCard
+                } else if detail.status == .interrupted {
+                    interruptedCard
                 } else if detail.status == .failed {
                     failedCard
                 } else {
                     CollapsibleSection(
-                        title: String(localized: "Overview"),
-                        copyLabel: String(localized: "Copy overview"),
+                        title: String(localized: "Summary"),
+                        copyLabel: String(localized: "Copy summary"),
                         onCopy: { viewModel.onNoteCopied(section: .overview) },
+                        onRestyle: detail.transcript.isEmpty ? nil : { viewModel.onPresetSheetRequested() },
                         text: detail.body,
                         labelBackground: Brand.primaryContainer,
                         labelForeground: Brand.onPrimaryContainer,
@@ -54,6 +57,7 @@ struct NoteDetailView: View {
             .padding()
         }
         .background(Color(.systemGroupedBackground))
+        .modifier(SoftTopEdge())
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .task(id: processingHapticsKey) { await runProcessingHaptics() }
@@ -75,7 +79,7 @@ struct NoteDetailView: View {
                         Button {
                             viewModel.onPresetSheetRequested()
                         } label: {
-                            Label(String(localized: "Change note style"), systemImage: "slider.horizontal.3")
+                            Label(String(localized: "Change summary style"), systemImage: "gearshape")
                         }
                     }
                     if detail.hasAudio && state.isRetranscribeAvailable {
@@ -91,7 +95,7 @@ struct NoteDetailView: View {
                         Label(String(localized: "Delete"), systemImage: "trash")
                     }
                 } label: {
-                    Image(systemName: "ellipsis.circle")
+                    Image(systemName: "ellipsis")
                 }
                 .accessibilityLabel(String(localized: "More actions"))
             }
@@ -104,7 +108,7 @@ struct NoteDetailView: View {
             Button(String(localized: "Re-transcribe")) { viewModel.onRetranscribeConfirmed() }
             Button(String(localized: "Cancel"), role: .cancel) { viewModel.onRetranscribeDismissed() }
         } message: {
-            Text(String(localized: "The recording will be transcribed and summarized again, replacing the current title, overview and transcript. The audio recording itself is kept."))
+            Text(String(localized: "The recording will be transcribed and summarized again, replacing the current title, summary and transcript. The audio recording itself is kept."))
         }
         .sheet(isPresented: shareBinding) {
             ShareNoteSheet(
@@ -212,35 +216,56 @@ struct NoteDetailView: View {
     }
 
     private var processingCard: some View {
-        HStack(spacing: 12) {
-            ProgressView()
-            VStack(alignment: .leading, spacing: 2) {
-                Text(processingStage)
-                if let percent = state.noteProgress[KotlinLong(value: detail.id)]?.intValue {
-                    Text("\(percent)%")
-                        .font(.caption)
-                        .monospacedDigit()
-                        .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                ProgressView()
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(processingStage)
+                    if let percent = state.noteProgress[KotlinLong(value: detail.id)]?.intValue {
+                        Text("\(percent)%")
+                            .font(.caption)
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
+            KeepOpenHint()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
+    }
+
+    private var interruptedCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(
+                String(localized: "This note was paused before it was finished. Keep Offhand open and it will continue."),
+                systemImage: "pause.circle"
+            )
+            .foregroundStyle(.secondary)
+            Button(String(localized: "Continue")) {
+                viewModel.onResumeProcessingRequested()
+            }
+            .buttonStyle(.bordered)
+            .tint(Brand.primary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
     }
 
     private var processingStage: String {
         detail.transcript.isEmpty
             ? String(localized: "Transcribing your recording")
-            : String(localized: "Writing your overview")
+            : String(localized: "Writing your summary")
     }
 
     private var failedCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Label(
                 detail.transcript.isEmpty
-                    ? String(localized: "We were unable to create an overview and transcript for this note.")
-                    : String(localized: "We were unable to create an overview for this note. The transcript is saved below."),
+                    ? String(localized: "We were unable to create a summary and transcript for this note.")
+                    : String(localized: "We were unable to create a summary for this note. The transcript is saved below."),
                 systemImage: "exclamationmark.triangle"
             )
             .foregroundStyle(.secondary)
@@ -254,7 +279,7 @@ struct NoteDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
     }
 
     private var playbackCard: some View {
@@ -288,7 +313,7 @@ struct NoteDetailView: View {
             }
         }
         .padding()
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
     }
 
     private var shareBinding: Binding<Bool> {
@@ -350,6 +375,7 @@ private struct CollapsibleSection: View {
     let title: String
     let copyLabel: String
     let onCopy: () -> Void
+    let onRestyle: (() -> Void)?
     let text: String
     let labelBackground: Color
     let labelForeground: Color
@@ -365,6 +391,7 @@ private struct CollapsibleSection: View {
         title: String,
         copyLabel: String,
         onCopy: @escaping () -> Void,
+        onRestyle: (() -> Void)? = nil,
         text: String,
         labelBackground: Color,
         labelForeground: Color,
@@ -373,6 +400,7 @@ private struct CollapsibleSection: View {
         self.title = title
         self.copyLabel = copyLabel
         self.onCopy = onCopy
+        self.onRestyle = onRestyle
         self.text = text
         self.labelBackground = labelBackground
         self.labelForeground = labelForeground
@@ -388,7 +416,7 @@ private struct CollapsibleSection: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(cardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .background(cardBackground, in: RoundedRectangle(cornerRadius: Brand.cardRadius))
     }
 
     private var sectionHeader: some View {
@@ -411,6 +439,17 @@ private struct CollapsibleSection: View {
                 .accessibilityLabel(isExpanded ? String(localized: "Show less") : String(localized: "Show more"))
             }
             Spacer()
+            if let onRestyle {
+                Button(action: onRestyle) {
+                    Image(systemName: "gearshape")
+                        .font(.caption.weight(.semibold))
+                        .frame(width: Self.pillHeight, height: Self.pillHeight)
+                        .background(labelBackground, in: Circle())
+                        .foregroundStyle(labelForeground)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(String(localized: "Change summary style"))
+            }
             CopySectionButton(
                 text: text,
                 onCopy: onCopy,
@@ -595,50 +634,15 @@ private struct NoteStyleSheet: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                if !customStyles.isEmpty {
-                    Section(String(localized: "Your styles")) {
-                        ForEach(customStyles, id: \.id) { style in
-                            StyleOptionRow(
-                                title: style.name,
-                                details: style.description_,
-                                symbol: NoteStyleLabels.customSymbol,
-                                isSelected: current.customId == style.id,
-                                showProBadge: !isCustomStylesUnlocked
-                            ) {
-                                viewModel.onStyleSelected(style: NoteStyleRefCustom(id: style.id))
-                            }
-                        }
-                    }
-                }
-                Section {
-                    ForEach([NotePreset.summary, .meeting, .visit, .legal], id: \.self) { preset in
-                        StyleOptionRow(
-                            title: NoteStyleLabels.label(for: preset),
-                            details: NoteStyleLabels.details(for: preset),
-                            symbol: NoteStyleLabels.symbol(for: preset),
-                            isSelected: current.builtInPreset == preset
-                        ) {
-                            viewModel.onStyleSelected(style: NoteStyleRefBuiltIn(preset: preset))
-                        }
-                    }
-                } header: {
-                    Text(String(localized: "Built in"))
-                } footer: {
-                    Text(String(localized: "The recording is kept. The title and overview are written again from the transcript in the style you pick."))
-                }
-                Section {
-                    Button(action: onCreateStyle) {
-                        HStack(spacing: 6) {
-                            Label(String(localized: "Create a new style"), systemImage: "plus")
-                            if !isCustomStylesUnlocked {
-                                ProBadge()
-                            }
-                        }
-                    }
-                }
-            }
-            .navigationTitle(String(localized: "Rewrite this note as"))
+            NoteStyleList(
+                current: current,
+                customStyles: customStyles.map { NoteStyleChoice(id: $0.id, name: $0.name, details: $0.description_) },
+                isCustomStylesUnlocked: isCustomStylesUnlocked,
+                footer: String(localized: "The recording is kept. The title and summary are written again from the transcript in the style you pick."),
+                onSelect: { viewModel.onStyleSelected(style: $0) },
+                onCreateStyle: onCreateStyle
+            )
+            .navigationTitle(String(localized: "Change summary style"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -702,4 +706,16 @@ private struct ActivityShareSheet: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+// The toolbar has no title, so without this the header scrolls under the
+// glass buttons with nothing between them.
+private struct SoftTopEdge: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.scrollEdgeEffectStyle(.soft, for: .top)
+        } else {
+            content
+        }
+    }
 }

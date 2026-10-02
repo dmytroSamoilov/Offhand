@@ -10,6 +10,7 @@
     <string name="paywall_pro_export">Gepflegte Dokumente teilen</string>
     <string name="paywall_pro_suggestions">Nie wieder ein Follow-up verpassen</string>
     <string name="paywall_pro_import">Jede Aufnahme in eine Notiz verwandeln</string>
+    <string name="paywall_pro_folders">Ordner, die ihren Stil kennen</string>
     <string name="paywall_pro_more">Neue Pro-Funktionen sind enthalten, sobald sie erscheinen</string>
     <string name="paywall_plan_yearly">Jährlich</string>
     <string name="paywall_plan_yearly_price">%1$s / Jahr</string>
@@ -34,14 +35,16 @@
     <string name="paywall_close">Schließen</string>
     <string name="paywall_no_browser">Kein Browser gefunden, um den Link zu öffnen.</string>
     <string name="paywall_context_tagline">Teil von Offhand Pro. Hol mehr aus jeder Aufnahme heraus.</string>
-    <string name="paywall_context_styles">Deinen eigenen Notizstil speichern</string>
+    <string name="paywall_context_styles">Deinen eigenen Zusammenfassungsstil speichern</string>
     <string name="paywall_context_export">Diese Notiz als PDF oder Word teilen</string>
     <string name="paywall_context_suggestions">Termine und Aufgaben in deinen Notizen finden</string>
     <string name="paywall_context_import">Deine Aufnahmen in Notizen verwandeln</string>
+    <string name="paywall_context_folder_styles">Diesem Ordner einen eigenen Zusammenfassungsstil geben</string>
     <string name="paywall_pro_styles_hint">Deine Überschriften, deine Abschnitte, jedes Mal</string>
     <string name="paywall_pro_export_hint">PDF und Word, bereit für Kunden, E-Mail und Druck</string>
     <string name="paywall_pro_suggestions_hint">Termine und Aufgaben direkt in deinen Kalender</string>
     <string name="paywall_pro_import_hint">Sprachmemos, Anrufe und Dateien aus anderen Apps</string>
+    <string name="paywall_pro_folders_hint">Jeder Ordner mit eigenem Zusammenfassungsstil</string>
     <string name="paywall_plan_yearly_monthly">Etwa %1$s im Monat</string>
     <string name="paywall_plan_best_value">Bester Wert</string>
     <string name="paywall_no_charge">Heute keine Abbuchung</string>

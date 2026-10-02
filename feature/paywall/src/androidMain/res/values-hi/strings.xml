@@ -10,6 +10,7 @@
     <string name="paywall_pro_export">सुव्यवस्थित दस्तावेज़ साझा करें</string>
     <string name="paywall_pro_suggestions">कोई फ़ॉलो-अप न छूटे</string>
     <string name="paywall_pro_import">किसी भी रिकॉर्डिंग को नोट बनाएँ</string>
+    <string name="paywall_pro_folders">ऐसे फ़ोल्डर जो अपनी शैली जानते हैं</string>
     <string name="paywall_pro_more">नई Pro सुविधाएँ आते ही शामिल हो जाती हैं</string>
     <string name="paywall_plan_yearly">वार्षिक</string>
     <string name="paywall_plan_yearly_price">%1$s / वर्ष</string>
@@ -34,14 +35,16 @@
     <string name="paywall_close">बंद करें</string>
     <string name="paywall_no_browser">लिंक खोलने के लिए कोई ब्राउज़र नहीं मिला।</string>
     <string name="paywall_context_tagline">Offhand Pro का हिस्सा। हर रिकॉर्डिंग से और ज़्यादा पाएँ।</string>
-    <string name="paywall_context_styles">अपनी नोट शैली सहेजें</string>
+    <string name="paywall_context_styles">अपनी सारांश शैली सहेजें</string>
     <string name="paywall_context_export">यह नोट PDF या Word में साझा करें</string>
     <string name="paywall_context_suggestions">अपने नोट्स में तारीखें और काम ढूँढें</string>
     <string name="paywall_context_import">अपनी रिकॉर्डिंग को नोट्स में बदलें</string>
+    <string name="paywall_context_folder_styles">इस फ़ोल्डर को अपनी सारांश शैली दें</string>
     <string name="paywall_pro_styles_hint">आपके शीर्षक, आपके सेक्शन, हर बार</string>
     <string name="paywall_pro_export_hint">PDF और Word, क्लाइंट, ईमेल और प्रिंट के लिए तैयार</string>
     <string name="paywall_pro_suggestions_hint">तारीखें और काम सीधे आपके कैलेंडर में</string>
     <string name="paywall_pro_import_hint">वॉइस मेमो, कॉल और दूसरे ऐप्स की फ़ाइलें</string>
+    <string name="paywall_pro_folders_hint">हर फ़ोल्डर की अपनी सारांश शैली</string>
     <string name="paywall_plan_yearly_monthly">लगभग %1$s प्रति माह</string>
     <string name="paywall_plan_best_value">सबसे किफ़ायती</string>
     <string name="paywall_no_charge">आज कोई शुल्क नहीं</string>

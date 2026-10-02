@@ -95,13 +95,26 @@ class RestoreBackupUseCase(
             }
         }
 
+        // A restored folder's style follows its remapped custom style; a folder
+        // that already exists keeps its own style and place.
         suspend fun restoreFolders(folders: List<BackupFolder>) {
             val existing = foldersRepository.observeFolders().first()
-            folders.forEach { folder ->
+            folders.sortedBy { it.position }.forEach { folder ->
                 val match = existing.firstOrNull { it.name.equals(folder.name, ignoreCase = true) }
                 folderIds[folder.id] = match?.id?.also { foldersReused += 1 }
-                    ?: foldersRepository.createFolder(folder.name).also { foldersCreated += 1 }
+                    ?: restoreFolder(folder).also { foldersCreated += 1 }
             }
+        }
+
+        private suspend fun restoreFolder(folder: BackupFolder): Long {
+            val id = foldersRepository.createFolder(folder.name)
+            folder.styleKey?.let { key -> foldersRepository.setFolderStyle(id, restoredStyle(key)) }
+            return id
+        }
+
+        private fun restoredStyle(key: String): NoteStyleRef? = when (val style = NoteStyleRef.fromStorageKey(key)) {
+            is NoteStyleRef.BuiltIn -> style
+            is NoteStyleRef.Custom -> styleIds[style.id]?.let(NoteStyleRef::Custom)
         }
 
         suspend fun restoreNotes(notes: List<BackupNote>) {

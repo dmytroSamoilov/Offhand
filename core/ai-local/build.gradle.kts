@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-val sherpaOnnxSha256 = "03f9c4df965f21c71269365a7951a7f23b5696fddd093fa318c80d65550ab780"
+val sherpaOnnxSha256 = "633c24321e06b1fe79feafa03ea16cbc0f8a286641e2da3559bac91bdb13bd96"
 val sherpaOnnxVersion: String = libs.versions.sherpaOnnx.get()
 val sherpaOnnxAar: File = rootProject.file("libs/sherpa-onnx-$sherpaOnnxVersion.aar")
 

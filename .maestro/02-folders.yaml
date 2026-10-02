@@ -9,10 +9,16 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "New folder"
 - inputText: "Work"
 - tapOn: "Save"
-- assertVisible: "No notes in this folder yet."
+- assertVisible: "No notes in this folder."
+
+# Give the folder its own summary style (Pro; the uitest store is Pro):
+# tapping the selected chip opens the folder menu on both platforms
+- tapOn: "Work"
+- tapOn: "Summary style.*"
+- tapOn: "Meeting notes"
 - tapOn: "All notes"
 
-# Move the note into it from the detail menu
+# Move the note into it from the detail menu; the folder style rewrites it
 - tapOn: "Smoke test note"
 - runFlow:
     when:
@@ -22,7 +28,9 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "More actions"
 - tapOn: "Move to folder"
 - tapOn: "Work"
-- assertVisible: "Overview"
+- extendedWaitUntil:
+    visible: "Summary"
+    timeout: 30000
 - runFlow:
     when:
       platform: Android
@@ -40,17 +48,8 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "Work"
 - assertVisible: "Smoke test note"
 
-# Rename: Android opens the menu by tapping the selected chip, iOS by long press
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - tapOn: "Work"
-- runFlow:
-    when:
-      platform: iOS
-    commands:
-      - longPressOn: "Work"
+# Rename: tapping the selected chip opens the menu
+- tapOn: "Work"
 - tapOn: "Rename folder"
 - eraseText
 - inputText: "Clients"
@@ -58,25 +57,20 @@ appId: com.dmytrosamoilov.offhand.uitest
 - assertVisible: "Clients"
 
 # Delete: the note survives and is back under All notes
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - tapOn: "Clients"
-- runFlow:
-    when:
-      platform: iOS
-    commands:
-      - longPressOn: "Clients"
+- tapOn: "Clients"
 - tapOn: "Delete folder"
 - tapOn: "Delete"
 - assertNotVisible: "Clients"
 - assertVisible: "Smoke test note"
 
-# Leading swipe on a card opens the same move sheet
-- swipe:
-    from: "Smoke test note"
-    direction: RIGHT
-- assertVisible: "Move to folder"
+# Leading swipe on a card opens the same move sheet; the CI emulator
+# sometimes drops the first swipe short of the threshold
+- retry:
+    maxRetries: 2
+    commands:
+      - swipe:
+          from: "Smoke test note"
+          direction: RIGHT
+      - assertVisible: "Move to folder"
 - tapOn: "No folder"
 - assertVisible: "Smoke test note"

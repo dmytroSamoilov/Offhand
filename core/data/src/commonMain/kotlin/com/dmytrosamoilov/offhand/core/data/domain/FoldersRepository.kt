@@ -10,5 +10,9 @@ interface FoldersRepository {
 
     suspend fun renameFolder(id: Long, name: String)
 
+    suspend fun setFolderStyle(id: Long, style: NoteStyleRef?)
+
+    suspend fun reorderFolders(orderedIds: List<Long>)
+
     suspend fun deleteFolder(id: Long)
 }

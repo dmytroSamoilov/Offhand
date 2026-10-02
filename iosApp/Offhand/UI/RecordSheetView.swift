@@ -19,7 +19,8 @@ struct RecordSheetView: View {
         failureMessage: nil,
         savedNoteId: nil,
         isDeveloperMode: false,
-        externalMicName: nil
+        externalMicName: nil,
+        isNotificationPromptRequested: false
     )
     @State private var isPermissionDenied = false
     @State private var isDiscardConfirmationVisible = false
@@ -90,6 +91,19 @@ struct RecordSheetView: View {
         .task {
             for await newState in viewModel.uiState {
                 state = newState
+            }
+        }
+    }
+
+    // The first finished recording is the moment to ask for notifications; the
+    // sheet is on its way out, so the answer goes straight to the ViewModel.
+    private func askForNotificationsIfPending() {
+        guard viewModel.isNotificationPromptPending else { return }
+        NoteNotifications.shared.requestPermissionIfUndetermined { granted in
+            if let granted {
+                viewModel.onNotificationPromptAnswered(granted: granted)
+            } else {
+                viewModel.onNotificationPromptSkipped()
             }
         }
     }
@@ -173,6 +187,7 @@ struct RecordSheetView: View {
                 Button {
                     Haptics.confirm()
                     viewModel.onStopRecording()
+                    askForNotificationsIfPending()
                 } label: {
                     Image(systemName: "stop.fill")
                         .font(.title2)

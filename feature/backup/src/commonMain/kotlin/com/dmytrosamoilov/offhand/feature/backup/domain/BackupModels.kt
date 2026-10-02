@@ -37,6 +37,8 @@ data class BackupFolder(
     val id: Long,
     val name: String,
     val createdAtEpochMs: Long,
+    val styleKey: String? = null,
+    val position: Int = 0,
 )
 
 @Serializable

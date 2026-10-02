@@ -6,7 +6,6 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 data class SettingsUiState(
     val noteStyle: NoteStyleRef = NoteStyleRef.DEFAULT,
     val customStyles: List<CustomStyleOptionUi> = emptyList(),
-    val isCustomStylesUnlocked: Boolean = false,
     val isDynamicColorEnabled: Boolean = false,
     val isAppLockEnabled: Boolean = false,
     val isDeviceSecure: Boolean = false,
@@ -16,6 +15,7 @@ data class SettingsUiState(
     val pro: ProStatusUi = ProStatusUi.Free,
     val proOverride: ProOverride? = null,
     val isImportPickerRequested: Boolean = false,
+    val isRedeemFallbackRequested: Boolean = false,
     val importNotice: ImportNoticeUi? = null,
 )
 

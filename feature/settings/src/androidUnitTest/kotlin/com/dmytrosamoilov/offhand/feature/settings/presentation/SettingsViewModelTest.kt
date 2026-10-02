@@ -11,6 +11,7 @@ import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
+import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
@@ -18,14 +19,13 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImport
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOverrideUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStatusUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.RedeemProCodeUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
 import io.mockk.coEvery
@@ -54,10 +54,8 @@ class SettingsViewModelTest {
 
     private val setDynamicColor: SetDynamicColorUseCase = mockk(relaxed = true)
     private val observeDynamicColor: ObserveDynamicColorUseCase = mockk()
-    private val setNoteStyle: SetNoteStyleUseCase = mockk(relaxed = true)
     private val observeNoteStyle: ObserveNoteStyleUseCase = mockk()
     private val observeCustomNoteStyles: ObserveCustomNoteStylesUseCase = mockk()
-    private val isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase = mockk()
     private val setAppLockEnabled: SetAppLockEnabledUseCase = mockk(relaxed = true)
     private val observeAppLockEnabled: ObserveAppLockEnabledUseCase = mockk()
     private val appLockManager: AppLockManager = mockk()
@@ -69,6 +67,7 @@ class SettingsViewModelTest {
     private val observeProOverride: ObserveProOverrideUseCase = mockk()
     private val setProOverride: SetProOverrideUseCase = mockk(relaxed = true)
     private val gate: ProUpgradeGate = mockk()
+    private val redeemProCode: RedeemProCodeUseCase = mockk()
 
     @Before
     fun setUp() {
@@ -76,7 +75,6 @@ class SettingsViewModelTest {
         every { observeDynamicColor() } returns flowOf(true)
         every { observeNoteStyle() } returns flowOf(NoteStyleRef.BuiltIn(NotePreset.MEETING))
         every { observeCustomNoteStyles() } returns flowOf(emptyList())
-        every { isCustomNoteStylesAvailable() } returns flowOf(true)
         every { observeAppLockEnabled() } returns flowOf(true)
         every { appLockManager.isDeviceSecure } returns true
         every { isAudioImportAvailable() } returns flowOf(true)
@@ -96,9 +94,7 @@ class SettingsViewModelTest {
         observeDynamicColor = observeDynamicColor,
         setDynamicColor = setDynamicColor,
         observeNoteStyle = observeNoteStyle,
-        setNoteStyle = setNoteStyle,
         observeCustomNoteStyles = observeCustomNoteStyles,
-        isCustomNoteStylesAvailable = isCustomNoteStylesAvailable,
         observeAppLockEnabled = observeAppLockEnabled,
         setAppLockEnabled = setAppLockEnabled,
         appLockManager = appLockManager,
@@ -110,9 +106,28 @@ class SettingsViewModelTest {
         observeProOverride = observeProOverride,
         setProOverride = setProOverride,
         proUpgradeGate = gate,
+        redeemProCode = redeemProCode,
         buildInfo = BuildInfo(isDeveloperBuild = false, appVersion = "1", platform = "test"),
         analyticsTracker = mockk(relaxed = true),
     )
+
+    @Test
+    fun `redeem confirmation asks for the store fallback only when the purchase flow fails`() = runTest(dispatcher) {
+        coEvery { redeemProCode() } returns PurchaseOutcome.CANCELLED
+        val viewModel = viewModel()
+
+        viewModel.onRedeemCodeConfirmed()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.isRedeemFallbackRequested)
+
+        coEvery { redeemProCode() } returns PurchaseOutcome.FAILED
+        viewModel.onRedeemCodeConfirmed()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isRedeemFallbackRequested)
+
+        viewModel.onRedeemFallbackOpened()
+        assertFalse(viewModel.uiState.value.isRedeemFallbackRequested)
+    }
 
     @Test
     fun `state reflects note preset and dynamic color`() = runTest(dispatcher) {
@@ -121,17 +136,6 @@ class SettingsViewModelTest {
 
         assertEquals(NoteStyleRef.BuiltIn(NotePreset.MEETING), viewModel.uiState.value.noteStyle)
         assertTrue(viewModel.uiState.value.isDynamicColorEnabled)
-    }
-
-    @Test
-    fun `note preset selection persists the preference`() = runTest(dispatcher) {
-        val viewModel = viewModel()
-        dispatcher.scheduler.advanceUntilIdle()
-
-        viewModel.onNoteStyleSelected(NoteStyleRef.BuiltIn(NotePreset.VISIT))
-        dispatcher.scheduler.advanceUntilIdle()
-
-        coVerify { setNoteStyle(NoteStyleRef.BuiltIn(NotePreset.VISIT)) }
     }
 
     @Test
@@ -168,23 +172,6 @@ class SettingsViewModelTest {
 
         assertEquals(false, viewModel.uiState.value.isDeviceSecure)
         coVerify { setAppLockEnabled(false) }
-    }
-
-    @Test
-    fun `custom styles stay listed while locked and selecting one goes through the paywall`() = runTest(dispatcher) {
-        every { observeCustomNoteStyles() } returns flowOf(listOf(customStyle))
-        every { isCustomNoteStylesAvailable() } returns flowOf(false)
-        coEvery { gate.requirePro(any()) } returns false
-        val viewModel = viewModel()
-        advanceUntilIdle()
-
-        assertEquals(listOf("Debrief"), viewModel.uiState.value.customStyles.map { it.name })
-        assertFalse(viewModel.uiState.value.isCustomStylesUnlocked)
-
-        viewModel.onNoteStyleSelected(NoteStyleRef.Custom(1))
-        advanceUntilIdle()
-
-        coVerify(exactly = 0) { setNoteStyle(any()) }
     }
 
     @Test

@@ -27,12 +27,14 @@
     <string name="recording_notification_action_resume">Продолжить</string>
     <string name="recording_notification_action_stop">Стоп</string>
     <string name="recording_notification_processing_title">Создаём вашу заметку</string>
-    <string name="recording_notification_processing_text">Расшифровываем и структурируем на вашем телефоне</string>
+    <string name="recording_notification_processing_text">Превращаем вашу запись в заметку</string>
     <string name="recording_notification_notes_channel_name">Готовые заметки</string>
     <string name="recording_notification_ready_title">Ваша заметка готова</string>
-    <string name="recording_notification_ready_text">Нажмите, чтобы открыть готовую заметку.</string>
+    <string name="recording_notification_ready_text">Нажмите, чтобы прочитать.</string>
     <string name="recording_default_note_title">Запись %1$d</string>
     <string name="recording_untitled_note_title">Голосовая заметка</string>
-    <string name="recording_notification_note_failed_title">Расшифровка не удалась</string>
-    <string name="recording_notification_note_failed_text">Запись сохранена. Нажмите, чтобы открыть её.</string>
+    <string name="recording_notification_note_failed_title">Ваша заметка не завершена</string>
+    <string name="recording_notification_note_failed_text">Запись сохранена. Нажмите, чтобы открыть её и повторить попытку.</string>
+    <string name="recording_notification_note_paused_title">Ваша заметка приостановлена</string>
+    <string name="recording_notification_note_paused_text">Откройте Offhand, и она завершится.</string>
 </resources>

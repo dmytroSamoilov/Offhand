@@ -10,7 +10,7 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "New folder"
 - inputText: "Calls"
 - tapOn: "Save"
-- assertVisible: "No notes in this folder yet."
+- assertVisible: "No notes in this folder."
 
 # Record through the fake microphone while the folder is open
 - runFlow:
@@ -35,7 +35,7 @@ appId: com.dmytrosamoilov.offhand.uitest
 
 # Saving opens the new note; wait for processing, then go back to the list
 - extendedWaitUntil:
-    visible: "Overview"
+    visible: "Summary"
     timeout: 30000
 - assertVisible: "Smoke test note"
 - runFlow:
@@ -55,4 +55,4 @@ appId: com.dmytrosamoilov.offhand.uitest
 - extendedWaitUntil:
     visible: "Smoke test note"
     timeout: 30000
-- assertNotVisible: "No notes in this folder yet."
+- assertNotVisible: "No notes in this folder."

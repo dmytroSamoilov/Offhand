@@ -26,21 +26,16 @@
     <string name="settings_delete_model_dialog_confirm">हटाएँ</string>
     <string name="settings_delete_model_dialog_cancel">रद्द करें</string>
 
-    <string name="settings_note_style_title">डिफ़ॉल्ट नोट शैली</string>
-    <string name="settings_note_style_note">नई रिकॉर्डिंग पर लागू होती है। किसी मौजूदा नोट की शैली आप नोट की स्क्रीन से बदल सकते हैं।</string>
-    <string name="settings_note_styles_manage">नोट शैलियाँ प्रबंधित करें</string>
-    <string name="settings_note_styles_manage_subtitle">अपने शीर्षक और फ़ॉर्मैट बनाएँ</string>
-    <string name="settings_note_styles_title">नोट शैलियाँ</string>
-    <string name="settings_note_styles_built_in">पहले से मौजूद</string>
-    <string name="settings_note_styles_custom">आपकी शैलियाँ</string>
-    <string name="settings_note_styles_empty">अभी कोई अपनी शैली नहीं है। AI को अपने शीर्षक देने के लिए एक बनाएँ।</string>
-    <string name="settings_note_styles_new">नई शैली</string>
+    <string name="settings_note_style_note">चुनी गई शैली नई रिकॉर्डिंग के लिए इस्तेमाल होती है। आप किसी भी नोट की शैली उस नोट से ही बदल सकते हैं।</string>
+    <string name="settings_note_styles_default_value">डिफ़ॉल्ट: %1$s</string>
+    <string name="settings_note_styles_title">सारांश शैलियाँ</string>
+    <string name="settings_note_styles_edit">संपादित करें</string>
     <string name="settings_note_styles_delete">शैली हटाएँ</string>
     <string name="settings_note_styles_delete_dialog_title">यह शैली हटाएँ?</string>
     <string name="settings_note_styles_delete_dialog_body">इससे लिखे गए नोट बने रहेंगे। अगली बार दोबारा लिखने पर वे सारांश शैली में चले जाएँगे।</string>
     <string name="settings_note_styles_delete_dialog_confirm">हटाएँ</string>
-    <string name="settings_note_style_editor_new_title">नई नोट शैली</string>
-    <string name="settings_note_style_editor_edit_title">नोट शैली संपादित करें</string>
+    <string name="settings_note_style_editor_new_title">नई सारांश शैली</string>
+    <string name="settings_note_style_editor_edit_title">सारांश शैली संपादित करें</string>
     <string name="settings_note_style_editor_back">वापस</string>
     <string name="settings_note_style_editor_save">सहेजें</string>
     <string name="settings_note_style_editor_name">नाम</string>
@@ -108,9 +103,9 @@
     <string name="settings_developer_label">डेवलपर विकल्प</string>
     <string name="settings_developer_description">ऑन-डिवाइस AI प्रबंधन, एक्सेलरेशन और प्रोसेसिंग डायग्नोस्टिक्स दिखाएँ।</string>
     <string name="settings_backup_title">बैकअप और रीस्टोर</string>
-    <string name="settings_backup_subtitle">अपने नोट्स नए फ़ोन पर ले जाएं या एक कॉपी रखें</string>
+    <string name="settings_backup_subtitle">अपने नोट्स नए फ़ोन पर ले जाएं या एक कॉपी रखें।</string>
     <string name="settings_import_audio_title">ऑडियो इंपोर्ट करें</string>
-    <string name="settings_import_audio_subtitle">ऑडियो फ़ाइलों को नोट्स में बदलें। एक या कई फ़ाइलें एक साथ चुनें</string>
+    <string name="settings_import_audio_subtitle">ऑडियो फ़ाइलों को नोट्स में बदलें। एक या कई फ़ाइलें एक साथ चुनें।</string>
     <string name="settings_import_unreadable">कुछ फ़ाइलें पढ़ी नहीं जा सकीं।</string>
     <string name="settings_import_dismiss">ठीक है</string>
     <string name="settings_import_pro_title">Offhand Pro के साथ इंपोर्ट करें</string>
@@ -139,4 +134,6 @@
     <string name="settings_about_footer">सब कुछ आपके फ़ोन पर ही रहता है। कुछ भी कभी अपलोड नहीं होता।</string>
     <string name="settings_note_style_editor_no_sections">बिना सेक्शन के नोट एक मुक्त सारांश होगा।</string>
     <string name="settings_redeem_code">कोड रिडीम करें</string>
+    <string name="settings_redeem_code_body">Google Play सालाना प्लान खोलेगा। भुगतान विधि के बगल वाले तीर पर टैप करें, “कोड रिडीम करें” चुनें और अपना कोड डालें। इसका मुफ़्त ट्रायल सामान्य ट्रायल की जगह लेगा।</string>
+    <string name="settings_redeem_code_confirm">जारी रखें</string>
 </resources>

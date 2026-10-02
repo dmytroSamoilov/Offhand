@@ -2,13 +2,16 @@ package com.dmytrosamoilov.offhand.feature.recording.domain
 
 internal object NoteSectionMerger {
 
-    fun merge(overviews: List<String>, headings: List<String>): String {
+    // Prose sections are the user's own text: their paragraph breaks are kept
+    // and their lines are never de-duplicated, because a repeated line there
+    // is what was said, not a merge artefact.
+    fun merge(overviews: List<String>, headings: List<String>, proseHeadings: List<String> = emptyList()): String {
         val sections = linkedMapOf(PREAMBLE to mutableListOf<String>())
         headings.forEach { heading -> sections[heading] = mutableListOf() }
-        overviews.forEach { overview -> collect(overview, headings, sections) }
+        overviews.forEach { overview -> collect(overview, headings, proseHeadings, sections) }
         dropLinesRepeatedInLaterSections(sections)
         return sections.entries
-            .filter { it.value.isNotEmpty() }
+            .filter { it.value.any(String::isNotEmpty) }
             .joinToString(SECTION_SEPARATOR) { (heading, lines) -> render(heading, lines) }
     }
 
@@ -46,16 +49,25 @@ internal object NoteSectionMerger {
     private fun collect(
         overview: String,
         headings: List<String>,
+        proseHeadings: List<String>,
         sections: MutableMap<String, MutableList<String>>,
     ) {
         var current = PREAMBLE
-        overview.lines().map(String::trim).filter(String::isNotEmpty).forEach { line ->
+        var startsParagraph = true
+        overview.lines().map(String::trim).forEach { line ->
             val heading = headingOf(line, headings)
-            if (heading != null) {
-                current = heading
-                sections.getOrPut(heading) { mutableListOf() }
-            } else {
-                sections.getValue(current).addIfAbsent(normalizeListMarkers(line))
+            when {
+                heading != null -> {
+                    current = heading
+                    startsParagraph = true
+                    sections.getOrPut(heading) { mutableListOf() }
+                }
+                current !in proseHeadings -> if (line.isNotEmpty()) sections.getValue(current).addIfAbsent(normalizeListMarkers(line))
+                line.isEmpty() -> startsParagraph = true
+                else -> {
+                    sections.getValue(current).addProseLine(line, startsParagraph)
+                    startsParagraph = false
+                }
             }
         }
     }
@@ -67,12 +79,10 @@ internal object NoteSectionMerger {
             ?: "$HEADING_PREFIX$text"
     }
 
-    private fun render(heading: String, lines: List<String>): String =
-        if (heading == PREAMBLE) {
-            lines.joinToString(LINE_BREAK)
-        } else {
-            heading + LINE_BREAK + lines.joinToString(LINE_BREAK)
-        }
+    private fun render(heading: String, lines: List<String>): String {
+        val body = lines.dropLastWhile(String::isEmpty).joinToString(LINE_BREAK)
+        return if (heading == PREAMBLE) body else heading + LINE_BREAK + body
+    }
 
     private fun normalizeListMarkers(line: String): String =
         line.replace(LIST_MARKER_RUN) { "$LIST_MARKER " }
@@ -81,7 +91,13 @@ internal object NoteSectionMerger {
         if (line !in this) add(line)
     }
 
+    private fun MutableList<String>.addProseLine(line: String, startsParagraph: Boolean) {
+        if (startsParagraph && isNotEmpty()) add(PARAGRAPH_BREAK)
+        add(line)
+    }
+
     private const val PREAMBLE = ""
+    private const val PARAGRAPH_BREAK = ""
     private const val HEADING_MARKER = "#"
     private const val HEADING_PREFIX = "## "
     private const val LIST_MARKER = "-"

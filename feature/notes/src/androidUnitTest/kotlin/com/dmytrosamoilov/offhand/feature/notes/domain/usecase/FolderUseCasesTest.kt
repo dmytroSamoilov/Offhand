@@ -1,6 +1,12 @@
 package com.dmytrosamoilov.offhand.feature.notes.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetFolderStyleUseCase
+import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.feature.notes.domain.FolderNameError
@@ -16,6 +22,10 @@ import org.junit.Test
 class FolderUseCasesTest {
 
     private val existing = listOf(Folder(id = 7, name = "Work", createdAtEpochMs = 0))
+    private val getFolderStyle: GetFolderStyleUseCase = mockk {
+        coEvery { this@mockk.invoke(any()) } returns null
+    }
+    private val controller: RecordingProcessController = mockk(relaxed = true)
     private val foldersRepository: FoldersRepository = mockk(relaxed = true) {
         every { observeFolders() } returns flowOf(existing)
         coEvery { createFolder(any()) } returns 42L
@@ -56,8 +66,44 @@ class FolderUseCasesTest {
 
     @Test
     fun `move note delegates to the notes repository`() = runTest {
-        MoveNoteToFolderUseCase(notesRepository)(noteId = 3L, folderId = null)
+        MoveNoteToFolderUseCase(notesRepository, getFolderStyle, controller)(noteId = 3L, folderId = null)
 
         coVerify { notesRepository.moveNoteToFolder(3L, null) }
     }
+
+    @Test
+    fun `moving a ready note into a styled folder rewrites it in that style`() = runTest {
+        val notesRepository: NotesRepository = mockk(relaxed = true)
+        coEvery { getFolderStyle(7L) } returns NoteStyleRef.BuiltIn(NotePreset.MEETING)
+        coEvery { notesRepository.getNote(3L) } returns readyNote(style = NoteStyleRef.BuiltIn(NotePreset.SUMMARY))
+
+        MoveNoteToFolderUseCase(notesRepository, getFolderStyle, controller)(noteId = 3L, folderId = 7L)
+
+        coVerify { notesRepository.moveNoteToFolder(3L, 7L) }
+        coVerify { controller.restructureNote(3L, NoteStyleRef.BuiltIn(NotePreset.MEETING)) }
+    }
+
+    @Test
+    fun `a note that already has the folder style is left alone`() = runTest {
+        val notesRepository: NotesRepository = mockk(relaxed = true)
+        coEvery { getFolderStyle(7L) } returns NoteStyleRef.BuiltIn(NotePreset.MEETING)
+        coEvery { notesRepository.getNote(3L) } returns readyNote(style = NoteStyleRef.BuiltIn(NotePreset.MEETING))
+
+        MoveNoteToFolderUseCase(notesRepository, getFolderStyle, controller)(noteId = 3L, folderId = 7L)
+
+        coVerify(exactly = 0) { controller.restructureNote(any(), any()) }
+    }
+
+    private fun readyNote(style: NoteStyleRef) = Note(
+        id = 3,
+        title = "Note",
+        body = "Body",
+        transcript = "Transcript",
+        createdAtEpochMs = 0,
+        transcriptionTimeMs = null,
+        structuringTimeMs = null,
+        hardwareBackend = null,
+        status = NoteStatus.READY,
+        style = style,
+    )
 }

@@ -13,6 +13,7 @@ data class UserPreferences(
     val noteStyle: NoteStyleRef,
     val proOverride: ProOverride,
     val smartSuggestionsEnabled: Boolean,
+    val notificationsPrompted: Boolean = false,
 )
 
 // Debug builds only: lets a dev install walk the free and the Pro paths
@@ -52,4 +53,6 @@ interface UserPreferencesRepository {
     suspend fun setProOverride(override: ProOverride)
 
     suspend fun setSmartSuggestionsEnabled(enabled: Boolean)
+
+    suspend fun setNotificationsPrompted()
 }
