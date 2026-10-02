@@ -44,7 +44,8 @@ struct OffhandApp: App {
                 noteDocuments: NoteDocumentBridgeImpl(),
                 proStore: StoreKitProStore(),
                 analytics: AnalyticsBridgeImpl(),
-                isDeveloperBuild: Self.isDeveloperBuild
+                isDeveloperBuild: Self.isDeveloperBuild,
+                network: NetworkMonitorBridgeImpl()
             ),
             useSmokeFakes: Self.useSmokeFakes
         )

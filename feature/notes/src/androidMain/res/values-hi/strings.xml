@@ -4,6 +4,13 @@
     <string name="notes_empty_state">अभी कोई नोट नहीं है। पहला नोट रिकॉर्ड करने के लिए माइक्रोफ़ोन बटन दबाएं।</string>
     <string name="notes_model_banner_title">आपका ऑन-डिवाइस AI सेट हो रहा है</string>
     <string name="notes_model_banner_subtitle">बैकग्राउंड में डाउनलोड हो रहा है</string>
+    <string name="notes_model_banner_waiting_title">आपका ऑन-डिवाइस AI डाउनलोड के लिए तैयार है</string>
+    <string name="notes_model_banner_waiting_subtitle">लगभग %1$s GB · Wi‑Fi का इंतज़ार</string>
+    <string name="notes_model_banner_mobile_data_button">मोबाइल डेटा पर डाउनलोड करें</string>
+    <string name="notes_model_banner_info_description">आपके ऑन-डिवाइस AI के बारे में</string>
+    <string name="notes_model_banner_info_title">आपका ऑन-डिवाइस AI</string>
+    <string name="notes_model_banner_info_body">Offhand रिकॉर्डिंग को ऐसे AI से नोट्स में बदलता है जो पूरी तरह आपके फ़ोन पर चलता है। यह एक बार का डाउनलोड है; इसके बाद कभी कुछ अपलोड नहीं होता।</string>
+    <string name="notes_model_banner_info_dismiss">समझ गया</string>
     <string name="notes_day_today">आज</string>
     <string name="notes_day_yesterday">कल</string>
     <plurals name="notes_word_count">

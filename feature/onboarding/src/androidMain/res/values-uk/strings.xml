@@ -24,11 +24,6 @@
     <string name="onboarding_lock_enable_label">Вимагати розблокування, щоб відкрити Offhand</string>
     <string name="onboarding_lock_enable_description">Це можна будь-коли змінити в налаштуваннях.</string>
 
-    <string name="onboarding_download_title">Налаштуйте ШІ на пристрої</string>
-    <string name="onboarding_download_body">Offhand розшифровує та узагальнює голосові нотатки за допомогою ШІ, який працює повністю на вашому телефоні. Для початку потрібне одноразове завантаження.</string>
-    <string name="onboarding_download_size">Одноразове завантаження · близько %1$s ГБ</string>
-    <string name="onboarding_download_background_hint">Завантаження триває у фоні — можна одразу починати запис. Ми повідомимо, коли все буде готово.</string>
-    <string name="onboarding_download_wifi_hint">Порада: підключіться до Wi‑Fi, щоб заощадити мобільний трафік.</string>
     <string name="onboarding_notification_download_channel_name">Завантаження ШІ на пристрої</string>
     <string name="onboarding_notification_status_channel_name">Стан ШІ на пристрої</string>
     <string name="onboarding_notification_downloading_title">Завантажити ШІ на пристрої</string>

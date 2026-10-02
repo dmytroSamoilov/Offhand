@@ -99,9 +99,10 @@ data class NoteShareUi(
     val saveToDevice: Boolean = false,
 )
 
-data class ModelPreparationUi(
-    val progressPercent: Int,
-)
+sealed interface ModelPreparationUi {
+    data class Downloading(val progressPercent: Int) : ModelPreparationUi
+    data class WaitingForMobileData(val sizeGb: String) : ModelPreparationUi
+}
 
 data class NotesSectionUi(
     val dayLabel: NoteDayLabelUi,

@@ -4,6 +4,13 @@
     <string name="notes_empty_state">Noch keine Notizen. Tippe auf das Mikrofon, um deine erste aufzunehmen.</string>
     <string name="notes_model_banner_title">Deine KI auf dem Gerät wird eingerichtet</string>
     <string name="notes_model_banner_subtitle">Wird im Hintergrund heruntergeladen</string>
+    <string name="notes_model_banner_waiting_title">Deine KI auf dem Gerät ist bereit zum Download</string>
+    <string name="notes_model_banner_waiting_subtitle">Etwa %1$s GB · wartet auf WLAN</string>
+    <string name="notes_model_banner_mobile_data_button">Über mobile Daten laden</string>
+    <string name="notes_model_banner_info_description">Über deine KI auf dem Gerät</string>
+    <string name="notes_model_banner_info_title">Deine KI auf dem Gerät</string>
+    <string name="notes_model_banner_info_body">Offhand macht aus Aufnahmen Notizen – mit KI, die vollständig auf deinem Handy läuft. Der Download ist einmalig; danach wird nie etwas hochgeladen.</string>
+    <string name="notes_model_banner_info_dismiss">Verstanden</string>
     <string name="notes_day_today">Heute</string>
     <string name="notes_day_yesterday">Gestern</string>
     <plurals name="notes_word_count">

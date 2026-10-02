@@ -222,7 +222,7 @@ struct RootView: View {
             case .downloading(let downloading):
                 wasDownloading = true
                 downloadActivityController.progressed(percent: Int(downloading.progressPercent))
-            case .idle:
+            case .idle, .waitingForMobileData:
                 guard wasDownloading else { continue }
                 wasDownloading = false
                 let isReady = (try? await SharedGraph.shared.modelManager().isModelDownloaded())?.boolValue ?? false

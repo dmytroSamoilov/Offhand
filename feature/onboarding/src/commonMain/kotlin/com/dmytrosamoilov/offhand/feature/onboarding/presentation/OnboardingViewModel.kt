@@ -1,11 +1,10 @@
 package com.dmytrosamoilov.offhand.feature.onboarding.presentation
 
+import com.dmytrosamoilov.offhand.core.common.BaseViewModel
+import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
-import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
-import com.dmytrosamoilov.offhand.core.common.BaseViewModel
-import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.device.DeviceCapabilityChecker
 import com.dmytrosamoilov.offhand.core.device.isLocalLlmCapable
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
@@ -18,16 +17,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
+// Four pages, then the app: the on-device AI download starts by itself the
+// moment the device check passes (on Wi-Fi, or on mobile data once the user
+// asks for it from the notes list), and notifications are asked for after the
+// first recording instead of here.
 class OnboardingViewModel(
-    private val modelDownloadController: ModelDownloadController,
+    private val modelDownloadLauncher: ModelDownloadLauncher,
     private val deviceCapabilityChecker: DeviceCapabilityChecker,
-    private val modelManager: ModelManager,
     private val appLockManager: AppLockManager,
     private val setAppLockEnabled: SetAppLockEnabledUseCase,
     private val setTelemetryConsent: SetTelemetryConsentUseCase,
     private val setNotePreset: SetNotePresetUseCase,
     private val completeOnboarding: CompleteOnboardingUseCase,
-    private val stepPolicy: OnboardingStepPolicy,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
@@ -39,6 +40,7 @@ class OnboardingViewModel(
     }
 
     fun onPrivacyContinue() {
+        trackStep(OnboardingStep.PRIVACY)
         moveToNextPage()
     }
 
@@ -69,17 +71,11 @@ class OnboardingViewModel(
         mutableUiState.update { it.copy(isTelemetryEnabled = granted) }
     }
 
+    // The last page: its Continue is the end of onboarding.
     fun onConsentContinue() {
-        commitAndMoveOn(OnboardingStep.TELEMETRY_CONSENT)
-    }
-
-    fun onNotificationsContinue() {
-        moveToNextPage()
-    }
-
-    fun onDownloadContinue() {
         launchSafely {
-            modelDownloadController.start()
+            commitStep(OnboardingStep.TELEMETRY_CONSENT)
+            trackStep(OnboardingStep.TELEMETRY_CONSENT)
             completeOnboarding()
             analyticsTracker.track(AnalyticsEvents.onboardingCompleted())
         }
@@ -103,8 +99,13 @@ class OnboardingViewModel(
     private fun commitAndMoveOn(step: OnboardingStep) {
         launchSafely {
             commitStep(step)
+            trackStep(step)
             moveToNextPage()
         }
+    }
+
+    private fun trackStep(step: OnboardingStep) {
+        analyticsTracker.track(AnalyticsEvents.onboardingStep(step.name.lowercase()))
     }
 
     private suspend fun commitStep(step: OnboardingStep) {
@@ -132,30 +133,29 @@ class OnboardingViewModel(
         }
     }
 
-    private fun buildPages(): List<OnboardingStep> = buildList {
-        add(OnboardingStep.PRIVACY)
-        add(OnboardingStep.NOTE_STYLE)
-        add(OnboardingStep.DEVICE_LOCK)
-        add(OnboardingStep.TELEMETRY_CONSENT)
-        if (stepPolicy.asksNotificationPermission) add(OnboardingStep.NOTIFICATIONS)
-        add(OnboardingStep.MODEL_DOWNLOAD)
-    }
+    private fun buildPages(): List<OnboardingStep> = listOf(
+        OnboardingStep.PRIVACY,
+        OnboardingStep.NOTE_STYLE,
+        OnboardingStep.DEVICE_LOCK,
+        OnboardingStep.TELEMETRY_CONSENT,
+    )
 
     private fun evaluateDevice() {
         val capability = deviceCapabilityChecker.snapshot()
         mutableUiState.update { current ->
             if (capability.isLocalLlmCapable()) {
+                modelDownloadLauncher.startIfAllowed()
                 current.copy(
                     step = OnboardingStep.PRIVACY,
                     pages = buildPages(),
                     currentPage = 0,
                     furthestPage = 0,
                     isDeviceSecure = appLockManager.isDeviceSecure,
-                    downloadSizeGb = formatDownloadSizeGb(
-                        modelManager.model.sizeInBytes + modelManager.speechModelSizeInBytes,
-                    ),
                 )
             } else {
+                analyticsTracker.track(
+                    AnalyticsEvents.deviceUnsupported(capability.totalRamMb / MB_PER_GB, capability.cpuCores),
+                )
                 current.copy(
                     step = OnboardingStep.DEVICE_INCOMPATIBLE,
                     deviceSpecs = capability.toDeviceSpecsUi(),
@@ -164,3 +164,5 @@ class OnboardingViewModel(
         }
     }
 }
+
+private const val MB_PER_GB = 1024L

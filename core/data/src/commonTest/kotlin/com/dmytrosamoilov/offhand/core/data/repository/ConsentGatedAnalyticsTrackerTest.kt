@@ -96,4 +96,5 @@ private class ConsentPreferences : UserPreferencesRepository {
     override suspend fun setReviewPromptState(state: ReviewPromptState) = Unit
     override suspend fun setProOverride(override: ProOverride) = Unit
     override suspend fun setSmartSuggestionsEnabled(enabled: Boolean) = Unit
+    override suspend fun setNotificationsPrompted() = Unit
 }

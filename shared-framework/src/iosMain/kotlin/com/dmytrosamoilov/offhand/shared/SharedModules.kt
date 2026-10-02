@@ -8,6 +8,7 @@ import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsSink
 import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
+import com.dmytrosamoilov.offhand.core.common.NetworkMonitor
 import com.dmytrosamoilov.offhand.core.data.di.PLATFORM_PRO_STORE
 import com.dmytrosamoilov.offhand.core.data.di.coreDataModule
 import com.dmytrosamoilov.offhand.core.data.domain.ProStore
@@ -21,7 +22,6 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareLabels
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareLabelsProvider
 import com.dmytrosamoilov.offhand.feature.onboarding.di.featureOnboardingModule
 import com.dmytrosamoilov.offhand.feature.paywall.di.featurePaywallModule
-import com.dmytrosamoilov.offhand.feature.onboarding.presentation.OnboardingStepPolicy
 import com.dmytrosamoilov.offhand.feature.recording.di.featureRecordingIosModule
 import com.dmytrosamoilov.offhand.feature.recording.di.featureRecordingModule
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.AppIconProvider
@@ -58,6 +58,7 @@ class IosPlatformDeps(
     val proStore: IosProStoreBridge,
     val analytics: IosAnalyticsBridge,
     val isDeveloperBuild: Boolean,
+    val network: IosNetworkMonitorBridge,
 )
 
 fun startSharedKoin(deps: IosPlatformDeps) {
@@ -100,7 +101,8 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
     single<AppForegroundState>(createdAtStart = true) { IosAppForegroundState() }
     single { deps.gemmaEngine }
     single { deps.whisperEngine }
-    single { IosFileDownloader() }
+    single<NetworkMonitor> { IosNetworkMonitor(deps.network) }
+    single { IosFileDownloader(get()) }
     single { IosModelManager(get(), get()) } bind ModelManager::class
     single<AiBackend> { IosAiBackend(get(), get()) }
     single<SpeechToText> { IosWhisperSpeechToText(get(), get(), get()) }
@@ -118,7 +120,6 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
             CoroutineScope(SupervisorJob() + Dispatchers.Default),
         )
     }
-    single { OnboardingStepPolicy(asksNotificationPermission = true) }
     factory { IosRootViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
 }
 

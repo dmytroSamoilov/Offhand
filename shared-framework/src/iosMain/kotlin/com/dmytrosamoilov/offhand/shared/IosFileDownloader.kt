@@ -9,6 +9,8 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.Foundation.NSError
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSOperationQueue
+import com.dmytrosamoilov.offhand.core.common.ModelDownloadPolicy
+import platform.Foundation.NSMutableURLRequest
 import platform.Foundation.NSURL
 import platform.Foundation.NSURLSession
 import platform.Foundation.NSURLSessionConfiguration
@@ -24,7 +26,9 @@ import platform.darwin.dispatch_get_main_queue
 // transfers going while the app is suspended and relaunches the app when they
 // finish, which a default session does not survive. Every mutation of the
 // waiter map runs on the session's serial delegate queue, so no lock is needed.
-class IosFileDownloader {
+class IosFileDownloader(
+    private val downloadPolicy: ModelDownloadPolicy,
+) {
 
     class DownloadFailedException(message: String) : Exception(message)
 
@@ -72,10 +76,16 @@ class IosFileDownloader {
 
     // The destination travels with the task so a download that finishes while
     // nobody awaits it (the app was relaunched for it) still lands in place.
-    private fun newTask(url: String, destinationPath: String): NSURLSessionDownloadTask =
-        session.downloadTaskWithURL(NSURL(string = url)).apply {
+    // A task started on Wi-Fi stays on Wi-Fi: unless the user allowed mobile
+    // data, the system parks it until an unmetered path is back.
+    private fun newTask(url: String, destinationPath: String): NSURLSessionDownloadTask {
+        val request = NSMutableURLRequest(uRL = NSURL(string = url)).apply {
+            setAllowsExpensiveNetworkAccess(downloadPolicy.isMobileDataAllowed.value)
+        }
+        return session.downloadTaskWithRequest(request).apply {
             taskDescription = destinationPath
         }
+    }
 
     private fun attach(task: NSURLSessionDownloadTask, waiter: Waiter) {
         if (!waiter.continuation.isActive) return

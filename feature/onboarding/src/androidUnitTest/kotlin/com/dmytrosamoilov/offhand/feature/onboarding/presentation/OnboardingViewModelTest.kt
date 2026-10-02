@@ -4,10 +4,11 @@ import com.dmytrosamoilov.offhand.core.ai.api.AvailableModel
 import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
 import com.dmytrosamoilov.offhand.core.ai.api.ModelFamily
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
-import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
+import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.device.DeviceCapability
 import com.dmytrosamoilov.offhand.core.device.DeviceCapabilityChecker
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.CompleteOnboardingUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetAppLockEnabledUseCase
@@ -62,7 +63,8 @@ class OnboardingViewModelTest {
     private val setTelemetryConsent: SetTelemetryConsentUseCase = mockk(relaxed = true)
     private val setNotePreset: SetNotePresetUseCase = mockk(relaxed = true)
     private val completeOnboarding: CompleteOnboardingUseCase = mockk(relaxed = true)
-    private val modelDownloadController: ModelDownloadController = mockk(relaxed = true)
+    private val modelDownloadLauncher: ModelDownloadLauncher = mockk(relaxed = true)
+    private val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
 
     @Before
     fun setUp() {
@@ -78,19 +80,15 @@ class OnboardingViewModelTest {
         unmockkAll()
     }
 
-    private fun viewModel(
-        stepPolicy: OnboardingStepPolicy = OnboardingStepPolicy(asksNotificationPermission = false),
-    ): OnboardingViewModel = OnboardingViewModel(
-        modelDownloadController = modelDownloadController,
+    private fun viewModel(): OnboardingViewModel = OnboardingViewModel(
+        modelDownloadLauncher = modelDownloadLauncher,
         deviceCapabilityChecker = deviceCapabilityChecker,
-        modelManager = modelManager,
         appLockManager = appLockManager,
         setAppLockEnabled = setAppLockEnabled,
         setTelemetryConsent = setTelemetryConsent,
         setNotePreset = setNotePreset,
         completeOnboarding = completeOnboarding,
-        stepPolicy = stepPolicy,
-        analyticsTracker = mockk(relaxed = true),
+        analyticsTracker = analyticsTracker,
     )
 
     private fun capableViewModel(): OnboardingViewModel {
@@ -125,13 +123,12 @@ class OnboardingViewModelTest {
     }
 
     @Test
-    fun `capable device lands on privacy step with download size`() = runTest(dispatcher) {
+    fun `capable device lands on privacy step with four pages`() = runTest(dispatcher) {
         val viewModel = capableViewModel()
 
         assertEquals(OnboardingStep.PRIVACY, viewModel.uiState.value.step)
-        assertEquals("2.3", viewModel.uiState.value.downloadSizeGb)
         assertEquals(0, viewModel.uiState.value.currentPage)
-        assertEquals(5, viewModel.uiState.value.pageCount)
+        assertEquals(4, viewModel.uiState.value.pageCount)
     }
 
     @Test
@@ -140,7 +137,7 @@ class OnboardingViewModelTest {
 
         val viewModel = capableViewModel()
 
-        assertEquals(5, viewModel.uiState.value.pageCount)
+        assertEquals(4, viewModel.uiState.value.pageCount)
         assertEquals(false, viewModel.uiState.value.isDeviceSecure)
     }
 
@@ -158,36 +155,8 @@ class OnboardingViewModelTest {
         viewModel.onDeviceLockContinue()
         dispatcher.scheduler.advanceUntilIdle()
         assertEquals(3, viewModel.uiState.value.currentPage)
-
-        viewModel.onConsentContinue()
-        dispatcher.scheduler.advanceUntilIdle()
-        assertEquals(4, viewModel.uiState.value.currentPage)
-        assertEquals(OnboardingStep.MODEL_DOWNLOAD, viewModel.uiState.value.step)
+        assertEquals(OnboardingStep.TELEMETRY_CONSENT, viewModel.uiState.value.step)
     }
-
-    @Test
-    fun `notification policy inserts the notifications step before the download`() =
-        runTest(dispatcher) {
-            every { deviceCapabilityChecker.snapshot() } returns capableDevice
-            val viewModel = viewModel(OnboardingStepPolicy(asksNotificationPermission = true))
-            dispatcher.scheduler.advanceUntilIdle()
-
-            assertEquals(6, viewModel.uiState.value.pageCount)
-
-            viewModel.onPrivacyContinue()
-            viewModel.onNoteStyleContinue()
-            dispatcher.scheduler.advanceUntilIdle()
-            viewModel.onDeviceLockContinue()
-            dispatcher.scheduler.advanceUntilIdle()
-            viewModel.onConsentContinue()
-            dispatcher.scheduler.advanceUntilIdle()
-            assertEquals(OnboardingStep.NOTIFICATIONS, viewModel.uiState.value.step)
-            assertEquals(4, viewModel.uiState.value.currentPage)
-
-            viewModel.onNotificationsContinue()
-            assertEquals(OnboardingStep.MODEL_DOWNLOAD, viewModel.uiState.value.step)
-            assertEquals(5, viewModel.uiState.value.currentPage)
-        }
 
     @Test
     fun `privacy continue moves to note style step`() = runTest(dispatcher) {
@@ -304,8 +273,7 @@ class OnboardingViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         coVerify { setTelemetryConsent(true) }
-        assertEquals(OnboardingStep.MODEL_DOWNLOAD, viewModel.uiState.value.step)
-        coVerify(exactly = 0) { completeOnboarding() }
+        coVerify { completeOnboarding() }
     }
 
     @Test
@@ -317,7 +285,7 @@ class OnboardingViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         coVerify { setTelemetryConsent(false) }
-        assertEquals(OnboardingStep.MODEL_DOWNLOAD, viewModel.uiState.value.step)
+        coVerify { completeOnboarding() }
     }
 
     @Test
@@ -378,15 +346,44 @@ class OnboardingViewModelTest {
         }
 
     @Test
-    fun `download continue starts download and completes onboarding`() = runTest(dispatcher) {
+    fun `consent continue persists the choice and completes onboarding`() = runTest(dispatcher) {
         val viewModel = consentStepViewModel()
+
         viewModel.onConsentContinue()
         dispatcher.scheduler.advanceUntilIdle()
 
-        viewModel.onDownloadContinue()
+        coVerify { setTelemetryConsent(true) }
+        coVerify { completeOnboarding() }
+        verify { analyticsTracker.track(match { it.name == "onboarding_completed" }) }
+    }
+
+    @Test
+    fun `a capable device starts the download when the policy allows it`() = runTest(dispatcher) {
+        capableViewModel()
+
+        verify { modelDownloadLauncher.startIfAllowed() }
+    }
+
+    @Test
+    fun `every page passed with continue is reported as a step`() = runTest(dispatcher) {
+        val viewModel = consentStepViewModel()
+
+        verify { analyticsTracker.track(match { it.name == "onboarding_step" && it.params["step"] == "privacy" }) }
+        verify { analyticsTracker.track(match { it.name == "onboarding_step" && it.params["step"] == "note_style" }) }
+        verify { analyticsTracker.track(match { it.name == "onboarding_step" && it.params["step"] == "device_lock" }) }
+        assertEquals(OnboardingStep.TELEMETRY_CONSENT, viewModel.uiState.value.step)
+    }
+
+    @Test
+    fun `an unsupported device is reported with its memory and cores`() = runTest(dispatcher) {
+        every { deviceCapabilityChecker.snapshot() } returns weakDevice
+        viewModel()
         dispatcher.scheduler.advanceUntilIdle()
 
-        verify { modelDownloadController.start() }
-        coVerify { completeOnboarding() }
+        verify {
+            analyticsTracker.track(
+                match { it.name == "device_unsupported" && it.params["ram_gb"] == 4L && it.params["cores"] == 4L },
+            )
+        }
     }
 }

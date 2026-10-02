@@ -210,7 +210,10 @@ struct NotesListView: View {
         .onChange(of: searchQuery) { viewModel.onSearchQueryChanged(query: searchQuery) }
         .safeAreaInset(edge: .top) {
             if let preparation = state.modelPreparation {
-                ModelPreparationBanner(percent: Int(preparation.progressPercent))
+                ModelPreparationBanner(
+                    preparation: preparation,
+                    onDownloadOnMobileData: { viewModel.onDownloadOnMobileDataClicked() }
+                )
             }
         }
         .navigationDestination(isPresented: folderStyleEditorBinding) {
@@ -510,27 +513,64 @@ private struct FolderChipLabel: View {
 }
 
 private struct ModelPreparationBanner: View {
-    let percent: Int
+    let preparation: ModelPreparationUi
+    let onDownloadOnMobileData: () -> Void
+    @State private var isInfoVisible = false
 
     var body: some View {
-        HStack(spacing: 12) {
-            ProgressView()
-            VStack(alignment: .leading, spacing: 2) {
-                Text(String(localized: "Setting up your on-device AI"))
-                    .font(.subheadline.weight(.semibold))
-                Text(String(localized: "New notes start processing once this finishes."))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 12) {
+            switch onEnum(of: preparation) {
+            case .downloading(let downloading):
+                HStack(spacing: 12) {
+                    ProgressView()
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(String(localized: "Setting up your on-device AI"))
+                            .font(.subheadline.weight(.semibold))
+                        Text(String(localized: "New notes start processing once this finishes."))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Text("\(Int(downloading.progressPercent))%")
+                        .font(.subheadline.weight(.medium))
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                    infoButton
+                }
+            case .waitingForMobileData(let waiting):
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(String(localized: "Your on-device AI is ready to download"))
+                            .font(.subheadline.weight(.semibold))
+                        Text(String(format: String(localized: "About %@ GB · waits for Wi‑Fi"), waiting.sizeGb))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    infoButton
+                }
+                Button(String(localized: "Download on mobile data"), action: onDownloadOnMobileData)
+                    .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity)
             }
-            Spacer()
-            Text("\(percent)%")
-                .font(.subheadline.weight(.medium))
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(.bar)
+        .alert(String(localized: "Your on-device AI"), isPresented: $isInfoVisible) {
+            Button(String(localized: "Got it")) {}
+        } message: {
+            Text(String(localized: "Offhand turns recordings into notes with on-device AI that runs entirely on your iPhone. It is a one-time download; after that, nothing is uploaded, ever."))
+        }
+    }
+
+    private var infoButton: some View {
+        Button {
+            isInfoVisible = true
+        } label: {
+            Image(systemName: "info.circle")
+        }
+        .accessibilityLabel(String(localized: "About your on-device AI"))
     }
 }
 

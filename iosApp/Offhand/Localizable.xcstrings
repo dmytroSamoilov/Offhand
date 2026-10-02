@@ -4,46 +4,6 @@
     "" : {
 
     },
-    "Allow notifications and Offhand will tell you when a note is ready, or when it needs you to come back." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erlaube Mitteilungen, und Offhand sagt dir Bescheid, wenn eine Notiz fertig ist oder du zurückkommen sollst."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Permite las notificaciones y Offhand te avisará cuando una nota esté lista o cuando necesite que vuelvas."
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "नोटिफ़िकेशन की अनुमति दें, और जब कोई नोट तैयार होगा या आपको वापस आना होगा, तब Offhand आपको बता देगा।"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Permita as notificações e o Offhand avisa quando uma nota estiver pronta ou quando precisar que você volte."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Разрешите уведомления, и Offhand сообщит, когда заметка будет готова или когда вам нужно вернуться."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Дозвольте сповіщення, і Offhand повідомить, коли нотатка буде готова або коли вам потрібно повернутися."
-          }
-        }
-      }
-    },
     "Default" : {
       "localizations" : {
         "de" : {
@@ -1629,6 +1589,46 @@
         }
       }
     },
+    "About %@ GB · waits for Wi‑Fi" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etwa %@ GB · wartet auf WLAN"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unos %@ GB · espera a la Wi‑Fi"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "लगभग %@ GB · Wi‑Fi का इंतज़ार"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerca de %@ GB · aguarda Wi‑Fi"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Около %@ ГБ · ждёт Wi‑Fi"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Близько %@ ГБ · чекає на Wi‑Fi"
+          }
+        }
+      }
+    },
     "About & support" : {
       "localizations" : {
         "de" : {
@@ -1705,6 +1705,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Близько %@ на місяць"
+          }
+        }
+      }
+    },
+    "About your on-device AI" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Über deine KI auf dem Gerät"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre tu IA en el dispositivo"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपके ऑन-डिवाइस AI के बारे में"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre sua IA no dispositivo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Об ИИ на устройстве"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Про ШІ на пристрої"
           }
         }
       }
@@ -3992,6 +4032,46 @@
         }
       }
     },
+    "Download on mobile data" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Über mobile Daten laden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descargar con datos móviles"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "मोबाइल डेटा पर डाउनलोड करें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baixar pelos dados móveis"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скачать через мобильный интернет"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завантажити через мобільний інтернет"
+          }
+        }
+      }
+    },
     "Download on-device AI" : {
       "comment" : "A button that downloads the on-device AI.",
       "isCommentAutoGenerated" : true
@@ -5240,6 +5320,46 @@
         }
       }
     },
+    "Got it" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verstanden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entendido"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "समझ गया"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entendi"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Понятно"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зрозуміло"
+          }
+        }
+      }
+    },
     "Heading" : {
       "localizations" : {
         "de" : {
@@ -5677,46 +5797,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Збережіть цю парольну фразу в надійному місці. Якщо її буде втрачено, ні ви, ні ми не зможемо відновити нотатки з цієї копії."
-          }
-        }
-      }
-    },
-    "Know when notes are ready" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erfahre, wann Notizen fertig sind"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Entérate de cuándo están listas tus notas"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "जानें कि नोट्स कब तैयार हैं"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saiba quando as notas ficam prontas"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Узнавайте, когда заметки готовы"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Дізнавайтеся, коли нотатки готові"
           }
         }
       }
@@ -7811,50 +7891,45 @@
         }
       }
     },
-    "Offhand transcribes and summarizes voice notes with AI that runs entirely on your iPhone. To get started, it needs a one-time download of its AI models." : {
-      "extractionState" : "stale",
+    "Offhand turns recordings into notes with on-device AI that runs entirely on your iPhone. It is a one-time download; after that, nothing is uploaded, ever." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Offhand transkribiert und fasst Sprachnotizen mit KI zusammen, die vollständig auf deinem iPhone läuft. Zum Start ist ein einmaliger Download der KI-Modelle nötig."
+            "value" : "Offhand macht aus Aufnahmen Notizen – mit KI, die vollständig auf deinem iPhone läuft. Der Download ist einmalig; danach wird nie etwas hochgeladen."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Offhand transcribe y resume notas de voz con IA que se ejecuta por completo en tu iPhone. Para empezar, necesita una descarga única de sus modelos de IA."
+            "value" : "Offhand convierte las grabaciones en notas con IA que se ejecuta por completo en tu iPhone. Es una descarga única; después, nunca se sube nada."
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Offhand वॉयस नोट्स को ऐसे AI से ट्रांसक्राइब और सारांशित करता है जो पूरी तरह आपके iPhone पर चलता है। शुरू करने के लिए, इसके AI मॉडल का एक बार डाउनलोड ज़रूरी है।"
+            "value" : "Offhand रिकॉर्डिंग को ऐसे AI से नोट्स में बदलता है जो पूरी तरह आपके iPhone पर चलता है। यह एक बार का डाउनलोड है; इसके बाद कभी कुछ अपलोड नहीं होता।"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O Offhand transcreve e resume notas de voz com IA que roda inteiramente no seu iPhone. Para começar, ele precisa de um download único dos modelos de IA."
+            "value" : "O Offhand transforma gravações em notas com IA que roda inteiramente no seu iPhone. É um download único; depois disso, nada é enviado, nunca."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Offhand расшифровывает голосовые заметки и кратко излагает их суть с помощью ИИ, который работает полностью на вашем iPhone. Для начала нужно один раз скачать его модели ИИ."
+            "value" : "Offhand превращает записи в заметки с помощью ИИ, который работает целиком на вашем iPhone. Загрузка нужна один раз; после этого ничего никуда не отправляется."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Offhand розшифровує голосові нотатки та стисло викладає їхню суть за допомогою ШІ, який працює повністю на вашому iPhone. Щоб почати, потрібно один раз завантажити його моделі ШІ."
+            "value" : "Offhand перетворює записи на нотатки за допомогою ШІ, який працює повністю на вашому iPhone. Завантаження потрібне один раз; після цього нічого нікуди не надсилається."
           }
         }
       }
-    },
-    "Offhand transcribes and summarizes voice notes with on-device AI that runs entirely on your iPhone. To get started, it needs a one-time download." : {
-      "comment" : "A description of the on-device AI that powers Offhand.",
-      "isCommentAutoGenerated" : true
     },
     "OK" : {
       "localizations" : {
@@ -7932,46 +8007,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ШІ на пристрої"
-          }
-        }
-      }
-    },
-    "One-time download · about %@ GB" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Einmaliger Download · etwa %@ GB"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descarga única · unos %@ GB"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "एक बार का डाउनलोड · लगभग %@ GB"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Download único · cerca de %@ GB"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Разовое скачивание · около %@ ГБ"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Одноразове завантаження · близько %@ ГБ"
           }
         }
       }
@@ -10206,9 +10241,6 @@
       "comment" : "A warning message displayed when the user has not yet trained the AI.",
       "isCommentAutoGenerated" : true
     },
-    "Set up your on-device AI" : {
-
-    },
     "Set up your private AI" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -11617,46 +11649,6 @@
         }
       }
     },
-    "The download continues in the background — you can start recording right away." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Download läuft im Hintergrund weiter — du kannst sofort mit dem Aufnehmen beginnen."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La descarga continúa en segundo plano: puedes empezar a grabar ya."
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "डाउनलोड बैकग्राउंड में चलता रहता है — आप तुरंत रिकॉर्डिंग शुरू कर सकते हैं।"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O download continua em segundo plano — você já pode começar a gravar."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Скачивание продолжается в фоне — можно сразу начинать запись."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Завантаження триває у фоні — можна одразу починати запис."
-          }
-        }
-      }
-    },
     "The file could not be read or written." : {
       "localizations" : {
         "de" : {
@@ -12303,46 +12295,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Така назва вже використовується"
-          }
-        }
-      }
-    },
-    "Tip: connect to Wi‑Fi to save mobile data." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tipp: Verbinde dich mit WLAN, um mobile Daten zu sparen."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Consejo: conéctate a una red Wi‑Fi para ahorrar datos móviles."
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "सुझाव: मोबाइल डेटा बचाने के लिए Wi‑Fi से कनेक्ट करें।"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dica: conecte-se ao Wi‑Fi para economizar dados móveis."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Совет: подключитесь к Wi‑Fi, чтобы сэкономить мобильный трафик."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Порада: підключіться до Wi‑Fi, щоб заощадити мобільний трафік."
           }
         }
       }
@@ -14121,6 +14073,86 @@
     },
     "Your notes stay locked until your iPhone confirms it's you." : {
 
+    },
+    "Your on-device AI" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine KI auf dem Gerät"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu IA en el dispositivo"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपका ऑन-डिवाइस AI"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua IA no dispositivo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ИИ на устройстве"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ШІ на пристрої"
+          }
+        }
+      }
+    },
+    "Your on-device AI is ready to download" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine KI auf dem Gerät ist bereit zum Download"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu IA en el dispositivo está lista para descargarse"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपका ऑन-डिवाइस AI डाउनलोड के लिए तैयार है"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua IA no dispositivo está pronta para baixar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ИИ на устройстве готов к загрузке"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ШІ на пристрої готовий до завантаження"
+          }
+        }
+      }
     },
     "Your payment is still being processed. Pro unlocks as soon as it completes." : {
       "localizations" : {

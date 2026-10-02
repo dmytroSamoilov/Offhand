@@ -4,6 +4,13 @@
     <string name="notes_empty_state">Ainda não há notas. Toque no botão do microfone para gravar a primeira.</string>
     <string name="notes_model_banner_title">Configurando sua IA no dispositivo</string>
     <string name="notes_model_banner_subtitle">Baixando em segundo plano</string>
+    <string name="notes_model_banner_waiting_title">Sua IA no dispositivo está pronta para baixar</string>
+    <string name="notes_model_banner_waiting_subtitle">Cerca de %1$s GB · aguarda Wi‑Fi</string>
+    <string name="notes_model_banner_mobile_data_button">Baixar pelos dados móveis</string>
+    <string name="notes_model_banner_info_description">Sobre sua IA no dispositivo</string>
+    <string name="notes_model_banner_info_title">Sua IA no dispositivo</string>
+    <string name="notes_model_banner_info_body">O Offhand transforma gravações em notas com IA que roda inteiramente no seu telefone. É um download único; depois disso, nada é enviado, nunca.</string>
+    <string name="notes_model_banner_info_dismiss">Entendi</string>
     <string name="notes_day_today">Hoje</string>
     <string name="notes_day_yesterday">Ontem</string>
     <plurals name="notes_word_count">

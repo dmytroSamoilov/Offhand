@@ -17,11 +17,19 @@ final class NoteNotifications: NSObject, ObservableObject, UNUserNotificationCen
         UNUserNotificationCenter.current().delegate = self
     }
 
-    func requestPermission(completion: @escaping () -> Void) {
-        UNUserNotificationCenter.current()
-            .requestAuthorization(options: [.alert, .sound]) { _, _ in
-                DispatchQueue.main.async { completion() }
+    // Asks only while iOS has not decided yet; otherwise answers nil so the
+    // caller knows no prompt was shown.
+    func requestPermissionIfUndetermined(completion: @escaping (Bool?) -> Void) {
+        let center = UNUserNotificationCenter.current()
+        center.getNotificationSettings { settings in
+            guard settings.authorizationStatus == .notDetermined else {
+                DispatchQueue.main.async { completion(nil) }
+                return
             }
+            center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
+                DispatchQueue.main.async { completion(granted) }
+            }
+        }
     }
 
     @MainActor

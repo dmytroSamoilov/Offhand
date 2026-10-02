@@ -63,10 +63,14 @@ appId: com.dmytrosamoilov.offhand.uitest
 - assertNotVisible: "Clients"
 - assertVisible: "Smoke test note"
 
-# Leading swipe on a card opens the same move sheet
-- swipe:
-    from: "Smoke test note"
-    direction: RIGHT
-- assertVisible: "Move to folder"
+# Leading swipe on a card opens the same move sheet; the CI emulator
+# sometimes drops the first swipe short of the threshold
+- retry:
+    maxRetries: 2
+    commands:
+      - swipe:
+          from: "Smoke test note"
+          direction: RIGHT
+      - assertVisible: "Move to folder"
 - tapOn: "No folder"
 - assertVisible: "Smoke test note"

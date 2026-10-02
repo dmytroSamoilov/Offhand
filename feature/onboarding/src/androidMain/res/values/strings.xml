@@ -24,11 +24,6 @@
     <string name="onboarding_lock_enable_label">Require unlock to open Offhand</string>
     <string name="onboarding_lock_enable_description">You can change this any time in Settings.</string>
 
-    <string name="onboarding_download_title">Set up your on-device AI</string>
-    <string name="onboarding_download_body">Offhand transcribes and summarizes voice notes with on-device AI that runs entirely on your phone. To get started, it needs a one-time download.</string>
-    <string name="onboarding_download_size">One-time download · about %1$s GB</string>
-    <string name="onboarding_download_background_hint">The download continues in the background — you can start recording right away. We\'ll notify you when everything is ready.</string>
-    <string name="onboarding_download_wifi_hint">Tip: connect to Wi‑Fi to save mobile data.</string>
     <string name="onboarding_notification_download_channel_name">On-device AI downloads</string>
     <string name="onboarding_notification_status_channel_name">On-device AI status</string>
     <string name="onboarding_notification_downloading_title">Download on-device AI</string>

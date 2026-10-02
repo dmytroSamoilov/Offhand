@@ -3,62 +3,63 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
+import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
+import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
 import com.dmytrosamoilov.offhand.core.data.domain.Note
-import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
-import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
-import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
-import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearTranscriptionCheckpointUseCase
-import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.NoteSection
+import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
+import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearTranscriptionCheckpointUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteFolderUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.FolderSaveResult
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsFolderStylesAvailableUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ReorderFoldersUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SetFolderStyleUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.FolderSaveResult
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCalendarSuggestionsAvailableUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsFolderStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ReorderFoldersUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SetFolderStyleUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.ImportRejection
 import com.dmytrosamoilov.offhand.feature.recording.domain.NoteProcessingEvent
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RequestNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -100,6 +101,7 @@ class NotesViewModel(
     private val proUpgradeGate: ProUpgradeGate,
     private val sessionManager: RecordingSessionManager,
     aiCoreDownloadStatus: AiCoreDownloadStatus,
+    private val modelDownloadLauncher: ModelDownloadLauncher,
     private val clearTranscriptionCheckpoint: ClearTranscriptionCheckpointUseCase,
     private val resumeInterruptedNotes: ResumeInterruptedNotesUseCase,
     buildInfo: BuildInfo,
@@ -190,6 +192,10 @@ class NotesViewModel(
                 mutableUiState.update { it.copy(modelPreparation = downloadState.toPreparationUi()) }
             }
         }
+    }
+
+    fun onDownloadOnMobileDataClicked() {
+        modelDownloadLauncher.startOnMobileData()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
