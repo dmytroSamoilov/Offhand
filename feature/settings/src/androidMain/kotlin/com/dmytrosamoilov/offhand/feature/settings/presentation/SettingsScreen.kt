@@ -87,6 +87,13 @@ fun SettingsScreen(
         }
     }
     ImportNotice(notice = state.importNotice, onDismiss = viewModel::onImportNoticeDismissed)
+    val context = LocalContext.current
+    LaunchedEffect(state.isRedeemFallbackRequested) {
+        if (state.isRedeemFallbackRequested) {
+            viewModel.onRedeemFallbackOpened()
+            openInPlayStore(context, PLAY_REDEEM_URL)
+        }
+    }
 
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
         Scaffold(
@@ -105,6 +112,7 @@ fun SettingsScreen(
                     status = state.pro,
                     onProCardClick = viewModel::onProCardClicked,
                     onRedeemCodeClick = viewModel::onRedeemCodeClicked,
+                    onRedeemCodeConfirm = viewModel::onRedeemCodeConfirmed,
                 )
                 NotesSection(
                     state = state,
@@ -196,7 +204,12 @@ private fun AppearanceSection(
 }
 
 @Composable
-private fun ProSection(status: ProStatusUi, onProCardClick: () -> Unit, onRedeemCodeClick: () -> Unit) {
+private fun ProSection(
+    status: ProStatusUi,
+    onProCardClick: () -> Unit,
+    onRedeemCodeClick: () -> Unit,
+    onRedeemCodeConfirm: () -> Unit,
+) {
     val context = LocalContext.current
     SettingsCard(title = stringResource(R.string.settings_subscription_title)) {
         if (status == ProStatusUi.Free) {
@@ -211,22 +224,46 @@ private fun ProSection(status: ProStatusUi, onProCardClick: () -> Unit, onRedeem
                 onClick = { openSubscriptionManagement(context) },
             )
         }
-        RedeemCodeRow(onClick = onRedeemCodeClick)
+        RedeemCodeRow(onClick = onRedeemCodeClick, onConfirm = onRedeemCodeConfirm)
     }
 }
 
-// Play has no in-app redemption sheet; the redeem page opens inside the Play
-// Store app (the web page refuses subscription codes) and the foreground
-// refresh picks the purchase up on return.
+// A code is entered inside Play's purchase sheet, behind the arrow next to the
+// payment method (custom codes work nowhere else), so the row explains that
+// before the yearly flow opens.
 @Composable
-private fun RedeemCodeRow(onClick: () -> Unit) {
-    val context = LocalContext.current
+private fun RedeemCodeRow(onClick: () -> Unit, onConfirm: () -> Unit) {
+    var isHintVisible by remember { mutableStateOf(false) }
     SettingsLinkRow(
         title = stringResource(R.string.settings_redeem_code),
         subtitle = null,
         onClick = {
             onClick()
-            openInPlayStore(context, PLAY_REDEEM_URL)
+            isHintVisible = true
+        },
+    )
+    if (isHintVisible) {
+        RedeemCodeDialog(
+            onConfirm = {
+                isHintVisible = false
+                onConfirm()
+            },
+            onDismiss = { isHintVisible = false },
+        )
+    }
+}
+
+@Composable
+private fun RedeemCodeDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.settings_redeem_code)) },
+        text = { Text(text = stringResource(R.string.settings_redeem_code_body)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text(text = stringResource(R.string.settings_redeem_code_confirm)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.settings_import_pro_cancel)) }
         },
     )
 }

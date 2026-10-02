@@ -135,4 +135,6 @@
     <string name="settings_about_footer">Tudo fica no seu celular. Nada é enviado, nunca.</string>
     <string name="settings_note_style_editor_no_sections">Sem seções, a nota vira um resumo livre.</string>
     <string name="settings_redeem_code">Resgatar um código</string>
+    <string name="settings_redeem_code_body">O Google Play abre o plano anual. Toque na seta ao lado da forma de pagamento, escolha “Resgatar código” e digite seu código. O período de teste dele substitui o padrão.</string>
+    <string name="settings_redeem_code_confirm">Continuar</string>
 </resources>

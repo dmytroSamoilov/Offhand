@@ -15,6 +15,7 @@ data class SettingsUiState(
     val pro: ProStatusUi = ProStatusUi.Free,
     val proOverride: ProOverride? = null,
     val isImportPickerRequested: Boolean = false,
+    val isRedeemFallbackRequested: Boolean = false,
     val importNotice: ImportNoticeUi? = null,
 )
 

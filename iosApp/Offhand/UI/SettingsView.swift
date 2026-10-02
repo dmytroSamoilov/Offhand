@@ -17,6 +17,7 @@ struct SettingsView: View {
         pro: ProStatusUiFree.shared,
         proOverride: nil,
         isImportPickerRequested: false,
+        isRedeemFallbackRequested: false,
         importNotice: nil
     )
     @State private var isAudioImporterPresented = false

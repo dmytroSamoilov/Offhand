@@ -140,4 +140,6 @@
     <string name="settings_about_footer">Everything stays on your phone. Nothing is uploaded, ever.</string>
     <string name="settings_note_style_editor_no_sections">Without sections the note is one free-form summary.</string>
     <string name="settings_redeem_code">Redeem a code</string>
+    <string name="settings_redeem_code_body">Google Play opens the yearly plan. Tap the arrow next to the payment method, choose Redeem code and enter your code. Its free trial replaces the standard one.</string>
+    <string name="settings_redeem_code_confirm">Continue</string>
 </resources>

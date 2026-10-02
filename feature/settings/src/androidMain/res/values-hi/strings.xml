@@ -134,4 +134,6 @@
     <string name="settings_about_footer">सब कुछ आपके फ़ोन पर ही रहता है। कुछ भी कभी अपलोड नहीं होता।</string>
     <string name="settings_note_style_editor_no_sections">बिना सेक्शन के नोट एक मुक्त सारांश होगा।</string>
     <string name="settings_redeem_code">कोड रिडीम करें</string>
+    <string name="settings_redeem_code_body">Google Play सालाना प्लान खोलेगा। भुगतान विधि के बगल वाले तीर पर टैप करें, “कोड रिडीम करें” चुनें और अपना कोड डालें। इसका मुफ़्त ट्रायल सामान्य ट्रायल की जगह लेगा।</string>
+    <string name="settings_redeem_code_confirm">जारी रखें</string>
 </resources>

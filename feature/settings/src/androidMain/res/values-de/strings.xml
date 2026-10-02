@@ -134,4 +134,6 @@
     <string name="settings_about_footer">Alles bleibt auf deinem Handy. Nichts wird jemals hochgeladen.</string>
     <string name="settings_note_style_editor_no_sections">Ohne Abschnitte wird die Notiz eine freie Zusammenfassung.</string>
     <string name="settings_redeem_code">Code einlösen</string>
+    <string name="settings_redeem_code_body">Google Play öffnet den Jahresplan. Tippe auf den Pfeil neben der Zahlungsmethode, wähle „Code einlösen“ und gib deinen Code ein. Seine kostenlose Testphase ersetzt die normale.</string>
+    <string name="settings_redeem_code_confirm">Weiter</string>
 </resources>

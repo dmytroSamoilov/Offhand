@@ -136,4 +136,6 @@
     <string name="settings_about_footer">Усе залишається на вашому телефоні. Нічого ніколи не завантажується.</string>
     <string name="settings_note_style_editor_no_sections">Без розділів нотатка стає вільним резюме.</string>
     <string name="settings_redeem_code">Ввести промокод</string>
+    <string name="settings_redeem_code_body">Google Play відкриє річний план. Натисніть стрілку поруч зі способом оплати, виберіть «Активувати код» і введіть код. Його безкоштовний період замінить стандартний.</string>
+    <string name="settings_redeem_code_confirm">Продовжити</string>
 </resources>

@@ -11,6 +11,7 @@ import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
+import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
@@ -22,6 +23,7 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteSty
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOverrideUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStatusUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.RedeemProCodeUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
@@ -65,6 +67,7 @@ class SettingsViewModelTest {
     private val observeProOverride: ObserveProOverrideUseCase = mockk()
     private val setProOverride: SetProOverrideUseCase = mockk(relaxed = true)
     private val gate: ProUpgradeGate = mockk()
+    private val redeemProCode: RedeemProCodeUseCase = mockk()
 
     @Before
     fun setUp() {
@@ -103,9 +106,28 @@ class SettingsViewModelTest {
         observeProOverride = observeProOverride,
         setProOverride = setProOverride,
         proUpgradeGate = gate,
+        redeemProCode = redeemProCode,
         buildInfo = BuildInfo(isDeveloperBuild = false, appVersion = "1", platform = "test"),
         analyticsTracker = mockk(relaxed = true),
     )
+
+    @Test
+    fun `redeem confirmation asks for the store fallback only when the purchase flow fails`() = runTest(dispatcher) {
+        coEvery { redeemProCode() } returns PurchaseOutcome.CANCELLED
+        val viewModel = viewModel()
+
+        viewModel.onRedeemCodeConfirmed()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.isRedeemFallbackRequested)
+
+        coEvery { redeemProCode() } returns PurchaseOutcome.FAILED
+        viewModel.onRedeemCodeConfirmed()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isRedeemFallbackRequested)
+
+        viewModel.onRedeemFallbackOpened()
+        assertFalse(viewModel.uiState.value.isRedeemFallbackRequested)
+    }
 
     @Test
     fun `state reflects note preset and dynamic color`() = runTest(dispatcher) {
