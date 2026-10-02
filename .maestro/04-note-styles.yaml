@@ -12,7 +12,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       - tapOn: "Settings"
       - tapOn: "Summary styles"
       - assertVisible: "Built in"
-      - tapOn: "Create a new style"
+      - tapOn: "New"
 
       # Fill the form: name, kind, two sections. The keyboard is closed after
       # every field so the next tap does not land on it.
@@ -89,7 +89,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       - tapOn: "Settings"
       - tapOn: "Summary styles"
       - assertVisible: "Built in"
-      - tapOn: "Create a new style"
+      - tapOn: "New"
 
       # Fill the form; the editor has no keyboard Done button, a short drag on
       # the form closes the keyboard so the next tap is not swallowed by it.

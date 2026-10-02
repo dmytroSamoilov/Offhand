@@ -70,9 +70,10 @@ struct NoteStyleChoice: Identifiable {
     let details: String
 }
 
-// One list for every place a style is picked: "Create a new style" first, then
-// the user's own styles, then the built-in ones. The Summary styles screen adds
-// an Edit button to the custom rows; the restyle sheet shows the plain list.
+// One list for every place a style is picked: the user's own styles, then the
+// built-in ones, with "New" as a toolbar item in the host's top-right corner.
+// The Summary styles screen adds an Edit button to the custom rows; the
+// restyle sheet shows the plain list.
 // The selected row looks the same as on Android: tinted, with a filled check.
 struct NoteStyleList: View {
     let current: NoteStyleRef?
@@ -86,18 +87,6 @@ struct NoteStyleList: View {
 
     var body: some View {
         List {
-            if let onCreateStyle {
-                Section {
-                    Button(action: onCreateStyle) {
-                        HStack(spacing: 6) {
-                            Label(String(localized: "Create a new style"), systemImage: "plus")
-                            if !isCustomStylesUnlocked {
-                                ProBadge()
-                            }
-                        }
-                    }
-                }
-            }
             if let onDefaultSelected {
                 Section {
                     StyleOptionRow(
@@ -131,6 +120,13 @@ struct NoteStyleList: View {
                 Text(String(localized: "Built in"))
             } footer: {
                 Text(footer)
+            }
+        }
+        .toolbar {
+            if let onCreateStyle {
+                ToolbarItem(placement: .primaryAction) {
+                    Button(String(localized: "New"), action: onCreateStyle)
+                }
             }
         }
     }

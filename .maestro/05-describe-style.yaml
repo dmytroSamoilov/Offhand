@@ -11,7 +11,7 @@ appId: com.dmytrosamoilov.offhand.uitest
     commands:
       - tapOn: "Settings"
       - tapOn: "Summary styles"
-      - tapOn: "Create a new style"
+      - tapOn: "New"
       - tapOn: "Describe it and let the AI fill the form"
       - tapOn: "For example.*"
       - inputText: "After each sales call I want the customer, their needs and the agreed next steps"
@@ -37,7 +37,7 @@ appId: com.dmytrosamoilov.offhand.uitest
     commands:
       - tapOn: "Settings"
       - tapOn: "Summary styles"
-      - tapOn: "Create a new style"
+      - tapOn: "New"
       - tapOn: "Describe it and let the AI fill the form"
       - tapOn: "For example.*"
       - inputText: "After each sales call I want the customer, their needs and the agreed next steps"

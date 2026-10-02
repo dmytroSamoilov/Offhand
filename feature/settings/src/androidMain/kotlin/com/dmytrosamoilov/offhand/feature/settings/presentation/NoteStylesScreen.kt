@@ -24,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleChoice
+import com.dmytrosamoilov.offhand.core.ui.component.NewStyleButton
 import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleList
 import com.dmytrosamoilov.offhand.feature.settings.R
 import org.koin.androidx.compose.koinViewModel
@@ -42,7 +43,7 @@ fun NoteStylesScreen(
 
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
         Scaffold(
-            topBar = { NoteStylesTopBar(onBack = onBack) },
+            topBar = { NoteStylesTopBar(onBack = onBack, onCreateStyle = onCreateStyle) },
             contentWindowInsets = WindowInsets(0.dp),
         ) { innerPadding ->
             Column(
@@ -63,7 +64,6 @@ fun NoteStylesScreen(
                     customStyles = state.customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) },
                     isCustomStylesUnlocked = state.isUnlocked,
                     onSelected = viewModel::onStyleSelected,
-                    onCreateStyle = onCreateStyle,
                     customStyleActions = { style ->
                         TextButton(onClick = { onEditStyle(style.id) }) {
                             Text(text = stringResource(R.string.settings_note_styles_edit))
@@ -76,7 +76,7 @@ fun NoteStylesScreen(
 }
 
 @Composable
-private fun NoteStylesTopBar(onBack: () -> Unit) {
+private fun NoteStylesTopBar(onBack: () -> Unit, onCreateStyle: () -> Unit) {
     AppTopBar(
         title = stringResource(R.string.settings_note_styles_title),
         navigationIcon = {
@@ -87,5 +87,6 @@ private fun NoteStylesTopBar(onBack: () -> Unit) {
                 )
             }
         },
+        actions = { NewStyleButton(onClick = onCreateStyle, modifier = Modifier.padding(end = 8.dp)) },
     )
 }

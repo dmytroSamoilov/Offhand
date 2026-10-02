@@ -13,8 +13,8 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "More actions"
 - tapOn: "Change summary style"
 - scrollUntilVisible:
-    element: "Create a new style"
-- tapOn: "Create a new style"
+    element: "New"
+- tapOn: "New"
 - assertVisible: "New summary style"
 - runFlow:
     when:
