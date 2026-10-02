@@ -4,6 +4,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
+import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvent
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsSink
@@ -18,16 +19,19 @@ import kotlinx.coroutines.test.runTest
 class ConsentGatedAnalyticsTrackerTest {
 
     private val logged = mutableListOf<String>()
+    private val loggedParams = mutableListOf<Map<String, Any>>()
     private val sink = object : AnalyticsSink {
         override fun log(name: String, params: Map<String, Any>) {
             logged += name
+            loggedParams += params
         }
     }
     private val preferences = ConsentPreferences()
+    private val buildInfo = BuildInfo(isDeveloperBuild = false, platform = "android")
 
     @Test
     fun `events are dropped until consent is granted`() = runTest {
-        val tracker = ConsentGatedAnalyticsTracker(sink, preferences, backgroundScope)
+        val tracker = ConsentGatedAnalyticsTracker(sink, preferences, buildInfo, backgroundScope)
         runCurrent()
 
         tracker.track(AnalyticsEvent("note_played"))
@@ -41,7 +45,7 @@ class ConsentGatedAnalyticsTrackerTest {
     @Test
     fun `withdrawn consent stops events again`() = runTest {
         preferences.consent.value = true
-        val tracker = ConsentGatedAnalyticsTracker(sink, preferences, backgroundScope)
+        val tracker = ConsentGatedAnalyticsTracker(sink, preferences, buildInfo, backgroundScope)
         runCurrent()
 
         tracker.track(AnalyticsEvent("share_clicked"))
@@ -50,6 +54,17 @@ class ConsentGatedAnalyticsTrackerTest {
         tracker.track(AnalyticsEvent("note_deleted"))
 
         assertEquals(listOf("share_clicked"), logged)
+    }
+
+    @Test
+    fun `every event carries the platform next to its own parameters`() = runTest {
+        preferences.consent.value = true
+        val tracker = ConsentGatedAnalyticsTracker(sink, preferences, buildInfo, backgroundScope)
+        runCurrent()
+
+        tracker.track(AnalyticsEvent("note_recorded", mapOf("duration_s" to 12L)))
+
+        assertEquals(listOf(mapOf<String, Any>("duration_s" to 12L, "platform" to "android")), loggedParams)
     }
 }
 

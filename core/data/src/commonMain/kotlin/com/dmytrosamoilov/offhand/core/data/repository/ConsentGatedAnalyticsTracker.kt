@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.core.data.repository
 
+import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvent
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsSink
@@ -11,10 +12,12 @@ import kotlinx.coroutines.flow.stateIn
 
 // Events exist only for users who agreed to telemetry: anything sent before
 // the consent is known, or after it is withdrawn, is dropped here and never
-// reaches Firebase.
+// reaches Firebase. Every event carries the platform, so exports that merge
+// both streams still tell Android and iOS behaviour apart.
 class ConsentGatedAnalyticsTracker(
     private val sink: AnalyticsSink,
     userPreferences: UserPreferencesRepository,
+    private val buildInfo: BuildInfo,
     scope: CoroutineScope,
 ) : AnalyticsTracker {
 
@@ -24,6 +27,10 @@ class ConsentGatedAnalyticsTracker(
 
     override fun track(event: AnalyticsEvent) {
         if (!isConsentGranted.value) return
-        sink.log(event.name, event.params)
+        sink.log(event.name, event.params + (PLATFORM_PARAM to buildInfo.platform))
+    }
+
+    private companion object {
+        const val PLATFORM_PARAM = "platform"
     }
 }

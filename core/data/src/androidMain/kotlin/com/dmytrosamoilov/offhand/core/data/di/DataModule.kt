@@ -116,7 +116,7 @@ val coreDataModule = module {
     singleOf(::StoreProStatusRepository) bind ProStatusRepository::class
     singleOf(::ProUpgradeCoordinator) bind ProUpgradeGate::class
     single<AnalyticsTracker> {
-        ConsentGatedAnalyticsTracker(get(), get(), CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        ConsentGatedAnalyticsTracker(get(), get(), get(), CoroutineScope(SupervisorJob() + Dispatchers.Default))
     }
     single<DataStore<Preferences>> { createUserPreferencesDataStore(androidContext()) }
     single<UserPreferencesRepository> { DataStoreUserPreferencesRepository(get(), get()) }
