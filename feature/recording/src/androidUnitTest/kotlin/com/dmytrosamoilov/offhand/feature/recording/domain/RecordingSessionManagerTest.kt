@@ -50,6 +50,7 @@ import java.io.ByteArrayOutputStream
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -419,6 +420,33 @@ class RecordingSessionManagerTest {
             )
         }
         verify { audioDecoder.discard(source) }
+    }
+
+    @Test
+    fun `several imports show up as processing notes before the first one finishes`() = runTest {
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        val first = AudioImportSource(handle = "/cache/imports/a", displayName = "First.m4a")
+        val second = AudioImportSource(handle = "/cache/imports/b", displayName = "Second.m4a")
+        coEvery { createImportedNote("First", "note-1.pcm.enc", any()) } returns 9L
+        coEvery { createImportedNote("Second", "note-1.pcm.enc", any()) } returns 10L
+        val firstDecode = CompletableDeferred<Unit>()
+        coEvery { audioDecoder.decode(first, any(), any()) } coAnswers {
+            firstDecode.await()
+            throw AudioImportException.Unsupported()
+        }
+        coEvery { audioDecoder.decode(second, any(), any()) } throws AudioImportException.Unsupported()
+        justRun { audioStore.delete("note-1.pcm.enc") }
+
+        val manager = manager()
+        manager.importAudio(first)
+        manager.importAudio(second)
+        testScheduler.runCurrent()
+
+        assertEquals(setOf(9L, 10L), manager.processingNoteIds.value.toSet())
+
+        firstDecode.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertTrue(manager.processingNoteIds.value.isEmpty())
     }
 
     @Test

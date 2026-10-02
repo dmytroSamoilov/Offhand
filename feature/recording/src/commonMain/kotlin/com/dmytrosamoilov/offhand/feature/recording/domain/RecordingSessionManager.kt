@@ -235,18 +235,27 @@ class RecordingSessionManager(
         }
     }
 
+    // The placeholder note is created before the processing lock is taken, so
+    // every file picked at once shows up in the list right away and waits its
+    // turn, like recordings made while an earlier note is still processing.
     fun importAudio(source: AudioImportSource) {
         scope.launch {
-            processingMutex.withLock { importLocked(source) }
+            val queued = queueImport(source)
+            processingMutex.withLock { importLocked(queued) }
         }
     }
 
-    private suspend fun importLocked(source: AudioImportSource) {
+    private suspend fun queueImport(source: AudioImportSource): QueuedImport {
         val fileName = audioStore.newRecordingFileName()
         val style = getNoteStyle()
         val noteId = createImportedNote(importedTitle(source.displayName), fileName, style)
         mutableProcessingNoteIds.update { it + noteId }
         updateProgress(noteId, 0f)
+        return QueuedImport(source, noteId, fileName, style)
+    }
+
+    private suspend fun importLocked(queued: QueuedImport) {
+        val (source, noteId, fileName, style) = queued
         val decoded = decodeImport(source, fileName) { fraction ->
             updateProgress(noteId, fraction * IMPORT_DECODE_SHARE)
         }
@@ -822,3 +831,10 @@ class RecordingSessionManager(
         const val SKIP_BUFFER_BYTES = 64 * 1024
     }
 }
+
+private data class QueuedImport(
+    val source: AudioImportSource,
+    val noteId: Long,
+    val fileName: String,
+    val style: NoteStyleRef,
+)
