@@ -3,9 +3,13 @@ package com.dmytrosamoilov.offhand.feature.recording.presentation
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.SessionPhase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNotificationsPromptedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveDeveloperOptionsUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveNotificationsPromptedUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,9 +22,15 @@ class RecordingViewModel(
     private val recordingProcessController: RecordingProcessController,
     private val sessionManager: RecordingSessionManager,
     observeDeveloperOptions: ObserveDeveloperOptionsUseCase,
+    observeNotificationsPrompted: ObserveNotificationsPromptedUseCase,
+    private val markNotificationsPrompted: MarkNotificationsPromptedUseCase,
+    private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
     private val waveform = MutableStateFlow<List<Float>>(emptyList())
+    private val isNotificationPromptRequested = MutableStateFlow(false)
+    private val wasNotificationPrompted = observeNotificationsPrompted()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     val uiState: StateFlow<RecordingUiState> = combine(
         sessionManager.session,
@@ -29,7 +39,9 @@ class RecordingViewModel(
         observeDeveloperOptions(),
         sessionManager.externalMicName,
         ::toRecordingUiState,
-    ).stateIn(
+    ).combine(isNotificationPromptRequested) { state, isPromptRequested ->
+        state.copy(isNotificationPromptRequested = isPromptRequested)
+    }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
         initialValue = RecordingUiState(),
@@ -52,8 +64,28 @@ class RecordingViewModel(
         sessionManager.resume()
     }
 
+    // The first finished recording is the moment to ask for notifications: the
+    // user has just made something worth being told about.
     fun onStopRecording() {
         sessionManager.stop()
+        if (!wasNotificationPrompted.value) isNotificationPromptRequested.value = true
+    }
+
+    // Read right after onStopRecording by the iOS sheet, which closes before the
+    // combined state would have caught up.
+    val isNotificationPromptPending: Boolean
+        get() = isNotificationPromptRequested.value
+
+    fun onNotificationPromptAnswered(granted: Boolean) {
+        analyticsTracker.track(AnalyticsEvents.notificationPermission(granted))
+        onNotificationPromptSkipped()
+    }
+
+    // The platform had nothing to ask (already decided, or no permission on
+    // this OS version), so only remember that the moment has passed.
+    fun onNotificationPromptSkipped() {
+        isNotificationPromptRequested.value = false
+        launchSafely(showLoading = false) { markNotificationsPrompted() }
     }
 
     fun onDiscardRecording() {

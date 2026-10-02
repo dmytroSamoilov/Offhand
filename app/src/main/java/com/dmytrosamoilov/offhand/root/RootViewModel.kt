@@ -3,8 +3,8 @@ package com.dmytrosamoilov.offhand.root
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
-import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
+import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.AppLockState
 import com.dmytrosamoilov.offhand.core.security.DatabasePassphraseProvider
@@ -27,7 +27,7 @@ class RootViewModel(
     private val appLockManager: AppLockManager,
     private val passphraseProvider: DatabasePassphraseProvider,
     private val modelManager: ModelManager,
-    private val modelDownloadController: ModelDownloadController,
+    private val modelDownloadLauncher: ModelDownloadLauncher,
     private val resumeInterruptedNotes: Lazy<ResumeInterruptedNotesUseCase>,
     private val sweepOrphanedRecordings: Lazy<SweepOrphanedRecordingsUseCase>,
     private val clearShareCache: ClearShareCacheUseCase,
@@ -97,7 +97,7 @@ class RootViewModel(
         launchSafely(showLoading = false) {
             uiState.first { it.phase == RootPhase.READY }
             if (!modelManager.isModelDownloaded()) {
-                modelDownloadController.start()
+                modelDownloadLauncher.startWhenAllowed()
             }
         }
     }

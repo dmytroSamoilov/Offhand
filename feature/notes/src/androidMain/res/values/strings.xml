@@ -4,6 +4,13 @@
     <string name="notes_empty_state">No notes yet. Tap the microphone button to record your first one.</string>
     <string name="notes_model_banner_title">Setting up your on-device AI</string>
     <string name="notes_model_banner_subtitle">Downloading in the background</string>
+    <string name="notes_model_banner_waiting_title">Your on-device AI is ready to download</string>
+    <string name="notes_model_banner_waiting_subtitle">About %1$s GB · waits for Wi‑Fi</string>
+    <string name="notes_model_banner_mobile_data_button">Download on mobile data</string>
+    <string name="notes_model_banner_info_description">About your on-device AI</string>
+    <string name="notes_model_banner_info_title">Your on-device AI</string>
+    <string name="notes_model_banner_info_body">Offhand turns recordings into notes with on-device AI that runs entirely on your phone. It is a one-time download; after that, nothing is uploaded, ever.</string>
+    <string name="notes_model_banner_info_dismiss">Got it</string>
     <string name="notes_model_banner_percent" translatable="false">%1$d%%</string>
     <string name="notes_day_today">Today</string>
     <string name="notes_day_yesterday">Yesterday</string>

@@ -3,7 +3,7 @@ package com.dmytrosamoilov.offhand.shared
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
-import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
+import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.AppLockState
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
@@ -28,7 +28,7 @@ class IosRootViewModel(
     observeUserPreferences: ObserveUserPreferencesUseCase,
     private val appLockManager: AppLockManager,
     private val modelManager: ModelManager,
-    private val modelDownloadController: ModelDownloadController,
+    private val modelDownloadLauncher: ModelDownloadLauncher,
     private val resumeInterruptedNotes: ResumeInterruptedNotesUseCase,
     private val sweepOrphanedRecordings: SweepOrphanedRecordingsUseCase,
     private val clearShareCache: ClearShareCacheUseCase,
@@ -97,7 +97,7 @@ class IosRootViewModel(
 
     private suspend fun startModelDownloadIfMissing() {
         if (!modelManager.isModelDownloaded()) {
-            modelDownloadController.start()
+            modelDownloadLauncher.startWhenAllowed()
         }
     }
 

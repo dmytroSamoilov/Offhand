@@ -82,6 +82,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -310,6 +311,7 @@ fun NotesScreen(
                         isFolderStylesUnlocked = state.isFolderStylesUnlocked,
                         customStyles = state.customStyles,
                         modelPreparation = state.modelPreparation,
+                        onDownloadOnMobileData = viewModel::onDownloadOnMobileDataClicked,
                         onNoteClick = { id ->
                             focusManager.clearFocus()
                             viewModel.onNoteSelected(id)
@@ -709,6 +711,7 @@ private fun NotesListPane(
     isFolderStylesUnlocked: Boolean,
     customStyles: List<NoteStyleOptionUi>,
     modelPreparation: ModelPreparationUi?,
+    onDownloadOnMobileData: () -> Unit,
     onNoteClick: (Long) -> Unit,
     onDeleteRequested: (Long) -> Unit,
     onMoveRequested: (Long) -> Unit,
@@ -753,7 +756,7 @@ private fun NotesListPane(
                 .padding(innerPadding)
                 .userInitiatedFocusOnly(),
         ) {
-            ModelPreparationBanner(preparation = modelPreparation)
+            ModelPreparationBanner(preparation = modelPreparation, onDownloadOnMobileData = onDownloadOnMobileData)
             val isLibraryEmpty = sections.isEmpty() && folders.isEmpty() &&
                 searchQuery.isBlank() && selectedFolderId == null
             if (isLibraryEmpty) {
@@ -1275,8 +1278,8 @@ private fun ClearSearchButton(onClick: () -> Unit) {
 }
 
 @Composable
-private fun ModelPreparationBanner(preparation: ModelPreparationUi?) {
-    var lastVisible by remember { mutableStateOf(ModelPreparationUi(progressPercent = 0)) }
+private fun ModelPreparationBanner(preparation: ModelPreparationUi?, onDownloadOnMobileData: () -> Unit) {
+    var lastVisible by remember { mutableStateOf<ModelPreparationUi>(ModelPreparationUi.Downloading(progressPercent = 0)) }
     if (preparation != null) {
         lastVisible = preparation
     }
@@ -1285,10 +1288,6 @@ private fun ModelPreparationBanner(preparation: ModelPreparationUi?) {
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut(),
     ) {
-        val progress by animateFloatAsState(
-            targetValue = lastVisible.progressPercent / 100f,
-            label = "modelPreparationProgress",
-        )
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1297,36 +1296,96 @@ private fun ModelPreparationBanner(preparation: ModelPreparationUi?) {
             color = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    MorphingLoadingIndicator(modifier = Modifier.size(28.dp))
-                    Spacer(modifier = Modifier.width(14.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.notes_model_banner_title),
-                            style = MaterialTheme.typography.titleSmall,
-                        )
-                        Text(
-                            text = stringResource(R.string.notes_model_banner_subtitle),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = stringResource(
-                            R.string.notes_model_banner_percent,
-                            lastVisible.progressPercent,
-                        ),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier.fillMaxWidth(),
+            when (val visible = lastVisible) {
+                is ModelPreparationUi.Downloading -> DownloadingBanner(progressPercent = visible.progressPercent)
+                is ModelPreparationUi.WaitingForMobileData -> WaitingForMobileDataBanner(
+                    sizeGb = visible.sizeGb,
+                    onDownloadOnMobileData = onDownloadOnMobileData,
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun DownloadingBanner(progressPercent: Int) {
+    val progress by animateFloatAsState(
+        targetValue = progressPercent / 100f,
+        label = "modelPreparationProgress",
+    )
+    Column(modifier = Modifier.padding(16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            MorphingLoadingIndicator(modifier = Modifier.size(28.dp))
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.notes_model_banner_title),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Text(
+                    text = stringResource(R.string.notes_model_banner_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = stringResource(R.string.notes_model_banner_percent, progressPercent),
+                style = MaterialTheme.typography.labelLarge,
+            )
+            ModelInfoButton()
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+// The download holds back on mobile data; the user decides whether to spend it.
+@Composable
+private fun WaitingForMobileDataBanner(sizeGb: String, onDownloadOnMobileData: () -> Unit) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.notes_model_banner_waiting_title),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Text(
+                    text = stringResource(R.string.notes_model_banner_waiting_subtitle, sizeGb),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            ModelInfoButton()
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        FilledTonalButton(onClick = onDownloadOnMobileData, modifier = Modifier.fillMaxWidth()) {
+            Text(text = stringResource(R.string.notes_model_banner_mobile_data_button))
+        }
+    }
+}
+
+@Composable
+private fun ModelInfoButton() {
+    var isInfoVisible by remember { mutableStateOf(false) }
+    IconButton(onClick = { isInfoVisible = true }) {
+        Icon(
+            imageVector = Icons.Outlined.Info,
+            contentDescription = stringResource(R.string.notes_model_banner_info_description),
+        )
+    }
+    if (isInfoVisible) {
+        AlertDialog(
+            onDismissRequest = { isInfoVisible = false },
+            title = { Text(text = stringResource(R.string.notes_model_banner_info_title)) },
+            text = { Text(text = stringResource(R.string.notes_model_banner_info_body)) },
+            confirmButton = {
+                TextButton(onClick = { isInfoVisible = false }) {
+                    Text(text = stringResource(R.string.notes_model_banner_info_dismiss))
+                }
+            },
+        )
     }
 }
 

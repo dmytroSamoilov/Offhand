@@ -5,7 +5,6 @@ import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 data class OnboardingUiState(
     val step: OnboardingStep = OnboardingStep.DEVICE_CHECK,
     val deviceSpecs: DeviceSpecsUi? = null,
-    val downloadSizeGb: String = "",
     val notePreset: NotePreset = NotePreset.DEFAULT,
     val isDeviceSecure: Boolean = false,
     val isAppLockEnabled: Boolean = true,
@@ -24,8 +23,6 @@ enum class OnboardingStep {
     NOTE_STYLE,
     DEVICE_LOCK,
     TELEMETRY_CONSENT,
-    NOTIFICATIONS,
-    MODEL_DOWNLOAD,
 }
 
 data class DeviceSpecsUi(

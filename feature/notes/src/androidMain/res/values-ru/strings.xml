@@ -4,6 +4,13 @@
     <string name="notes_empty_state">Заметок пока нет. Нажмите кнопку микрофона, чтобы записать первую.</string>
     <string name="notes_model_banner_title">Настраиваем ИИ на устройстве</string>
     <string name="notes_model_banner_subtitle">Загружается в фоне</string>
+    <string name="notes_model_banner_waiting_title">ИИ на устройстве готов к загрузке</string>
+    <string name="notes_model_banner_waiting_subtitle">Около %1$s ГБ · ждёт Wi‑Fi</string>
+    <string name="notes_model_banner_mobile_data_button">Скачать через мобильный интернет</string>
+    <string name="notes_model_banner_info_description">Об ИИ на устройстве</string>
+    <string name="notes_model_banner_info_title">ИИ на устройстве</string>
+    <string name="notes_model_banner_info_body">Offhand превращает записи в заметки с помощью ИИ, который работает целиком на вашем телефоне. Загрузка нужна один раз; после этого ничего никуда не отправляется.</string>
+    <string name="notes_model_banner_info_dismiss">Понятно</string>
     <string name="notes_day_today">Сегодня</string>
     <string name="notes_day_yesterday">Вчера</string>
     <plurals name="notes_word_count">

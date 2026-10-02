@@ -4,6 +4,7 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
 import com.dmytrosamoilov.offhand.core.common.DurationFormatter
+import com.dmytrosamoilov.offhand.core.common.formatGigabytes
 import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.Note
@@ -121,7 +122,8 @@ private fun NoteStatus.toUi(): NoteStatusUi = when (this) {
 }
 
 internal fun AiCoreDownloadState.toPreparationUi(): ModelPreparationUi? = when (this) {
-    is AiCoreDownloadState.Downloading -> ModelPreparationUi(progressPercent = progressPercent)
+    is AiCoreDownloadState.Downloading -> ModelPreparationUi.Downloading(progressPercent = progressPercent)
+    is AiCoreDownloadState.WaitingForMobileData -> ModelPreparationUi.WaitingForMobileData(sizeGb = formatGigabytes(bytesTotal))
     is AiCoreDownloadState.Idle -> null
 }
 

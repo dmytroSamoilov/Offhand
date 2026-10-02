@@ -31,6 +31,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.TranscriptionCheckpointReposi
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatusCache
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatusRepository
+import com.dmytrosamoilov.offhand.core.common.ModelDownloadPolicy
+import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
 import com.dmytrosamoilov.offhand.core.data.domain.ProStore
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
@@ -115,6 +117,8 @@ val coreDataModule = module {
     single<ProStatusCache> { DataStoreProStatusCache(get()) }
     singleOf(::StoreProStatusRepository) bind ProStatusRepository::class
     singleOf(::ProUpgradeCoordinator) bind ProUpgradeGate::class
+    singleOf(::ModelDownloadPolicy)
+    singleOf(::ModelDownloadLauncher)
     single<AnalyticsTracker> {
         ConsentGatedAnalyticsTracker(get(), get(), get(), CoroutineScope(SupervisorJob() + Dispatchers.Default))
     }

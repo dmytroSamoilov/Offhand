@@ -1,15 +1,9 @@
 package com.dmytrosamoilov.offhand.feature.onboarding.presentation
 
-import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.res.Configuration
-import android.os.Build
 import android.provider.Settings
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
@@ -32,7 +26,6 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -54,7 +47,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
@@ -77,9 +69,6 @@ fun OnboardingScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { viewModel.onDownloadContinue() }
 
     LifecycleResumeEffect(Unit) {
         viewModel.onDeviceLockRecheck()
@@ -99,12 +88,6 @@ fun OnboardingScreen(
                     OnboardingStep.NOTE_STYLE -> viewModel.onNoteStyleContinue()
                     OnboardingStep.DEVICE_LOCK -> viewModel.onDeviceLockContinue()
                     OnboardingStep.TELEMETRY_CONSENT -> viewModel.onConsentContinue()
-                    OnboardingStep.MODEL_DOWNLOAD ->
-                        if (needsNotificationPermission(context)) {
-                            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        } else {
-                            viewModel.onDownloadContinue()
-                        }
                     else -> Unit
                 }
             },
@@ -224,9 +207,6 @@ private fun WizardStepContent(
         OnboardingStep.TELEMETRY_CONSENT -> TelemetryConsentStep(
             isTelemetryEnabled = state.isTelemetryEnabled,
             onTelemetryToggled = onTelemetryToggled,
-        )
-        OnboardingStep.MODEL_DOWNLOAD -> ModelDownloadStep(
-            downloadSizeGb = state.downloadSizeGb,
         )
         else -> Unit
     }
@@ -420,33 +400,6 @@ private fun TelemetryConsentStep(
     }
 }
 
-@Composable
-private fun ModelDownloadStep(downloadSizeGb: String) {
-    Image(
-        painter = painterResource(DesignR.drawable.ic_offhand_logo),
-        contentDescription = null,
-        modifier = Modifier.size(96.dp),
-    )
-    Spacer(modifier = Modifier.height(28.dp))
-    StepTitle(text = stringResource(R.string.onboarding_download_title))
-    StepBody(text = stringResource(R.string.onboarding_download_body))
-    Spacer(modifier = Modifier.height(24.dp))
-    DownloadSizeBadge(downloadSizeGb = downloadSizeGb)
-    Spacer(modifier = Modifier.height(24.dp))
-    Text(
-        text = stringResource(R.string.onboarding_download_background_hint),
-        style = MaterialTheme.typography.bodyMedium,
-        textAlign = TextAlign.Center,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-    Text(
-        text = stringResource(R.string.onboarding_download_wifi_hint),
-        style = MaterialTheme.typography.bodyMedium,
-        textAlign = TextAlign.Center,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-}
 
 @Composable
 private fun DeviceIncompatibleStep(specs: DeviceSpecsUi?) {
@@ -491,30 +444,6 @@ private fun PrimaryStepButton(text: String, onClick: () -> Unit) {
     }
 }
 
-@Composable
-private fun DownloadSizeBadge(downloadSizeGb: String) {
-    Surface(
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Download,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-            )
-            Text(
-                text = stringResource(R.string.onboarding_download_size, downloadSizeGb),
-                style = MaterialTheme.typography.labelLarge,
-            )
-        }
-    }
-}
 
 private fun openSecuritySettings(context: Context) {
     try {
@@ -523,13 +452,6 @@ private fun openSecuritySettings(context: Context) {
         context.startActivity(Intent(Settings.ACTION_SETTINGS))
     }
 }
-
-private fun needsNotificationPermission(context: Context): Boolean =
-    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.POST_NOTIFICATIONS,
-        ) != PackageManager.PERMISSION_GRANTED
 
 @Composable
 private fun StepTitle(text: String) {
@@ -572,7 +494,6 @@ private val previewPages = listOf(
     OnboardingStep.NOTE_STYLE,
     OnboardingStep.DEVICE_LOCK,
     OnboardingStep.TELEMETRY_CONSENT,
-    OnboardingStep.MODEL_DOWNLOAD,
 )
 
 @Composable
@@ -654,28 +575,3 @@ private fun TelemetryConsentPreview() {
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun ModelDownloadPreview() {
-    OnboardingStatePreview(
-        OnboardingUiState(
-            step = OnboardingStep.MODEL_DOWNLOAD,
-            downloadSizeGb = "2.3",
-            currentPage = 4,
-            pages = previewPages,
-        ),
-    )
-}
-
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun ModelDownloadDarkPreview() {
-    OnboardingStatePreview(
-        OnboardingUiState(
-            step = OnboardingStep.MODEL_DOWNLOAD,
-            downloadSizeGb = "2.3",
-            currentPage = 4,
-            pages = previewPages,
-        ),
-    )
-}

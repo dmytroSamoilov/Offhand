@@ -694,12 +694,14 @@ class RecordingSessionManager(
         style: NoteStyleRef,
         source: NoteSource,
     ) {
+        var failureReason = FAILURE_REASON_EMPTY_TRANSCRIPT
         val outcome = try {
             structureNote(noteId, transcripts, transcriptionMs, progressOffset, style, source)
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (t: Throwable) {
             Logger.withTag(LOG_TAG).e(t) { "Processing note $noteId failed" }
+            failureReason = t.failureReason()
             StructureOutcome.FAILED
         } finally {
             mutableProcessingNoteIds.update { it - noteId }
@@ -707,18 +709,21 @@ class RecordingSessionManager(
         }
         // Reported only once the note no longer counts as processing, so a
         // listener that resumes it right away is not turned down as a duplicate.
-        if (outcome == StructureOutcome.FAILED) settleFailure(noteId, source)
+        if (outcome == StructureOutcome.FAILED) settleFailure(noteId, source, failureReason)
     }
+
+    // The exception's type is reason enough for analytics and carries no content.
+    private fun Throwable.failureReason(): String = this::class.simpleName ?: FAILURE_REASON_UNKNOWN
 
     // A failure while the app was away is the system's doing, not the
     // recording's: the note is parked instead of failed and continues from its
     // checkpoint on the next return to the foreground.
-    private suspend fun settleFailure(noteId: Long, source: NoteSource) {
+    private suspend fun settleFailure(noteId: Long, source: NoteSource, reason: String) {
         if (wasBackgrounded(noteId)) {
             analyticsTracker.track(AnalyticsEvents.noteInterrupted(source))
             if (interruptNote(noteId)) mutableEvents.emit(NoteProcessingEvent.Interrupted(noteId))
         } else {
-            analyticsTracker.track(AnalyticsEvents.noteFailed(source))
+            analyticsTracker.track(AnalyticsEvents.noteFailed(source, reason))
             if (failNote(noteId)) mutableEvents.emit(NoteProcessingEvent.Failed(noteId))
         }
     }
@@ -821,6 +826,8 @@ class RecordingSessionManager(
         this == SessionPhase.RECORDING || this == SessionPhase.DRAINING
 
     private companion object {
+        const val FAILURE_REASON_EMPTY_TRANSCRIPT = "empty_transcript"
+        const val FAILURE_REASON_UNKNOWN = "unknown"
         const val LOG_TAG = "RecordingSession"
         // Strictly under the Whisper decoder's 30-second per-decode cap.
         const val RETRY_CHUNK_MS = 29_000L

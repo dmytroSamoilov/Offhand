@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.core.ai.api
 
+import com.dmytrosamoilov.offhand.core.common.ModelDownloadPolicy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -7,29 +8,36 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 sealed interface AiCoreDownloadState {
     data object Idle : AiCoreDownloadState
     data class Downloading(val progressPercent: Int) : AiCoreDownloadState
+    // Nothing is on disk and the policy holds the download back until Wi-Fi or
+    // the user's say-so.
+    data class WaitingForMobileData(val bytesTotal: Long) : AiCoreDownloadState
 }
 
 class AiCoreDownloadStatus(
     private val modelManager: ModelManager,
     speechToText: SpeechToText,
+    downloadPolicy: ModelDownloadPolicy,
 ) {
 
     val state: Flow<AiCoreDownloadState> =
-        combine(modelManager.modelState, speechToText.downloadState) { modelState, speechState ->
-            toDownloadState(modelState, speechState)
+        combine(modelManager.modelState, speechToText.downloadState, downloadPolicy.canStart) { modelState, speechState, canStart ->
+            toDownloadState(modelState, speechState, canStart)
         }.distinctUntilChanged()
 
     private fun toDownloadState(
         modelState: ModelState,
         speechState: SpeechModelState,
+        canStart: Boolean,
     ): AiCoreDownloadState {
         val isDownloading =
             modelState is ModelState.Downloading || speechState is SpeechModelState.Downloading
-        if (!isDownloading) return AiCoreDownloadState.Idle
-
         val modelBytesTotal = modelManager.model.sizeInBytes
         val speechBytesTotal = modelManager.speechModelSizeInBytes
         val bytesTotal = modelBytesTotal + speechBytesTotal
+        if (!isDownloading) {
+            val isMissing = modelState is ModelState.NotDownloaded || speechState is SpeechModelState.NotDownloaded
+            return if (isMissing && !canStart) AiCoreDownloadState.WaitingForMobileData(bytesTotal) else AiCoreDownloadState.Idle
+        }
         if (bytesTotal <= 0) return AiCoreDownloadState.Downloading(progressPercent = 0)
 
         val bytesDownloaded = modelState.downloadedBytes(modelBytesTotal) +

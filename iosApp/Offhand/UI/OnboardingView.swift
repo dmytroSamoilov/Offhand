@@ -9,7 +9,6 @@ struct OnboardingView: View {
     @State private var state = OnboardingUiState(
         step: .deviceCheck,
         deviceSpecs: nil,
-        downloadSizeGb: "",
         notePreset: .summary,
         isDeviceSecure: false,
         isAppLockEnabled: true,
@@ -49,8 +48,8 @@ struct OnboardingView: View {
     // makes the leftover momentum cascade across several pages at once. Paged
     // scrolling moves one card per gesture, so settling past the furthest
     // unlocked page acts as Continue for the card just crossed; only the final
-    // download card is button-only, because its Continue starts the download
-    // and ends onboarding. The dots and the continue button stay put.
+    // consent card is button-only, because its Continue ends onboarding. The
+    // dots and the continue button stay put.
     private var wizard: some View {
         VStack(spacing: 0) {
             TabView(selection: $visiblePage) {
@@ -159,31 +158,6 @@ struct OnboardingView: View {
                     )
                 }
             )
-        case .notifications:
-            StepCard(
-                icon: "bell.badge.fill",
-                title: String(localized: "Know when notes are ready"),
-                message: String(localized: "Allow notifications and Offhand will tell you when a note is ready, or when it needs you to come back.")
-            )
-        case .modelDownload:
-            StepCard(
-                icon: "arrow.down.circle.fill",
-                title: String(localized: "Set up your on-device AI"),
-                message: String(localized: "Offhand transcribes and summarizes voice notes with on-device AI that runs entirely on your iPhone. To get started, it needs a one-time download."),
-                content: {
-                    VStack(spacing: 16) {
-                        DownloadSizeBadge(sizeGb: state.downloadSizeGb)
-                        Text(String(localized: "The download continues in the background — you can start recording right away."))
-                            .font(.footnote)
-                            .foregroundStyle(Brand.onSurfaceVariant)
-                            .multilineTextAlignment(.center)
-                        Text(String(localized: "Tip: connect to Wi‑Fi to save mobile data."))
-                            .font(.footnote)
-                            .foregroundStyle(Brand.onSurfaceVariant)
-                            .multilineTextAlignment(.center)
-                    }
-                }
-            )
         default:
             EmptyView()
         }
@@ -226,16 +200,8 @@ struct OnboardingView: View {
                 }
             }
         case .telemetryConsent:
-            return { viewModel.onConsentContinue() }
-        case .notifications:
             return {
-                NoteNotifications.shared.requestPermission {
-                    viewModel.onNotificationsContinue()
-                }
-            }
-        case .modelDownload:
-            return {
-                viewModel.onDownloadContinue()
+                viewModel.onConsentContinue()
                 onFinished()
             }
         default:
@@ -374,23 +340,6 @@ private struct ToggleCard: View {
             )
             .contentShape(Rectangle())
             .onTapGesture { isOn.toggle() }
-    }
-}
-
-private struct DownloadSizeBadge: View {
-    let sizeGb: String
-
-    var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "arrow.down.circle")
-                .font(.subheadline)
-            Text(String(format: String(localized: "One-time download · about %@ GB"), sizeGb))
-                .font(.subheadline.weight(.medium))
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .foregroundStyle(Brand.onPrimaryContainer)
-        .background(Brand.primaryContainer, in: Capsule())
     }
 }
 

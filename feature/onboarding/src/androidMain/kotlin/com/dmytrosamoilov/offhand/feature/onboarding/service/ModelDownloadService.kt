@@ -16,6 +16,8 @@ import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.designsystem.R as DesignR
 import com.dmytrosamoilov.offhand.feature.onboarding.R
 import kotlin.coroutines.cancellation.CancellationException
@@ -38,6 +40,7 @@ class ModelDownloadService : Service(), KoinComponent {
     private val modelManager: ModelManager by inject()
     private val speechToText: SpeechToText by inject()
     private val aiCoreDownloadStatus: AiCoreDownloadStatus by inject()
+    private val analyticsTracker: AnalyticsTracker by inject()
     private val appForegroundState: AppForegroundState by inject()
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -80,6 +83,7 @@ class ModelDownloadService : Service(), KoinComponent {
                 throw cancellation
             } catch (t: Throwable) {
                 Timber.tag(LOG_TAG).e(t, "Model download failed")
+                analyticsTracker.track(AnalyticsEvents.modelDownloadFailed(t::class.simpleName ?: UNKNOWN_REASON))
                 notifyFinished(isSuccess = false)
             } finally {
                 ServiceCompat.stopForeground(
@@ -176,6 +180,7 @@ class ModelDownloadService : Service(), KoinComponent {
     }
 
     companion object {
+        const val UNKNOWN_REASON = "unknown"
         private const val LOG_TAG = "ModelDownload"
         private const val DOWNLOAD_CHANNEL_ID = "model_download"
         private const val STATUS_CHANNEL_ID = "model_status"

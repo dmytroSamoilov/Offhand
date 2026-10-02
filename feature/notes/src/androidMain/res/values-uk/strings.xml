@@ -4,6 +4,13 @@
     <string name="notes_empty_state">Нотаток поки немає. Натисніть кнопку мікрофона, щоб записати першу.</string>
     <string name="notes_model_banner_title">Налаштовуємо ШІ на пристрої</string>
     <string name="notes_model_banner_subtitle">Завантажується у фоні</string>
+    <string name="notes_model_banner_waiting_title">ШІ на пристрої готовий до завантаження</string>
+    <string name="notes_model_banner_waiting_subtitle">Близько %1$s ГБ · чекає на Wi‑Fi</string>
+    <string name="notes_model_banner_mobile_data_button">Завантажити через мобільний інтернет</string>
+    <string name="notes_model_banner_info_description">Про ШІ на пристрої</string>
+    <string name="notes_model_banner_info_title">ШІ на пристрої</string>
+    <string name="notes_model_banner_info_body">Offhand перетворює записи на нотатки за допомогою ШІ, який працює повністю на вашому телефоні. Завантаження потрібне один раз; після цього нічого нікуди не надсилається.</string>
+    <string name="notes_model_banner_info_dismiss">Зрозуміло</string>
     <string name="notes_day_today">Сьогодні</string>
     <string name="notes_day_yesterday">Вчора</string>
     <plurals name="notes_word_count">

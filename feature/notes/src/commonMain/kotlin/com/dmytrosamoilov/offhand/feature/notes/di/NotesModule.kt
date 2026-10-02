@@ -101,6 +101,7 @@ val featureNotesModule = module {
             isSmartSuggestionsEnabled = get(),
             proUpgradeGate = get(),
             sessionManager = get(),
+            modelDownloadLauncher = get(),
             aiCoreDownloadStatus = get(),
             clearTranscriptionCheckpoint = get(),
             resumeInterruptedNotes = get(),
