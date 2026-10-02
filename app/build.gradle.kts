@@ -126,4 +126,12 @@ dependencies {
 
     debugImplementation(libs.leakcanary.android)
     "uitestImplementation"(project(":testing:fakes"))
+
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.uiautomator)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    // The Compose test library drags in Espresso 3.5, which crashes on Android 15+.
+    androidTestImplementation(libs.androidx.espresso.core)
 }
