@@ -24,11 +24,6 @@
     <string name="onboarding_lock_enable_label">Требовать разблокировку при открытии Offhand</string>
     <string name="onboarding_lock_enable_description">Это можно изменить в любой момент в настройках.</string>
 
-    <string name="onboarding_download_title">Настройте ИИ на устройстве</string>
-    <string name="onboarding_download_body">Offhand расшифровывает и обобщает голосовые заметки с помощью ИИ, который работает полностью на вашем телефоне. Для начала нужна однократная загрузка.</string>
-    <string name="onboarding_download_size">Разовое скачивание · около %1$s ГБ</string>
-    <string name="onboarding_download_background_hint">Скачивание продолжается в фоне — можно сразу начинать запись. Мы сообщим, когда всё будет готово.</string>
-    <string name="onboarding_download_wifi_hint">Совет: подключитесь к Wi‑Fi, чтобы сэкономить мобильный трафик.</string>
     <string name="onboarding_notification_download_channel_name">Загрузки ИИ на устройстве</string>
     <string name="onboarding_notification_status_channel_name">Состояние ИИ на устройстве</string>
     <string name="onboarding_notification_downloading_title">Скачать ИИ на устройстве</string>

@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
+import app.cash.turbine.test
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.ai.api.AvailableModel
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
@@ -7,13 +8,15 @@ import com.dmytrosamoilov.offhand.core.ai.api.ModelState
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechModelState
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.common.ModelDownloadPolicy
+import com.dmytrosamoilov.offhand.core.common.NetworkMonitor
 import com.dmytrosamoilov.offhand.core.data.domain.CalendarEventSuggestion
+import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
+import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.core.data.domain.SuggestedEvent
 import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
-import com.dmytrosamoilov.offhand.core.data.domain.Note
-import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlaybackState
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
@@ -21,28 +24,30 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteFolderUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCalendarSuggestionsAvailableUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsFolderStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ReorderFoldersUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SetFolderStyleUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RequestNoteSuggestionsUseCase
-import app.cash.turbine.test
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -51,6 +56,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -88,6 +94,11 @@ class NotesViewModelTest {
     private val renameFolder: RenameFolderUseCase = mockk(relaxed = true)
     private val deleteFolder: DeleteFolderUseCase = mockk(relaxed = true)
     private val moveNoteToFolder: MoveNoteToFolderUseCase = mockk(relaxed = true)
+    private val setFolderStyle: SetFolderStyleUseCase = mockk(relaxed = true)
+    private val reorderFolders: ReorderFoldersUseCase = mockk(relaxed = true)
+    private val isFolderStylesAvailable: IsFolderStylesAvailableUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
     private val observeCustomNoteStyles: ObserveCustomNoteStylesUseCase = mockk {
         every { this@mockk.invoke() } returns flowOf(emptyList())
     }
@@ -167,6 +178,10 @@ class NotesViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private val unmeteredNetwork = object : NetworkMonitor {
+        override val isUnmetered: StateFlow<Boolean> = MutableStateFlow(true)
+    }
+
     private fun viewModel() = NotesViewModel(
         recordingProcessController = recordingProcessController,
         dateLabelFormatter = dateLabelFormatter,
@@ -177,6 +192,9 @@ class NotesViewModelTest {
         renameFolder = renameFolder,
         deleteFolder = deleteFolder,
         moveNoteToFolder = moveNoteToFolder,
+        setFolderStyle = setFolderStyle,
+        reorderFolders = reorderFolders,
+        isFolderStylesAvailable = isFolderStylesAvailable,
         observeDeveloperOptions = observeDeveloperOptions,
         observeCustomNoteStyles = observeCustomNoteStyles,
         isCustomNoteStylesAvailable = isCustomNoteStylesAvailable,
@@ -197,8 +215,10 @@ class NotesViewModelTest {
         isSmartSuggestionsEnabled = isSmartSuggestionsEnabled,
         proUpgradeGate = gate,
         sessionManager = sessionManager,
-        aiCoreDownloadStatus = AiCoreDownloadStatus(modelManager, speechToText),
+        aiCoreDownloadStatus = AiCoreDownloadStatus(modelManager, speechToText, ModelDownloadPolicy(unmeteredNetwork)),
+        modelDownloadLauncher = mockk(relaxed = true),
         clearTranscriptionCheckpoint = mockk(relaxed = true),
+        resumeInterruptedNotes = mockk(relaxed = true),
         buildInfo = BuildInfo(isDeveloperBuild = true),
         analyticsTracker = mockk(relaxed = true),
     )
@@ -366,7 +386,7 @@ class NotesViewModelTest {
         )
         modelState.value = ModelState.NotDownloaded
         dispatcher.scheduler.advanceUntilIdle()
-        assertEquals(12, viewModel.uiState.value.modelPreparation?.progressPercent)
+        assertEquals(ModelPreparationUi.Downloading(progressPercent = 12), viewModel.uiState.value.modelPreparation)
 
         speechDownloadState.value = SpeechModelState.Downloaded
         modelState.value = ModelState.Downloading(
@@ -375,7 +395,7 @@ class NotesViewModelTest {
             bytesTotal = 3_000,
         )
         dispatcher.scheduler.advanceUntilIdle()
-        assertEquals(62, viewModel.uiState.value.modelPreparation?.progressPercent)
+        assertEquals(ModelPreparationUi.Downloading(progressPercent = 62), viewModel.uiState.value.modelPreparation)
 
         modelState.value = ModelState.Ready
         dispatcher.scheduler.advanceUntilIdle()

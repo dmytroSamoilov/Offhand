@@ -10,6 +10,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.TranscriptionResult
 import com.dmytrosamoilov.offhand.core.audio.AudioChunk
 import com.dmytrosamoilov.offhand.core.audio.ChunkBoundaryReason
 import com.dmytrosamoilov.offhand.core.audio.VadSnapshot
+import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
 import com.dmytrosamoilov.offhand.core.data.domain.CalendarEventSuggestion
@@ -28,6 +29,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCa
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetTranscriptionCheckpointUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.InterruptNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsCalendarSuggestionsAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsThinkingEnabledUseCase
@@ -48,6 +50,7 @@ import java.io.ByteArrayOutputStream
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -92,6 +95,11 @@ class RecordingSessionManagerTest {
     }
     private val completeNote: CompleteNoteUseCase = mockk()
     private val failNote: FailNoteUseCase = mockk()
+    private val interruptNote: InterruptNoteUseCase = mockk()
+    private val isInForeground = MutableStateFlow(true)
+    private val appForegroundState = object : AppForegroundState {
+        override val isInForeground = this@RecordingSessionManagerTest.isInForeground
+    }
     private val markNoteProcessing: MarkNoteProcessingUseCase = mockk()
     private val registerSavedRecording: RegisterSavedRecordingUseCase = mockk {
         coJustRun { this@mockk.invoke() }
@@ -112,7 +120,7 @@ class RecordingSessionManagerTest {
         coEvery { this@mockk.invoke() } returns true
     }
     private val getNoteStyle: GetNoteStyleUseCase = mockk {
-        coEvery { this@mockk.invoke() } returns NoteStyleRef.BuiltIn(NotePreset.SUMMARY)
+        coEvery { this@mockk.invoke(any()) } returns NoteStyleRef.BuiltIn(NotePreset.SUMMARY)
     }
     private val getNote: GetNoteUseCase = mockk {
         coEvery { this@mockk(any()) } returns null
@@ -191,6 +199,7 @@ class RecordingSessionManagerTest {
         discardNote = discardNote,
         completeNote = completeNote,
         failNote = failNote,
+        interruptNote = interruptNote,
         markNoteProcessing = markNoteProcessing,
         registerSavedRecording = registerSavedRecording,
         saveNoteTranscript = saveNoteTranscript,
@@ -207,6 +216,7 @@ class RecordingSessionManagerTest {
         audioBackup = audioBackup,
         audioDecoder = audioDecoder,
         analyticsTracker = analyticsTracker,
+        appForegroundState = appForegroundState,
         scope = this,
     )
 
@@ -266,22 +276,25 @@ class RecordingSessionManagerTest {
     }
 
     @Test
-    fun `failed chunk is skipped and remaining transcript still completes the note`() = runTest {
+    fun `failed chunk sends the whole recording through the stored audio again`() = runTest {
         every { recorder.vad } returns MutableStateFlow(VadSnapshot())
         every { recorder.recordStream(pcmSink = any()) } returns flowOf(chunk(1), chunk(2))
         justRun { recorder.resetVad() }
         coEvery { speechToText.transcribe(any()) } returns
-            sttResult("only good chunk") andThenThrows IllegalStateException("engine hiccup")
+            sttResult("only good chunk") andThenThrows IllegalStateException("engine hiccup") andThen sttResult("whole recording")
         coEvery { createRecordingNote(any(), any(), any()) } returns 7L
         coEvery { markNoteRecorded(7L, any(), any()) } returns storedNote(7L)
+        coEvery { markNoteProcessing(7L) } returns storedNote(7L)
+        every { audioStore.sizeOf(any()) } returns 64_000L
+        stubBackupRead(64_000)
         coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(BuiltInNoteStyles.spec(NotePreset.SUMMARY)), any()) } returns AiResult(
-            text = """{"title": "Partial notes", "overview": "- good chunk content"}""",
+            text = """{"title": "Whole notes", "overview": "- whole content"}""",
             processingTimeMs = 100,
             inputTokens = 5,
             outputTokens = 5,
             hardwareBackend = HardwareBackend.CPU,
         )
-        stubPolish("""{"title": "Partial notes", "overview": "- good chunk content"}""")
+        stubPolish("""{"title": "Whole notes", "overview": "- whole content"}""")
         coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
 
         val manager = manager()
@@ -289,12 +302,13 @@ class RecordingSessionManagerTest {
         testScheduler.advanceUntilIdle()
 
         assertEquals(SessionPhase.IDLE, manager.session.value.phase)
+        coVerify { markNoteProcessing(7L) }
         coVerify {
             completeNote(
                 noteId = 7L,
-                title = "Partial notes",
-                body = "- good chunk content",
-                transcript = "only good chunk",
+                title = "Whole notes",
+                body = "- whole content",
+                transcript = "whole recording",
                 transcriptionTimeMs = 200,
                 structuringTimeMs = 100,
                 hardwareBackend = "CPU",
@@ -409,6 +423,33 @@ class RecordingSessionManagerTest {
     }
 
     @Test
+    fun `several imports show up as processing notes before the first one finishes`() = runTest {
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        val first = AudioImportSource(handle = "/cache/imports/a", displayName = "First.m4a")
+        val second = AudioImportSource(handle = "/cache/imports/b", displayName = "Second.m4a")
+        coEvery { createImportedNote("First", "note-1.pcm.enc", any()) } returns 9L
+        coEvery { createImportedNote("Second", "note-1.pcm.enc", any()) } returns 10L
+        val firstDecode = CompletableDeferred<Unit>()
+        coEvery { audioDecoder.decode(first, any(), any()) } coAnswers {
+            firstDecode.await()
+            throw AudioImportException.Unsupported()
+        }
+        coEvery { audioDecoder.decode(second, any(), any()) } throws AudioImportException.Unsupported()
+        justRun { audioStore.delete("note-1.pcm.enc") }
+
+        val manager = manager()
+        manager.importAudio(first)
+        manager.importAudio(second)
+        testScheduler.runCurrent()
+
+        assertEquals(setOf(9L, 10L), manager.processingNoteIds.value.toSet())
+
+        firstDecode.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertTrue(manager.processingNoteIds.value.isEmpty())
+    }
+
+    @Test
     fun `rejected import removes the placeholder note and reports why`() = runTest {
         every { recorder.vad } returns MutableStateFlow(VadSnapshot())
         val source = AudioImportSource(handle = "/cache/imports/y", displayName = "movie.mkv")
@@ -478,6 +519,31 @@ class RecordingSessionManagerTest {
         assertEquals(SessionPhase.IDLE, manager.session.value.phase)
         assertEquals(listOf<NoteProcessingEvent>(NoteProcessingEvent.Failed(9L)), events)
         coVerify { failNote(9L) }
+        coroutineContext.cancelChildren()
+    }
+
+    @Test
+    fun `failure while the app is in the background parks the note instead of failing it`() = runTest {
+        isInForeground.value = false
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.recordStream(pcmSink = any()) } returns flowOf(chunk(1))
+        justRun { recorder.resetVad() }
+        coEvery { speechToText.transcribe(any()) } returns sttResult("   ")
+        coEvery { createRecordingNote(any(), any(), any()) } returns 9L
+        coEvery { markNoteRecorded(9L, any(), any()) } returns storedNote(9L)
+        coEvery { interruptNote(9L) } returns true
+        val events = mutableListOf<NoteProcessingEvent>()
+
+        val manager = manager()
+        manager.events.onEach { events += it }.launchIn(this)
+        testScheduler.runCurrent()
+        manager.start(folderId = null)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(listOf<NoteProcessingEvent>(NoteProcessingEvent.Interrupted(9L)), events)
+        assertTrue(manager.processingNoteIds.value.isEmpty())
+        coVerify { interruptNote(9L) }
+        coVerify(exactly = 0) { failNote(any()) }
         coroutineContext.cancelChildren()
     }
 

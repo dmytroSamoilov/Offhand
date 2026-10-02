@@ -58,7 +58,7 @@ struct PaywallView: View {
                     planSection
                     legalRow
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 16)
                 .padding(.bottom, 8)
             }
             bottomActions
@@ -83,7 +83,7 @@ struct PaywallView: View {
                     }
                     ComparisonTable(highlighted: .general)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 16)
                 .padding(.bottom, 20)
             }
         }
@@ -97,12 +97,13 @@ struct PaywallView: View {
             } label: {
                 Image(systemName: "xmark")
                     .font(.body.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .padding(10)
+                    .foregroundStyle(.primary)
+                    .padding(6)
             }
+            .modifier(CircleButton())
             .accessibilityLabel(String(localized: "Close"))
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 16)
     }
 
     private var header: some View {
@@ -155,6 +156,7 @@ struct PaywallView: View {
                 Text(PaywallCopy.cta(for: state.selectedOffer)).frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+            .controlSize(.large)
             .disabled(state.selectedOffer == nil || state.isPurchasing)
             if let disclosure = PaywallCopy.disclosure(for: state.selectedOffer) {
                 Text(disclosure).font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
@@ -163,7 +165,7 @@ struct PaywallView: View {
                 .font(.footnote)
                 .padding(.top, 2)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .background(.bar)
     }
@@ -214,10 +216,11 @@ private enum PaywallCopy {
     static func headline(for feature: ProFeature) -> String {
         switch feature {
         case .general: return String(localized: "Offhand Pro")
-        case .customStyles: return String(localized: "Save your own note style")
+        case .customStyles: return String(localized: "Save your own summary style")
         case .documentExport: return String(localized: "Share this note as PDF or Word")
         case .smartSuggestions: return String(localized: "Find dates and to-dos in your notes")
         case .audioImport: return String(localized: "Turn your recordings into notes")
+        case .folderStyles: return String(localized: "Give this folder its own summary style")
         }
     }
 
@@ -267,6 +270,7 @@ private struct ComparisonTable: View {
             Row(id: 6, title: String(localized: "Share polished documents"), hint: String(localized: "PDF and Word, ready for clients, email and print"), feature: .documentExport),
             Row(id: 7, title: String(localized: "Never miss a follow-up"), hint: String(localized: "Dates and to-dos straight into your calendar"), feature: .smartSuggestions),
             Row(id: 8, title: String(localized: "Turn any recording into a note"), hint: String(localized: "Voice memos, calls and files from other apps"), feature: .audioImport),
+            Row(id: 9, title: String(localized: "Folders that know their style"), hint: String(localized: "Each folder with its own summary style"), feature: .folderStyles),
         ]
     }
 
@@ -283,15 +287,15 @@ private struct ComparisonTable: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-            Text(String(localized: "Payments go through the App Store. Offhand never sees your card, and your notes never leave your phone."))
-                .font(.caption2)
+            Text(String(localized: "Payments go through the App Store. Offhand never sees your card, and your notes never leave your iPhone."))
+                .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 12)
                 .padding(.bottom, 8)
         }
         .padding(.vertical, 6)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
     }
 
     private var tableHeader: some View {
@@ -368,9 +372,9 @@ private struct PlanCard: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(14)
-            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: Brand.cardRadius)
                     .strokeBorder(isSelected ? Brand.primary : Color(.systemGray4), lineWidth: isSelected ? 2 : 1)
             )
             .overlay(alignment: .top) {
@@ -419,5 +423,17 @@ private struct PlanCard: View {
             return String.localizedStringWithFormat(String(localized: "Less than %d years of yearly"), years.int32Value)
         }
         return nil
+    }
+}
+
+// The system toolbar draws its buttons as circles on glass; the paywall has
+// no toolbar, so its close button borrows the same shape.
+private struct CircleButton: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.buttonStyle(.glass).buttonBorderShape(.circle)
+        } else {
+            content.buttonStyle(.bordered).buttonBorderShape(.circle)
+        }
     }
 }

@@ -101,6 +101,7 @@ private class FakePreferences : UserPreferencesRepository {
     override suspend fun incrementSavedRecordingsCount() = Unit
     override suspend fun setReviewPromptState(state: ReviewPromptState) = Unit
     override suspend fun setSmartSuggestionsEnabled(enabled: Boolean) = Unit
+    override suspend fun setNotificationsPrompted() = Unit
 
     override suspend fun setProOverride(override: ProOverride) {
         this.override.value = override

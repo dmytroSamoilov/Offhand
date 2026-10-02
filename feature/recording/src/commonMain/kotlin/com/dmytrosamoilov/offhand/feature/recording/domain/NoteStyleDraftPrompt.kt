@@ -41,7 +41,7 @@ internal object NoteStyleDraftPrompt {
         "After the thinking block, output a single JSON object, exactly in this shape:"
 
     private const val JSON_SHAPE =
-        """{"name": "...", "kind": "...", "sections": [{"heading": "...", "guidance": "...", "format": "bullets"}]}"""
+        """{"name": "...", "kind": "...", "sections": [{"heading": "...", "guidance": "...", "format": "..."}]}"""
 
     private val JSON_RULES = """
         Rules for the JSON output:

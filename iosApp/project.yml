@@ -14,8 +14,8 @@ settings:
   # Project-wide so the app and the widget extension can never disagree; bump
   # here and regenerate, the App Store rejects an extension on another build.
   base:
-    MARKETING_VERSION: "1.3.1"
-    CURRENT_PROJECT_VERSION: "23"
+    MARKETING_VERSION: "1.4.1"
+    CURRENT_PROJECT_VERSION: "28"
   configs:
     Debug-dev:
       APP_ID_SUFFIX: .dev
@@ -42,10 +42,10 @@ settings:
 packages:
   LiteRTLM:
     url: https://github.com/google-ai-edge/LiteRT-LM
-    exactVersion: 0.16.0
+    exactVersion: 0.17.1
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk
-    from: 12.18.0
+    from: 12.19.2
 targets:
   Offhand:
     type: application

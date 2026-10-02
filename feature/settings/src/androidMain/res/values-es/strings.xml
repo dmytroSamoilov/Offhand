@@ -26,21 +26,16 @@
     <string name="settings_delete_model_dialog_confirm">Quitar</string>
     <string name="settings_delete_model_dialog_cancel">Cancelar</string>
 
-    <string name="settings_note_style_title">Estilo de nota predeterminado</string>
-    <string name="settings_note_style_note">Se aplica a las grabaciones nuevas. Puedes cambiar el estilo de una nota existente desde la pantalla de la nota.</string>
-    <string name="settings_note_styles_manage">Gestionar estilos de nota</string>
-    <string name="settings_note_styles_manage_subtitle">Crea tus propios encabezados y formato</string>
-    <string name="settings_note_styles_title">Estilos de nota</string>
-    <string name="settings_note_styles_built_in">Integrados</string>
-    <string name="settings_note_styles_custom">Tus estilos</string>
-    <string name="settings_note_styles_empty">Aún no hay estilos propios. Crea uno para darle a la IA tus propios encabezados.</string>
-    <string name="settings_note_styles_new">Nuevo estilo</string>
+    <string name="settings_note_style_note">El estilo elegido se usa para las grabaciones nuevas. Puedes cambiar el estilo de cualquier nota desde la propia nota.</string>
+    <string name="settings_note_styles_default_value">Predeterminado: %1$s</string>
+    <string name="settings_note_styles_title">Estilos de resumen</string>
+    <string name="settings_note_styles_edit">Editar</string>
     <string name="settings_note_styles_delete">Eliminar estilo</string>
     <string name="settings_note_styles_delete_dialog_title">¿Eliminar este estilo?</string>
     <string name="settings_note_styles_delete_dialog_body">Las notas escritas con él se conservan. Pasarán al estilo Resumen la próxima vez que se reescriban.</string>
     <string name="settings_note_styles_delete_dialog_confirm">Eliminar</string>
-    <string name="settings_note_style_editor_new_title">Nuevo estilo de nota</string>
-    <string name="settings_note_style_editor_edit_title">Editar estilo de nota</string>
+    <string name="settings_note_style_editor_new_title">Nuevo estilo de resumen</string>
+    <string name="settings_note_style_editor_edit_title">Editar estilo de resumen</string>
     <string name="settings_note_style_editor_back">Atrás</string>
     <string name="settings_note_style_editor_save">Guardar</string>
     <string name="settings_note_style_editor_name">Nombre</string>
@@ -108,9 +103,9 @@
     <string name="settings_developer_label">Opciones de desarrollador</string>
     <string name="settings_developer_description">Mostrar gestión de la IA en el dispositivo, aceleración y diagnósticos de procesamiento.</string>
     <string name="settings_backup_title">Copia de seguridad</string>
-    <string name="settings_backup_subtitle">Lleva tus notas a un teléfono nuevo o guarda una copia</string>
+    <string name="settings_backup_subtitle">Lleva tus notas a un teléfono nuevo o guarda una copia.</string>
     <string name="settings_import_audio_title">Importar audio</string>
-    <string name="settings_import_audio_subtitle">Convierte archivos de audio en notas. Elige uno o varios a la vez</string>
+    <string name="settings_import_audio_subtitle">Convierte archivos de audio en notas. Elige uno o varios a la vez.</string>
     <string name="settings_import_unreadable">Algunos de los archivos no se pudieron leer.</string>
     <string name="settings_import_dismiss">Aceptar</string>
     <string name="settings_import_pro_title">Importar con Offhand Pro</string>
@@ -140,4 +135,6 @@
     <string name="settings_about_footer">Todo se queda en tu teléfono. Nunca se sube nada.</string>
     <string name="settings_note_style_editor_no_sections">Sin secciones, la nota es un resumen libre.</string>
     <string name="settings_redeem_code">Canjear un código</string>
+    <string name="settings_redeem_code_body">Google Play abre el plan anual. Toca la flecha junto al método de pago, elige «Canjear código» e introduce tu código. Su prueba gratuita sustituye a la estándar.</string>
+    <string name="settings_redeem_code_confirm">Continuar</string>
 </resources>

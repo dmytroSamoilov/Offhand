@@ -13,6 +13,7 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOver
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStatusUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.RedeemProCodeUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SaveCustomNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDeveloperOptionsUseCase
@@ -45,6 +46,7 @@ val featureSettingsModule = module {
     factoryOf(::ObserveProStatusUseCase)
     factoryOf(::ObserveSmartSuggestionsEnabledUseCase)
     factoryOf(::ObserveTelemetryConsentUseCase)
+    factoryOf(::RedeemProCodeUseCase)
     factoryOf(::SaveCustomNoteStyleUseCase)
     factoryOf(::SetAppLockEnabledUseCase)
     factoryOf(::SetDeveloperOptionsUseCase)
@@ -62,6 +64,7 @@ val featureSettingsModule = module {
             styleId = parameters.get(),
             getCustomNoteStyle = get(),
             saveCustomNoteStyle = get(),
+            deleteCustomNoteStyle = get(),
             draftNoteStyle = get(),
             isCustomNoteStylesAvailable = get(),
             proUpgradeGate = get(),

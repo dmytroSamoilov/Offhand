@@ -27,8 +27,16 @@ internal object CustomNoteStyleSpecBuilder {
             overviewRule = overviewRule(kind, headings, effective),
             language = language,
             userInstructions = userInstructions(effective, headings),
+            listSections = headingsWithFormat(effective, headings, SectionFormat.BULLETS),
+            proseSections = headingsWithFormat(effective, headings, SectionFormat.FREE),
         )
     }
+
+    private fun headingsWithFormat(
+        sections: List<NoteStyleSection>,
+        headings: List<String>,
+        format: SectionFormat,
+    ): List<String> = sections.zip(headings).filter { (section, _) -> section.format == format }.map { it.second }
 
     // A free section with guidance is the user's own slot: the model is told
     // to follow it over every form, tone and language rule of ours.
@@ -46,8 +54,8 @@ internal object CustomNoteStyleSpecBuilder {
     ): String = buildString {
         append("$kind in Markdown, built only from these section headings: ")
         append(NoteStylePrompt.quoteList(headings))
-        append(". ")
-        append(ONE_HEADING_RULE)
+        append(".")
+        if (headings.size > 1) append(" $ONE_HEADING_RULE")
         sections.zip(headings).forEach { (section, heading) ->
             append(" ${sectionRule(section, heading)}.")
         }
@@ -83,8 +91,11 @@ internal object CustomNoteStyleSpecBuilder {
     private const val SENTENCES_RULE = "write short plain sentences"
     private const val BULLETS_RULE = "write one \"- \" line per point"
     private const val FREE_RULE = "write it in whatever form fits the content best"
+    // Our own bullet and heading habits must not leak into the user's slot: the
+    // only formatting a free section gets is what its instructions ask for.
     private const val INSTRUCTIONS_RULE =
-        "follow these instructions exactly, even where they differ from every other rule about form, tone or language"
+        "follow these instructions exactly, even where they differ from every other rule about form, tone or " +
+            "language, and add no list markers, headings or other formatting they do not ask for"
     private val UNSAFE_CHARS = Regex("[\"{}\\\\`<>]")
     private val WHITESPACE = Regex("\\s+")
 }

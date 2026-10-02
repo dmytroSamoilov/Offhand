@@ -10,6 +10,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":core:ai-api"))
+            implementation(project(":core:common"))
             implementation(project(":core:audio"))
             implementation(project(":core:data"))
             implementation(project(":core:device"))

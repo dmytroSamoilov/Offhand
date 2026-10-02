@@ -12,8 +12,11 @@ internal object NoteStylePrompt {
     ).joinToString(LINE_BREAK)
 
     fun polishStructureRule(spec: NoteStyleSpec): String = listOf(
-        sectionPolishRule(spec.sections),
         userInstructionsPolishRule(spec.userInstructions),
+        proseSectionsPolishRule(spec.proseSections),
+        sectionPolishRule(spec.sections),
+        listSectionsPolishRule(spec.listSections),
+        EMPTY_HEADING_POLISH_RULE,
     ).filter { it.isNotBlank() }.joinToString(LINE_BREAK)
 
     fun polishFieldRules(): String = listOf(
@@ -51,9 +54,18 @@ internal object NoteStylePrompt {
         "- Move a point that sits under the wrong heading to the heading where it belongs. " +
             "When a point clearly belongs under one of the allowed headings that the draft " +
             "does not have yet, add that heading and move the point under it.",
-        "- Keep each point as one \"- \" line in sections that use \"- \" lines, and remove " +
-            "a heading that has nothing under it as well as lines that only say none or not mentioned.",
     ).joinToString(LINE_BREAK)
+
+    // Named per section, so a style without list sections never hears about
+    // "- " lines at all.
+    private fun listSectionsPolishRule(sections: List<String>): String =
+        if (sections.isEmpty()) "" else "- Keep each point as one \"- \" line under ${quoteList(sections)}."
+
+    private fun proseSectionsPolishRule(sections: List<String>): String =
+        sections.joinToString(LINE_BREAK) { heading ->
+            "- Under \"$heading\" keep the text as it is written: no \"- \" lines, no headings inside it " +
+                "and no other list markers unless its instructions ask for them."
+        }
 
     private const val LINE_BREAK = "\n"
     private const val SECTION_LIST_SEPARATOR = ", "
@@ -64,6 +76,8 @@ internal object NoteStylePrompt {
         "- \"title\": a short title for the note, at most 8 words."
     private const val OVERVIEW_RULE_PREFIX = "- \"overview\": "
     private const val POLISHED_OVERVIEW_RULE = "the full polished note and nothing else."
+    private const val EMPTY_HEADING_POLISH_RULE =
+        "- Remove a heading that has nothing under it as well as lines that only say none or not mentioned."
     private const val EMPTY_SECTION_RULE =
         "- Write a heading only when the recording really contains that kind of content. " +
             "Never write a heading with nothing under it, and never write none, not mentioned or N/A."

@@ -30,7 +30,7 @@ struct OffhandApp: App {
                 shareLabels: NoteShareLabels(
                     title: String(localized: "Title"),
                     date: String(localized: "Date"),
-                    overview: String(localized: "Overview"),
+                    overview: String(localized: "Summary"),
                     transcript: String(localized: "Transcript"),
                     recorded: String(localized: "Recorded"),
                     duration: String(localized: "Duration"),
@@ -44,7 +44,8 @@ struct OffhandApp: App {
                 noteDocuments: NoteDocumentBridgeImpl(),
                 proStore: StoreKitProStore(),
                 analytics: AnalyticsBridgeImpl(),
-                isDeveloperBuild: Self.isDeveloperBuild
+                isDeveloperBuild: Self.isDeveloperBuild,
+                network: NetworkMonitorBridgeImpl()
             ),
             useSmokeFakes: Self.useSmokeFakes
         )

@@ -12,7 +12,7 @@ class NoteShareLabelsProviderImpl(
     override fun labels(): NoteShareLabels = NoteShareLabels(
         title = context.getString(R.string.notes_edit_title_label),
         date = context.getString(R.string.notes_share_date_label),
-        overview = context.getString(R.string.notes_overview_heading),
+        overview = context.getString(R.string.notes_summary_heading),
         transcript = context.getString(R.string.notes_transcript_heading),
         recorded = context.getString(R.string.notes_share_recorded_label),
         duration = context.getString(R.string.notes_share_duration_label),

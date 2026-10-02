@@ -126,6 +126,34 @@ class NoteSectionMergerTest {
     }
 
     @Test
+    fun `prose section keeps its paragraphs and repeated lines`() {
+        val merged = NoteSectionMerger.merge(
+            overviews = listOf(
+                "## Proofread\nOkay.\nSo we start with the budget.\n\nOkay.\nThen the hiring plan.",
+                "## Proofread\nAnd that was the end of it.",
+            ),
+            headings = listOf("## Proofread"),
+            proseHeadings = listOf("## Proofread"),
+        )
+
+        assertEquals(
+            "## Proofread\nOkay.\nSo we start with the budget.\n\nOkay.\nThen the hiring plan.\n\nAnd that was the end of it.",
+            merged,
+        )
+    }
+
+    @Test
+    fun `list sections still drop blank lines and duplicates next to a prose section`() {
+        val merged = NoteSectionMerger.merge(
+            overviews = listOf("## Decisions\n- Ship Friday\n\n- Ship Friday\n## Notes\nWe talked.\n\nWe talked."),
+            headings = listOf("## Decisions", "## Notes"),
+            proseHeadings = listOf("## Notes"),
+        )
+
+        assertEquals("## Decisions\n- Ship Friday\n\n## Notes\nWe talked.\n\nWe talked.", merged)
+    }
+
+    @Test
     fun `overview without headings survives untouched`() {
         val merged = NoteSectionMerger.merge(listOf("Just a plain paragraph."), headings)
 

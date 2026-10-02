@@ -19,6 +19,7 @@ data class Note(
 enum class NoteStatus {
     RECORDING,
     PROCESSING,
+    INTERRUPTED,
     READY,
     FAILED,
 }

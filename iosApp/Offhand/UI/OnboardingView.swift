@@ -9,7 +9,6 @@ struct OnboardingView: View {
     @State private var state = OnboardingUiState(
         step: .deviceCheck,
         deviceSpecs: nil,
-        downloadSizeGb: "",
         notePreset: .summary,
         isDeviceSecure: false,
         isAppLockEnabled: true,
@@ -49,8 +48,8 @@ struct OnboardingView: View {
     // makes the leftover momentum cascade across several pages at once. Paged
     // scrolling moves one card per gesture, so settling past the furthest
     // unlocked page acts as Continue for the card just crossed; only the final
-    // download card is button-only, because its Continue starts the download
-    // and ends onboarding. The dots and the continue button stay put.
+    // consent card is button-only, because its Continue ends onboarding. The
+    // dots and the continue button stay put.
     private var wizard: some View {
         VStack(spacing: 0) {
             TabView(selection: $visiblePage) {
@@ -159,31 +158,6 @@ struct OnboardingView: View {
                     )
                 }
             )
-        case .notifications:
-            StepCard(
-                icon: "bell.badge.fill",
-                title: String(localized: "Know when notes are ready"),
-                message: String(localized: "Notes keep preparing while Offhand is in the background. Allow notifications and Offhand will tell you the moment a note is ready to read.")
-            )
-        case .modelDownload:
-            StepCard(
-                icon: "arrow.down.circle.fill",
-                title: String(localized: "Set up your on-device AI"),
-                message: String(localized: "Offhand transcribes and summarizes voice notes with on-device AI that runs entirely on your iPhone. To get started, it needs a one-time download."),
-                content: {
-                    VStack(spacing: 16) {
-                        DownloadSizeBadge(sizeGb: state.downloadSizeGb)
-                        Text(String(localized: "The download continues in the background — you can start recording right away."))
-                            .font(.footnote)
-                            .foregroundStyle(Brand.onSurfaceVariant)
-                            .multilineTextAlignment(.center)
-                        Text(String(localized: "Tip: connect to Wi‑Fi to save mobile data."))
-                            .font(.footnote)
-                            .foregroundStyle(Brand.onSurfaceVariant)
-                            .multilineTextAlignment(.center)
-                    }
-                }
-            )
         default:
             EmptyView()
         }
@@ -226,16 +200,8 @@ struct OnboardingView: View {
                 }
             }
         case .telemetryConsent:
-            return { viewModel.onConsentContinue() }
-        case .notifications:
             return {
-                NoteNotifications.shared.requestPermission {
-                    viewModel.onNotificationsContinue()
-                }
-            }
-        case .modelDownload:
-            return {
-                viewModel.onDownloadContinue()
+                viewModel.onConsentContinue()
                 onFinished()
             }
         default:
@@ -364,7 +330,7 @@ private struct ToggleCard: View {
 
     var body: some View {
         Toggle(label, isOn: $isOn)
-            .tint(Brand.primary)
+            .tint(Brand.toggle)
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
             .background(Brand.surface, in: RoundedRectangle(cornerRadius: 12))
@@ -374,23 +340,6 @@ private struct ToggleCard: View {
             )
             .contentShape(Rectangle())
             .onTapGesture { isOn.toggle() }
-    }
-}
-
-private struct DownloadSizeBadge: View {
-    let sizeGb: String
-
-    var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "arrow.down.circle")
-                .font(.subheadline)
-            Text(String(format: String(localized: "One-time download · about %@ GB"), sizeGb))
-                .font(.subheadline.weight(.medium))
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .foregroundStyle(Brand.onPrimaryContainer)
-        .background(Brand.primaryContainer, in: Capsule())
     }
 }
 
@@ -404,7 +353,6 @@ struct NotePresetPicker: View {
                 PresetCard(
                     title: NoteStyleLabels.label(for: preset),
                     details: NoteStyleLabels.details(for: preset),
-                    symbol: NoteStyleLabels.symbol(for: preset),
                     isSelected: selected == preset
                 ) {
                     onSelect(preset)
@@ -418,7 +366,6 @@ struct NotePresetPicker: View {
 struct PresetCard: View {
     let title: String
     let details: String
-    let symbol: String
     let isSelected: Bool
     var showProBadge = false
     let action: () -> Void
@@ -426,9 +373,6 @@ struct PresetCard: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 16) {
-                Image(systemName: symbol)
-                    .foregroundStyle(Brand.primary)
-                    .frame(width: 24)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
                         Text(title)

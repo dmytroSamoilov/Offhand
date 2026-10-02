@@ -4,6 +4,7 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
 import com.dmytrosamoilov.offhand.core.common.DurationFormatter
+import com.dmytrosamoilov.offhand.core.common.formatGigabytes
 import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.Note
@@ -47,7 +48,7 @@ internal fun List<NoteSearchResult>.toSectionsUi(
 
 internal fun List<Folder>.toFoldersUi(notes: List<Note>): List<FolderUi> {
     val counts = notes.groupingBy { it.folderId }.eachCount()
-    return map { folder -> FolderUi(id = folder.id, name = folder.name, noteCount = counts[folder.id] ?: 0) }
+    return map { folder -> FolderUi(id = folder.id, name = folder.name, noteCount = counts[folder.id] ?: 0, style = folder.style) }
 }
 
 internal fun FolderNameError.toUi(): FolderNameErrorUi = when (this) {
@@ -115,12 +116,14 @@ private fun Note.createdAtLocalDateTime(): LocalDateTime =
 private fun NoteStatus.toUi(): NoteStatusUi = when (this) {
     NoteStatus.RECORDING -> NoteStatusUi.PROCESSING
     NoteStatus.PROCESSING -> NoteStatusUi.PROCESSING
+    NoteStatus.INTERRUPTED -> NoteStatusUi.INTERRUPTED
     NoteStatus.READY -> NoteStatusUi.READY
     NoteStatus.FAILED -> NoteStatusUi.FAILED
 }
 
 internal fun AiCoreDownloadState.toPreparationUi(): ModelPreparationUi? = when (this) {
-    is AiCoreDownloadState.Downloading -> ModelPreparationUi(progressPercent = progressPercent)
+    is AiCoreDownloadState.Downloading -> ModelPreparationUi.Downloading(progressPercent = progressPercent)
+    is AiCoreDownloadState.WaitingForMobileData -> ModelPreparationUi.WaitingForMobileData(sizeGb = formatGigabytes(bytesTotal))
     is AiCoreDownloadState.Idle -> null
 }
 

@@ -6,28 +6,20 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material.icons.filled.FactCheck
-import androidx.compose.material.icons.filled.Gavel
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Summarize
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -39,27 +31,22 @@ import com.dmytrosamoilov.offhand.core.ui.R
 enum class NotePresetOption(
     @StringRes val labelRes: Int,
     @StringRes val descriptionRes: Int,
-    val icon: ImageVector,
 ) {
     SUMMARY(
         labelRes = R.string.core_ui_note_preset_summary,
         descriptionRes = R.string.core_ui_note_preset_summary_description,
-        icon = Icons.Filled.Summarize,
     ),
     MEETING(
         labelRes = R.string.core_ui_note_preset_meeting,
         descriptionRes = R.string.core_ui_note_preset_meeting_description,
-        icon = Icons.Filled.Groups,
     ),
     VISIT(
         labelRes = R.string.core_ui_note_preset_visit,
         descriptionRes = R.string.core_ui_note_preset_visit_description,
-        icon = Icons.Filled.FactCheck,
     ),
     LEGAL(
         labelRes = R.string.core_ui_note_preset_legal,
         descriptionRes = R.string.core_ui_note_preset_legal_description,
-        icon = Icons.Filled.Gavel,
     ),
 }
 
@@ -87,7 +74,6 @@ fun NotePresetOptionCard(
     NoteStyleCard(
         title = stringResource(option.labelRes),
         description = stringResource(option.descriptionRes),
-        icon = option.icon,
         isSelected = isSelected,
         onClick = onClick,
         modifier = modifier,
@@ -98,11 +84,11 @@ fun NotePresetOptionCard(
 fun NoteStyleCard(
     title: String,
     description: String,
-    icon: ImageVector,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     showProBadge: Boolean = false,
+    trailingActions: @Composable RowScope.() -> Unit = {},
 ) {
     val containerColor by animateColorAsState(
         targetValue = if (isSelected) {
@@ -131,12 +117,7 @@ fun NoteStyleCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp),
-            )
+            RoundedCheckbox(checked = isSelected)
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -153,11 +134,7 @@ fun NoteStyleCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Spacer(modifier = Modifier.width(12.dp))
-            RoundedCheckbox(checked = isSelected)
+            trailingActions()
         }
     }
 }
-
-val CustomNoteStyleIcon: ImageVector
-    get() = Icons.Filled.EditNote

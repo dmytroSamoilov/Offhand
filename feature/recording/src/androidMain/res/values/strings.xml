@@ -29,12 +29,14 @@
     <string name="recording_notification_action_stop">Stop</string>
     <string name="recording_notification_chip" translatable="false">REC</string>
     <string name="recording_notification_processing_title">Creating your note</string>
-    <string name="recording_notification_processing_text">Transcribing and structuring on your phone</string>
+    <string name="recording_notification_processing_text">Turning your recording into a note</string>
     <string name="recording_notification_notes_channel_name">Finished notes</string>
     <string name="recording_notification_ready_title">Your note is ready</string>
-    <string name="recording_notification_ready_text">Tap to open the finished note.</string>
+    <string name="recording_notification_ready_text">Tap to read it.</string>
     <string name="recording_default_note_title">Recording %1$d</string>
     <string name="recording_untitled_note_title">Voice note</string>
-    <string name="recording_notification_note_failed_title">Transcription failed</string>
-    <string name="recording_notification_note_failed_text">The recording is saved. Tap to open it.</string>
+    <string name="recording_notification_note_failed_title">Your note didn\'t finish</string>
+    <string name="recording_notification_note_failed_text">The recording is saved. Tap to open it and try again.</string>
+    <string name="recording_notification_note_paused_title">Your note is paused</string>
+    <string name="recording_notification_note_paused_text">Open Offhand and it will finish.</string>
 </resources>

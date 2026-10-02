@@ -43,4 +43,6 @@ internal fun FolderEntity.toDomain(): Folder = Folder(
     id = id,
     name = name,
     createdAtEpochMs = createdAtEpochMs,
+    style = styleKey?.let(NoteStyleRef::fromStorageKey),
+    position = position,
 )

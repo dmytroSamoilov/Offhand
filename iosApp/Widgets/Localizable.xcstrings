@@ -85,42 +85,42 @@
         }
       }
     },
-    "Open Offhand to finish preparing your note" : {
+    "Open Offhand to finish it" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Öffne Offhand, um deine Notiz fertigzustellen"
+            "value" : "Öffne Offhand, um sie fertigzustellen"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abre Offhand para terminar de preparar tu nota"
+            "value" : "Abre Offhand para terminarla"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "अपना नोट पूरा तैयार करने के लिए Offhand खोलें"
+            "value" : "इसे पूरा करने के लिए Offhand खोलें"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abra o Offhand para terminar de preparar sua nota"
+            "value" : "Abra o Offhand para concluí-la"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Откройте Offhand, чтобы завершить подготовку заметки"
+            "value" : "Откройте Offhand, чтобы завершить"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Відкрийте Offhand, щоб завершити підготовку нотатки"
+            "value" : "Відкрийте Offhand, щоб завершити"
           }
         }
       }
@@ -321,6 +321,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Налаштовуємо ШІ на пристрої"
+          }
+        }
+      }
+    },
+    "Your note is paused" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Notiz ist pausiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu nota está en pausa"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपका नोट रुका हुआ है"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua nota está pausada"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваша заметка приостановлена"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вашу нотатку призупинено"
           }
         }
       }

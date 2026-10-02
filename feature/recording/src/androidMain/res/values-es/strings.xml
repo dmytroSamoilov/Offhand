@@ -27,12 +27,14 @@
     <string name="recording_notification_action_resume">Reanudar</string>
     <string name="recording_notification_action_stop">Detener</string>
     <string name="recording_notification_processing_title">Creando tu nota</string>
-    <string name="recording_notification_processing_text">Transcribiendo y estructurando en tu teléfono</string>
+    <string name="recording_notification_processing_text">Convirtiendo tu grabación en una nota</string>
     <string name="recording_notification_notes_channel_name">Notas terminadas</string>
     <string name="recording_notification_ready_title">Tu nota está lista</string>
-    <string name="recording_notification_ready_text">Toca para abrir la nota terminada.</string>
+    <string name="recording_notification_ready_text">Toca para leerla.</string>
     <string name="recording_default_note_title">Grabación %1$d</string>
     <string name="recording_untitled_note_title">Nota de voz</string>
-    <string name="recording_notification_note_failed_title">La transcripción ha fallado</string>
-    <string name="recording_notification_note_failed_text">La grabación está guardada. Toca para abrirla.</string>
+    <string name="recording_notification_note_failed_title">Tu nota no se terminó</string>
+    <string name="recording_notification_note_failed_text">La grabación está guardada. Toca para abrirla e intentarlo de nuevo.</string>
+    <string name="recording_notification_note_paused_title">Tu nota está en pausa</string>
+    <string name="recording_notification_note_paused_text">Abre Offhand y se terminará.</string>
 </resources>

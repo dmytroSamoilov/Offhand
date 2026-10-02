@@ -32,4 +32,16 @@ tar -xjf "$ARCHIVE" -C "$WORK"
 cp -R "$WORK/build-ios/sherpa-onnx.xcframework" "$FRAMEWORKS/"
 ONNX="$(find "$WORK/build-ios/ios-onnxruntime" -maxdepth 2 -type d -name onnxruntime.xcframework | head -1)"
 cp -R "$ONNX" "$FRAMEWORKS/"
+
+# The release ships bare C headers with no module map, so Swift cannot
+# `import SherpaOnnxC`; each slice gets one pointing at the C API header.
+for HEADERS in "$FRAMEWORKS"/sherpa-onnx.xcframework/*/Headers; do
+  [ -f "$HEADERS/module.modulemap" ] && continue
+  if [ -f "$HEADERS/c-api.h" ]; then
+    C_API="c-api.h"
+  else
+    C_API="sherpa-onnx/c-api/c-api.h"
+  fi
+  printf 'module SherpaOnnxC {\n  header "%s"\n  export *\n}\n' "$C_API" > "$HEADERS/module.modulemap"
+done
 echo "Installed sherpa-onnx.xcframework and onnxruntime.xcframework into $FRAMEWORKS"

@@ -54,7 +54,7 @@ fun CollapsibleCard(
     labelContentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer,
     collapsedMaxHeight: Dp = DEFAULT_COLLAPSED_MAX_HEIGHT,
     initiallyExpanded: Boolean = false,
-    action: CollapsibleCardAction? = null,
+    actions: List<CollapsibleCardAction> = emptyList(),
     content: @Composable () -> Unit,
 ) {
     var isExpanded by rememberSaveable { mutableStateOf(initiallyExpanded) }
@@ -94,7 +94,8 @@ fun CollapsibleCard(
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                if (action != null) {
+                actions.forEachIndexed { index, action ->
+                    if (index > 0) Spacer(modifier = Modifier.width(8.dp))
                     PillIconButton(
                         icon = action.icon,
                         contentDescription = action.contentDescription,

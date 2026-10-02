@@ -7,4 +7,5 @@ enum class ProFeature {
     DOCUMENT_EXPORT,
     SMART_SUGGESTIONS,
     AUDIO_IMPORT,
+    FOLDER_STYLES,
 }

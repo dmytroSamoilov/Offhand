@@ -26,7 +26,7 @@ struct SmartSuggestionsSection: View {
         }
         .padding(.vertical, 20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(cardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .background(cardBackground, in: RoundedRectangle(cornerRadius: Brand.cardRadius))
     }
 
     @ViewBuilder

@@ -24,11 +24,6 @@
     <string name="onboarding_lock_enable_label">Pedir desbloqueo al abrir Offhand</string>
     <string name="onboarding_lock_enable_description">Puedes cambiarlo en cualquier momento en Ajustes.</string>
 
-    <string name="onboarding_download_title">Configura tu IA en el dispositivo</string>
-    <string name="onboarding_download_body">Offhand transcribe y resume notas de voz con IA que se ejecuta por completo en tu teléfono. Para empezar, necesita una descarga única.</string>
-    <string name="onboarding_download_size">Descarga única · unos %1$s GB</string>
-    <string name="onboarding_download_background_hint">La descarga continúa en segundo plano: puedes empezar a grabar ya. Te avisaremos cuando todo esté listo.</string>
-    <string name="onboarding_download_wifi_hint">Consejo: conéctate a una red Wi‑Fi para ahorrar datos móviles.</string>
     <string name="onboarding_notification_download_channel_name">Descargas de IA en el dispositivo</string>
     <string name="onboarding_notification_status_channel_name">Estado de la IA en el dispositivo</string>
     <string name="onboarding_notification_downloading_title">Descargar IA en el dispositivo</string>

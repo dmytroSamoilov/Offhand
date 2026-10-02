@@ -104,6 +104,7 @@ struct AboutSupportView: View {
                     set: { viewModel.onTelemetryChanged(granted: $0) }
                 )
             )
+            .tint(Brand.toggle)
         } header: {
             Text(String(localized: "Privacy"))
         } footer: {
@@ -134,6 +135,7 @@ struct AboutSupportView: View {
                     set: { viewModel.onDeveloperOptionsChanged(enabled: $0) }
                 )
             )
+            .tint(Brand.toggle)
         }
     }
 
