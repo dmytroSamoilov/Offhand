@@ -185,13 +185,17 @@ jobs:
       - name: Seed the import sample
         run: |
           xcrun simctl launch "${{ steps.sim.outputs.udid }}" com.apple.DocumentsApp
-          sleep 5
-          GROUPS="$HOME/Library/Developer/CoreSimulator/Devices/${{ steps.sim.outputs.udid }}/data/Containers/Shared/AppGroup"
+          # GROUPS is a read-only bash variable, so the directory needs another name.
+          GROUP_DIR="$HOME/Library/Developer/CoreSimulator/Devices/${{ steps.sim.outputs.udid }}/data/Containers/Shared/AppGroup"
           STORAGE=""
-          for GROUP in "$GROUPS"/*/; do
-            if plutil -p "$GROUP/.com.apple.mobile_container_manager.metadata.plist" 2>/dev/null | grep -q "FileProvider.LocalStorage"; then
-              STORAGE="$GROUP"
-            fi
+          for ATTEMPT in $(seq 1 12); do
+            for GROUP in "$GROUP_DIR"/*/; do
+              if plutil -p "$GROUP/.com.apple.mobile_container_manager.metadata.plist" 2>/dev/null | grep -q "FileProvider.LocalStorage"; then
+                STORAGE="$GROUP"
+              fi
+            done
+            test -n "$STORAGE" && break
+            sleep 5
           done
           test -n "$STORAGE"
           mkdir -p "$STORAGE/File Provider Storage"
