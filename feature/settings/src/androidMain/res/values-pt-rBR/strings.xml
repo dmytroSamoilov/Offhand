@@ -104,14 +104,14 @@
     <string name="settings_developer_description">Mostrar gerenciamento da IA no dispositivo, aceleração e diagnósticos de processamento.</string>
     <string name="settings_backup_title">Backup e restauração</string>
     <string name="settings_backup_subtitle">Leve suas notas para um novo telefone ou guarde uma cópia.</string>
-    <string name="settings_import_audio_title">Importar áudio</string>
-    <string name="settings_import_audio_subtitle">Transforme arquivos de áudio ou vídeo em notas.</string>
+    <string name="settings_import_audio_title">Importar áudio ou vídeo</string>
+    <string name="settings_import_audio_subtitle">Transforme gravações, memos de voz e vídeos em notas.</string>
     <string name="settings_import_free_left">%1$d de %2$d importações grátis restantes</string>
     <string name="settings_import_unreadable">Alguns dos arquivos não puderam ser lidos.</string>
     <string name="settings_import_one_video">Vídeos são importados um de cada vez. Escolha um único arquivo de vídeo.</string>
     <string name="settings_import_dismiss">OK</string>
     <string name="settings_import_pro_title">Importar com o Offhand Pro</string>
-    <string name="settings_import_pro_body">Transformar gravações de outros apps em notas faz parte do Offhand Pro. Faça upgrade para importar o áudio compartilhado.</string>
+    <string name="settings_import_pro_body">Transformar gravações e vídeos de outros apps em notas faz parte do Offhand Pro. Faça upgrade para importar o arquivo compartilhado.</string>
     <string name="settings_import_pro_cancel">Cancelar</string>
     <string name="settings_import_started_title">Importação iniciada</string>
     <plurals name="settings_import_started">
@@ -119,7 +119,7 @@
         <item quantity="many">%d arquivos estão sendo importados. As notas são criadas em segundo plano e aparecerão na sua lista de notas assim que estiverem prontas.</item>
         <item quantity="other">%d arquivos estão sendo importados. As notas são criadas em segundo plano e aparecerão na sua lista de notas assim que estiverem prontas.</item>
     </plurals>
-    <string name="settings_pro_upgrade_subtitle">Estilos, exportação em PDF e Word, sugestões inteligentes, importações e pastas ilimitadas</string>
+    <string name="settings_pro_upgrade_subtitle">Estilos, exportação em PDF e Word, sugestões inteligentes, importação de áudio e vídeo e pastas ilimitadas</string>
     <string name="settings_pro_upgrade">Fazer upgrade</string>
     <string name="settings_subscription_title">Assinatura</string>
     <string name="settings_subscription_lifetime">Vitalício, seu para sempre</string>

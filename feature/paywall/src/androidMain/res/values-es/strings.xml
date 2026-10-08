@@ -10,7 +10,7 @@
     <string name="paywall_pro_styles">Notas en tu formato</string>
     <string name="paywall_pro_export">Comparte documentos cuidados</string>
     <string name="paywall_pro_suggestions">No pierdas ningún seguimiento</string>
-    <string name="paywall_pro_import">Convierte cualquier grabación en una nota</string>
+    <string name="paywall_pro_import">Convierte cualquier grabación o vídeo en una nota</string>
     <string name="paywall_pro_folders">Tantas carpetas como necesites</string>
     <string name="paywall_pro_backup">Copias con tus grabaciones</string>
     <string name="paywall_pro_more">Las nuevas funciones Pro se incluyen en cuanto salen</string>
@@ -41,14 +41,14 @@
     <string name="paywall_context_note_styles">Elige otro estilo de resumen</string>
     <string name="paywall_context_export">Comparte esta nota en PDF o Word</string>
     <string name="paywall_context_suggestions">Encuentra fechas y tareas en tus notas</string>
-    <string name="paywall_context_import">Convierte tus grabaciones en notas</string>
+    <string name="paywall_context_import">Convierte grabaciones y vídeos en notas</string>
     <string name="paywall_context_folder_styles">Dale a esta carpeta su propio estilo de resumen</string>
     <string name="paywall_context_folders">Ten más de dos carpetas</string>
     <string name="paywall_context_backup_audio">Haz copia también de tus grabaciones</string>
     <string name="paywall_pro_styles_hint">Notas de reunión, Informe de visita, Nota jurídica, tus propios estilos y otro estilo para cualquier nota</string>
     <string name="paywall_pro_export_hint">PDF y Word, listos para clientes, correo e impresión</string>
     <string name="paywall_pro_suggestions_hint">Fechas y tareas directas a tu calendario</string>
-    <string name="paywall_pro_import_hint">Notas de voz, llamadas, vídeos y archivos sin límite (tres gratis para probar)</string>
+    <string name="paywall_pro_import_hint">Notas de voz, llamadas, grabaciones de pantalla y vídeos sin límite (tres gratis para probar)</string>
     <string name="paywall_pro_folders_hint">Cada una con su propio estilo de resumen</string>
     <string name="paywall_pro_backup_hint">Con el audio, siempre cifrado</string>
     <string name="paywall_plan_yearly_monthly">Unos %1$s al mes</string>

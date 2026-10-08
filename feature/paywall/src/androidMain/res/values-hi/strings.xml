@@ -10,7 +10,7 @@
     <string name="paywall_pro_styles">आपके फ़ॉर्मैट में नोट्स</string>
     <string name="paywall_pro_export">सुव्यवस्थित दस्तावेज़ साझा करें</string>
     <string name="paywall_pro_suggestions">कोई फ़ॉलो-अप न छूटे</string>
-    <string name="paywall_pro_import">किसी भी रिकॉर्डिंग को नोट बनाएँ</string>
+    <string name="paywall_pro_import">किसी भी रिकॉर्डिंग या वीडियो को नोट बनाएँ</string>
     <string name="paywall_pro_folders">जितने चाहें उतने फ़ोल्डर</string>
     <string name="paywall_pro_backup">आपकी रिकॉर्डिंग के साथ बैकअप</string>
     <string name="paywall_pro_more">नई Pro सुविधाएँ आते ही शामिल हो जाती हैं</string>
@@ -41,14 +41,14 @@
     <string name="paywall_context_note_styles">कोई दूसरी सारांश शैली चुनें</string>
     <string name="paywall_context_export">यह नोट PDF या Word में साझा करें</string>
     <string name="paywall_context_suggestions">अपने नोट्स में तारीखें और काम ढूँढें</string>
-    <string name="paywall_context_import">अपनी रिकॉर्डिंग को नोट्स में बदलें</string>
+    <string name="paywall_context_import">रिकॉर्डिंग और वीडियो को नोट्स में बदलें</string>
     <string name="paywall_context_folder_styles">इस फ़ोल्डर को अपनी सारांश शैली दें</string>
     <string name="paywall_context_folders">दो से ज़्यादा फ़ोल्डर रखें</string>
     <string name="paywall_context_backup_audio">अपनी रिकॉर्डिंग का भी बैकअप लें</string>
     <string name="paywall_pro_styles_hint">मीटिंग नोट्स, विज़िट रिपोर्ट, कानूनी नोट, आपकी अपनी शैलियाँ और किसी भी नोट के लिए नई शैली</string>
     <string name="paywall_pro_export_hint">PDF और Word, क्लाइंट, ईमेल और प्रिंट के लिए तैयार</string>
     <string name="paywall_pro_suggestions_hint">तारीखें और काम सीधे आपके कैलेंडर में</string>
-    <string name="paywall_pro_import_hint">वॉइस मेमो, कॉल, वीडियो और फ़ाइलें बिना सीमा (तीन मुफ़्त आज़माने के लिए)</string>
+    <string name="paywall_pro_import_hint">वॉइस मेमो, कॉल, स्क्रीन रिकॉर्डिंग और वीडियो फ़ाइलें बिना सीमा (तीन मुफ़्त आज़माने के लिए)</string>
     <string name="paywall_pro_folders_hint">हर एक की अपनी सारांश शैली</string>
     <string name="paywall_pro_backup_hint">ऑडियो सहित, फिर भी एन्क्रिप्टेड</string>
     <string name="paywall_plan_yearly_monthly">लगभग %1$s प्रति माह</string>

@@ -14,7 +14,7 @@
     <string name="paywall_pro_styles">Notes in your format</string>
     <string name="paywall_pro_export">Share polished documents</string>
     <string name="paywall_pro_suggestions">Never miss a follow-up</string>
-    <string name="paywall_pro_import">Turn any recording into a note</string>
+    <string name="paywall_pro_import">Turn any recording or video into a note</string>
     <string name="paywall_pro_folders">As many folders as you need</string>
     <string name="paywall_pro_backup">Backups with your recordings</string>
     <string name="paywall_pro_more">New Pro features are included as they ship</string>
@@ -45,14 +45,14 @@
     <string name="paywall_context_note_styles">Choose a different summary style</string>
     <string name="paywall_context_export">Share this note as PDF or Word</string>
     <string name="paywall_context_suggestions">Find dates and to-dos in your notes</string>
-    <string name="paywall_context_import">Turn your recordings into notes</string>
+    <string name="paywall_context_import">Turn recordings and videos into notes</string>
     <string name="paywall_context_folder_styles">Give this folder its own summary style</string>
     <string name="paywall_context_folders">Keep more than two folders</string>
     <string name="paywall_context_backup_audio">Back up your recordings too</string>
     <string name="paywall_pro_styles_hint">Meeting notes, Visit report, Legal note, your own styles, and a new style for any note</string>
     <string name="paywall_pro_export_hint">PDF and Word, ready for clients, email and print</string>
     <string name="paywall_pro_suggestions_hint">Dates and to-dos straight into your calendar</string>
-    <string name="paywall_pro_import_hint">Voice memos, calls, videos and files without limit (three are free to try)</string>
+    <string name="paywall_pro_import_hint">Voice memos, calls, screen recordings and video files without limit (three are free to try)</string>
     <string name="paywall_pro_folders_hint">Each with its own summary style</string>
     <string name="paywall_pro_backup_hint">Audio included, still encrypted</string>
     <string name="paywall_plan_yearly_monthly">About %1$s a month</string>

@@ -6,7 +6,7 @@ enum ImportNoticeText {
         if case .started = onEnum(of: notice) {
             return String(localized: "Import started")
         }
-        return String(localized: "Import audio")
+        return String(localized: "Import audio or video")
     }
 
     static func message(_ notice: ImportNoticeUi) -> String {

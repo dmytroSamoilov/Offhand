@@ -104,21 +104,21 @@
     <string name="settings_developer_description">Verwaltung der KI auf dem Gerät, Beschleunigung und Verarbeitungsdiagnose anzeigen.</string>
     <string name="settings_backup_title">Sichern &amp; wiederherstellen</string>
     <string name="settings_backup_subtitle">Notizen auf ein neues Handy übertragen oder eine Kopie behalten.</string>
-    <string name="settings_import_audio_title">Audio importieren</string>
-    <string name="settings_import_audio_subtitle">Audio- oder Videodateien in Notizen verwandeln.</string>
+    <string name="settings_import_audio_title">Audio oder Video importieren</string>
+    <string name="settings_import_audio_subtitle">Aufnahmen, Sprachmemos und Videos in Notizen verwandeln.</string>
     <string name="settings_import_free_left">%1$d von %2$d kostenlosen Importen übrig</string>
     <string name="settings_import_unreadable">Einige der Dateien konnten nicht gelesen werden.</string>
     <string name="settings_import_one_video">Videos werden einzeln importiert. Wähle eine einzelne Videodatei.</string>
     <string name="settings_import_dismiss">OK</string>
     <string name="settings_import_pro_title">Importieren mit Offhand Pro</string>
-    <string name="settings_import_pro_body">Aufnahmen aus anderen Apps in Notizen zu verwandeln ist Teil von Offhand Pro. Führe ein Upgrade durch, um das geteilte Audio zu importieren.</string>
+    <string name="settings_import_pro_body">Aufnahmen und Videos aus anderen Apps in Notizen zu verwandeln ist Teil von Offhand Pro. Upgrade, um die geteilte Datei zu importieren.</string>
     <string name="settings_import_pro_cancel">Abbrechen</string>
     <string name="settings_import_started_title">Import gestartet</string>
     <plurals name="settings_import_started">
         <item quantity="one">%d Datei wird importiert. Die Notiz wird im Hintergrund erstellt und erscheint in deiner Notizenliste, sobald sie fertig ist.</item>
         <item quantity="other">%d Dateien werden importiert. Die Notizen werden im Hintergrund erstellt und erscheinen in deiner Notizenliste, sobald sie fertig sind.</item>
     </plurals>
-    <string name="settings_pro_upgrade_subtitle">Stile, PDF- und Word-Export, smarte Vorschläge, Importe und unbegrenzt Ordner</string>
+    <string name="settings_pro_upgrade_subtitle">Stile, PDF- und Word-Export, smarte Vorschläge, Audio- und Video-Import und unbegrenzt Ordner</string>
     <string name="settings_pro_upgrade">Upgrade</string>
     <string name="settings_subscription_title">Abo</string>
     <string name="settings_subscription_lifetime">Lebenslang, gehört dir für immer</string>

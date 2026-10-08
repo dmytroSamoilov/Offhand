@@ -10,7 +10,7 @@
     <string name="paywall_pro_styles">Notizen in deinem Format</string>
     <string name="paywall_pro_export">Gepflegte Dokumente teilen</string>
     <string name="paywall_pro_suggestions">Nie wieder ein Follow-up verpassen</string>
-    <string name="paywall_pro_import">Jede Aufnahme in eine Notiz verwandeln</string>
+    <string name="paywall_pro_import">Jede Aufnahme oder jedes Video wird zur Notiz</string>
     <string name="paywall_pro_folders">So viele Ordner, wie du brauchst</string>
     <string name="paywall_pro_backup">Backups mit deinen Aufnahmen</string>
     <string name="paywall_pro_more">Neue Pro-Funktionen sind enthalten, sobald sie erscheinen</string>
@@ -41,14 +41,14 @@
     <string name="paywall_context_note_styles">Einen anderen Zusammenfassungsstil wählen</string>
     <string name="paywall_context_export">Diese Notiz als PDF oder Word teilen</string>
     <string name="paywall_context_suggestions">Termine und Aufgaben in deinen Notizen finden</string>
-    <string name="paywall_context_import">Deine Aufnahmen in Notizen verwandeln</string>
+    <string name="paywall_context_import">Aufnahmen und Videos in Notizen verwandeln</string>
     <string name="paywall_context_folder_styles">Diesem Ordner einen eigenen Zusammenfassungsstil geben</string>
     <string name="paywall_context_folders">Mehr als zwei Ordner anlegen</string>
     <string name="paywall_context_backup_audio">Auch deine Aufnahmen sichern</string>
     <string name="paywall_pro_styles_hint">Meeting-Notizen, Besuchsbericht, Juristische Notiz, eigene Stile und ein neuer Stil für jede Notiz</string>
     <string name="paywall_pro_export_hint">PDF und Word, bereit für Kunden, E-Mail und Druck</string>
     <string name="paywall_pro_suggestions_hint">Termine und Aufgaben direkt in deinen Kalender</string>
-    <string name="paywall_pro_import_hint">Sprachmemos, Anrufe, Videos und Dateien ohne Limit (drei zum Ausprobieren gratis)</string>
+    <string name="paywall_pro_import_hint">Sprachmemos, Anrufe, Bildschirmaufnahmen und Videodateien ohne Limit (drei zum Ausprobieren gratis)</string>
     <string name="paywall_pro_folders_hint">Jeder mit eigenem Zusammenfassungsstil</string>
     <string name="paywall_pro_backup_hint">Audio inklusive, weiterhin verschlüsselt</string>
     <string name="paywall_plan_yearly_monthly">Etwa %1$s im Monat</string>

@@ -219,7 +219,7 @@ private enum PaywallCopy {
         case .customStyles: return String(localized: "Save your own summary style")
         case .documentExport: return String(localized: "Share this note as PDF or Word")
         case .smartSuggestions: return String(localized: "Find dates and to-dos in your notes")
-        case .audioImport: return String(localized: "Turn your recordings into notes")
+        case .audioImport: return String(localized: "Turn recordings and videos into notes")
         case .folderStyles: return String(localized: "Give this folder its own summary style")
         case .noteStyles: return String(localized: "Choose a different summary style")
         case .folders: return String(localized: "Keep more than two folders")
@@ -275,7 +275,7 @@ private struct ComparisonTable: View {
             Row(id: 5, title: String(localized: "Notes in your format"), hint: String(localized: "Meeting notes, Visit report, Legal note, your own styles, and a new style for any note"), features: [.customStyles, .noteStyles]),
             Row(id: 6, title: String(localized: "Share polished documents"), hint: String(localized: "PDF and Word, ready for clients, email and print"), features: [.documentExport]),
             Row(id: 7, title: String(localized: "Never miss a follow-up"), hint: String(localized: "Dates and to-dos straight into your calendar"), features: [.smartSuggestions]),
-            Row(id: 8, title: String(localized: "Turn any recording into a note"), hint: String(localized: "Voice memos, calls, videos and files without limit (three are free to try)"), features: [.audioImport]),
+            Row(id: 8, title: String(localized: "Turn any recording or video into a note"), hint: String(localized: "Voice memos, calls, screen recordings and video files without limit (three are free to try)"), features: [.audioImport]),
             Row(id: 9, title: String(localized: "As many folders as you need"), hint: String(localized: "Each with its own summary style"), features: [.folderStyles, .folders]),
             Row(id: 10, title: String(localized: "Backups with your recordings"), hint: String(localized: "Audio included, still encrypted"), features: [.backupAudio]),
         ]

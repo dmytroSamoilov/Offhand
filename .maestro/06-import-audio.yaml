@@ -13,9 +13,9 @@ appId: com.dmytrosamoilov.offhand.uitest
       - tapOn: "Settings"
       - scrollUntilVisible:
           element:
-            text: "Import audio"
+            text: "Import audio or video"
           direction: DOWN
-      - tapOn: "Import audio"
+      - tapOn: "Import audio or video"
       - tapOn:
           text: "import-sample.*"
       - extendedWaitUntil:
@@ -38,7 +38,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - tapOn: "Settings"
-      - tapOn: "Import audio"
+      - tapOn: "Import audio or video"
       # The document picker runs out of process and is invisible to Maestro,
       # and it reopens in whatever folder it showed last, so it is driven by
       # position through its search: search field, name, the "On My iPhone"

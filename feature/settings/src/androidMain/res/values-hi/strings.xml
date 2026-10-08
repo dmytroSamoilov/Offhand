@@ -104,21 +104,21 @@
     <string name="settings_developer_description">ऑन-डिवाइस AI प्रबंधन, एक्सेलरेशन और प्रोसेसिंग डायग्नोस्टिक्स दिखाएँ।</string>
     <string name="settings_backup_title">बैकअप और रीस्टोर</string>
     <string name="settings_backup_subtitle">अपने नोट्स नए फ़ोन पर ले जाएं या एक कॉपी रखें।</string>
-    <string name="settings_import_audio_title">ऑडियो इंपोर्ट करें</string>
-    <string name="settings_import_audio_subtitle">ऑडियो या वीडियो फ़ाइलों को नोट्स में बदलें।</string>
+    <string name="settings_import_audio_title">ऑडियो या वीडियो आयात करें</string>
+    <string name="settings_import_audio_subtitle">रिकॉर्डिंग, वॉइस मेमो और वीडियो को नोट्स में बदलें।</string>
     <string name="settings_import_free_left">%2$d में से %1$d मुफ़्त आयात बचे हैं</string>
     <string name="settings_import_unreadable">कुछ फ़ाइलें पढ़ी नहीं जा सकीं।</string>
     <string name="settings_import_one_video">वीडियो एक-एक करके आयात होते हैं। केवल एक वीडियो फ़ाइल चुनें।</string>
     <string name="settings_import_dismiss">ठीक है</string>
     <string name="settings_import_pro_title">Offhand Pro के साथ इंपोर्ट करें</string>
-    <string name="settings_import_pro_body">दूसरे ऐप्स की रिकॉर्डिंग को नोट्स में बदलना Offhand Pro का हिस्सा है। साझा किया गया ऑडियो इंपोर्ट करने के लिए अपग्रेड करें।</string>
+    <string name="settings_import_pro_body">दूसरे ऐप्स की रिकॉर्डिंग और वीडियो को नोट्स में बदलना Offhand Pro का हिस्सा है। साझा की गई फ़ाइल आयात करने के लिए अपग्रेड करें।</string>
     <string name="settings_import_pro_cancel">रद्द करें</string>
     <string name="settings_import_started_title">इंपोर्ट शुरू हुआ</string>
     <plurals name="settings_import_started">
         <item quantity="one">%d फ़ाइल इंपोर्ट हो रही है। नोट बैकग्राउंड में बनता है और तैयार होते ही आपकी नोट्स सूची में दिखेगा।</item>
         <item quantity="other">%d फ़ाइलें इंपोर्ट हो रही हैं। नोट्स बैकग्राउंड में बनते हैं और तैयार होते ही आपकी नोट्स सूची में दिखेंगे।</item>
     </plurals>
-    <string name="settings_pro_upgrade_subtitle">शैलियाँ, PDF और Word निर्यात, स्मार्ट सुझाव, आयात और असीमित फ़ोल्डर</string>
+    <string name="settings_pro_upgrade_subtitle">शैलियाँ, PDF और Word निर्यात, स्मार्ट सुझाव, ऑडियो और वीडियो आयात और असीमित फ़ोल्डर</string>
     <string name="settings_pro_upgrade">अपग्रेड करें</string>
     <string name="settings_subscription_title">सदस्यता</string>
     <string name="settings_subscription_lifetime">आजीवन, हमेशा के लिए आपकी</string>

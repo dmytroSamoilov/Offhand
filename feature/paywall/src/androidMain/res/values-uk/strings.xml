@@ -10,7 +10,7 @@
     <string name="paywall_pro_styles">Нотатки у вашому форматі</string>
     <string name="paywall_pro_export">Охайні документи</string>
     <string name="paywall_pro_suggestions">Не пропускайте follow-up</string>
-    <string name="paywall_pro_import">Будь-який запис стає нотаткою</string>
+    <string name="paywall_pro_import">Будь-який запис чи відео стає нотаткою</string>
     <string name="paywall_pro_folders">Стільки папок, скільки потрібно</string>
     <string name="paywall_pro_backup">Резервні копії із записами</string>
     <string name="paywall_pro_more">Нові функції Pro включено одразу після виходу</string>
@@ -41,14 +41,14 @@
     <string name="paywall_context_note_styles">Вибрати інший стиль резюме</string>
     <string name="paywall_context_export">Поділитися нотаткою у PDF або Word</string>
     <string name="paywall_context_suggestions">Знайти дати й завдання в нотатках</string>
-    <string name="paywall_context_import">Перетворити записи на нотатки</string>
+    <string name="paywall_context_import">Перетворюйте записи й відео на нотатки</string>
     <string name="paywall_context_folder_styles">Задайте цій папці власний стиль резюме</string>
     <string name="paywall_context_folders">Більше двох папок</string>
     <string name="paywall_context_backup_audio">Зберігайте в резервну копію й записи</string>
     <string name="paywall_pro_styles_hint">Нотатки зі зустрічі, Звіт про візит, Юридична нотатка, ваші стилі та новий стиль для будь-якої нотатки</string>
     <string name="paywall_pro_export_hint">PDF і Word, готові для клієнтів, пошти й друку</string>
     <string name="paywall_pro_suggestions_hint">Дати й завдання одразу в календар</string>
-    <string name="paywall_pro_import_hint">Голосові нотатки, дзвінки, відео й файли без обмежень (три можна спробувати безкоштовно)</string>
+    <string name="paywall_pro_import_hint">Голосові нотатки, дзвінки, записи екрана й відеофайли без обмежень (три можна спробувати безкоштовно)</string>
     <string name="paywall_pro_folders_hint">У кожної свій стиль резюме</string>
     <string name="paywall_pro_backup_hint">Разом з аудіо, як і раніше зашифровано</string>
     <string name="paywall_plan_yearly_monthly">Близько %1$s на місяць</string>

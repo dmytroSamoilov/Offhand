@@ -3149,42 +3149,42 @@
         }
       }
     },
-    "Styles, PDF and Word export, smart suggestions, imports and unlimited folders" : {
+    "Styles, PDF and Word export, smart suggestions, audio and video import and unlimited folders" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stile, PDF- und Word-Export, smarte Vorschläge, Importe und unbegrenzt Ordner"
+            "value" : "Stile, PDF- und Word-Export, smarte Vorschläge, Audio- und Video-Import und unbegrenzt Ordner"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estilos, exportación a PDF y Word, sugerencias inteligentes, importaciones y carpetas ilimitadas"
+            "value" : "Estilos, exportación a PDF y Word, sugerencias inteligentes, importación de audio y vídeo y carpetas ilimitadas"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "शैलियाँ, PDF और Word निर्यात, स्मार्ट सुझाव, आयात और असीमित फ़ोल्डर"
+            "value" : "शैलियाँ, PDF और Word निर्यात, स्मार्ट सुझाव, ऑडियो और वीडियो आयात और असीमित फ़ोल्डर"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estilos, exportação em PDF e Word, sugestões inteligentes, importações e pastas ilimitadas"
+            "value" : "Estilos, exportação em PDF e Word, sugestões inteligentes, importação de áudio e vídeo e pastas ilimitadas"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Стили, экспорт в PDF и Word, умные подсказки, импорт и папки без ограничений"
+            "value" : "Стили, экспорт в PDF и Word, умные подсказки, импорт аудио и видео и папки без ограничений"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Стилі, експорт у PDF і Word, розумні підказки, імпорт і папки без обмежень"
+            "value" : "Стилі, експорт у PDF і Word, розумні підказки, імпорт аудіо й відео та папки без обмежень"
           }
         }
       }
@@ -5400,42 +5400,42 @@
         }
       }
     },
-    "Import audio" : {
+    "Import audio or video" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Audio importieren"
+            "value" : "Audio oder Video importieren"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Importar audio"
+            "value" : "Importar audio o vídeo"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ऑडियो इंपोर्ट करें"
+            "value" : "ऑडियो या वीडियो आयात करें"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Importar áudio"
+            "value" : "Importar áudio ou vídeo"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Импорт аудио"
+            "value" : "Импорт аудио или видео"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Імпорт аудіо"
+            "value" : "Імпорт аудіо чи відео"
           }
         }
       }
@@ -12500,82 +12500,82 @@
         }
       }
     },
-    "Turn any recording into a note" : {
+    "Turn any recording or video into a note" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Jede Aufnahme in eine Notiz verwandeln"
+            "value" : "Jede Aufnahme oder jedes Video wird zur Notiz"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Convierte cualquier grabación en una nota"
+            "value" : "Convierte cualquier grabación o vídeo en una nota"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "किसी भी रिकॉर्डिंग को नोट बनाएँ"
+            "value" : "किसी भी रिकॉर्डिंग या वीडियो को नोट बनाएँ"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transforme qualquer gravação em nota"
+            "value" : "Transforme qualquer gravação ou vídeo em nota"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Любая запись становится заметкой"
+            "value" : "Любая запись или видео становится заметкой"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Будь-який запис стає нотаткою"
+            "value" : "Будь-який запис чи відео стає нотаткою"
           }
         }
       }
     },
-    "Turn audio or video files into notes." : {
+    "Turn recordings, voice memos and videos into notes." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Audio- oder Videodateien in Notizen verwandeln."
+            "value" : "Aufnahmen, Sprachmemos und Videos in Notizen verwandeln."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Convierte archivos de audio o vídeo en notas."
+            "value" : "Convierte grabaciones, notas de voz y vídeos en notas."
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ऑडियो या वीडियो फ़ाइलों को नोट्स में बदलें।"
+            "value" : "रिकॉर्डिंग, वॉइस मेमो और वीडियो को नोट्स में बदलें।"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transforme arquivos de áudio ou vídeo em notas."
+            "value" : "Transforme gravações, memos de voz e vídeos em notas."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Превращайте аудио- и видеофайлы в заметки."
+            "value" : "Превращайте записи, голосовые заметки и видео в заметки."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Перетворюйте аудіо- та відеофайли на нотатки."
+            "value" : "Перетворюйте записи, голосові нотатки й відео на нотатки."
           }
         }
       }
@@ -12584,82 +12584,82 @@
       "comment" : "A description of why the user needs to allow microphone access to record a note.",
       "isCommentAutoGenerated" : true
     },
-    "Turn your recordings into notes" : {
+    "Turn recordings and videos into notes" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Deine Aufnahmen in Notizen verwandeln"
+            "value" : "Aufnahmen und Videos in Notizen verwandeln"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Convierte tus grabaciones en notas"
+            "value" : "Convierte grabaciones y vídeos en notas"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "अपनी रिकॉर्डिंग को नोट्स में बदलें"
+            "value" : "रिकॉर्डिंग और वीडियो को नोट्स में बदलें"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transforme suas gravações em notas"
+            "value" : "Transforme gravações e vídeos em notas"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Превратить записи в заметки"
+            "value" : "Превращайте записи и видео в заметки"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Перетворити записи на нотатки"
+            "value" : "Перетворюйте записи й відео на нотатки"
           }
         }
       }
     },
-    "Turning recordings from other apps into notes is part of Offhand Pro. Upgrade to import the shared audio." : {
+    "Turning recordings and videos from other apps into notes is part of Offhand Pro. Upgrade to import the shared file." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aufnahmen aus anderen Apps in Notizen zu verwandeln ist Teil von Offhand Pro. Führe ein Upgrade durch, um das geteilte Audio zu importieren."
+            "value" : "Aufnahmen und Videos aus anderen Apps in Notizen zu verwandeln ist Teil von Offhand Pro. Upgrade, um die geteilte Datei zu importieren."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Convertir grabaciones de otras apps en notas forma parte de Offhand Pro. Pásate a Pro para importar el audio compartido."
+            "value" : "Convertir grabaciones y vídeos de otras apps en notas forma parte de Offhand Pro. Mejora para importar el archivo compartido."
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "दूसरे ऐप्स की रिकॉर्डिंग को नोट्स में बदलना Offhand Pro का हिस्सा है। साझा किया गया ऑडियो इंपोर्ट करने के लिए अपग्रेड करें।"
+            "value" : "दूसरे ऐप्स की रिकॉर्डिंग और वीडियो को नोट्स में बदलना Offhand Pro का हिस्सा है। साझा की गई फ़ाइल आयात करने के लिए अपग्रेड करें।"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transformar gravações de outros apps em notas faz parte do Offhand Pro. Faça upgrade para importar o áudio compartilhado."
+            "value" : "Transformar gravações e vídeos de outros apps em notas faz parte do Offhand Pro. Faça upgrade para importar o arquivo compartilhado."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Превращение записей из других приложений в заметки входит в Offhand Pro. Перейдите на Pro, чтобы импортировать полученное аудио."
+            "value" : "Превращение записей и видео из других приложений в заметки входит в Offhand Pro. Оформите Pro, чтобы импортировать файл."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Перетворення записів з інших застосунків на нотатки входить до Offhand Pro. Перейдіть на Pro, щоб імпортувати отримане аудіо."
+            "value" : "Перетворення записів і відео з інших застосунків на нотатки входить до Offhand Pro. Оформіть Pro, щоб імпортувати файл."
           }
         }
       }
@@ -13105,42 +13105,42 @@
         }
       }
     },
-    "Voice memos, calls, videos and files without limit (three are free to try)" : {
+    "Voice memos, calls, screen recordings and video files without limit (three are free to try)" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sprachmemos, Anrufe, Videos und Dateien ohne Limit (drei zum Ausprobieren gratis)"
+            "value" : "Sprachmemos, Anrufe, Bildschirmaufnahmen und Videodateien ohne Limit (drei zum Ausprobieren gratis)"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notas de voz, llamadas, vídeos y archivos sin límite (tres gratis para probar)"
+            "value" : "Notas de voz, llamadas, grabaciones de pantalla y vídeos sin límite (tres gratis para probar)"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "वॉइस मेमो, कॉल, वीडियो और फ़ाइलें बिना सीमा (तीन मुफ़्त आज़माने के लिए)"
+            "value" : "वॉइस मेमो, कॉल, स्क्रीन रिकॉर्डिंग और वीडियो फ़ाइलें बिना सीमा (तीन मुफ़्त आज़माने के लिए)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Memos de voz, ligações, vídeos e arquivos sem limite (três grátis para experimentar)"
+            "value" : "Memos de voz, ligações, gravações de tela e vídeos sem limite (três grátis para experimentar)"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Голосовые заметки, звонки, видео и файлы без ограничений (три можно попробовать бесплатно)"
+            "value" : "Голосовые заметки, звонки, записи экрана и видеофайлы без ограничений (три можно попробовать бесплатно)"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Голосові нотатки, дзвінки, відео й файли без обмежень (три можна спробувати безкоштовно)"
+            "value" : "Голосові нотатки, дзвінки, записи екрана й відеофайли без обмежень (три можна спробувати безкоштовно)"
           }
         }
       }

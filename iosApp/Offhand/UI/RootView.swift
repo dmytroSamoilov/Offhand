@@ -90,7 +90,7 @@ struct RootView: View {
             Button(String(localized: "Upgrade")) { sharedAudioImport.onUpgradeClicked() }
             Button(String(localized: "Cancel"), role: .cancel) { sharedAudioImport.onImportDeclined() }
         } message: {
-            Text(String(localized: "Turning recordings from other apps into notes is part of Offhand Pro. Upgrade to import the shared audio."))
+            Text(String(localized: "Turning recordings and videos from other apps into notes is part of Offhand Pro. Upgrade to import the shared file."))
         }
         .alert(sharedImportNoticeTitle, isPresented: sharedImportNoticeBinding) {
             Button(String(localized: "OK")) { sharedAudioImport.onNoticeDismissed() }

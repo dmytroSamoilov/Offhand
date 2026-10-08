@@ -77,7 +77,7 @@ struct SettingsView: View {
                         }
                     }
                     SettingsActionRow(
-                        title: String(localized: "Import audio"),
+                        title: String(localized: "Import audio or video"),
                         subtitle: importSubtitle,
                         showsProBadge: !state.isAudioImportUnlocked
                     ) {
@@ -177,7 +177,7 @@ struct SettingsView: View {
                             Text(String(localized: "Offhand Pro"))
                             ProCrown(size: 20)
                         }
-                        Text(String(localized: "Styles, PDF and Word export, smart suggestions, imports and unlimited folders"))
+                        Text(String(localized: "Styles, PDF and Word export, smart suggestions, audio and video import and unlimited folders"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -230,7 +230,7 @@ struct SettingsView: View {
     // The free tier counts its imports down; Pro has nothing to count.
     private var importSubtitle: String {
         guard let left = state.freeImportsLeft else {
-            return String(localized: "Turn audio or video files into notes.")
+            return String(localized: "Turn recordings, voice memos and videos into notes.")
         }
         return String.localizedStringWithFormat(
             String(localized: "%1$d of %2$d free imports left"),

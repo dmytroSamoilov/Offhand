@@ -104,14 +104,14 @@
     <string name="settings_developer_description">Показувати керування ШІ на пристрої, прискорення та діагностику обробки.</string>
     <string name="settings_backup_title">Резервна копія</string>
     <string name="settings_backup_subtitle">Перенесіть нотатки на новий телефон або збережіть копію.</string>
-    <string name="settings_import_audio_title">Імпорт аудіо</string>
-    <string name="settings_import_audio_subtitle">Перетворюйте аудіо- та відеофайли на нотатки.</string>
+    <string name="settings_import_audio_title">Імпорт аудіо чи відео</string>
+    <string name="settings_import_audio_subtitle">Перетворюйте записи, голосові нотатки й відео на нотатки.</string>
     <string name="settings_import_free_left">Залишилося %1$d із %2$d безкоштовних імпортів</string>
     <string name="settings_import_unreadable">Деякі файли не вдалося прочитати.</string>
     <string name="settings_import_one_video">Відео імпортуються по одному. Виберіть один відеофайл.</string>
     <string name="settings_import_dismiss">ОК</string>
     <string name="settings_import_pro_title">Імпорт з Offhand Pro</string>
-    <string name="settings_import_pro_body">Перетворення записів з інших застосунків на нотатки входить до Offhand Pro. Перейдіть на Pro, щоб імпортувати отримане аудіо.</string>
+    <string name="settings_import_pro_body">Перетворення записів і відео з інших застосунків на нотатки входить до Offhand Pro. Оформіть Pro, щоб імпортувати файл.</string>
     <string name="settings_import_pro_cancel">Скасувати</string>
     <string name="settings_import_started_title">Імпорт розпочато</string>
     <plurals name="settings_import_started">
@@ -120,7 +120,7 @@
         <item quantity="many">Імпортується %d файлів. Нотатки створюються у фоні й зʼявляться у списку нотаток, щойно будуть готові.</item>
         <item quantity="other">Імпортується %d файла. Нотатки створюються у фоні й зʼявляться у списку нотаток, щойно будуть готові.</item>
     </plurals>
-    <string name="settings_pro_upgrade_subtitle">Стилі, експорт у PDF і Word, розумні підказки, імпорт і папки без обмежень</string>
+    <string name="settings_pro_upgrade_subtitle">Стилі, експорт у PDF і Word, розумні підказки, імпорт аудіо й відео та папки без обмежень</string>
     <string name="settings_pro_upgrade">Перейти на Pro</string>
     <string name="settings_subscription_title">Підписка</string>
     <string name="settings_subscription_lifetime">Назавжди, ваша без обмежень</string>
