@@ -4,6 +4,7 @@ package com.dmytrosamoilov.offhand.feature.recording.domain
 
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
+import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
@@ -20,8 +21,12 @@ import kotlinx.coroutines.launch
 // Reacts to the model download finishing: notes waiting for the AI core are
 // picked up, and the download time is reported (measured from when this
 // process saw the download running, so a restart mid-download shortens it).
+// A note the system interrupted while the app is already back in front is
+// resumed at once, without waiting for the next foreground return.
 class PendingNotesCoordinator(
     private val aiCoreDownloadStatus: AiCoreDownloadStatus,
+    private val sessionManager: RecordingSessionManager,
+    private val appForegroundState: AppForegroundState,
     private val resumeInterruptedNotes: ResumeInterruptedNotesUseCase,
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
     private val analyticsTracker: AnalyticsTracker,
@@ -37,6 +42,13 @@ class PendingNotesCoordinator(
         scope.launch {
             aiCoreDownloadStatus.state.collect { state ->
                 onDownloadState(state is AiCoreDownloadState.Downloading)
+            }
+        }
+        scope.launch {
+            sessionManager.events.collect { event ->
+                if (event is NoteProcessingEvent.Interrupted && appForegroundState.isInForeground.value) {
+                    resumeInterruptedNotes()
+                }
             }
         }
     }

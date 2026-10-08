@@ -9,6 +9,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleErrors
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleFieldError
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.DeleteCustomNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.DraftNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.GetCustomNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
@@ -65,7 +66,9 @@ class NoteStyleEditorViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel(styleId: Long) = NoteStyleEditorViewModel(styleId, getStyle, saveStyle, draftStyle, isAvailable, gate, mockk(relaxed = true))
+    private val deleteStyle: DeleteCustomNoteStyleUseCase = mockk(relaxed = true)
+
+    private fun viewModel(styleId: Long) = NoteStyleEditorViewModel(styleId, getStyle, saveStyle, deleteStyle, draftStyle, isAvailable, gate, mockk(relaxed = true))
 
     @Test
     fun `new editor starts with one empty section`() {
@@ -208,5 +211,30 @@ class NoteStyleEditorViewModelTest {
 
         coVerify(exactly = 0) { gate.requirePro(any()) }
         coVerify(exactly = 0) { saveStyle(any()) }
+    }
+
+    @Test
+    fun `deleting an existing style confirms first and then closes the editor`() = runTest(dispatcher) {
+        coEvery { getStyle(5L) } returns null
+        val viewModel = viewModel(5L)
+        advanceUntilIdle()
+
+        viewModel.onDeleteRequested()
+        assertTrue(viewModel.uiState.value.isDeleteRequested)
+
+        viewModel.onDeleteConfirmed()
+        advanceUntilIdle()
+
+        coVerify { deleteStyle(5L) }
+        assertTrue(viewModel.uiState.value.isDeleted)
+    }
+
+    @Test
+    fun `a new style has nothing to delete`() {
+        val viewModel = viewModel(0L)
+
+        viewModel.onDeleteRequested()
+
+        assertFalse(viewModel.uiState.value.isDeleteRequested)
     }
 }

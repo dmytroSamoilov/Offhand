@@ -79,10 +79,24 @@ fun RecordingSheetHost(
     viewModel: RecordingViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    // Hosted here, not in the sheet: the sheet closes on stop, and the answer
+    // must still find its way back.
+    val notificationLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted -> viewModel.onNotificationPromptAnswered(granted) }
 
     LaunchedEffect(state.phase, isVisible) {
         if (state.phase == RecordingPhaseUi.RECORDING && !isVisible) {
             onVisibilityChange(true)
+        }
+    }
+    LaunchedEffect(state.isNotificationPromptRequested) {
+        if (!state.isNotificationPromptRequested) return@LaunchedEffect
+        if (needsNotificationPermission(context)) {
+            notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            viewModel.onNotificationPromptSkipped()
         }
     }
 
@@ -258,12 +272,12 @@ private fun hasMicPermission(context: Context): Boolean =
     ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
         PackageManager.PERMISSION_GRANTED
 
-private fun requiredPermissions(): Array<String> =
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.POST_NOTIFICATIONS)
-    } else {
-        arrayOf(Manifest.permission.RECORD_AUDIO)
-    }
+private fun requiredPermissions(): Array<String> = arrayOf(Manifest.permission.RECORD_AUDIO)
+
+private fun needsNotificationPermission(context: Context): Boolean =
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+        PackageManager.PERMISSION_GRANTED
 
 @Composable
 private fun RecordingContent(

@@ -12,5 +12,7 @@
     <string name="core_ui_note_preset_legal_description">Assunto, fatos declarados, instruções, orientações dadas e próximos passos.</string>
     <string name="core_ui_styles_custom_header">Seus estilos</string>
     <string name="core_ui_styles_built_in_header">Integrados</string>
-    <string name="core_ui_styles_create_button">Criar um novo estilo</string>
+    <string name="core_ui_styles_new_button">Novo</string>
+    <string name="core_ui_styles_default_option">Padrão</string>
+    <string name="core_ui_styles_default_option_description">O estilo escolhido em Configurações</string>
 </resources>

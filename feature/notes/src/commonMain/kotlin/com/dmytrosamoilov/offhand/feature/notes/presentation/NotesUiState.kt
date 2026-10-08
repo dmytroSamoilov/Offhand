@@ -22,6 +22,8 @@ data class NotesUiState(
     val folderEditor: FolderEditorUi? = null,
     val pendingDeleteFolderId: Long? = null,
     val moveToFolder: MoveToFolderUi? = null,
+    val folderStylePicker: FolderStylePickerUi? = null,
+    val isFolderStylesUnlocked: Boolean = false,
     val customStyles: List<NoteStyleOptionUi> = emptyList(),
     val importMessage: ImportMessageUi? = null,
     val smartSuggestions: SmartSuggestionsUi? = null,
@@ -70,6 +72,13 @@ data class FolderUi(
     val id: Long,
     val name: String,
     val noteCount: Int,
+    val style: NoteStyleRef? = null,
+)
+
+data class FolderStylePickerUi(
+    val folderId: Long,
+    val folderName: String,
+    val style: NoteStyleRef?,
 )
 
 data class FolderEditorUi(
@@ -90,9 +99,10 @@ data class NoteShareUi(
     val saveToDevice: Boolean = false,
 )
 
-data class ModelPreparationUi(
-    val progressPercent: Int,
-)
+sealed interface ModelPreparationUi {
+    data class Downloading(val progressPercent: Int) : ModelPreparationUi
+    data class WaitingForMobileData(val sizeGb: String) : ModelPreparationUi
+}
 
 data class NotesSectionUi(
     val dayLabel: NoteDayLabelUi,
@@ -140,6 +150,7 @@ data class NoteDetailUi(
 
 enum class NoteStatusUi {
     PROCESSING,
+    INTERRUPTED,
     READY,
     FAILED,
 }

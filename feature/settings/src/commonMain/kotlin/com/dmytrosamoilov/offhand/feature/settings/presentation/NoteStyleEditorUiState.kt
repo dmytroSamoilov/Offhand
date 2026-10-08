@@ -14,6 +14,8 @@ data class NoteStyleEditorUiState(
     val describe: DescribeStyleUi? = null,
     val isSaved: Boolean = false,
     val isLocked: Boolean = false,
+    val isDeleteRequested: Boolean = false,
+    val isDeleted: Boolean = false,
 )
 
 data class DescribeStyleUi(

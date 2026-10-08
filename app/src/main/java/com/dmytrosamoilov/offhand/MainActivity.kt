@@ -5,25 +5,29 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.IntentCompat
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportIntake
 import com.dmytrosamoilov.offhand.feature.recording.service.RecordingService
+import com.dmytrosamoilov.offhand.feature.settings.presentation.AudioImportPicker
+import com.dmytrosamoilov.offhand.feature.settings.presentation.LocalAudioImportPicker
 import com.dmytrosamoilov.offhand.feature.settings.presentation.SharedAudioImportViewModel
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 import com.dmytrosamoilov.offhand.root.RootScreen
 import com.dmytrosamoilov.offhand.root.RootViewModel
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -33,6 +37,12 @@ class MainActivity : FragmentActivity() {
     private val importIntake: AudioImportIntake by inject()
     // Activity-scoped so the dialog host inside RootScreen observes the same instance.
     private val sharedAudioImport: SharedAudioImportViewModel by viewModel()
+    // Registered on the activity, not in Settings: the picker sends the app to
+    // the background, the lock screen replaces Settings, and a launcher there
+    // would be gone when the result comes back.
+    private val audioImportPicker = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+        importAudio(uris)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,11 +57,15 @@ class MainActivity : FragmentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    RootScreen(
-                        viewModel = viewModel,
-                        requestedNoteId = requestedNoteId,
-                        onRequestedNoteConsumed = { requestedNoteId = null },
-                    )
+                    CompositionLocalProvider(
+                        LocalAudioImportPicker provides AudioImportPicker { audioImportPicker.launch(arrayOf(AUDIO_MIME_TYPE)) },
+                    ) {
+                        RootScreen(
+                            viewModel = viewModel,
+                            requestedNoteId = requestedNoteId,
+                            onRequestedNoteConsumed = { requestedNoteId = null },
+                        )
+                    }
                 }
             }
         }
@@ -75,6 +89,10 @@ class MainActivity : FragmentActivity() {
         if (intent?.type?.startsWith(AUDIO_MIME_PREFIX) != true) return
         val uris = sharedAudioUris(intent)
         intent.removeExtra(Intent.EXTRA_STREAM)
+        importAudio(uris)
+    }
+
+    private fun importAudio(uris: List<Uri>) {
         if (uris.isEmpty()) return
         lifecycleScope.launch {
             val staged = uris.map { uri -> importIntake.stage(uri) }
@@ -95,5 +113,6 @@ class MainActivity : FragmentActivity() {
     private companion object {
         const val NO_NOTE_ID = -1L
         const val AUDIO_MIME_PREFIX = "audio/"
+        const val AUDIO_MIME_TYPE = "audio/*"
     }
 }

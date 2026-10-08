@@ -81,3 +81,16 @@ internal val MIGRATION_9_10 = object : Migration(9, 10) {
         )
     }
 }
+
+// Folder styles and a user-defined order; existing folders keep their
+// alphabetical order as their starting positions.
+internal val MIGRATION_10_11 = object : Migration(10, 11) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE folders ADD COLUMN styleKey TEXT")
+        connection.execSQL("ALTER TABLE folders ADD COLUMN position INTEGER NOT NULL DEFAULT 0")
+        connection.execSQL(
+            "UPDATE folders SET position = (SELECT COUNT(*) FROM folders AS earlier " +
+                "WHERE earlier.name COLLATE NOCASE < folders.name COLLATE NOCASE)",
+        )
+    }
+}

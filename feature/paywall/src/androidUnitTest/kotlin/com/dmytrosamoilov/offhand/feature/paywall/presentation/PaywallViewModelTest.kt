@@ -14,6 +14,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -143,12 +144,26 @@ class PaywallViewModelTest {
         verify { gate.onPaywallClosed() }
     }
 
-    private fun createViewModel() = PaywallViewModel(
+    @Test
+    fun `one presentation reports its dismissal once however many controls close it`() = runTest {
+        every { gate.requestedFeature } returns MutableStateFlow(ProFeature.GENERAL)
+        val tracker: AnalyticsTracker = mockk(relaxed = true)
+        val viewModel = createViewModel(tracker)
+        viewModel.onOpened()
+
+        viewModel.onClosed()
+        viewModel.onClosed()
+
+        verify(exactly = 1) { tracker.track(match { it.name == "paywall_dismissed" }) }
+        verify(exactly = 2) { gate.onPaywallClosed() }
+    }
+
+    private fun createViewModel(tracker: AnalyticsTracker = mockk(relaxed = true)) = PaywallViewModel(
         loadProOffers = loadProOffers,
         purchasePro = purchasePro,
         restoreProPurchases = restoreProPurchases,
         observeProStatus = observeProStatus,
         proUpgradeGate = gate,
-        analyticsTracker = mockk(relaxed = true),
+        analyticsTracker = tracker,
     )
 }

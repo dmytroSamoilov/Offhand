@@ -31,7 +31,10 @@ internal class DataStoreUserPreferencesRepository(
                 // until the onboarding step writes their answer.
                 appLockEnabled = preferences[KEY_APP_LOCK_ENABLED]
                     ?: preferences[KEY_ONBOARDING_COMPLETED] ?: false,
-                telemetryConsent = preferences[KEY_TELEMETRY_CONSENT] ?: false,
+                // On until the consent page says otherwise, so Firebase runs from
+                // the first launch and an install that never finishes onboarding
+                // still shows up.
+                telemetryConsent = preferences[KEY_TELEMETRY_CONSENT] ?: true,
                 dynamicColor = preferences[KEY_DYNAMIC_COLOR] ?: false,
                 developerOptions = buildInfo.isDeveloperBuild &&
                     (preferences[KEY_DEVELOPER_OPTIONS] ?: false),
@@ -45,6 +48,7 @@ internal class DataStoreUserPreferencesRepository(
                 noteStyle = NoteStyleRef.fromStorageKey(preferences[KEY_NOTE_STYLE]),
                 proOverride = proOverride(preferences),
                 smartSuggestionsEnabled = preferences[KEY_SMART_SUGGESTIONS] ?: false,
+                notificationsPrompted = preferences[KEY_NOTIFICATIONS_PROMPTED] ?: false,
             )
         }
 
@@ -54,6 +58,10 @@ internal class DataStoreUserPreferencesRepository(
 
     override suspend fun setAppLockEnabled(enabled: Boolean) {
         dataStore.edit { it[KEY_APP_LOCK_ENABLED] = enabled }
+    }
+
+    override suspend fun setNotificationsPrompted() {
+        dataStore.edit { it[KEY_NOTIFICATIONS_PROMPTED] = true }
     }
 
     override suspend fun setTelemetryConsent(granted: Boolean) {
@@ -114,6 +122,7 @@ internal class DataStoreUserPreferencesRepository(
         val KEY_LEGACY_LAST_REVIEW_REQUEST_AT_MS = longPreferencesKey("last_review_request_at_ms")
         val KEY_NOTE_STYLE = stringPreferencesKey("note_preset")
         val KEY_PRO_OVERRIDE = stringPreferencesKey("debug_pro_override")
+        val KEY_NOTIFICATIONS_PROMPTED = booleanPreferencesKey("notifications_prompted")
         val KEY_SMART_SUGGESTIONS = booleanPreferencesKey("smart_suggestions_enabled")
     }
 }

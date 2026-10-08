@@ -1,22 +1,29 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
-import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
-import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.DeleteCustomNoteStyleUseCase
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+// One screen picks the default summary style and opens the editor for the custom ones.
 class NoteStylesViewModel(
     observeCustomNoteStyles: ObserveCustomNoteStylesUseCase,
     isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase,
-    private val deleteCustomNoteStyle: DeleteCustomNoteStyleUseCase,
+    observeNoteStyle: ObserveNoteStyleUseCase,
+    private val setNoteStyle: SetNoteStyleUseCase,
+    private val proUpgradeGate: ProUpgradeGate,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
@@ -34,22 +41,18 @@ class NoteStylesViewModel(
                 mutableUiState.update { it.copy(isUnlocked = unlocked) }
             }
         }
+        viewModelScope.launch {
+            observeNoteStyle().collect { style ->
+                mutableUiState.update { it.copy(selected = style) }
+            }
+        }
     }
 
-    fun onDeleteRequested(id: Long) {
-        mutableUiState.update { it.copy(pendingDeleteId = id) }
-    }
-
-    fun onDeleteDismissed() {
-        mutableUiState.update { it.copy(pendingDeleteId = null) }
-    }
-
-    fun onDeleteConfirmed() {
-        val id = mutableUiState.value.pendingDeleteId ?: return
-        mutableUiState.update { it.copy(pendingDeleteId = null) }
+    fun onStyleSelected(style: NoteStyleRef) {
         launchSafely(showLoading = false) {
-            deleteCustomNoteStyle(id)
-            analyticsTracker.track(AnalyticsEvents.noteStyleDeleted())
+            if (style is NoteStyleRef.Custom && !proUpgradeGate.requirePro(ProFeature.CUSTOM_STYLES)) return@launchSafely
+            setNoteStyle(style)
+            analyticsTracker.track(AnalyticsEvents.defaultStyleChanged(style))
         }
     }
 }

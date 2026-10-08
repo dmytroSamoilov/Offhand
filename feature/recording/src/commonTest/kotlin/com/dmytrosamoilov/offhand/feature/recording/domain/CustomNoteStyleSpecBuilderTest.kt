@@ -76,7 +76,8 @@ class CustomNoteStyleSpecBuilderTest {
         assertTrue(
             spec.overviewRule.contains(
                 "Under \"## Notes\" follow these instructions exactly, even where they differ from every other rule " +
-                    "about form, tone or language: write it as a poem in French.",
+                    "about form, tone or language, and add no list markers, headings or other formatting they do " +
+                    "not ask for: write it as a poem in French.",
             ),
         )
         assertTrue(structure.contains("in English, whatever language the recording is spoken in. Where a section's own instructions"))
@@ -120,6 +121,34 @@ class CustomNoteStyleSpecBuilderTest {
         assertTrue(english.contains("in English, whatever language"))
         assertFalse(english.contains("same language the recording is spoken in"))
         assertTrue(recording.contains("same language the recording is spoken in"))
+    }
+
+    @Test
+    fun `a single free section never hears about bullet lines or other headings`() {
+        val proofread = style.copy(
+            sections = listOf(NoteStyleSection("Proofread", "the transcript, proofread and structured", SectionFormat.FREE)),
+        )
+
+        val spec = CustomNoteStyleSpecBuilder.build(proofread)
+        val structure = ModelPromptSet.Gemma4.structureNote(spec)
+        val polish = ModelPromptSet.Gemma4.polishNote(spec, thinkingEnabled = false)
+
+        assertEquals(listOf("## Proofread"), spec.proseSections)
+        assertTrue(spec.listSections.isEmpty())
+        assertFalse(structure.contains("\"- \""))
+        assertFalse(structure.contains("Every point goes under exactly one heading"))
+        assertFalse(polish.contains("\"- \" line under"))
+        assertTrue(polish.contains("Under \"## Proofread\" keep the text as it is written: no \"- \" lines"))
+        assertTrue(polish.indexOf("the draft follows these instructions") < polish.indexOf("Keep only these section headings"))
+    }
+
+    @Test
+    fun `polish names the bullet sections instead of a generic bullet rule`() {
+        val polish = ModelPromptSet.Gemma4.polishNote(CustomNoteStyleSpecBuilder.build(style), thinkingEnabled = false)
+
+        assertEquals(listOf("## Next steps"), CustomNoteStyleSpecBuilder.build(style).listSections)
+        assertTrue(polish.contains("Keep each point as one \"- \" line under \"## Next steps\"."))
+        assertTrue(polish.contains("Remove a heading that has nothing under it"))
     }
 
     @Test

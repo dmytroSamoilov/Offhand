@@ -3,6 +3,9 @@ package com.dmytrosamoilov.offhand.core.ai.api
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
+import com.dmytrosamoilov.offhand.core.common.ModelDownloadPolicy
+import com.dmytrosamoilov.offhand.core.common.NetworkMonitor
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -24,7 +27,25 @@ class AiCoreDownloadStatusTest {
         every { downloadState } returns speechState
     }
 
-    private val status = AiCoreDownloadStatus(modelManager, speechToText)
+    private val isUnmetered = MutableStateFlow(true)
+    private val networkMonitor = object : NetworkMonitor {
+        override val isUnmetered: StateFlow<Boolean> = this@AiCoreDownloadStatusTest.isUnmetered
+    }
+    private val policy = ModelDownloadPolicy(networkMonitor)
+
+    private val status = AiCoreDownloadStatus(modelManager, speechToText, policy)
+
+    @Test
+    fun `missing models on mobile data wait until the user allows the download`() = runTest {
+        modelState.value = ModelState.NotDownloaded
+        speechState.value = SpeechModelState.NotDownloaded
+        isUnmetered.value = false
+
+        assertEquals(AiCoreDownloadState.WaitingForMobileData(bytesTotal = 4_000L), status.state.first())
+
+        policy.allowMobileData()
+        assertEquals(AiCoreDownloadState.Idle, status.state.first())
+    }
 
     @Test
     fun `idle when nothing is downloading`() = runTest {

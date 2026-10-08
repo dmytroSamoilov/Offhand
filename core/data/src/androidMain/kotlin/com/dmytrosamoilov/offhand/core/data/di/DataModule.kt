@@ -13,6 +13,7 @@ import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_5_6
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_6_7
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_7_8
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_8_9
+import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_10_11
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_9_10
 import com.dmytrosamoilov.offhand.core.data.billing.ForegroundActivityHolder
 import com.dmytrosamoilov.offhand.core.data.billing.PlayProStore
@@ -30,6 +31,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.TranscriptionCheckpointReposi
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatusCache
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatusRepository
+import com.dmytrosamoilov.offhand.core.common.ModelDownloadPolicy
+import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
 import com.dmytrosamoilov.offhand.core.data.domain.ProStore
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
@@ -86,6 +89,7 @@ private fun createNotesDatabase(
             MIGRATION_7_8,
             MIGRATION_8_9,
             MIGRATION_9_10,
+            MIGRATION_10_11,
         )
         .build()
 }
@@ -113,8 +117,10 @@ val coreDataModule = module {
     single<ProStatusCache> { DataStoreProStatusCache(get()) }
     singleOf(::StoreProStatusRepository) bind ProStatusRepository::class
     singleOf(::ProUpgradeCoordinator) bind ProUpgradeGate::class
+    singleOf(::ModelDownloadPolicy)
+    singleOf(::ModelDownloadLauncher)
     single<AnalyticsTracker> {
-        ConsentGatedAnalyticsTracker(get(), get(), CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        ConsentGatedAnalyticsTracker(get(), get(), get(), CoroutineScope(SupervisorJob() + Dispatchers.Default))
     }
     single<DataStore<Preferences>> { createUserPreferencesDataStore(androidContext()) }
     single<UserPreferencesRepository> { DataStoreUserPreferencesRepository(get(), get()) }

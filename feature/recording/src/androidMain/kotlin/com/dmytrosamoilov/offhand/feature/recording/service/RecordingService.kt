@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.designsystem.R as DesignR
@@ -35,6 +36,7 @@ import org.koin.core.component.inject
 class RecordingService : Service(), KoinComponent {
 
     private val sessionManager: RecordingSessionManager by inject()
+    private val appForegroundState: AppForegroundState by inject()
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var observeJob: Job? = null
@@ -153,7 +155,10 @@ class RecordingService : Service(), KoinComponent {
         }
     }
 
+    // Only an app that is out of sight needs telling; in the foreground the
+    // note itself shows what happened.
     private fun notifyProcessingFinished(event: NoteProcessingEvent) {
+        if (appForegroundState.isInForeground.value) return
         val notification = when (event) {
             is NoteProcessingEvent.ImportRejected -> return
             is NoteProcessingEvent.Completed -> noteFinishedNotification(
@@ -165,6 +170,11 @@ class RecordingService : Service(), KoinComponent {
                 noteId = event.noteId,
                 title = getString(R.string.recording_notification_note_failed_title),
                 text = getString(R.string.recording_notification_note_failed_text),
+            )
+            is NoteProcessingEvent.Interrupted -> noteFinishedNotification(
+                noteId = event.noteId,
+                title = getString(R.string.recording_notification_note_paused_title),
+                text = getString(R.string.recording_notification_note_paused_text),
             )
         }
         getSystemService(NotificationManager::class.java)

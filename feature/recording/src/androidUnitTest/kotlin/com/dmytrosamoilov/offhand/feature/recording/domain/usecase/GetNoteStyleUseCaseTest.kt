@@ -8,6 +8,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
@@ -19,7 +20,10 @@ class GetNoteStyleUseCaseTest {
 
     private val preferences: UserPreferencesRepository = mockk()
     private val entitlements: ProStatusRepository = mockk()
-    private val useCase = GetNoteStyleUseCase(preferences, entitlements)
+    private val getFolderStyle: GetFolderStyleUseCase = mockk {
+        coEvery { this@mockk.invoke(any()) } returns null
+    }
+    private val useCase = GetNoteStyleUseCase(preferences, entitlements, getFolderStyle)
 
     @Test
     fun `custom default style is used while unlocked`() = runTest {
@@ -42,6 +46,14 @@ class GetNoteStyleUseCaseTest {
         every { preferences.preferences } returns flowOf(preferences(NoteStyleRef.BuiltIn(NotePreset.LEGAL)))
 
         assertEquals(NoteStyleRef.BuiltIn(NotePreset.LEGAL), useCase())
+    }
+
+    @Test
+    fun `a folder style wins over the default`() = runTest {
+        every { preferences.preferences } returns flowOf(preferences(NoteStyleRef.BuiltIn(NotePreset.LEGAL)))
+        coEvery { getFolderStyle(7L) } returns NoteStyleRef.BuiltIn(NotePreset.MEETING)
+
+        assertEquals(NoteStyleRef.BuiltIn(NotePreset.MEETING), useCase(folderId = 7L))
     }
 
     private fun preferences(style: NoteStyleRef) = UserPreferences(

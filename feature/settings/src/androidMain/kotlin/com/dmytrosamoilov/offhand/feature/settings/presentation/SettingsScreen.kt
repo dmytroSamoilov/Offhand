@@ -1,7 +1,5 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import android.content.Context
 import android.content.Intent
 import android.text.format.DateUtils
@@ -9,12 +7,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -27,15 +23,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -45,19 +40,14 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleChoice
-import com.dmytrosamoilov.offhand.core.ui.component.NoteStylePickerSheet
 import com.dmytrosamoilov.offhand.core.ui.component.label
-import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportIntake
 import com.dmytrosamoilov.offhand.feature.settings.R
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 
 @Composable
 fun SettingsScreen(
@@ -68,14 +58,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val importIntake: AudioImportIntake = koinInject()
-    val importScope = rememberCoroutineScope()
-    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
-        importScope.launch {
-            val staged = uris.map { uri -> importIntake.stage(uri) }
-            viewModel.onAudioImportSelected(staged.filterNotNull(), staged.count { it == null })
-        }
-    }
+    val importPicker = LocalAudioImportPicker.current
 
     LifecycleResumeEffect(Unit) {
         viewModel.onScreenShown()
@@ -84,10 +67,16 @@ fun SettingsScreen(
     LaunchedEffect(state.isImportPickerRequested) {
         if (state.isImportPickerRequested) {
             viewModel.onImportPickerOpened()
-            importLauncher.launch(arrayOf(AUDIO_MIME_TYPE))
+            importPicker.pick()
         }
     }
-    ImportNotice(notice = state.importNotice, onDismiss = viewModel::onImportNoticeDismissed)
+    val context = LocalContext.current
+    LaunchedEffect(state.isRedeemFallbackRequested) {
+        if (state.isRedeemFallbackRequested) {
+            viewModel.onRedeemFallbackOpened()
+            openInPlayStore(context, PLAY_REDEEM_URL)
+        }
+    }
 
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
         Scaffold(
@@ -106,11 +95,11 @@ fun SettingsScreen(
                     status = state.pro,
                     onProCardClick = viewModel::onProCardClicked,
                     onRedeemCodeClick = viewModel::onRedeemCodeClicked,
+                    onRedeemCodeConfirm = viewModel::onRedeemCodeConfirmed,
                 )
                 NotesSection(
                     state = state,
-                    onStyleSelected = viewModel::onNoteStyleSelected,
-                    onManageClick = onNoteStylesClick,
+                    onStylesClick = onNoteStylesClick,
                     onSmartSuggestionsChanged = viewModel::onSmartSuggestionsChanged,
                 )
                 SecuritySection(
@@ -136,23 +125,20 @@ fun SettingsScreen(
     }
 }
 
-// Mirrors the iOS form: one Notes group with the default style, the style
-// manager and the suggestions switch.
+// Mirrors the iOS form: one Notes group with the Summary styles screen (which
+// also holds the default choice) and the suggestions switch.
 @Composable
 private fun NotesSection(
     state: SettingsUiState,
-    onStyleSelected: (NoteStyleRef) -> Unit,
-    onManageClick: () -> Unit,
+    onStylesClick: () -> Unit,
     onSmartSuggestionsChanged: (Boolean) -> Unit,
 ) {
-    var isPickerVisible by remember { mutableStateOf(false) }
     val choices = state.customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) }
     SettingsCard(title = stringResource(R.string.settings_notes_title)) {
-        DefaultStyleRow(label = state.noteStyle.label(choices), onClick = { isPickerVisible = true })
         SettingsLinkRow(
-            title = stringResource(R.string.settings_note_styles_manage),
-            subtitle = stringResource(R.string.settings_note_styles_manage_subtitle),
-            onClick = onManageClick,
+            title = stringResource(R.string.settings_note_styles_title),
+            subtitle = stringResource(R.string.settings_note_styles_default_value, state.noteStyle.label(choices)),
+            onClick = onStylesClick,
         )
         SwitchRow(
             label = stringResource(R.string.settings_smart_suggestions_label),
@@ -160,45 +146,6 @@ private fun NotesSection(
             checked = state.isSmartSuggestionsEnabled,
             onCheckedChange = onSmartSuggestionsChanged,
             showProBadge = !state.isSmartSuggestionsUnlocked,
-        )
-    }
-    if (isPickerVisible) {
-        NoteStylePickerSheet(
-            title = stringResource(R.string.settings_note_style_title),
-            body = stringResource(R.string.settings_note_style_note),
-            selected = state.noteStyle,
-            customStyles = choices,
-            isCustomStylesUnlocked = state.isCustomStylesUnlocked,
-            onSelected = { style ->
-                isPickerVisible = false
-                onStyleSelected(style)
-            },
-            onDismiss = { isPickerVisible = false },
-        )
-    }
-}
-
-@Composable
-private fun DefaultStyleRow(label: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .acrossCardPadding()
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .settingsRowPadding(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = stringResource(R.string.settings_note_style_title),
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f),
-        )
-        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(modifier = Modifier.width(4.dp))
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -240,7 +187,12 @@ private fun AppearanceSection(
 }
 
 @Composable
-private fun ProSection(status: ProStatusUi, onProCardClick: () -> Unit, onRedeemCodeClick: () -> Unit) {
+private fun ProSection(
+    status: ProStatusUi,
+    onProCardClick: () -> Unit,
+    onRedeemCodeClick: () -> Unit,
+    onRedeemCodeConfirm: () -> Unit,
+) {
     val context = LocalContext.current
     SettingsCard(title = stringResource(R.string.settings_subscription_title)) {
         if (status == ProStatusUi.Free) {
@@ -255,21 +207,46 @@ private fun ProSection(status: ProStatusUi, onProCardClick: () -> Unit, onRedeem
                 onClick = { openSubscriptionManagement(context) },
             )
         }
-        RedeemCodeRow(onClick = onRedeemCodeClick)
+        RedeemCodeRow(onClick = onRedeemCodeClick, onConfirm = onRedeemCodeConfirm)
     }
 }
 
-// Play has no in-app redemption sheet; the store's redeem page opens and the
-// foreground refresh picks the purchase up on return.
+// A code is entered inside Play's purchase sheet, behind the arrow next to the
+// payment method (custom codes work nowhere else), so the row explains that
+// before the yearly flow opens.
 @Composable
-private fun RedeemCodeRow(onClick: () -> Unit) {
-    val context = LocalContext.current
+private fun RedeemCodeRow(onClick: () -> Unit, onConfirm: () -> Unit) {
+    var isHintVisible by remember { mutableStateOf(false) }
     SettingsLinkRow(
         title = stringResource(R.string.settings_redeem_code),
         subtitle = null,
         onClick = {
             onClick()
-            openLink(context, PLAY_REDEEM_URL)
+            isHintVisible = true
+        },
+    )
+    if (isHintVisible) {
+        RedeemCodeDialog(
+            onConfirm = {
+                isHintVisible = false
+                onConfirm()
+            },
+            onDismiss = { isHintVisible = false },
+        )
+    }
+}
+
+@Composable
+private fun RedeemCodeDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.settings_redeem_code)) },
+        text = { Text(text = stringResource(R.string.settings_redeem_code_body)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text(text = stringResource(R.string.settings_redeem_code_confirm)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.settings_import_pro_cancel)) }
         },
     )
 }
@@ -278,7 +255,13 @@ private fun openLink(context: Context, url: String) {
     runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
 }
 
+private fun openInPlayStore(context: Context, url: String) {
+    val intent = Intent(Intent.ACTION_VIEW, url.toUri()).setPackage(PLAY_STORE_PACKAGE)
+    runCatching { context.startActivity(intent) }.onFailure { openLink(context, url) }
+}
+
 private const val PLAY_REDEEM_URL = "https://play.google.com/redeem"
+private const val PLAY_STORE_PACKAGE = "com.android.vending"
 
 @Composable
 private fun UpgradeRow(onClick: () -> Unit) {
@@ -315,9 +298,11 @@ private fun ProRow(subtitle: String, onClick: () -> Unit, trailing: @Composable 
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        ProCrown(size = 24.dp)
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = stringResource(R.string.settings_pro_title), style = MaterialTheme.typography.bodyLarge)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(text = stringResource(R.string.settings_pro_title), style = MaterialTheme.typography.bodyLarge)
+                ProCrown(size = 20.dp)
+            }
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
@@ -345,7 +330,7 @@ private fun formatDate(epochMs: Long): String =
 // Play's subscription center for this product; Play requires an in-app way
 // to reach it and it is where cancellation lives.
 private fun openSubscriptionManagement(context: Context) {
-    openLink(context, "https://play.google.com/store/account/subscriptions?sku=offhand_pro&package=${context.packageName}")
+    openInPlayStore(context, "https://play.google.com/store/account/subscriptions?sku=offhand_pro&package=${context.packageName}")
 }
 
 @Composable
@@ -405,7 +390,6 @@ private fun ImportNoticeDialog(title: String, text: String, onDismiss: () -> Uni
     )
 }
 
-private const val AUDIO_MIME_TYPE = "audio/*"
 
 @Composable
 private fun BackupSection(isImportUnlocked: Boolean, onBackupClick: () -> Unit, onImportClick: () -> Unit) {

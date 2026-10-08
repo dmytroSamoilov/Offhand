@@ -26,7 +26,7 @@ class ResumeInterruptedNotesUseCase(
         val activeNoteIds = sessionManager.processingNoteIds.value
         val liveRecordingNoteId = sessionManager.activeRecordingNoteId.value
         notesRepository.observeNotes().first()
-            .filter { it.status == NoteStatus.PROCESSING || it.status == NoteStatus.RECORDING }
+            .filter { it.status in RESUMABLE_STATUSES }
             .filter { it.id !in activeNoteIds && it.id != liveRecordingNoteId }
             .sortedBy { it.createdAtEpochMs }
             .forEach { note -> resume(note) }
@@ -76,6 +76,7 @@ class ResumeInterruptedNotesUseCase(
 
     private companion object {
         const val LOG_TAG = "RecordingSession"
+        val RESUMABLE_STATUSES = setOf(NoteStatus.PROCESSING, NoteStatus.INTERRUPTED, NoteStatus.RECORDING)
         const val PCM_BYTES_PER_SECOND = AudioRecorder.SAMPLE_RATE * 2L
     }
 }

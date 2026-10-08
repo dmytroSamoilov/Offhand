@@ -30,6 +30,8 @@ class PaywallViewModel(
 ) : BaseViewModel() {
 
     private val mutableUiState = MutableStateFlow(PaywallUiState())
+    private var isDismissalTracked = false
+
     val uiState: StateFlow<PaywallUiState> = mutableUiState.asStateFlow()
 
     init {
@@ -46,6 +48,7 @@ class PaywallViewModel(
     // rather than taken from the collected state, which a first presentation
     // may not have received yet.
     fun onOpened() {
+        isDismissalTracked = false
         val feature = proUpgradeGate.requestedFeature.value ?: ProFeature.GENERAL
         mutableUiState.update {
             it.copy(
@@ -102,9 +105,14 @@ class PaywallViewModel(
         mutableUiState.update { it.copy(message = null) }
     }
 
+    // Several controls can close one presentation (the close button, the
+    // free-version link, system back), so the dismissal is reported once.
     fun onClosed() {
         val state = mutableUiState.value
-        if (!state.isPro) analyticsTracker.track(AnalyticsEvents.paywallDismissed(state.feature))
+        if (!state.isPro && !isDismissalTracked) {
+            isDismissalTracked = true
+            analyticsTracker.track(AnalyticsEvents.paywallDismissed(state.feature))
+        }
         proUpgradeGate.onPaywallClosed()
     }
 

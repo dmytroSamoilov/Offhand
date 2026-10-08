@@ -8,7 +8,6 @@ struct SettingsView: View {
     @State private var state = SettingsUiState(
         noteStyle: NoteStyleRefBuiltIn(preset: .summary),
         customStyles: [],
-        isCustomStylesUnlocked: false,
         isDynamicColorEnabled: false,
         isAppLockEnabled: false,
         isDeviceSecure: false,
@@ -18,9 +17,9 @@ struct SettingsView: View {
         pro: ProStatusUiFree.shared,
         proOverride: nil,
         isImportPickerRequested: false,
+        isRedeemFallbackRequested: false,
         importNotice: nil
     )
-    @State private var isPresetPickerVisible = false
     @State private var isAudioImporterPresented = false
 
     var body: some View {
@@ -28,20 +27,19 @@ struct SettingsView: View {
             Form {
                 proSection
                 Section(String(localized: "Notes")) {
-                    SettingsActionRow(
-                        title: String(localized: "Default note style"),
-                        value: NoteStyleLabels.label(for: state.noteStyle, customStyles: state.customStyles)
-                    ) {
-                        isPresetPickerVisible = true
-                    }
                     NavigationLink {
                         NoteStylesView()
                     } label: {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(String(localized: "Manage note styles"))
-                            Text(String(localized: "Create your own headings and format"))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                            Text(String(localized: "Summary styles"))
+                            Text(
+                                String(
+                                    format: String(localized: "Default: %@"),
+                                    NoteStyleLabels.label(for: state.noteStyle, customStyles: state.customStyles)
+                                )
+                            )
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                         }
                     }
                     SettingsSwitchRow(
@@ -71,14 +69,14 @@ struct SettingsView: View {
                     } label: {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(String(localized: "Backup & restore"))
-                            Text(String(localized: "Move your notes to a new iPhone or keep a copy"))
+                            Text(String(localized: "Move your notes to a new iPhone or keep a copy."))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
                     SettingsActionRow(
                         title: String(localized: "Import audio"),
-                        subtitle: String(localized: "Turn audio files into notes. Pick one or several at once"),
+                        subtitle: String(localized: "Turn audio files into notes. Pick one or several at once."),
                         showsProBadge: !state.isAudioImportUnlocked
                     ) {
                         viewModel.onImportAudioClicked()
@@ -112,41 +110,6 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle(String(localized: "Settings"))
-        }
-        .sheet(isPresented: $isPresetPickerVisible) {
-            NavigationStack {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 10) {
-                        if !state.customStyles.isEmpty {
-                            Text(String(localized: "Your styles"))
-                                .font(.footnote.weight(.semibold))
-                                .foregroundStyle(.secondary)
-                            ForEach(state.customStyles, id: \.id) { style in
-                                CustomStyleCard(
-                                    style: style,
-                                    isSelected: state.noteStyle.customId == style.id,
-                                    showProBadge: !state.isCustomStylesUnlocked
-                                ) {
-                                    viewModel.onNoteStyleSelected(style: NoteStyleRefCustom(id: style.id))
-                                    isPresetPickerVisible = false
-                                }
-                            }
-                            Text(String(localized: "Built in"))
-                                .font(.footnote.weight(.semibold))
-                                .foregroundStyle(.secondary)
-                                .padding(.top, 8)
-                        }
-                        NotePresetPicker(selected: state.noteStyle.builtInPreset) { preset in
-                            viewModel.onNoteStyleSelected(style: NoteStyleRefBuiltIn(preset: preset))
-                            isPresetPickerVisible = false
-                        }
-                    }
-                    .padding()
-                }
-                .navigationTitle(String(localized: "Default note style"))
-                .navigationBarTitleDisplayMode(.inline)
-            }
-            .presentationDetents([.medium, .large])
         }
         .onChange(of: scenePhase) {
             // A passcode can be added or removed while this screen is backgrounded.
@@ -207,9 +170,11 @@ struct SettingsView: View {
         if case .free = onEnum(of: state.pro) {
             Section(String(localized: "Subscription")) {
                 HStack(spacing: 12) {
-                    ProCrown(size: 24)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(String(localized: "Offhand Pro"))
+                        HStack(spacing: 8) {
+                            Text(String(localized: "Offhand Pro"))
+                            ProCrown(size: 20)
+                        }
                         Text(String(localized: "Custom styles, PDF and Word export, smart suggestions and audio import"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -232,9 +197,11 @@ struct SettingsView: View {
                     viewModel.onProCardClicked()
                 } label: {
                     HStack(spacing: 12) {
-                        ProCrown(size: 24)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(String(localized: "Offhand Pro"))
+                            HStack(spacing: 8) {
+                                Text(String(localized: "Offhand Pro"))
+                                ProCrown(size: 20)
+                            }
                             Text(proStatusLabel).font(.caption).foregroundStyle(.secondary)
                         }
                         Spacer()
@@ -291,24 +258,6 @@ struct SettingsView: View {
                 .labelsHidden()
             }
         }
-    }
-}
-
-private struct CustomStyleCard: View {
-    let style: CustomStyleOptionUi
-    let isSelected: Bool
-    var showProBadge = false
-    let onSelect: () -> Void
-
-    var body: some View {
-        PresetCard(
-            title: style.name,
-            details: style.description_,
-            symbol: NoteStyleLabels.customSymbol,
-            isSelected: isSelected,
-            showProBadge: showProBadge,
-            action: onSelect
-        )
     }
 }
 
@@ -369,6 +318,7 @@ private struct SettingsSwitchRow: View {
                 }
                 Spacer()
                 Toggle("", isOn: .constant(isOn))
+                    .tint(Brand.toggle)
                     .labelsHidden()
                     .allowsHitTesting(false)
             }

@@ -3,58 +3,63 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
+import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
+import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
 import com.dmytrosamoilov.offhand.core.data.domain.Note
-import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
-import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
-import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
-import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearTranscriptionCheckpointUseCase
-import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.NoteSection
+import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
+import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearTranscriptionCheckpointUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteFolderUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.FolderSaveResult
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.FolderSaveResult
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCalendarSuggestionsAvailableUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsFolderStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
-import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ReorderFoldersUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SetFolderStyleUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.ImportRejection
 import com.dmytrosamoilov.offhand.feature.recording.domain.NoteProcessingEvent
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RequestNoteSuggestionsUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -72,6 +77,9 @@ class NotesViewModel(
     private val renameFolder: RenameFolderUseCase,
     private val deleteFolder: DeleteFolderUseCase,
     private val moveNoteToFolder: MoveNoteToFolderUseCase,
+    private val setFolderStyle: SetFolderStyleUseCase,
+    private val reorderFolders: ReorderFoldersUseCase,
+    isFolderStylesAvailable: IsFolderStylesAvailableUseCase,
     observeDeveloperOptions: ObserveDeveloperOptionsUseCase,
     observeCustomNoteStyles: ObserveCustomNoteStylesUseCase,
     isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase,
@@ -93,7 +101,9 @@ class NotesViewModel(
     private val proUpgradeGate: ProUpgradeGate,
     private val sessionManager: RecordingSessionManager,
     aiCoreDownloadStatus: AiCoreDownloadStatus,
+    private val modelDownloadLauncher: ModelDownloadLauncher,
     private val clearTranscriptionCheckpoint: ClearTranscriptionCheckpointUseCase,
+    private val resumeInterruptedNotes: ResumeInterruptedNotesUseCase,
     buildInfo: BuildInfo,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
@@ -168,6 +178,11 @@ class NotesViewModel(
             }
         }
         viewModelScope.launch {
+            isFolderStylesAvailable().collect { unlocked ->
+                mutableUiState.update { it.copy(isFolderStylesUnlocked = unlocked) }
+            }
+        }
+        viewModelScope.launch {
             observeSmartSuggestions().collect { suggestions ->
                 mutableUiState.update { it.copy(smartSuggestions = suggestions) }
             }
@@ -177,6 +192,10 @@ class NotesViewModel(
                 mutableUiState.update { it.copy(modelPreparation = downloadState.toPreparationUi()) }
             }
         }
+    }
+
+    fun onDownloadOnMobileDataClicked() {
+        modelDownloadLauncher.startOnMobileData()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -229,6 +248,40 @@ class NotesViewModel(
 
     fun onNewFolderRequested() {
         mutableUiState.update { it.copy(folderEditor = FolderEditorUi(folderId = null, name = "")) }
+    }
+
+    fun onFolderStyleRequested(folderId: Long) {
+        val folder = folders.value.firstOrNull { it.id == folderId } ?: return
+        mutableUiState.update {
+            it.copy(folderStylePicker = FolderStylePickerUi(folderId = folder.id, folderName = folder.name, style = folder.style))
+        }
+    }
+
+    fun onFolderStyleDismissed() {
+        mutableUiState.update { it.copy(folderStylePicker = null) }
+    }
+
+    // Giving a folder its own style is the Pro action; going back to the
+    // default is free.
+    fun onFolderStyleSelected(style: NoteStyleRef?) {
+        val picker = mutableUiState.value.folderStylePicker ?: return
+        mutableUiState.update { it.copy(folderStylePicker = null) }
+        launchSafely(showLoading = false) {
+            if (style != null && !proUpgradeGate.requirePro(ProFeature.FOLDER_STYLES)) return@launchSafely
+            setFolderStyle(picker.folderId, style)
+            analyticsTracker.track(AnalyticsEvents.folderStyleChanged(style))
+        }
+    }
+
+    fun onFolderMoved(fromIndex: Int, toIndex: Int) {
+        val current = folders.value
+        if (fromIndex !in current.indices || toIndex !in current.indices || fromIndex == toIndex) return
+        val reordered = current.toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
+        folders.value = reordered
+        launchSafely(showLoading = false) {
+            reorderFolders(reordered.map { it.id })
+            analyticsTracker.track(AnalyticsEvents.foldersReordered())
+        }
     }
 
     fun onRenameFolderRequested(folderId: Long) {
@@ -333,6 +386,7 @@ class NotesViewModel(
 
     private suspend fun maybeRequestReview(note: Note) {
         if (note.status == NoteStatus.READY && shouldRequestReview()) {
+            analyticsTracker.track(AnalyticsEvents.reviewRequested())
             mutableReviewRequests.emit(Unit)
         }
     }
@@ -343,11 +397,14 @@ class NotesViewModel(
         }
     }
 
-    private fun refreshSelected(notes: List<Note>) {
+    // A recording opens its note while it is still processing, so the review
+    // moment is the note becoming ready on screen, not only opening a ready one.
+    private suspend fun refreshSelected(notes: List<Note>) {
         val current = selectedNote ?: return
         val refreshed = notes.firstOrNull { it.id == current.id }
         if (refreshed == null || refreshed == current) return
         selectedNote = refreshed
+        if (current.status != NoteStatus.READY) maybeRequestReview(refreshed)
         mutableUiState.update { state ->
             if (state.editor != null) {
                 state
@@ -562,6 +619,14 @@ class NotesViewModel(
         val note = selectedNote ?: return
         val audioFileName = note.audioFileName ?: return
         recordingProcessController.retryNote(note.id, audioFileName)
+    }
+
+    // Continues an interrupted note from its checkpoint, the same way a return
+    // to the foreground does.
+    fun onResumeProcessingRequested() {
+        launchSafely(showLoading = false) {
+            resumeInterruptedNotes()
+        }
     }
 
     fun onRetranscribeRequested() {

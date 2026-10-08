@@ -1,80 +1,32 @@
 import OffhandShared
 import SwiftUI
 
+// The same list as the restyle sheet: picking a row sets the default for new
+// recordings, custom rows open the editor, where deleting lives.
 struct NoteStylesView: View {
     private let viewModel = AppViewModels.noteStyles
-    @State private var state = NoteStylesUiState(customStyles: [], isUnlocked: false, pendingDeleteId: nil)
+    @State private var state = NoteStylesUiState(
+        customStyles: [],
+        isUnlocked: false,
+        selected: NoteStyleRefBuiltIn(preset: .summary)
+    )
+    @State private var editorStyleId: Int64 = 0
+    @State private var isEditorVisible = false
 
     var body: some View {
-        List {
-            Section(String(localized: "Your styles")) {
-                if state.customStyles.isEmpty {
-                    Text(String(localized: "No custom styles yet. Create one to give the AI your own headings."))
-                        .foregroundStyle(.secondary)
-                }
-                ForEach(state.customStyles, id: \.id) { style in
-                    NavigationLink {
-                        NoteStyleEditorView(styleId: style.id)
-                    } label: {
-                        Label {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(style.name)
-                                Text(style.description_)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        } icon: {
-                            Image(systemName: NoteStyleLabels.customSymbol).foregroundStyle(Brand.primary)
-                        }
-                    }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button(role: .destructive) {
-                            Haptics.confirm()
-                            viewModel.onDeleteRequested(id: style.id)
-                        } label: {
-                            Label(String(localized: "Delete style"), systemImage: "trash")
-                        }
-                    }
-                }
-            }
-            Section(String(localized: "Built in")) {
-                ForEach([NotePreset.summary, .meeting, .visit, .legal], id: \.self) { preset in
-                    Label {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(NoteStyleLabels.label(for: preset))
-                            Text(NoteStyleLabels.details(for: preset))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    } icon: {
-                        Image(systemName: NoteStyleLabels.symbol(for: preset)).foregroundStyle(Brand.primary)
-                    }
-                }
-            }
-        }
-        .navigationTitle(String(localized: "Note styles"))
+        NoteStyleList(
+            current: state.selected,
+            customStyles: state.customStyles.map { NoteStyleChoice(id: $0.id, name: $0.name, details: $0.description_) },
+            isCustomStylesUnlocked: state.isUnlocked,
+            footer: String(localized: "The selected style is used for new recordings. You can change the style of any note from the note itself."),
+            onSelect: { viewModel.onStyleSelected(style: $0) },
+            onCreateStyle: { openEditor(styleId: 0) },
+            onEdit: { openEditor(styleId: $0) }
+        )
+        .navigationTitle(String(localized: "Summary styles"))
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                NavigationLink {
-                    NoteStyleEditorView(styleId: 0)
-                } label: {
-                    if state.isUnlocked {
-                        Label(String(localized: "New style"), systemImage: "plus")
-                    } else {
-                        HStack(spacing: 6) {
-                            Text(String(localized: "New style"))
-                            ProBadge()
-                        }
-                    }
-                }
-            }
-        }
-        .alert(String(localized: "Delete this style?"), isPresented: deleteBinding) {
-            Button(String(localized: "Delete"), role: .destructive) { viewModel.onDeleteConfirmed() }
-            Button(String(localized: "Cancel"), role: .cancel) { viewModel.onDeleteDismissed() }
-        } message: {
-            Text(String(localized: "Notes written with it are kept. They switch to the Summary style the next time they are rewritten."))
+        .navigationDestination(isPresented: $isEditorVisible) {
+            NoteStyleEditorView(styleId: editorStyleId)
         }
         .task {
             for await newState in viewModel.uiState {
@@ -83,10 +35,8 @@ struct NoteStylesView: View {
         }
     }
 
-    private var deleteBinding: Binding<Bool> {
-        Binding(
-            get: { state.pendingDeleteId != nil },
-            set: { isShown in if !isShown { viewModel.onDeleteDismissed() } }
-        )
+    private func openEditor(styleId: Int64) {
+        editorStyleId = styleId
+        isEditorVisible = true
     }
 }

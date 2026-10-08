@@ -26,21 +26,16 @@
     <string name="settings_delete_model_dialog_confirm">Remover</string>
     <string name="settings_delete_model_dialog_cancel">Cancelar</string>
 
-    <string name="settings_note_style_title">Estilo de nota padrão</string>
-    <string name="settings_note_style_note">Vale para novas gravações. Você pode mudar o estilo de uma nota existente na tela da nota.</string>
-    <string name="settings_note_styles_manage">Gerenciar estilos de nota</string>
-    <string name="settings_note_styles_manage_subtitle">Crie seus próprios títulos e formato</string>
-    <string name="settings_note_styles_title">Estilos de nota</string>
-    <string name="settings_note_styles_built_in">Integrados</string>
-    <string name="settings_note_styles_custom">Seus estilos</string>
-    <string name="settings_note_styles_empty">Nenhum estilo próprio ainda. Crie um para dar à IA seus próprios títulos.</string>
-    <string name="settings_note_styles_new">Novo estilo</string>
+    <string name="settings_note_style_note">O estilo selecionado é usado nas novas gravações. Você pode mudar o estilo de qualquer nota na própria nota.</string>
+    <string name="settings_note_styles_default_value">Padrão: %1$s</string>
+    <string name="settings_note_styles_title">Estilos de resumo</string>
+    <string name="settings_note_styles_edit">Editar</string>
     <string name="settings_note_styles_delete">Excluir estilo</string>
     <string name="settings_note_styles_delete_dialog_title">Excluir este estilo?</string>
     <string name="settings_note_styles_delete_dialog_body">As notas escritas com ele são mantidas. Elas passam para o estilo Resumo na próxima vez que forem reescritas.</string>
     <string name="settings_note_styles_delete_dialog_confirm">Excluir</string>
-    <string name="settings_note_style_editor_new_title">Novo estilo de nota</string>
-    <string name="settings_note_style_editor_edit_title">Editar estilo de nota</string>
+    <string name="settings_note_style_editor_new_title">Novo estilo de resumo</string>
+    <string name="settings_note_style_editor_edit_title">Editar estilo de resumo</string>
     <string name="settings_note_style_editor_back">Voltar</string>
     <string name="settings_note_style_editor_save">Salvar</string>
     <string name="settings_note_style_editor_name">Nome</string>
@@ -108,9 +103,9 @@
     <string name="settings_developer_label">Opções de desenvolvedor</string>
     <string name="settings_developer_description">Mostrar gerenciamento da IA no dispositivo, aceleração e diagnósticos de processamento.</string>
     <string name="settings_backup_title">Backup e restauração</string>
-    <string name="settings_backup_subtitle">Leve suas notas para um novo telefone ou guarde uma cópia</string>
+    <string name="settings_backup_subtitle">Leve suas notas para um novo telefone ou guarde uma cópia.</string>
     <string name="settings_import_audio_title">Importar áudio</string>
-    <string name="settings_import_audio_subtitle">Transforme arquivos de áudio em notas. Escolha um ou vários de uma vez</string>
+    <string name="settings_import_audio_subtitle">Transforme arquivos de áudio em notas. Escolha um ou vários de uma vez.</string>
     <string name="settings_import_unreadable">Alguns dos arquivos não puderam ser lidos.</string>
     <string name="settings_import_dismiss">OK</string>
     <string name="settings_import_pro_title">Importar com o Offhand Pro</string>
@@ -140,4 +135,6 @@
     <string name="settings_about_footer">Tudo fica no seu celular. Nada é enviado, nunca.</string>
     <string name="settings_note_style_editor_no_sections">Sem seções, a nota vira um resumo livre.</string>
     <string name="settings_redeem_code">Resgatar um código</string>
+    <string name="settings_redeem_code_body">O Google Play abre o plano anual. Toque na seta ao lado da forma de pagamento, escolha “Resgatar código” e digite seu código. O período de teste dele substitui o padrão.</string>
+    <string name="settings_redeem_code_confirm">Continuar</string>
 </resources>

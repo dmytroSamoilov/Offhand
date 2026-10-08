@@ -14,7 +14,8 @@ final class NoteFinishCoordinator {
     private static let resumeTaskIdentifier = "\(bundleId).finish.resume"
     private static let logger = os.Logger(subsystem: bundleId, category: "FinishTask")
 
-    var onLegacyExpired: (() -> Void)?
+    // Set by the root view: ends the app's own Live Activity in its paused state.
+    static var onExpired: (() -> Void)?
     private var registeredIdentifiers: Set<String> = []
     private var submittedNoteIds: Set<Int64> = []
     private var legacyTaskId: UIBackgroundTaskIdentifier = .invalid
@@ -32,7 +33,7 @@ final class NoteFinishCoordinator {
         let request = BGContinuedProcessingTaskRequest(
             identifier: identifier,
             title: String(localized: "Preparing your note"),
-            subtitle: String(localized: "Transcribing and structuring on your iPhone")
+            subtitle: String(localized: "Turning your recording into a note")
         )
         request.strategy = .queue
         do {
@@ -75,11 +76,16 @@ final class NoteFinishCoordinator {
         let sessionManager = SharedGraph.shared.sessionManager()
         task.progress.totalUnitCount = 100
         let expired = ExpirationFlag()
+        // The system shows a task ended with success: false as failed, and the
+        // note is only paused, so the task is re-titled and closed quietly; the
+        // app's own notification and Live Activity carry the paused state.
         task.expirationHandler = {
             expired.raise()
+            task.updateTitle(String(localized: "Your note is paused"), subtitle: String(localized: "Open Offhand to finish it"))
             scheduleReopenReminder()
             scheduleResume()
-            task.setTaskCompleted(success: false)
+            Task { @MainActor in onExpired?() }
+            task.setTaskCompleted(success: true)
         }
         for await ids in sessionManager.processingNoteIds {
             if expired.isRaised { return }
@@ -104,13 +110,13 @@ final class NoteFinishCoordinator {
         legacyTaskId = UIApplication.shared.beginBackgroundTask(withName: "finish-note") { [weak self] in
             scheduleReopenReminder()
             Self.scheduleResume()
-            self?.onLegacyExpired?()
+            Self.onExpired?()
             self?.endLegacyTask()
         }
         if legacyTaskId == .invalid {
             scheduleReopenReminder()
             Self.scheduleResume()
-            onLegacyExpired?()
+            Self.onExpired?()
         }
     }
 
@@ -218,15 +224,17 @@ private final class ExpirationFlag: @unchecked Sendable {
     }
 }
 
+// The system ending the task is the pause the user will notice, so it is
+// announced as one; the note is not failed and continues on the next return.
 @MainActor
 func scheduleReopenReminder() {
     let center = UNUserNotificationCenter.current()
     center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
         guard granted else { return }
         let content = UNMutableNotificationContent()
-        content.title = String(localized: "Your note isn't finished")
-        content.body = String(localized: "Open Offhand to finish preparing your note.")
+        content.title = String(localized: "Your note is paused")
+        content.body = String(localized: "Open Offhand and it will finish.")
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
-        center.add(UNNotificationRequest(identifier: "note-pending", content: content, trigger: trigger))
+        center.add(UNNotificationRequest(identifier: NoteNotifications.pendingIdentifier, content: content, trigger: trigger))
     }
 }

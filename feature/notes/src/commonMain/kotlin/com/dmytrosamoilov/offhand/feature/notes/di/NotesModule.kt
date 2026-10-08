@@ -18,6 +18,9 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCalendarSuggestionsAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsFolderStylesAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ReorderFoldersUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SetFolderStyleUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteDocumentBuilder
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
@@ -51,6 +54,9 @@ val featureNotesModule = module {
     factoryOf(::IsCalendarSuggestionsAvailableUseCase)
     factoryOf(::IsCustomNoteStylesAvailableUseCase)
     factoryOf(::IsDocumentExportAvailableUseCase)
+    factoryOf(::IsFolderStylesAvailableUseCase)
+    factoryOf(::SetFolderStyleUseCase)
+    factoryOf(::ReorderFoldersUseCase)
     factoryOf(::IsSmartSuggestionsEnabledUseCase)
     factory { NoteDocumentBuilder(get(), get(), get()) }
     factoryOf(::MarkReviewAttemptUseCase)
@@ -72,6 +78,9 @@ val featureNotesModule = module {
             renameFolder = get(),
             deleteFolder = get(),
             moveNoteToFolder = get(),
+            setFolderStyle = get(),
+            reorderFolders = get(),
+            isFolderStylesAvailable = get(),
             observeDeveloperOptions = get(),
             observeCustomNoteStyles = get(),
             isCustomNoteStylesAvailable = get(),
@@ -92,8 +101,10 @@ val featureNotesModule = module {
             isSmartSuggestionsEnabled = get(),
             proUpgradeGate = get(),
             sessionManager = get(),
+            modelDownloadLauncher = get(),
             aiCoreDownloadStatus = get(),
             clearTranscriptionCheckpoint = get(),
+            resumeInterruptedNotes = get(),
             buildInfo = get(),
             analyticsTracker = get(),
         )
