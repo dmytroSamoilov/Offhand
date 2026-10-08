@@ -180,6 +180,7 @@ private data class ComparisonRow(val titleRes: Int, val hintRes: Int?, val featu
 }
 
 private val comparisonRows = listOf(
+    ComparisonRow(R.string.paywall_free_summary, null, emptySet()),
     ComparisonRow(R.string.paywall_free_private, null, emptySet()),
     ComparisonRow(R.string.paywall_free_offline, null, emptySet()),
     ComparisonRow(R.string.paywall_free_no_ads, null, emptySet()),
@@ -202,7 +203,9 @@ private fun ComparisonTable(highlighted: ProFeature) {
         Column(modifier = Modifier.padding(vertical = 8.dp)) {
             TableHeader()
             comparisonRows.forEachIndexed { index, row ->
-                if (index == FREE_ROW_COUNT) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+                if (index > 0 && row.isPro && !comparisonRows[index - 1].isPro) {
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+                }
                 TableRow(row = row, isHighlighted = highlighted in row.features)
             }
             Text(
@@ -512,5 +515,4 @@ private fun openLink(context: Context, url: String) {
 }
 
 private val COLUMN_WIDTH = 56.dp
-private const val FREE_ROW_COUNT = 5
 private const val SUCCESS_DISMISS_MS = 1600L

@@ -84,42 +84,42 @@
         }
       }
     },
-    "Encrypted backup, search and folders" : {
+    "Encrypted backup, search and two folders" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verschlüsseltes Backup, Suche und Ordner"
+            "value" : "Verschlüsseltes Backup, Suche und zwei Ordner"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Copia de seguridad cifrada, búsqueda y carpetas"
+            "value" : "Copia de seguridad cifrada, búsqueda y dos carpetas"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "एन्क्रिप्टेड बैकअप, खोज और फ़ोल्डर"
+            "value" : "एन्क्रिप्टेड बैकअप, खोज और दो फ़ोल्डर"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Backup criptografado, busca e pastas"
+            "value" : "Backup criptografado, busca e duas pastas"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Зашифрованная резервная копия, поиск и папки"
+            "value" : "Зашифрованная резервная копия, поиск и две папки"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Зашифрована резервна копія, пошук і папки"
+            "value" : "Зашифрована резервна копія, пошук і дві папки"
           }
         }
       }
@@ -13105,42 +13105,42 @@
         }
       }
     },
-    "Voice memos, calls, videos and files from other apps" : {
+    "Voice memos, calls, videos and files without limit (three are free to try)" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sprachmemos, Anrufe, Videos und Dateien aus anderen Apps"
+            "value" : "Sprachmemos, Anrufe, Videos und Dateien ohne Limit (drei zum Ausprobieren gratis)"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notas de voz, llamadas, vídeos y archivos de otras apps"
+            "value" : "Notas de voz, llamadas, vídeos y archivos sin límite (tres gratis para probar)"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "वॉइस मेमो, कॉल, वीडियो और दूसरे ऐप्स की फ़ाइलें"
+            "value" : "वॉइस मेमो, कॉल, वीडियो और फ़ाइलें बिना सीमा (तीन मुफ़्त आज़माने के लिए)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Memos de voz, ligações, vídeos e arquivos de outros apps"
+            "value" : "Memos de voz, ligações, vídeos e arquivos sem limite (três grátis para experimentar)"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Голосовые заметки, звонки, видео и файлы из других приложений"
+            "value" : "Голосовые заметки, звонки, видео и файлы без ограничений (три можно попробовать бесплатно)"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Голосові нотатки, дзвінки, відео й файли з інших застосунків"
+            "value" : "Голосові нотатки, дзвінки, відео й файли без обмежень (три можна спробувати безкоштовно)"
           }
         }
       }
@@ -13785,42 +13785,42 @@
         }
       }
     },
-    "Meeting notes, Visit report, Legal note and your own styles" : {
+    "Meeting notes, Visit report, Legal note, your own styles, and a new style for any note" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meeting-Notizen, Besuchsbericht, Juristische Notiz und deine eigenen Stile"
+            "value" : "Meeting-Notizen, Besuchsbericht, Juristische Notiz, eigene Stile und ein neuer Stil für jede Notiz"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notas de reunión, Informe de visita, Nota jurídica y tus propios estilos"
+            "value" : "Notas de reunión, Informe de visita, Nota jurídica, tus propios estilos y otro estilo para cualquier nota"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "मीटिंग नोट्स, विज़िट रिपोर्ट, कानूनी नोट और आपकी अपनी शैलियाँ"
+            "value" : "मीटिंग नोट्स, विज़िट रिपोर्ट, कानूनी नोट, आपकी अपनी शैलियाँ और किसी भी नोट के लिए नई शैली"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notas de reunião, Relatório de visita, Nota jurídica e seus próprios estilos"
+            "value" : "Notas de reunião, Relatório de visita, Nota jurídica, seus próprios estilos e outro estilo para qualquer nota"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Заметки со встречи, Отчёт о визите, Юридическая заметка и ваши стили"
+            "value" : "Заметки со встречи, Отчёт о визите, Юридическая заметка, ваши стили и новый стиль для любой заметки"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Нотатки зі зустрічі, Звіт про візит, Юридична нотатка та ваші стилі"
+            "value" : "Нотатки зі зустрічі, Звіт про візит, Юридична нотатка, ваші стилі та новий стиль для будь-якої нотатки"
           }
         }
       }
@@ -14750,6 +14750,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Показати можливості Pro"
+          }
+        }
+      }
+    },
+    "Transcript and Summary on every note" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transkript und Zusammenfassung zu jeder Notiz"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripción y resumen en cada nota"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "हर नोट में ट्रांसक्रिप्ट और सारांश"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcrição e resumo em toda nota"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Расшифровка и резюме к каждой заметке"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Розшифровка та резюме до кожної нотатки"
           }
         }
       }

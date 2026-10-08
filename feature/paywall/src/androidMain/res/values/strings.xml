@@ -5,11 +5,12 @@
     <string name="paywall_column_pro" translatable="false">Pro</string>
     <string name="paywall_not_included" translatable="false">–</string>
     <string name="paywall_tagline">Get more out of every recording.</string>
+    <string name="paywall_free_summary">Transcript and Summary on every note</string>
     <string name="paywall_free_private">Private by design</string>
     <string name="paywall_free_offline">Fully offline</string>
     <string name="paywall_free_no_ads">No ads, no account</string>
     <string name="paywall_free_unlimited">Unlimited notes and recordings</string>
-    <string name="paywall_free_backup">Encrypted backup, search and folders</string>
+    <string name="paywall_free_backup">Encrypted backup, search and two folders</string>
     <string name="paywall_pro_styles">Notes in your format</string>
     <string name="paywall_pro_export">Share polished documents</string>
     <string name="paywall_pro_suggestions">Never miss a follow-up</string>
@@ -48,10 +49,10 @@
     <string name="paywall_context_folder_styles">Give this folder its own summary style</string>
     <string name="paywall_context_folders">Keep more than two folders</string>
     <string name="paywall_context_backup_audio">Back up your recordings too</string>
-    <string name="paywall_pro_styles_hint">Meeting notes, Visit report, Legal note and your own styles</string>
+    <string name="paywall_pro_styles_hint">Meeting notes, Visit report, Legal note, your own styles, and a new style for any note</string>
     <string name="paywall_pro_export_hint">PDF and Word, ready for clients, email and print</string>
     <string name="paywall_pro_suggestions_hint">Dates and to-dos straight into your calendar</string>
-    <string name="paywall_pro_import_hint">Voice memos, calls, videos and files from other apps</string>
+    <string name="paywall_pro_import_hint">Voice memos, calls, videos and files without limit (three are free to try)</string>
     <string name="paywall_pro_folders_hint">Each with its own summary style</string>
     <string name="paywall_pro_backup_hint">Audio included, still encrypted</string>
     <string name="paywall_plan_yearly_monthly">About %1$s a month</string>

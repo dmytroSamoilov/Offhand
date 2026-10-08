@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="paywall_tagline">Отримуйте більше від кожного запису.</string>
+    <string name="paywall_free_summary">Розшифровка та резюме до кожної нотатки</string>
     <string name="paywall_free_private">Приватність за замовчуванням</string>
     <string name="paywall_free_offline">Повністю офлайн</string>
     <string name="paywall_free_no_ads">Без реклами й без облікового запису</string>
     <string name="paywall_free_unlimited">Необмежено нотаток і записів</string>
-    <string name="paywall_free_backup">Зашифрована резервна копія, пошук і папки</string>
+    <string name="paywall_free_backup">Зашифрована резервна копія, пошук і дві папки</string>
     <string name="paywall_pro_styles">Нотатки у вашому форматі</string>
     <string name="paywall_pro_export">Охайні документи</string>
     <string name="paywall_pro_suggestions">Не пропускайте follow-up</string>
@@ -44,10 +45,10 @@
     <string name="paywall_context_folder_styles">Задайте цій папці власний стиль резюме</string>
     <string name="paywall_context_folders">Більше двох папок</string>
     <string name="paywall_context_backup_audio">Зберігайте в резервну копію й записи</string>
-    <string name="paywall_pro_styles_hint">Нотатки зі зустрічі, Звіт про візит, Юридична нотатка та ваші стилі</string>
+    <string name="paywall_pro_styles_hint">Нотатки зі зустрічі, Звіт про візит, Юридична нотатка, ваші стилі та новий стиль для будь-якої нотатки</string>
     <string name="paywall_pro_export_hint">PDF і Word, готові для клієнтів, пошти й друку</string>
     <string name="paywall_pro_suggestions_hint">Дати й завдання одразу в календар</string>
-    <string name="paywall_pro_import_hint">Голосові нотатки, дзвінки, відео й файли з інших застосунків</string>
+    <string name="paywall_pro_import_hint">Голосові нотатки, дзвінки, відео й файли без обмежень (три можна спробувати безкоштовно)</string>
     <string name="paywall_pro_folders_hint">У кожної свій стиль резюме</string>
     <string name="paywall_pro_backup_hint">Разом з аудіо, як і раніше зашифровано</string>
     <string name="paywall_plan_yearly_monthly">Близько %1$s на місяць</string>

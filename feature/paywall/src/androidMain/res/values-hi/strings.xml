@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="paywall_tagline">हर रिकॉर्डिंग से और ज़्यादा पाएँ।</string>
+    <string name="paywall_free_summary">हर नोट में ट्रांसक्रिप्ट और सारांश</string>
     <string name="paywall_free_private">डिज़ाइन से ही निजी</string>
     <string name="paywall_free_offline">पूरी तरह ऑफ़लाइन</string>
     <string name="paywall_free_no_ads">न विज्ञापन, न खाता</string>
     <string name="paywall_free_unlimited">असीमित नोट्स और रिकॉर्डिंग</string>
-    <string name="paywall_free_backup">एन्क्रिप्टेड बैकअप, खोज और फ़ोल्डर</string>
+    <string name="paywall_free_backup">एन्क्रिप्टेड बैकअप, खोज और दो फ़ोल्डर</string>
     <string name="paywall_pro_styles">आपके फ़ॉर्मैट में नोट्स</string>
     <string name="paywall_pro_export">सुव्यवस्थित दस्तावेज़ साझा करें</string>
     <string name="paywall_pro_suggestions">कोई फ़ॉलो-अप न छूटे</string>
@@ -44,10 +45,10 @@
     <string name="paywall_context_folder_styles">इस फ़ोल्डर को अपनी सारांश शैली दें</string>
     <string name="paywall_context_folders">दो से ज़्यादा फ़ोल्डर रखें</string>
     <string name="paywall_context_backup_audio">अपनी रिकॉर्डिंग का भी बैकअप लें</string>
-    <string name="paywall_pro_styles_hint">मीटिंग नोट्स, विज़िट रिपोर्ट, कानूनी नोट और आपकी अपनी शैलियाँ</string>
+    <string name="paywall_pro_styles_hint">मीटिंग नोट्स, विज़िट रिपोर्ट, कानूनी नोट, आपकी अपनी शैलियाँ और किसी भी नोट के लिए नई शैली</string>
     <string name="paywall_pro_export_hint">PDF और Word, क्लाइंट, ईमेल और प्रिंट के लिए तैयार</string>
     <string name="paywall_pro_suggestions_hint">तारीखें और काम सीधे आपके कैलेंडर में</string>
-    <string name="paywall_pro_import_hint">वॉइस मेमो, कॉल, वीडियो और दूसरे ऐप्स की फ़ाइलें</string>
+    <string name="paywall_pro_import_hint">वॉइस मेमो, कॉल, वीडियो और फ़ाइलें बिना सीमा (तीन मुफ़्त आज़माने के लिए)</string>
     <string name="paywall_pro_folders_hint">हर एक की अपनी सारांश शैली</string>
     <string name="paywall_pro_backup_hint">ऑडियो सहित, फिर भी एन्क्रिप्टेड</string>
     <string name="paywall_plan_yearly_monthly">लगभग %1$s प्रति माह</string>

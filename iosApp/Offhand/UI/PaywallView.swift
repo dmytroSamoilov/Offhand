@@ -266,15 +266,16 @@ private struct ComparisonTable: View {
 
     private var rows: [Row] {
         [
+            Row(id: 11, title: String(localized: "Transcript and Summary on every note"), hint: nil, features: []),
             Row(id: 0, title: String(localized: "Private by design"), hint: nil, features: []),
             Row(id: 1, title: String(localized: "Fully offline"), hint: nil, features: []),
             Row(id: 2, title: String(localized: "No ads, no account"), hint: nil, features: []),
             Row(id: 3, title: String(localized: "Unlimited notes and recordings"), hint: nil, features: []),
-            Row(id: 4, title: String(localized: "Encrypted backup, search and folders"), hint: nil, features: []),
-            Row(id: 5, title: String(localized: "Notes in your format"), hint: String(localized: "Meeting notes, Visit report, Legal note and your own styles"), features: [.customStyles, .noteStyles]),
+            Row(id: 4, title: String(localized: "Encrypted backup, search and two folders"), hint: nil, features: []),
+            Row(id: 5, title: String(localized: "Notes in your format"), hint: String(localized: "Meeting notes, Visit report, Legal note, your own styles, and a new style for any note"), features: [.customStyles, .noteStyles]),
             Row(id: 6, title: String(localized: "Share polished documents"), hint: String(localized: "PDF and Word, ready for clients, email and print"), features: [.documentExport]),
             Row(id: 7, title: String(localized: "Never miss a follow-up"), hint: String(localized: "Dates and to-dos straight into your calendar"), features: [.smartSuggestions]),
-            Row(id: 8, title: String(localized: "Turn any recording into a note"), hint: String(localized: "Voice memos, calls, videos and files from other apps"), features: [.audioImport]),
+            Row(id: 8, title: String(localized: "Turn any recording into a note"), hint: String(localized: "Voice memos, calls, videos and files without limit (three are free to try)"), features: [.audioImport]),
             Row(id: 9, title: String(localized: "As many folders as you need"), hint: String(localized: "Each with its own summary style"), features: [.folderStyles, .folders]),
             Row(id: 10, title: String(localized: "Backups with your recordings"), hint: String(localized: "Audio included, still encrypted"), features: [.backupAudio]),
         ]

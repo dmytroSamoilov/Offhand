@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="paywall_tagline">Hol mehr aus jeder Aufnahme heraus.</string>
+    <string name="paywall_free_summary">Transkript und Zusammenfassung zu jeder Notiz</string>
     <string name="paywall_free_private">Privatsphäre von Grund auf</string>
     <string name="paywall_free_offline">Komplett offline</string>
     <string name="paywall_free_no_ads">Keine Werbung, kein Konto</string>
     <string name="paywall_free_unlimited">Unbegrenzt Notizen und Aufnahmen</string>
-    <string name="paywall_free_backup">Verschlüsseltes Backup, Suche und Ordner</string>
+    <string name="paywall_free_backup">Verschlüsseltes Backup, Suche und zwei Ordner</string>
     <string name="paywall_pro_styles">Notizen in deinem Format</string>
     <string name="paywall_pro_export">Gepflegte Dokumente teilen</string>
     <string name="paywall_pro_suggestions">Nie wieder ein Follow-up verpassen</string>
@@ -44,10 +45,10 @@
     <string name="paywall_context_folder_styles">Diesem Ordner einen eigenen Zusammenfassungsstil geben</string>
     <string name="paywall_context_folders">Mehr als zwei Ordner anlegen</string>
     <string name="paywall_context_backup_audio">Auch deine Aufnahmen sichern</string>
-    <string name="paywall_pro_styles_hint">Meeting-Notizen, Besuchsbericht, Juristische Notiz und deine eigenen Stile</string>
+    <string name="paywall_pro_styles_hint">Meeting-Notizen, Besuchsbericht, Juristische Notiz, eigene Stile und ein neuer Stil für jede Notiz</string>
     <string name="paywall_pro_export_hint">PDF und Word, bereit für Kunden, E-Mail und Druck</string>
     <string name="paywall_pro_suggestions_hint">Termine und Aufgaben direkt in deinen Kalender</string>
-    <string name="paywall_pro_import_hint">Sprachmemos, Anrufe, Videos und Dateien aus anderen Apps</string>
+    <string name="paywall_pro_import_hint">Sprachmemos, Anrufe, Videos und Dateien ohne Limit (drei zum Ausprobieren gratis)</string>
     <string name="paywall_pro_folders_hint">Jeder mit eigenem Zusammenfassungsstil</string>
     <string name="paywall_pro_backup_hint">Audio inklusive, weiterhin verschlüsselt</string>
     <string name="paywall_plan_yearly_monthly">Etwa %1$s im Monat</string>
