@@ -2,7 +2,6 @@ package com.dmytrosamoilov.offhand.feature.onboarding.presentation
 
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.device.DeviceCapabilityChecker
@@ -10,14 +9,13 @@ import com.dmytrosamoilov.offhand.core.device.isLocalLlmCapable
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.CompleteOnboardingUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetAppLockEnabledUseCase
-import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetNotePresetUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetTelemetryConsentUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-// Four pages, then the app: the on-device AI download starts by itself the
+// Three pages, then the app: the on-device AI download starts by itself the
 // moment the device check passes (on Wi-Fi, or on mobile data once the user
 // asks for it from the notes list), and notifications are asked for after the
 // first recording instead of here.
@@ -27,7 +25,6 @@ class OnboardingViewModel(
     private val appLockManager: AppLockManager,
     private val setAppLockEnabled: SetAppLockEnabledUseCase,
     private val setTelemetryConsent: SetTelemetryConsentUseCase,
-    private val setNotePreset: SetNotePresetUseCase,
     private val completeOnboarding: CompleteOnboardingUseCase,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
@@ -42,14 +39,6 @@ class OnboardingViewModel(
     fun onPrivacyContinue() {
         trackStep(OnboardingStep.PRIVACY)
         moveToNextPage()
-    }
-
-    fun onNoteStyleSelected(preset: NotePreset) {
-        mutableUiState.update { it.copy(notePreset = preset) }
-    }
-
-    fun onNoteStyleContinue() {
-        commitAndMoveOn(OnboardingStep.NOTE_STYLE)
     }
 
     fun onAppLockToggled(enabled: Boolean) {
@@ -111,7 +100,6 @@ class OnboardingViewModel(
     private suspend fun commitStep(step: OnboardingStep) {
         val current = uiState.value
         when (step) {
-            OnboardingStep.NOTE_STYLE -> setNotePreset(current.notePreset)
             // A device with no passcode has nothing to authenticate against, so
             // the answer is no regardless of how the toggle was left.
             OnboardingStep.DEVICE_LOCK ->
@@ -135,7 +123,6 @@ class OnboardingViewModel(
 
     private fun buildPages(): List<OnboardingStep> = listOf(
         OnboardingStep.PRIVACY,
-        OnboardingStep.NOTE_STYLE,
         OnboardingStep.DEVICE_LOCK,
         OnboardingStep.TELEMETRY_CONSENT,
     )

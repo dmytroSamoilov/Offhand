@@ -6,8 +6,9 @@ import androidx.compose.runtime.staticCompositionLocalOf
 // lock screen replaces Settings before the result arrives. The activity owns
 // the launcher and hands the result to the activity-scoped import flow, and
 // Settings only asks for the picker through this seam.
+// allowMultiple: several files at once are Pro, a free import is one file.
 fun interface AudioImportPicker {
-    fun pick()
+    fun pick(allowMultiple: Boolean)
 }
 
 val LocalAudioImportPicker = staticCompositionLocalOf<AudioImportPicker> {

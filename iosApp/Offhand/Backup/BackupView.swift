@@ -5,7 +5,8 @@ import UniformTypeIdentifiers
 struct BackupView: View {
     private let viewModel = AppViewModels.backup
     @State private var state = BackupUiState(
-        includeAudio: true,
+        includeAudio: false,
+        isAudioUnlocked: false,
         includeStyles: true,
         passphrase: "",
         passphraseConfirmation: "",
@@ -196,10 +197,15 @@ private struct BackupSheet: View {
                     Text(BackupFileNames.shared.EXTENSION)
                         .foregroundStyle(.secondary)
                 }
-                Toggle(String(localized: "Include audio recordings"), isOn: Binding(
+                Toggle(isOn: Binding(
                     get: { state.includeAudio },
                     set: { viewModel.onIncludeAudioChanged(enabled: $0) }
-                ))
+                )) {
+                    HStack(spacing: 8) {
+                        Text(String(localized: "Include audio recordings"))
+                        if !state.isAudioUnlocked { ProBadge() }
+                    }
+                }
                 .tint(Brand.toggle)
                 Toggle(String(localized: "Include summary styles"), isOn: Binding(
                     get: { state.includeStyles },

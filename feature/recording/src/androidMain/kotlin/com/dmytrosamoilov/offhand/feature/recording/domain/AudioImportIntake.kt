@@ -3,6 +3,7 @@ package com.dmytrosamoilov.offhand.feature.recording.domain
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import com.dmytrosamoilov.offhand.core.data.domain.AudioImportKind
 import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
 import java.io.File
 import java.util.UUID
@@ -28,7 +29,7 @@ class AudioImportIntake(
             target.delete()
             return@withContext null
         }
-        AudioImportSource(handle = target.absolutePath, displayName = displayName)
+        AudioImportSource(handle = target.absolutePath, displayName = displayName, kind = kindOf(uri))
     }
 
     // Staged copies that never reached the decoder, such as a share that
@@ -36,6 +37,9 @@ class AudioImportIntake(
     override suspend fun discard(sources: List<AudioImportSource>) = withContext(Dispatchers.IO) {
         sources.forEach { source -> File(source.handle).delete() }
     }
+
+    private fun kindOf(uri: Uri): AudioImportKind =
+        if (context.contentResolver.getType(uri)?.startsWith(VIDEO_MIME_PREFIX) == true) AudioImportKind.VIDEO else AudioImportKind.AUDIO
 
     private fun importDirectory(): File = File(context.cacheDir, IMPORT_DIRECTORY).apply { mkdirs() }
 
@@ -50,5 +54,6 @@ class AudioImportIntake(
     private companion object {
         const val IMPORT_DIRECTORY = "imports"
         const val DEFAULT_NAME = "audio"
+        const val VIDEO_MIME_PREFIX = "video/"
     }
 }

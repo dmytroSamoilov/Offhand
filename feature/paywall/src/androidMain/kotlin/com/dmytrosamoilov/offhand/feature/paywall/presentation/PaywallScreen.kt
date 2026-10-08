@@ -175,19 +175,22 @@ private fun Header(feature: ProFeature) {
     }
 }
 
-private data class ComparisonRow(val titleRes: Int, val hintRes: Int?, val feature: ProFeature?)
+private data class ComparisonRow(val titleRes: Int, val hintRes: Int?, val features: Set<ProFeature>) {
+    val isPro: Boolean get() = features.isNotEmpty()
+}
 
 private val comparisonRows = listOf(
-    ComparisonRow(R.string.paywall_free_private, null, null),
-    ComparisonRow(R.string.paywall_free_offline, null, null),
-    ComparisonRow(R.string.paywall_free_no_ads, null, null),
-    ComparisonRow(R.string.paywall_free_unlimited, null, null),
-    ComparisonRow(R.string.paywall_free_backup, null, null),
-    ComparisonRow(R.string.paywall_pro_styles, R.string.paywall_pro_styles_hint, ProFeature.CUSTOM_STYLES),
-    ComparisonRow(R.string.paywall_pro_export, R.string.paywall_pro_export_hint, ProFeature.DOCUMENT_EXPORT),
-    ComparisonRow(R.string.paywall_pro_suggestions, R.string.paywall_pro_suggestions_hint, ProFeature.SMART_SUGGESTIONS),
-    ComparisonRow(R.string.paywall_pro_import, R.string.paywall_pro_import_hint, ProFeature.AUDIO_IMPORT),
-    ComparisonRow(R.string.paywall_pro_folders, R.string.paywall_pro_folders_hint, ProFeature.FOLDER_STYLES),
+    ComparisonRow(R.string.paywall_free_private, null, emptySet()),
+    ComparisonRow(R.string.paywall_free_offline, null, emptySet()),
+    ComparisonRow(R.string.paywall_free_no_ads, null, emptySet()),
+    ComparisonRow(R.string.paywall_free_unlimited, null, emptySet()),
+    ComparisonRow(R.string.paywall_free_backup, null, emptySet()),
+    ComparisonRow(R.string.paywall_pro_styles, R.string.paywall_pro_styles_hint, setOf(ProFeature.CUSTOM_STYLES, ProFeature.NOTE_STYLES)),
+    ComparisonRow(R.string.paywall_pro_export, R.string.paywall_pro_export_hint, setOf(ProFeature.DOCUMENT_EXPORT)),
+    ComparisonRow(R.string.paywall_pro_suggestions, R.string.paywall_pro_suggestions_hint, setOf(ProFeature.SMART_SUGGESTIONS)),
+    ComparisonRow(R.string.paywall_pro_import, R.string.paywall_pro_import_hint, setOf(ProFeature.AUDIO_IMPORT)),
+    ComparisonRow(R.string.paywall_pro_folders, R.string.paywall_pro_folders_hint, setOf(ProFeature.FOLDER_STYLES, ProFeature.FOLDERS)),
+    ComparisonRow(R.string.paywall_pro_backup, R.string.paywall_pro_backup_hint, setOf(ProFeature.BACKUP_AUDIO)),
 )
 
 @Composable
@@ -200,7 +203,7 @@ private fun ComparisonTable(highlighted: ProFeature) {
             TableHeader()
             comparisonRows.forEachIndexed { index, row ->
                 if (index == FREE_ROW_COUNT) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
-                TableRow(row = row, isHighlighted = row.feature != null && row.feature == highlighted)
+                TableRow(row = row, isHighlighted = highlighted in row.features)
             }
             Text(
                 text = stringResource(R.string.paywall_pro_more),
@@ -258,7 +261,7 @@ private fun TableRow(row: ComparisonRow, isHighlighted: Boolean) {
                 Text(text = stringResource(hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        CheckCell(isIncluded = row.feature == null, tint = MaterialTheme.colorScheme.primary)
+        CheckCell(isIncluded = !row.isPro, tint = MaterialTheme.colorScheme.primary)
         CheckCell(isIncluded = true, tint = ProGold)
     }
 }
@@ -466,7 +469,7 @@ private fun ProOfferUi.hintLabel(): String = when {
 private fun ProOfferUi.secondHintLabel(): String? = when (plan) {
     ProPlan.YEARLY -> monthlyPrice?.let { stringResource(R.string.paywall_plan_yearly_monthly, it) }
     ProPlan.LIFETIME -> yearsOfYearly?.let { pluralStringResource(R.plurals.paywall_plan_lifetime_vs_yearly, it, it) }
-    ProPlan.NONE -> null
+    ProPlan.NONE, ProPlan.INCLUDED -> null
 }
 
 @Composable
@@ -495,6 +498,9 @@ private fun ProFeature.headlineRes(): Int = when (this) {
     ProFeature.SMART_SUGGESTIONS -> R.string.paywall_context_suggestions
     ProFeature.AUDIO_IMPORT -> R.string.paywall_context_import
     ProFeature.FOLDER_STYLES -> R.string.paywall_context_folder_styles
+    ProFeature.NOTE_STYLES -> R.string.paywall_context_note_styles
+    ProFeature.FOLDERS -> R.string.paywall_context_folders
+    ProFeature.BACKUP_AUDIO -> R.string.paywall_context_backup_audio
 }
 
 private fun openLink(context: Context, url: String) {

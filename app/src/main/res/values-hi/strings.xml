@@ -7,4 +7,8 @@
     <string name="lock_unlock_button">अनलॉक करें</string>
     <string name="lock_prompt_title">Offhand अनलॉक करें</string>
     <string name="lock_prompt_subtitle">अपना स्क्रीन लॉक या फ़िंगरप्रिंट इस्तेमाल करें</string>
+    <string name="early_adopter_title">Offhand Pro आपका है</string>
+    <string name="early_adopter_body">आप 1.5 से पहले से यहाँ थे, जब Offhand अभी कच्चा था। इसे मेरे साथ आज़माने के लिए धन्यवाद। धन्यवाद के तौर पर Offhand Pro की हर चीज़ इस फ़ोन पर हमेशा के लिए खुली है। न कोई ख़रीद, न कोई खाता।\n\nएक बात: Pro सिर्फ़ इसी फ़ोन पर रहता है। अगर आप Offhand हटाते या दोबारा इंस्टॉल करते हैं, या नया फ़ोन लेते हैं, तो यह वापस नहीं आएगा।</string>
+    <string name="early_adopter_benefits">Pro के फ़ायदे देखें</string>
+    <string name="early_adopter_confirm">समझ गया</string>
 </resources>

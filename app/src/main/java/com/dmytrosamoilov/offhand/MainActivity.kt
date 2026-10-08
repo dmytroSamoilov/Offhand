@@ -43,6 +43,9 @@ class MainActivity : FragmentActivity() {
     private val audioImportPicker = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         importAudio(uris)
     }
+    private val singleAudioImportPicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        importAudio(listOfNotNull(uri))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,7 +61,7 @@ class MainActivity : FragmentActivity() {
                     color = MaterialTheme.colorScheme.background,
                 ) {
                     CompositionLocalProvider(
-                        LocalAudioImportPicker provides AudioImportPicker { audioImportPicker.launch(arrayOf(AUDIO_MIME_TYPE)) },
+                        LocalAudioImportPicker provides AudioImportPicker { allowMultiple -> openImportPicker(allowMultiple) },
                     ) {
                         RootScreen(
                             viewModel = viewModel,
@@ -85,8 +88,13 @@ class MainActivity : FragmentActivity() {
         }
     }
 
+    private fun openImportPicker(allowMultiple: Boolean) {
+        if (allowMultiple) audioImportPicker.launch(IMPORT_MIME_TYPES) else singleAudioImportPicker.launch(IMPORT_MIME_TYPES)
+    }
+
     private fun consumeSharedAudio(intent: Intent?) {
-        if (intent?.type?.startsWith(AUDIO_MIME_PREFIX) != true) return
+        val type = intent?.type ?: return
+        if (!type.startsWith(AUDIO_MIME_PREFIX) && !type.startsWith(VIDEO_MIME_PREFIX)) return
         val uris = sharedAudioUris(intent)
         intent.removeExtra(Intent.EXTRA_STREAM)
         importAudio(uris)
@@ -113,6 +121,7 @@ class MainActivity : FragmentActivity() {
     private companion object {
         const val NO_NOTE_ID = -1L
         const val AUDIO_MIME_PREFIX = "audio/"
-        const val AUDIO_MIME_TYPE = "audio/*"
+        const val VIDEO_MIME_PREFIX = "video/"
+        val IMPORT_MIME_TYPES = arrayOf("audio/*", "video/*")
     }
 }

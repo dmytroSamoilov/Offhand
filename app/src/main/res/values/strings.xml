@@ -8,4 +8,8 @@
     <string name="lock_unlock_button">Unlock</string>
     <string name="lock_prompt_title">Unlock Offhand</string>
     <string name="lock_prompt_subtitle">Use your screen lock or fingerprint</string>
+    <string name="early_adopter_title">Offhand Pro is yours</string>
+    <string name="early_adopter_body">You were here before 1.5, while Offhand was still rough. Thank you for testing it with me. As a thank-you, everything in Offhand Pro is unlocked on this phone, for good. No purchase, no account.\n\nOne thing to know: Pro lives on this phone only. If you delete or reinstall Offhand, or move to a new phone, it will not come back.</string>
+    <string name="early_adopter_benefits">Show Pro benefits</string>
+    <string name="early_adopter_confirm">Got it</string>
 </resources>

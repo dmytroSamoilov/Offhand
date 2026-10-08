@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
+import com.dmytrosamoilov.offhand.core.designsystem.component.ProBadge
 import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.feature.backup.R
@@ -216,7 +217,11 @@ private fun OptionsStep(state: BackupUiState, viewModel: BackupViewModel, onSave
         suffix = { Text(text = BackupFileNames.EXTENSION) },
         singleLine = true,
     )
-    IncludeAudioRow(checked = state.includeAudio, onCheckedChange = viewModel::onIncludeAudioChanged)
+    IncludeAudioRow(
+        checked = state.includeAudio,
+        showProBadge = !state.isAudioUnlocked,
+        onCheckedChange = viewModel::onIncludeAudioChanged,
+    )
     IncludeStylesRow(checked = state.includeStyles, onCheckedChange = viewModel::onIncludeStylesChanged)
     Button(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
         Text(text = stringResource(R.string.backup_save_button))
@@ -284,12 +289,13 @@ private fun PassphraseErrorUi.message(): String = when (this) {
 }
 
 @Composable
-private fun IncludeAudioRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+private fun IncludeAudioRow(checked: Boolean, showProBadge: Boolean, onCheckedChange: (Boolean) -> Unit) {
     OptionSwitchRow(
         label = stringResource(R.string.backup_include_audio_label),
         description = stringResource(R.string.backup_include_audio_description),
         checked = checked,
         onCheckedChange = onCheckedChange,
+        showProBadge = showProBadge,
     )
 }
 
@@ -309,13 +315,17 @@ private fun OptionSwitchRow(
     description: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    showProBadge: Boolean = false,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = label, style = MaterialTheme.typography.bodyLarge)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(text = label, style = MaterialTheme.typography.bodyLarge)
+                if (showProBadge) ProBadge()
+            }
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,

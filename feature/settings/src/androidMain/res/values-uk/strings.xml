@@ -105,8 +105,10 @@
     <string name="settings_backup_title">Резервна копія</string>
     <string name="settings_backup_subtitle">Перенесіть нотатки на новий телефон або збережіть копію.</string>
     <string name="settings_import_audio_title">Імпорт аудіо</string>
-    <string name="settings_import_audio_subtitle">Перетворюйте аудіофайли на нотатки. Виберіть один або кілька одразу.</string>
+    <string name="settings_import_audio_subtitle">Перетворюйте аудіо- та відеофайли на нотатки.</string>
+    <string name="settings_import_free_left">Залишилося %1$d із %2$d безкоштовних імпортів</string>
     <string name="settings_import_unreadable">Деякі файли не вдалося прочитати.</string>
+    <string name="settings_import_one_video">Відео імпортуються по одному. Виберіть один відеофайл.</string>
     <string name="settings_import_dismiss">ОК</string>
     <string name="settings_import_pro_title">Імпорт з Offhand Pro</string>
     <string name="settings_import_pro_body">Перетворення записів з інших застосунків на нотатки входить до Offhand Pro. Перейдіть на Pro, щоб імпортувати отримане аудіо.</string>
@@ -118,10 +120,11 @@
         <item quantity="many">Імпортується %d файлів. Нотатки створюються у фоні й зʼявляться у списку нотаток, щойно будуть готові.</item>
         <item quantity="other">Імпортується %d файла. Нотатки створюються у фоні й зʼявляться у списку нотаток, щойно будуть готові.</item>
     </plurals>
-    <string name="settings_pro_upgrade_subtitle">Власні стилі, експорт у PDF і Word, розумні підказки та імпорт аудіо</string>
+    <string name="settings_pro_upgrade_subtitle">Стилі, експорт у PDF і Word, розумні підказки, імпорт і папки без обмежень</string>
     <string name="settings_pro_upgrade">Перейти на Pro</string>
     <string name="settings_subscription_title">Підписка</string>
     <string name="settings_subscription_lifetime">Назавжди, ваша без обмежень</string>
+    <string name="settings_subscription_included">Включено на цьому пристрої. Не входить до резервних копій і не зберігається після перевстановлення.</string>
     <string name="settings_subscription_trial">Пробний період</string>
     <string name="settings_subscription_trial_until">Пробний період до %1$s</string>
     <string name="settings_subscription_yearly">Річна</string>

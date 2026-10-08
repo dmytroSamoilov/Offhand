@@ -4,6 +4,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
@@ -87,6 +88,21 @@ class NoteStylesViewModelTest {
         advanceUntilIdle()
 
         coVerify { setNoteStyle(NoteStyleRef.BuiltIn(NotePreset.VISIT)) }
+    }
+
+    @Test
+    fun `a built-in style other than Summary goes through the paywall while locked`() = runTest(dispatcher) {
+        coEvery { gate.requirePro(ProFeature.NOTE_STYLES) } returns false
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.onStyleSelected(NoteStyleRef.BuiltIn(NotePreset.VISIT))
+        viewModel.onStyleSelected(NoteStyleRef.BuiltIn(NotePreset.SUMMARY))
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { setNoteStyle(NoteStyleRef.BuiltIn(NotePreset.VISIT)) }
+        coVerify { setNoteStyle(NoteStyleRef.BuiltIn(NotePreset.SUMMARY)) }
+        coVerify(exactly = 0) { gate.requirePro(ProFeature.CUSTOM_STYLES) }
     }
 
     @Test

@@ -14,16 +14,13 @@ class InAppReviewPolicyTest {
 
     private val policy = InAppReviewPolicy(InAppReviewRules.PRODUCTION)
     private val now = 1_000.days.inWholeMilliseconds
-    private val matureInstall = now - 30.days.inWholeMilliseconds
 
     private fun shouldRequest(
         savedRecordingsCount: Int = 5,
-        installedAtMs: Long = matureInstall,
         state: ReviewPromptState = ReviewPromptState(),
         nowMs: Long = now,
     ): Boolean = policy.shouldRequestReview(
         savedRecordingsCount = savedRecordingsCount,
-        installedAtMs = installedAtMs,
         state = state,
         nowMs = nowMs,
     )
@@ -34,8 +31,8 @@ class InAppReviewPolicyTest {
     }
 
     @Test
-    fun `young install blocks the request`() {
-        assertFalse(shouldRequest(installedAtMs = now - 6.days.inWholeMilliseconds))
+    fun `a young install with enough recordings is asked right away`() {
+        assertTrue(shouldRequest(savedRecordingsCount = 3, nowMs = 1.hours.inWholeMilliseconds))
     }
 
     @Test
@@ -118,12 +115,10 @@ class InAppReviewPolicyTest {
     @Test
     fun `debug rules collapse the timeline to minutes`() {
         val debugPolicy = InAppReviewPolicy(InAppReviewRules.DEBUG)
-        val installedAt = now - 5.minutes.inWholeMilliseconds
 
         assertTrue(
             debugPolicy.shouldRequestReview(
                 savedRecordingsCount = 1,
-                installedAtMs = installedAt,
                 state = ReviewPromptState(),
                 nowMs = now,
             ),
@@ -132,7 +127,6 @@ class InAppReviewPolicyTest {
         assertFalse(
             debugPolicy.shouldRequestReview(
                 savedRecordingsCount = 1,
-                installedAtMs = installedAt,
                 state = afterFirst,
                 nowMs = now + 59.seconds.inWholeMilliseconds,
             ),
@@ -140,7 +134,6 @@ class InAppReviewPolicyTest {
         assertTrue(
             debugPolicy.shouldRequestReview(
                 savedRecordingsCount = 1,
-                installedAtMs = installedAt,
                 state = afterFirst,
                 nowMs = now + 1.minutes.inWholeMilliseconds,
             ),

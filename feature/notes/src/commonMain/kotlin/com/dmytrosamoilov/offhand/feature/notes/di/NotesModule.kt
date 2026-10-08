@@ -8,6 +8,8 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.review.InAppReviewRules
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearTranscriptionCheckpointUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DecideEarlyAdopterProUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkEarlyAdopterThankedUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
@@ -19,6 +21,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCalendarSuggest
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsFolderStylesAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsUnlimitedFoldersAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ReorderFoldersUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SetFolderStyleUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
@@ -44,6 +47,8 @@ val featureNotesModule = module {
     factoryOf(::ClearShareCacheUseCase)
     factoryOf(::ClearTranscriptionCheckpointUseCase)
     factoryOf(::CreateFolderUseCase)
+    factoryOf(::DecideEarlyAdopterProUseCase)
+    factoryOf(::MarkEarlyAdopterThankedUseCase)
     factoryOf(::DeleteFolderUseCase)
     factoryOf(::MoveNoteToFolderUseCase)
     factoryOf(::ObserveCustomNoteStylesUseCase)
@@ -55,6 +60,7 @@ val featureNotesModule = module {
     factoryOf(::IsCustomNoteStylesAvailableUseCase)
     factoryOf(::IsDocumentExportAvailableUseCase)
     factoryOf(::IsFolderStylesAvailableUseCase)
+    factoryOf(::IsUnlimitedFoldersAvailableUseCase)
     factoryOf(::SetFolderStyleUseCase)
     factoryOf(::ReorderFoldersUseCase)
     factoryOf(::IsSmartSuggestionsEnabledUseCase)
@@ -81,6 +87,7 @@ val featureNotesModule = module {
             setFolderStyle = get(),
             reorderFolders = get(),
             isFolderStylesAvailable = get(),
+            isUnlimitedFoldersAvailable = get(),
             observeDeveloperOptions = get(),
             observeCustomNoteStyles = get(),
             isCustomNoteStylesAvailable = get(),

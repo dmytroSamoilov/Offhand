@@ -17,7 +17,7 @@ struct NoteStylesView: View {
         NoteStyleList(
             current: state.selected,
             customStyles: state.customStyles.map { NoteStyleChoice(id: $0.id, name: $0.name, details: $0.description_) },
-            isCustomStylesUnlocked: state.isUnlocked,
+            isProStylesUnlocked: state.isUnlocked,
             footer: String(localized: "The selected style is used for new recordings. You can change the style of any note from the note itself."),
             onSelect: { viewModel.onStyleSelected(style: $0) },
             onCreateStyle: { openEditor(styleId: 0) },

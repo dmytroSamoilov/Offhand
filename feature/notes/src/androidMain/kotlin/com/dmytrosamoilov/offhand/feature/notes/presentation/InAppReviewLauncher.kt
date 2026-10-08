@@ -63,7 +63,6 @@ class FakeInAppReviewLauncher(
     private fun rulesSummary(activity: Activity): String = activity.getString(
         R.string.notes_fake_review_body,
         rules.minSavedRecordings,
-        TimeUnit.MILLISECONDS.toMinutes(rules.minInstallAgeMs),
         TimeUnit.MILLISECONDS.toMinutes(rules.attemptGapMs),
         TimeUnit.MILLISECONDS.toMinutes(rules.burstWindowMs),
         TimeUnit.MILLISECONDS.toMinutes(rules.cooldownMs),

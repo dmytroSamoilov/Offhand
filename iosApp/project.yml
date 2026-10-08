@@ -106,12 +106,15 @@ targets:
       path: Offhand/Info.plist
       properties:
         CFBundleDisplayName: $(APP_DISPLAY_NAME)
-        # Lists Offhand in the share sheet and "Open in" for audio files; iOS
-        # hands the copy in Documents/Inbox to RootView.onOpenURL.
+        # Lists Offhand in the share sheet and "Open in" for audio and video
+        # files; iOS hands the copy in Documents/Inbox to RootView.onOpenURL.
         CFBundleDocumentTypes:
           - CFBundleTypeName: Audio
             LSHandlerRank: Alternate
             LSItemContentTypes: [public.audio]
+          - CFBundleTypeName: Video
+            LSHandlerRank: Alternate
+            LSItemContentTypes: [public.movie]
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen: {}

@@ -221,6 +221,9 @@ private enum PaywallCopy {
         case .smartSuggestions: return String(localized: "Find dates and to-dos in your notes")
         case .audioImport: return String(localized: "Turn your recordings into notes")
         case .folderStyles: return String(localized: "Give this folder its own summary style")
+        case .noteStyles: return String(localized: "Choose a different summary style")
+        case .folders: return String(localized: "Keep more than two folders")
+        case .backupAudio: return String(localized: "Back up your recordings too")
         }
     }
 
@@ -254,23 +257,26 @@ private struct ComparisonTable: View {
         let id: Int
         let title: String
         let hint: String?
-        let feature: ProFeature?
+        let features: Set<ProFeature>
+
+        var isPro: Bool { !features.isEmpty }
     }
 
     private static let columnWidth: CGFloat = 52
 
     private var rows: [Row] {
         [
-            Row(id: 0, title: String(localized: "Private by design"), hint: nil, feature: nil),
-            Row(id: 1, title: String(localized: "Fully offline"), hint: nil, feature: nil),
-            Row(id: 2, title: String(localized: "No ads, no account"), hint: nil, feature: nil),
-            Row(id: 3, title: String(localized: "Unlimited notes and recordings"), hint: nil, feature: nil),
-            Row(id: 4, title: String(localized: "Encrypted backup, search and folders"), hint: nil, feature: nil),
-            Row(id: 5, title: String(localized: "Notes in your format"), hint: String(localized: "Your headings, your sections, every time"), feature: .customStyles),
-            Row(id: 6, title: String(localized: "Share polished documents"), hint: String(localized: "PDF and Word, ready for clients, email and print"), feature: .documentExport),
-            Row(id: 7, title: String(localized: "Never miss a follow-up"), hint: String(localized: "Dates and to-dos straight into your calendar"), feature: .smartSuggestions),
-            Row(id: 8, title: String(localized: "Turn any recording into a note"), hint: String(localized: "Voice memos, calls and files from other apps"), feature: .audioImport),
-            Row(id: 9, title: String(localized: "Folders that know their style"), hint: String(localized: "Each folder with its own summary style"), feature: .folderStyles),
+            Row(id: 0, title: String(localized: "Private by design"), hint: nil, features: []),
+            Row(id: 1, title: String(localized: "Fully offline"), hint: nil, features: []),
+            Row(id: 2, title: String(localized: "No ads, no account"), hint: nil, features: []),
+            Row(id: 3, title: String(localized: "Unlimited notes and recordings"), hint: nil, features: []),
+            Row(id: 4, title: String(localized: "Encrypted backup, search and folders"), hint: nil, features: []),
+            Row(id: 5, title: String(localized: "Notes in your format"), hint: String(localized: "Meeting notes, Visit report, Legal note and your own styles"), features: [.customStyles, .noteStyles]),
+            Row(id: 6, title: String(localized: "Share polished documents"), hint: String(localized: "PDF and Word, ready for clients, email and print"), features: [.documentExport]),
+            Row(id: 7, title: String(localized: "Never miss a follow-up"), hint: String(localized: "Dates and to-dos straight into your calendar"), features: [.smartSuggestions]),
+            Row(id: 8, title: String(localized: "Turn any recording into a note"), hint: String(localized: "Voice memos, calls, videos and files from other apps"), features: [.audioImport]),
+            Row(id: 9, title: String(localized: "As many folders as you need"), hint: String(localized: "Each with its own summary style"), features: [.folderStyles, .folders]),
+            Row(id: 10, title: String(localized: "Backups with your recordings"), hint: String(localized: "Audio included, still encrypted"), features: [.backupAudio]),
         ]
     }
 
@@ -313,7 +319,7 @@ private struct ComparisonTable: View {
     }
 
     private func tableRow(_ row: Row) -> some View {
-        let isHighlighted = row.feature != nil && row.feature == highlighted
+        let isHighlighted = row.features.contains(highlighted)
         return HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(row.title).font(isHighlighted ? .subheadline.weight(.semibold) : .subheadline)
@@ -322,7 +328,7 @@ private struct ComparisonTable: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            checkCell(included: row.feature == nil, color: Brand.primary)
+            checkCell(included: !row.isPro, color: Brand.primary)
             checkCell(included: true, color: Brand.proGold)
         }
         .padding(.horizontal, 8)

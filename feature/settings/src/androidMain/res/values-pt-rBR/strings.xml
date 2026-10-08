@@ -105,8 +105,10 @@
     <string name="settings_backup_title">Backup e restauração</string>
     <string name="settings_backup_subtitle">Leve suas notas para um novo telefone ou guarde uma cópia.</string>
     <string name="settings_import_audio_title">Importar áudio</string>
-    <string name="settings_import_audio_subtitle">Transforme arquivos de áudio em notas. Escolha um ou vários de uma vez.</string>
+    <string name="settings_import_audio_subtitle">Transforme arquivos de áudio ou vídeo em notas.</string>
+    <string name="settings_import_free_left">%1$d de %2$d importações grátis restantes</string>
     <string name="settings_import_unreadable">Alguns dos arquivos não puderam ser lidos.</string>
+    <string name="settings_import_one_video">Vídeos são importados um de cada vez. Escolha um único arquivo de vídeo.</string>
     <string name="settings_import_dismiss">OK</string>
     <string name="settings_import_pro_title">Importar com o Offhand Pro</string>
     <string name="settings_import_pro_body">Transformar gravações de outros apps em notas faz parte do Offhand Pro. Faça upgrade para importar o áudio compartilhado.</string>
@@ -117,10 +119,11 @@
         <item quantity="many">%d arquivos estão sendo importados. As notas são criadas em segundo plano e aparecerão na sua lista de notas assim que estiverem prontas.</item>
         <item quantity="other">%d arquivos estão sendo importados. As notas são criadas em segundo plano e aparecerão na sua lista de notas assim que estiverem prontas.</item>
     </plurals>
-    <string name="settings_pro_upgrade_subtitle">Estilos personalizados, exportação em PDF e Word, sugestões inteligentes e importação de áudio</string>
+    <string name="settings_pro_upgrade_subtitle">Estilos, exportação em PDF e Word, sugestões inteligentes, importações e pastas ilimitadas</string>
     <string name="settings_pro_upgrade">Fazer upgrade</string>
     <string name="settings_subscription_title">Assinatura</string>
     <string name="settings_subscription_lifetime">Vitalício, seu para sempre</string>
+    <string name="settings_subscription_included">Incluído neste aparelho. Não faz parte dos backups e não sobrevive a uma reinstalação.</string>
     <string name="settings_subscription_trial">Teste grátis</string>
     <string name="settings_subscription_trial_until">Teste grátis até %1$s</string>
     <string name="settings_subscription_yearly">Anual</string>

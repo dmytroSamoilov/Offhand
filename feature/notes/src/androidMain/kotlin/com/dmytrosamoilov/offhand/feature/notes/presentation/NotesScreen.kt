@@ -309,6 +309,7 @@ fun NotesScreen(
                         onFolderStyle = viewModel::onFolderStyleRequested,
                         onFolderMoved = viewModel::onFolderMoved,
                         isFolderStylesUnlocked = state.isFolderStylesUnlocked,
+                        isFolderLimitReached = state.isFolderLimitReached,
                         customStyles = state.customStyles,
                         modelPreparation = state.modelPreparation,
                         onDownloadOnMobileData = viewModel::onDownloadOnMobileDataClicked,
@@ -374,7 +375,7 @@ fun NotesScreen(
             body = stringResource(R.string.notes_folder_style_body),
             selected = picker.style,
             customStyles = state.customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) },
-            isCustomStylesUnlocked = state.isFolderStylesUnlocked,
+            isProStylesUnlocked = state.isFolderStylesUnlocked,
             onSelected = viewModel::onFolderStyleSelected,
             onDismiss = viewModel::onFolderStyleDismissed,
             onDefaultSelected = { viewModel.onFolderStyleSelected(null) },
@@ -411,7 +412,7 @@ fun NotesScreen(
         NoteStyleSheet(
             selected = selectedStyle,
             customStyles = state.customStyles,
-            isCustomStylesUnlocked = state.isCustomStylesUnlocked,
+            isProStylesUnlocked = state.isProStylesUnlocked,
             onSelected = viewModel::onStyleSelected,
             onDismiss = viewModel::onPresetSheetDismissed,
             onCreateStyle = {
@@ -426,7 +427,7 @@ fun NotesScreen(
 private fun NoteStyleSheet(
     selected: NoteStyleRef,
     customStyles: List<NoteStyleOptionUi>,
-    isCustomStylesUnlocked: Boolean,
+    isProStylesUnlocked: Boolean,
     onSelected: (NoteStyleRef) -> Unit,
     onDismiss: () -> Unit,
     onCreateStyle: () -> Unit,
@@ -436,7 +437,7 @@ private fun NoteStyleSheet(
         body = stringResource(R.string.notes_preset_sheet_body),
         selected = selected,
         customStyles = customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) },
-        isCustomStylesUnlocked = isCustomStylesUnlocked,
+        isProStylesUnlocked = isProStylesUnlocked,
         onSelected = onSelected,
         onDismiss = onDismiss,
         onCreateStyle = onCreateStyle,
@@ -709,6 +710,7 @@ private fun NotesListPane(
     onFolderStyle: (Long) -> Unit,
     onFolderMoved: (Int, Int) -> Unit,
     isFolderStylesUnlocked: Boolean,
+    isFolderLimitReached: Boolean,
     customStyles: List<NoteStyleOptionUi>,
     modelPreparation: ModelPreparationUi?,
     onDownloadOnMobileData: () -> Unit,
@@ -787,6 +789,7 @@ private fun NotesListPane(
                             onFolderStyle = onFolderStyle,
                             onFolderMoved = onFolderMoved,
                             isFolderStylesUnlocked = isFolderStylesUnlocked,
+                            isFolderLimitReached = isFolderLimitReached,
                             styleChoices = customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) },
                         )
                     }
@@ -838,6 +841,7 @@ private fun FolderChips(
     onFolderStyle: (Long) -> Unit,
     onFolderMoved: (Int, Int) -> Unit,
     isFolderStylesUnlocked: Boolean,
+    isFolderLimitReached: Boolean,
     styleChoices: List<NoteStyleChoice>,
 ) {
     val listState = rememberLazyListState()
@@ -885,7 +889,7 @@ private fun FolderChips(
                     },
             )
         }
-        item(key = NEW_FOLDER_CHIP_KEY) { NewFolderChip(onClick = onNewFolder) }
+        item(key = NEW_FOLDER_CHIP_KEY) { NewFolderChip(showProBadge = isFolderLimitReached, onClick = onNewFolder) }
     }
 }
 
@@ -932,10 +936,15 @@ private const val NEW_FOLDER_CHIP_KEY = "new-folder"
 private val CHIP_SPACING = 8.dp
 
 @Composable
-private fun NewFolderChip(onClick: () -> Unit) {
+private fun NewFolderChip(showProBadge: Boolean, onClick: () -> Unit) {
     AssistChip(
         onClick = onClick,
-        label = { Text(text = stringResource(R.string.notes_folder_new)) },
+        label = {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(text = stringResource(R.string.notes_folder_new))
+                if (showProBadge) ProBadge()
+            }
+        },
         leadingIcon = {
             Icon(imageVector = Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
         },

@@ -33,6 +33,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownl
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsCalendarSuggestionsAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteRecordedUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RefundFreeImportUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteTranscriptUseCase
@@ -78,6 +79,7 @@ class RecordingSessionManager(
     private val audioStore: EncryptedAudioStore,
     private val audioBackup: RecordingAudioBackup,
     private val audioDecoder: AudioDecoder,
+    private val refundFreeImport: RefundFreeImportUseCase,
     private val analyticsTracker: AnalyticsTracker,
     private val appForegroundState: AppForegroundState,
     private val scope: CoroutineScope,
@@ -333,6 +335,7 @@ class RecordingSessionManager(
         runCatching { audioStore.delete(fileName) }
         mutableProcessingNoteIds.update { it - noteId }
         mutableNoteProgress.update { it - noteId }
+        refundFreeImport()
         mutableEvents.emit(NoteProcessingEvent.ImportRejected(noteId, lastImportRejection))
         analyticsTracker.track(AnalyticsEvents.audioImportRejected(lastImportRejection.name.lowercase()))
     }

@@ -70,6 +70,7 @@ fun NotePresetOptionCard(
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    showProBadge: Boolean = false,
 ) {
     NoteStyleCard(
         title = stringResource(option.labelRes),
@@ -77,6 +78,7 @@ fun NotePresetOptionCard(
         isSelected = isSelected,
         onClick = onClick,
         modifier = modifier,
+        showProBadge = showProBadge,
     )
 }
 

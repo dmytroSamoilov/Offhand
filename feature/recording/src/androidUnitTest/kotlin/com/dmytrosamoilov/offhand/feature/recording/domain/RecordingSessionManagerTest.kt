@@ -35,6 +35,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsCalendarSug
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsThinkingEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteRecordedUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RefundFreeImportUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteTranscriptUseCase
@@ -184,6 +185,8 @@ class RecordingSessionManagerTest {
         every { this@mockk.invoke() } returns false
     }
 
+    private val refundFreeImport: RefundFreeImportUseCase = mockk(relaxed = true)
+
     private val defaultNoteTitleProvider: DefaultNoteTitleProvider = mockk {
         every { untitledTitle() } returns "Voice note"
     }
@@ -215,6 +218,7 @@ class RecordingSessionManagerTest {
         audioStore = audioStore,
         audioBackup = audioBackup,
         audioDecoder = audioDecoder,
+        refundFreeImport = refundFreeImport,
         analyticsTracker = analyticsTracker,
         appForegroundState = appForegroundState,
         scope = this,

@@ -44,42 +44,42 @@
         }
       }
     },
-    "Each folder with its own summary style" : {
+    "Each with its own summary style" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Jeder Ordner mit eigenem Zusammenfassungsstil"
+            "value" : "Jeder mit eigenem Zusammenfassungsstil"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cada carpeta con su propio estilo de resumen"
+            "value" : "Cada una con su propio estilo de resumen"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "हर फ़ोल्डर की अपनी सारांश शैली"
+            "value" : "हर एक की अपनी सारांश शैली"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cada pasta com seu próprio estilo de resumo"
+            "value" : "Cada uma com seu próprio estilo de resumo"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "У каждой папки свой стиль резюме"
+            "value" : "У каждой свой стиль резюме"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "У кожної папки свій стиль резюме"
+            "value" : "У кожної свій стиль резюме"
           }
         }
       }
@@ -124,42 +124,42 @@
         }
       }
     },
-    "Folders that know their style" : {
+    "As many folders as you need" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ordner, die ihren Stil kennen"
+            "value" : "So viele Ordner, wie du brauchst"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Carpetas que conocen su estilo"
+            "value" : "Tantas carpetas como necesites"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ऐसे फ़ोल्डर जो अपनी शैली जानते हैं"
+            "value" : "जितने चाहें उतने फ़ोल्डर"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pastas que conhecem o próprio estilo"
+            "value" : "Quantas pastas você precisar"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Папки, которые знают свой стиль"
+            "value" : "Столько папок, сколько нужно"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Папки, які знають свій стиль"
+            "value" : "Стільки папок, скільки потрібно"
           }
         }
       }
@@ -3149,42 +3149,42 @@
         }
       }
     },
-    "Custom styles, PDF and Word export, smart suggestions and audio import" : {
+    "Styles, PDF and Word export, smart suggestions, imports and unlimited folders" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eigene Stile, PDF- und Word-Export, smarte Vorschläge und Audio-Import"
+            "value" : "Stile, PDF- und Word-Export, smarte Vorschläge, Importe und unbegrenzt Ordner"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estilos personalizados, exportación a PDF y Word, sugerencias inteligentes e importación de audio"
+            "value" : "Estilos, exportación a PDF y Word, sugerencias inteligentes, importaciones y carpetas ilimitadas"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "कस्टम शैलियाँ, PDF और Word निर्यात, स्मार्ट सुझाव और ऑडियो आयात"
+            "value" : "शैलियाँ, PDF और Word निर्यात, स्मार्ट सुझाव, आयात और असीमित फ़ोल्डर"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estilos personalizados, exportação em PDF e Word, sugestões inteligentes e importação de áudio"
+            "value" : "Estilos, exportação em PDF e Word, sugestões inteligentes, importações e pastas ilimitadas"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Свои стили, экспорт в PDF и Word, умные подсказки и импорт аудио"
+            "value" : "Стили, экспорт в PDF и Word, умные подсказки, импорт и папки без ограничений"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Власні стилі, експорт у PDF і Word, розумні підказки та імпорт аудіо"
+            "value" : "Стилі, експорт у PDF і Word, розумні підказки, імпорт і папки без обмежень"
           }
         }
       }
@@ -5396,46 +5396,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Заголовок"
-          }
-        }
-      }
-    },
-    "How should notes be organized?" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wie sollen Notizen aufgebaut sein?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Cómo se deben organizar las notas?"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "नोट्स कैसे व्यवस्थित हों?"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Como as notas devem ser organizadas?"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Как оформлять заметки?"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Як оформлювати нотатки?"
           }
         }
       }
@@ -8407,46 +8367,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "PDF-файл"
-          }
-        }
-      }
-    },
-    "Pick a default style. You can change it for any note later." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wähle einen Standardstil. Du kannst ihn später für jede Notiz ändern."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elige un estilo predeterminado. Podrás cambiarlo para cualquier nota más tarde."
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "एक डिफ़ॉल्ट शैली चुनें। बाद में आप इसे किसी भी नोट के लिए बदल सकते हैं।"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Escolha um estilo padrão. Você pode mudá-lo para qualquer nota depois."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выберите стиль по умолчанию. Позже его можно изменить для любой заметки."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Виберіть стиль за замовчуванням. Пізніше його можна змінити для будь-якої нотатки."
           }
         }
       }
@@ -12620,42 +12540,42 @@
         }
       }
     },
-    "Turn audio files into notes. Pick one or several at once." : {
+    "Turn audio or video files into notes." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mache aus Audiodateien Notizen. Wähle eine oder mehrere auf einmal."
+            "value" : "Audio- oder Videodateien in Notizen verwandeln."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Convierte archivos de audio en notas. Elige uno o varios a la vez."
+            "value" : "Convierte archivos de audio o vídeo en notas."
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ऑडियो फ़ाइलों को नोट्स में बदलें। एक या कई फ़ाइलें एक साथ चुनें।"
+            "value" : "ऑडियो या वीडियो फ़ाइलों को नोट्स में बदलें।"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transforme arquivos de áudio em notas. Escolha um ou vários de uma vez."
+            "value" : "Transforme arquivos de áudio ou vídeo em notas."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Превратите аудиофайлы в заметки. Выберите один или несколько сразу."
+            "value" : "Превращайте аудио- и видеофайлы в заметки."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Перетворюйте аудіофайли на нотатки. Виберіть один або кілька одразу."
+            "value" : "Перетворюйте аудіо- та відеофайли на нотатки."
           }
         }
       }
@@ -13185,42 +13105,42 @@
         }
       }
     },
-    "Voice memos, calls and files from other apps" : {
+    "Voice memos, calls, videos and files from other apps" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sprachmemos, Anrufe und Dateien aus anderen Apps"
+            "value" : "Sprachmemos, Anrufe, Videos und Dateien aus anderen Apps"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notas de voz, llamadas y archivos de otras apps"
+            "value" : "Notas de voz, llamadas, vídeos y archivos de otras apps"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "वॉइस मेमो, कॉल और दूसरे ऐप्स की फ़ाइलें"
+            "value" : "वॉइस मेमो, कॉल, वीडियो और दूसरे ऐप्स की फ़ाइलें"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Memos de voz, ligações e arquivos de outros apps"
+            "value" : "Memos de voz, ligações, vídeos e arquivos de outros apps"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Голосовые заметки, звонки и файлы из других приложений"
+            "value" : "Голосовые заметки, звонки, видео и файлы из других приложений"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Голосові нотатки, дзвінки й файли з інших застосунків"
+            "value" : "Голосові нотатки, дзвінки, відео й файли з інших застосунків"
           }
         }
       }
@@ -13865,42 +13785,42 @@
         }
       }
     },
-    "Your headings, your sections, every time" : {
+    "Meeting notes, Visit report, Legal note and your own styles" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Deine Überschriften, deine Abschnitte, jedes Mal"
+            "value" : "Meeting-Notizen, Besuchsbericht, Juristische Notiz und deine eigenen Stile"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tus encabezados, tus secciones, siempre"
+            "value" : "Notas de reunión, Informe de visita, Nota jurídica y tus propios estilos"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "आपके शीर्षक, आपके सेक्शन, हर बार"
+            "value" : "मीटिंग नोट्स, विज़िट रिपोर्ट, कानूनी नोट और आपकी अपनी शैलियाँ"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seus títulos, suas seções, sempre"
+            "value" : "Notas de reunião, Relatório de visita, Nota jurídica e seus próprios estilos"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ваши заголовки, ваши разделы, каждый раз"
+            "value" : "Заметки со встречи, Отчёт о визите, Юридическая заметка и ваши стили"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ваші заголовки, ваші розділи, щоразу"
+            "value" : "Нотатки зі зустрічі, Звіт про візит, Юридична нотатка та ваші стилі"
           }
         }
       }
@@ -14230,6 +14150,606 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ваші стилі"
+          }
+        }
+      }
+    },
+    "Offhand Pro is yours" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro gehört dir"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro es tuyo"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro आपका है"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Offhand Pro é seu"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro ваш"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro ваш"
+          }
+        }
+      }
+    },
+    "You were here before 1.5, while Offhand was still rough. Thank you for testing it with me. As a thank-you, everything in Offhand Pro is unlocked on this iPhone, for good. No purchase, no account.\n\nOne thing to know: Pro lives on this iPhone only. If you delete or reinstall Offhand, or move to a new iPhone, it will not come back." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du warst schon vor 1.5 dabei, als Offhand noch holprig war. Danke, dass du es mit mir getestet hast. Als Dankeschön ist alles aus Offhand Pro auf diesem iPhone für immer freigeschaltet. Kein Kauf, kein Konto.\n\nEins noch: Pro lebt nur auf diesem iPhone. Wenn du Offhand löschst oder neu installierst oder auf ein neues iPhone wechselst, kommt es nicht zurück."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estabas aquí antes de la 1.5, cuando Offhand aún estaba verde. Gracias por probarlo conmigo. Como agradecimiento, todo Offhand Pro queda desbloqueado en este iPhone, para siempre. Sin compra y sin cuenta.\n\nUna cosa: Pro vive solo en este iPhone. Si borras o reinstalas Offhand, o cambias de iPhone, no volverá."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आप 1.5 से पहले से यहाँ थे, जब Offhand अभी कच्चा था। इसे मेरे साथ आज़माने के लिए धन्यवाद। धन्यवाद के तौर पर Offhand Pro की हर चीज़ इस iPhone पर हमेशा के लिए खुली है। न कोई ख़रीद, न कोई खाता।\n\nएक बात: Pro सिर्फ़ इसी iPhone पर रहता है। अगर आप Offhand हटाते या दोबारा इंस्टॉल करते हैं, या नया iPhone लेते हैं, तो यह वापस नहीं आएगा।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você estava aqui antes da 1.5, quando o Offhand ainda estava bruto. Obrigado por testá-lo comigo. Como agradecimento, tudo do Offhand Pro fica liberado neste iPhone, para sempre. Sem compra e sem conta.\n\nSó uma coisa: o Pro vive apenas neste iPhone. Se você apagar ou reinstalar o Offhand, ou trocar de iPhone, ele não volta."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы были здесь до версии 1.5, когда Offhand был ещё сырым. Спасибо, что тестировали его со мной. В благодарность всё из Offhand Pro открыто на этом iPhone навсегда. Без покупки и без аккаунта.\n\nОдно замечание: Pro живёт только на этом iPhone. Если удалить или переустановить Offhand либо перейти на новый iPhone, он не вернётся."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ви були тут до версії 1.5, коли Offhand був ще сирим. Дякую, що тестували його зі мною. На знак подяки все з Offhand Pro відкрито на цьому iPhone назавжди. Без покупки й без облікового запису.\n\nОдне зауваження: Pro живе лише на цьому iPhone. Якщо видалити або перевстановити Offhand чи перейти на новий iPhone, він не повернеться."
+          }
+        }
+      }
+    },
+    "Included on this iPhone. It is not part of backups and does not survive a reinstall." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf diesem iPhone enthalten. Nicht Teil von Backups, und eine Neuinstallation setzt es zurück."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluido en este iPhone. No forma parte de las copias de seguridad y no sobrevive a una reinstalación."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "इस iPhone पर शामिल है। यह बैकअप का हिस्सा नहीं है और दोबारा इंस्टॉल करने पर नहीं रहता।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluído neste iPhone. Não faz parte dos backups e não sobrevive a uma reinstalação."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включено на этом iPhone. Не входит в резервные копии и не сохраняется после переустановки."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включено на цьому iPhone. Не входить до резервних копій і не зберігається після перевстановлення."
+          }
+        }
+      }
+    },
+    "Choose a different summary style" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einen anderen Zusammenfassungsstil wählen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige otro estilo de resumen"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "कोई दूसरी सारांश शैली चुनें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha outro estilo de resumo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрать другой стиль резюме"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вибрати інший стиль резюме"
+          }
+        }
+      }
+    },
+    "Keep more than two folders" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehr als zwei Ordner anlegen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ten más de dos carpetas"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "दो से ज़्यादा फ़ोल्डर रखें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tenha mais de duas pastas"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Больше двух папок"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Більше двох папок"
+          }
+        }
+      }
+    },
+    "Back up your recordings too" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auch deine Aufnahmen sichern"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haz copia también de tus grabaciones"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "अपनी रिकॉर्डिंग का भी बैकअप लें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faça backup das suas gravações também"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохраняйте в резервную копию и записи"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зберігайте в резервну копію й записи"
+          }
+        }
+      }
+    },
+    "Backups with your recordings" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backups mit deinen Aufnahmen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copias con tus grabaciones"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपकी रिकॉर्डिंग के साथ बैकअप"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backups com suas gravações"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Резервные копии с записями"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Резервні копії із записами"
+          }
+        }
+      }
+    },
+    "Audio included, still encrypted" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio inklusive, weiterhin verschlüsselt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con el audio, siempre cifrado"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ऑडियो सहित, फिर भी एन्क्रिप्टेड"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Com o áudio, sempre criptografado"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вместе с аудио, по-прежнему зашифровано"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разом з аудіо, як і раніше зашифровано"
+          }
+        }
+      }
+    },
+    "%1$d of %2$d free imports left" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$d von %2$d kostenlosen Importen übrig"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Te quedan %1$d de %2$d importaciones gratis"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%2$d में से %1$d मुफ़्त आयात बचे हैं"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$d de %2$d importações grátis restantes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Осталось %1$d из %2$d бесплатных импортов"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Залишилося %1$d із %2$d безкоштовних імпортів"
+          }
+        }
+      }
+    },
+    "Videos are imported one at a time. Pick a single video file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videos werden einzeln importiert. Wähle eine einzelne Videodatei."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los vídeos se importan de uno en uno. Elige un solo archivo de vídeo."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "वीडियो एक-एक करके आयात होते हैं। केवल एक वीडियो फ़ाइल चुनें।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vídeos são importados um de cada vez. Escolha um único arquivo de vídeo."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видео импортируются по одному. Выберите один видеофайл."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відео імпортуються по одному. Виберіть один відеофайл."
+          }
+        }
+      }
+    },
+    "Start recording" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme starten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezar a grabar"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "रिकॉर्डिंग शुरू करें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Começar a gravar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начать запись"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Почати запис"
+          }
+        }
+      }
+    },
+    "Stop recording" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme beenden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detener la grabación"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "रिकॉर्डिंग रोकें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parar a gravação"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Остановить запись"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зупинити запис"
+          }
+        }
+      }
+    },
+    "Opens Offhand and starts a new recording." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet Offhand und startet eine neue Aufnahme."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre Offhand y empieza una grabación nueva."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand खोलता है और नई रिकॉर्डिंग शुरू करता है।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o Offhand e começa uma nova gravação."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открывает Offhand и начинает новую запись."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відкриває Offhand і починає новий запис."
+          }
+        }
+      }
+    },
+    "Opens Offhand and stops the recording in progress." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet Offhand und beendet die laufende Aufnahme."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre Offhand y detiene la grabación en curso."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand खोलता है और चल रही रिकॉर्डिंग रोकता है।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o Offhand e para a gravação em andamento."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открывает Offhand и останавливает текущую запись."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відкриває Offhand і зупиняє поточний запис."
+          }
+        }
+      }
+    },
+    "Show Pro benefits" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro-Vorteile anzeigen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver las ventajas de Pro"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro के फ़ायदे देखें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver as vantagens do Pro"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать возможности Pro"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показати можливості Pro"
           }
         }
       }

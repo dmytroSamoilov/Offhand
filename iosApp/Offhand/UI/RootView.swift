@@ -15,7 +15,10 @@ struct RootView: View {
     @State private var phase: IosRootPhase = .loading
     @State private var selectedTab = 0
     @State private var isPaywallPresented = false
+    @State private var isEarlyAdopterThanksShown = false
+    @State private var showsBenefitsAfterThanks = false
     @ObservedObject private var notifications = NoteNotifications.shared
+    @ObservedObject private var shortcuts = ShortcutRequests.shared
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -46,6 +49,21 @@ struct RootView: View {
             for await feature in proUpgradeGate.requestedFeature {
                 isPaywallPresented = feature != nil
             }
+        }
+        .task {
+            for await isShown in viewModel.isEarlyAdopterThanksShown {
+                isEarlyAdopterThanksShown = isShown.boolValue
+            }
+        }
+        .sheet(isPresented: earlyAdopterThanksBinding, onDismiss: showBenefitsIfRequested) {
+            EarlyAdopterThanksSheet(
+                onShowBenefits: {
+                    showsBenefitsAfterThanks = true
+                    viewModel.onEarlyAdopterThanksDismissed()
+                },
+                onDismiss: { viewModel.onEarlyAdopterThanksDismissed() }
+            )
+            .presentationDetents([.fraction(0.66), .large])
         }
         .task { await observeSession() }
         .task { await observeProcessingIds() }
@@ -87,6 +105,8 @@ struct RootView: View {
             }
             notifications.register()
         }
+        .onChange(of: shortcuts.pending) { runPendingShortcut() }
+        .onChange(of: phase) { runPendingShortcut() }
         .onChange(of: notifications.noteIdToOpen) {
             guard let noteId = notifications.noteIdToOpen else { return }
             notifications.noteIdToOpen = nil
@@ -117,6 +137,37 @@ struct RootView: View {
                 break
             }
         }
+    }
+
+    // A shortcut fired while the app was locked or still loading waits here
+    // until the notes list can act on it.
+    private func runPendingShortcut() {
+        guard phase == .ready, let request = shortcuts.pending else { return }
+        shortcuts.pending = nil
+        switch request {
+        case .startRecording:
+            selectedTab = 0
+            shortcuts.recordSheetRequestId += 1
+        case .stopRecording:
+            if sessionManager.session.value.phase != .idle {
+                AppViewModels.recording.onStopRecording()
+            }
+        }
+    }
+
+    // The paywall is a full-screen cover on this view, which a sheet cannot
+    // raise, so the benefits open once the thank-you sheet has gone.
+    private func showBenefitsIfRequested() {
+        guard showsBenefitsAfterThanks else { return }
+        showsBenefitsAfterThanks = false
+        viewModel.onProBenefitsRequested()
+    }
+
+    private var earlyAdopterThanksBinding: Binding<Bool> {
+        Binding(
+            get: { isEarlyAdopterThanksShown },
+            set: { isShown in if !isShown { viewModel.onEarlyAdopterThanksDismissed() } }
+        )
     }
 
     private func observeSession() async {
@@ -287,5 +338,37 @@ struct MainTabView: View {
                 .tag(1)
         }
         .tint(Brand.primary)
+    }
+}
+
+// The early-adopter grant: the crown and a primary button keep it from being
+// tapped past, and the body says plainly that Pro stays on this iPhone only.
+private struct EarlyAdopterThanksSheet: View {
+    let onShowBenefits: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(spacing: 20) {
+            ProCrown(size: 56)
+                .padding(.top, 8)
+            Text(String(localized: "Offhand Pro is yours"))
+                .font(.title2.bold())
+                .multilineTextAlignment(.center)
+            Text(String(localized: "You were here before 1.5, while Offhand was still rough. Thank you for testing it with me. As a thank-you, everything in Offhand Pro is unlocked on this iPhone, for good. No purchase, no account.\n\nOne thing to know: Pro lives on this iPhone only. If you delete or reinstall Offhand, or move to a new iPhone, it will not come back."))
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+            Button(String(localized: "Show Pro benefits"), action: onShowBenefits)
+                .buttonStyle(.borderedProminent)
+                .tint(Brand.primary)
+                .controlSize(.large)
+                .frame(maxWidth: .infinity)
+            Button(String(localized: "Got it"), action: onDismiss)
+                .buttonStyle(.plain)
+                .foregroundStyle(Brand.primary)
+        }
+        .padding(24)
     }
 }

@@ -7,4 +7,8 @@
     <string name="lock_unlock_button">Desbloquear</string>
     <string name="lock_prompt_title">Desbloquear o Offhand</string>
     <string name="lock_prompt_subtitle">Use o bloqueio de tela ou sua impressão digital</string>
+    <string name="early_adopter_title">O Offhand Pro é seu</string>
+    <string name="early_adopter_body">Você estava aqui antes da 1.5, quando o Offhand ainda estava bruto. Obrigado por testá-lo comigo. Como agradecimento, tudo do Offhand Pro fica liberado neste celular, para sempre. Sem compra e sem conta.\n\nSó uma coisa: o Pro vive apenas neste celular. Se você apagar ou reinstalar o Offhand, ou trocar de celular, ele não volta.</string>
+    <string name="early_adopter_benefits">Ver as vantagens do Pro</string>
+    <string name="early_adopter_confirm">Entendi</string>
 </resources>

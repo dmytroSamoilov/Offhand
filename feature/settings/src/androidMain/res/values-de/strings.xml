@@ -105,8 +105,10 @@
     <string name="settings_backup_title">Sichern &amp; wiederherstellen</string>
     <string name="settings_backup_subtitle">Notizen auf ein neues Handy übertragen oder eine Kopie behalten.</string>
     <string name="settings_import_audio_title">Audio importieren</string>
-    <string name="settings_import_audio_subtitle">Mache aus Audiodateien Notizen. Wähle eine oder mehrere auf einmal.</string>
+    <string name="settings_import_audio_subtitle">Audio- oder Videodateien in Notizen verwandeln.</string>
+    <string name="settings_import_free_left">%1$d von %2$d kostenlosen Importen übrig</string>
     <string name="settings_import_unreadable">Einige der Dateien konnten nicht gelesen werden.</string>
+    <string name="settings_import_one_video">Videos werden einzeln importiert. Wähle eine einzelne Videodatei.</string>
     <string name="settings_import_dismiss">OK</string>
     <string name="settings_import_pro_title">Importieren mit Offhand Pro</string>
     <string name="settings_import_pro_body">Aufnahmen aus anderen Apps in Notizen zu verwandeln ist Teil von Offhand Pro. Führe ein Upgrade durch, um das geteilte Audio zu importieren.</string>
@@ -116,10 +118,11 @@
         <item quantity="one">%d Datei wird importiert. Die Notiz wird im Hintergrund erstellt und erscheint in deiner Notizenliste, sobald sie fertig ist.</item>
         <item quantity="other">%d Dateien werden importiert. Die Notizen werden im Hintergrund erstellt und erscheinen in deiner Notizenliste, sobald sie fertig sind.</item>
     </plurals>
-    <string name="settings_pro_upgrade_subtitle">Eigene Stile, PDF- und Word-Export, smarte Vorschläge und Audio-Import</string>
+    <string name="settings_pro_upgrade_subtitle">Stile, PDF- und Word-Export, smarte Vorschläge, Importe und unbegrenzt Ordner</string>
     <string name="settings_pro_upgrade">Upgrade</string>
     <string name="settings_subscription_title">Abo</string>
     <string name="settings_subscription_lifetime">Lebenslang, gehört dir für immer</string>
+    <string name="settings_subscription_included">Auf diesem Gerät enthalten. Nicht Teil von Backups, und eine Neuinstallation setzt es zurück.</string>
     <string name="settings_subscription_trial">Kostenlose Testphase</string>
     <string name="settings_subscription_trial_until">Kostenlose Testphase bis %1$s</string>
     <string name="settings_subscription_yearly">Jährlich</string>

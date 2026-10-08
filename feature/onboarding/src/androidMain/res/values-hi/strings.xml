@@ -11,9 +11,6 @@
     <string name="onboarding_privacy_body">सब कुछ आपके फ़ोन पर ही रहता है। रिकॉर्डिंग, ट्रांसक्रिप्ट और नोट्स एन्क्रिप्टेड हैं, और उन्हें प्रोसेस करने वाला ऑन-डिवाइस AI वहीं चलता है। कुछ भी कभी अपलोड नहीं होता।</string>
     <string name="onboarding_continue">जारी रखें</string>
 
-    <string name="onboarding_note_style_title">आप Offhand का इस्तेमाल कैसे करेंगे?</string>
-    <string name="onboarding_note_style_body">वह शैली चुनें जिसमें आपके नोट्स लिखे जाएं। आपकी हर रिकॉर्डिंग इसी तरह का नोट बनती है।</string>
-    <string name="onboarding_note_style_hint">इसे आप कभी भी सेटिंग्स में बदल सकते हैं, या किसी भी एक नोट की शैली अलग से बदल सकते हैं।</string>
 
     <string name="onboarding_lock_title">अपने नोट्स सुरक्षित रखें</string>
     <string name="onboarding_lock_body">आपके नोट्स इस फ़ोन के सुरक्षित हार्डवेयर में रखी एक कुंजी से एन्क्रिप्ट होते हैं। इस फ़ोन पर कोई स्क्रीन लॉक नहीं है, इसलिए जो भी इसे उठाए, वह Offhand खोल सकता है। अपने नोट्स निजी रखने के लिए PIN, पैटर्न या फ़िंगरप्रिंट सेट करें।</string>

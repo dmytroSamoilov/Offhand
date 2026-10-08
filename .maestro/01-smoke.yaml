@@ -10,7 +10,6 @@ appId: com.dmytrosamoilov.offhand.uitest
 
 # Onboarding
 - tapOn: "Continue"
-- tapOn: "Continue"
 - runFlow:
     when:
       visible: "Continue without a lock"

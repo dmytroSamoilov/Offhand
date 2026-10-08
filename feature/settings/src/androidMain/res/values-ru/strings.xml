@@ -105,8 +105,10 @@
     <string name="settings_backup_title">Резервная копия</string>
     <string name="settings_backup_subtitle">Перенесите заметки на новый телефон или сохраните копию.</string>
     <string name="settings_import_audio_title">Импорт аудио</string>
-    <string name="settings_import_audio_subtitle">Превратите аудиофайлы в заметки. Выберите один или несколько сразу.</string>
+    <string name="settings_import_audio_subtitle">Превращайте аудио- и видеофайлы в заметки.</string>
+    <string name="settings_import_free_left">Осталось %1$d из %2$d бесплатных импортов</string>
     <string name="settings_import_unreadable">Некоторые файлы не удалось прочитать.</string>
+    <string name="settings_import_one_video">Видео импортируются по одному. Выберите один видеофайл.</string>
     <string name="settings_import_dismiss">ОК</string>
     <string name="settings_import_pro_title">Импорт с Offhand Pro</string>
     <string name="settings_import_pro_body">Превращение записей из других приложений в заметки входит в Offhand Pro. Перейдите на Pro, чтобы импортировать полученное аудио.</string>
@@ -118,10 +120,11 @@
         <item quantity="many">Импортируется %d файлов. Заметки создаются в фоне и появятся в списке заметок, как только будут готовы.</item>
         <item quantity="other">Импортируется %d файла. Заметки создаются в фоне и появятся в списке заметок, как только будут готовы.</item>
     </plurals>
-    <string name="settings_pro_upgrade_subtitle">Свои стили, экспорт в PDF и Word, умные подсказки и импорт аудио</string>
+    <string name="settings_pro_upgrade_subtitle">Стили, экспорт в PDF и Word, умные подсказки, импорт и папки без ограничений</string>
     <string name="settings_pro_upgrade">Перейти на Pro</string>
     <string name="settings_subscription_title">Подписка</string>
     <string name="settings_subscription_lifetime">Навсегда, ваша без ограничений</string>
+    <string name="settings_subscription_included">Включено на этом устройстве. Не входит в резервные копии и не сохраняется после переустановки.</string>
     <string name="settings_subscription_trial">Пробный период</string>
     <string name="settings_subscription_trial_until">Пробный период до %1$s</string>
     <string name="settings_subscription_yearly">Годовая</string>

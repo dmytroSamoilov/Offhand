@@ -18,6 +18,8 @@ enum ImportNoticeText {
             )
         case .unreadable:
             return String(localized: "Some of the files could not be read.")
+        case .oneVideoAtATime:
+            return String(localized: "Videos are imported one at a time. Pick a single video file.")
         }
     }
 }

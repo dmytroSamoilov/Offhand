@@ -4,9 +4,13 @@ import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.AppLockState
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DecideEarlyAdopterProUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkEarlyAdopterThankedUseCase
+import com.dmytrosamoilov.offhand.core.data.domain.isEarlyAdopterThanksPending
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserPreferencesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinator
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
@@ -32,6 +36,9 @@ class IosRootViewModel(
     private val resumeInterruptedNotes: ResumeInterruptedNotesUseCase,
     private val sweepOrphanedRecordings: SweepOrphanedRecordingsUseCase,
     private val clearShareCache: ClearShareCacheUseCase,
+    private val decideEarlyAdopterPro: DecideEarlyAdopterProUseCase,
+    private val markEarlyAdopterThanked: MarkEarlyAdopterThankedUseCase,
+    private val proUpgradeGate: ProUpgradeGate,
     pendingNotesCoordinator: PendingNotesCoordinator,
 ) : BaseViewModel() {
 
@@ -46,6 +53,10 @@ class IosRootViewModel(
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, IosRootPhase.LOADING)
 
+    val isEarlyAdopterThanksShown: StateFlow<Boolean> = combine(phase, observeUserPreferences()) { phase, preferences ->
+        phase == IosRootPhase.READY && preferences.isEarlyAdopterThanksPending
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
     val isDeviceSecure: Boolean
         get() = appLockManager.isDeviceSecure
 
@@ -56,6 +67,16 @@ class IosRootViewModel(
         // Picks notes back up the moment the model download finishes, instead of
         // leaving them stuck until the app is backgrounded and reopened.
         pendingNotesCoordinator.start()
+    }
+
+    fun onEarlyAdopterThanksDismissed() {
+        launchSafely(showLoading = false) { markEarlyAdopterThanked() }
+    }
+
+    // Called once the thank-you sheet is gone: a sheet cannot present the
+    // paywall cover itself.
+    fun onProBenefitsRequested() {
+        proUpgradeGate.showBenefits()
     }
 
     fun onUnlockAuthenticated() {
@@ -81,6 +102,7 @@ class IosRootViewModel(
     private fun finishStartupWhenReady() {
         launchSafely(showLoading = false) {
             phase.first { it == IosRootPhase.READY }
+            decideEarlyAdopterPro()
             resumeInterruptedNotes()
             sweepOrphanedRecordings()
             clearShareCache()
@@ -105,6 +127,7 @@ class IosRootViewModel(
         launchSafely(showLoading = false) {
             if (!observeUserPreferences().first().onboardingCompleted) {
                 appLockManager.markUnlocked()
+                decideEarlyAdopterPro()
             }
         }
     }

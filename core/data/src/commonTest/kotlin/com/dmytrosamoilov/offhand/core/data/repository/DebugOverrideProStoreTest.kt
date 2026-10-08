@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.core.data.repository
 
+import com.dmytrosamoilov.offhand.core.data.domain.EarlyAdopterPro
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProOffer
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
@@ -102,6 +103,16 @@ private class FakePreferences : UserPreferencesRepository {
     override suspend fun setReviewPromptState(state: ReviewPromptState) = Unit
     override suspend fun setSmartSuggestionsEnabled(enabled: Boolean) = Unit
     override suspend fun setNotificationsPrompted() = Unit
+
+    override suspend fun setEarlyAdopterPro(decision: EarlyAdopterPro) = Unit
+
+    override suspend fun setEarlyAdopterThanked() = Unit
+
+    override suspend fun incrementFreeImportsUsed() = Unit
+
+    override suspend fun refundFreeImport() = Unit
+
+    override suspend fun setModelDownloadProgress(percent: Int?) = Unit
 
     override suspend fun setProOverride(override: ProOverride) {
         this.override.value = override

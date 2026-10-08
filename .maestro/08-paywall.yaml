@@ -1,9 +1,10 @@
 # Runs after 01-smoke.yaml. The smoke fake owns the lifetime plan, so the debug
 # override in Settings plays the free user: crowns appear, the paywall opens
-# from the Upgrade card and from Import audio, a simulated purchase flips the
-# override to Pro, and the import picker that was waiting behind the paywall
-# opens on its own. Tapping the plan row as a subscriber shows what Pro
-# includes, without prices.
+# from the Upgrade card and from the Smart suggestions switch, a simulated
+# purchase flips the override to Pro, and the switch that was waiting behind
+# the paywall ends up on. (Import audio no longer opens the paywall for a fresh
+# free install: the first three imports are free.) Tapping the plan row as a
+# subscriber shows what Pro includes, without prices.
 appId: com.dmytrosamoilov.offhand.uitest
 ---
 - launchApp
@@ -30,18 +31,16 @@ appId: com.dmytrosamoilov.offhand.uitest
       - assertNotVisible: "Start 14-day free trial"
       - scrollUntilVisible:
           element:
-            text: "Import audio"
+            text: "Show smart suggestions"
           direction: DOWN
-      - tapOn: "Import audio"
-      - assertVisible: "Turn your recordings into notes"
+      - tapOn: "Show smart suggestions"
+      - assertVisible: "Find dates and to-dos in your notes"
       - tapOn: "Start 14-day free trial"
       # The success beat lasts under two seconds, so the check is what follows
-      # it: the gate resumes the import click and the system picker opens
+      # it: the gate resumes the switch, which ends up on
       - extendedWaitUntil:
           notVisible: "Start 14-day free trial"
           timeout: 10000
-      - assertVisible: "Downloads|Recent|Files"
-      - back
       - scrollUntilVisible:
           element:
             text: "Subscription"
@@ -74,14 +73,13 @@ appId: com.dmytrosamoilov.offhand.uitest
       - tapOn: "Close"
       - assertNotVisible: "Start 14-day free trial"
       - scrollUntilVisible:
-          element: "Import audio"
-      - tapOn: "Import audio"
-      - assertVisible: "Turn your recordings into notes"
+          element: "Show smart suggestions"
+      - tapOn: "Show smart suggestions"
+      - assertVisible: "Find dates and to-dos in your notes"
       - tapOn: "Start 14-day free trial"
       - extendedWaitUntil:
-          visible: "Cancel"
+          notVisible: "Start 14-day free trial"
           timeout: 10000
-      - tapOn: "Cancel"
       - scrollUntilVisible:
           element: "Lifetime, yours forever"
           direction: UP

@@ -7,4 +7,8 @@
     <string name="lock_unlock_button">Розблокувати</string>
     <string name="lock_prompt_title">Розблокувати Offhand</string>
     <string name="lock_prompt_subtitle">Скористайтеся блокуванням екрана або відбитком пальця</string>
+    <string name="early_adopter_title">Offhand Pro ваш</string>
+    <string name="early_adopter_body">Ви були тут до версії 1.5, коли Offhand був ще сирим. Дякую, що тестували його зі мною. На знак подяки все з Offhand Pro відкрито на цьому телефоні назавжди. Без покупки й без облікового запису.\n\nОдне зауваження: Pro живе лише на цьому телефоні. Якщо видалити або перевстановити Offhand чи перейти на новий телефон, він не повернеться.</string>
+    <string name="early_adopter_benefits">Показати можливості Pro</string>
+    <string name="early_adopter_confirm">Зрозуміло</string>
 </resources>

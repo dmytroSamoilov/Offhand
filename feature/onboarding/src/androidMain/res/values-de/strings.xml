@@ -11,9 +11,6 @@
     <string name="onboarding_privacy_body">Alles bleibt auf deinem Handy. Aufnahmen, Transkripte und Notizen sind verschlüsselt, und die KI, die sie verarbeitet, läuft direkt auf dem Gerät. Nichts wird jemals hochgeladen.</string>
     <string name="onboarding_continue">Weiter</string>
 
-    <string name="onboarding_note_style_title">Wie wirst du Offhand nutzen?</string>
-    <string name="onboarding_note_style_body">Wähle den Stil, in dem deine Notizen geschrieben werden. Jede Aufnahme wird zu dieser Art von Notiz.</string>
-    <string name="onboarding_note_style_hint">Du kannst das jederzeit in den Einstellungen ändern oder jede einzelne Notiz umformulieren lassen.</string>
 
     <string name="onboarding_lock_title">Schütze deine Notizen</string>
     <string name="onboarding_lock_body">Deine Notizen werden mit einem Schlüssel verschlüsselt, der in der sicheren Hardware dieses Smartphones liegt. Dieses Smartphone hat keine Displaysperre, also kann jeder, der es in die Hand nimmt, Offhand öffnen. Richte eine PIN, ein Muster oder einen Fingerabdruck ein, damit deine Notizen privat bleiben.</string>

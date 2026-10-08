@@ -31,7 +31,8 @@ object AnalyticsEvents {
 
     fun noteInterrupted(source: NoteSource): AnalyticsEvent = event("note_interrupted", "source" to source.label())
 
-    fun audioImportStarted(files: Int): AnalyticsEvent = event("audio_import_started", "files" to files.toLong())
+    fun audioImportStarted(files: Int, videos: Int): AnalyticsEvent =
+        event("audio_import_started", "files" to files.toLong(), "videos" to videos.toLong())
 
     fun audioImportRejected(reason: String): AnalyticsEvent = event("audio_import_rejected", "reason" to reason)
 
@@ -105,6 +106,8 @@ object AnalyticsEvents {
 
     fun restoreClicked(): AnalyticsEvent = event("restore_clicked")
 
+    fun proGrandfathered(): AnalyticsEvent = event("pro_grandfathered")
+
     fun redeemCodeClicked(): AnalyticsEvent = event("redeem_code_clicked")
 
     fun onboardingCompleted(): AnalyticsEvent = event("onboarding_completed")
@@ -117,6 +120,9 @@ object AnalyticsEvents {
     fun modelDownloadStarted(network: String): AnalyticsEvent = event("model_download_started", "network" to network)
 
     fun modelDownloadFailed(reason: String): AnalyticsEvent = event("model_download_failed", "reason" to reason)
+
+    fun modelDownloadAbandoned(percent: Int): AnalyticsEvent =
+        event("model_download_abandoned", "percent" to percent.toLong())
 
     fun notificationPermission(granted: Boolean): AnalyticsEvent =
         event("notification_permission", "granted" to granted.label())
