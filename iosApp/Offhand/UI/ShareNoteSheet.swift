@@ -98,6 +98,9 @@ struct ShareNoteSheet: View {
                     Image(systemName: "checkmark").foregroundStyle(Brand.primary)
                 }
             }
+            // A plain button in a List only reacts where its label draws
+            // something; the shape makes the whole row, Spacer included, tappable
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
