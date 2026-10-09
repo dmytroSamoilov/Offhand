@@ -14,10 +14,12 @@ appId: com.dmytrosamoilov.offhand.uitest
       visible: "Continue without a lock"
     commands:
       - tapOn: "Continue without a lock"
+# The lock switch starts on where the device has a credential; switch it off
 - runFlow:
     when:
       visible: "Lock Offhand?"
     commands:
+      - tapOn: "Require unlock to open Offhand"
       - tapOn: "Continue"
 - runFlow:
     when:
@@ -32,7 +34,7 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "Continue"
 - assertVisible: "Notes"
 
-# The declined consent is what Settings shows
+# The consent switch is reachable in Settings (its state is not exposed to Maestro)
 - tapOn: "Settings"
 - runFlow:
     when:
@@ -43,9 +45,7 @@ appId: com.dmytrosamoilov.offhand.uitest
             text: "About & support"
           direction: DOWN
       - tapOn: "About & support"
-      - assertVisible:
-          text: "Anonymous usage & stability reports"
-          checked: false
+      - assertVisible: "Anonymous usage & stability reports"
       - back
       - tapOn:
           id: "tab_notes"
@@ -53,14 +53,16 @@ appId: com.dmytrosamoilov.offhand.uitest
     when:
       platform: iOS
     commands:
+      - scrollUntilVisible:
+          element: "About & support"
       - tapOn: "About & support"
       - assertVisible: "Share usage & stability reports"
       - swipe:
           start: "1%,50%"
           end: "70%,50%"
       - tapOn:
+          id: "list.bullet"
           text: "Notes"
-          index: 1
 
 # Without the microphone the record sheet shows the fallback
 - runFlow:

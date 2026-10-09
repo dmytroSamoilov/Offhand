@@ -64,6 +64,7 @@ struct NoteDetailView: View {
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button { viewModel.onShareRequested() } label: { Image(systemName: "square.and.arrow.up") }
+                    .accessibilityLabel(String(localized: "Share note"))
                 Menu {
                     Button {
                         viewModel.onEditStarted()
@@ -293,6 +294,9 @@ struct NoteDetailView: View {
                     .foregroundStyle(Brand.primary)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(
+                state.playback.isPlaying ? String(localized: "Pause playback") : String(localized: "Play recording")
+            )
             VStack(spacing: 4) {
                 Slider(
                     value: Binding(

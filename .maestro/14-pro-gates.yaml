@@ -21,6 +21,8 @@ appId: com.dmytrosamoilov.offhand.uitest
           element:
             text: "Import audio or video"
           direction: UP
+      # Pro imports did not use up the free taste
+      - assertVisible: "3 of 3 free imports left"
 - runFlow:
     when:
       platform: iOS
@@ -28,15 +30,33 @@ appId: com.dmytrosamoilov.offhand.uitest
       - scrollUntilVisible:
           element: "Pro status override"
       - tapOn: "Free"
+      # Pro imports did not use up the free taste (the row sits next to the
+      # override at the bottom of the form)
+      - assertVisible: "3 of 3 free imports left"
+      # Scroll back to the very top (the hierarchy reports rows clipped under
+      # the title as visible, so aim at the first row like 08 does)
       - scrollUntilVisible:
-          element: "Import audio or video"
+          element: "Upgrade"
           direction: UP
 
-# Pro imports did not use up the free taste
-- assertVisible: "3 of 3 free imports left"
-
 # A built-in style other than Summary as the default
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "Summary styles"
+          direction: UP
+- extendedWaitUntil:
+    visible: "Default: Summary"
+    timeout: 5000
+- waitForAnimationToEnd:
+    timeout: 3000
 - tapOn: "Summary styles"
+- extendedWaitUntil:
+    visible: "Built in"
+    timeout: 5000
 - tapOn: "Meeting notes"
 - assertVisible: "Choose a different summary style"
 - tapOn: "Close"
@@ -53,16 +73,39 @@ appId: com.dmytrosamoilov.offhand.uitest
           start: "1%,50%"
           end: "70%,50%"
 
-# Recordings inside a backup
+# Recordings inside a backup: the switch lives on the options step
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "Backup & restore"
+          direction: DOWN
 - tapOn: "Backup & restore"
+- tapOn: "Back up"
+- tapOn: "Passphrase"
+- inputText: "smoke-test-passphrase"
+- tapOn: "Repeat passphrase"
+- inputText: "smoke-test-passphrase"
+- tapOn: "Continue"
+- assertVisible: "Include audio recordings"
 - tapOn: "Include audio recordings"
 - assertVisible: "Back up your recordings too"
 - tapOn: "Close"
+# The options sheet stepped aside for the paywall and is back, switch still off
+- assertVisible: "Include audio recordings"
 - runFlow:
     when:
       platform: Android
     commands:
       - back
+      - tapOn: "Back"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Cancel"
 - runFlow:
     when:
       platform: iOS
@@ -83,8 +126,8 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - tapOn:
+          id: "list.bullet"
           text: "Notes"
-          index: 1
 - tapOn: "New folder"
 - inputText: "Second"
 - tapOn: "Save"

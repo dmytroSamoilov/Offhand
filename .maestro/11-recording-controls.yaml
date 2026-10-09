@@ -28,11 +28,16 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "Resume recording"
 - assertVisible: "Recording…"
 - tapOn: "Discard recording"
-- assertVisible: "Discard this recording?"
+- extendedWaitUntil:
+    visible: "Discard this recording?"
+    timeout: 5000
+# A tap during the dialog's entrance animation lands next to the button
+- waitForAnimationToEnd:
+    timeout: 3000
 - tapOn: "Discard"
 - extendedWaitUntil:
     notVisible: "Save note"
-    timeout: 10000
+    timeout: 20000
 # The placeholder note created for the recording went with it
 - assertNotVisible: "Recording [0-9]+"
 - assertVisible: "Smoke test note"

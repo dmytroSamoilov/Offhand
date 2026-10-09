@@ -33,7 +33,14 @@ appId: com.dmytrosamoilov.offhand.uitest
           element:
             text: "Show smart suggestions"
           direction: DOWN
+      # 07 leaves the switch on; the free user turns it off without a gate and
+      # the paywall opens on the way back on
       - tapOn: "Show smart suggestions"
+      - runFlow:
+          when:
+            notVisible: "Find dates and to-dos in your notes"
+          commands:
+            - tapOn: "Show smart suggestions"
       - assertVisible: "Find dates and to-dos in your notes"
       - tapOn: "Start 14-day free trial"
       # The success beat lasts under two seconds, so the check is what follows
@@ -74,7 +81,14 @@ appId: com.dmytrosamoilov.offhand.uitest
       - assertNotVisible: "Start 14-day free trial"
       - scrollUntilVisible:
           element: "Show smart suggestions"
+      # 07 leaves the switch on; the free user turns it off without a gate and
+      # the paywall opens on the way back on
       - tapOn: "Show smart suggestions"
+      - runFlow:
+          when:
+            notVisible: "Find dates and to-dos in your notes"
+          commands:
+            - tapOn: "Show smart suggestions"
       - assertVisible: "Find dates and to-dos in your notes"
       - tapOn: "Start 14-day free trial"
       - extendedWaitUntil:

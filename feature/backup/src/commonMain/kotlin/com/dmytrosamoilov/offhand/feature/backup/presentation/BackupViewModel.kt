@@ -43,10 +43,25 @@ class BackupViewModel(
     }
 
     fun onIncludeAudioChanged(enabled: Boolean) {
-        launchSafely(showLoading = false) {
-            if (enabled && !proUpgradeGate.requirePro(ProFeature.BACKUP_AUDIO)) return@launchSafely
+        if (!enabled || uiState.value.isAudioUnlocked) {
             mutableUiState.update { it.copy(includeAudio = enabled) }
+            return
         }
+        launchSafely(showLoading = false) {
+            val unlocked = withBackupSheetClosed { proUpgradeGate.requirePro(ProFeature.BACKUP_AUDIO) }
+            mutableUiState.update { it.copy(includeAudio = unlocked) }
+        }
+    }
+
+    // The options sheet would cover the paywall (a bottom sheet is its own
+    // window on Android, and a SwiftUI sheet cannot present a cover), so it
+    // steps aside and comes back with its fields intact.
+    private suspend fun withBackupSheetClosed(block: suspend () -> Boolean): Boolean {
+        val step = uiState.value.backupStep
+        mutableUiState.update { it.copy(backupStep = null) }
+        val result = block()
+        mutableUiState.update { it.copy(backupStep = step) }
+        return result
     }
 
     fun onIncludeStylesChanged(enabled: Boolean) {

@@ -15,6 +15,14 @@ appId: com.dmytrosamoilov.offhand.uitest
             text: "Import audio or video"
           direction: DOWN
       - tapOn: "Import audio or video"
+      # Downloads also holds the files the earlier flows saved there
+      - tapOn:
+          text: "Videos"
+          optional: true
+      - scrollUntilVisible:
+          element:
+            text: "import-sample.mp4"
+          direction: DOWN
       - tapOn:
           text: "import-sample.mp4"
       - extendedWaitUntil:
@@ -29,6 +37,10 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - tapOn: "Settings"
+      # On a tall screen the row first lands under the floating tab bar
+      - scrollUntilVisible:
+          element: "Import audio or video"
+          centerElement: true
       - tapOn: "Import audio or video"
       # Same position-driven picker as 06, searched by the full file name so
       # the audio sample does not match too
@@ -50,12 +62,15 @@ appId: com.dmytrosamoilov.offhand.uitest
       - assertVisible: "1 file is being imported.*"
       - tapOn: "OK"
       - tapOn:
+          id: "list.bullet"
           text: "Notes"
-          index: 1
-# Fourth note written by the fake engines (smoke, audio import, folder recording)
+# The placeholder named after the file turns into the fourth note written by
+# the fake engines (smoke, audio import, folder recording came before)
 - extendedWaitUntil:
-    visible:
+    notVisible: "import-sample.*"
+    timeout: 90000
+- scrollUntilVisible:
+    element:
       text: "Smoke test note"
       index: 3
-    timeout: 90000
-- assertNotVisible: "import-sample"
+    direction: DOWN

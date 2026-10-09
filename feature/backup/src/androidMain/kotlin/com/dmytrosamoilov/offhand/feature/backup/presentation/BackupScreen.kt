@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -21,9 +22,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -42,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -49,13 +51,13 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.designsystem.component.ProBadge
+import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.feature.backup.R
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupFileNames
 import com.dmytrosamoilov.offhand.feature.backup.domain.UriBackupFile
 import org.koin.androidx.compose.koinViewModel
-import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 
 @Composable
 fun BackupScreen(
@@ -317,8 +319,18 @@ private fun OptionSwitchRow(
     onCheckedChange: (Boolean) -> Unit,
     showProBadge: Boolean = false,
 ) {
+    val haptics = haptics()
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(
+                value = checked,
+                role = Role.Switch,
+                onValueChange = { isOn ->
+                    haptics.toggle(isOn)
+                    onCheckedChange(isOn)
+                },
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -333,14 +345,7 @@ private fun OptionSwitchRow(
             )
         }
         Spacer(modifier = Modifier.width(12.dp))
-        val haptics = haptics()
-        Switch(
-            checked = checked,
-            onCheckedChange = { isOn ->
-                haptics.toggle(isOn)
-                onCheckedChange(isOn)
-            },
-        )
+        Switch(checked = checked, onCheckedChange = null)
     }
 }
 

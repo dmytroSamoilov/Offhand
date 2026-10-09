@@ -321,9 +321,11 @@ private struct SettingsActionRow: View {
 
 // The whole row flips the switch, like the Android row; a plain Toggle only
 // reacts to the switch itself.
-private struct SettingsSwitchRow: View {
+// A plain Toggle in a Form only flips on the switch itself; wrapping it in a
+// Button makes the whole row tappable, like Android's rows.
+struct SettingsSwitchRow: View {
     let title: String
-    let subtitle: String
+    var subtitle: String? = nil
     let isOn: Bool
     var showsProBadge = false
     let action: () -> Void
@@ -336,7 +338,9 @@ private struct SettingsSwitchRow: View {
                         Text(title)
                         if showsProBadge { ProBadge() }
                     }
-                    Text(subtitle).font(.caption).foregroundStyle(.secondary)
+                    if let subtitle {
+                        Text(subtitle).font(.caption).foregroundStyle(.secondary)
+                    }
                 }
                 Spacer()
                 Toggle("", isOn: .constant(isOn))

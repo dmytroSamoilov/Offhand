@@ -16,6 +16,14 @@ appId: com.dmytrosamoilov.offhand.uitest
             text: "Import audio or video"
           direction: DOWN
       - tapOn: "Import audio or video"
+      # Downloads also holds the files the other flows save there
+      - tapOn:
+          text: "Audio"
+          optional: true
+      - scrollUntilVisible:
+          element:
+            text: "import-sample.*"
+          direction: DOWN
       - tapOn:
           text: "import-sample.*"
       - extendedWaitUntil:
@@ -38,6 +46,10 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - tapOn: "Settings"
+      # On a tall screen the row first lands under the floating tab bar
+      - scrollUntilVisible:
+          element: "Import audio or video"
+          centerElement: true
       - tapOn: "Import audio or video"
       # The document picker runs out of process and is invisible to Maestro,
       # and it reopens in whatever folder it showed last, so it is driven by
@@ -60,10 +72,10 @@ appId: com.dmytrosamoilov.offhand.uitest
           timeout: 10000
       - assertVisible: "1 file is being imported.*"
       - tapOn: "OK"
-      # The Settings form has a "Notes" section header, so the tab is index 1
+      # The Settings form has a "Notes" section header, so the tab is picked by its symbol
       - tapOn:
+          id: "list.bullet"
           text: "Notes"
-          index: 1
       - extendedWaitUntil:
           visible:
             text: "Smoke test note"

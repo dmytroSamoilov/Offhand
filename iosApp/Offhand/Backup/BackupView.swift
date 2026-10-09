@@ -197,21 +197,19 @@ private struct BackupSheet: View {
                     Text(BackupFileNames.shared.EXTENSION)
                         .foregroundStyle(.secondary)
                 }
-                Toggle(isOn: Binding(
-                    get: { state.includeAudio },
-                    set: { viewModel.onIncludeAudioChanged(enabled: $0) }
-                )) {
-                    HStack(spacing: 8) {
-                        Text(String(localized: "Include audio recordings"))
-                        if !state.isAudioUnlocked { ProBadge() }
-                    }
+                SettingsSwitchRow(
+                    title: String(localized: "Include audio recordings"),
+                    isOn: state.includeAudio,
+                    showsProBadge: !state.isAudioUnlocked
+                ) {
+                    viewModel.onIncludeAudioChanged(enabled: !state.includeAudio)
                 }
-                .tint(Brand.toggle)
-                Toggle(String(localized: "Include summary styles"), isOn: Binding(
-                    get: { state.includeStyles },
-                    set: { viewModel.onIncludeStylesChanged(enabled: $0) }
-                ))
-                .tint(Brand.toggle)
+                SettingsSwitchRow(
+                    title: String(localized: "Include summary styles"),
+                    isOn: state.includeStyles
+                ) {
+                    viewModel.onIncludeStylesChanged(enabled: !state.includeStyles)
+                }
             } footer: {
                 Text(String(localized: "Recordings make the file much larger."))
             }

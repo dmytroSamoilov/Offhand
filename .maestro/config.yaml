@@ -13,3 +13,11 @@ executionOrder:
     - 08-paywall
     - 09-record-into-folder
     - 10-new-style-from-note
+    - 11-recording-controls
+    - 12-note-actions
+    - 13-share-export
+    - 14-pro-gates
+    - 15-video-import
+    - 16-settings
+    - 17-delete-note
+    - 18-onboarding-branches
