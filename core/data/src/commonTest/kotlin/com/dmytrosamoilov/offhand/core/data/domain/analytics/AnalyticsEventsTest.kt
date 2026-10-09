@@ -35,7 +35,7 @@ class AnalyticsEventsTest {
             AnalyticsEvents.shareCompleted("pdf", savedToDevice = true),
             AnalyticsEvents.noteStyleCreated(sections = 3, described = true),
             AnalyticsEvents.backupCreated(notes = 7, withAudio = false),
-            AnalyticsEvents.purchaseCompleted(ProPlan.YEARLY, trial = true),
+            AnalyticsEvents.purchaseCompleted(ProPlan.YEARLY, trial = true, feature = ProFeature.GENERAL),
             AnalyticsEvents.paywallShown(ProFeature.DOCUMENT_EXPORT),
             AnalyticsEvents.noteCopied(NoteSection.TRANSCRIPT),
         )

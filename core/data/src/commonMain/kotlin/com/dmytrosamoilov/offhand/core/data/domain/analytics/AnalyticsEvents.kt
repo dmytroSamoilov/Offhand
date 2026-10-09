@@ -99,14 +99,16 @@ object AnalyticsEvents {
     fun paywallDismissed(feature: ProFeature): AnalyticsEvent =
         event("paywall_dismissed", "feature" to feature.label())
 
-    fun purchaseStarted(plan: ProPlan): AnalyticsEvent = event("purchase_started", "plan" to plan.label())
+    fun purchaseStarted(plan: ProPlan, feature: ProFeature): AnalyticsEvent =
+        event("purchase_started", "plan" to plan.label(), "feature" to feature.label())
 
-    fun purchaseCompleted(plan: ProPlan, trial: Boolean): AnalyticsEvent =
-        event("purchase_completed", "plan" to plan.label(), "trial" to trial.label())
+    fun purchaseCompleted(plan: ProPlan, trial: Boolean, feature: ProFeature): AnalyticsEvent =
+        event("purchase_completed", "plan" to plan.label(), "trial" to trial.label(), "feature" to feature.label())
 
     fun restoreClicked(): AnalyticsEvent = event("restore_clicked")
 
-    fun proGrandfathered(): AnalyticsEvent = event("pro_grandfathered")
+    fun proGrandfathered(hasPurchase: Boolean): AnalyticsEvent =
+        event("pro_grandfathered", "has_purchase" to hasPurchase.label())
 
     fun redeemCodeClicked(): AnalyticsEvent = event("redeem_code_clicked")
 

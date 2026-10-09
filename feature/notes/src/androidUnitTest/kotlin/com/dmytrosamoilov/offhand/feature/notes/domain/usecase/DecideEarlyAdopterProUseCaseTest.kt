@@ -3,6 +3,8 @@ package com.dmytrosamoilov.offhand.feature.notes.domain.usecase
 import com.dmytrosamoilov.offhand.core.data.domain.EarlyAdopterPro
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
+import com.dmytrosamoilov.offhand.core.data.domain.ProStatusRepository
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
@@ -26,8 +28,11 @@ class DecideEarlyAdopterProUseCaseTest {
         coJustRun { setEarlyAdopterPro(any()) }
     }
     private val notesRepository: NotesRepository = mockk()
+    private val proStatusRepository: ProStatusRepository = mockk {
+        every { observeStatus() } returns flowOf(ProStatus.FREE)
+    }
     private val analyticsTracker: AnalyticsTracker = mockk { justRun { track(any()) } }
-    private val useCase = DecideEarlyAdopterProUseCase(userPreferences, notesRepository, analyticsTracker)
+    private val useCase = DecideEarlyAdopterProUseCase(userPreferences, notesRepository, proStatusRepository, analyticsTracker)
 
     @Test
     fun `an onboarded install with a note is granted once`() = runTest {
@@ -37,7 +42,22 @@ class DecideEarlyAdopterProUseCaseTest {
         useCase()
 
         coVerify { userPreferences.setEarlyAdopterPro(EarlyAdopterPro.GRANTED) }
-        verify { analyticsTracker.track(AnalyticsEvents.proGrandfathered()) }
+        coVerify(exactly = 0) { userPreferences.setEarlyAdopterThanked() }
+        verify { analyticsTracker.track(AnalyticsEvents.proGrandfathered(hasPurchase = false)) }
+    }
+
+    @Test
+    fun `a paying install is granted quietly without the thank-you`() = runTest {
+        givenPreferences(onboardingCompleted = true)
+        coEvery { notesRepository.countNotes() } returns 1
+        every { proStatusRepository.observeStatus() } returns flowOf(ProStatus.LIFETIME)
+        coJustRun { userPreferences.setEarlyAdopterThanked() }
+
+        useCase()
+
+        coVerify { userPreferences.setEarlyAdopterPro(EarlyAdopterPro.GRANTED) }
+        coVerify { userPreferences.setEarlyAdopterThanked() }
+        verify { analyticsTracker.track(AnalyticsEvents.proGrandfathered(hasPurchase = true)) }
     }
 
     @Test
