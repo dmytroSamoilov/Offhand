@@ -1,0 +1,70 @@
+# Runs after 01-smoke.yaml and relies on the note it created. Covers editing
+# the title (and putting it back), copying the summary, playing the recording
+# back and re-transcribing from the note's menu.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- tapOn: "Smoke test note"
+- runFlow:
+    when:
+      visible: "In-app review · dev build"
+    commands:
+      - tapOn: "COUNT ATTEMPT"
+
+# Edit the title
+- tapOn: "More actions"
+- tapOn: "Edit note"
+- tapOn: "Smoke test note"
+- eraseText: 40
+- inputText: "Edited smoke note"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Save changes"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Save"
+- assertVisible: "Edited smoke note"
+
+# Put the title back so the later flows find the note
+- tapOn: "More actions"
+- tapOn: "Edit note"
+- tapOn: "Edited smoke note"
+- eraseText: 40
+- inputText: "Smoke test note"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Save changes"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Save"
+- assertVisible: "Smoke test note"
+
+# Copy the summary
+- tapOn: "Copy summary"
+
+# Play the recording back and pause it again
+- tapOn: "Play recording"
+- extendedWaitUntil:
+    visible: "Pause playback"
+    timeout: 5000
+- tapOn: "Pause playback"
+- assertVisible: "Play recording"
+
+# Re-transcribe from the stored audio; the fake engines write the same note
+- tapOn: "More actions"
+- tapOn: "Re-transcribe"
+- assertVisible: "Re-transcribe this note?"
+- tapOn: "Re-transcribe"
+- extendedWaitUntil:
+    visible: "Summary"
+    timeout: 60000
+- assertVisible: "Smoke test note"
+- assertVisible: "Transcript"

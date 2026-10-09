@@ -1,0 +1,52 @@
+# Not part of the main folder: it needs a screen lock on the device, which the
+# other flows must run without. CI sets one up right before it (Android:
+# `adb shell locksettings set-pin 1234`; iOS: Face ID enrolled with notifyutil
+# and a loop answering every prompt with pearl.match) and removes it after.
+# Run with `maestro test .maestro/lock/`. Covers switching the lock on in
+# onboarding, the lock screen on the next launch, unlocking, and switching the
+# lock off in Settings.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp:
+    clearState: true
+- tapOn: "Continue"
+- assertVisible: "Lock Offhand?"
+- tapOn: "Require unlock to open Offhand"
+- tapOn: "Continue"
+- tapOn: "Continue"
+- assertVisible: "Notes"
+
+# The next launch is locked
+- stopApp
+- launchApp
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - assertVisible: "Notes locked"
+      - tapOn: "Unlock"
+      # BiometricPrompt falls back to the device PIN when nothing else is enrolled
+      - extendedWaitUntil:
+          visible: "(?i).*pin.*"
+          timeout: 10000
+      - inputText: "1234"
+      - pressKey: Enter
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertVisible: "Offhand is locked"
+- extendedWaitUntil:
+    visible: "Notes"
+    timeout: 15000
+- assertVisible: "Smoke test note|No notes yet.*"
+
+# Switching the lock off in Settings makes the next launch open straight away
+- tapOn: "Settings"
+- tapOn: "Require unlock to open Offhand"
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: "Notes"
+    timeout: 15000
+- assertNotVisible: "Notes locked|Offhand is locked"

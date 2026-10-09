@@ -156,54 +156,75 @@ struct RecordSheetView: View {
     }
 
     private var recordingContent: some View {
-        VStack(spacing: 20) {
-            Text(state.isPaused ? String(localized: "Paused") : String(localized: "Recording"))
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(state.isPaused ? Color.secondary : Brand.primary)
+        VStack(spacing: 0) {
+            WaveformBar(levels: state.waveform.map { $0.floatValue })
+                .frame(height: 56)
             Text(state.elapsedTime)
                 .font(.system(size: 44, weight: .semibold))
                 .monospacedDigit()
-            WaveformBar(levels: state.waveform.map { $0.floatValue })
-                .frame(height: 56)
+                .padding(.top, 24)
+            Text(state.isPaused ? String(localized: "Paused") : String(localized: "Recording…"))
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .padding(.top, 4)
+            chunkPills
+                .padding(.top, 12)
             if let mic = state.externalMicName {
                 Label(mic, systemImage: "headphones")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .padding(.top, 12)
             }
-            HStack(spacing: 32) {
-                Button {
-                    Haptics.tap()
-                    state.isPaused ? viewModel.onResumeRecording() : viewModel.onPauseRecording()
-                } label: {
-                    Image(systemName: state.isPaused ? "play.fill" : "pause.fill")
-                        .font(.title2)
-                        .frame(width: 64, height: 64)
-                        .background(Color(.secondarySystemFill), in: Circle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(
-                    state.isPaused ? String(localized: "Resume recording") : String(localized: "Pause recording")
-                )
-                Button {
-                    Haptics.confirm()
-                    viewModel.onStopRecording()
-                    askForNotificationsIfPending()
-                } label: {
-                    Image(systemName: "stop.fill")
-                        .font(.title2)
-                        .foregroundStyle(.white)
-                        .frame(width: 80, height: 80)
-                        .background(Brand.primary, in: Circle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(String(localized: "Save note"))
+            HStack(spacing: 16) {
+                pauseResumeButton
+                saveNoteButton
             }
-            Button(String(localized: "Discard"), role: .destructive) {
+            .padding(.top, 28)
+            Button(String(localized: "Discard recording"), role: .destructive) {
                 isDiscardConfirmationVisible = true
             }
             .font(.subheadline)
-            chunkPills
+            .padding(.top, 12)
         }
+    }
+
+    private var pauseResumeButton: some View {
+        Button {
+            Haptics.tap()
+            state.isPaused ? viewModel.onResumeRecording() : viewModel.onPauseRecording()
+        } label: {
+            Image(systemName: state.isPaused ? "play.fill" : "pause.fill")
+                .font(.title2)
+                .foregroundStyle(Brand.primary)
+                .frame(width: 64, height: 64)
+                .background(Brand.primaryContainer, in: Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(
+            state.isPaused ? String(localized: "Resume recording") : String(localized: "Pause recording")
+        )
+    }
+
+    // Mirrors Android: the main action is a labelled "Save note" pill, not a
+    // bare stop icon, so it is clear which button keeps the recording.
+    private var saveNoteButton: some View {
+        Button {
+            Haptics.confirm()
+            viewModel.onStopRecording()
+            askForNotificationsIfPending()
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "checkmark")
+                    .font(.title3.weight(.semibold))
+                Text(String(localized: "Save note"))
+                    .font(.headline)
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 64)
+            .background(Brand.primary, in: Capsule())
+        }
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder

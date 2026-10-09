@@ -1,0 +1,82 @@
+# Runs after 01-smoke.yaml. Covers the About & support screen: the telemetry
+# switch, developer options with removing and re-downloading the on-device AI
+# (the fake reports it back at once), and on Android the wallpaper-colour
+# switch and the "Redeem a code" hint dialog.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- tapOn: "Settings"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "About & support"
+          direction: DOWN
+      - tapOn: "About & support"
+      - tapOn: "Anonymous usage & stability reports"
+      - assertVisible:
+          text: "Anonymous usage & stability reports"
+          checked: false
+      - tapOn: "Anonymous usage & stability reports"
+      - assertVisible:
+          text: "Anonymous usage & stability reports"
+          checked: true
+      - scrollUntilVisible:
+          element:
+            text: "Developer options"
+          direction: DOWN
+      - tapOn: "Developer options"
+      - scrollUntilVisible:
+          element:
+            text: "Remove on-device AI"
+          direction: UP
+      - tapOn: "Remove on-device AI"
+      - assertVisible: "Remove the on-device AI?"
+      - tapOn: "Remove"
+      - assertVisible: "Not downloaded"
+      - tapOn: "Download on-device AI"
+      - extendedWaitUntil:
+          visible: "Remove on-device AI"
+          timeout: 10000
+      - scrollUntilVisible:
+          element:
+            text: "Developer options"
+          direction: DOWN
+      - tapOn: "Developer options"
+      - back
+      - scrollUntilVisible:
+          element:
+            text: "Wallpaper colors"
+          direction: DOWN
+      - tapOn: "Wallpaper colors"
+      - tapOn: "Wallpaper colors"
+      - scrollUntilVisible:
+          element:
+            text: "Redeem a code"
+          direction: UP
+      - tapOn: "Redeem a code"
+      - assertVisible: "Google Play opens the yearly plan.*"
+      - tapOn: "Cancel"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "About & support"
+      - tapOn: "Share usage & stability reports"
+      - tapOn: "Share usage & stability reports"
+      - tapOn: "Developer options"
+      - tapOn: "Remove on-device AI"
+      - assertVisible: "Remove the on-device AI?"
+      - tapOn: "Remove"
+      - assertVisible: "Download on-device AI"
+      - tapOn: "Download on-device AI"
+      - extendedWaitUntil:
+          visible: "Remove on-device AI"
+          timeout: 10000
+      - tapOn: "Developer options"
+      - swipe:
+          start: "1%,50%"
+          end: "70%,50%"
+      - assertVisible: "Backup & restore"

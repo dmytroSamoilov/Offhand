@@ -1,0 +1,61 @@
+# Runs after 06-import-audio.yaml. Expects a video file named import-sample.mp4
+# next to the audio sample (Download on Android, "On My iPhone" on iOS) and
+# covers importing it through the same picker: the audio track becomes a note.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- assertVisible: "Smoke test note"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Settings"
+      - scrollUntilVisible:
+          element:
+            text: "Import audio or video"
+          direction: DOWN
+      - tapOn: "Import audio or video"
+      - tapOn:
+          text: "import-sample.mp4"
+      - extendedWaitUntil:
+          visible: "Import started"
+          timeout: 10000
+      - assertVisible: "1 file is being imported.*"
+      - tapOn: "OK"
+      - tapOn:
+          id: "tab_notes"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Settings"
+      - tapOn: "Import audio or video"
+      # Same position-driven picker as 06, searched by the full file name so
+      # the audio sample does not match too
+      - extendedWaitUntil:
+          visible: "Cancel"
+          timeout: 10000
+      - tapOn:
+          point: "50%,19%"
+      - inputText: "import-sample.mp4"
+      - tapOn:
+          point: "73%,25%"
+      - tapOn:
+          point: "18%,41%"
+      - tapOn:
+          point: "87%,13%"
+      - extendedWaitUntil:
+          visible: "Import started"
+          timeout: 10000
+      - assertVisible: "1 file is being imported.*"
+      - tapOn: "OK"
+      - tapOn:
+          text: "Notes"
+          index: 1
+# Fourth note written by the fake engines (smoke, audio import, folder recording)
+- extendedWaitUntil:
+    visible:
+      text: "Smoke test note"
+      index: 3
+    timeout: 90000
+- assertNotVisible: "import-sample"

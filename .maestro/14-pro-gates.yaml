@@ -1,0 +1,147 @@
+# Runs after 08-paywall.yaml and 09-record-into-folder.yaml. The debug override
+# plays the free user again and every 1.5 gate is tapped: a built-in style as
+# the default and as a restyle, the third folder, backups with audio, PDF export,
+# and the free-import counter on the Settings row. Each one opens the paywall
+# with its own headline and is declined, so nothing changes.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- assertVisible: "Smoke test note"
+- tapOn: "Settings"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "Free"
+          direction: DOWN
+      - tapOn: "Free"
+      - scrollUntilVisible:
+          element:
+            text: "Import audio or video"
+          direction: UP
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element: "Pro status override"
+      - tapOn: "Free"
+      - scrollUntilVisible:
+          element: "Import audio or video"
+          direction: UP
+
+# Pro imports did not use up the free taste
+- assertVisible: "3 of 3 free imports left"
+
+# A built-in style other than Summary as the default
+- tapOn: "Summary styles"
+- tapOn: "Meeting notes"
+- assertVisible: "Choose a different summary style"
+- tapOn: "Close"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: "1%,50%"
+          end: "70%,50%"
+
+# Recordings inside a backup
+- tapOn: "Backup & restore"
+- tapOn: "Include audio recordings"
+- assertVisible: "Back up your recordings too"
+- tapOn: "Close"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: "1%,50%"
+          end: "70%,50%"
+
+# The third folder (09 left "Calls" behind)
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          id: "tab_notes"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: "Notes"
+          index: 1
+- tapOn: "New folder"
+- inputText: "Second"
+- tapOn: "Save"
+- assertVisible: "No notes in this folder."
+- tapOn: "New folder"
+- assertVisible: "Keep more than two folders"
+- tapOn: "Close"
+- tapOn: "Second"
+- tapOn: "Delete folder"
+- tapOn: "Delete"
+- assertNotVisible: "Second"
+- tapOn: "All notes"
+
+# Restyling a note and exporting it as PDF
+- tapOn: "Smoke test note"
+- runFlow:
+    when:
+      visible: "In-app review · dev build"
+    commands:
+      - tapOn: "COUNT ATTEMPT"
+- tapOn: "More actions"
+- tapOn: "Change summary style"
+- tapOn: "Meeting notes"
+- assertVisible: "Choose a different summary style"
+- tapOn: "Close"
+- extendedWaitUntil:
+    visible: "Summary"
+    timeout: 10000
+- tapOn: "Share note"
+- tapOn: "PDF file"
+- tapOn: "Share"
+- assertVisible: "Share this note as PDF or Word"
+- tapOn: "Close"
+- extendedWaitUntil:
+    visible: "Summary"
+    timeout: 10000
+
+# Back to the store's answer (lifetime) for the flows that follow
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+      - tapOn: "Settings"
+      - scrollUntilVisible:
+          element:
+            text: "Store"
+          direction: DOWN
+      - tapOn: "Store"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: "1%,50%"
+          end: "70%,50%"
+      - tapOn: "Settings"
+      - scrollUntilVisible:
+          element: "Pro status override"
+      - tapOn: "Store"

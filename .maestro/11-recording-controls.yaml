@@ -1,0 +1,38 @@
+# Runs after 01-smoke.yaml. Covers the controls on the record sheet: pause,
+# resume and discard with its confirmation. A discarded recording leaves no
+# note behind.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- assertVisible: "Notes"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Start a new recording"
+      - runFlow:
+          when:
+            visible: "Start recording"
+          commands:
+            - tapOn: "Start recording"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Record a note"
+- extendedWaitUntil:
+    visible: "00:0[2-9]"
+    timeout: 15000
+- tapOn: "Pause recording"
+- assertVisible: "Paused"
+- tapOn: "Resume recording"
+- assertVisible: "Recording…"
+- tapOn: "Discard recording"
+- assertVisible: "Discard this recording?"
+- tapOn: "Discard"
+- extendedWaitUntil:
+    notVisible: "Save note"
+    timeout: 10000
+# The placeholder note created for the recording went with it
+- assertNotVisible: "Recording [0-9]+"
+- assertVisible: "Smoke test note"

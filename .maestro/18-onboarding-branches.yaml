@@ -1,0 +1,82 @@
+# Runs last: it clears the app. Covers the onboarding branches the smoke flow
+# does not take: no lock, consent declined (the About & support switch ends up
+# off), and recording without the microphone permission, which shows the
+# fallback instead of the sheet.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp:
+    clearState: true
+    permissions:
+      microphone: deny
+- tapOn: "Continue"
+- runFlow:
+    when:
+      visible: "Continue without a lock"
+    commands:
+      - tapOn: "Continue without a lock"
+- runFlow:
+    when:
+      visible: "Lock Offhand?"
+    commands:
+      - tapOn: "Continue"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Share anonymous reports"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Share usage & stability reports"
+- tapOn: "Continue"
+- assertVisible: "Notes"
+
+# The declined consent is what Settings shows
+- tapOn: "Settings"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "About & support"
+          direction: DOWN
+      - tapOn: "About & support"
+      - assertVisible:
+          text: "Anonymous usage & stability reports"
+          checked: false
+      - back
+      - tapOn:
+          id: "tab_notes"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "About & support"
+      - assertVisible: "Share usage & stability reports"
+      - swipe:
+          start: "1%,50%"
+          end: "70%,50%"
+      - tapOn:
+          text: "Notes"
+          index: 1
+
+# Without the microphone the record sheet shows the fallback
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Start a new recording"
+      - tapOn:
+          text: "(?i)don.t allow|deny"
+          optional: true
+      - assertVisible: "Tap to record.*"
+      - assertVisible: "Start recording"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Record a note"
+      - assertVisible: "Offhand needs the microphone"
+      - assertVisible: "Open Settings"
