@@ -9061,6 +9061,46 @@
         }
       }
     },
+    "Recording could not start. Try again in a moment." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Aufnahme konnte nicht gestartet werden. Versuche es gleich noch einmal."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo iniciar la grabación. Inténtalo de nuevo en un momento."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "रिकॉर्डिंग शुरू नहीं हो सकी। कुछ देर बाद फिर से कोशिश करें।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível iniciar a gravação. Tente de novo em instantes."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось начать запись. Попробуйте ещё раз чуть позже."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося почати запис. Спробуйте ще раз трохи пізніше."
+          }
+        }
+      }
+    },
     "Recording stopped because the audio input changed." : {
       "localizations" : {
         "de" : {

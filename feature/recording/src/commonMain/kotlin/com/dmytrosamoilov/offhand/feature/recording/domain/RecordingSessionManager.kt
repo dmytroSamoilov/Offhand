@@ -523,6 +523,7 @@ class RecordingSessionManager(
         mutableActiveRecordingNoteId.value = null
         val chunkTranscripts = sortedTranscripts()
         when {
+            !hasMinimumAudio() -> discardEmptyNote(noteId)
             chunkTranscripts.isNotEmpty() -> {
                 markNoteRecorded(noteId, recorder.vad.value.totalElapsedMs, audioFileName) ?: return
                 startProcessing(noteId, chunkTranscripts, transcriptionTimeMs, sessionStyle)
@@ -531,9 +532,17 @@ class RecordingSessionManager(
                 markNoteRecorded(noteId, recorder.vad.value.totalElapsedMs, audioFileName)
                 failNote(noteId)
             }
-            else -> runCatching { discardNote(noteId) }
-                .onFailure { Logger.withTag(LOG_TAG).w(it) { "Empty failed note cleanup failed" } }
+            else -> discardEmptyNote(noteId)
         }
+    }
+
+    private fun hasMinimumAudio(): Boolean =
+        recorder.vad.value.totalElapsedMs >= RecordingLimits.MIN_DURATION_MS
+
+    private suspend fun discardEmptyNote(noteId: Long) {
+        deleteAudioBackup()
+        runCatching { discardNote(noteId) }
+            .onFailure { Logger.withTag(LOG_TAG).w(it) { "Empty note cleanup failed" } }
     }
 
     private suspend fun prepareTranscriber() {
@@ -632,6 +641,10 @@ class RecordingSessionManager(
 
     private suspend fun finishRecordedSession() {
         val noteId = mutableSession.value.noteId
+        if (!hasMinimumAudio()) {
+            discardShortSession(noteId)
+            return
+        }
         val recorded = noteId?.let {
             markNoteRecorded(it, recorder.vad.value.totalElapsedMs, audioFileName)
         }
@@ -653,6 +666,14 @@ class RecordingSessionManager(
         } else {
             startProcessing(noteId, chunkTranscripts, recordedTranscriptionMs, style)
         }
+    }
+
+    private suspend fun discardShortSession(noteId: Long?) {
+        Logger.withTag(LOG_TAG).i { "Recording under ${RecordingLimits.MIN_DURATION_MS} ms discarded" }
+        noteId?.let { discardEmptyNote(it) } ?: deleteAudioBackup()
+        mutableActiveRecordingNoteId.value = null
+        transcripts.clear()
+        mutableSession.value = RecordingSession()
     }
 
     private fun startProcessing(
