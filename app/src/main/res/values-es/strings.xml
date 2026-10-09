@@ -11,4 +11,7 @@
     <string name="early_adopter_body">Estabas aquí antes de la 1.5, cuando Offhand aún estaba verde. Gracias por probarlo conmigo. Como agradecimiento, todo Offhand Pro queda desbloqueado en este teléfono, para siempre. Sin compra y sin cuenta.\n\nUna cosa: Pro vive solo en este teléfono. Si borras o reinstalas Offhand, o cambias de teléfono, no volverá.</string>
     <string name="early_adopter_benefits">Ver las ventajas de Pro</string>
     <string name="early_adopter_confirm">Entendido</string>
+    <string name="framework_unsupported_title">Offhand no puede funcionar en este teléfono</string>
+    <string name="framework_unsupported_body">El software del sistema de este teléfono está modificado e indica una versión de Android más reciente de la que realmente tiene. Offhand necesita un Android 12 o posterior sin modificar.</string>
+    <string name="framework_unsupported_close">Cerrar</string>
 </resources>

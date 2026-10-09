@@ -12,4 +12,7 @@
     <string name="early_adopter_body">You were here before 1.5, while Offhand was still rough. Thank you for testing it with me. As a thank-you, everything in Offhand Pro is unlocked on this phone, for good. No purchase, no account.\n\nOne thing to know: Pro lives on this phone only. If you delete or reinstall Offhand, or move to a new phone, it will not come back.</string>
     <string name="early_adopter_benefits">Show Pro benefits</string>
     <string name="early_adopter_confirm">Got it</string>
+    <string name="framework_unsupported_title">Offhand can’t run on this phone</string>
+    <string name="framework_unsupported_body">This phone’s system software is modified and reports a newer Android version than it runs. Offhand needs an unmodified Android 12 or newer.</string>
+    <string name="framework_unsupported_close">Close</string>
 </resources>

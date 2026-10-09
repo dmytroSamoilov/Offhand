@@ -11,4 +11,7 @@
     <string name="early_adopter_body">Вы были здесь до версии 1.5, когда Offhand был ещё сырым. Спасибо, что тестировали его со мной. В благодарность всё из Offhand Pro открыто на этом телефоне навсегда. Без покупки и без аккаунта.\n\nОдно замечание: Pro живёт только на этом телефоне. Если удалить или переустановить Offhand либо перейти на новый телефон, он не вернётся.</string>
     <string name="early_adopter_benefits">Показать возможности Pro</string>
     <string name="early_adopter_confirm">Понятно</string>
+    <string name="framework_unsupported_title">Offhand не может работать на этом телефоне</string>
+    <string name="framework_unsupported_body">Системное ПО этого телефона изменено и сообщает более новую версию Android, чем есть на самом деле. Offhand нужен немодифицированный Android 12 или новее.</string>
+    <string name="framework_unsupported_close">Закрыть</string>
 </resources>

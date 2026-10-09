@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -18,6 +19,8 @@ import androidx.core.content.IntentCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportIntake
 import com.dmytrosamoilov.offhand.feature.recording.service.RecordingService
@@ -34,6 +37,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class MainActivity : FragmentActivity() {
 
     private var requestedNoteId by mutableStateOf<Long?>(null)
+    private val analyticsTracker: AnalyticsTracker by inject()
     private val importIntake: AudioImportIntake by inject()
     // Activity-scoped so the dialog host inside RootScreen observes the same instance.
     private val sharedAudioImport: SharedAudioImportViewModel by viewModel()
@@ -49,6 +53,10 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!FrameworkCompatibility.isComposeSupported()) {
+            showUnsupportedFramework()
+            return
+        }
         enableEdgeToEdge()
         consumeNoteIdExtra(intent)
         consumeSharedAudio(intent)
@@ -123,5 +131,15 @@ class MainActivity : FragmentActivity() {
         const val AUDIO_MIME_PREFIX = "audio/"
         const val VIDEO_MIME_PREFIX = "video/"
         val IMPORT_MIME_TYPES = arrayOf("audio/*", "video/*")
+    }
+
+    private fun showUnsupportedFramework() {
+        analyticsTracker.track(AnalyticsEvents.frameworkUnsupported())
+        AlertDialog.Builder(this)
+            .setTitle(R.string.framework_unsupported_title)
+            .setMessage(R.string.framework_unsupported_body)
+            .setPositiveButton(R.string.framework_unsupported_close) { _, _ -> finish() }
+            .setOnDismissListener { finish() }
+            .show()
     }
 }

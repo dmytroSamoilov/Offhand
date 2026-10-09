@@ -11,4 +11,7 @@
     <string name="early_adopter_body">आप 1.5 से पहले से यहाँ थे, जब Offhand अभी कच्चा था। इसे मेरे साथ आज़माने के लिए धन्यवाद। धन्यवाद के तौर पर Offhand Pro की हर चीज़ इस फ़ोन पर हमेशा के लिए खुली है। न कोई ख़रीद, न कोई खाता।\n\nएक बात: Pro सिर्फ़ इसी फ़ोन पर रहता है। अगर आप Offhand हटाते या दोबारा इंस्टॉल करते हैं, या नया फ़ोन लेते हैं, तो यह वापस नहीं आएगा।</string>
     <string name="early_adopter_benefits">Pro के फ़ायदे देखें</string>
     <string name="early_adopter_confirm">समझ गया</string>
+    <string name="framework_unsupported_title">Offhand इस फ़ोन पर नहीं चल सकता</string>
+    <string name="framework_unsupported_body">इस फ़ोन का सिस्टम सॉफ़्टवेयर बदला हुआ है और यह असली से नया Android वर्शन बताता है। Offhand को बिना बदला हुआ Android 12 या नया चाहिए।</string>
+    <string name="framework_unsupported_close">बंद करें</string>
 </resources>

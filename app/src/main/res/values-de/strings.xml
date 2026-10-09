@@ -11,4 +11,7 @@
     <string name="early_adopter_body">Du warst schon vor 1.5 dabei, als Offhand noch holprig war. Danke, dass du es mit mir getestet hast. Als Dankeschön ist alles aus Offhand Pro auf diesem Handy für immer freigeschaltet. Kein Kauf, kein Konto.\n\nEins noch: Pro lebt nur auf diesem Handy. Wenn du Offhand löschst oder neu installierst oder auf ein neues Handy wechselst, kommt es nicht zurück.</string>
     <string name="early_adopter_benefits">Pro-Vorteile anzeigen</string>
     <string name="early_adopter_confirm">Alles klar</string>
+    <string name="framework_unsupported_title">Offhand kann auf diesem Handy nicht laufen</string>
+    <string name="framework_unsupported_body">Die Systemsoftware dieses Handys ist verändert und meldet eine neuere Android-Version, als sie tatsächlich ist. Offhand braucht ein unverändertes Android 12 oder neuer.</string>
+    <string name="framework_unsupported_close">Schließen</string>
 </resources>
