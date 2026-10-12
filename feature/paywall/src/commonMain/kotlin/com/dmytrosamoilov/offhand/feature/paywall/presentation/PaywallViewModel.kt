@@ -79,7 +79,7 @@ class PaywallViewModel(
         if (state.isPurchasing || state.selectedOffer == null) return
         launchSafely(showLoading = false) {
             mutableUiState.update { it.copy(isPurchasing = true) }
-            analyticsTracker.track(AnalyticsEvents.purchaseStarted(state.selectedPlan))
+            analyticsTracker.track(AnalyticsEvents.purchaseStarted(state.selectedPlan, state.feature))
             val outcome = purchasePro(state.selectedPlan)
             if (outcome == PurchaseOutcome.PURCHASED) trackPurchase(state)
             mutableUiState.update { it.copy(isPurchasing = false, message = outcome.toMessage()) }
@@ -88,7 +88,7 @@ class PaywallViewModel(
 
     private fun trackPurchase(state: PaywallUiState) {
         val trial = state.selectedOffer?.trialDays?.let { it > 0 } ?: false
-        analyticsTracker.track(AnalyticsEvents.purchaseCompleted(state.selectedPlan, trial))
+        analyticsTracker.track(AnalyticsEvents.purchaseCompleted(state.selectedPlan, trial, state.feature))
     }
 
     fun onRestoreClicked() {

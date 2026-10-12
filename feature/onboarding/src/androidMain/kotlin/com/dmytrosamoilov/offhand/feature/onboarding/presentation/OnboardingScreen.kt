@@ -49,15 +49,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.designsystem.R as DesignR
 import com.dmytrosamoilov.offhand.core.designsystem.component.MorphingLoadingIndicator
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
-import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
-import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOptionCard
-import com.dmytrosamoilov.offhand.core.ui.component.toDomain
-import com.dmytrosamoilov.offhand.core.ui.component.toUi
 import com.dmytrosamoilov.offhand.feature.onboarding.R
 import org.koin.androidx.compose.koinViewModel
 import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
@@ -78,14 +73,12 @@ fun OnboardingScreen(
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
         OnboardingContent(
             state = state,
-            onNoteStyleSelected = viewModel::onNoteStyleSelected,
             onDeviceLockSetup = { openSecuritySettings(context) },
             onAppLockToggled = viewModel::onAppLockToggled,
             onTelemetryToggled = viewModel::onTelemetryToggled,
             onContinue = { step ->
                 when (step) {
                     OnboardingStep.PRIVACY -> viewModel.onPrivacyContinue()
-                    OnboardingStep.NOTE_STYLE -> viewModel.onNoteStyleContinue()
                     OnboardingStep.DEVICE_LOCK -> viewModel.onDeviceLockContinue()
                     OnboardingStep.TELEMETRY_CONSENT -> viewModel.onConsentContinue()
                     else -> Unit
@@ -98,7 +91,6 @@ fun OnboardingScreen(
 @Composable
 private fun OnboardingContent(
     state: OnboardingUiState,
-    onNoteStyleSelected: (NotePreset) -> Unit,
     onDeviceLockSetup: () -> Unit,
     onAppLockToggled: (Boolean) -> Unit,
     onTelemetryToggled: (Boolean) -> Unit,
@@ -111,7 +103,6 @@ private fun OnboardingContent(
         }
         else -> WizardPage(
             state = state,
-            onNoteStyleSelected = onNoteStyleSelected,
             onDeviceLockSetup = onDeviceLockSetup,
             onAppLockToggled = onAppLockToggled,
             onTelemetryToggled = onTelemetryToggled,
@@ -137,7 +128,6 @@ private fun CenteredPane(content: @Composable () -> Unit) {
 @Composable
 private fun WizardPage(
     state: OnboardingUiState,
-    onNoteStyleSelected: (NotePreset) -> Unit,
     onDeviceLockSetup: () -> Unit,
     onAppLockToggled: (Boolean) -> Unit,
     onTelemetryToggled: (Boolean) -> Unit,
@@ -165,8 +155,7 @@ private fun WizardPage(
             ) {
                 WizardStepContent(
                     state = state,
-                    onNoteStyleSelected = onNoteStyleSelected,
-                    onDeviceLockSetup = onDeviceLockSetup,
+                            onDeviceLockSetup = onDeviceLockSetup,
                     onAppLockToggled = onAppLockToggled,
                     onTelemetryToggled = onTelemetryToggled,
                 )
@@ -185,17 +174,12 @@ private fun WizardPage(
 @Composable
 private fun WizardStepContent(
     state: OnboardingUiState,
-    onNoteStyleSelected: (NotePreset) -> Unit,
     onDeviceLockSetup: () -> Unit,
     onAppLockToggled: (Boolean) -> Unit,
     onTelemetryToggled: (Boolean) -> Unit,
 ) {
     when (state.step) {
         OnboardingStep.PRIVACY -> PrivacyStep()
-        OnboardingStep.NOTE_STYLE -> NoteStyleStep(
-            selected = state.notePreset.toUi(),
-            onSelected = { option -> onNoteStyleSelected(option.toDomain()) },
-        )
         OnboardingStep.DEVICE_LOCK -> if (state.isDeviceSecure) {
             AppLockStep(
                 isAppLockEnabled = state.isAppLockEnabled,
@@ -260,35 +244,6 @@ private fun PrivacyStep() {
     Spacer(modifier = Modifier.height(28.dp))
     StepTitle(text = stringResource(R.string.onboarding_privacy_title))
     StepBody(text = stringResource(R.string.onboarding_privacy_body))
-}
-
-@Composable
-private fun NoteStyleStep(
-    selected: NotePresetOption,
-    onSelected: (NotePresetOption) -> Unit,
-) {
-    StepTitle(text = stringResource(R.string.onboarding_note_style_title))
-    StepBody(text = stringResource(R.string.onboarding_note_style_body))
-    Spacer(modifier = Modifier.height(24.dp))
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        NotePresetOption.entries.forEach { option ->
-            NotePresetOptionCard(
-                option = option,
-                isSelected = option == selected,
-                onClick = { onSelected(option) },
-            )
-        }
-    }
-    Spacer(modifier = Modifier.height(16.dp))
-    Text(
-        text = stringResource(R.string.onboarding_note_style_hint),
-        style = MaterialTheme.typography.bodySmall,
-        textAlign = TextAlign.Center,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
 }
 
 @Composable
@@ -491,7 +446,6 @@ private fun SpecRow(label: String, value: String, isSatisfied: Boolean) {
 
 private val previewPages = listOf(
     OnboardingStep.PRIVACY,
-    OnboardingStep.NOTE_STYLE,
     OnboardingStep.DEVICE_LOCK,
     OnboardingStep.TELEMETRY_CONSENT,
 )
@@ -505,7 +459,6 @@ private fun OnboardingStatePreview(state: OnboardingUiState) {
         ) {
             OnboardingContent(
                 state = state,
-                onNoteStyleSelected = {},
                 onDeviceLockSetup = {},
                 onAppLockToggled = {},
                 onTelemetryToggled = {},
@@ -531,17 +484,9 @@ private fun PrivacyPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun NoteStylePreview() {
-    OnboardingStatePreview(
-        OnboardingUiState(step = OnboardingStep.NOTE_STYLE, currentPage = 1, pages = previewPages),
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
 private fun DeviceLockPreview() {
     OnboardingStatePreview(
-        OnboardingUiState(step = OnboardingStep.DEVICE_LOCK, currentPage = 2, pages = previewPages),
+        OnboardingUiState(step = OnboardingStep.DEVICE_LOCK, currentPage = 1, pages = previewPages),
     )
 }
 
@@ -569,7 +514,7 @@ private fun TelemetryConsentPreview() {
     OnboardingStatePreview(
         OnboardingUiState(
             step = OnboardingStep.TELEMETRY_CONSENT,
-            currentPage = 3,
+            currentPage = 2,
             pages = previewPages,
         ),
     )

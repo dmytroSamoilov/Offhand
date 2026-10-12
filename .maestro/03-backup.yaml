@@ -1,6 +1,6 @@
 # Relies on the notes created by the earlier flows. Android drives the system
-# document picker end to end; on iOS the Files picker is out of reach, so the
-# flow stops once the backup has been written and the sheet reports it.
+# document picker end to end; iOS drives the Files picker by position through
+# its search field, the same way the import flow does.
 appId: com.dmytrosamoilov.offhand.uitest
 ---
 - launchApp
@@ -69,3 +69,33 @@ appId: com.dmytrosamoilov.offhand.uitest
           timeout: 30000
       - assertVisible: ".*notes and .*folders were saved."
       - tapOn: "Done"
+      # Restore the file just written: the open picker is driven by position
+      # through its search like the import flow. The search names today's
+      # date so an older backup on the device cannot come first, and a
+      # single-file picker opens the tile on tap.
+      - tapOn: "Choose a backup file"
+      - extendedWaitUntil:
+          visible: "Cancel"
+          timeout: 10000
+      - tapOn:
+          point: "50%,19%"
+      - evalScript: ${output.today = new Date().toISOString().slice(0, 10)}
+      - inputText: "Offhand backup ${output.today}"
+      # Dismiss the keyboard with its search key first; a tap on the tile while
+      # the keyboard is up sometimes only closes the keyboard
+      - pressKey: Enter
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - tapOn:
+          point: "18%,41%"
+      # Files hands the picked file over with a noticeable delay
+      - extendedWaitUntil:
+          visible: "Enter the backup passphrase"
+          timeout: 30000
+      - inputText: "smoke-test-passphrase"
+      - tapOn: "Restore"
+      - extendedWaitUntil:
+          visible: "Restore complete"
+          timeout: 60000
+      - assertVisible: ".*skipped as duplicates.*"
+      - tapOn: "OK"

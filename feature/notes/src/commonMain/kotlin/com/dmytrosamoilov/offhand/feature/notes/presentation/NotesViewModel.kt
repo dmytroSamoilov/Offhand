@@ -11,6 +11,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
+import com.dmytrosamoilov.offhand.core.data.domain.requiredProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
@@ -19,6 +20,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.NoteSection
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
+import com.dmytrosamoilov.offhand.feature.notes.domain.FolderLimits
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearTranscriptionCheckpointUseCase
@@ -31,6 +33,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCalendarSuggest
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsFolderStylesAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsUnlimitedFoldersAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
@@ -80,6 +83,7 @@ class NotesViewModel(
     private val setFolderStyle: SetFolderStyleUseCase,
     private val reorderFolders: ReorderFoldersUseCase,
     isFolderStylesAvailable: IsFolderStylesAvailableUseCase,
+    isUnlimitedFoldersAvailable: IsUnlimitedFoldersAvailableUseCase,
     observeDeveloperOptions: ObserveDeveloperOptionsUseCase,
     observeCustomNoteStyles: ObserveCustomNoteStylesUseCase,
     isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase,
@@ -157,7 +161,7 @@ class NotesViewModel(
             combine(observeCustomNoteStyles(), isCustomNoteStylesAvailable()) { styles, unlocked ->
                 styles.map { style -> style.toOptionUi() } to unlocked
             }.collect { (styles, unlocked) ->
-                mutableUiState.update { it.copy(customStyles = styles, isCustomStylesUnlocked = unlocked) }
+                mutableUiState.update { it.copy(customStyles = styles, isProStylesUnlocked = unlocked) }
             }
         }
         viewModelScope.launch {
@@ -181,6 +185,11 @@ class NotesViewModel(
             isFolderStylesAvailable().collect { unlocked ->
                 mutableUiState.update { it.copy(isFolderStylesUnlocked = unlocked) }
             }
+        }
+        viewModelScope.launch {
+            combine(isUnlimitedFoldersAvailable(), folders) { unlocked, folders ->
+                !unlocked && folders.size >= FolderLimits.FREE_FOLDERS
+            }.collect { reached -> mutableUiState.update { it.copy(isFolderLimitReached = reached) } }
         }
         viewModelScope.launch {
             observeSmartSuggestions().collect { suggestions ->
@@ -246,8 +255,13 @@ class NotesViewModel(
         selectedFolderId.value = folderId
     }
 
+    // The third folder is where the free tier ends; the paywall opens before
+    // the name is typed, so nothing is lost when it is declined.
     fun onNewFolderRequested() {
-        mutableUiState.update { it.copy(folderEditor = FolderEditorUi(folderId = null, name = "")) }
+        launchSafely(showLoading = false) {
+            if (mutableUiState.value.isFolderLimitReached && !proUpgradeGate.requirePro(ProFeature.FOLDERS)) return@launchSafely
+            mutableUiState.update { it.copy(folderEditor = FolderEditorUi(folderId = null, name = "")) }
+        }
     }
 
     fun onFolderStyleRequested(folderId: Long) {
@@ -441,11 +455,13 @@ class NotesViewModel(
         mutableUiState.update { it.copy(isPresetSheetVisible = false) }
     }
 
+    // Rewriting a finished note is Pro whatever the target style, Summary included.
     fun onStyleSelected(style: NoteStyleRef) {
         val note = selectedNote ?: return
         mutableUiState.update { it.copy(isPresetSheetVisible = false) }
         launchSafely(showLoading = false) {
-            if (style is NoteStyleRef.Custom && !proUpgradeGate.requirePro(ProFeature.CUSTOM_STYLES)) return@launchSafely
+            val feature = style.requiredProFeature() ?: ProFeature.NOTE_STYLES
+            if (!proUpgradeGate.requirePro(feature)) return@launchSafely
             analyticsTracker.track(AnalyticsEvents.noteStyleChanged(style))
             recordingProcessController.restructureNote(note.id, style)
         }

@@ -78,7 +78,7 @@ struct NoteStyleChoice: Identifiable {
 struct NoteStyleList: View {
     let current: NoteStyleRef?
     let customStyles: [NoteStyleChoice]
-    let isCustomStylesUnlocked: Bool
+    let isProStylesUnlocked: Bool
     let footer: String
     let onSelect: (NoteStyleRef) -> Void
     var onCreateStyle: (() -> Void)?
@@ -110,7 +110,8 @@ struct NoteStyleList: View {
                     StyleOptionRow(
                         title: NoteStyleLabels.label(for: preset),
                         details: NoteStyleLabels.details(for: preset),
-                        isSelected: current?.builtInPreset == preset
+                        isSelected: current?.builtInPreset == preset,
+                        showProBadge: !isProStylesUnlocked && preset != .summary
                     ) {
                         onSelect(NoteStyleRefBuiltIn(preset: preset))
                     }
@@ -139,7 +140,7 @@ struct NoteStyleList: View {
                 title: style.name,
                 details: style.details,
                 isSelected: isSelected,
-                showProBadge: !isCustomStylesUnlocked
+                showProBadge: !isProStylesUnlocked
             ) {
                 onSelect(NoteStyleRefCustom(id: style.id))
             }

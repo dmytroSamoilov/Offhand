@@ -1,0 +1,58 @@
+# Not part of the main folder: it needs a screen lock on the device, which the
+# other flows must run without. CI sets one up right before it (Android:
+# `adb shell locksettings set-pin 1234`; iOS: Face ID enrolled with notifyutil
+# and a loop answering every prompt with pearl.match every few seconds, slow
+# enough for the lock screen to be seen first) and removes it after.
+# Run with `maestro test .maestro/lock/`. Covers switching the lock on in
+# onboarding, the lock screen on the next launch, unlocking, and switching the
+# lock off in Settings.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp:
+    clearState: true
+- tapOn: "Continue"
+# The switch starts on. iOS confirms the identity with Face ID here (answered
+# by the matcher loop); Android asks for the credential only at the lock screen
+- assertVisible: "Lock Offhand?"
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Share anonymous reports|Share usage & stability reports"
+    timeout: 15000
+- tapOn: "Continue"
+- assertVisible: "Notes"
+
+# The next launch is locked
+- stopApp
+- launchApp
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      # The credential prompt opens by itself over the lock screen and falls
+      # back to the PIN keypad when nothing else is enrolled
+      - extendedWaitUntil:
+          visible: "Unlock Offhand"
+          timeout: 10000
+      - inputText: "1234"
+      - pressKey: Enter
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Offhand is locked"
+          timeout: 10000
+- extendedWaitUntil:
+    visible: "Notes"
+    timeout: 15000
+- assertVisible: "Smoke test note|No notes yet.*"
+
+# Switching the lock off in Settings makes the next launch open straight away
+- tapOn: "Settings"
+- tapOn: "Require unlock to open Offhand"
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: "Notes"
+    timeout: 15000
+- assertNotVisible: "Notes locked|Offhand is locked"

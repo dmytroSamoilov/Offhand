@@ -62,7 +62,7 @@ fun NoteStylesScreen(
                 NoteStyleList(
                     selected = state.selected,
                     customStyles = state.customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) },
-                    isCustomStylesUnlocked = state.isUnlocked,
+                    isProStylesUnlocked = state.isUnlocked,
                     onSelected = viewModel::onStyleSelected,
                     customStyleActions = { style ->
                         TextButton(onClick = { onEditStyle(style.id) }) {

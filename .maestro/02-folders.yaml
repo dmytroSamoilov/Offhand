@@ -16,6 +16,11 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "Work"
 - tapOn: "Summary style.*"
 - tapOn: "Meeting notes"
+# The picker offers "Default" on top; picking Meeting again closes it the same way
+- tapOn: "Work"
+- tapOn: "Summary style.*"
+- assertVisible: "Default"
+- tapOn: "Meeting notes"
 - tapOn: "All notes"
 
 # Move the note into it from the detail menu; the folder style rewrites it

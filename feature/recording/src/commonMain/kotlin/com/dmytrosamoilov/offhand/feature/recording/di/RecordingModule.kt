@@ -22,6 +22,9 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUs
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.InterruptNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveImportAllowanceUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RefundFreeImportUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RememberModelDownloadProgressUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsCalendarSuggestionsAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsThinkingEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
@@ -84,6 +87,7 @@ val featureRecordingModule = module {
             audioStore = get(),
             audioBackup = get(),
             audioDecoder = get(),
+            refundFreeImport = get(),
             analyticsTracker = get(),
             appForegroundState = get(),
             scope = get(recordingSessionScopeQualifier),
@@ -104,6 +108,9 @@ val featureRecordingModule = module {
     factoryOf(::GetTranscriptionCheckpointUseCase)
     factoryOf(::DiscardStagedAudioUseCase)
     factoryOf(::ImportAudioUseCase)
+    factoryOf(::ObserveImportAllowanceUseCase)
+    factoryOf(::RefundFreeImportUseCase)
+    factoryOf(::RememberModelDownloadProgressUseCase)
     factoryOf(::IsAudioImportAvailableUseCase)
     factoryOf(::IsAiCoreDownloadedUseCase)
     factoryOf(::IsCalendarSuggestionsAvailableUseCase)

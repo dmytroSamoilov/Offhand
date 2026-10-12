@@ -41,6 +41,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
+import com.dmytrosamoilov.offhand.feature.recording.domain.FreeImportLimits
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
@@ -67,7 +68,7 @@ fun SettingsScreen(
     LaunchedEffect(state.isImportPickerRequested) {
         if (state.isImportPickerRequested) {
             viewModel.onImportPickerOpened()
-            importPicker.pick()
+            importPicker.pick(allowMultiple = state.allowsMultipleImports)
         }
     }
     val context = LocalContext.current
@@ -113,6 +114,7 @@ fun SettingsScreen(
                 )
                 BackupSection(
                     isImportUnlocked = state.isAudioImportUnlocked,
+                    freeImportsLeft = state.freeImportsLeft,
                     onBackupClick = onBackupClick,
                     onImportClick = viewModel::onImportAudioClicked,
                 )
@@ -317,6 +319,7 @@ private fun ProRow(subtitle: String, onClick: () -> Unit, trailing: @Composable 
 private fun ProStatusUi.statusLabel(): String = when (this) {
     ProStatusUi.Free -> ""
     ProStatusUi.Lifetime -> stringResource(R.string.settings_subscription_lifetime)
+    ProStatusUi.Included -> stringResource(R.string.settings_subscription_included)
     is ProStatusUi.Trial -> endsAtMs?.let { stringResource(R.string.settings_subscription_trial_until, formatDate(it)) }
         ?: stringResource(R.string.settings_subscription_trial)
     is ProStatusUi.Yearly -> renewsAtMs?.let { stringResource(R.string.settings_subscription_yearly_renews, formatDate(it)) }
@@ -375,6 +378,11 @@ internal fun ImportNotice(notice: ImportNoticeUi?, onDismiss: () -> Unit) {
             text = stringResource(R.string.settings_import_unreadable),
             onDismiss = onDismiss,
         )
+        ImportNoticeUi.OneVideoAtATime -> ImportNoticeDialog(
+            title = stringResource(R.string.settings_import_audio_title),
+            text = stringResource(R.string.settings_import_one_video),
+            onDismiss = onDismiss,
+        )
     }
 }
 
@@ -392,7 +400,12 @@ private fun ImportNoticeDialog(title: String, text: String, onDismiss: () -> Uni
 
 
 @Composable
-private fun BackupSection(isImportUnlocked: Boolean, onBackupClick: () -> Unit, onImportClick: () -> Unit) {
+private fun BackupSection(
+    isImportUnlocked: Boolean,
+    freeImportsLeft: Int?,
+    onBackupClick: () -> Unit,
+    onImportClick: () -> Unit,
+) {
     SettingsCard(title = stringResource(R.string.settings_backup_section_title)) {
         SettingsLinkRow(
             title = stringResource(R.string.settings_backup_title),
@@ -401,7 +414,8 @@ private fun BackupSection(isImportUnlocked: Boolean, onBackupClick: () -> Unit, 
         )
         SettingsLinkRow(
             title = stringResource(R.string.settings_import_audio_title),
-            subtitle = stringResource(R.string.settings_import_audio_subtitle),
+            subtitle = freeImportsLeft?.let { stringResource(R.string.settings_import_free_left, it, FreeImportLimits.FREE_IMPORTS) }
+                ?: stringResource(R.string.settings_import_audio_subtitle),
             onClick = onImportClick,
             showProBadge = !isImportUnlocked,
         )

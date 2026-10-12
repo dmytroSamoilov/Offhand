@@ -5,14 +5,12 @@ import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
 import com.dmytrosamoilov.offhand.core.ai.api.ModelFamily
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
-import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.device.DeviceCapability
 import com.dmytrosamoilov.offhand.core.device.DeviceCapabilityChecker
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.CompleteOnboardingUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetAppLockEnabledUseCase
-import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetNotePresetUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetTelemetryConsentUseCase
 import io.mockk.coVerify
 import io.mockk.every
@@ -61,7 +59,6 @@ class OnboardingViewModelTest {
     private val appLockManager: AppLockManager = mockk()
     private val setAppLockEnabled: SetAppLockEnabledUseCase = mockk(relaxed = true)
     private val setTelemetryConsent: SetTelemetryConsentUseCase = mockk(relaxed = true)
-    private val setNotePreset: SetNotePresetUseCase = mockk(relaxed = true)
     private val completeOnboarding: CompleteOnboardingUseCase = mockk(relaxed = true)
     private val modelDownloadLauncher: ModelDownloadLauncher = mockk(relaxed = true)
     private val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
@@ -86,7 +83,6 @@ class OnboardingViewModelTest {
         appLockManager = appLockManager,
         setAppLockEnabled = setAppLockEnabled,
         setTelemetryConsent = setTelemetryConsent,
-        setNotePreset = setNotePreset,
         completeOnboarding = completeOnboarding,
         analyticsTracker = analyticsTracker,
     )
@@ -100,7 +96,6 @@ class OnboardingViewModelTest {
 
     private fun lockStepViewModel(): OnboardingViewModel = capableViewModel().apply {
         onPrivacyContinue()
-        onNoteStyleContinue()
         dispatcher.scheduler.advanceUntilIdle()
     }
 
@@ -123,12 +118,12 @@ class OnboardingViewModelTest {
     }
 
     @Test
-    fun `capable device lands on privacy step with four pages`() = runTest(dispatcher) {
+    fun `capable device lands on privacy step with three pages`() = runTest(dispatcher) {
         val viewModel = capableViewModel()
 
         assertEquals(OnboardingStep.PRIVACY, viewModel.uiState.value.step)
         assertEquals(0, viewModel.uiState.value.currentPage)
-        assertEquals(4, viewModel.uiState.value.pageCount)
+        assertEquals(3, viewModel.uiState.value.pageCount)
     }
 
     @Test
@@ -137,7 +132,7 @@ class OnboardingViewModelTest {
 
         val viewModel = capableViewModel()
 
-        assertEquals(4, viewModel.uiState.value.pageCount)
+        assertEquals(3, viewModel.uiState.value.pageCount)
         assertEquals(false, viewModel.uiState.value.isDeviceSecure)
     }
 
@@ -148,50 +143,30 @@ class OnboardingViewModelTest {
         viewModel.onPrivacyContinue()
         assertEquals(1, viewModel.uiState.value.currentPage)
 
-        viewModel.onNoteStyleContinue()
-        dispatcher.scheduler.advanceUntilIdle()
-        assertEquals(2, viewModel.uiState.value.currentPage)
-
         viewModel.onDeviceLockContinue()
         dispatcher.scheduler.advanceUntilIdle()
-        assertEquals(3, viewModel.uiState.value.currentPage)
+        assertEquals(2, viewModel.uiState.value.currentPage)
         assertEquals(OnboardingStep.TELEMETRY_CONSENT, viewModel.uiState.value.step)
     }
 
     @Test
-    fun `privacy continue moves to note style step`() = runTest(dispatcher) {
+    fun `privacy continue moves to lock step`() = runTest(dispatcher) {
         val viewModel = capableViewModel()
 
         viewModel.onPrivacyContinue()
 
-        assertEquals(OnboardingStep.NOTE_STYLE, viewModel.uiState.value.step)
-        assertEquals(NotePreset.SUMMARY, viewModel.uiState.value.notePreset)
-    }
-
-    @Test
-    fun `note style continue persists choice and moves to lock step`() = runTest(dispatcher) {
-        val viewModel = capableViewModel()
-        viewModel.onPrivacyContinue()
-
-        viewModel.onNoteStyleSelected(NotePreset.VISIT)
-        viewModel.onNoteStyleContinue()
-        dispatcher.scheduler.advanceUntilIdle()
-
-        coVerify { setNotePreset(NotePreset.VISIT) }
         assertEquals(OnboardingStep.DEVICE_LOCK, viewModel.uiState.value.step)
     }
 
     @Test
-    fun `note style continue shows lock step on unsecured device`() = runTest(dispatcher) {
+    fun `privacy continue shows lock step on unsecured device`() = runTest(dispatcher) {
         every { appLockManager.isDeviceSecure } returns false
         val viewModel = capableViewModel()
+
         viewModel.onPrivacyContinue()
 
-        viewModel.onNoteStyleContinue()
-        dispatcher.scheduler.advanceUntilIdle()
-
-        coVerify { setNotePreset(NotePreset.SUMMARY) }
         assertEquals(OnboardingStep.DEVICE_LOCK, viewModel.uiState.value.step)
+        assertEquals(false, viewModel.uiState.value.isDeviceSecure)
     }
 
     @Test
@@ -297,8 +272,7 @@ class OnboardingViewModelTest {
 
         assertEquals(OnboardingStep.PRIVACY, viewModel.uiState.value.step)
         assertEquals(0, viewModel.uiState.value.currentPage)
-        assertEquals(3, viewModel.uiState.value.furthestPage)
-        coVerify(exactly = 1) { setNotePreset(any()) }
+        assertEquals(2, viewModel.uiState.value.furthestPage)
         coVerify(exactly = 1) { setAppLockEnabled(any()) }
     }
 
@@ -308,14 +282,14 @@ class OnboardingViewModelTest {
         viewModel.onPageSelected(1)
         dispatcher.scheduler.advanceUntilIdle()
 
-        viewModel.onNoteStyleSelected(NotePreset.LEGAL)
-        viewModel.onPageSelected(3)
+        viewModel.onAppLockToggled(false)
+        viewModel.onPageSelected(2)
         dispatcher.scheduler.advanceUntilIdle()
 
-        coVerify { setNotePreset(NotePreset.LEGAL) }
-        coVerify(exactly = 2) { setAppLockEnabled(true) }
+        coVerify(exactly = 1) { setAppLockEnabled(true) }
+        coVerify(exactly = 1) { setAppLockEnabled(false) }
         assertEquals(OnboardingStep.TELEMETRY_CONSENT, viewModel.uiState.value.step)
-        assertEquals(3, viewModel.uiState.value.currentPage)
+        assertEquals(2, viewModel.uiState.value.currentPage)
     }
 
     @Test
@@ -326,7 +300,7 @@ class OnboardingViewModelTest {
         viewModel.onPageSelected(4)
         dispatcher.scheduler.advanceUntilIdle()
 
-        assertEquals(OnboardingStep.NOTE_STYLE, viewModel.uiState.value.step)
+        assertEquals(OnboardingStep.DEVICE_LOCK, viewModel.uiState.value.step)
         assertEquals(1, viewModel.uiState.value.currentPage)
         assertEquals(1, viewModel.uiState.value.furthestPage)
     }
@@ -340,9 +314,9 @@ class OnboardingViewModelTest {
 
             viewModel.onPrivacyContinue()
 
-            assertEquals(OnboardingStep.NOTE_STYLE, viewModel.uiState.value.step)
+            assertEquals(OnboardingStep.DEVICE_LOCK, viewModel.uiState.value.step)
             assertEquals(1, viewModel.uiState.value.currentPage)
-            assertEquals(3, viewModel.uiState.value.furthestPage)
+            assertEquals(2, viewModel.uiState.value.furthestPage)
         }
 
     @Test
@@ -369,7 +343,6 @@ class OnboardingViewModelTest {
         val viewModel = consentStepViewModel()
 
         verify { analyticsTracker.track(match { it.name == "onboarding_step" && it.params["step"] == "privacy" }) }
-        verify { analyticsTracker.track(match { it.name == "onboarding_step" && it.params["step"] == "note_style" }) }
         verify { analyticsTracker.track(match { it.name == "onboarding_step" && it.params["step"] == "device_lock" }) }
         assertEquals(OnboardingStep.TELEMETRY_CONSENT, viewModel.uiState.value.step)
     }

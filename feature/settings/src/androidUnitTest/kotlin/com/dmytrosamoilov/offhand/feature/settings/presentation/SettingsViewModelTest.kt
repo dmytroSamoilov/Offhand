@@ -15,7 +15,9 @@ import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.ImportAllowance
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveImportAllowanceUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
@@ -61,6 +63,7 @@ class SettingsViewModelTest {
     private val appLockManager: AppLockManager = mockk()
     private val importAudio: ImportAudioUseCase = mockk()
     private val isAudioImportAvailable: IsAudioImportAvailableUseCase = mockk()
+    private val observeImportAllowance: ObserveImportAllowanceUseCase = mockk()
     private val observeSmartSuggestionsEnabled: ObserveSmartSuggestionsEnabledUseCase = mockk()
     private val setSmartSuggestionsEnabled: SetSmartSuggestionsEnabledUseCase = mockk(relaxed = true)
     private val observeProStatus: ObserveProStatusUseCase = mockk()
@@ -78,6 +81,7 @@ class SettingsViewModelTest {
         every { observeAppLockEnabled() } returns flowOf(true)
         every { appLockManager.isDeviceSecure } returns true
         every { isAudioImportAvailable() } returns flowOf(true)
+        every { observeImportAllowance() } returns flowOf(ImportAllowance.Unlimited)
         coEvery { importAudio(any()) } returns ImportAudioResult.STARTED
         every { observeSmartSuggestionsEnabled() } returns flowOf(false)
         every { observeProStatus() } returns flowOf(ProStatus.LIFETIME)
@@ -100,6 +104,7 @@ class SettingsViewModelTest {
         appLockManager = appLockManager,
         importAudio = importAudio,
         isAudioImportAvailable = isAudioImportAvailable,
+        observeImportAllowance = observeImportAllowance,
         observeSmartSuggestionsEnabled = observeSmartSuggestionsEnabled,
         setSmartSuggestionsEnabled = setSmartSuggestionsEnabled,
         observeProStatus = observeProStatus,
@@ -191,6 +196,7 @@ class SettingsViewModelTest {
 
     @Test
     fun `the import picker opens only after the paywall passes`() = runTest(dispatcher) {
+        every { observeImportAllowance() } returns flowOf(ImportAllowance.Free(left = 0))
         coEvery { gate.requirePro(any()) } returns false
         val viewModel = viewModel()
         advanceUntilIdle()
@@ -205,6 +211,21 @@ class SettingsViewModelTest {
         assertTrue(viewModel.uiState.value.isImportPickerRequested)
         viewModel.onImportPickerOpened()
         assertFalse(viewModel.uiState.value.isImportPickerRequested)
+    }
+
+    @Test
+    fun `a free import left opens the picker without the paywall`() = runTest(dispatcher) {
+        every { observeImportAllowance() } returns flowOf(ImportAllowance.Free(left = 2))
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.onImportAudioClicked()
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isImportPickerRequested)
+        assertFalse(viewModel.uiState.value.allowsMultipleImports)
+        assertEquals(2, viewModel.uiState.value.freeImportsLeft)
+        coVerify(exactly = 0) { gate.requirePro(any()) }
     }
 
     @Test

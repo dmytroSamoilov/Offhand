@@ -1,0 +1,30 @@
+# Runs after 09-record-into-folder.yaml, which left a second note. Deletes it
+# from the note's menu with the confirmation; the first note stays.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- tapOn:
+    text: "Smoke test note"
+    index: 1
+- runFlow:
+    when:
+      visible: "In-app review · dev build"
+    commands:
+      - tapOn: "COUNT ATTEMPT"
+- tapOn: "More actions"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Delete note"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Delete"
+- assertVisible: "Delete this note?"
+- tapOn: "Delete"
+- extendedWaitUntil:
+    visible: "Smoke test note"
+    timeout: 10000
+- assertNotVisible: "Delete this note?"

@@ -11,6 +11,7 @@ import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsSink
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DecideEarlyAdopterProUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
 import com.dmytrosamoilov.offhand.lifecycle.ProcessForegroundState
@@ -40,6 +41,9 @@ val appModule = module {
             resumeInterruptedNotes = lazy { get<ResumeInterruptedNotesUseCase>() },
             sweepOrphanedRecordings = lazy { get<SweepOrphanedRecordingsUseCase>() },
             clearShareCache = get<ClearShareCacheUseCase>(),
+            decideEarlyAdopterPro = lazy { get<DecideEarlyAdopterProUseCase>() },
+            markEarlyAdopterThanked = get(),
+            proUpgradeGate = get(),
             appForegroundState = get(),
         )
     }
