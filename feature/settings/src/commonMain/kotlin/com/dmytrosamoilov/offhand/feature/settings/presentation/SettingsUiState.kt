@@ -10,6 +10,8 @@ data class SettingsUiState(
     val isAppLockEnabled: Boolean = false,
     val isDeviceSecure: Boolean = false,
     val isAudioImportUnlocked: Boolean = false,
+    val freeImportsLeft: Int? = null,
+    val allowsMultipleImports: Boolean = false,
     val isSmartSuggestionsEnabled: Boolean = false,
     val isSmartSuggestionsUnlocked: Boolean = false,
     val pro: ProStatusUi = ProStatusUi.Free,
@@ -24,10 +26,12 @@ sealed interface ProStatusUi {
     data class Trial(val endsAtMs: Long?) : ProStatusUi
     data class Yearly(val renewsAtMs: Long?) : ProStatusUi
     data object Lifetime : ProStatusUi
+    data object Included : ProStatusUi
 }
 
 sealed interface ImportNoticeUi {
     data object Unreadable : ImportNoticeUi
+    data object OneVideoAtATime : ImportNoticeUi
     data class Started(val fileCount: Int) : ImportNoticeUi
 }
 

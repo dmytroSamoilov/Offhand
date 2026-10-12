@@ -12,6 +12,8 @@ struct SettingsView: View {
         isAppLockEnabled: false,
         isDeviceSecure: false,
         isAudioImportUnlocked: false,
+        freeImportsLeft: nil,
+        allowsMultipleImports: false,
         isSmartSuggestionsEnabled: false,
         isSmartSuggestionsUnlocked: false,
         pro: ProStatusUiFree.shared,
@@ -75,8 +77,8 @@ struct SettingsView: View {
                         }
                     }
                     SettingsActionRow(
-                        title: String(localized: "Import audio"),
-                        subtitle: String(localized: "Turn audio files into notes. Pick one or several at once."),
+                        title: String(localized: "Import audio or video"),
+                        subtitle: importSubtitle,
                         showsProBadge: !state.isAudioImportUnlocked
                     ) {
                         viewModel.onImportAudioClicked()
@@ -122,8 +124,8 @@ struct SettingsView: View {
         }
         .fileImporter(
             isPresented: $isAudioImporterPresented,
-            allowedContentTypes: [.audio],
-            allowsMultipleSelection: true
+            allowedContentTypes: [.audio, .movie],
+            allowsMultipleSelection: state.allowsMultipleImports
         ) { result in
             guard case .success(let urls) = result else { return }
             let staged = urls.map(AudioFileStaging.stage)
@@ -175,7 +177,7 @@ struct SettingsView: View {
                             Text(String(localized: "Offhand Pro"))
                             ProCrown(size: 20)
                         }
-                        Text(String(localized: "Custom styles, PDF and Word export, smart suggestions and audio import"))
+                        Text(String(localized: "Styles, PDF and Word export, smart suggestions, audio and video import and unlimited folders"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -212,7 +214,7 @@ struct SettingsView: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                if case .lifetime = onEnum(of: state.pro) {} else {
+                if isSubscription(state.pro) {
                     SettingsActionRow(title: String(localized: "Manage subscription")) {
                         SubscriptionManagement.present()
                     }
@@ -225,16 +227,36 @@ struct SettingsView: View {
         }
     }
 
+    // The free tier counts its imports down; Pro has nothing to count.
+    private var importSubtitle: String {
+        guard let left = state.freeImportsLeft else {
+            return String(localized: "Turn recordings, voice memos and videos into notes.")
+        }
+        return String.localizedStringWithFormat(
+            String(localized: "%1$d of %2$d free imports left"),
+            Int(truncating: left),
+            Int(FreeImportLimits.shared.FREE_IMPORTS)
+        )
+    }
+
     private var proStatusLabel: String {
         switch onEnum(of: state.pro) {
         case .free: return ""
         case .lifetime: return String(localized: "Lifetime, yours forever")
+        case .included: return String(localized: "Included on this iPhone. It is not part of backups and does not survive a reinstall.")
         case .trial(let trial):
             guard let endsAt = trial.endsAtMs else { return String(localized: "Free trial") }
             return String(format: String(localized: "Free trial until %@"), formatDate(endsAt.int64Value))
         case .yearly(let yearly):
             guard let renewsAt = yearly.renewsAtMs else { return String(localized: "Yearly") }
             return String(format: String(localized: "Yearly, renews on %@"), formatDate(renewsAt.int64Value))
+        }
+    }
+
+    private func isSubscription(_ status: ProStatusUi) -> Bool {
+        switch onEnum(of: status) {
+        case .yearly, .trial: return true
+        case .free, .lifetime, .included: return false
         }
     }
 
@@ -299,9 +321,11 @@ private struct SettingsActionRow: View {
 
 // The whole row flips the switch, like the Android row; a plain Toggle only
 // reacts to the switch itself.
-private struct SettingsSwitchRow: View {
+// A plain Toggle in a Form only flips on the switch itself; wrapping it in a
+// Button makes the whole row tappable, like Android's rows.
+struct SettingsSwitchRow: View {
     let title: String
-    let subtitle: String
+    var subtitle: String? = nil
     let isOn: Bool
     var showsProBadge = false
     let action: () -> Void
@@ -314,7 +338,9 @@ private struct SettingsSwitchRow: View {
                         Text(title)
                         if showsProBadge { ProBadge() }
                     }
-                    Text(subtitle).font(.caption).foregroundStyle(.secondary)
+                    if let subtitle {
+                        Text(subtitle).font(.caption).foregroundStyle(.secondary)
+                    }
                 }
                 Spacer()
                 Toggle("", isOn: .constant(isOn))

@@ -8,12 +8,9 @@ class InAppReviewPolicy(
 
     fun shouldRequestReview(
         savedRecordingsCount: Int,
-        installedAtMs: Long,
         state: ReviewPromptState,
         nowMs: Long,
-    ): Boolean = hasEnoughRecordings(savedRecordingsCount) &&
-        isInstallMatureEnough(installedAtMs, nowMs) &&
-        isAttemptDue(state, nowMs)
+    ): Boolean = hasEnoughRecordings(savedRecordingsCount) && isAttemptDue(state, nowMs)
 
     fun nextStateAfterAttempt(state: ReviewPromptState, nowMs: Long): ReviewPromptState =
         if (isBurstActive(state, nowMs)) {
@@ -36,9 +33,6 @@ class InAppReviewPolicy(
 
     private fun hasEnoughRecordings(savedRecordingsCount: Int): Boolean =
         savedRecordingsCount >= rules.minSavedRecordings
-
-    private fun isInstallMatureEnough(installedAtMs: Long, nowMs: Long): Boolean =
-        nowMs - installedAtMs >= rules.minInstallAgeMs
 
     private companion object {
         const val NEVER = 0L

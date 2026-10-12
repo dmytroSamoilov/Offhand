@@ -10,8 +10,6 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.export.AndroidAppIconProv
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.AndroidNotePdfRenderer
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.AppIconProvider
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.NotePdfRenderer
-import com.dmytrosamoilov.offhand.feature.notes.domain.review.AndroidAppInstallInfoProvider
-import com.dmytrosamoilov.offhand.feature.notes.domain.review.AppInstallInfoProvider
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.AndroidPrepareNoteShareUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
 import com.dmytrosamoilov.offhand.feature.notes.presentation.DateLabelFormatterImpl
@@ -27,7 +25,6 @@ import org.koin.dsl.module
 
 val featureNotesAndroidModule = module {
     singleOf(::DateLabelFormatterImpl) bind DateLabelFormatter::class
-    singleOf(::AndroidAppInstallInfoProvider) bind AppInstallInfoProvider::class
     singleOf(::PlayInAppReviewLauncher)
     singleOf(::FakeInAppReviewLauncher)
     single<InAppReviewLauncher> {

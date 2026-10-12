@@ -11,9 +11,6 @@
     <string name="onboarding_privacy_body">Todo se queda en tu teléfono. Las grabaciones, transcripciones y notas están cifradas, y la IA que las procesa se ejecuta ahí mismo. Nunca se sube nada.</string>
     <string name="onboarding_continue">Continuar</string>
 
-    <string name="onboarding_note_style_title">¿Cómo vas a usar Offhand?</string>
-    <string name="onboarding_note_style_body">Elige el estilo en el que se escriben tus notas. Cada grabación que hagas se convierte en este tipo de nota.</string>
-    <string name="onboarding_note_style_hint">Puedes cambiarlo cuando quieras en Ajustes, o cambiar el estilo de cualquier nota.</string>
 
     <string name="onboarding_lock_title">Protege tus notas</string>
     <string name="onboarding_lock_body">Tus notas se cifran con una clave guardada en el hardware seguro de este teléfono. Este teléfono no tiene bloqueo de pantalla, así que cualquiera que lo coja puede abrir Offhand. Configura un PIN, un patrón o una huella para mantener tus notas en privado.</string>

@@ -24,11 +24,12 @@ data class NotesUiState(
     val moveToFolder: MoveToFolderUi? = null,
     val folderStylePicker: FolderStylePickerUi? = null,
     val isFolderStylesUnlocked: Boolean = false,
+    val isFolderLimitReached: Boolean = false,
     val customStyles: List<NoteStyleOptionUi> = emptyList(),
     val importMessage: ImportMessageUi? = null,
     val smartSuggestions: SmartSuggestionsUi? = null,
     val isDocumentExportUnlocked: Boolean = false,
-    val isCustomStylesUnlocked: Boolean = false,
+    val isProStylesUnlocked: Boolean = false,
     val pendingCalendarEvent: CalendarEventSuggestion? = null,
     val isRetranscribeAvailable: Boolean = false,
 )

@@ -97,14 +97,12 @@ struct AboutSupportView: View {
 
     private var privacySection: some View {
         Section {
-            Toggle(
-                String(localized: "Share usage & stability reports"),
-                isOn: Binding(
-                    get: { state.isTelemetryEnabled },
-                    set: { viewModel.onTelemetryChanged(granted: $0) }
-                )
-            )
-            .tint(Brand.toggle)
+            SettingsSwitchRow(
+                title: String(localized: "Share usage & stability reports"),
+                isOn: state.isTelemetryEnabled
+            ) {
+                viewModel.onTelemetryChanged(granted: !state.isTelemetryEnabled)
+            }
         } header: {
             Text(String(localized: "Privacy"))
         } footer: {
@@ -128,14 +126,12 @@ struct AboutSupportView: View {
 
     private var developerSection: some View {
         Section(String(localized: "Developer")) {
-            Toggle(
-                String(localized: "Developer options"),
-                isOn: Binding(
-                    get: { state.isDeveloperOptionsEnabled },
-                    set: { viewModel.onDeveloperOptionsChanged(enabled: $0) }
-                )
-            )
-            .tint(Brand.toggle)
+            SettingsSwitchRow(
+                title: String(localized: "Developer options"),
+                isOn: state.isDeveloperOptionsEnabled
+            ) {
+                viewModel.onDeveloperOptionsChanged(enabled: !state.isDeveloperOptionsEnabled)
+            }
         }
     }
 

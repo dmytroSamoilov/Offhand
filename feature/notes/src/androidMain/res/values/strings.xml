@@ -78,7 +78,7 @@
     <string name="notes_share_exported_label">Exported</string>
     <string name="notes_preset_description">Change summary style</string>
     <string name="notes_fake_review_title" translatable="false">In-app review · dev build</string>
-    <string name="notes_fake_review_body" translatable="false">Google Play would show its rating dialog here. Rules: %1$d recording(s) · install age %2$d min · attempt gap %3$d min · burst window %4$d min · cooldown %5$d min. Tapping outside counts the attempt, like the real dialog.</string>
+    <string name="notes_fake_review_body" translatable="false">Google Play would show its rating dialog here. Rules: %1$d recording(s) · attempt gap %2$d min · burst window %3$d min · cooldown %4$d min. Tapping outside counts the attempt, like the real dialog.</string>
     <string name="notes_fake_review_success" translatable="false">Count attempt</string>
     <string name="notes_fake_review_failure" translatable="false">Simulate failure</string>
     <string name="notes_preset_sheet_body">The recording is kept. The title and summary are written again from the transcript in the style you pick.</string>

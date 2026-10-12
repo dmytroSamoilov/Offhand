@@ -6,7 +6,7 @@ enum ImportNoticeText {
         if case .started = onEnum(of: notice) {
             return String(localized: "Import started")
         }
-        return String(localized: "Import audio")
+        return String(localized: "Import audio or video")
     }
 
     static func message(_ notice: ImportNoticeUi) -> String {
@@ -18,6 +18,8 @@ enum ImportNoticeText {
             )
         case .unreadable:
             return String(localized: "Some of the files could not be read.")
+        case .oneVideoAtATime:
+            return String(localized: "Videos are imported one at a time. Pick a single video file.")
         }
     }
 }

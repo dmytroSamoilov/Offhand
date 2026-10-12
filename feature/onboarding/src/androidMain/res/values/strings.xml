@@ -11,9 +11,6 @@
     <string name="onboarding_privacy_body">Everything stays on your phone. Recordings, transcripts and notes are encrypted, and the on-device AI that processes them runs right there. Nothing is uploaded, ever.</string>
     <string name="onboarding_continue">Continue</string>
 
-    <string name="onboarding_note_style_title">How will you use Offhand?</string>
-    <string name="onboarding_note_style_body">Pick the style your notes are written in. Every recording you make becomes this kind of note.</string>
-    <string name="onboarding_note_style_hint">You can change this anytime in Settings, or restyle any single note.</string>
 
     <string name="onboarding_lock_title">Protect your notes</string>
     <string name="onboarding_lock_body">Your notes are encrypted with a key stored in this phone\'s secure hardware. This phone has no screen lock, so anyone who picks it up can open Offhand. Set up a PIN, pattern, or fingerprint to keep your notes private.</string>

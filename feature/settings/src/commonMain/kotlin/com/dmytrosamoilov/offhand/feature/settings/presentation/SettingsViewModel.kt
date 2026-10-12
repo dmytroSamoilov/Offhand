@@ -28,11 +28,14 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSugges
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveImportAllowanceUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.ImportAllowance
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -46,6 +49,7 @@ class SettingsViewModel(
     private val appLockManager: AppLockManager,
     private val importAudio: ImportAudioUseCase,
     isAudioImportAvailable: IsAudioImportAvailableUseCase,
+    private val observeImportAllowance: ObserveImportAllowanceUseCase,
     observeSmartSuggestionsEnabled: ObserveSmartSuggestionsEnabledUseCase,
     private val setSmartSuggestionsEnabled: SetSmartSuggestionsEnabledUseCase,
     observeProStatus: ObserveProStatusUseCase,
@@ -68,6 +72,7 @@ class SettingsViewModel(
         collect(observeAppLockEnabled()) { enabled -> copy(isAppLockEnabled = enabled) }
         collect(observeCustomNoteStyles()) { styles -> copy(customStyles = styles.map { it.toOptionUi() }) }
         collect(isAudioImportAvailable()) { unlocked -> copy(isAudioImportUnlocked = unlocked) }
+        collect(observeImportAllowance()) { allowance -> withImportAllowance(allowance) }
         collect(observeSmartSuggestionsEnabled()) { enabled -> copy(isSmartSuggestionsEnabled = enabled) }
         collect(observeProStatus()) { status -> copy(pro = status.toUi(), isSmartSuggestionsUnlocked = status.isPro) }
         if (buildInfo.isDeveloperBuild) collect(observeProOverride()) { override -> copy(proOverride = override) }
@@ -134,11 +139,12 @@ class SettingsViewModel(
         }
     }
 
-    // The picker only opens once the gate has passed, so a free user meets
-    // the paywall before choosing files.
+    // The picker opens straight away while a free import is left (one file);
+    // otherwise a free user meets the paywall before choosing files.
     fun onImportAudioClicked() {
         launchSafely(showLoading = false) {
-            if (!proUpgradeGate.requirePro(ProFeature.AUDIO_IMPORT)) return@launchSafely
+            val covered = observeImportAllowance().first().covers(SINGLE_FILE)
+            if (!covered && !proUpgradeGate.requirePro(ProFeature.AUDIO_IMPORT)) return@launchSafely
             mutableUiState.update { it.copy(isImportPickerRequested = true) }
         }
     }
@@ -155,6 +161,7 @@ class SettingsViewModel(
             val notice = importNoticeOf(
                 hasUnreadable = unreadableCount > 0,
                 startedCount = if (result == ImportAudioResult.STARTED) sources.size else 0,
+                result = result,
             )
             mutableUiState.update { it.copy(importNotice = notice) }
         }
@@ -165,8 +172,16 @@ class SettingsViewModel(
     }
 }
 
+private const val SINGLE_FILE = 1
+
+private fun SettingsUiState.withImportAllowance(allowance: ImportAllowance): SettingsUiState = when (allowance) {
+    ImportAllowance.Unlimited -> copy(freeImportsLeft = null, allowsMultipleImports = true)
+    is ImportAllowance.Free -> copy(freeImportsLeft = allowance.left, allowsMultipleImports = false)
+}
+
 private fun ProStatus.toUi(): ProStatusUi = when {
     plan == ProPlan.LIFETIME -> ProStatusUi.Lifetime
+    plan == ProPlan.INCLUDED -> ProStatusUi.Included
     plan == ProPlan.YEARLY && isTrial -> ProStatusUi.Trial(renewsAtMs)
     plan == ProPlan.YEARLY -> ProStatusUi.Yearly(renewsAtMs)
     else -> ProStatusUi.Free
