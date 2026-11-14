@@ -1,0 +1,73 @@
+# Runs after 01-smoke.yaml. Covers the share sheet as a Pro user: the text tab
+# with its three formats, sharing a PDF through the system share sheet, the
+# audio tab, and (Android) downloading the WAV through the system file picker.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- tapOn: "Smoke test note"
+- runFlow:
+    when:
+      visible: "In-app review · dev build"
+    commands:
+      - tapOn: "COUNT ATTEMPT"
+- tapOn: "Share note"
+- assertVisible: "Text file"
+- assertVisible: "PDF file"
+- assertVisible: "Word file"
+- tapOn: "Word file"
+- tapOn: "PDF file"
+- tapOn: "Share"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      # The system chooser takes over; back closes it and lands on the note
+      - extendedWaitUntil:
+          notVisible: "PDF file"
+          timeout: 10000
+      - back
+      - extendedWaitUntil:
+          visible: "Summary"
+          timeout: 10000
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          notVisible: "PDF file"
+          timeout: 10000
+      - tapOn:
+          text: "Close"
+          optional: true
+      - extendedWaitUntil:
+          visible: "Summary"
+          timeout: 10000
+
+# The audio tab offers the WAV file
+- tapOn: "Share note"
+- tapOn: "Audio file"
+- assertVisible: "WAV file"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Download"
+      - tapOn:
+          text: "(?i)save"
+      - extendedWaitUntil:
+          visible: "Summary"
+          timeout: 10000
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Share"
+      - extendedWaitUntil:
+          notVisible: "WAV file"
+          timeout: 10000
+      - tapOn:
+          text: "Close"
+          optional: true
+      - extendedWaitUntil:
+          visible: "Summary"
+          timeout: 10000

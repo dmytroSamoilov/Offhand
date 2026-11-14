@@ -64,6 +64,7 @@ struct NoteDetailView: View {
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button { viewModel.onShareRequested() } label: { Image(systemName: "square.and.arrow.up") }
+                    .accessibilityLabel(String(localized: "Share note"))
                 Menu {
                     Button {
                         viewModel.onEditStarted()
@@ -136,7 +137,7 @@ struct NoteDetailView: View {
                 viewModel: viewModel,
                 current: detail.style,
                 customStyles: state.customStyles,
-                isCustomStylesUnlocked: state.isCustomStylesUnlocked,
+                isProStylesUnlocked: state.isProStylesUnlocked,
                 onCreateStyle: {
                     isNewStyleRequested = true
                     viewModel.onPresetSheetDismissed()
@@ -293,6 +294,9 @@ struct NoteDetailView: View {
                     .foregroundStyle(Brand.primary)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(
+                state.playback.isPlaying ? String(localized: "Pause playback") : String(localized: "Play recording")
+            )
             VStack(spacing: 4) {
                 Slider(
                     value: Binding(
@@ -629,7 +633,7 @@ private struct NoteStyleSheet: View {
     let viewModel: NotesViewModel
     let current: NoteStyleRef
     let customStyles: [NoteStyleOptionUi]
-    let isCustomStylesUnlocked: Bool
+    let isProStylesUnlocked: Bool
     let onCreateStyle: () -> Void
 
     var body: some View {
@@ -637,7 +641,7 @@ private struct NoteStyleSheet: View {
             NoteStyleList(
                 current: current,
                 customStyles: customStyles.map { NoteStyleChoice(id: $0.id, name: $0.name, details: $0.description_) },
-                isCustomStylesUnlocked: isCustomStylesUnlocked,
+                isProStylesUnlocked: isProStylesUnlocked,
                 footer: String(localized: "The recording is kept. The title and summary are written again from the transcript in the style you pick."),
                 onSelect: { viewModel.onStyleSelected(style: $0) },
                 onCreateStyle: onCreateStyle

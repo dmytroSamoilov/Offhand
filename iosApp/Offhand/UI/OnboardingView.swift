@@ -9,7 +9,6 @@ struct OnboardingView: View {
     @State private var state = OnboardingUiState(
         step: .deviceCheck,
         deviceSpecs: nil,
-        notePreset: .summary,
         isDeviceSecure: false,
         isAppLockEnabled: true,
         isTelemetryEnabled: true,
@@ -103,17 +102,6 @@ struct OnboardingView: View {
                 title: String(localized: "Private by design"),
                 message: String(localized: "Everything stays on your iPhone. Recordings, transcripts and notes are encrypted, and the on-device AI that processes them runs right there. Nothing is uploaded, ever.")
             )
-        case .noteStyle:
-            StepCard(
-                icon: "text.badge.checkmark",
-                title: String(localized: "How should notes be organized?"),
-                message: String(localized: "Pick a default style. You can change it for any note later."),
-                content: {
-                    NotePresetPicker(selected: state.notePreset) { preset in
-                        viewModel.onNoteStyleSelected(preset: preset)
-                    }
-                }
-            )
         case .deviceLock:
             if state.isDeviceSecure {
                 StepCard(
@@ -174,8 +162,6 @@ struct OnboardingView: View {
         switch step {
         case .privacy:
             return { viewModel.onPrivacyContinue() }
-        case .noteStyle:
-            return { viewModel.onNoteStyleContinue() }
         case .deviceLock:
             return {
                 guard state.isDeviceSecure && state.isAppLockEnabled else {
@@ -340,67 +326,5 @@ private struct ToggleCard: View {
             )
             .contentShape(Rectangle())
             .onTapGesture { isOn.toggle() }
-    }
-}
-
-struct NotePresetPicker: View {
-    let selected: NotePreset?
-    let onSelect: (NotePreset) -> Void
-
-    var body: some View {
-        VStack(spacing: 10) {
-            ForEach([NotePreset.summary, .meeting, .visit, .legal], id: \.self) { preset in
-                PresetCard(
-                    title: NoteStyleLabels.label(for: preset),
-                    details: NoteStyleLabels.details(for: preset),
-                    isSelected: selected == preset
-                ) {
-                    onSelect(preset)
-                }
-            }
-        }
-        .animation(.easeInOut(duration: 0.15), value: selected)
-    }
-}
-
-struct PresetCard: View {
-    let title: String
-    let details: String
-    let isSelected: Bool
-    var showProBadge = false
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 16) {
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 6) {
-                        Text(title)
-                            .foregroundStyle(Brand.onSurface)
-                        if showProBadge { ProBadge() }
-                    }
-                    Text(details)
-                        .font(.caption)
-                        .foregroundStyle(Brand.onSurfaceVariant)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 12)
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
-                    .foregroundStyle(isSelected ? Brand.primary : Color(.systemGray3))
-            }
-            .padding(16)
-            .background(
-                isSelected ? Brand.primaryContainer : Brand.surface,
-                in: RoundedRectangle(cornerRadius: 12)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(isSelected ? Brand.primary : Color(.systemGray4), lineWidth: 1)
-            )
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
     }
 }

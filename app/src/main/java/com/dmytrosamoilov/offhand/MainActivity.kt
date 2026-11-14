@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -18,6 +19,8 @@ import androidx.core.content.IntentCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportIntake
 import com.dmytrosamoilov.offhand.feature.recording.service.RecordingService
@@ -34,6 +37,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class MainActivity : FragmentActivity() {
 
     private var requestedNoteId by mutableStateOf<Long?>(null)
+    private val analyticsTracker: AnalyticsTracker by inject()
     private val importIntake: AudioImportIntake by inject()
     // Activity-scoped so the dialog host inside RootScreen observes the same instance.
     private val sharedAudioImport: SharedAudioImportViewModel by viewModel()
@@ -43,9 +47,16 @@ class MainActivity : FragmentActivity() {
     private val audioImportPicker = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         importAudio(uris)
     }
+    private val singleAudioImportPicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        importAudio(listOfNotNull(uri))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!FrameworkCompatibility.isComposeSupported()) {
+            showUnsupportedFramework()
+            return
+        }
         enableEdgeToEdge()
         consumeNoteIdExtra(intent)
         consumeSharedAudio(intent)
@@ -58,7 +69,7 @@ class MainActivity : FragmentActivity() {
                     color = MaterialTheme.colorScheme.background,
                 ) {
                     CompositionLocalProvider(
-                        LocalAudioImportPicker provides AudioImportPicker { audioImportPicker.launch(arrayOf(AUDIO_MIME_TYPE)) },
+                        LocalAudioImportPicker provides AudioImportPicker { allowMultiple -> openImportPicker(allowMultiple) },
                     ) {
                         RootScreen(
                             viewModel = viewModel,
@@ -85,8 +96,13 @@ class MainActivity : FragmentActivity() {
         }
     }
 
+    private fun openImportPicker(allowMultiple: Boolean) {
+        if (allowMultiple) audioImportPicker.launch(IMPORT_MIME_TYPES) else singleAudioImportPicker.launch(IMPORT_MIME_TYPES)
+    }
+
     private fun consumeSharedAudio(intent: Intent?) {
-        if (intent?.type?.startsWith(AUDIO_MIME_PREFIX) != true) return
+        val type = intent?.type ?: return
+        if (!type.startsWith(AUDIO_MIME_PREFIX) && !type.startsWith(VIDEO_MIME_PREFIX)) return
         val uris = sharedAudioUris(intent)
         intent.removeExtra(Intent.EXTRA_STREAM)
         importAudio(uris)
@@ -113,6 +129,17 @@ class MainActivity : FragmentActivity() {
     private companion object {
         const val NO_NOTE_ID = -1L
         const val AUDIO_MIME_PREFIX = "audio/"
-        const val AUDIO_MIME_TYPE = "audio/*"
+        const val VIDEO_MIME_PREFIX = "video/"
+        val IMPORT_MIME_TYPES = arrayOf("audio/*", "video/*")
+    }
+
+    private fun showUnsupportedFramework() {
+        analyticsTracker.track(AnalyticsEvents.frameworkUnsupported())
+        AlertDialog.Builder(this)
+            .setTitle(R.string.framework_unsupported_title)
+            .setMessage(R.string.framework_unsupported_body)
+            .setPositiveButton(R.string.framework_unsupported_close) { _, _ -> finish() }
+            .setOnDismissListener { finish() }
+            .show()
     }
 }

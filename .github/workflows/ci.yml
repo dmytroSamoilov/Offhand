@@ -104,7 +104,11 @@ jobs:
           script: |
             adb install -r app/build/outputs/apk/uitest/debug/app-uitest-debug.apk
             adb push .maestro/assets/import-sample.m4a /sdcard/Download/import-sample.m4a
+            adb push .maestro/assets/import-sample.mp4 /sdcard/Download/import-sample.mp4
             maestro test --format junit --output maestro-android.xml .maestro/
+            adb shell locksettings set-pin 1234
+            maestro test --format junit --output maestro-android-lock.xml .maestro/lock/
+            adb shell locksettings clear --old 1234
             adb shell pm clear com.dmytrosamoilov.offhand.uitest
             ./gradlew :app:connectedUitestDebugAndroidTest
 
@@ -115,6 +119,7 @@ jobs:
           name: maestro-android
           path: |
             maestro-android.xml
+            maestro-android-lock.xml
             ~/.maestro/tests
             app/build/reports/androidTests/connected
 
@@ -200,10 +205,24 @@ jobs:
           test -n "$STORAGE"
           mkdir -p "$STORAGE/File Provider Storage"
           cp .maestro/assets/import-sample.m4a "$STORAGE/File Provider Storage/import-sample.m4a"
+          cp .maestro/assets/import-sample.mp4 "$STORAGE/File Provider Storage/import-sample.mp4"
           xcrun simctl terminate "${{ steps.sim.outputs.udid }}" com.apple.DocumentsApp
 
       - name: Run the smoke flow
         run: maestro --device "${{ steps.sim.outputs.udid }}" test --format junit --output maestro-ios.xml .maestro/
+
+      - name: Run the app-lock flow with Face ID enrolled
+        run: |
+          UDID="${{ steps.sim.outputs.udid }}"
+          xcrun simctl spawn "$UDID" notifyutil -s com.apple.BiometricKit.enrollmentChanged 1
+          xcrun simctl spawn "$UDID" notifyutil -p com.apple.BiometricKit.enrollmentChanged
+          # Every few seconds, so the lock screen is on screen long enough to be asserted before the match lands
+          ( while true; do xcrun simctl spawn "$UDID" notifyutil -p com.apple.BiometricKit_Sim.pearl.match; sleep 4; done ) &
+          MATCHER=$!
+          STATUS=0
+          maestro --device "$UDID" test --format junit --output maestro-ios-lock.xml .maestro/lock/ || STATUS=$?
+          kill "$MATCHER"
+          exit "$STATUS"
 
       - name: Upload Maestro artifacts
         if: failure()
@@ -212,4 +231,5 @@ jobs:
           name: maestro-ios
           path: |
             maestro-ios.xml
+            maestro-ios-lock.xml
             ~/.maestro/tests

@@ -4,7 +4,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardStagedAudioUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
-import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.ImportAllowance
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveImportAllowanceUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -31,7 +32,7 @@ class SharedAudioImportViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private val importAudio: ImportAudioUseCase = mockk()
     private val discardStagedAudio: DiscardStagedAudioUseCase = mockk(relaxed = true)
-    private val isAudioImportAvailable: IsAudioImportAvailableUseCase = mockk()
+    private val observeImportAllowance: ObserveImportAllowanceUseCase = mockk()
     private val sources = listOf(AudioImportSource(handle = "/tmp/a", displayName = "a.m4a"))
 
     @Before
@@ -47,8 +48,8 @@ class SharedAudioImportViewModelTest {
 
     @Test
     fun `pro user imports at once and sees the started notice`() = runTest(dispatcher) {
-        every { isAudioImportAvailable() } returns flowOf(true)
-        val viewModel = SharedAudioImportViewModel(importAudio, discardStagedAudio, isAudioImportAvailable)
+        every { observeImportAllowance() } returns flowOf(ImportAllowance.Unlimited)
+        val viewModel = SharedAudioImportViewModel(importAudio, discardStagedAudio, observeImportAllowance)
 
         viewModel.onSharedAudioReceived(sources, unreadableCount = 0)
         advanceUntilIdle()
@@ -59,9 +60,21 @@ class SharedAudioImportViewModelTest {
     }
 
     @Test
+    fun `a free import left lets one shared file in without the dialog`() = runTest(dispatcher) {
+        every { observeImportAllowance() } returns flowOf(ImportAllowance.Free(left = 2))
+        val viewModel = SharedAudioImportViewModel(importAudio, discardStagedAudio, observeImportAllowance)
+
+        viewModel.onSharedAudioReceived(sources, unreadableCount = 0)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isProDialogShown)
+        coVerify(exactly = 1) { importAudio(sources) }
+    }
+
+    @Test
     fun `free user is asked first and nothing is imported yet`() = runTest(dispatcher) {
-        every { isAudioImportAvailable() } returns flowOf(false)
-        val viewModel = SharedAudioImportViewModel(importAudio, discardStagedAudio, isAudioImportAvailable)
+        every { observeImportAllowance() } returns flowOf(ImportAllowance.Free(left = 0))
+        val viewModel = SharedAudioImportViewModel(importAudio, discardStagedAudio, observeImportAllowance)
 
         viewModel.onSharedAudioReceived(sources, unreadableCount = 0)
         advanceUntilIdle()
@@ -73,8 +86,8 @@ class SharedAudioImportViewModelTest {
 
     @Test
     fun `upgrade runs the gated import with the pending files`() = runTest(dispatcher) {
-        every { isAudioImportAvailable() } returns flowOf(false)
-        val viewModel = SharedAudioImportViewModel(importAudio, discardStagedAudio, isAudioImportAvailable)
+        every { observeImportAllowance() } returns flowOf(ImportAllowance.Free(left = 0))
+        val viewModel = SharedAudioImportViewModel(importAudio, discardStagedAudio, observeImportAllowance)
         viewModel.onSharedAudioReceived(sources, unreadableCount = 0)
         advanceUntilIdle()
 
@@ -88,9 +101,9 @@ class SharedAudioImportViewModelTest {
 
     @Test
     fun `declined paywall after upgrade discards the staged files`() = runTest(dispatcher) {
-        every { isAudioImportAvailable() } returns flowOf(false)
+        every { observeImportAllowance() } returns flowOf(ImportAllowance.Free(left = 0))
         coEvery { importAudio(any()) } returns ImportAudioResult.LOCKED
-        val viewModel = SharedAudioImportViewModel(importAudio, discardStagedAudio, isAudioImportAvailable)
+        val viewModel = SharedAudioImportViewModel(importAudio, discardStagedAudio, observeImportAllowance)
         viewModel.onSharedAudioReceived(sources, unreadableCount = 0)
         advanceUntilIdle()
 
@@ -103,8 +116,8 @@ class SharedAudioImportViewModelTest {
 
     @Test
     fun `cancel discards the staged files without importing`() = runTest(dispatcher) {
-        every { isAudioImportAvailable() } returns flowOf(false)
-        val viewModel = SharedAudioImportViewModel(importAudio, discardStagedAudio, isAudioImportAvailable)
+        every { observeImportAllowance() } returns flowOf(ImportAllowance.Free(left = 0))
+        val viewModel = SharedAudioImportViewModel(importAudio, discardStagedAudio, observeImportAllowance)
         viewModel.onSharedAudioReceived(sources, unreadableCount = 0)
         advanceUntilIdle()
 
@@ -118,8 +131,8 @@ class SharedAudioImportViewModelTest {
 
     @Test
     fun `unreadable files alone show the notice without the pro dialog`() = runTest(dispatcher) {
-        every { isAudioImportAvailable() } returns flowOf(false)
-        val viewModel = SharedAudioImportViewModel(importAudio, discardStagedAudio, isAudioImportAvailable)
+        every { observeImportAllowance() } returns flowOf(ImportAllowance.Free(left = 0))
+        val viewModel = SharedAudioImportViewModel(importAudio, discardStagedAudio, observeImportAllowance)
 
         viewModel.onSharedAudioReceived(emptyList(), unreadableCount = 2)
         advanceUntilIdle()

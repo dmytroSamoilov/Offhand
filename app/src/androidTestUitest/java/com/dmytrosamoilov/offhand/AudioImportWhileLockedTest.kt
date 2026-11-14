@@ -178,7 +178,7 @@ class AudioImportWhileLockedTest {
 
     private companion object {
         const val TAB_SETTINGS = "tab_settings"
-        const val IMPORT_ROW = "Import audio"
+        const val IMPORT_ROW = "Import audio or video"
         const val LOCK_TITLE = "Notes locked"
         const val IMPORT_STARTED = "Import started"
         const val SAMPLE_RATE = 16_000

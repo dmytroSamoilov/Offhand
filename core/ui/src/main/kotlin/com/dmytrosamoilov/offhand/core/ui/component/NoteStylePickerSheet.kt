@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.requiredProFeature
 import com.dmytrosamoilov.offhand.core.ui.R
 
 data class NoteStyleChoice(
@@ -46,7 +47,7 @@ fun NoteStylePickerSheet(
     body: String?,
     selected: NoteStyleRef?,
     customStyles: List<NoteStyleChoice>,
-    isCustomStylesUnlocked: Boolean,
+    isProStylesUnlocked: Boolean,
     onSelected: (NoteStyleRef) -> Unit,
     onDismiss: () -> Unit,
     onCreateStyle: (() -> Unit)? = null,
@@ -72,7 +73,7 @@ fun NoteStylePickerSheet(
             NoteStyleList(
                 selected = selected,
                 customStyles = customStyles,
-                isCustomStylesUnlocked = isCustomStylesUnlocked,
+                isProStylesUnlocked = isProStylesUnlocked,
                 onSelected = onSelected,
                 onDefaultSelected = onDefaultSelected,
             )
@@ -89,7 +90,7 @@ fun NoteStylePickerSheet(
 fun ColumnScope.NoteStyleList(
     selected: NoteStyleRef?,
     customStyles: List<NoteStyleChoice>,
-    isCustomStylesUnlocked: Boolean,
+    isProStylesUnlocked: Boolean,
     onSelected: (NoteStyleRef) -> Unit,
     onDefaultSelected: (() -> Unit)? = null,
     customStyleActions: @Composable RowScope.(NoteStyleChoice) -> Unit = {},
@@ -110,7 +111,7 @@ fun ColumnScope.NoteStyleList(
                 description = style.description,
                 isSelected = selected == NoteStyleRef.Custom(style.id),
                 onClick = { onSelected(NoteStyleRef.Custom(style.id)) },
-                showProBadge = !isCustomStylesUnlocked,
+                showProBadge = !isProStylesUnlocked,
                 trailingActions = { customStyleActions(style) },
             )
         }
@@ -118,7 +119,12 @@ fun ColumnScope.NoteStyleList(
     PickerHeader(text = stringResource(R.string.core_ui_styles_built_in_header))
     NotePresetOption.entries.forEach { option ->
         val style = NoteStyleRef.BuiltIn(option.toDomain())
-        NotePresetOptionCard(option = option, isSelected = selected == style, onClick = { onSelected(style) })
+        NotePresetOptionCard(
+            option = option,
+            isSelected = selected == style,
+            onClick = { onSelected(style) },
+            showProBadge = !isProStylesUnlocked && style.requiredProFeature() != null,
+        )
     }
 }
 

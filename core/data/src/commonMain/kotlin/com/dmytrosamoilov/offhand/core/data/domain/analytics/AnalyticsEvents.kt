@@ -31,7 +31,8 @@ object AnalyticsEvents {
 
     fun noteInterrupted(source: NoteSource): AnalyticsEvent = event("note_interrupted", "source" to source.label())
 
-    fun audioImportStarted(files: Int): AnalyticsEvent = event("audio_import_started", "files" to files.toLong())
+    fun audioImportStarted(files: Int, videos: Int): AnalyticsEvent =
+        event("audio_import_started", "files" to files.toLong(), "videos" to videos.toLong())
 
     fun audioImportRejected(reason: String): AnalyticsEvent = event("audio_import_rejected", "reason" to reason)
 
@@ -98,12 +99,16 @@ object AnalyticsEvents {
     fun paywallDismissed(feature: ProFeature): AnalyticsEvent =
         event("paywall_dismissed", "feature" to feature.label())
 
-    fun purchaseStarted(plan: ProPlan): AnalyticsEvent = event("purchase_started", "plan" to plan.label())
+    fun purchaseStarted(plan: ProPlan, feature: ProFeature): AnalyticsEvent =
+        event("purchase_started", "plan" to plan.label(), "feature" to feature.label())
 
-    fun purchaseCompleted(plan: ProPlan, trial: Boolean): AnalyticsEvent =
-        event("purchase_completed", "plan" to plan.label(), "trial" to trial.label())
+    fun purchaseCompleted(plan: ProPlan, trial: Boolean, feature: ProFeature): AnalyticsEvent =
+        event("purchase_completed", "plan" to plan.label(), "trial" to trial.label(), "feature" to feature.label())
 
     fun restoreClicked(): AnalyticsEvent = event("restore_clicked")
+
+    fun proGrandfathered(hasPurchase: Boolean): AnalyticsEvent =
+        event("pro_grandfathered", "has_purchase" to hasPurchase.label())
 
     fun redeemCodeClicked(): AnalyticsEvent = event("redeem_code_clicked")
 
@@ -114,9 +119,14 @@ object AnalyticsEvents {
     fun deviceUnsupported(ramGb: Long, cpuCores: Int): AnalyticsEvent =
         event("device_unsupported", "ram_gb" to ramGb, "cores" to cpuCores.toLong())
 
+    fun frameworkUnsupported(): AnalyticsEvent = event("framework_unsupported")
+
     fun modelDownloadStarted(network: String): AnalyticsEvent = event("model_download_started", "network" to network)
 
     fun modelDownloadFailed(reason: String): AnalyticsEvent = event("model_download_failed", "reason" to reason)
+
+    fun modelDownloadAbandoned(percent: Int): AnalyticsEvent =
+        event("model_download_abandoned", "percent" to percent.toLong())
 
     fun notificationPermission(granted: Boolean): AnalyticsEvent =
         event("notification_permission", "granted" to granted.label())

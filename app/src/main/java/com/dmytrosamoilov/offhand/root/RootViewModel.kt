@@ -5,10 +5,14 @@ import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.AppLockState
 import com.dmytrosamoilov.offhand.core.security.DatabasePassphraseProvider
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DecideEarlyAdopterProUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkEarlyAdopterThankedUseCase
+import com.dmytrosamoilov.offhand.core.data.domain.isEarlyAdopterThanksPending
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserPreferencesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
@@ -31,6 +35,9 @@ class RootViewModel(
     private val resumeInterruptedNotes: Lazy<ResumeInterruptedNotesUseCase>,
     private val sweepOrphanedRecordings: Lazy<SweepOrphanedRecordingsUseCase>,
     private val clearShareCache: ClearShareCacheUseCase,
+    private val decideEarlyAdopterPro: Lazy<DecideEarlyAdopterProUseCase>,
+    private val markEarlyAdopterThanked: MarkEarlyAdopterThankedUseCase,
+    private val proUpgradeGate: ProUpgradeGate,
     private val appForegroundState: AppForegroundState,
 ) : BaseViewModel() {
 
@@ -38,13 +45,15 @@ class RootViewModel(
         observeUserPreferences(),
         appLockManager.lockState,
     ) { preferences, lockState ->
+        val phase = when {
+            !preferences.onboardingCompleted -> RootPhase.ONBOARDING
+            preferences.appLockEnabled && lockState == AppLockState.LOCKED -> RootPhase.LOCKED
+            else -> RootPhase.READY
+        }
         RootUiState(
-            phase = when {
-                !preferences.onboardingCompleted -> RootPhase.ONBOARDING
-                preferences.appLockEnabled && lockState == AppLockState.LOCKED -> RootPhase.LOCKED
-                else -> RootPhase.READY
-            },
+            phase = phase,
             isDynamicColorEnabled = preferences.dynamicColor,
+            isEarlyAdopterThanksShown = phase == RootPhase.READY && preferences.isEarlyAdopterThanksPending,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -57,6 +66,19 @@ class RootViewModel(
         resumeInterruptedNotesWhenReady()
         resumeInterruptedNotesOnReturn()
         resumeModelDownloadWhenReady()
+    }
+
+    fun onEarlyAdopterThanksDismissed() {
+        launchSafely(showLoading = false) { markEarlyAdopterThanked() }
+    }
+
+    // The thank-you offers a look at what the grant includes: the paywall in
+    // its benefits mode, since the status already reads as Pro.
+    fun onEarlyAdopterBenefitsRequested() {
+        launchSafely(showLoading = false) {
+            markEarlyAdopterThanked()
+            proUpgradeGate.showBenefits()
+        }
     }
 
     fun onUnlockAuthenticated() {
@@ -75,6 +97,7 @@ class RootViewModel(
     private fun resumeInterruptedNotesWhenReady() {
         launchSafely(showLoading = false) {
             uiState.first { it.phase == RootPhase.READY }
+            decideEarlyAdopterPro.value.invoke()
             resumeInterruptedNotes.value.invoke()
             sweepOrphanedRecordings.value.invoke()
             clearShareCache()
@@ -106,6 +129,7 @@ class RootViewModel(
         launchSafely(showLoading = false) {
             if (!observeUserPreferences().first().onboardingCompleted) {
                 appLockManager.markUnlocked()
+                decideEarlyAdopterPro.value.invoke()
             }
         }
     }

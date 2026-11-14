@@ -35,6 +35,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsCalendarSug
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsThinkingEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteRecordedUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RefundFreeImportUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteTranscriptUseCase
@@ -55,6 +56,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -184,6 +186,8 @@ class RecordingSessionManagerTest {
         every { this@mockk.invoke() } returns false
     }
 
+    private val refundFreeImport: RefundFreeImportUseCase = mockk(relaxed = true)
+
     private val defaultNoteTitleProvider: DefaultNoteTitleProvider = mockk {
         every { untitledTitle() } returns "Voice note"
     }
@@ -215,6 +219,7 @@ class RecordingSessionManagerTest {
         audioStore = audioStore,
         audioBackup = audioBackup,
         audioDecoder = audioDecoder,
+        refundFreeImport = refundFreeImport,
         analyticsTracker = analyticsTracker,
         appForegroundState = appForegroundState,
         scope = this,
@@ -222,7 +227,7 @@ class RecordingSessionManagerTest {
 
     @Test
     fun `session saves placeholder at drain, completes note in background`() = runTest {
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         every { recorder.recordStream(pcmSink = any()) } returns flowOf(chunk(1), chunk(2))
         justRun { recorder.resetVad() }
         coEvery { speechToText.transcribe(any()) } returnsMany listOf(
@@ -277,7 +282,7 @@ class RecordingSessionManagerTest {
 
     @Test
     fun `failed chunk sends the whole recording through the stored audio again`() = runTest {
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         every { recorder.recordStream(pcmSink = any()) } returns flowOf(chunk(1), chunk(2))
         justRun { recorder.resetVad() }
         coEvery { speechToText.transcribe(any()) } returns
@@ -320,7 +325,7 @@ class RecordingSessionManagerTest {
     @Test
     fun `pause and resume toggle recorder and session state`() = runTest {
         val liveStream = MutableSharedFlow<AudioChunk>()
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         every { recorder.recordStream(pcmSink = any()) } returns liveStream
         justRun { recorder.resetVad() }
         justRun { recorder.pause() }
@@ -344,7 +349,7 @@ class RecordingSessionManagerTest {
 
     @Test
     fun `retry re-transcribes stored audio and completes the note`() = runTest {
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         coEvery { markNoteProcessing(7L) } returns storedNote(7L)
         every { audioStore.sizeOf("note-7.pcm.enc") } returns 64_000L
         stubBackupRead(64_000)
@@ -381,7 +386,7 @@ class RecordingSessionManagerTest {
 
     @Test
     fun `imported audio is decoded into the store and processed like a retry`() = runTest {
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         val source = AudioImportSource(handle = "/cache/imports/x", displayName = "Client call.m4a")
         coEvery { createImportedNote("Client call", "note-1.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.SUMMARY)) } returns 9L
         coEvery { audioDecoder.decode(source, any(), any()) } answers {
@@ -424,7 +429,7 @@ class RecordingSessionManagerTest {
 
     @Test
     fun `several imports show up as processing notes before the first one finishes`() = runTest {
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         val first = AudioImportSource(handle = "/cache/imports/a", displayName = "First.m4a")
         val second = AudioImportSource(handle = "/cache/imports/b", displayName = "Second.m4a")
         coEvery { createImportedNote("First", "note-1.pcm.enc", any()) } returns 9L
@@ -451,7 +456,7 @@ class RecordingSessionManagerTest {
 
     @Test
     fun `rejected import removes the placeholder note and reports why`() = runTest {
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         val source = AudioImportSource(handle = "/cache/imports/y", displayName = "movie.mkv")
         coEvery { createImportedNote("movie", "note-1.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.SUMMARY)) } returns 4L
         coEvery { audioDecoder.decode(source, any(), any()) } throws AudioImportException.Unsupported()
@@ -475,7 +480,7 @@ class RecordingSessionManagerTest {
     @Test
     fun `discard deletes the note and its audio`() = runTest {
         val liveChunks = Channel<AudioChunk>()
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         every { recorder.recordStream(pcmSink = any()) } returns liveChunks.consumeAsFlow()
         justRun { recorder.resetVad() }
         justRun { recorder.stop() }
@@ -501,7 +506,7 @@ class RecordingSessionManagerTest {
 
     @Test
     fun `silent recording marks the note as failed`() = runTest {
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         every { recorder.recordStream(pcmSink = any()) } returns flowOf(chunk(1))
         justRun { recorder.resetVad() }
         coEvery { speechToText.transcribe(any()) } returns sttResult("   ")
@@ -523,9 +528,50 @@ class RecordingSessionManagerTest {
     }
 
     @Test
+    fun `recording shorter than a second is discarded without a note`() = runTest {
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 600L))
+        every { recorder.recordStream(pcmSink = any()) } returns flowOf(chunk(1))
+        justRun { recorder.resetVad() }
+        justRun { audioStore.delete("note-1.pcm.enc") }
+        coEvery { speechToText.transcribe(any()) } returns sttResult("hi")
+        coEvery { createRecordingNote("note-1.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.SUMMARY), null) } returns 5L
+
+        val manager = manager()
+        manager.start(folderId = null)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(RecordingSession(), manager.session.value)
+        verify { audioStore.delete("note-1.pcm.enc") }
+        coVerify { discardNote(5L) }
+        coVerify(exactly = 0) { markNoteRecorded(any(), any(), any()) }
+        coroutineContext.cancelChildren()
+    }
+
+    @Test
+    fun `capture that fails before any audio leaves no note behind`() = runTest {
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.recordStream(pcmSink = any()) } returns flow { throw IllegalStateException("Microphone unavailable") }
+        justRun { recorder.resetVad() }
+        justRun { audioStore.delete("note-1.pcm.enc") }
+        coEvery { createRecordingNote(any(), any(), any()) } returns 5L
+
+        val manager = manager()
+        manager.start(folderId = null)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(SessionPhase.FAILED, manager.session.value.phase)
+        assertEquals("Microphone unavailable", manager.session.value.errorMessage)
+        verify { audioStore.delete("note-1.pcm.enc") }
+        coVerify { discardNote(5L) }
+        coVerify(exactly = 0) { failNote(any()) }
+        coVerify(exactly = 0) { markNoteRecorded(any(), any(), any()) }
+        coroutineContext.cancelChildren()
+    }
+
+    @Test
     fun `failure while the app is in the background parks the note instead of failing it`() = runTest {
         isInForeground.value = false
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         every { recorder.recordStream(pcmSink = any()) } returns flowOf(chunk(1))
         justRun { recorder.resetVad() }
         coEvery { speechToText.transcribe(any()) } returns sttResult("   ")
@@ -549,7 +595,7 @@ class RecordingSessionManagerTest {
 
     @Test
     fun `chunk without speech never reaches the transcriber`() = runTest {
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         every { recorder.recordStream(pcmSink = any()) } returns
             flowOf(chunk(1), chunk(2, speechMs = 0L))
         justRun { recorder.resetVad() }
@@ -586,7 +632,7 @@ class RecordingSessionManagerTest {
 
     @Test
     fun `structuring failure completes the note with the transcript only`() = runTest {
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         every { recorder.recordStream(pcmSink = any()) } returns flowOf(chunk(1))
         justRun { recorder.resetVad() }
         coEvery { speechToText.transcribe(any()) } returns
@@ -623,7 +669,7 @@ class RecordingSessionManagerTest {
 
     @Test
     fun `truncated stored audio keeps the readable part on retry`() = runTest {
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         coEvery { markNoteProcessing(7L) } returns storedNote(7L)
         every { audioStore.sizeOf("note-7.pcm.enc") } returns 200_000L
         stubBackupRead(100_000)
@@ -660,7 +706,7 @@ class RecordingSessionManagerTest {
 
     @Test
     fun `retry continues from the checkpoint and keeps the transcribed part`() = runTest {
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         val windowBytes = (29_000L * 32).toInt()
         coEvery { markNoteProcessing(7L) } returns storedNote(7L).copy(transcript = "first window")
         coEvery { getTranscriptionCheckpoint(7L) } returns TranscriptionCheckpoint(7L, windowBytes.toLong(), 150)
@@ -700,7 +746,7 @@ class RecordingSessionManagerTest {
 
     @Test
     fun `every transcribed window is checkpointed with its byte offset`() = runTest {
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         val windowBytes = (29_000L * 32).toInt()
         coEvery { markNoteProcessing(7L) } returns storedNote(7L)
         every { audioStore.sizeOf("note-7.pcm.enc") } returns (windowBytes * 2).toLong()
@@ -725,7 +771,7 @@ class RecordingSessionManagerTest {
         val event = CalendarEventSuggestion("Call Anna", 1_000L, 2_000L, false, "", "")
         coEvery { getNote(7L) } returns readyNote
         coEvery { markNoteProcessing(7L) } returns storedNote(7L)
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         every { audioStore.sizeOf("note-7.pcm.enc") } returns 32_000L
         stubBackupRead(32_000)
         coEvery { speechToText.transcribe(any()) } returns sttResult("Call Anna on Monday")
@@ -751,7 +797,7 @@ class RecordingSessionManagerTest {
 
     @Test
     fun `on-demand suggestions skip locked and unfinished notes`() = runTest {
-        every { recorder.vad } returns MutableStateFlow(VadSnapshot())
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
         coEvery { getNote(8L) } returns storedNote(8L).copy(status = NoteStatus.READY)
         coEvery { isCalendarSuggestionsAvailable() } returns false
         coEvery { getNote(9L) } returns storedNote(9L)

@@ -3,10 +3,10 @@ package com.dmytrosamoilov.offhand.feature.settings.presentation
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
-import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import com.dmytrosamoilov.offhand.core.data.domain.requiredProFeature
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
@@ -48,9 +48,11 @@ class NoteStylesViewModel(
         }
     }
 
+    // Summary is free; every other default goes through the paywall.
     fun onStyleSelected(style: NoteStyleRef) {
         launchSafely(showLoading = false) {
-            if (style is NoteStyleRef.Custom && !proUpgradeGate.requirePro(ProFeature.CUSTOM_STYLES)) return@launchSafely
+            val feature = style.requiredProFeature()
+            if (feature != null && !proUpgradeGate.requirePro(feature)) return@launchSafely
             setNoteStyle(style)
             analyticsTracker.track(AnalyticsEvents.defaultStyleChanged(style))
         }

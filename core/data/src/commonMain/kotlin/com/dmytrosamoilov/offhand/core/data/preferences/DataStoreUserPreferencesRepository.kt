@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.data.domain.EarlyAdopterPro
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
@@ -49,6 +50,10 @@ internal class DataStoreUserPreferencesRepository(
                 proOverride = proOverride(preferences),
                 smartSuggestionsEnabled = preferences[KEY_SMART_SUGGESTIONS] ?: false,
                 notificationsPrompted = preferences[KEY_NOTIFICATIONS_PROMPTED] ?: false,
+                earlyAdopterPro = earlyAdopterPro(preferences),
+                isEarlyAdopterThanked = preferences[KEY_EARLY_ADOPTER_THANKED] ?: false,
+                freeImportsUsed = preferences[KEY_FREE_IMPORTS_USED] ?: 0,
+                modelDownloadProgress = preferences[KEY_MODEL_DOWNLOAD_PROGRESS],
             )
         }
 
@@ -95,6 +100,37 @@ internal class DataStoreUserPreferencesRepository(
         dataStore.edit { it[KEY_PRO_OVERRIDE] = override.name }
     }
 
+    override suspend fun setEarlyAdopterPro(decision: EarlyAdopterPro) {
+        dataStore.edit { it[KEY_EARLY_ADOPTER_PRO] = decision.name }
+    }
+
+    override suspend fun setEarlyAdopterThanked() {
+        dataStore.edit { it[KEY_EARLY_ADOPTER_THANKED] = true }
+    }
+
+    override suspend fun incrementFreeImportsUsed() {
+        dataStore.edit { preferences ->
+            preferences[KEY_FREE_IMPORTS_USED] = (preferences[KEY_FREE_IMPORTS_USED] ?: 0) + 1
+        }
+    }
+
+    override suspend fun refundFreeImport() {
+        dataStore.edit { preferences ->
+            preferences[KEY_FREE_IMPORTS_USED] = ((preferences[KEY_FREE_IMPORTS_USED] ?: 0) - 1).coerceAtLeast(0)
+        }
+    }
+
+    override suspend fun setModelDownloadProgress(percent: Int?) {
+        dataStore.edit { preferences ->
+            if (percent == null) preferences.remove(KEY_MODEL_DOWNLOAD_PROGRESS) else preferences[KEY_MODEL_DOWNLOAD_PROGRESS] = percent
+        }
+    }
+
+    private fun earlyAdopterPro(preferences: Preferences): EarlyAdopterPro {
+        val name = preferences[KEY_EARLY_ADOPTER_PRO] ?: return EarlyAdopterPro.UNDECIDED
+        return EarlyAdopterPro.entries.firstOrNull { it.name == name } ?: EarlyAdopterPro.UNDECIDED
+    }
+
     private fun proOverride(preferences: Preferences): ProOverride {
         if (!buildInfo.isDeveloperBuild) return ProOverride.STORE
         val name = preferences[KEY_PRO_OVERRIDE] ?: return ProOverride.STORE
@@ -124,5 +160,9 @@ internal class DataStoreUserPreferencesRepository(
         val KEY_PRO_OVERRIDE = stringPreferencesKey("debug_pro_override")
         val KEY_NOTIFICATIONS_PROMPTED = booleanPreferencesKey("notifications_prompted")
         val KEY_SMART_SUGGESTIONS = booleanPreferencesKey("smart_suggestions_enabled")
+        val KEY_EARLY_ADOPTER_PRO = stringPreferencesKey("early_adopter_pro")
+        val KEY_EARLY_ADOPTER_THANKED = booleanPreferencesKey("early_adopter_thanked")
+        val KEY_FREE_IMPORTS_USED = intPreferencesKey("free_imports_used")
+        val KEY_MODEL_DOWNLOAD_PROGRESS = intPreferencesKey("model_download_progress")
     }
 }

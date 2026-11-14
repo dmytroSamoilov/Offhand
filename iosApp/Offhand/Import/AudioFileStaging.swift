@@ -1,5 +1,6 @@
 import Foundation
 import OffhandShared
+import UniformTypeIdentifiers
 
 // A picked or shared file is only readable while its grant lasts, while decoding
 // runs later on the session's scope, so it is copied into tmp first; the
@@ -16,6 +17,12 @@ enum AudioFileStaging {
         if url.pathComponents.contains("Inbox") {
             try? FileManager.default.removeItem(at: url)
         }
-        return AudioImportSource(handle: copy.path, displayName: url.lastPathComponent)
+        return AudioImportSource(handle: copy.path, displayName: url.lastPathComponent, kind: kind(of: url))
+    }
+
+    // A video is imported for its audio track and goes in on its own.
+    private static func kind(of url: URL) -> AudioImportKind {
+        let type = UTType(filenameExtension: url.pathExtension)
+        return type?.conforms(to: .movie) == true ? .video : .audio
     }
 }

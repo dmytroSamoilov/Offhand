@@ -13,6 +13,8 @@ import com.dmytrosamoilov.offhand.core.common.NetworkMonitor
 import com.dmytrosamoilov.offhand.core.data.domain.CalendarEventSuggestion
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
+import com.dmytrosamoilov.offhand.core.data.domain.Folder
+import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.core.data.domain.SuggestedEvent
@@ -30,6 +32,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCalendarSuggest
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsFolderStylesAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsUnlimitedFoldersAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
@@ -97,6 +100,9 @@ class NotesViewModelTest {
     private val setFolderStyle: SetFolderStyleUseCase = mockk(relaxed = true)
     private val reorderFolders: ReorderFoldersUseCase = mockk(relaxed = true)
     private val isFolderStylesAvailable: IsFolderStylesAvailableUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
+    private val isUnlimitedFoldersAvailable: IsUnlimitedFoldersAvailableUseCase = mockk {
         every { this@mockk.invoke() } returns flowOf(true)
     }
     private val observeCustomNoteStyles: ObserveCustomNoteStylesUseCase = mockk {
@@ -195,6 +201,7 @@ class NotesViewModelTest {
         setFolderStyle = setFolderStyle,
         reorderFolders = reorderFolders,
         isFolderStylesAvailable = isFolderStylesAvailable,
+        isUnlimitedFoldersAvailable = isUnlimitedFoldersAvailable,
         observeDeveloperOptions = observeDeveloperOptions,
         observeCustomNoteStyles = observeCustomNoteStyles,
         isCustomNoteStylesAvailable = isCustomNoteStylesAvailable,
@@ -222,6 +229,25 @@ class NotesViewModelTest {
         buildInfo = BuildInfo(isDeveloperBuild = true),
         analyticsTracker = mockk(relaxed = true),
     )
+
+    @Test
+    fun `the third folder opens the paywall while free and the editor once it is passed`() = runTest(dispatcher) {
+        every { observeFolders() } returns flowOf(listOf(Folder(1, "Work", 0), Folder(2, "Home", 0)))
+        every { isUnlimitedFoldersAvailable() } returns flowOf(false)
+        coEvery { gate.requirePro(ProFeature.FOLDERS) } returns false
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isFolderLimitReached)
+        viewModel.onNewFolderRequested()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertNull(viewModel.uiState.value.folderEditor)
+
+        coEvery { gate.requirePro(ProFeature.FOLDERS) } returns true
+        viewModel.onNewFolderRequested()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(FolderEditorUi(folderId = null, name = ""), viewModel.uiState.value.folderEditor)
+    }
 
     @Test
     fun `notes map to cards with markdown-free preview`() = runTest(dispatcher) {

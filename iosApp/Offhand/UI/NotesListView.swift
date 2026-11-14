@@ -26,15 +26,17 @@ struct NotesListView: View {
         moveToFolder: nil,
         folderStylePicker: nil,
         isFolderStylesUnlocked: false,
+        isFolderLimitReached: false,
         customStyles: [],
         importMessage: nil,
         smartSuggestions: nil,
         isDocumentExportUnlocked: false,
-        isCustomStylesUnlocked: false,
+        isProStylesUnlocked: false,
         pendingCalendarEvent: nil,
         isRetranscribeAvailable: false
     )
     @State private var recordSheetRequest: RecordSheetRequest?
+    @ObservedObject private var shortcuts = ShortcutRequests.shared
     @State private var recordedNoteId: Int64?
     @State private var searchQuery = ""
     @State private var newStyleFolderId: Int64?
@@ -43,6 +45,10 @@ struct NotesListView: View {
 
     var body: some View {
         layout
+        .onChange(of: shortcuts.recordSheetRequestId) {
+            guard recordSheetRequest == nil else { return }
+            recordSheetRequest = RecordSheetRequest(folderId: state.selectedFolderId?.int64Value)
+        }
         .sheet(item: $recordSheetRequest, onDismiss: openRecordedNote) { request in
             RecordSheetView(autoStart: true, folderId: request.folderId) { recordedNoteId = $0 }
         }
@@ -161,6 +167,7 @@ struct NotesListView: View {
                     folders: state.folders,
                     selectedFolderId: state.selectedFolderId?.int64Value,
                     isFolderStylesUnlocked: state.isFolderStylesUnlocked,
+                    isFolderLimitReached: state.isFolderLimitReached,
                     onSelect: { viewModel.onFolderSelected(folderId: $0.map { KotlinLong(value: $0) }) },
                     onNew: { viewModel.onNewFolderRequested() },
                     onRename: { viewModel.onRenameFolderRequested(folderId: $0) },
@@ -362,6 +369,7 @@ private struct FolderChips: View {
     let folders: [FolderUi]
     let selectedFolderId: Int64?
     let isFolderStylesUnlocked: Bool
+    let isFolderLimitReached: Bool
     let onSelect: (Int64?) -> Void
     let onNew: () -> Void
     let onRename: (Int64) -> Void
@@ -388,7 +396,10 @@ private struct FolderChips: View {
                     }
                 }
                 Button(action: onNew) {
-                    Label(String(localized: "New folder"), systemImage: "plus")
+                    HStack(spacing: 6) {
+                        Label(String(localized: "New folder"), systemImage: "plus")
+                        if isFolderLimitReached { ProBadge() }
+                    }
                         .font(.subheadline.weight(.medium))
                         .padding(.horizontal, 14)
                         .frame(height: 32)
@@ -458,7 +469,7 @@ private struct FolderStyleSheet: View {
             NoteStyleList(
                 current: picker.style,
                 customStyles: state.customStyles.map { NoteStyleChoice(id: $0.id, name: $0.name, details: $0.description_) },
-                isCustomStylesUnlocked: state.isFolderStylesUnlocked,
+                isProStylesUnlocked: state.isFolderStylesUnlocked,
                 footer: String(localized: "New recordings in this folder use it, and notes moved here are rewritten in it."),
                 onSelect: { viewModel.onFolderStyleSelected(style: $0) },
                 onCreateStyle: onCreateStyle,

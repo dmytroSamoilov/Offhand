@@ -27,7 +27,6 @@ val smokeFakesModule = module {
 // mid-suite for the Maestro flows, and the store's prompt covers the screen.
 private val neverPromptForReview = InAppReviewRules(
     minSavedRecordings = Int.MAX_VALUE,
-    minInstallAgeMs = Long.MAX_VALUE,
     burstWindowMs = 0L,
     attemptGapMs = 0L,
     cooldownMs = 0L,

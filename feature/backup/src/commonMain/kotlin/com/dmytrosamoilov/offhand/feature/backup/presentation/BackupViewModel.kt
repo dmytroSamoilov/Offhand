@@ -4,10 +4,13 @@ import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
+import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupException
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupFile
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupFileNames
 import com.dmytrosamoilov.offhand.feature.backup.domain.usecase.CreateBackupUseCase
+import com.dmytrosamoilov.offhand.feature.backup.domain.usecase.IsBackupAudioAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.backup.domain.usecase.RestoreBackupUseCase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +22,8 @@ import kotlinx.coroutines.launch
 class BackupViewModel(
     private val createBackup: CreateBackupUseCase,
     private val restoreBackup: RestoreBackupUseCase,
+    isBackupAudioAvailable: IsBackupAudioAvailableUseCase,
+    private val proUpgradeGate: ProUpgradeGate,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
@@ -27,8 +32,36 @@ class BackupViewModel(
 
     private var pendingRestore: BackupFile? = null
 
+    // Recordings in the file are Pro: the switch starts where the plan allows
+    // and switching it on while free opens the paywall.
+    init {
+        viewModelScope.launch {
+            isBackupAudioAvailable().collect { unlocked ->
+                mutableUiState.update { it.copy(isAudioUnlocked = unlocked, includeAudio = unlocked) }
+            }
+        }
+    }
+
     fun onIncludeAudioChanged(enabled: Boolean) {
-        mutableUiState.update { it.copy(includeAudio = enabled) }
+        if (!enabled || uiState.value.isAudioUnlocked) {
+            mutableUiState.update { it.copy(includeAudio = enabled) }
+            return
+        }
+        launchSafely(showLoading = false) {
+            val unlocked = withBackupSheetClosed { proUpgradeGate.requirePro(ProFeature.BACKUP_AUDIO) }
+            mutableUiState.update { it.copy(includeAudio = unlocked) }
+        }
+    }
+
+    // The options sheet would cover the paywall (a bottom sheet is its own
+    // window on Android, and a SwiftUI sheet cannot present a cover), so it
+    // steps aside and comes back with its fields intact.
+    private suspend fun withBackupSheetClosed(block: suspend () -> Boolean): Boolean {
+        val step = uiState.value.backupStep
+        mutableUiState.update { it.copy(backupStep = null) }
+        val result = block()
+        mutableUiState.update { it.copy(backupStep = step) }
+        return result
     }
 
     fun onIncludeStylesChanged(enabled: Boolean) {

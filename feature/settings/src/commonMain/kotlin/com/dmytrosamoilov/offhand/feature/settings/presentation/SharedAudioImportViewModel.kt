@@ -5,7 +5,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardStagedAudioUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
-import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveImportAllowanceUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,13 +21,14 @@ data class SharedAudioImportUiState(
         get() = pendingSources.isNotEmpty()
 }
 
-// Audio handed over by another app: a Pro user's files go straight into the
-// pipeline, a free user is asked first, because the share sheet gave no hint
-// that this is a Pro feature, and only "Upgrade" leads to the paywall.
+// Audio handed over by another app: files the plan covers (Pro, or one file
+// while a free import is left) go straight into the pipeline, otherwise the
+// user is asked first, because the share sheet gave no hint that this is a
+// Pro feature, and only "Upgrade" leads to the paywall.
 class SharedAudioImportViewModel(
     private val importAudio: ImportAudioUseCase,
     private val discardStagedAudio: DiscardStagedAudioUseCase,
-    private val isAudioImportAvailable: IsAudioImportAvailableUseCase,
+    private val observeImportAllowance: ObserveImportAllowanceUseCase,
 ) : BaseViewModel() {
 
     private val mutableUiState = MutableStateFlow(SharedAudioImportUiState())
@@ -36,7 +37,7 @@ class SharedAudioImportViewModel(
     fun onSharedAudioReceived(sources: List<AudioImportSource>, unreadableCount: Int) {
         if (sources.isEmpty() && unreadableCount == 0) return
         launchSafely(showLoading = false) {
-            if (sources.isEmpty() || isAudioImportAvailable().first()) {
+            if (sources.isEmpty() || observeImportAllowance().first().covers(sources.size)) {
                 start(sources, unreadableCount)
             } else {
                 mutableUiState.update {

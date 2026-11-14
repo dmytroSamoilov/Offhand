@@ -3,7 +3,7 @@ import Foundation
 import OffhandShared
 
 final class MicAudioSource: NSObject, IosAudioSource {
-    private let audioEngine = AVAudioEngine()
+    private var audioEngine = AVAudioEngine()
     private var pendingSamples: [Int16] = []
     private let frameSamples = 800
     private var converter: AVAudioConverter?
@@ -29,8 +29,10 @@ final class MicAudioSource: NSObject, IosAudioSource {
         .allowBluetoothHFP,
     ]
 
-    private static let restartAttempts = 3
-    private static let restartRetryDelay: TimeInterval = 0.15
+    // A Bluetooth headset that just dropped off keeps the input unusable for
+    // a second or two while the system tears the route down.
+    private static let restartAttempts = 10
+    private static let restartRetryDelay: TimeInterval = 0.2
 
     func hasPermission() -> Bool {
         AVAudioApplication.shared.recordPermission == .granted
@@ -69,20 +71,17 @@ final class MicAudioSource: NSObject, IosAudioSource {
         inputNameSink = onInputChanged
         failureSink = onFailure
         pendingSamples.removeAll()
-        do {
-            try activateSession()
-        } catch {
-            clearSinks()
-            return false
-        }
-        guard installTap(), startEngine() else {
-            deactivateSession()
-            clearSinks()
-            return false
-        }
         isCapturing = true
         observeSessionEvents()
-        publishInputName()
+        // Hitting record right after a headset disconnected can land while the
+        // old input is still going away: the session or the engine refuses for
+        // a moment, so the open is retried like a route change instead of
+        // failing the recording outright.
+        if reopenCapture() {
+            publishInputName()
+        } else {
+            restartCapture(failureMessage: startFailureMessage)
+        }
         return true
     }
 
@@ -155,9 +154,15 @@ final class MicAudioSource: NSObject, IosAudioSource {
             forName: AVAudioSession.routeChangeNotification,
             object: session,
             queue: .main
-        ) { [weak self] _ in
-            self?.handleRouteChange()
+        ) { [weak self] notification in
+            self?.handleRouteChange(notification)
         }
+        observeConfigurationChanges()
+    }
+
+    private func observeConfigurationChanges() {
+        let center = NotificationCenter.default
+        configurationObserver.map(center.removeObserver)
         configurationObserver = center.addObserver(
             forName: .AVAudioEngineConfigurationChange,
             object: audioEngine,
@@ -196,10 +201,14 @@ final class MicAudioSource: NSObject, IosAudioSource {
         }
     }
 
-    private func handleRouteChange() {
+    private func handleRouteChange(_ notification: Notification) {
         guard isCapturing, !isRestarting else { return }
         publishInputName()
-        guard !audioEngine.isRunning else { return }
+        // When the input that was feeding the tap disappears, the engine can keep
+        // reporting itself as running while no buffers arrive any more, so the
+        // capture is reopened on the input that replaced it.
+        let inputGone = notification.routeChangeReason == .oldDeviceUnavailable
+        guard inputGone || !audioEngine.isRunning else { return }
         restartCapture(failureMessage: routeFailureMessage)
     }
 
@@ -212,6 +221,10 @@ final class MicAudioSource: NSObject, IosAudioSource {
         String(localized: "Recording stopped because the audio input changed.")
     }
 
+    private var startFailureMessage: String {
+        String(localized: "Recording could not start. Try again in a moment.")
+    }
+
     private func restartCapture(
         failureMessage: String,
         attemptsRemaining: Int = MicAudioSource.restartAttempts
@@ -220,6 +233,7 @@ final class MicAudioSource: NSObject, IosAudioSource {
         isRestarting = true
         audioEngine.inputNode.removeTap(onBus: 0)
         audioEngine.stop()
+        deactivateSession()
         if reopenCapture() {
             isRestarting = false
             publishInputName()
@@ -246,7 +260,21 @@ final class MicAudioSource: NSObject, IosAudioSource {
         } catch {
             return false
         }
+        replaceEngine()
         return installTap() && startEngine()
+    }
+
+    // The input node keeps the hardware format it saw when it was first used.
+    // After a headset leaves, the old engine still asks for the headset's
+    // 44.1 kHz on the 48 kHz built-in microphone and fails to start with
+    // kAudioUnitErr_FormatNotSupported on every attempt until the process
+    // restarts; a fresh engine reads the current format.
+    private func replaceEngine() {
+        audioEngine.inputNode.removeTap(onBus: 0)
+        audioEngine.stop()
+        audioEngine = AVAudioEngine()
+        converter = nil
+        if isCapturing { observeConfigurationChanges() }
     }
 
     private func publishInputName() {
@@ -315,5 +343,12 @@ final class MicAudioSource: NSObject, IosAudioSource {
             }
             onFrame(kotlinFrame)
         }
+    }
+}
+
+private extension Notification {
+    var routeChangeReason: AVAudioSession.RouteChangeReason? {
+        guard let raw = userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt else { return nil }
+        return AVAudioSession.RouteChangeReason(rawValue: raw)
     }
 }

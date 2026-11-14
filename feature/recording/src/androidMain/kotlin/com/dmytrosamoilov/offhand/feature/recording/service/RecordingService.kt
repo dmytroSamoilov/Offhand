@@ -3,6 +3,7 @@ package com.dmytrosamoilov.offhand.feature.recording.service
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.ForegroundServiceStartNotAllowedException
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
@@ -10,6 +11,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import co.touchlab.kermit.Logger
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
@@ -112,6 +114,16 @@ class RecordingService : Service(), KoinComponent {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    // Android 15 gives mediaProcessing six hours a day; when they are used up
+    // the system calls this and expects the service to stop within seconds.
+    // The work itself lives on the session scope and carries on while the app
+    // is open; a note the system stops later resumes as Interrupted.
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        Logger.withTag(LOG_TAG).w { "Foreground service time limit reached for type $fgsType" }
+        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        stopSelf()
+    }
+
     override fun onDestroy() {
         serviceScope.cancel()
         super.onDestroy()
@@ -190,11 +202,19 @@ class RecordingService : Service(), KoinComponent {
             .setContentIntent(openNoteIntent(noteId))
             .build()
 
+    // ServiceCompat masks the type against a compile-time list of known
+    // types and strips FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING (API 35+),
+    // which crashes with "Starting FGS with type none" on targetSdk 35+.
+    // A refused start (the daily mediaProcessing budget is spent, or the app
+    // may not raise a foreground service from where it is) used to crash the
+    // app; the service bows out instead and the work goes on in-process.
     private fun startForeground(notification: Notification, type: Int) {
-        // ServiceCompat masks the type against a compile-time list of known
-        // types and strips FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING (API 35+),
-        // which crashes with "Starting FGS with type none" on targetSdk 35+.
-        startForeground(NOTIFICATION_ID, notification, type)
+        try {
+            startForeground(NOTIFICATION_ID, notification, type)
+        } catch (refused: ForegroundServiceStartNotAllowedException) {
+            Logger.withTag(LOG_TAG).w(refused) { "Foreground start refused for type $type" }
+            stopSelf()
+        }
     }
 
     private fun processingForegroundType(): Int =
@@ -324,6 +344,7 @@ class RecordingService : Service(), KoinComponent {
     )
 
     companion object {
+        private const val LOG_TAG = "RecordingService"
         const val EXTRA_NOTE_ID = "com.dmytrosamoilov.offhand.extra.NOTE_ID"
 
         private const val CHANNEL_ID = "recording"
