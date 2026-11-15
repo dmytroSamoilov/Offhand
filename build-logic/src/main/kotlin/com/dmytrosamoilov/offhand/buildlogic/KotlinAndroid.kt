@@ -6,10 +6,10 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getByType
-import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 
 internal const val COMPILE_SDK = 37
 internal const val MIN_SDK = 31
@@ -25,10 +25,8 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
     commonExtension.compileOptions.sourceCompatibility = JavaVersion.VERSION_11
     commonExtension.compileOptions.targetCompatibility = JavaVersion.VERSION_11
 
-    tasks.withType<KotlinCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(JVM_TARGET)
-        }
+    extensions.configure<KotlinAndroidProjectExtension> {
+        compilerOptions.jvmTarget.set(JVM_TARGET)
     }
 }
 
