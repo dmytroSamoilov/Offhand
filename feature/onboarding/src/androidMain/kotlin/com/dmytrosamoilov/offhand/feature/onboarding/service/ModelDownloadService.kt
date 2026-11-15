@@ -75,8 +75,7 @@ class ModelDownloadService : Service(), KoinComponent {
         observeProgress()
         downloadJob = serviceScope.launch {
             try {
-                speechToText.prepare()
-                speechToText.release()
+                speechToText.download()
                 modelManager.ensureModelAvailable()
                 notifyFinished(isSuccess = true)
             } catch (cancellation: CancellationException) {

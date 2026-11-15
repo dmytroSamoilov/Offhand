@@ -157,7 +157,7 @@ class IosModelDownloadController(
     override fun start() {
         if (run?.isActive == true) return
         run = scope.launch {
-            runCatching { speechToText.prepare() }
+            runCatching { speechToText.download() }
             runCatching { modelManager.ensureModelAvailable() }
         }
     }

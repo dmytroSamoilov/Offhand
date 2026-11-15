@@ -5,6 +5,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.AiBackend
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackendException
 import com.dmytrosamoilov.offhand.core.ai.api.AiResult
 import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
+import com.dmytrosamoilov.offhand.core.ai.api.SpeechModelState
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
 import com.dmytrosamoilov.offhand.core.ai.api.TranscriptionResult
 import com.dmytrosamoilov.offhand.core.audio.AudioChunk
@@ -85,7 +86,9 @@ class RecordingSessionManagerTest {
             if (remaining <= 0) -1 else minOf(requested, remaining).also { delivered += it }
         }
     }
+    private val speechModelState = MutableStateFlow<SpeechModelState>(SpeechModelState.Downloaded)
     private val speechToText: SpeechToText = mockk {
+        every { downloadState } returns speechModelState
         coJustRun { prepare() }
         justRun { release() }
     }
@@ -382,6 +385,114 @@ class RecordingSessionManagerTest {
             )
         }
         verify { speechToText.release() }
+    }
+
+    @Test
+    fun `recording made without the speech model waits for the ai core untranscribed`() = runTest {
+        speechModelState.value = SpeechModelState.NotDownloaded
+        coEvery { isAiCoreDownloaded() } returns false
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
+        every { recorder.recordStream(pcmSink = any()) } returns flowOf(chunk(1), chunk(2))
+        justRun { recorder.resetVad() }
+        coEvery { createRecordingNote(any(), any(), any()) } returns 11L
+        coEvery { markNoteRecorded(11L, any(), any()) } returns storedNote(11L)
+        coEvery { markNoteProcessing(11L) } returns storedNote(11L)
+
+        val manager = manager()
+        manager.start(folderId = null)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(SessionPhase.IDLE, manager.session.value.phase)
+        assertTrue(manager.processingNoteIds.value.isEmpty())
+        coVerify { markNoteRecorded(11L, 5_000L, "note-1.pcm.enc") }
+        coVerify(exactly = 0) { speechToText.prepare() }
+        coVerify(exactly = 0) { speechToText.transcribe(any()) }
+        verify(exactly = 0) { speechToText.release() }
+        coVerify(exactly = 0) { saveTranscriptionCheckpoint(any()) }
+        coVerify(exactly = 0) { failNote(any()) }
+        coVerify(exactly = 0) { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `recording made without the speech model is transcribed from the stored audio when the ai core is there at save`() = runTest {
+        speechModelState.value = SpeechModelState.NotDownloaded
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
+        every { recorder.recordStream(pcmSink = any()) } returns flowOf(chunk(1), chunk(2))
+        justRun { recorder.resetVad() }
+        coEvery { speechToText.transcribe(any()) } returns sttResult("whole recording")
+        coEvery { createRecordingNote(any(), any(), any()) } returns 12L
+        coEvery { markNoteRecorded(12L, any(), any()) } returns storedNote(12L)
+        coEvery { markNoteProcessing(12L) } returns storedNote(12L)
+        every { audioStore.sizeOf(any()) } returns 64_000L
+        stubBackupRead(64_000)
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(BuiltInNoteStyles.spec(NotePreset.SUMMARY)), any()) } returns AiResult(
+            text = """{"title": "Whole notes", "overview": "- whole content"}""",
+            processingTimeMs = 100,
+            inputTokens = 5,
+            outputTokens = 5,
+            hardwareBackend = HardwareBackend.CPU,
+        )
+        stubPolish("""{"title": "Whole notes", "overview": "- whole content"}""")
+        coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
+
+        val manager = manager()
+        manager.start(folderId = null)
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(manager.processingNoteIds.value.isEmpty())
+        coVerify(exactly = 1) { speechToText.transcribe(any()) }
+        coVerify {
+            completeNote(
+                noteId = 12L,
+                title = "Whole notes",
+                body = "- whole content",
+                transcript = "whole recording",
+                transcriptionTimeMs = 200,
+                structuringTimeMs = 100,
+                hardwareBackend = "CPU",
+                style = NoteStyleRef.BuiltIn(NotePreset.SUMMARY),
+            )
+        }
+    }
+
+    @Test
+    fun `retry while the ai core is missing parks the note instead of transcribing`() = runTest {
+        coEvery { isAiCoreDownloaded() } returns false
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
+        coEvery { markNoteProcessing(9L) } returns storedNote(9L)
+
+        val manager = manager()
+        manager.retryNote(9L, "note-9.pcm.enc")
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(manager.processingNoteIds.value.isEmpty())
+        coVerify { markNoteProcessing(9L) }
+        coVerify(exactly = 0) { speechToText.prepare() }
+        coVerify(exactly = 0) { speechToText.transcribe(any()) }
+        coVerify(exactly = 0) { failNote(any()) }
+    }
+
+    @Test
+    fun `import while the ai core is missing keeps the decoded audio and waits`() = runTest {
+        coEvery { isAiCoreDownloaded() } returns false
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
+        val source = AudioImportSource(handle = "/cache/imports/x", displayName = "Client call.m4a")
+        coEvery { createImportedNote("Client call", "note-1.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.SUMMARY)) } returns 9L
+        coEvery { audioDecoder.decode(source, any(), any()) } answers {
+            secondArg<(ByteArray, Int) -> Unit>().invoke(ByteArray(32_000), 32_000)
+            DecodedAudio(durationMs = 1_000)
+        }
+        coEvery { markNoteRecorded(9L, 1_000L, "note-1.pcm.enc") } returns storedNote(9L)
+
+        val manager = manager()
+        manager.importAudio(source)
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(manager.processingNoteIds.value.isEmpty())
+        coVerify { markNoteRecorded(9L, 1_000L, "note-1.pcm.enc") }
+        coVerify(exactly = 0) { speechToText.prepare() }
+        coVerify(exactly = 0) { failNote(any()) }
+        verify(exactly = 0) { audioStore.delete(any()) }
     }
 
     @Test

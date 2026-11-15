@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.recording.domain
 
 import co.touchlab.kermit.Logger
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackendException
+import com.dmytrosamoilov.offhand.core.ai.api.SpeechModelState
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
 import com.dmytrosamoilov.offhand.core.ai.api.TranscriptionResult
 import com.dmytrosamoilov.offhand.core.audio.AudioChunk
@@ -123,6 +124,11 @@ class RecordingSessionManager(
 
     private var isDiscardRequested = false
 
+    // Decided once per recording: without the speech model on disk the session
+    // only captures audio, so it never starts or waits on a download, and the
+    // note is transcribed from the stored audio once the on-device AI is there.
+    private var isTranscribingLive = true
+
     private var sessionStyle: NoteStyleRef = NoteStyleRef.DEFAULT
 
     private var sessionFolderId: Long? = null
@@ -177,6 +183,11 @@ class RecordingSessionManager(
     fun retryNote(noteId: Long, audioFileName: String) {
         if (!claimProcessing(noteId)) return
         scope.launch {
+            if (!isAiCoreDownloaded()) {
+                markNoteProcessing(noteId)
+                parkUntilAiCoreArrives(noteId)
+                return@launch
+            }
             processingMutex.withLock {
                 val note = markNoteProcessing(noteId)
                 if (note == null) {
@@ -266,6 +277,10 @@ class RecordingSessionManager(
             return
         }
         markNoteRecorded(noteId, decoded.durationMs, fileName)
+        if (!isAiCoreDownloaded()) {
+            parkUntilAiCoreArrives(noteId)
+            return
+        }
         trackingForeground(noteId) {
             val stored = transcribeStoredAudio(noteId, fileName, ResumePoint.START) { fraction ->
                 updateProgress(noteId, IMPORT_DECODE_SHARE + fraction * (RETRY_WHISPER_SHARE - IMPORT_DECODE_SHARE))
@@ -355,6 +370,14 @@ class RecordingSessionManager(
     // interruption event), so the check and the claim are one atomic update.
     private fun claimProcessing(noteId: Long): Boolean =
         noteId !in mutableProcessingNoteIds.getAndUpdate { it + noteId }
+
+    // The note stays PROCESSING with its audio or transcript, which is what
+    // ResumeInterruptedNotesUseCase picks up when the download finishes.
+    private fun parkUntilAiCoreArrives(noteId: Long) {
+        Logger.withTag(LOG_TAG).w { "AI core not downloaded yet, note $noteId stays queued" }
+        mutableProcessingNoteIds.update { it - noteId }
+        mutableNoteProgress.update { it - noteId }
+    }
 
     // The checkpoint survives a failure on purpose: "Try again" then continues
     // where the transcription stopped instead of starting over.
@@ -480,17 +503,18 @@ class RecordingSessionManager(
 
     private suspend fun runSession() {
         sessionStyle = getNoteStyle(sessionFolderId)
+        isTranscribingLive = speechToText.downloadState.value is SpeechModelState.Downloaded
         openAudioBackup()
         mutableActiveRecordingNoteId.value = createSessionNote()
         val queue = Channel<AudioChunk>(Channel.UNLIMITED)
-        scope.launch { prepareTranscriber() }
+        if (isTranscribingLive) scope.launch { prepareTranscriber() }
         scope.launch { produceChunks(queue) }
         for (chunk in queue) {
-            if (!isDiscardRequested) {
+            if (isTranscribingLive && !isDiscardRequested) {
                 transcribeChunk(chunk)
             }
         }
-        speechToText.release()
+        if (isTranscribingLive) speechToText.release()
         when {
             isDiscardRequested -> finishDiscardedSession()
             mutableSession.value.phase == SessionPhase.FAILED -> salvageFailedSession()
@@ -528,12 +552,17 @@ class RecordingSessionManager(
                 markNoteRecorded(noteId, recorder.vad.value.totalElapsedMs, audioFileName) ?: return
                 startProcessing(noteId, chunkTranscripts, transcriptionTimeMs, sessionStyle)
             }
-            audioFileName != null -> {
-                markNoteRecorded(noteId, recorder.vad.value.totalElapsedMs, audioFileName)
-                failNote(noteId)
-            }
+            audioFileName != null -> salvageUntranscribedSession(noteId)
             else -> discardEmptyNote(noteId)
         }
+    }
+
+    // A session that never transcribed live has no transcript to judge the
+    // audio by, so it goes through the stored audio like a saved one.
+    private suspend fun salvageUntranscribedSession(noteId: Long) {
+        val fileName = audioFileName ?: return
+        markNoteRecorded(noteId, recorder.vad.value.totalElapsedMs, fileName)
+        if (isTranscribingLive) failNote(noteId) else retryNote(noteId, fileName)
     }
 
     private fun hasMinimumAudio(): Boolean =
@@ -658,7 +687,7 @@ class RecordingSessionManager(
         val chunkTranscripts = sortedTranscripts()
         val recordedTranscriptionMs = transcriptionTimeMs
         val style = sessionStyle
-        val storedAudio = audioFileName.takeIf { mutableSession.value.chunks.any { it.state == ChunkState.FAILED } }
+        val storedAudio = audioFileName.takeIf { needsStoredAudioTranscription() }
         analyticsTracker.track(AnalyticsEvents.noteRecorded(recorder.vad.value.totalElapsedMs, style))
         mutableSession.value = RecordingSession(noteId = noteId)
         if (storedAudio != null) {
@@ -667,6 +696,9 @@ class RecordingSessionManager(
             startProcessing(noteId, chunkTranscripts, recordedTranscriptionMs, style)
         }
     }
+
+    private fun needsStoredAudioTranscription(): Boolean =
+        !isTranscribingLive || mutableSession.value.chunks.any { it.state == ChunkState.FAILED }
 
     private suspend fun discardShortSession(noteId: Long?) {
         Logger.withTag(LOG_TAG).i { "Recording under ${RecordingLimits.MIN_DURATION_MS} ms discarded" }
@@ -685,8 +717,7 @@ class RecordingSessionManager(
         mutableProcessingNoteIds.update { it + noteId }
         scope.launch {
             if (!isAiCoreDownloaded()) {
-                Logger.withTag(LOG_TAG).w { "AI core not downloaded yet, note $noteId stays queued" }
-                mutableProcessingNoteIds.update { it - noteId }
+                parkUntilAiCoreArrives(noteId)
                 return@launch
             }
             processingMutex.withLock {
