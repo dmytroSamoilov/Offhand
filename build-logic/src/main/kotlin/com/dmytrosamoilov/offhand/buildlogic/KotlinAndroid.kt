@@ -13,19 +13,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 internal val Project.libs: VersionCatalog
     get() = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
-internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension<*, *, *, *, *, *>) {
-    commonExtension.apply {
-        compileSdk = 36
-
-        defaultConfig {
-            minSdk = 31
-        }
-
-        compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_11
-            targetCompatibility = JavaVersion.VERSION_11
-        }
-    }
+internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
+    commonExtension.compileSdk = 37
+    commonExtension.defaultConfig.minSdk = 31
+    commonExtension.compileOptions.sourceCompatibility = JavaVersion.VERSION_11
+    commonExtension.compileOptions.targetCompatibility = JavaVersion.VERSION_11
 
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {

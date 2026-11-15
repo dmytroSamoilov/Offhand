@@ -121,7 +121,6 @@ class ModelDownloader {
             }
             GenAiLog.logHttp("← ${response.code} ${response.message} (streaming body)")
             val body = response.body
-                ?: return DownloadProgress.Failed("Empty response body")
             val isResumed = response.code == HTTP_PARTIAL_CONTENT && resumeFrom > 0
             val startOffset = if (isResumed) resumeFrom else 0L
             val bytesTotal = (startOffset + body.contentLength()).coerceAtLeast(1L)
