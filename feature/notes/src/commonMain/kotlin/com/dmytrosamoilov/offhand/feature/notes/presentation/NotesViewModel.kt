@@ -201,6 +201,11 @@ class NotesViewModel(
                 mutableUiState.update { it.copy(modelPreparation = downloadState.toPreparationUi()) }
             }
         }
+        viewModelScope.launch {
+            aiCoreDownloadStatus.isMissing.collect { isMissing ->
+                mutableUiState.update { it.copy(isWaitingForAi = isMissing) }
+            }
+        }
     }
 
     fun onDownloadOnMobileDataClicked() {

@@ -230,7 +230,9 @@ struct NoteDetailView: View {
                     }
                 }
             }
-            KeepOpenHint()
+            if !state.isWaitingForAi {
+                KeepOpenHint()
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
@@ -256,7 +258,10 @@ struct NoteDetailView: View {
     }
 
     private var processingStage: String {
-        detail.transcript.isEmpty
+        if state.isWaitingForAi {
+            return String(localized: "Waiting for your on-device AI to finish downloading")
+        }
+        return detail.transcript.isEmpty
             ? String(localized: "Transcribing your recording")
             : String(localized: "Writing your summary")
     }

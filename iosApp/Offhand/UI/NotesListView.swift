@@ -18,6 +18,7 @@ struct NotesListView: View {
         isDeveloperMode: false,
         noteProgress: [:],
         modelPreparation: nil,
+        isWaitingForAi: false,
         searchQuery: "",
         folders: [],
         selectedFolderId: nil,
@@ -184,7 +185,11 @@ struct NotesListView: View {
                         Button {
                             viewModel.onNoteSelected(id: note.id)
                         } label: {
-                            NoteCardRow(note: note, progress: state.noteProgress[KotlinLong(value: note.id)]?.intValue)
+                            NoteCardRow(
+                                note: note,
+                                progress: state.noteProgress[KotlinLong(value: note.id)]?.intValue,
+                                isWaitingForAi: state.isWaitingForAi
+                            )
                         }
                         .buttonStyle(.plain)
                         .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
@@ -588,6 +593,7 @@ private struct ModelPreparationBanner: View {
 private struct NoteCardRow: View {
     let note: NoteCardUi
     let progress: Int?
+    let isWaitingForAi: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -638,6 +644,9 @@ private struct NoteCardRow: View {
     }
 
     private var progressText: String {
+        if isWaitingForAi {
+            return String(localized: "Waiting for your on-device AI to finish downloading")
+        }
         if let progress { return "\(progress)%" }
         return String(localized: "Preparing your note")
     }

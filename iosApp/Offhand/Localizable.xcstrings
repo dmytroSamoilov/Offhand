@@ -13385,6 +13385,46 @@
         }
       }
     },
+    "Waiting for your on-device AI to finish downloading" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wartet, bis deine KI auf dem Gerät heruntergeladen ist"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esperando a que termine de descargarse tu IA en el dispositivo"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपके ऑन-डिवाइस AI के डाउनलोड होने का इंतज़ार है"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aguardando o download da sua IA no dispositivo terminar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ждём, пока загрузится ИИ на устройстве"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чекаємо, доки завантажиться ШІ на пристрої"
+          }
+        }
+      }
+    },
     "WAV file" : {
       "localizations" : {
         "de" : {

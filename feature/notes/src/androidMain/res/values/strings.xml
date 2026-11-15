@@ -30,6 +30,9 @@
     <string name="notes_processing_preview">Transcribing and summarizing on your phone. You can play the recording already.</string>
     <string name="notes_processing_transcribing">Processing the transcript… It will appear here automatically.</string>
     <string name="notes_processing_structuring">Writing the summary… The transcript is already below.</string>
+    <string name="notes_processing_waiting_preview">Waiting for your on-device AI to finish downloading. You can play the recording already.</string>
+    <string name="notes_processing_waiting_transcribing">Your note will be written when your on-device AI finishes downloading. It will appear here automatically.</string>
+    <string name="notes_processing_waiting_structuring">Your summary will be written when your on-device AI finishes downloading. The transcript is already below.</string>
     <string name="notes_recording_fallback_title">Recording</string>
     <string name="notes_failed_description">We were unable to create a summary and transcript for this note.</string>
     <string name="notes_failed_summary_description">We were unable to create a summary for this note. The transcript is saved below.</string>

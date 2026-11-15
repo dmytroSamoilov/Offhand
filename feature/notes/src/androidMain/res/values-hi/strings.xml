@@ -26,6 +26,9 @@
     <string name="notes_processing_preview">आपके फ़ोन पर ट्रांसक्राइब और सारांश तैयार हो रहा है। आप रिकॉर्डिंग अभी चला सकते हैं।</string>
     <string name="notes_processing_transcribing">ट्रांसक्रिप्ट प्रोसेस हो रहा है… यह यहां अपने-आप दिखेगा।</string>
     <string name="notes_processing_structuring">सारांश लिखा जा रहा है… ट्रांसक्रिप्ट पहले से नीचे मौजूद है।</string>
+    <string name="notes_processing_waiting_preview">आपके ऑन-डिवाइस AI के डाउनलोड होने का इंतज़ार है। आप रिकॉर्डिंग अभी चला सकते हैं।</string>
+    <string name="notes_processing_waiting_transcribing">आपका ऑन-डिवाइस AI डाउनलोड होते ही आपका नोट लिखा जाएगा। यह यहां अपने-आप दिखेगा।</string>
+    <string name="notes_processing_waiting_structuring">आपका ऑन-डिवाइस AI डाउनलोड होते ही सारांश लिखा जाएगा। ट्रांसक्रिप्ट पहले से नीचे मौजूद है।</string>
     <string name="notes_recording_fallback_title">रिकॉर्डिंग</string>
     <string name="notes_failed_description">हम इस नोट के लिए सारांश और ट्रांसक्रिप्ट नहीं बना सके।</string>
     <string name="notes_failed_summary_description">हम इस नोट के लिए सारांश नहीं बना सके। ट्रांसक्रिप्ट नीचे सहेजा गया है।</string>

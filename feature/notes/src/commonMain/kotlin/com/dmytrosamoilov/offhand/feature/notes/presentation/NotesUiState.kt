@@ -16,6 +16,7 @@ data class NotesUiState(
     val isDeveloperMode: Boolean = false,
     val noteProgress: Map<Long, Int> = emptyMap(),
     val modelPreparation: ModelPreparationUi? = null,
+    val isWaitingForAi: Boolean = false,
     val searchQuery: String = "",
     val folders: List<FolderUi> = emptyList(),
     val selectedFolderId: Long? = null,

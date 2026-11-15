@@ -312,6 +312,7 @@ fun NotesScreen(
                         isFolderLimitReached = state.isFolderLimitReached,
                         customStyles = state.customStyles,
                         modelPreparation = state.modelPreparation,
+                        isWaitingForAi = state.isWaitingForAi,
                         onDownloadOnMobileData = viewModel::onDownloadOnMobileDataClicked,
                         onNoteClick = { id ->
                             focusManager.clearFocus()
@@ -713,6 +714,7 @@ private fun NotesListPane(
     isFolderLimitReached: Boolean,
     customStyles: List<NoteStyleOptionUi>,
     modelPreparation: ModelPreparationUi?,
+    isWaitingForAi: Boolean,
     onDownloadOnMobileData: () -> Unit,
     onNoteClick: (Long) -> Unit,
     onDeleteRequested: (Long) -> Unit,
@@ -808,7 +810,11 @@ private fun NotesListPane(
                                 onMoveRequested = { onMoveRequested(note.id) },
                                 modifier = Modifier.animateItem(),
                             ) {
-                                NoteCard(note = note, onClick = { onNoteClick(note.id) })
+                                NoteCard(
+                                    note = note,
+                                    isWaitingForAi = isWaitingForAi,
+                                    onClick = { onNoteClick(note.id) },
+                                )
                             }
                         }
                     }
@@ -1479,6 +1485,7 @@ private fun SwipeBackground(direction: SwipeToDismissBoxValue) {
 @Composable
 private fun NoteCard(
     note: NoteCardUi,
+    isWaitingForAi: Boolean,
     onClick: () -> Unit,
 ) {
     Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
@@ -1507,7 +1514,7 @@ private fun NoteCard(
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = note.cardPreview(),
+                text = note.cardPreview(isWaitingForAi),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
@@ -1602,8 +1609,12 @@ private fun NoteCardUi.cardTitle(): String = when (status) {
 }
 
 @Composable
-private fun NoteCardUi.cardPreview(): AnnotatedString = when (status) {
-    NoteStatusUi.PROCESSING -> AnnotatedString(stringResource(R.string.notes_processing_preview))
+private fun NoteCardUi.cardPreview(isWaitingForAi: Boolean): AnnotatedString = when (status) {
+    NoteStatusUi.PROCESSING -> AnnotatedString(
+        stringResource(
+            if (isWaitingForAi) R.string.notes_processing_waiting_preview else R.string.notes_processing_preview,
+        ),
+    )
     NoteStatusUi.FAILED -> AnnotatedString(stringResource(R.string.notes_failed_description))
     NoteStatusUi.INTERRUPTED -> AnnotatedString(stringResource(R.string.notes_interrupted_preview))
     NoteStatusUi.READY -> preview.highlighted(previewHighlights)
@@ -1641,6 +1652,7 @@ private fun NoteDetailPane(
             showMetrics = state.isDeveloperMode,
             isRetranscribeAvailable = state.isRetranscribeAvailable,
             progressPercent = state.noteProgress[selected.id],
+            isWaitingForAi = state.isWaitingForAi,
             onBack = viewModel::onDetailClosed,
             onEdit = viewModel::onEditStarted,
             onShareRequested = viewModel::onShareRequested,
@@ -1686,6 +1698,7 @@ private fun NoteDetail(
     showMetrics: Boolean,
     isRetranscribeAvailable: Boolean,
     progressPercent: Int?,
+    isWaitingForAi: Boolean,
     onBack: () -> Unit,
     onEdit: () -> Unit,
     onShareRequested: () -> Unit,
@@ -1724,6 +1737,7 @@ private fun NoteDetail(
             suggestionActions = suggestionActions,
             showMetrics = showMetrics,
             progressPercent = progressPercent,
+            isWaitingForAi = isWaitingForAi,
             onPlayPause = onPlayPause,
             onSeek = onSeek,
             onRetryTranscription = onRetryTranscription,
@@ -1919,6 +1933,7 @@ private fun NoteDetailContent(
     suggestionActions: SuggestionActions,
     showMetrics: Boolean,
     progressPercent: Int?,
+    isWaitingForAi: Boolean,
     onPlayPause: () -> Unit,
     onSeek: (Float) -> Unit,
     onRetryTranscription: () -> Unit,
@@ -1986,13 +2001,7 @@ private fun NoteDetailContent(
         ProcessingHaptics(noteId = note.id, status = note.status)
         when (note.status) {
             NoteStatusUi.PROCESSING -> DetailStatusCard(
-                text = stringResource(
-                    if (note.transcript.isBlank()) {
-                        R.string.notes_processing_transcribing
-                    } else {
-                        R.string.notes_processing_structuring
-                    },
-                ),
+                text = stringResource(note.processingText(isWaitingForAi)),
                 percent = progressPercent,
             )
             NoteStatusUi.FAILED -> FailedDetailCard(
@@ -2122,6 +2131,13 @@ private fun TrustBadge(icon: ImageVector, label: String) {
             Text(text = label, style = MaterialTheme.typography.labelMedium)
         }
     }
+}
+
+private fun NoteDetailUi.processingText(isWaitingForAi: Boolean): Int = when {
+    isWaitingForAi && transcript.isBlank() -> R.string.notes_processing_waiting_transcribing
+    isWaitingForAi -> R.string.notes_processing_waiting_structuring
+    transcript.isBlank() -> R.string.notes_processing_transcribing
+    else -> R.string.notes_processing_structuring
 }
 
 @Composable

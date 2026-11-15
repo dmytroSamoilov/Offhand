@@ -27,6 +27,9 @@
     <string name="notes_processing_preview">Transcrevendo e resumindo no seu celular. Você já pode ouvir a gravação.</string>
     <string name="notes_processing_transcribing">Processando a transcrição… Ela vai aparecer aqui automaticamente.</string>
     <string name="notes_processing_structuring">Escrevendo o resumo… A transcrição já está abaixo.</string>
+    <string name="notes_processing_waiting_preview">Aguardando o download da sua IA no dispositivo terminar. Você já pode ouvir a gravação.</string>
+    <string name="notes_processing_waiting_transcribing">Sua nota será escrita quando o download da sua IA no dispositivo terminar. Ela vai aparecer aqui automaticamente.</string>
+    <string name="notes_processing_waiting_structuring">O resumo será escrito quando o download da sua IA no dispositivo terminar. A transcrição já está abaixo.</string>
     <string name="notes_recording_fallback_title">Gravação</string>
     <string name="notes_failed_description">Não foi possível criar um resumo e uma transcrição para esta nota.</string>
     <string name="notes_failed_summary_description">Não foi possível criar um resumo para esta nota. A transcrição está salva abaixo.</string>

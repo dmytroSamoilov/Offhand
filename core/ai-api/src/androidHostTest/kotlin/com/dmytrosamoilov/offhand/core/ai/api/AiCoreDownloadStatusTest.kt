@@ -48,6 +48,24 @@ class AiCoreDownloadStatusTest {
     }
 
     @Test
+    fun `ai core counts as missing until both parts are on disk`() = runTest {
+        assertEquals(false, status.isMissing.first())
+
+        speechState.value = SpeechModelState.NotDownloaded
+        assertEquals(true, status.isMissing.first())
+
+        speechState.value = SpeechModelState.Downloaded
+        modelState.value = ModelState.Downloading(progress = 0.5f, bytesDownloaded = 1_500, bytesTotal = 3_000)
+        assertEquals(true, status.isMissing.first())
+
+        modelState.value = ModelState.NotDownloaded
+        assertEquals(true, status.isMissing.first())
+
+        modelState.value = ModelState.Ready
+        assertEquals(false, status.isMissing.first())
+    }
+
+    @Test
     fun `idle when nothing is downloading`() = runTest {
         assertEquals(AiCoreDownloadState.Idle, status.state.first())
     }

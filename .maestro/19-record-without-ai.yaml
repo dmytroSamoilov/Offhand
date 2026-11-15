@@ -79,11 +79,13 @@ appId: com.dmytrosamoilov.offhand.uitest
     visible: "00:(0[4-9]|[1-5][0-9])"
     timeout: 15000
 - tapOn: "Save note"
-# Saving opens the note: the transcript is there, the summary waits for the AI
+# Saving opens the note: the transcript is there, and the card says the summary
+# waits for the on-device AI instead of claiming it is being written
 - extendedWaitUntil:
     visible: "Team meeting about the quarterly budget."
     timeout: 15000
-- assertVisible: "Writing (the|your) summary.*"
+- assertVisible: "(Your summary will be written when|Waiting for) your on-device AI.*"
+- assertNotVisible: "Writing (the|your) summary.*"
 - stopApp
 - launchApp
 # The waiting note carries its placeholder title until it is finished
@@ -99,4 +101,5 @@ appId: com.dmytrosamoilov.offhand.uitest
     commands:
       - tapOn: "COUNT ATTEMPT"
 - assertVisible: "Team meeting about the quarterly budget."
+- assertNotVisible: "(Your summary will be written when|Waiting for) your on-device AI.*"
 - assertNotVisible: "Writing (the|your) summary.*"

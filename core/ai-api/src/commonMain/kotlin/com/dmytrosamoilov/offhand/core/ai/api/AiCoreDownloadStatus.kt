@@ -24,6 +24,17 @@ class AiCoreDownloadStatus(
             toDownloadState(modelState, speechState, canStart)
         }.distinctUntilChanged()
 
+    // True while a part of the on-device AI is not on the phone yet, whether a
+    // download is running, waiting or has not started: notes cannot be worked
+    // on until it is false.
+    val isMissing: Flow<Boolean> =
+        combine(modelManager.modelState, speechToText.downloadState) { modelState, speechState ->
+            modelState.isNotOnDisk() || speechState !is SpeechModelState.Downloaded
+        }.distinctUntilChanged()
+
+    private fun ModelState.isNotOnDisk(): Boolean =
+        this is ModelState.NotDownloaded || this is ModelState.Downloading
+
     private fun toDownloadState(
         modelState: ModelState,
         speechState: SpeechModelState,

@@ -26,6 +26,9 @@
     <string name="notes_processing_preview">Wird auf deinem Handy transkribiert und zusammengefasst. Du kannst die Aufnahme schon abspielen.</string>
     <string name="notes_processing_transcribing">Das Transkript wird verarbeitet… Es erscheint hier automatisch.</string>
     <string name="notes_processing_structuring">Die Zusammenfassung wird geschrieben… Das Transkript steht schon unten.</string>
+    <string name="notes_processing_waiting_preview">Wartet, bis deine KI auf dem Gerät heruntergeladen ist. Du kannst die Aufnahme schon abspielen.</string>
+    <string name="notes_processing_waiting_transcribing">Deine Notiz wird geschrieben, sobald deine KI auf dem Gerät heruntergeladen ist. Sie erscheint hier automatisch.</string>
+    <string name="notes_processing_waiting_structuring">Die Zusammenfassung wird geschrieben, sobald deine KI auf dem Gerät heruntergeladen ist. Das Transkript steht schon unten.</string>
     <string name="notes_recording_fallback_title">Aufnahme</string>
     <string name="notes_failed_description">Wir konnten für diese Notiz keine Zusammenfassung und kein Transkript erstellen.</string>
     <string name="notes_failed_summary_description">Wir konnten für diese Notiz keine Zusammenfassung erstellen. Das Transkript ist unten gespeichert.</string>

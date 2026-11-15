@@ -28,6 +28,9 @@
     <string name="notes_processing_preview">Расшифровываем и обобщаем на вашем телефоне. Запись уже можно прослушать.</string>
     <string name="notes_processing_transcribing">Идёт расшифровка… Она появится здесь автоматически.</string>
     <string name="notes_processing_structuring">Пишем резюме… Расшифровка уже ниже.</string>
+    <string name="notes_processing_waiting_preview">Ждём, пока загрузится ИИ на устройстве. Запись уже можно прослушать.</string>
+    <string name="notes_processing_waiting_transcribing">Заметка будет готова, когда загрузится ИИ на устройстве. Она появится здесь автоматически.</string>
+    <string name="notes_processing_waiting_structuring">Резюме будет написано, когда загрузится ИИ на устройстве. Расшифровка уже ниже.</string>
     <string name="notes_recording_fallback_title">Запись</string>
     <string name="notes_failed_description">Нам не удалось создать резюме и расшифровку для этой заметки.</string>
     <string name="notes_failed_summary_description">Нам не удалось создать резюме для этой заметки. Расшифровка сохранена ниже.</string>

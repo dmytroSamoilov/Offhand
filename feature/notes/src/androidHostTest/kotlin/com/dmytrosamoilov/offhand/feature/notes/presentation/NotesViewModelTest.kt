@@ -400,6 +400,21 @@ class NotesViewModelTest {
     }
 
     @Test
+    fun `notes wait for the ai while a part of it is not on the phone`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(false, viewModel.uiState.value.isWaitingForAi)
+
+        modelState.value = ModelState.NotDownloaded
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(true, viewModel.uiState.value.isWaitingForAi)
+
+        modelState.value = ModelState.Ready
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(false, viewModel.uiState.value.isWaitingForAi)
+    }
+
+    @Test
     fun `banner shows total progress across whisper and main model`() = runTest(dispatcher) {
         val viewModel = viewModel()
         dispatcher.scheduler.advanceUntilIdle()
