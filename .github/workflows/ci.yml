@@ -27,7 +27,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build, test and lint
-        run: ./gradlew assembleDebug testDebugUnitTest lintDebug :app:lintDevDebug
+        run: >-
+          ./gradlew assembleDebug
+          testAndroidHostTest testDebugUnitTest
+          lintAndroidMain lintDebug :app:lintDevDebug
 
   # Kotlin/Native has its own regex and stdlib quirks; running the shared tests
   # on the simulator target catches what the JVM run cannot.
