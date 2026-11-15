@@ -22,10 +22,10 @@ appId: com.dmytrosamoilov.offhand.uitest
           optional: true
       - scrollUntilVisible:
           element:
-            text: "import-sample.*"
+            text: "import-sample.m4a"
           direction: DOWN
       - tapOn:
-          text: "import-sample.*"
+          text: "import-sample.m4a"
       - extendedWaitUntil:
           visible: "Import started"
           timeout: 10000
