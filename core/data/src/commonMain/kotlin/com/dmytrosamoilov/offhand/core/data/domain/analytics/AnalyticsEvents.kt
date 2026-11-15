@@ -133,6 +133,8 @@ object AnalyticsEvents {
 
     fun modelDownloaded(durationMs: Long): AnalyticsEvent = event("model_downloaded", "duration_s" to seconds(durationMs))
 
+    fun modelDownloadedWhileAway(): AnalyticsEvent = event("model_downloaded")
+
     fun notesSearched(): AnalyticsEvent = event("notes_searched")
 
     fun reviewRequested(): AnalyticsEvent = event("review_requested")

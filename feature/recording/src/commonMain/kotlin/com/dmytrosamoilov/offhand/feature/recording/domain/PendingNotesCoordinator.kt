@@ -10,6 +10,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RememberModelDownloadProgressUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SettleRememberedModelDownloadUseCase
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.time.TimeMark
@@ -23,7 +24,9 @@ import kotlinx.coroutines.launch
 // picked up, and the download time is reported (measured from when this
 // process saw the download running, so a restart mid-download shortens it).
 // The percent reached is remembered across starts: a download still pending
-// at a cold start with the model missing is reported as abandoned, once.
+// at a cold start is reported once: as abandoned with the model missing, as
+// downloaded when it finished while no process was watching (iOS relaunches
+// the app for a background download without building the root view model).
 // A note the system interrupted while the app is already back in front is
 // resumed at once, without waiting for the next foreground return.
 class PendingNotesCoordinator(
@@ -33,6 +36,7 @@ class PendingNotesCoordinator(
     private val resumeInterruptedNotes: ResumeInterruptedNotesUseCase,
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
     private val rememberDownloadProgress: RememberModelDownloadProgressUseCase,
+    private val settleRememberedDownload: SettleRememberedModelDownloadUseCase,
     private val analyticsTracker: AnalyticsTracker,
 ) {
 
@@ -45,7 +49,7 @@ class PendingNotesCoordinator(
     fun start() {
         if (!isStarted.compareAndSet(expectedValue = false, newValue = true)) return
         scope.launch {
-            reportAbandonedDownload()
+            settleRememberedDownload()
             aiCoreDownloadStatus.state.collect { state ->
                 onDownloadState(state is AiCoreDownloadState.Downloading)
                 if (state is AiCoreDownloadState.Downloading) rememberProgress(state.progressPercent)
@@ -77,16 +81,6 @@ class PendingNotesCoordinator(
             rememberDownloadProgress.remember(null)
         }
         resumeInterruptedNotes()
-    }
-
-    private suspend fun reportAbandonedDownload() {
-        val pending = rememberDownloadProgress.pending() ?: return
-        if (isAiCoreDownloaded()) {
-            rememberDownloadProgress.remember(null)
-            return
-        }
-        analyticsTracker.track(AnalyticsEvents.modelDownloadAbandoned(pending))
-        rememberDownloadProgress.remember(null)
     }
 
     // Written in steps, not on every tick: the value only has to survive a kill.

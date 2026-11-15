@@ -38,6 +38,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterru
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteTranscriptUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveTranscriptionCheckpointUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SettleRememberedModelDownloadUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.presentation.RecordingViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -111,6 +112,7 @@ val featureRecordingModule = module {
     factoryOf(::ObserveImportAllowanceUseCase)
     factoryOf(::RefundFreeImportUseCase)
     factoryOf(::RememberModelDownloadProgressUseCase)
+    factoryOf(::SettleRememberedModelDownloadUseCase)
     factoryOf(::IsAudioImportAvailableUseCase)
     factoryOf(::IsAiCoreDownloadedUseCase)
     factoryOf(::IsCalendarSuggestionsAvailableUseCase)
