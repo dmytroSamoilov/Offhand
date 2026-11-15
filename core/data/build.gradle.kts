@@ -5,15 +5,15 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-android {
-    namespace = "com.dmytrosamoilov.offhand.core.data"
-}
-
 room {
     schemaDirectory("$projectDir/schemas")
 }
 
 kotlin {
+    android {
+        namespace = "com.dmytrosamoilov.offhand.core.data"
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(project(":core:common"))

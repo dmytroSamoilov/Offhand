@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.ApplicationExtension
+import com.dmytrosamoilov.offhand.buildlogic.TARGET_SDK
 import com.dmytrosamoilov.offhand.buildlogic.configureAndroidCompose
 import com.dmytrosamoilov.offhand.buildlogic.configureKotlinAndroid
 import org.gradle.api.Plugin
@@ -14,7 +15,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
                 configureAndroidCompose(this)
-                defaultConfig.targetSdk = 36
+                defaultConfig.targetSdk = TARGET_SDK
                 buildFeatures.buildConfig = true
             }
         }

@@ -2,11 +2,11 @@ plugins {
     alias(libs.plugins.offhand.kmp.library)
 }
 
-android {
-    namespace = "com.dmytrosamoilov.offhand.core.security"
-}
-
 kotlin {
+    android {
+        namespace = "com.dmytrosamoilov.offhand.core.security"
+    }
+
     sourceSets {
         commonMain.dependencies {
             api(libs.coroutines.core)
@@ -21,7 +21,7 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
-        androidUnitTest.dependencies {
+        getByName("androidHostTest").dependencies {
             implementation(libs.mockk)
         }
     }

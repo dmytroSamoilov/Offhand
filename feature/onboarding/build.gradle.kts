@@ -2,11 +2,11 @@ plugins {
     alias(libs.plugins.offhand.kmp.feature)
 }
 
-android {
-    namespace = "com.dmytrosamoilov.offhand.feature.onboarding"
-}
-
 kotlin {
+    android {
+        namespace = "com.dmytrosamoilov.offhand.feature.onboarding"
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(project(":core:ai-api"))
