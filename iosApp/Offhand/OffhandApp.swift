@@ -49,7 +49,7 @@ struct OffhandApp: App {
             ),
             useSmokeFakes: Self.useSmokeFakes
         )
-        TelemetryController.shared.start()
+        TelemetryController.shared.start(isDeveloperBuild: Self.isDeveloperBuild)
     }
 
     var body: some Scene {

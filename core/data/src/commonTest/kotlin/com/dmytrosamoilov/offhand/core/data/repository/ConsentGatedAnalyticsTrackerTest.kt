@@ -58,6 +58,18 @@ class ConsentGatedAnalyticsTrackerTest {
     }
 
     @Test
+    fun `a developer build sends nothing even with consent`() = runTest {
+        preferences.consent.value = true
+        val developerBuild = BuildInfo(isDeveloperBuild = true, platform = "android")
+        val tracker = ConsentGatedAnalyticsTracker(sink, preferences, developerBuild, backgroundScope)
+        runCurrent()
+
+        tracker.track(AnalyticsEvent("note_played"))
+
+        assertEquals(emptyList(), logged)
+    }
+
+    @Test
     fun `every event carries the platform next to its own parameters`() = runTest {
         preferences.consent.value = true
         val tracker = ConsentGatedAnalyticsTracker(sink, preferences, buildInfo, backgroundScope)

@@ -23,9 +23,13 @@ final class TelemetryController {
     )
 
     private var task: Task<Void, Never>?
+    private var isDeveloperBuild = false
 
-    func start() {
+    // A developer build reports crashes but never analytics, automatic events
+    // included.
+    func start(isDeveloperBuild: Bool) {
         guard task == nil else { return }
+        self.isDeveloperBuild = isDeveloperBuild
         task = Task { @MainActor in
             for await granted in SharedGraph.shared.observeTelemetryConsent().invoke() {
                 apply(isGranted: granted.boolValue)
@@ -46,8 +50,8 @@ final class TelemetryController {
             return
         }
         guard configureIfNeeded() else { return }
+        Analytics.setAnalyticsCollectionEnabled(!isDeveloperBuild)
         Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
-        Analytics.setAnalyticsCollectionEnabled(true)
     }
 
     // A build without GoogleService-Info.plist is the normal state of a fresh

@@ -12,8 +12,9 @@ import kotlinx.coroutines.flow.stateIn
 
 // Events exist only for users who agreed to telemetry: anything sent before
 // the consent is known, or after it is withdrawn, is dropped here and never
-// reaches Firebase. Every event carries the platform, so exports that merge
-// both streams still tell Android and iOS behaviour apart.
+// reaches Firebase. Developer builds send nothing at all, so the owner's own
+// testing never lands in the numbers. Every event carries the platform, so
+// exports that merge both streams still tell Android and iOS behaviour apart.
 class ConsentGatedAnalyticsTracker(
     private val sink: AnalyticsSink,
     userPreferences: UserPreferencesRepository,
@@ -26,7 +27,7 @@ class ConsentGatedAnalyticsTracker(
         .stateIn(scope, SharingStarted.Eagerly, false)
 
     override fun track(event: AnalyticsEvent) {
-        if (!isConsentGranted.value) return
+        if (buildInfo.isDeveloperBuild || !isConsentGranted.value) return
         sink.log(event.name, event.params + (PLATFORM_PARAM to buildInfo.platform))
     }
 
