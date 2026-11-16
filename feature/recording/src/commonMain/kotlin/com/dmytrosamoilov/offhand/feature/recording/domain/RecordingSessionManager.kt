@@ -124,6 +124,13 @@ class RecordingSessionManager(
 
     private var isDiscardRequested = false
 
+    private var isStoppedInApp = false
+
+    // A recording the user stopped in the app's own interface was just saved.
+    // One stopped from the notification or from outside the app is not here.
+    private val mutableRecordingsSavedInApp = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val recordingsSavedInApp: SharedFlow<Unit> = mutableRecordingsSavedInApp.asSharedFlow()
+
     // Decided once per recording: without the speech model on disk the session
     // only captures audio, so it never starts or waits on a download, and the
     // note is transcribed from the stored audio once the on-device AI is there.
@@ -140,6 +147,7 @@ class RecordingSessionManager(
         transcriptionTimeMs = 0
         recordedBytes = 0
         isDiscardRequested = false
+        isStoppedInApp = false
         recorder.resetVad()
         mutableSession.value = RecordingSession(phase = SessionPhase.RECORDING)
         scope.launch { runSession() }
@@ -155,6 +163,11 @@ class RecordingSessionManager(
         if (mutableSession.value.phase != SessionPhase.RECORDING) return
         recorder.resume()
         mutableSession.update { it.copy(isPaused = false) }
+    }
+
+    fun stopInApp() {
+        isStoppedInApp = true
+        stop()
     }
 
     fun stop() {
@@ -684,6 +697,7 @@ class RecordingSessionManager(
         mutableActiveRecordingNoteId.value = null
         clearTranscriptionCheckpoint(noteId)
         registerSavedRecording()
+        if (isStoppedInApp) mutableRecordingsSavedInApp.emit(Unit)
         val chunkTranscripts = sortedTranscripts()
         val recordedTranscriptionMs = transcriptionTimeMs
         val style = sessionStyle

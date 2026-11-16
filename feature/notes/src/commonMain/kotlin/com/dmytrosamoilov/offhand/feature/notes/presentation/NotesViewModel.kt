@@ -136,6 +136,9 @@ class NotesViewModel(
             }
         }
         viewModelScope.launch {
+            sessionManager.recordingsSavedInApp.collect { requestReviewIfDue() }
+        }
+        viewModelScope.launch {
             observeFolders().collect { latest ->
                 folders.value = latest
                 if (selectedFolderId.value != null && latest.none { it.id == selectedFolderId.value }) {
@@ -399,12 +402,13 @@ class NotesViewModel(
                     pendingDeleteNoteId = null,
                 )
             }
-            maybeRequestReview(note)
         }
     }
 
-    private suspend fun maybeRequestReview(note: Note) {
-        if (note.status == NoteStatus.READY && shouldRequestReview()) {
+    // The one moment a review is asked for: the user stopped a recording in the
+    // app and it was saved.
+    private suspend fun requestReviewIfDue() {
+        if (shouldRequestReview()) {
             analyticsTracker.track(AnalyticsEvents.reviewRequested())
             mutableReviewRequests.emit(Unit)
         }
@@ -416,14 +420,11 @@ class NotesViewModel(
         }
     }
 
-    // A recording opens its note while it is still processing, so the review
-    // moment is the note becoming ready on screen, not only opening a ready one.
     private suspend fun refreshSelected(notes: List<Note>) {
         val current = selectedNote ?: return
         val refreshed = notes.firstOrNull { it.id == current.id }
         if (refreshed == null || refreshed == current) return
         selectedNote = refreshed
-        if (current.status != NoteStatus.READY) maybeRequestReview(refreshed)
         mutableUiState.update { state ->
             if (state.editor != null) {
                 state

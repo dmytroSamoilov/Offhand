@@ -43,7 +43,7 @@ import org.koin.dsl.module
 
 val featureNotesModule = module {
     singleOf(::InAppReviewPolicy)
-    single { if (get<BuildInfo>().isDeveloperBuild) InAppReviewRules.DEBUG else InAppReviewRules.PRODUCTION }
+    single { InAppReviewRules.of(get<BuildInfo>()) }
     factoryOf(::ClearShareCacheUseCase)
     factoryOf(::ClearTranscriptionCheckpointUseCase)
     factoryOf(::CreateFolderUseCase)

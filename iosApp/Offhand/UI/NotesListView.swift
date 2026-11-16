@@ -114,8 +114,7 @@ struct NotesListView: View {
         }
         .task {
             for await _ in viewModel.reviewRequests {
-                requestAppStoreReview()
-                viewModel.onReviewAttemptSucceeded()
+                if requestAppStoreReview() { viewModel.onReviewAttemptSucceeded() }
             }
         }
     }
@@ -258,10 +257,14 @@ struct NotesListView: View {
         }
     }
 
-    private func requestAppStoreReview() {
+    // False means nothing was asked (the app is not in front), so the attempt
+    // stays unused for the next recording. StoreKit gives no sign of whether
+    // the prompt appeared: no window is added and the app stays active.
+    private func requestAppStoreReview() -> Bool {
         guard let scene = UIApplication.shared.connectedScenes
-            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else { return }
+            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else { return false }
         AppStore.requestReview(in: scene)
+        return true
     }
 
     private var detailBinding: Binding<Bool> {

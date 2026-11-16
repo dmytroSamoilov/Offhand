@@ -114,6 +114,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCard
@@ -221,13 +223,15 @@ fun NotesScreen(
         viewModel.onShareLaunched()
     }
 
-    LaunchedEffect(Unit) {
+    // Away from the foreground is not a moment to ask: nothing is launched and
+    // the attempt stays unused for the next recording.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner) {
         viewModel.reviewRequests.collect {
             val activity = context.findActivity() ?: return@collect
+            if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) return@collect
             val reviewLauncher = viewModel.reviewLauncher as AndroidInAppReviewLauncher
-            if (reviewLauncher.launch(activity)) {
-                viewModel.onReviewAttemptSucceeded()
-            }
+            if (reviewLauncher.launch(activity)) viewModel.onReviewAttemptSucceeded()
         }
     }
 

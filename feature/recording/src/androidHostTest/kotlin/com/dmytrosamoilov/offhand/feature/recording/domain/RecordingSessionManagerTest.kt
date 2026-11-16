@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain
 
+import app.cash.turbine.test
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackend
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackendException
@@ -385,6 +386,47 @@ class RecordingSessionManagerTest {
             )
         }
         verify { speechToText.release() }
+    }
+
+    @Test
+    fun `a recording stopped in the app is reported once it is saved`() = runTest {
+        givenRecordingThatWaitsForTheAiCore()
+        val manager = manager()
+
+        manager.recordingsSavedInApp.test {
+            manager.start(folderId = null)
+            manager.stopInApp()
+            testScheduler.advanceUntilIdle()
+
+            awaitItem()
+        }
+    }
+
+    @Test
+    fun `a recording stopped outside the app is saved without being reported`() = runTest {
+        givenRecordingThatWaitsForTheAiCore()
+        val manager = manager()
+
+        manager.recordingsSavedInApp.test {
+            manager.start(folderId = null)
+            manager.stop()
+            testScheduler.advanceUntilIdle()
+
+            expectNoEvents()
+        }
+        coVerify { markNoteRecorded(11L, 5_000L, "note-1.pcm.enc") }
+    }
+
+    private fun givenRecordingThatWaitsForTheAiCore() {
+        speechModelState.value = SpeechModelState.NotDownloaded
+        coEvery { isAiCoreDownloaded() } returns false
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
+        every { recorder.recordStream(pcmSink = any()) } returns flowOf(chunk(1), chunk(2))
+        justRun { recorder.resetVad() }
+        justRun { recorder.stop() }
+        coEvery { createRecordingNote(any(), any(), any()) } returns 11L
+        coEvery { markNoteRecorded(11L, any(), any()) } returns storedNote(11L)
+        coEvery { markNoteProcessing(11L) } returns storedNote(11L)
     }
 
     @Test

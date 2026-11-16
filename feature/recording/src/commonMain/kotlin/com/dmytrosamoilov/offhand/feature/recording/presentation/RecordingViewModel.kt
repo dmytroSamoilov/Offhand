@@ -67,7 +67,7 @@ class RecordingViewModel(
     // The first finished recording is the moment to ask for notifications: the
     // user has just made something worth being told about.
     fun onStopRecording() {
-        sessionManager.stop()
+        sessionManager.stopInApp()
         if (!wasNotificationPrompted.value) isNotificationPromptRequested.value = true
     }
 

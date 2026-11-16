@@ -140,6 +140,7 @@ class NotesViewModelTest {
         coEvery { requirePro(any()) } returns true
     }
     private val clearShareCache: ClearShareCacheUseCase = mockk(relaxed = true)
+    private val recordingsSavedInApp = MutableSharedFlow<Unit>()
     private val shouldRequestReview: ShouldRequestReviewUseCase = mockk {
         coEvery { this@mockk.invoke() } returns false
     }
@@ -149,6 +150,7 @@ class NotesViewModelTest {
         every { state } returns MutableStateFlow(AudioPlaybackState())
     }
     private val sessionManager: RecordingSessionManager = mockk {
+        every { recordingsSavedInApp } returns this@NotesViewModelTest.recordingsSavedInApp
         every { noteProgress } returns MutableStateFlow(emptyMap())
         every { events } returns MutableSharedFlow()
         every { suggestingNoteIds } returns this@NotesViewModelTest.suggestingNoteIds
@@ -444,14 +446,27 @@ class NotesViewModelTest {
     }
 
     @Test
-    fun `opening a ready note emits a review request when the policy allows`() = runTest(dispatcher) {
+    fun `a recording stopped in the app emits a review request when the policy allows`() = runTest(dispatcher) {
+        coEvery { shouldRequestReview() } returns true
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.reviewRequests.test {
+            recordingsSavedInApp.emit(Unit)
+            dispatcher.scheduler.advanceUntilIdle()
+            awaitItem()
+        }
+    }
+
+    @Test
+    fun `opening a ready note never asks for a review`() = runTest(dispatcher) {
         coEvery { shouldRequestReview() } returns true
         val viewModel = viewModel()
 
         viewModel.reviewRequests.test {
             viewModel.onNoteSelected(5)
             dispatcher.scheduler.advanceUntilIdle()
-            awaitItem()
+            expectNoEvents()
         }
     }
 
@@ -460,8 +475,10 @@ class NotesViewModelTest {
         coEvery { shouldRequestReview() } returns false
         val viewModel = viewModel()
 
+        dispatcher.scheduler.advanceUntilIdle()
+
         viewModel.reviewRequests.test {
-            viewModel.onNoteSelected(5)
+            recordingsSavedInApp.emit(Unit)
             dispatcher.scheduler.advanceUntilIdle()
             expectNoEvents()
         }

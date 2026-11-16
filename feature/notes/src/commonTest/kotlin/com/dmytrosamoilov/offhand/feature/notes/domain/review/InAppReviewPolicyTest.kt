@@ -12,7 +12,13 @@ import kotlin.time.Duration.Companion.seconds
 
 class InAppReviewPolicyTest {
 
-    private val policy = InAppReviewPolicy(InAppReviewRules.PRODUCTION)
+    private val rules = InAppReviewRules(
+        minSavedRecordings = 3,
+        burstWindowMs = 5.days.inWholeMilliseconds,
+        attemptGapMs = 24.hours.inWholeMilliseconds,
+        cooldownMs = 45.days.inWholeMilliseconds,
+    )
+    private val policy = InAppReviewPolicy(rules)
     private val now = 1_000.days.inWholeMilliseconds
 
     private fun shouldRequest(
