@@ -38,6 +38,7 @@ class PendingNotesCoordinator(
     private val rememberDownloadProgress: RememberModelDownloadProgressUseCase,
     private val settleRememberedDownload: SettleRememberedModelDownloadUseCase,
     private val analyticsTracker: AnalyticsTracker,
+    private val speechWarmUp: SpeechWarmUp,
 ) {
 
     // Application-lifetime scope: lives as long as the process, never cancelled.
@@ -48,6 +49,7 @@ class PendingNotesCoordinator(
 
     fun start() {
         if (!isStarted.compareAndSet(expectedValue = false, newValue = true)) return
+        speechWarmUp.start(scope)
         scope.launch {
             settleRememberedDownload()
             aiCoreDownloadStatus.state.collect { state ->

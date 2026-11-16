@@ -4,6 +4,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleDrafter
 import com.dmytrosamoilov.offhand.feature.recording.domain.CalendarEventExtractor
 import com.dmytrosamoilov.offhand.feature.recording.domain.NoteStyleResolver
 import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinator
+import com.dmytrosamoilov.offhand.feature.recording.domain.SpeechWarmUp
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.SessionNoteStyleDrafter
 import com.dmytrosamoilov.offhand.feature.recording.domain.TranscriptStructurer
@@ -60,6 +61,7 @@ val featureRecordingModule = module {
     singleOf(::TranscriptStructurer)
     singleOf(::SessionNoteStyleDrafter) bind NoteStyleDrafter::class
     singleOf(::CalendarEventExtractor)
+    singleOf(::SpeechWarmUp)
     singleOf(::PendingNotesCoordinator)
     singleOf(::ResumeInterruptedNotesUseCase)
     single {
