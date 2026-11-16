@@ -32,6 +32,7 @@ kotlin {
             implementation(libs.okio)
             implementation(libs.timber)
             implementation(libs.play.billing.ktx)
+            implementation(libs.play.blockstore)
         }
         iosMain.dependencies {
             implementation(libs.sqlite.bundled)

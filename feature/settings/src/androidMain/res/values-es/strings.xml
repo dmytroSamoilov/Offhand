@@ -140,4 +140,9 @@
     <string name="settings_redeem_code">Canjear un código</string>
     <string name="settings_redeem_code_body">Google Play abre el plan anual. Toca la flecha junto al método de pago, elige «Canjear código» e introduce tu código. Su prueba gratuita sustituye a la estándar.</string>
     <string name="settings_redeem_code_confirm">Continuar</string>
+    <plurals name="settings_subscription_app_trial_days_left">
+        <item quantity="one">Prueba gratis: queda %d día</item>
+        <item quantity="many">Prueba gratis: quedan %d días</item>
+        <item quantity="other">Prueba gratis: quedan %d días</item>
+    </plurals>
 </resources>

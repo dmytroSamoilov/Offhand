@@ -141,4 +141,10 @@
     <string name="settings_redeem_code">Ввести промокод</string>
     <string name="settings_redeem_code_body">Google Play відкриє річний план. Натисніть стрілку поруч зі способом оплати, виберіть «Активувати код» і введіть код. Його безкоштовний період замінить стандартний.</string>
     <string name="settings_redeem_code_confirm">Продовжити</string>
+    <plurals name="settings_subscription_app_trial_days_left">
+        <item quantity="one">Пробний період: залишився %d день</item>
+        <item quantity="few">Пробний період: залишилося %d дні</item>
+        <item quantity="many">Пробний період: залишилося %d днів</item>
+        <item quantity="other">Пробний період: залишилося %d дня</item>
+    </plurals>
 </resources>

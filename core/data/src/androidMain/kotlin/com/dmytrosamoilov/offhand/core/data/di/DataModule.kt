@@ -47,6 +47,10 @@ import com.dmytrosamoilov.offhand.core.data.repository.DebugOverrideProStore
 import com.dmytrosamoilov.offhand.core.data.repository.ProUpgradeCoordinator
 import com.dmytrosamoilov.offhand.core.data.repository.RoomNotesRepository
 import com.dmytrosamoilov.offhand.core.data.repository.StoreProStatusRepository
+import com.dmytrosamoilov.offhand.core.data.repository.BlockStoreProTrialRecordStore
+import com.dmytrosamoilov.offhand.core.data.repository.StoredProTrialRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialRecordStore
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialRepository
 import com.dmytrosamoilov.offhand.core.security.DatabasePassphraseProvider
 import com.dmytrosamoilov.offhand.core.security.PassphraseInvalidatedException
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
@@ -115,6 +119,8 @@ val coreDataModule = module {
     single<ProStore>(named(PLATFORM_PRO_STORE)) { PlayProStore(androidContext(), get()) }
     single<ProStore> { DebugOverrideProStore(get(named(PLATFORM_PRO_STORE)), get()) }
     single<ProStatusCache> { DataStoreProStatusCache(get()) }
+    single<ProTrialRecordStore> { BlockStoreProTrialRecordStore(androidContext()) }
+    single<ProTrialRepository> { StoredProTrialRepository(get(), get()) }
     singleOf(::StoreProStatusRepository) bind ProStatusRepository::class
     singleOf(::ProUpgradeCoordinator) bind ProUpgradeGate::class
     singleOf(::ModelDownloadPolicy)

@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialNotice
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.AppLockState
@@ -12,11 +13,16 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DecideEarlyAdopte
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkEarlyAdopterThankedUseCase
 import com.dmytrosamoilov.offhand.core.data.domain.isEarlyAdopterThanksPending
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserPreferencesUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.AcknowledgeProTrialNoticeUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.KeepProTrialInSyncUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SettleProTrialUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinator
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -38,6 +44,9 @@ class IosRootViewModel(
     private val clearShareCache: ClearShareCacheUseCase,
     private val decideEarlyAdopterPro: DecideEarlyAdopterProUseCase,
     private val markEarlyAdopterThanked: MarkEarlyAdopterThankedUseCase,
+    private val settleProTrial: SettleProTrialUseCase,
+    private val acknowledgeProTrialNotice: AcknowledgeProTrialNoticeUseCase,
+    private val keepProTrialInSync: KeepProTrialInSyncUseCase,
     private val proUpgradeGate: ProUpgradeGate,
     pendingNotesCoordinator: PendingNotesCoordinator,
 ) : BaseViewModel() {
@@ -57,6 +66,12 @@ class IosRootViewModel(
         phase == IosRootPhase.READY && preferences.isEarlyAdopterThanksPending
     }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    private val mutableTrialNotice = MutableStateFlow<ProTrialNotice?>(null)
+
+    // Set once per cold start, after the app is READY: the trial ran out or
+    // was removed and the user has not been told yet.
+    val trialNotice: StateFlow<ProTrialNotice?> = mutableTrialNotice.asStateFlow()
+
     val isDeviceSecure: Boolean
         get() = appLockManager.isDeviceSecure
 
@@ -64,6 +79,7 @@ class IosRootViewModel(
         skipLockForFirstRun(observeUserPreferences)
         finishStartupWhenReady()
         resumeModelDownloadWhenReady()
+        keepProTrialInSyncWhenReady()
         // Picks notes back up the moment the model download finishes, instead of
         // leaving them stuck until the app is backgrounded and reopened.
         pendingNotesCoordinator.start()
@@ -71,6 +87,12 @@ class IosRootViewModel(
 
     fun onEarlyAdopterThanksDismissed() {
         launchSafely(showLoading = false) { markEarlyAdopterThanked() }
+    }
+
+    fun onTrialNoticeDismissed() {
+        val notice = mutableTrialNotice.value ?: return
+        mutableTrialNotice.value = null
+        launchSafely(showLoading = false) { acknowledgeProTrialNotice(notice) }
     }
 
     // Called once the thank-you sheet is gone: a sheet cannot present the
@@ -103,9 +125,19 @@ class IosRootViewModel(
         launchSafely(showLoading = false) {
             phase.first { it == IosRootPhase.READY }
             decideEarlyAdopterPro()
+            mutableTrialNotice.value = settleProTrial()
             resumeInterruptedNotes()
             sweepOrphanedRecordings()
             clearShareCache()
+        }
+    }
+
+    // A trial record from before a reinstall can arrive from iCloud after
+    // the first launch already started a new one.
+    private fun keepProTrialInSyncWhenReady() {
+        launchSafely(showLoading = false) {
+            phase.first { it == IosRootPhase.READY }
+            keepProTrialInSync()
         }
     }
 

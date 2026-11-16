@@ -8,6 +8,10 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatusCache
 import com.dmytrosamoilov.offhand.core.data.domain.ProStore
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialNotice
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialRecord
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialState
 import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
@@ -25,7 +29,8 @@ class StoreProStatusRepositoryTest {
     private val store = StubProStore()
     private val cache = MemoryProStatusCache()
     private val preferences = GrantPreferences()
-    private val repository = StoreProStatusRepository(store, cache, preferences)
+    private val trial = StubProTrialRepository()
+    private val repository = StoreProStatusRepository(store, cache, preferences, trial)
 
     @Test
     fun `the store answer is cached and wins`() = runTest {
@@ -61,6 +66,43 @@ class StoreProStatusRepositoryTest {
         preferences.override.value = ProOverride.FREE
         assertEquals(ProStatus.FREE, repository.observeStatus().first())
     }
+
+    @Test
+    fun `a running trial is Pro until a purchase or the grant outranks it`() = runTest {
+        trial.state.value = ProTrialState.Active(endsAtMs = 99L)
+        assertEquals(ProStatus.trial(endsAtMs = 99L), repository.observeStatus().first())
+
+        preferences.grant.value = EarlyAdopterPro.GRANTED
+        assertEquals(ProStatus.INCLUDED, repository.observeStatus().first())
+
+        store.status.value = ProStatus.LIFETIME
+        assertEquals(ProStatus.LIFETIME, repository.observeStatus().first())
+    }
+
+    @Test
+    fun `an ended or removed trial and the free override leave the status free`() = runTest {
+        trial.state.value = ProTrialState.Ended
+        assertEquals(ProStatus.FREE, repository.observeStatus().first())
+
+        trial.state.value = ProTrialState.Revoked
+        assertEquals(ProStatus.FREE, repository.observeStatus().first())
+
+        trial.state.value = ProTrialState.Active(endsAtMs = 99L)
+        preferences.override.value = ProOverride.FREE
+        assertEquals(ProStatus.FREE, repository.observeStatus().first())
+    }
+}
+
+private class StubProTrialRepository : ProTrialRepository {
+    val state = MutableStateFlow<ProTrialState>(ProTrialState.NotStarted)
+    override fun observeState(): Flow<ProTrialState> = state
+    override suspend fun currentState(): ProTrialState = state.value
+    override suspend fun readRecord(): ProTrialRecord? = null
+    override suspend fun writeRecord(record: ProTrialRecord) = Unit
+    override suspend fun rememberCurrentTime() = Unit
+    override suspend fun isNoticeSeen(notice: ProTrialNotice): Boolean = false
+    override suspend fun markNoticeSeen(notice: ProTrialNotice) = Unit
+    override suspend fun keepInSync() = Unit
 }
 
 private class StubProStore : ProStore {

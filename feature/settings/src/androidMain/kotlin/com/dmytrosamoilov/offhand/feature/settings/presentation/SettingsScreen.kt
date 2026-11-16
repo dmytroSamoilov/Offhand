@@ -25,6 +25,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -197,10 +198,10 @@ private fun ProSection(
 ) {
     val context = LocalContext.current
     SettingsCard(title = stringResource(R.string.settings_subscription_title)) {
-        if (status == ProStatusUi.Free) {
-            UpgradeRow(onClick = onProCardClick)
-        } else {
-            PlanRow(status = status, onClick = onProCardClick)
+        when (status) {
+            ProStatusUi.Free -> UpgradeRow(onClick = onProCardClick)
+            is ProStatusUi.AppTrial -> TrialRow(status = status, onClick = onProCardClick)
+            else -> PlanRow(status = status, onClick = onProCardClick)
         }
         if (status is ProStatusUi.Yearly || status is ProStatusUi.Trial) {
             SettingsLinkRow(
@@ -274,6 +275,23 @@ private fun UpgradeRow(onClick: () -> Unit) {
     )
 }
 
+// The fourteen free days: how many are left, how much of the trial is used,
+// and the same Upgrade button a free user gets.
+@Composable
+private fun TrialRow(status: ProStatusUi.AppTrial, onClick: () -> Unit) {
+    ProRow(
+        subtitle = status.statusLabel(),
+        onClick = onClick,
+        trailing = { Button(onClick = onClick) { Text(text = stringResource(R.string.settings_pro_upgrade)) } },
+    )
+    LinearProgressIndicator(
+        progress = { status.elapsed },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp),
+    )
+}
+
 @Composable
 private fun PlanRow(status: ProStatusUi, onClick: () -> Unit) {
     ProRow(
@@ -320,6 +338,7 @@ private fun ProStatusUi.statusLabel(): String = when (this) {
     ProStatusUi.Free -> ""
     ProStatusUi.Lifetime -> stringResource(R.string.settings_subscription_lifetime)
     ProStatusUi.Included -> stringResource(R.string.settings_subscription_included)
+    is ProStatusUi.AppTrial -> pluralStringResource(R.plurals.settings_subscription_app_trial_days_left, daysLeft, daysLeft)
     is ProStatusUi.Trial -> endsAtMs?.let { stringResource(R.string.settings_subscription_trial_until, formatDate(it)) }
         ?: stringResource(R.string.settings_subscription_trial)
     is ProStatusUi.Yearly -> renewsAtMs?.let { stringResource(R.string.settings_subscription_yearly_renews, formatDate(it)) }

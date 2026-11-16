@@ -102,6 +102,7 @@ targets:
       path: Offhand/Offhand.entitlements
       properties:
         com.apple.developer.kernel.increased-memory-limit: true
+        com.apple.developer.ubiquity-kvstore-identifier: $(TeamIdentifierPrefix)$(CFBundleIdentifier)
     info:
       path: Offhand/Info.plist
       properties:

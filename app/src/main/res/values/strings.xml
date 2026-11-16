@@ -15,4 +15,10 @@
     <string name="framework_unsupported_title">Offhand can’t run on this phone</string>
     <string name="framework_unsupported_body">This phone’s system software is modified and reports a newer Android version than it runs. Offhand needs an unmodified Android 12 or newer.</string>
     <string name="framework_unsupported_close">Close</string>
+    <string name="trial_ended_title">Your Pro trial has ended</string>
+    <string name="trial_ended_body">Your 14 days of Offhand Pro are over. Your notes, folders and styles are all still here. You can keep using the free version, or upgrade to keep everything in Pro.</string>
+    <string name="trial_removed_title">Your Pro trial was removed</string>
+    <string name="trial_removed_body">The date on this phone was set back past the start of your trial, so the trial has ended. You can keep using the free version or upgrade to Offhand Pro.</string>
+    <string name="trial_notice_upgrade">See Offhand Pro</string>
+    <string name="trial_notice_keep_free">Continue with the free version</string>
 </resources>

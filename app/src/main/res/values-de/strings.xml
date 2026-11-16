@@ -14,4 +14,10 @@
     <string name="framework_unsupported_title">Offhand kann auf diesem Handy nicht laufen</string>
     <string name="framework_unsupported_body">Die Systemsoftware dieses Handys ist verändert und meldet eine neuere Android-Version, als sie tatsächlich ist. Offhand braucht ein unverändertes Android 12 oder neuer.</string>
     <string name="framework_unsupported_close">Schließen</string>
+    <string name="trial_ended_title">Deine Pro-Testphase ist beendet</string>
+    <string name="trial_ended_body">Deine 14 Tage Offhand Pro sind vorbei. Deine Notizen, Ordner und Stile sind alle noch da. Du kannst die kostenlose Version weiter nutzen oder upgraden, um alles aus Pro zu behalten.</string>
+    <string name="trial_removed_title">Deine Pro-Testphase wurde entfernt</string>
+    <string name="trial_removed_body">Das Datum auf diesem Smartphone wurde vor den Beginn deiner Testphase zurückgestellt, deshalb ist die Testphase beendet. Du kannst die kostenlose Version weiter nutzen oder auf Offhand Pro upgraden.</string>
+    <string name="trial_notice_upgrade">Offhand Pro ansehen</string>
+    <string name="trial_notice_keep_free">Mit der kostenlosen Version weitermachen</string>
 </resources>

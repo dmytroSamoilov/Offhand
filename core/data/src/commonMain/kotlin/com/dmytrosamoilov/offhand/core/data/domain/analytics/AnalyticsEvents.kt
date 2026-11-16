@@ -112,6 +112,12 @@ object AnalyticsEvents {
 
     fun redeemCodeClicked(): AnalyticsEvent = event("redeem_code_clicked")
 
+    fun proTrialStarted(): AnalyticsEvent = event("pro_trial_started")
+
+    fun proTrialEnded(): AnalyticsEvent = event("pro_trial_ended")
+
+    fun proTrialRevoked(): AnalyticsEvent = event("pro_trial_revoked")
+
     fun onboardingCompleted(): AnalyticsEvent = event("onboarding_completed")
 
     fun onboardingStep(step: String): AnalyticsEvent = event("onboarding_step", "step" to step)

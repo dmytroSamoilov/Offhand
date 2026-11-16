@@ -14,4 +14,10 @@
     <string name="framework_unsupported_title">Offhand не може працювати на цьому телефоні</string>
     <string name="framework_unsupported_body">Системне ПЗ цього телефона змінене й повідомляє новішу версію Android, ніж є насправді. Offhand потрібен незмінений Android 12 або новіший.</string>
     <string name="framework_unsupported_close">Закрити</string>
+    <string name="trial_ended_title">Пробний період Pro закінчився</string>
+    <string name="trial_ended_body">Ваші 14 днів Offhand Pro минули. Усі нотатки, папки та стилі залишилися на місці. Ви можете користуватися безкоштовною версією або перейти на Pro, щоб зберегти всі можливості.</string>
+    <string name="trial_removed_title">Пробний період Pro скасовано</string>
+    <string name="trial_removed_body">Дату на цьому телефоні було переведено на час до початку пробного періоду, тому його завершено. Ви можете користуватися безкоштовною версією або перейти на Offhand Pro.</string>
+    <string name="trial_notice_upgrade">Переглянути Offhand Pro</string>
+    <string name="trial_notice_keep_free">Продовжити з безкоштовною версією</string>
 </resources>

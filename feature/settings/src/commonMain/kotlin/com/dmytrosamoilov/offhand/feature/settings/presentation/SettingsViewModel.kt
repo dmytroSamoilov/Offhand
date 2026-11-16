@@ -8,6 +8,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialPolicy
+import kotlin.time.Clock
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
@@ -179,9 +181,15 @@ private fun SettingsUiState.withImportAllowance(allowance: ImportAllowance): Set
     is ImportAllowance.Free -> copy(freeImportsLeft = allowance.left, allowsMultipleImports = false)
 }
 
+private fun appTrialUi(endsAtMs: Long, nowMs: Long) = ProStatusUi.AppTrial(
+    daysLeft = ProTrialPolicy.daysLeft(endsAtMs, nowMs),
+    elapsed = ProTrialPolicy.elapsedFraction(endsAtMs, nowMs),
+)
+
 private fun ProStatus.toUi(): ProStatusUi = when {
     plan == ProPlan.LIFETIME -> ProStatusUi.Lifetime
     plan == ProPlan.INCLUDED -> ProStatusUi.Included
+    plan == ProPlan.TRIAL -> appTrialUi(endsAtMs = renewsAtMs ?: 0L, nowMs = Clock.System.now().toEpochMilliseconds())
     plan == ProPlan.YEARLY && isTrial -> ProStatusUi.Trial(renewsAtMs)
     plan == ProPlan.YEARLY -> ProStatusUi.Yearly(renewsAtMs)
     else -> ProStatusUi.Free

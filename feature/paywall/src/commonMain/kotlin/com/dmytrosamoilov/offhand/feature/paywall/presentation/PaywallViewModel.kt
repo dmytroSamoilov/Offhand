@@ -37,7 +37,7 @@ class PaywallViewModel(
     init {
         viewModelScope.launch {
             observeProStatus().collect { status ->
-                mutableUiState.update { it.copy(isPro = status.isPro) }
+                mutableUiState.update { it.copy(isPro = status.isProForGood) }
             }
         }
         loadOffers()
@@ -46,7 +46,8 @@ class PaywallViewModel(
     // The same instance serves every presentation, so a reopened paywall
     // starts from a clean slate and fresh prices. The status is read here
     // rather than taken from the collected state, which a first presentation
-    // may not have received yet.
+    // may not have received yet. Someone on the free trial is still shown
+    // the offer.
     fun onOpened() {
         isDismissalTracked = false
         val feature = proUpgradeGate.requestedFeature.value ?: ProFeature.GENERAL
@@ -60,7 +61,7 @@ class PaywallViewModel(
             )
         }
         launchSafely(showLoading = false) {
-            val isPro = observeProStatus().first().isPro
+            val isPro = observeProStatus().first().isProForGood
             mutableUiState.update { it.copy(isPro = isPro, mode = if (isPro) PaywallMode.BENEFITS else PaywallMode.OFFER) }
             if (isPro) return@launchSafely
             analyticsTracker.track(AnalyticsEvents.paywallShown(feature))
@@ -96,7 +97,7 @@ class PaywallViewModel(
         launchSafely(showLoading = false) {
             mutableUiState.update { it.copy(isPurchasing = true) }
             val restored = restoreProPurchases()
-            val message = PaywallMessageUi.NothingToRestore.takeUnless { restored?.isPro == true }
+            val message = PaywallMessageUi.NothingToRestore.takeUnless { restored?.isProForGood == true }
             mutableUiState.update { it.copy(isPurchasing = false, message = message) }
         }
     }

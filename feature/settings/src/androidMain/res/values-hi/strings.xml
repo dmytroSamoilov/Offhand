@@ -139,4 +139,8 @@
     <string name="settings_redeem_code">कोड रिडीम करें</string>
     <string name="settings_redeem_code_body">Google Play सालाना प्लान खोलेगा। भुगतान विधि के बगल वाले तीर पर टैप करें, “कोड रिडीम करें” चुनें और अपना कोड डालें। इसका मुफ़्त ट्रायल सामान्य ट्रायल की जगह लेगा।</string>
     <string name="settings_redeem_code_confirm">जारी रखें</string>
+    <plurals name="settings_subscription_app_trial_days_left">
+        <item quantity="one">मुफ़्त ट्रायल: %d दिन बाकी</item>
+        <item quantity="other">मुफ़्त ट्रायल: %d दिन बाकी</item>
+    </plurals>
 </resources>

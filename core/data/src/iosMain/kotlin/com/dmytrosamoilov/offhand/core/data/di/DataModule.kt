@@ -50,6 +50,10 @@ import com.dmytrosamoilov.offhand.core.data.repository.DebugOverrideProStore
 import com.dmytrosamoilov.offhand.core.data.repository.ProUpgradeCoordinator
 import com.dmytrosamoilov.offhand.core.data.repository.RoomNotesRepository
 import com.dmytrosamoilov.offhand.core.data.repository.StoreProStatusRepository
+import com.dmytrosamoilov.offhand.core.data.repository.ICloudProTrialRecordStore
+import com.dmytrosamoilov.offhand.core.data.repository.StoredProTrialRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialRecordStore
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialRepository
 import com.dmytrosamoilov.offhand.core.security.excludeFromBackup
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.Dispatchers
@@ -116,6 +120,8 @@ val coreDataModule = module {
     singleOf(::RoomTranscriptionCheckpointRepository) bind TranscriptionCheckpointRepository::class
     single<ProStore> { DebugOverrideProStore(get(named(PLATFORM_PRO_STORE)), get()) }
     single<ProStatusCache> { DataStoreProStatusCache(get()) }
+    single<ProTrialRecordStore> { ICloudProTrialRecordStore() }
+    single<ProTrialRepository> { StoredProTrialRepository(get(), get()) }
     singleOf(::StoreProStatusRepository) bind ProStatusRepository::class
     singleOf(::ProUpgradeCoordinator) bind ProUpgradeGate::class
     singleOf(::ModelDownloadPolicy)

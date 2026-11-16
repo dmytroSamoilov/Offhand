@@ -169,21 +169,27 @@ struct SettingsView: View {
     // cancellation lives.
     @ViewBuilder
     private var proSection: some View {
-        if case .free = onEnum(of: state.pro) {
+        if isUpgradeOffered {
             Section(String(localized: "Subscription")) {
-                HStack(spacing: 12) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        HStack(spacing: 8) {
-                            Text(String(localized: "Offhand Pro"))
-                            ProCrown(size: 20)
+                VStack(spacing: 10) {
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 8) {
+                                Text(String(localized: "Offhand Pro"))
+                                ProCrown(size: 20)
+                            }
+                            Text(upgradeSubtitle)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
-                        Text(String(localized: "Styles, PDF and Word export, smart suggestions, audio and video import and unlimited folders"))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button(String(localized: "Upgrade")) { viewModel.onProCardClicked() }
+                            .buttonStyle(.borderedProminent)
                     }
-                    Spacer()
-                    Button(String(localized: "Upgrade")) { viewModel.onProCardClicked() }
-                        .buttonStyle(.borderedProminent)
+                    if case .appTrial(let trial) = onEnum(of: state.pro) {
+                        ProgressView(value: Double(trial.elapsed))
+                            .tint(Brand.primary)
+                    }
                 }
                 .padding(.vertical, 4)
                 .contentShape(Rectangle())
@@ -239,9 +245,25 @@ struct SettingsView: View {
         )
     }
 
+    // A free user and someone on the fourteen free days both get the
+    // Upgrade row; the trial adds its days left and a bar of the time used.
+    private var isUpgradeOffered: Bool {
+        switch onEnum(of: state.pro) {
+        case .free, .appTrial: return true
+        case .lifetime, .included, .trial, .yearly: return false
+        }
+    }
+
+    private var upgradeSubtitle: String {
+        guard case .appTrial(let trial) = onEnum(of: state.pro) else {
+            return String(localized: "Styles, PDF and Word export, smart suggestions, audio and video import and unlimited folders")
+        }
+        return String.localizedStringWithFormat(String(localized: "Free trial: %d days left"), Int(trial.daysLeft))
+    }
+
     private var proStatusLabel: String {
         switch onEnum(of: state.pro) {
-        case .free: return ""
+        case .free, .appTrial: return ""
         case .lifetime: return String(localized: "Lifetime, yours forever")
         case .included: return String(localized: "Included on this iPhone. It is not part of backups and does not survive a reinstall.")
         case .trial(let trial):
@@ -256,7 +278,7 @@ struct SettingsView: View {
     private func isSubscription(_ status: ProStatusUi) -> Bool {
         switch onEnum(of: status) {
         case .yearly, .trial: return true
-        case .free, .lifetime, .included: return false
+        case .free, .lifetime, .included, .appTrial: return false
         }
     }
 

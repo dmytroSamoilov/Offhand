@@ -5,6 +5,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialNotice
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.AppLockState
@@ -14,9 +15,13 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DecideEarlyAdopte
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkEarlyAdopterThankedUseCase
 import com.dmytrosamoilov.offhand.core.data.domain.isEarlyAdopterThanksPending
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserPreferencesUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.AcknowledgeProTrialNoticeUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.KeepProTrialInSyncUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SettleProTrialUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -37,14 +42,20 @@ class RootViewModel(
     private val clearShareCache: ClearShareCacheUseCase,
     private val decideEarlyAdopterPro: Lazy<DecideEarlyAdopterProUseCase>,
     private val markEarlyAdopterThanked: MarkEarlyAdopterThankedUseCase,
+    private val settleProTrial: SettleProTrialUseCase,
+    private val acknowledgeProTrialNotice: AcknowledgeProTrialNoticeUseCase,
+    private val keepProTrialInSync: KeepProTrialInSyncUseCase,
     private val proUpgradeGate: ProUpgradeGate,
     private val appForegroundState: AppForegroundState,
 ) : BaseViewModel() {
 
+    private val trialNotice = MutableStateFlow<ProTrialNotice?>(null)
+
     val uiState: StateFlow<RootUiState> = combine(
         observeUserPreferences(),
         appLockManager.lockState,
-    ) { preferences, lockState ->
+        trialNotice,
+    ) { preferences, lockState, trialNotice ->
         val phase = when {
             !preferences.onboardingCompleted -> RootPhase.ONBOARDING
             preferences.appLockEnabled && lockState == AppLockState.LOCKED -> RootPhase.LOCKED
@@ -54,6 +65,7 @@ class RootViewModel(
             phase = phase,
             isDynamicColorEnabled = preferences.dynamicColor,
             isEarlyAdopterThanksShown = phase == RootPhase.READY && preferences.isEarlyAdopterThanksPending,
+            trialNotice = trialNotice.takeIf { phase == RootPhase.READY },
         )
     }.stateIn(
         scope = viewModelScope,
@@ -66,6 +78,19 @@ class RootViewModel(
         resumeInterruptedNotesWhenReady()
         resumeInterruptedNotesOnReturn()
         resumeModelDownloadWhenReady()
+        keepProTrialInSyncWhenReady()
+    }
+
+    fun onTrialNoticeDismissed() {
+        val notice = trialNotice.value ?: return
+        trialNotice.value = null
+        launchSafely(showLoading = false) { acknowledgeProTrialNotice(notice) }
+    }
+
+    // The trial is over, so the paywall opens with its offer.
+    fun onTrialUpgradeRequested() {
+        onTrialNoticeDismissed()
+        proUpgradeGate.showBenefits()
     }
 
     fun onEarlyAdopterThanksDismissed() {
@@ -98,6 +123,7 @@ class RootViewModel(
         launchSafely(showLoading = false) {
             uiState.first { it.phase == RootPhase.READY }
             decideEarlyAdopterPro.value.invoke()
+            trialNotice.value = settleProTrial()
             resumeInterruptedNotes.value.invoke()
             sweepOrphanedRecordings.value.invoke()
             clearShareCache()
@@ -112,6 +138,13 @@ class RootViewModel(
             appForegroundState.isInForeground.drop(1).filter { it }.collect {
                 resumeInterruptedNotes.value.invoke()
             }
+        }
+    }
+
+    private fun keepProTrialInSyncWhenReady() {
+        launchSafely(showLoading = false) {
+            uiState.first { it.phase == RootPhase.READY }
+            keepProTrialInSync()
         }
     }
 

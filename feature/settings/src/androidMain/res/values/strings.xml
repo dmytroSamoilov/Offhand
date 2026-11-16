@@ -145,4 +145,8 @@
     <string name="settings_redeem_code">Redeem a code</string>
     <string name="settings_redeem_code_body">Google Play opens the yearly plan. Tap the arrow next to the payment method, choose Redeem code and enter your code. Its free trial replaces the standard one.</string>
     <string name="settings_redeem_code_confirm">Continue</string>
+    <plurals name="settings_subscription_app_trial_days_left">
+        <item quantity="one">Free trial: %d day left</item>
+        <item quantity="other">Free trial: %d days left</item>
+    </plurals>
 </resources>

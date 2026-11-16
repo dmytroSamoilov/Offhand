@@ -164,6 +164,172 @@
         }
       }
     },
+    "Free trial: %d days left" : {
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Kostenlose Testphase: noch %d Tag"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Kostenlose Testphase: noch %d Tage"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Free trial: %d day left"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Free trial: %d days left"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Prueba gratis: quedan %d días"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Prueba gratis: queda %d día"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Prueba gratis: quedan %d días"
+                }
+              }
+            }
+          }
+        },
+        "hi" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "मुफ़्त ट्रायल: %d दिन बाकी"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "मुफ़्त ट्रायल: %d दिन बाकी"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Teste grátis: restam %d dias"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Teste grátis: resta %d dia"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Teste grátis: restam %d dias"
+                }
+              }
+            }
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Пробный период: осталось %d дня"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Пробный период: осталось %d дней"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Пробный период: остался %d день"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Пробный период: осталось %d дня"
+                }
+              }
+            }
+          }
+        },
+        "uk" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Пробний період: залишилося %d дні"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Пробний період: залишилося %d днів"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Пробний період: залишився %d день"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Пробний період: залишилося %d дня"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Give this folder its own summary style" : {
       "localizations" : {
         "de" : {
@@ -444,6 +610,46 @@
         }
       }
     },
+    "See Offhand Pro" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro ansehen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver Offhand Pro"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro देखें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver o Offhand Pro"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Посмотреть Offhand Pro"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переглянути Offhand Pro"
+          }
+        }
+      }
+    },
     "Summary style" : {
       "localizations" : {
         "de" : {
@@ -644,6 +850,46 @@
         }
       }
     },
+    "The date on this iPhone was set back past the start of your trial, so the trial has ended. You can keep using the free version or upgrade to Offhand Pro." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Datum auf diesem iPhone wurde vor den Beginn deiner Testphase zurückgestellt, deshalb ist die Testphase beendet. Du kannst die kostenlose Version weiter nutzen oder auf Offhand Pro upgraden."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La fecha de este iPhone se cambió a antes del inicio de tu prueba, así que la prueba ha terminado. Puedes seguir con la versión gratis o pasar a Offhand Pro."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "इस iPhone की तारीख़ आपके ट्रायल की शुरुआत से पहले की कर दी गई थी, इसलिए ट्रायल समाप्त हो गया है। आप मुफ़्त संस्करण इस्तेमाल करते रह सकते हैं या Offhand Pro में अपग्रेड कर सकते हैं।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A data deste iPhone foi alterada para antes do início do seu teste, então o teste terminou. Você pode continuar com a versão grátis ou fazer upgrade para o Offhand Pro."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дата на этом iPhone была переведена на время до начала пробного периода, поэтому он завершён. Вы можете пользоваться бесплатной версией или перейти на Offhand Pro."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дату на цьому iPhone було переведено на час до початку пробного періоду, тому його завершено. Ви можете користуватися безкоштовною версією або перейти на Offhand Pro."
+          }
+        }
+      }
+    },
     "The style chosen in Settings" : {
       "localizations" : {
         "de" : {
@@ -764,6 +1010,46 @@
         }
       }
     },
+    "Your 14 days of Offhand Pro are over. Your notes, folders and styles are all still here. You can keep using the free version, or upgrade to keep everything in Pro." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine 14 Tage Offhand Pro sind vorbei. Deine Notizen, Ordner und Stile sind alle noch da. Du kannst die kostenlose Version weiter nutzen oder upgraden, um alles aus Pro zu behalten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus 14 días de Offhand Pro han terminado. Tus notas, carpetas y estilos siguen aquí. Puedes seguir con la versión gratis o mejorar para conservar todo lo de Pro."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro के आपके 14 दिन पूरे हो गए हैं। आपके नोट्स, फ़ोल्डर और स्टाइल सब यहीं हैं। आप मुफ़्त संस्करण इस्तेमाल करते रह सकते हैं या Pro की सभी सुविधाएँ रखने के लिए अपग्रेड कर सकते हैं।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus 14 dias de Offhand Pro acabaram. Suas notas, pastas e estilos continuam aqui. Você pode continuar com a versão grátis ou fazer upgrade para manter tudo do Pro."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваши 14 дней Offhand Pro истекли. Все заметки, папки и стили остались на месте. Вы можете пользоваться бесплатной версией или перейти на Pro, чтобы сохранить все возможности."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваші 14 днів Offhand Pro минули. Усі нотатки, папки та стилі залишилися на місці. Ви можете користуватися безкоштовною версією або перейти на Pro, щоб зберегти всі можливості."
+          }
+        }
+      }
+    },
     "Your note didn't finish" : {
       "localizations" : {
         "de" : {
@@ -840,6 +1126,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вашу нотатку ще не завершено"
+          }
+        }
+      }
+    },
+    "Your Pro trial has ended" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Pro-Testphase ist beendet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu prueba de Pro ha terminado"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपका Pro ट्रायल समाप्त हो गया है"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu teste do Pro terminou"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пробный период Pro закончился"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пробний період Pro закінчився"
+          }
+        }
+      }
+    },
+    "Your Pro trial was removed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Pro-Testphase wurde entfernt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu prueba de Pro se ha eliminado"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपका Pro ट्रायल हटा दिया गया है"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu teste do Pro foi removido"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пробный период Pro отменён"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пробний період Pro скасовано"
           }
         }
       }

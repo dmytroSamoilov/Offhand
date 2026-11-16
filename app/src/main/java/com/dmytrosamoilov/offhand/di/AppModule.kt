@@ -43,6 +43,9 @@ val appModule = module {
             clearShareCache = get<ClearShareCacheUseCase>(),
             decideEarlyAdopterPro = lazy { get<DecideEarlyAdopterProUseCase>() },
             markEarlyAdopterThanked = get(),
+            settleProTrial = get(),
+            acknowledgeProTrialNotice = get(),
+            keepProTrialInSync = get(),
             proUpgradeGate = get(),
             appForegroundState = get(),
         )

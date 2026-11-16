@@ -17,6 +17,8 @@ struct RootView: View {
     @State private var isPaywallPresented = false
     @State private var isEarlyAdopterThanksShown = false
     @State private var showsBenefitsAfterThanks = false
+    @State private var trialNotice: TrialNoticeItem?
+    @State private var showsOfferAfterTrialNotice = false
     @ObservedObject private var notifications = NoteNotifications.shared
     @ObservedObject private var shortcuts = ShortcutRequests.shared
     @Environment(\.scenePhase) private var scenePhase
@@ -64,6 +66,22 @@ struct RootView: View {
                 onDismiss: { viewModel.onEarlyAdopterThanksDismissed() }
             )
             .presentationDetents([.fraction(0.66), .large])
+        }
+        .task {
+            for await notice in viewModel.trialNotice {
+                trialNotice = notice.map(TrialNoticeItem.init)
+            }
+        }
+        .sheet(item: trialNoticeBinding, onDismiss: showOfferIfRequested) { item in
+            TrialNoticeSheet(
+                notice: item.notice,
+                onUpgrade: {
+                    showsOfferAfterTrialNotice = true
+                    viewModel.onTrialNoticeDismissed()
+                },
+                onDismiss: { viewModel.onTrialNoticeDismissed() }
+            )
+            .presentationDetents([.medium, .large])
         }
         .task { await observeSession() }
         .task { await observeProcessingIds() }
@@ -161,6 +179,20 @@ struct RootView: View {
         guard showsBenefitsAfterThanks else { return }
         showsBenefitsAfterThanks = false
         viewModel.onProBenefitsRequested()
+    }
+
+    // Same reason as the thank-you: the paywall opens once the sheet is gone.
+    private func showOfferIfRequested() {
+        guard showsOfferAfterTrialNotice else { return }
+        showsOfferAfterTrialNotice = false
+        viewModel.onProBenefitsRequested()
+    }
+
+    private var trialNoticeBinding: Binding<TrialNoticeItem?> {
+        Binding(
+            get: { trialNotice },
+            set: { item in if item == nil { viewModel.onTrialNoticeDismissed() } }
+        )
     }
 
     private var earlyAdopterThanksBinding: Binding<Bool> {
@@ -338,6 +370,57 @@ struct MainTabView: View {
                 .tag(1)
         }
         .tint(Brand.primary)
+    }
+}
+
+private struct TrialNoticeItem: Identifiable {
+    let notice: ProTrialNotice
+
+    var id: String { notice.name }
+}
+
+// Shown once, on the first launch after the free trial ran out or was
+// removed: the free version stays, and Pro is one tap away.
+private struct TrialNoticeSheet: View {
+    let notice: ProTrialNotice
+    let onUpgrade: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(spacing: 20) {
+            ProCrown(size: 56)
+                .padding(.top, 8)
+            Text(title)
+                .font(.title2.bold())
+                .multilineTextAlignment(.center)
+            Text(message)
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+            Button(String(localized: "See Offhand Pro"), action: onUpgrade)
+                .buttonStyle(.borderedProminent)
+                .tint(Brand.primary)
+                .controlSize(.large)
+                .frame(maxWidth: .infinity)
+            Button(String(localized: "Continue with the free version"), action: onDismiss)
+                .buttonStyle(.plain)
+                .foregroundStyle(Brand.primary)
+        }
+        .padding(24)
+    }
+
+    private var title: String {
+        notice == .removed
+            ? String(localized: "Your Pro trial was removed")
+            : String(localized: "Your Pro trial has ended")
+    }
+
+    private var message: String {
+        notice == .removed
+            ? String(localized: "The date on this iPhone was set back past the start of your trial, so the trial has ended. You can keep using the free version or upgrade to Offhand Pro.")
+            : String(localized: "Your 14 days of Offhand Pro are over. Your notes, folders and styles are all still here. You can keep using the free version, or upgrade to keep everything in Pro.")
     }
 }
 

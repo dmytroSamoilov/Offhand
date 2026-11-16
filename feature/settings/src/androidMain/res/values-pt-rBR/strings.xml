@@ -140,4 +140,9 @@
     <string name="settings_redeem_code">Resgatar um código</string>
     <string name="settings_redeem_code_body">O Google Play abre o plano anual. Toque na seta ao lado da forma de pagamento, escolha “Resgatar código” e digite seu código. O período de teste dele substitui o padrão.</string>
     <string name="settings_redeem_code_confirm">Continuar</string>
+    <plurals name="settings_subscription_app_trial_days_left">
+        <item quantity="one">Teste grátis: resta %d dia</item>
+        <item quantity="many">Teste grátis: restam %d dias</item>
+        <item quantity="other">Teste grátis: restam %d dias</item>
+    </plurals>
 </resources>

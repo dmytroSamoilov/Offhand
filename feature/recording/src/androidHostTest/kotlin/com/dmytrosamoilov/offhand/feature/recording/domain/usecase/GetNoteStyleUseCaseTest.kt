@@ -42,10 +42,19 @@ class GetNoteStyleUseCaseTest {
     }
 
     @Test
-    fun `built-in default style never consults entitlements`() = runTest {
+    fun `built-in default style is used while unlocked`() = runTest {
         every { preferences.preferences } returns flowOf(preferences(NoteStyleRef.BuiltIn(NotePreset.LEGAL)))
+        every { entitlements.observeStatus() } returns flowOf(ProStatus.trial(endsAtMs = 1L))
 
         assertEquals(NoteStyleRef.BuiltIn(NotePreset.LEGAL), useCase())
+    }
+
+    @Test
+    fun `built-in default style falls back to Summary when locked`() = runTest {
+        every { preferences.preferences } returns flowOf(preferences(NoteStyleRef.BuiltIn(NotePreset.LEGAL)))
+        every { entitlements.observeStatus() } returns flowOf(ProStatus.FREE)
+
+        assertEquals(NoteStyleRef.DEFAULT, useCase())
     }
 
     @Test

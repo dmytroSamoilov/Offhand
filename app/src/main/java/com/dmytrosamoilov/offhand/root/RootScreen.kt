@@ -10,6 +10,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.R
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialNotice
 import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.feature.onboarding.presentation.OnboardingScreen
@@ -40,6 +41,13 @@ fun RootScreen(
                 onDismiss = viewModel::onEarlyAdopterThanksDismissed,
             )
         }
+        state.trialNotice?.let { notice ->
+            TrialNoticeDialog(
+                notice = notice,
+                onUpgrade = viewModel::onTrialUpgradeRequested,
+                onDismiss = viewModel::onTrialNoticeDismissed,
+            )
+        }
     }
 }
 
@@ -57,6 +65,29 @@ private fun EarlyAdopterThanksDialog(onShowBenefits: () -> Unit, onDismiss: () -
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.early_adopter_confirm)) }
+        },
+    )
+}
+
+// Shown once, on the first launch after the free trial ran out or was
+// removed: the free version stays, and Pro is one tap away.
+@Composable
+private fun TrialNoticeDialog(notice: ProTrialNotice, onUpgrade: () -> Unit, onDismiss: () -> Unit) {
+    val isRemoved = notice == ProTrialNotice.REMOVED
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { ProCrown(size = 48.dp) },
+        title = {
+            Text(text = stringResource(if (isRemoved) R.string.trial_removed_title else R.string.trial_ended_title))
+        },
+        text = {
+            Text(text = stringResource(if (isRemoved) R.string.trial_removed_body else R.string.trial_ended_body))
+        },
+        confirmButton = {
+            Button(onClick = onUpgrade) { Text(text = stringResource(R.string.trial_notice_upgrade)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.trial_notice_keep_free)) }
         },
     )
 }

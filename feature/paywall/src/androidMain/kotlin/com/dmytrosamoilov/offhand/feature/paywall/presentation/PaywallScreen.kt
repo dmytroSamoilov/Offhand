@@ -472,7 +472,7 @@ private fun ProOfferUi.hintLabel(): String = when {
 private fun ProOfferUi.secondHintLabel(): String? = when (plan) {
     ProPlan.YEARLY -> monthlyPrice?.let { stringResource(R.string.paywall_plan_yearly_monthly, it) }
     ProPlan.LIFETIME -> yearsOfYearly?.let { pluralStringResource(R.plurals.paywall_plan_lifetime_vs_yearly, it, it) }
-    ProPlan.NONE, ProPlan.INCLUDED -> null
+    ProPlan.NONE, ProPlan.INCLUDED, ProPlan.TRIAL -> null
 }
 
 @Composable
