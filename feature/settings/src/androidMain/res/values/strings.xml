@@ -151,4 +151,8 @@
     </plurals>
     <string name="settings_subscription_monthly">Monthly</string>
     <string name="settings_subscription_monthly_renews">Monthly, renews on %1$s</string>
+    <string name="settings_transcription_label">Transcribe recordings</string>
+    <string name="settings_transcription_description">Turns what you say into text. When off, a note is only its recording.</string>
+    <string name="settings_summary_label">Write a summary</string>
+    <string name="settings_summary_description">Writes a note from the transcript in your writing style. Needs transcription.</string>
 </resources>

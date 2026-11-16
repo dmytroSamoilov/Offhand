@@ -15,6 +15,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardNoteUs
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardStagedAudioUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetFolderStyleUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteFeaturesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetTranscriptionCheckpointUseCase
@@ -81,6 +82,7 @@ val featureRecordingModule = module {
             clearTranscriptionCheckpoint = get(),
             isAiCoreDownloaded = get(),
             getNoteStyle = get(),
+            getNoteFeatures = get(),
             getNote = get(),
             calendarEventExtractor = get(),
             saveNoteSuggestions = get(),
@@ -104,6 +106,7 @@ val featureRecordingModule = module {
     factoryOf(::FailNoteUseCase)
     factoryOf(::InterruptNoteUseCase)
     factoryOf(::GetFolderStyleUseCase)
+    factoryOf(::GetNoteFeaturesUseCase)
     factoryOf(::GetNoteStyleUseCase)
     factoryOf(::GetNoteUseCase)
     factoryOf(::GetTranscriptionCheckpointUseCase)

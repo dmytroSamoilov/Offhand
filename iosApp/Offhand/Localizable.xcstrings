@@ -16719,6 +16719,206 @@
           }
         }
       }
+    },
+    "Transcribe recordings" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahmen transkribieren"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcribir grabaciones"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "रिकॉर्डिंग ट्रांसक्राइब करें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcrever gravações"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Расшифровывать записи"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Розшифровувати записи"
+          }
+        }
+      }
+    },
+    "Turns what you say into text. When off, a note is only its recording." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Macht aus dem Gesagten Text. Ausgeschaltet besteht eine Notiz nur aus der Aufnahme."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Convierte lo que dices en texto. Si está desactivado, la nota es solo la grabación."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपकी कही बात को टेक्स्ट में बदलता है। बंद होने पर नोट सिर्फ़ रिकॉर्डिंग होता है।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transforma o que você diz em texto. Desativado, a nota é só a gravação."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Превращает сказанное в текст. Если выключено, заметка — это только запись."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перетворює сказане на текст. Якщо вимкнено, нотатка — це лише запис."
+          }
+        }
+      }
+    },
+    "Write a summary" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusammenfassung schreiben"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribir un resumen"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "सारांश लिखें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escrever um resumo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Писать резюме"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Писати резюме"
+          }
+        }
+      }
+    },
+    "Writes a note from the transcript in your writing style. Needs transcription." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schreibt aus dem Transkript eine Notiz in deinem Schreibstil. Benötigt die Transkription."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribe una nota a partir de la transcripción con tu estilo de escritura. Requiere la transcripción."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ट्रांसक्रिप्ट से आपकी लेखन शैली में नोट लिखता है। इसके लिए ट्रांसक्रिप्शन चालू होना चाहिए।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escreve uma nota a partir da transcrição no seu estilo de escrita. Precisa da transcrição."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пишет заметку по расшифровке в вашем стиле письма. Нужна расшифровка."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пише нотатку за розшифровкою у вашому стилі письма. Потрібна розшифровка."
+          }
+        }
+      }
+    },
+    "This note is the recording only." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Notiz besteht nur aus der Aufnahme."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta nota es solo la grabación."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "यह नोट सिर्फ़ रिकॉर्डिंग है।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta nota é só a gravação."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Эта заметка — только запись."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ця нотатка — лише запис."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

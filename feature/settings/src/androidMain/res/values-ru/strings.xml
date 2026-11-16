@@ -149,4 +149,8 @@
     </plurals>
     <string name="settings_subscription_monthly">Месячная</string>
     <string name="settings_subscription_monthly_renews">Месячная, продлится %1$s</string>
+    <string name="settings_transcription_label">Расшифровывать записи</string>
+    <string name="settings_transcription_description">Превращает сказанное в текст. Если выключено, заметка — это только запись.</string>
+    <string name="settings_summary_label">Писать резюме</string>
+    <string name="settings_summary_description">Пишет заметку по расшифровке в вашем стиле письма. Нужна расшифровка.</string>
 </resources>

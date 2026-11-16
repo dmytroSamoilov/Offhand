@@ -1,5 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteFeaturesUseCase
+import com.dmytrosamoilov.offhand.core.data.domain.NoteFeatures
 import app.cash.turbine.test
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.ai.api.AvailableModel
@@ -92,6 +94,10 @@ class NotesViewModelTest {
 
     private val observeNotes: ObserveNotesUseCase = mockk()
     private val transcribingNoteIds = MutableStateFlow<Set<Long>>(emptySet())
+    private val noteFeatures = MutableStateFlow(NoteFeatures())
+    private val observeNoteFeatures: ObserveNoteFeaturesUseCase = mockk {
+        every { this@mockk.invoke() } returns noteFeatures
+    }
     private val observeFolders: ObserveFoldersUseCase = mockk {
         every { this@mockk() } returns flowOf(emptyList())
     }
@@ -225,6 +231,7 @@ class NotesViewModelTest {
         isCalendarSuggestionsAvailable = isCalendarSuggestionsAvailable,
         isDocumentExportAvailable = isDocumentExportAvailable,
         isSmartSuggestionsEnabled = isSmartSuggestionsEnabled,
+        observeNoteFeatures = observeNoteFeatures,
         proUpgradeGate = gate,
         sessionManager = sessionManager,
         aiCoreDownloadStatus = AiCoreDownloadStatus(modelManager, speechToText, ModelDownloadPolicy(unmeteredNetwork)),
@@ -395,6 +402,30 @@ class NotesViewModelTest {
 
         coVerify(exactly = 1) { deleteNote(5) }
         assertFalse(viewModel.uiState.value.isSelectingNotes)
+    }
+
+    @Test
+    fun `a tab is hidden when its feature is off and the note has no such text`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(listOf(NoteDetailTabUi.SUMMARY, NoteDetailTabUi.TRANSCRIPT), viewModel.uiState.value.visibleDetailTabs)
+
+        noteFeatures.value = NoteFeatures(isTranscriptionEnabled = false, isSummaryEnabled = true)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(listOf(NoteDetailTabUi.SUMMARY, NoteDetailTabUi.TRANSCRIPT), viewModel.uiState.value.visibleDetailTabs)
+
+        every { observeNotes() } returns flowOf(listOf(note.copy(body = "", transcript = "")))
+        coEvery { getNote(5) } returns note.copy(body = "", transcript = "")
+        val audioOnly = viewModel()
+        audioOnly.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertTrue(audioOnly.uiState.value.visibleDetailTabs.isEmpty())
+        assertNull(audioOnly.uiState.value.shownDetailTab)
+
+        noteFeatures.value = NoteFeatures(isTranscriptionEnabled = true, isSummaryEnabled = false)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(NoteDetailTabUi.TRANSCRIPT, audioOnly.uiState.value.shownDetailTab)
     }
 
     @Test

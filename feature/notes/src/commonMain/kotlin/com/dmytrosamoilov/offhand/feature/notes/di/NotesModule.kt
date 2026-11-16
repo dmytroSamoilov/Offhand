@@ -25,6 +25,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsUnlimitedFolder
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ReorderFoldersUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SetFolderStyleUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteFeaturesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteDocumentBuilder
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
@@ -64,6 +65,7 @@ val featureNotesModule = module {
     factoryOf(::SetFolderStyleUseCase)
     factoryOf(::ReorderFoldersUseCase)
     factoryOf(::IsSmartSuggestionsEnabledUseCase)
+    factoryOf(::ObserveNoteFeaturesUseCase)
     factory { NoteDocumentBuilder(get(), get(), get()) }
     factoryOf(::MarkReviewAttemptUseCase)
     factoryOf(::ObserveDeveloperOptionsUseCase)
@@ -106,6 +108,7 @@ val featureNotesModule = module {
             isCalendarSuggestionsAvailable = get(),
             isDocumentExportAvailable = get(),
             isSmartSuggestionsEnabled = get(),
+            observeNoteFeatures = get(),
             proUpgradeGate = get(),
             sessionManager = get(),
             modelDownloadLauncher = get(),

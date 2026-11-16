@@ -147,4 +147,8 @@
     </plurals>
     <string name="settings_subscription_monthly">Mensual</string>
     <string name="settings_subscription_monthly_renews">Mensual, se renueva el %1$s</string>
+    <string name="settings_transcription_label">Transcribir grabaciones</string>
+    <string name="settings_transcription_description">Convierte lo que dices en texto. Si está desactivado, la nota es solo la grabación.</string>
+    <string name="settings_summary_label">Escribir un resumen</string>
+    <string name="settings_summary_description">Escribe una nota a partir de la transcripción con tu estilo de escritura. Requiere la transcripción.</string>
 </resources>

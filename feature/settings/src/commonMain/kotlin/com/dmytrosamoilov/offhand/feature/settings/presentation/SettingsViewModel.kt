@@ -21,7 +21,10 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamic
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOverrideUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStatusUseCase
+import com.dmytrosamoilov.offhand.core.data.domain.NoteFeature
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteFeaturesUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteFeatureEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.RedeemProCodeUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
@@ -54,6 +57,8 @@ class SettingsViewModel(
     private val observeImportAllowance: ObserveImportAllowanceUseCase,
     observeSmartSuggestionsEnabled: ObserveSmartSuggestionsEnabledUseCase,
     private val setSmartSuggestionsEnabled: SetSmartSuggestionsEnabledUseCase,
+    observeNoteFeatures: ObserveNoteFeaturesUseCase,
+    private val setNoteFeatureEnabled: SetNoteFeatureEnabledUseCase,
     observeProStatus: ObserveProStatusUseCase,
     observeProOverride: ObserveProOverrideUseCase,
     private val setProOverride: SetProOverrideUseCase,
@@ -76,6 +81,9 @@ class SettingsViewModel(
         collect(isAudioImportAvailable()) { unlocked -> copy(isAudioImportUnlocked = unlocked) }
         collect(observeImportAllowance()) { allowance -> withImportAllowance(allowance) }
         collect(observeSmartSuggestionsEnabled()) { enabled -> copy(isSmartSuggestionsEnabled = enabled) }
+        collect(observeNoteFeatures()) { features ->
+            copy(isTranscriptionEnabled = features.isTranscriptionEnabled, isSummaryEnabled = features.writesSummary)
+        }
         collect(observeProStatus()) { status -> copy(pro = status.toUi(), isSmartSuggestionsUnlocked = status.isPro) }
         if (buildInfo.isDeveloperBuild) collect(observeProOverride()) { override -> copy(proOverride = override) }
     }
@@ -101,6 +109,21 @@ class SettingsViewModel(
             val effective = enabled && appLockManager.isDeviceSecure
             setAppLockEnabled(effective)
             analyticsTracker.track(AnalyticsEvents.appLockToggled(effective))
+        }
+    }
+
+    fun onTranscriptionChanged(enabled: Boolean) = setNoteFeature(NoteFeature.TRANSCRIPTION, enabled)
+
+    // A summary is written from the transcript, so its switch only counts
+    // while transcription is on.
+    fun onSummaryChanged(enabled: Boolean) {
+        if (mutableUiState.value.isTranscriptionEnabled) setNoteFeature(NoteFeature.SUMMARY, enabled)
+    }
+
+    private fun setNoteFeature(feature: NoteFeature, enabled: Boolean) {
+        launchSafely(showLoading = false) {
+            setNoteFeatureEnabled(feature, enabled)
+            analyticsTracker.track(AnalyticsEvents.noteFeatureToggled(feature, enabled))
         }
     }
 

@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.core.data.repository
 
+import com.dmytrosamoilov.offhand.core.data.domain.NoteFeature
 import com.dmytrosamoilov.offhand.core.data.domain.EarlyAdopterPro
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProOffer
@@ -102,6 +103,7 @@ private class FakePreferences : UserPreferencesRepository {
     override suspend fun incrementSavedRecordingsCount() = Unit
     override suspend fun setReviewPromptState(state: ReviewPromptState) = Unit
     override suspend fun setSmartSuggestionsEnabled(enabled: Boolean) = Unit
+    override suspend fun setNoteFeatureEnabled(feature: NoteFeature, enabled: Boolean) = Unit
     override suspend fun setNotificationsPrompted() = Unit
 
     override suspend fun setEarlyAdopterPro(decision: EarlyAdopterPro) = Unit

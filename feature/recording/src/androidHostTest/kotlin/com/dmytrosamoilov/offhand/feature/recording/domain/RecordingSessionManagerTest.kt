@@ -40,6 +40,8 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteRecor
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RefundFreeImportUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RegisterSavedRecordingUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteSuggestionsUseCase
+import com.dmytrosamoilov.offhand.core.data.domain.NoteFeatures
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteFeaturesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveNoteTranscriptUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SaveTranscriptionCheckpointUseCase
 import io.mockk.coEvery
@@ -109,6 +111,9 @@ class RecordingSessionManagerTest {
     private val markNoteProcessing: MarkNoteProcessingUseCase = mockk()
     private val registerSavedRecording: RegisterSavedRecordingUseCase = mockk {
         coJustRun { this@mockk.invoke() }
+    }
+    private val getNoteFeatures: GetNoteFeaturesUseCase = mockk {
+        coEvery { this@mockk.invoke() } returns NoteFeatures()
     }
     private val saveNoteTranscript: SaveNoteTranscriptUseCase = mockk {
         coJustRun { this@mockk.invoke(any(), any(), any(), any()) }
@@ -216,6 +221,7 @@ class RecordingSessionManagerTest {
         clearTranscriptionCheckpoint = clearTranscriptionCheckpoint,
         isAiCoreDownloaded = isAiCoreDownloaded,
         getNoteStyle = getNoteStyle,
+        getNoteFeatures = getNoteFeatures,
         getNote = getNote,
         calendarEventExtractor = calendarEventExtractor,
         saveNoteSuggestions = saveNoteSuggestions,
@@ -228,6 +234,46 @@ class RecordingSessionManagerTest {
         appForegroundState = appForegroundState,
         scope = this,
     )
+
+    @Test
+    fun `with transcription switched off a recording is saved as audio only and nothing is transcribed`() = runTest {
+        coEvery { getNoteFeatures() } returns NoteFeatures(isTranscriptionEnabled = false)
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
+        every { recorder.recordStream(pcmSink = any()) } returns flowOf(chunk(1), chunk(2))
+        justRun { recorder.resetVad() }
+        coEvery { createRecordingNote("note-1.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.SUMMARY), FOLDER_ID) } returns 42L
+        coEvery { markNoteRecorded(42L, any(), "note-1.pcm.enc") } returns storedNote(42L)
+        coEvery { getNote(42L) } returns storedNote(42L, transcript = "")
+        coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
+
+        val manager = manager()
+        manager.start(folderId = FOLDER_ID)
+        testScheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { speechToText.transcribe(any()) }
+        coVerify(exactly = 0) { aiBackend.processText(any(), any()) }
+        coVerify { completeNote(noteId = 42L, title = storedNote(42L).title, body = "", transcript = "", any(), any(), any(), any()) }
+        assertTrue(manager.processingNoteIds.value.isEmpty())
+    }
+
+    @Test
+    fun `with the summary switched off a note is finished with its transcript and no ai text`() = runTest {
+        coEvery { getNoteFeatures() } returns NoteFeatures(isSummaryEnabled = false)
+        every { recorder.vad } returns MutableStateFlow(VadSnapshot(totalElapsedMs = 5_000L))
+        every { recorder.recordStream(pcmSink = any()) } returns flowOf(chunk(1))
+        justRun { recorder.resetVad() }
+        coEvery { speechToText.transcribe(any()) } returns sttResult("first part of the meeting")
+        coEvery { createRecordingNote("note-1.pcm.enc", NoteStyleRef.BuiltIn(NotePreset.SUMMARY), FOLDER_ID) } returns 42L
+        coEvery { markNoteRecorded(42L, any(), "note-1.pcm.enc") } returns storedNote(42L)
+        coEvery { completeNote(any(), any(), any(), any(), any(), any(), any(), any()) } returns true
+
+        val manager = manager()
+        manager.start(folderId = FOLDER_ID)
+        testScheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { aiBackend.processText(any(), any()) }
+        coVerify { completeNote(noteId = 42L, title = any(), body = "", transcript = "first part of the meeting", any(), any(), any(), any()) }
+    }
 
     @Test
     fun `session saves placeholder at drain, completes note in background`() = runTest {

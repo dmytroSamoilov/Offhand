@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.recording.domain
 
 import co.touchlab.kermit.Logger
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackendException
+import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechModelState
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
 import com.dmytrosamoilov.offhand.core.ai.api.TranscriptionResult
@@ -26,6 +27,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateImporte
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateRecordingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteFeaturesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetTranscriptionCheckpointUseCase
@@ -73,6 +75,7 @@ class RecordingSessionManager(
     private val clearTranscriptionCheckpoint: ClearTranscriptionCheckpointUseCase,
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
     private val getNoteStyle: GetNoteStyleUseCase,
+    private val getNoteFeatures: GetNoteFeaturesUseCase,
     private val getNote: GetNoteUseCase,
     private val calendarEventExtractor: CalendarEventExtractor,
     private val saveNoteSuggestions: SaveNoteSuggestionsUseCase,
@@ -127,6 +130,10 @@ class RecordingSessionManager(
     private var audioFileName: String? = null
 
     private var isDiscardRequested = false
+
+    // Decided once per recording: with transcription switched off the note is
+    // the recording alone.
+    private var isSessionTranscribed = true
 
     private var isStoppedInApp = false
 
@@ -297,6 +304,10 @@ class RecordingSessionManager(
             return
         }
         markNoteRecorded(noteId, decoded.durationMs, fileName)
+        if (!getNoteFeatures().isTranscriptionEnabled) {
+            completeAudioOnly(noteId, NoteSource.IMPORT)
+            return
+        }
         if (!isAiCoreDownloaded()) {
             parkUntilAiCoreArrives(noteId)
             return
@@ -537,7 +548,8 @@ class RecordingSessionManager(
 
     private suspend fun runSession() {
         sessionStyle = getNoteStyle(sessionFolderId)
-        isTranscribingLive = speechToText.downloadState.value is SpeechModelState.Downloaded
+        isSessionTranscribed = getNoteFeatures().isTranscriptionEnabled
+        isTranscribingLive = isSessionTranscribed && speechToText.downloadState.value is SpeechModelState.Downloaded
         openAudioBackup()
         mutableActiveRecordingNoteId.value = createSessionNote()
         val queue = Channel<AudioChunk>(Channel.UNLIMITED)
@@ -731,11 +743,25 @@ class RecordingSessionManager(
         val storedAudio = audioFileName.takeIf { needsStoredAudioTranscription() }
         analyticsTracker.track(AnalyticsEvents.noteRecorded(recorder.vad.value.totalElapsedMs, style))
         mutableSession.value = RecordingSession(noteId = noteId)
-        if (storedAudio != null) {
+        if (!isSessionTranscribed) {
+            completeAudioOnly(noteId, NoteSource.RECORDING)
+        } else if (storedAudio != null) {
             retryNote(noteId, storedAudio)
         } else {
             startProcessing(noteId, chunkTranscripts, recordedTranscriptionMs, style)
         }
+    }
+
+    // With transcription off the note is finished the moment its audio is
+    // saved: it keeps the title it was created with and has no text.
+    private suspend fun completeAudioOnly(noteId: Long, source: NoteSource) {
+        val note = getNote(noteId)
+        if (note != null && completeNote(noteId, note.title, "", "", 0, 0, HardwareBackend.CPU.name, note.style)) {
+            mutableEvents.emit(NoteProcessingEvent.Completed(noteId))
+            trackNoteReady(noteId, source)
+        }
+        mutableProcessingNoteIds.update { it - noteId }
+        mutableNoteProgress.update { it - noteId }
     }
 
     private fun needsStoredAudioTranscription(): Boolean =
@@ -864,7 +890,12 @@ class RecordingSessionManager(
     ): StructureOutcome {
         if (transcripts.isEmpty()) return StructureOutcome.FAILED
         persistTranscript(noteId, transcripts, transcriptionMs)
-        val structured = structureOrKeepTranscript(noteId, transcripts, progressOffset, style)
+        val writesSummary = source == NoteSource.RESTYLE || getNoteFeatures().writesSummary
+        val structured = if (writesSummary) {
+            structureOrKeepTranscript(noteId, transcripts, progressOffset, style)
+        } else {
+            transcriptStructurer.transcriptOnly(transcripts, style).copy(overview = "")
+        }
         val stillExists = completeNote(
             noteId = noteId,
             title = structured.title,
@@ -880,7 +911,7 @@ class RecordingSessionManager(
         mutableNoteProgress.update { it - noteId }
         mutableEvents.emit(NoteProcessingEvent.Completed(noteId))
         trackNoteReady(noteId, source)
-        suggestEventsLocked(noteId)
+        if (writesSummary) suggestEventsLocked(noteId)
         return StructureOutcome.COMPLETED
     }
 

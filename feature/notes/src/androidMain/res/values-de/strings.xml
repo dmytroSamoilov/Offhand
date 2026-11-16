@@ -129,4 +129,5 @@
     <string name="notes_select_action">Auswählen</string>
     <string name="notes_bulk_delete_title">Ausgewählte Notizen löschen?</string>
     <string name="notes_bulk_delete_body">Sie werden dauerhaft von deinem Smartphone entfernt. Das lässt sich nicht rückgängig machen.</string>
+    <string name="notes_audio_only">Diese Notiz besteht nur aus der Aufnahme.</string>
 </resources>

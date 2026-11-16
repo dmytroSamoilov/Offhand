@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.EarlyAdopterPro
+import com.dmytrosamoilov.offhand.core.data.domain.NoteFeature
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
@@ -54,6 +55,8 @@ internal class DataStoreUserPreferencesRepository(
                 isEarlyAdopterThanked = preferences[KEY_EARLY_ADOPTER_THANKED] ?: false,
                 freeImportsUsed = preferences[KEY_FREE_IMPORTS_USED] ?: 0,
                 modelDownloadProgress = preferences[KEY_MODEL_DOWNLOAD_PROGRESS],
+                transcriptionEnabled = preferences[KEY_TRANSCRIPTION_ENABLED] ?: true,
+                summaryEnabled = preferences[KEY_SUMMARY_ENABLED] ?: true,
             )
         }
 
@@ -90,6 +93,14 @@ internal class DataStoreUserPreferencesRepository(
             preferences[KEY_SAVED_RECORDINGS_COUNT] =
                 (preferences[KEY_SAVED_RECORDINGS_COUNT] ?: 0) + 1
         }
+    }
+
+    override suspend fun setNoteFeatureEnabled(feature: NoteFeature, enabled: Boolean) {
+        val key = when (feature) {
+            NoteFeature.TRANSCRIPTION -> KEY_TRANSCRIPTION_ENABLED
+            NoteFeature.SUMMARY -> KEY_SUMMARY_ENABLED
+        }
+        dataStore.edit { it[key] = enabled }
     }
 
     override suspend fun setSmartSuggestionsEnabled(enabled: Boolean) {
@@ -160,6 +171,8 @@ internal class DataStoreUserPreferencesRepository(
         val KEY_PRO_OVERRIDE = stringPreferencesKey("debug_pro_override")
         val KEY_NOTIFICATIONS_PROMPTED = booleanPreferencesKey("notifications_prompted")
         val KEY_SMART_SUGGESTIONS = booleanPreferencesKey("smart_suggestions_enabled")
+        val KEY_TRANSCRIPTION_ENABLED = booleanPreferencesKey("transcription_enabled")
+        val KEY_SUMMARY_ENABLED = booleanPreferencesKey("summary_enabled")
         val KEY_EARLY_ADOPTER_PRO = stringPreferencesKey("early_adopter_pro")
         val KEY_EARLY_ADOPTER_THANKED = booleanPreferencesKey("early_adopter_thanked")
         val KEY_FREE_IMPORTS_USED = intPreferencesKey("free_imports_used")

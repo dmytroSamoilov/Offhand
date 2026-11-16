@@ -149,4 +149,8 @@
     </plurals>
     <string name="settings_subscription_monthly">Місячна</string>
     <string name="settings_subscription_monthly_renews">Місячна, поновиться %1$s</string>
+    <string name="settings_transcription_label">Розшифровувати записи</string>
+    <string name="settings_transcription_description">Перетворює сказане на текст. Якщо вимкнено, нотатка — це лише запис.</string>
+    <string name="settings_summary_label">Писати резюме</string>
+    <string name="settings_summary_description">Пише нотатку за розшифровкою у вашому стилі письма. Потрібна розшифровка.</string>
 </resources>

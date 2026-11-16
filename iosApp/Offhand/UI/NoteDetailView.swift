@@ -14,23 +14,39 @@ struct NoteDetailView: View {
             VStack(alignment: .leading, spacing: 16) {
                 header
                 trustBadges
-                // The recording is playable as soon as it is on disk, like on
-                // Android; only the overview waits for processing.
-                if detail.hasAudio && state.playback.isAvailable {
-                    playbackCard
+                // One kind of text needs no tab bar, and a note without any
+                // is its recording alone.
+                if state.visibleDetailTabs.count > 1 {
+                    NoteDetailTabs(
+                        selected: state.detailTab,
+                        isSummaryReadyMarked: state.isSummaryReadyMarked,
+                        onSelect: { viewModel.onDetailTabSelected(tab: $0) }
+                    )
                 }
-                NoteDetailTabs(
-                    selected: state.detailTab,
-                    isSummaryReadyMarked: state.isSummaryReadyMarked,
-                    onSelect: { viewModel.onDetailTabSelected(tab: $0) }
-                )
-                if state.detailTab == .summary {
+                if state.shownDetailTab == .summary {
                     summaryTab
-                } else {
+                } else if state.shownDetailTab == .transcript {
                     transcriptTab
+                } else {
+                    Text(String(localized: "This note is the recording only."))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(20)
+                        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
                 }
             }
             .padding()
+        }
+        // The recording is playable as soon as it is on disk, and its player
+        // stays in place above the text however far the note is scrolled.
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if detail.hasAudio && state.playback.isAvailable {
+                playbackCard
+                    .padding(.horizontal)
+                    .padding(.top, 4)
+                    .padding(.bottom, 8)
+                    .background(Color(.systemGroupedBackground))
+            }
         }
         .background(Color(.systemGroupedBackground))
         .modifier(SoftTopEdge())

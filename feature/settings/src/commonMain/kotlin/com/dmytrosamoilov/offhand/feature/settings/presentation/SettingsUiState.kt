@@ -13,6 +13,8 @@ data class SettingsUiState(
     val freeImportsLeft: Int? = null,
     val allowsMultipleImports: Boolean = false,
     val isSmartSuggestionsEnabled: Boolean = false,
+    val isTranscriptionEnabled: Boolean = true,
+    val isSummaryEnabled: Boolean = true,
     val isSmartSuggestionsUnlocked: Boolean = false,
     val pro: ProStatusUi = ProStatusUi.Free,
     val proOverride: ProOverride? = null,

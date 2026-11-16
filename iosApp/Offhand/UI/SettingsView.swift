@@ -15,6 +15,8 @@ struct SettingsView: View {
         freeImportsLeft: nil,
         allowsMultipleImports: false,
         isSmartSuggestionsEnabled: false,
+        isTranscriptionEnabled: true,
+        isSummaryEnabled: true,
         isSmartSuggestionsUnlocked: false,
         pro: ProStatusUiFree.shared,
         proOverride: nil,
@@ -44,6 +46,21 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                         }
                     }
+                    SettingsSwitchRow(
+                        title: String(localized: "Transcribe recordings"),
+                        subtitle: String(localized: "Turns what you say into text. When off, a note is only its recording."),
+                        isOn: state.isTranscriptionEnabled
+                    ) {
+                        viewModel.onTranscriptionChanged(enabled: !state.isTranscriptionEnabled)
+                    }
+                    SettingsSwitchRow(
+                        title: String(localized: "Write a summary"),
+                        subtitle: String(localized: "Writes a note from the transcript in your writing style. Needs transcription."),
+                        isOn: state.isSummaryEnabled
+                    ) {
+                        viewModel.onSummaryChanged(enabled: !state.isSummaryEnabled)
+                    }
+                    .disabled(!state.isTranscriptionEnabled)
                     SettingsSwitchRow(
                         title: String(localized: "Show smart suggestions"),
                         subtitle: String(localized: "Find calendar events and to-dos in every new note. Adds a few seconds of processing."),

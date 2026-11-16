@@ -69,7 +69,7 @@ private fun NoteSearchResult.toCardUi(
         title = note.title,
         dayLabel = createdAt.date.toDayLabel(today, dateLabelFormatter),
         time = dateLabelFormatter.time(createdAt),
-        preview = snippet ?: NoteTextCleaner.preview(note.body),
+        preview = snippet ?: NoteTextCleaner.preview(note.body.ifBlank { note.transcript }),
         durationText = note.durationMs?.let(::formatClock),
         status = note.status.toUi(),
         titleHighlights = titleMatches.map(TextMatch::toUi),

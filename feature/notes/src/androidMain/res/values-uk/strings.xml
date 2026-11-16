@@ -131,4 +131,5 @@
     <string name="notes_select_action">Вибрати</string>
     <string name="notes_bulk_delete_title">Видалити вибрані нотатки?</string>
     <string name="notes_bulk_delete_body">Їх буде назавжди видалено з телефона. Цю дію не можна скасувати.</string>
+    <string name="notes_audio_only">Ця нотатка — лише запис.</string>
 </resources>

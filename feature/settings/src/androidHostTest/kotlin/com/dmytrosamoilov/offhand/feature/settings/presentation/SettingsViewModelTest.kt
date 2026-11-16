@@ -1,5 +1,13 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import io.mockk.verify
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import kotlinx.coroutines.flow.MutableStateFlow
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteFeatureEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteFeaturesUseCase
+import com.dmytrosamoilov.offhand.core.data.domain.NoteFeatures
+import com.dmytrosamoilov.offhand.core.data.domain.NoteFeature
 import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
@@ -65,6 +73,12 @@ class SettingsViewModelTest {
     private val isAudioImportAvailable: IsAudioImportAvailableUseCase = mockk()
     private val observeImportAllowance: ObserveImportAllowanceUseCase = mockk()
     private val observeSmartSuggestionsEnabled: ObserveSmartSuggestionsEnabledUseCase = mockk()
+    private val noteFeatures = MutableStateFlow(NoteFeatures())
+    private val observeNoteFeatures: ObserveNoteFeaturesUseCase = mockk {
+        every { this@mockk.invoke() } returns noteFeatures
+    }
+    private val setNoteFeatureEnabled: SetNoteFeatureEnabledUseCase = mockk(relaxed = true)
+    private val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
     private val setSmartSuggestionsEnabled: SetSmartSuggestionsEnabledUseCase = mockk(relaxed = true)
     private val observeProStatus: ObserveProStatusUseCase = mockk()
     private val observeProOverride: ObserveProOverrideUseCase = mockk()
@@ -106,6 +120,8 @@ class SettingsViewModelTest {
         isAudioImportAvailable = isAudioImportAvailable,
         observeImportAllowance = observeImportAllowance,
         observeSmartSuggestionsEnabled = observeSmartSuggestionsEnabled,
+        observeNoteFeatures = observeNoteFeatures,
+        setNoteFeatureEnabled = setNoteFeatureEnabled,
         setSmartSuggestionsEnabled = setSmartSuggestionsEnabled,
         observeProStatus = observeProStatus,
         observeProOverride = observeProOverride,
@@ -113,7 +129,7 @@ class SettingsViewModelTest {
         proUpgradeGate = gate,
         redeemProCode = redeemProCode,
         buildInfo = BuildInfo(isDeveloperBuild = false, appVersion = "1", platform = "test"),
-        analyticsTracker = mockk(relaxed = true),
+        analyticsTracker = analyticsTracker,
     )
 
     @Test
@@ -280,5 +296,33 @@ class SettingsViewModelTest {
 
         assertEquals(ImportNoticeUi.Unreadable, viewModel.uiState.value.importNotice)
         coVerify(exactly = 1) { importAudio(any()) }
+    }
+
+    @Test
+    fun `switching transcription or the summary is stored and reported with its state`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onTranscriptionChanged(false)
+        viewModel.onSummaryChanged(false)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { setNoteFeatureEnabled(NoteFeature.TRANSCRIPTION, false) }
+        coVerify { setNoteFeatureEnabled(NoteFeature.SUMMARY, false) }
+        verify { analyticsTracker.track(AnalyticsEvents.noteFeatureToggled(NoteFeature.TRANSCRIPTION, false)) }
+        verify { analyticsTracker.track(AnalyticsEvents.noteFeatureToggled(NoteFeature.SUMMARY, false)) }
+    }
+
+    @Test
+    fun `without transcription the summary reads as off and its switch does nothing`() = runTest(dispatcher) {
+        noteFeatures.value = NoteFeatures(isTranscriptionEnabled = false, isSummaryEnabled = true)
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isSummaryEnabled)
+        viewModel.onSummaryChanged(true)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { setNoteFeatureEnabled(NoteFeature.SUMMARY, any()) }
     }
 }

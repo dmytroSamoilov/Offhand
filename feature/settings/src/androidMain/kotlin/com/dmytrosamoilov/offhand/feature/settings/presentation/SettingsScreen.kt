@@ -103,6 +103,8 @@ fun SettingsScreen(
                     state = state,
                     onStylesClick = onNoteStylesClick,
                     onSmartSuggestionsChanged = viewModel::onSmartSuggestionsChanged,
+                    onTranscriptionChanged = viewModel::onTranscriptionChanged,
+                    onSummaryChanged = viewModel::onSummaryChanged,
                 )
                 SecuritySection(
                     isAppLockEnabled = state.isAppLockEnabled,
@@ -135,6 +137,8 @@ private fun NotesSection(
     state: SettingsUiState,
     onStylesClick: () -> Unit,
     onSmartSuggestionsChanged: (Boolean) -> Unit,
+    onTranscriptionChanged: (Boolean) -> Unit,
+    onSummaryChanged: (Boolean) -> Unit,
 ) {
     val choices = state.customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) }
     SettingsCard(title = stringResource(R.string.settings_notes_title)) {
@@ -142,6 +146,19 @@ private fun NotesSection(
             title = stringResource(R.string.settings_note_styles_title),
             subtitle = stringResource(R.string.settings_note_styles_default_value, state.noteStyle.label(choices)),
             onClick = onStylesClick,
+        )
+        SwitchRow(
+            label = stringResource(R.string.settings_transcription_label),
+            description = stringResource(R.string.settings_transcription_description),
+            checked = state.isTranscriptionEnabled,
+            onCheckedChange = onTranscriptionChanged,
+        )
+        SwitchRow(
+            label = stringResource(R.string.settings_summary_label),
+            description = stringResource(R.string.settings_summary_description),
+            checked = state.isSummaryEnabled,
+            onCheckedChange = onSummaryChanged,
+            enabled = state.isTranscriptionEnabled,
         )
         SwitchRow(
             label = stringResource(R.string.settings_smart_suggestions_label),

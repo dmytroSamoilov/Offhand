@@ -142,4 +142,5 @@
     <string name="notes_select_action">Select</string>
     <string name="notes_bulk_delete_title">Delete the selected notes?</string>
     <string name="notes_bulk_delete_body">They will be permanently removed from your phone. This cannot be undone.</string>
+    <string name="notes_audio_only">This note is the recording only.</string>
 </resources>

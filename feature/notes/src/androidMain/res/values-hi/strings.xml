@@ -129,4 +129,5 @@
     <string name="notes_select_action">चुनें</string>
     <string name="notes_bulk_delete_title">चुने गए नोट हटाएं?</string>
     <string name="notes_bulk_delete_body">ये आपके फ़ोन से हमेशा के लिए हट जाएंगे। इसे वापस नहीं किया जा सकता।</string>
+    <string name="notes_audio_only">यह नोट सिर्फ़ रिकॉर्डिंग है।</string>
 </resources>

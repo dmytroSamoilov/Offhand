@@ -145,4 +145,8 @@
     </plurals>
     <string name="settings_subscription_monthly">मासिक</string>
     <string name="settings_subscription_monthly_renews">मासिक, %1$s को नवीनीकृत होगी</string>
+    <string name="settings_transcription_label">रिकॉर्डिंग ट्रांसक्राइब करें</string>
+    <string name="settings_transcription_description">आपकी कही बात को टेक्स्ट में बदलता है। बंद होने पर नोट सिर्फ़ रिकॉर्डिंग होता है।</string>
+    <string name="settings_summary_label">सारांश लिखें</string>
+    <string name="settings_summary_description">ट्रांसक्रिप्ट से आपकी लेखन शैली में नोट लिखता है। इसके लिए ट्रांसक्रिप्शन चालू होना चाहिए।</string>
 </resources>

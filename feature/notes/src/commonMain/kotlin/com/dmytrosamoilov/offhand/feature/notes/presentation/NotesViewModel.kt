@@ -35,6 +35,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportA
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsFolderStylesAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsUnlimitedFoldersAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteFeaturesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
@@ -102,6 +103,7 @@ class NotesViewModel(
     private val isCalendarSuggestionsAvailable: IsCalendarSuggestionsAvailableUseCase,
     isDocumentExportAvailable: IsDocumentExportAvailableUseCase,
     private val isSmartSuggestionsEnabled: IsSmartSuggestionsEnabledUseCase,
+    observeNoteFeatures: ObserveNoteFeaturesUseCase,
     private val proUpgradeGate: ProUpgradeGate,
     private val sessionManager: RecordingSessionManager,
     aiCoreDownloadStatus: AiCoreDownloadStatus,
@@ -155,6 +157,13 @@ class NotesViewModel(
         viewModelScope.launch {
             combine(selectedNoteId, sessionManager.transcribingNoteIds) { noteId, transcribing -> noteId in transcribing }
                 .collect { isTranscribing -> mutableUiState.update { it.copy(isTranscribing = isTranscribing) } }
+        }
+        viewModelScope.launch {
+            observeNoteFeatures().collect { features ->
+                mutableUiState.update {
+                    it.copy(isTranscriptionEnabled = features.isTranscriptionEnabled, isSummaryEnabled = features.writesSummary)
+                }
+            }
         }
         viewModelScope.launch {
             audioPlayer.state.collect { playback ->

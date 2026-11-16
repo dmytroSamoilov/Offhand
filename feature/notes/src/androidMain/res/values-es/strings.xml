@@ -130,4 +130,5 @@
     <string name="notes_select_action">Seleccionar</string>
     <string name="notes_bulk_delete_title">¿Eliminar las notas seleccionadas?</string>
     <string name="notes_bulk_delete_body">Se eliminarán de forma permanente de tu teléfono. Esta acción no se puede deshacer.</string>
+    <string name="notes_audio_only">Esta nota es solo la grabación.</string>
 </resources>

@@ -131,4 +131,5 @@
     <string name="notes_select_action">Выбрать</string>
     <string name="notes_bulk_delete_title">Удалить выбранные заметки?</string>
     <string name="notes_bulk_delete_body">Они будут навсегда удалены с телефона. Это действие нельзя отменить.</string>
+    <string name="notes_audio_only">Эта заметка — только запись.</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.core.data.domain.analytics
 
+import com.dmytrosamoilov.offhand.core.data.domain.NoteFeature
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
@@ -75,6 +76,14 @@ object AnalyticsEvents {
 
     fun defaultStyleChanged(style: NoteStyleRef): AnalyticsEvent =
         event("default_style_changed", "style" to style.analyticsName())
+
+    fun noteFeatureToggled(feature: NoteFeature, enabled: Boolean): AnalyticsEvent = event(
+        when (feature) {
+            NoteFeature.TRANSCRIPTION -> "transcription_toggled"
+            NoteFeature.SUMMARY -> "summary_toggled"
+        },
+        "enabled" to enabled.label(),
+    )
 
     fun smartSuggestionsToggled(enabled: Boolean): AnalyticsEvent =
         event("smart_suggestions_toggled", "enabled" to enabled.label())

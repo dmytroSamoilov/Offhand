@@ -11,7 +11,9 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamic
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOverrideUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStatusUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteFeaturesUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteFeatureEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.RedeemProCodeUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SaveCustomNoteStyleUseCase
@@ -41,6 +43,7 @@ val featureSettingsModule = module {
     factoryOf(::ObserveCustomNoteStylesUseCase)
     factoryOf(::ObserveDeveloperOptionsUseCase)
     factoryOf(::ObserveDynamicColorUseCase)
+    factoryOf(::ObserveNoteFeaturesUseCase)
     factoryOf(::ObserveNoteStyleUseCase)
     factoryOf(::ObserveProOverrideUseCase)
     factoryOf(::ObserveProStatusUseCase)
@@ -51,6 +54,7 @@ val featureSettingsModule = module {
     factoryOf(::SetAppLockEnabledUseCase)
     factoryOf(::SetDeveloperOptionsUseCase)
     factoryOf(::SetDynamicColorUseCase)
+    factoryOf(::SetNoteFeatureEnabledUseCase)
     factoryOf(::SetNoteStyleUseCase)
     factoryOf(::SetProOverrideUseCase)
     factoryOf(::SetSmartSuggestionsEnabledUseCase)

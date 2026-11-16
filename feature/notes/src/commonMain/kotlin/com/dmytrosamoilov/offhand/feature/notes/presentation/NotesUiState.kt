@@ -40,8 +40,27 @@ data class NotesUiState(
     val isTranscribing: Boolean = false,
     val selectedNoteIds: Set<Long> = emptySet(),
     val bulkAction: BulkNoteActionUi? = null,
+    val isTranscriptionEnabled: Boolean = true,
+    val isSummaryEnabled: Boolean = true,
 ) {
     val isSelectingNotes: Boolean get() = selectedNoteIds.isNotEmpty()
+
+    // A tab is there while its feature is on or the note already has that
+    // text; a failed or paused note keeps Summary, where its buttons are.
+    val visibleDetailTabs: List<NoteDetailTabUi>
+        get() {
+            val note = selected ?: return emptyList()
+            val showsSummary = isSummaryEnabled || note.body.isNotBlank() ||
+                note.status == NoteStatusUi.FAILED || note.status == NoteStatusUi.INTERRUPTED
+            val showsTranscript = isTranscriptionEnabled || note.transcript.isNotBlank()
+            return listOfNotNull(
+                NoteDetailTabUi.SUMMARY.takeIf { showsSummary },
+                NoteDetailTabUi.TRANSCRIPT.takeIf { showsTranscript },
+            )
+        }
+
+    val shownDetailTab: NoteDetailTabUi?
+        get() = detailTab.takeIf { it in visibleDetailTabs } ?: visibleDetailTabs.firstOrNull()
 }
 
 enum class BulkNoteActionUi {

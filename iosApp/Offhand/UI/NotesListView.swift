@@ -41,7 +41,9 @@ struct NotesListView: View {
         isUnsortedShown: false,
         isTranscribing: false,
         selectedNoteIds: [],
-        bulkAction: nil
+        bulkAction: nil,
+        isTranscriptionEnabled: true,
+        isSummaryEnabled: true
     )
     // A long press also ends in the row's own tap; the tap that follows a
     // long press is swallowed so the note is not toggled twice.

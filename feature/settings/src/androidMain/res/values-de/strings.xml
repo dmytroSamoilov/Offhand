@@ -145,4 +145,8 @@
     </plurals>
     <string name="settings_subscription_monthly">Monatlich</string>
     <string name="settings_subscription_monthly_renews">Monatlich, verlängert sich am %1$s</string>
+    <string name="settings_transcription_label">Aufnahmen transkribieren</string>
+    <string name="settings_transcription_description">Macht aus dem Gesagten Text. Ausgeschaltet besteht eine Notiz nur aus der Aufnahme.</string>
+    <string name="settings_summary_label">Zusammenfassung schreiben</string>
+    <string name="settings_summary_description">Schreibt aus dem Transkript eine Notiz in deinem Schreibstil. Benötigt die Transkription.</string>
 </resources>

@@ -17,7 +17,11 @@ struct AboutSupportView: View {
 
     var body: some View {
         Form {
-            modelSection
+            // The on-device AI's details and its remove button are developer
+            // tools on iOS; everyone else only needs it to be there.
+            if state.isDeveloperOptionsEnabled {
+                modelSection
+            }
             privacySection
             feedbackSection
             legalSection

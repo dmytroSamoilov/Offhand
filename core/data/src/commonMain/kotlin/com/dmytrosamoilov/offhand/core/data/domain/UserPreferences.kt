@@ -22,6 +22,8 @@ data class UserPreferences(
     // Percent of an on-device AI download that has not finished yet; null when
     // none is pending, so a cold start can tell an abandoned download apart.
     val modelDownloadProgress: Int? = null,
+    val transcriptionEnabled: Boolean = true,
+    val summaryEnabled: Boolean = true,
 )
 
 // Decided once per install when 1.5 first runs: an install that had finished
@@ -69,6 +71,8 @@ interface UserPreferencesRepository {
     suspend fun setProOverride(override: ProOverride)
 
     suspend fun setSmartSuggestionsEnabled(enabled: Boolean)
+
+    suspend fun setNoteFeatureEnabled(feature: NoteFeature, enabled: Boolean)
 
     suspend fun setNotificationsPrompted()
 

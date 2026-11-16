@@ -1831,7 +1831,8 @@ private fun NoteDetailPane(
             playback = state.playback,
             smartSuggestions = state.smartSuggestions,
             tabs = NoteDetailTabsUi(
-                selected = state.detailTab,
+                visible = state.visibleDetailTabs,
+                selected = state.shownDetailTab,
                 isSummaryReadyMarked = state.isSummaryReadyMarked,
                 onSelected = viewModel::onDetailTabSelected,
             ),
@@ -2139,20 +2140,61 @@ private fun NoteDetailContent(
     onCopied: (NoteSection) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-    ) {
+    // The player stays in place above the text, so a recording can be paused
+    // or scrubbed however far the note has been scrolled.
+    Column(modifier = modifier.fillMaxSize()) {
         if (note.hasAudio && playback.isAvailable) {
             AudioPlayerCard(
                 playback = playback,
                 onPlayPause = onPlayPause,
                 onSeek = onSeek,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp),
             )
-            Spacer(modifier = Modifier.height(20.dp))
         }
+        NoteDetailBody(
+            note = note,
+            playback = playback,
+            smartSuggestions = smartSuggestions,
+            suggestionActions = suggestionActions,
+            tabs = tabs,
+            showMetrics = showMetrics,
+            progressPercent = progressPercent,
+            isWaitingForAi = isWaitingForAi,
+            isTranscribing = isTranscribing,
+            onTranscriptTime = onTranscriptTime,
+            onRetryTranscription = onRetryTranscription,
+            onResumeProcessing = onResumeProcessing,
+            onPresetRequested = onPresetRequested,
+            onCopied = onCopied,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun NoteDetailBody(
+    note: NoteDetailUi,
+    playback: AudioPlaybackUi,
+    smartSuggestions: SmartSuggestionsUi?,
+    suggestionActions: SuggestionActions,
+    tabs: NoteDetailTabsUi,
+    showMetrics: Boolean,
+    progressPercent: Int?,
+    isWaitingForAi: Boolean,
+    isTranscribing: Boolean,
+    onTranscriptTime: (Long) -> Unit,
+    onRetryTranscription: () -> Unit,
+    onResumeProcessing: () -> Unit,
+    onPresetRequested: () -> Unit,
+    onCopied: (NoteSection) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+    ) {
         Text(text = note.detailTitle(), style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(4.dp))
         val locale = LocalConfiguration.current.locales[0]
@@ -2196,9 +2238,14 @@ private fun NoteDetailContent(
         }
         Spacer(modifier = Modifier.height(16.dp))
         ProcessingHaptics(noteId = note.id, status = note.status)
-        NoteDetailTabs(tabs = tabs)
-        Spacer(modifier = Modifier.height(16.dp))
+        // One kind of text needs no tab bar, and a note without any is its
+        // recording alone.
+        if (tabs.visible.size > 1) {
+            NoteDetailTabs(tabs = tabs)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
         when (tabs.selected) {
+            null -> AudioOnlyCard()
             NoteDetailTabUi.SUMMARY -> SummaryTab(
                 note = note,
                 smartSuggestions = smartSuggestions,
@@ -2226,7 +2273,8 @@ private fun NoteDetailContent(
 
 @Immutable
 private data class NoteDetailTabsUi(
-    val selected: NoteDetailTabUi,
+    val visible: List<NoteDetailTabUi>,
+    val selected: NoteDetailTabUi?,
     val isSummaryReadyMarked: Boolean,
     val onSelected: (NoteDetailTabUi) -> Unit,
 )
@@ -2235,14 +2283,14 @@ private data class NoteDetailTabsUi(
 private fun NoteDetailTabs(tabs: NoteDetailTabsUi) {
     val haptics = haptics()
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-        NoteDetailTabUi.entries.forEachIndexed { index, tab ->
+        tabs.visible.forEachIndexed { index, tab ->
             SegmentedButton(
                 selected = tab == tabs.selected,
                 onClick = {
                     haptics.tick()
                     tabs.onSelected(tab)
                 },
-                shape = SegmentedButtonDefaults.itemShape(index = index, count = NoteDetailTabUi.entries.size),
+                shape = SegmentedButtonDefaults.itemShape(index = index, count = tabs.visible.size),
             ) {
                 NoteDetailTabLabel(
                     text = stringResource(tab.labelRes()),
@@ -2440,6 +2488,18 @@ private fun NoteTextCard(
 }
 
 @Composable
+private fun AudioOnlyCard() {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.notes_audio_only),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(24.dp),
+        )
+    }
+}
+
+@Composable
 private fun EmptyTranscriptCard() {
     Card(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -2632,10 +2692,11 @@ private fun AudioPlayerCard(
     playback: AudioPlaybackUi,
     onPlayPause: () -> Unit,
     onSeek: (Float) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var dragFraction by remember { mutableStateOf<Float?>(null) }
     val haptics = haptics()
-    Card(modifier = Modifier.fillMaxWidth(), shape = CircleShape) {
+    Card(modifier = modifier.fillMaxWidth(), shape = CircleShape) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
