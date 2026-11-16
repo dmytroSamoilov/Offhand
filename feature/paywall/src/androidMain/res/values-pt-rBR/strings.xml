@@ -74,4 +74,6 @@
         <item quantity="other">Menos de %d anos do plano anual</item>
     </plurals>
     <string name="paywall_benefits_body">Tudo na coluna Pro é seu.</string>
+    <string name="paywall_trial_intro_title">Experimente o Offhand Pro grátis por 14 dias</string>
+    <string name="paywall_trial_intro_tagline">Tudo do Pro está liberado a partir de hoje. Sem pagamento e sem conta. Depois de 14 dias você fica com a versão grátis, a menos que faça upgrade.</string>
 </resources>

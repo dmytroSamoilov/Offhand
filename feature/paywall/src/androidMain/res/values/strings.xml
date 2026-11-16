@@ -78,4 +78,6 @@
         <item quantity="other">Less than %d years of yearly</item>
     </plurals>
     <string name="paywall_benefits_body">Everything in the Pro column is yours.</string>
+    <string name="paywall_trial_intro_title">Try Offhand Pro free for 14 days</string>
+    <string name="paywall_trial_intro_tagline">Everything in Pro is unlocked from today. No payment and no account. After 14 days you keep the free version unless you upgrade.</string>
 </resources>

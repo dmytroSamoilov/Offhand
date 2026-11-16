@@ -38,6 +38,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -59,6 +60,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.common.LegalLinks
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialPolicy
 import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
 import com.dmytrosamoilov.offhand.core.designsystem.component.ProGold
 import com.dmytrosamoilov.offhand.feature.paywall.R
@@ -107,7 +109,11 @@ private fun PaywallContent(state: PaywallUiState, viewModel: PaywallViewModel) {
             PlanSection(state = state, onPlanSelected = viewModel::onPlanSelected, onRetry = viewModel::onRetryOffers)
             LegalRow(isEnabled = !state.isPurchasing, onRestore = viewModel::onRestoreClicked)
         }
-        BottomActions(state = state, onPurchase = viewModel::onPurchaseClicked, onContinueFree = viewModel::onClosed)
+        if (state.feature == ProFeature.FREE_TRIAL) {
+            TrialIntroActions(state = state, onStartTrial = viewModel::onClosed, onPurchase = viewModel::onPurchaseClicked)
+        } else {
+            BottomActions(state = state, onPurchase = viewModel::onPurchaseClicked, onContinueFree = viewModel::onClosed)
+        }
     }
 }
 
@@ -167,7 +173,7 @@ private fun Header(feature: ProFeature) {
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = stringResource(if (feature == ProFeature.GENERAL) R.string.paywall_tagline else R.string.paywall_context_tagline),
+            text = stringResource(feature.taglineRes()),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -415,6 +421,32 @@ private fun BottomActions(state: PaywallUiState, onPurchase: () -> Unit, onConti
     }
 }
 
+// The welcome to the fourteen free days: starting them is the main action
+// and costs nothing, buying a plan right away sits under it.
+@Composable
+private fun TrialIntroActions(state: PaywallUiState, onStartTrial: () -> Unit, onPurchase: () -> Unit) {
+    val offer = state.selectedOffer
+    HorizontalDivider()
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Button(onClick = onStartTrial, enabled = !state.isPurchasing, modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = pluralStringResource(
+                    R.plurals.paywall_cta_trial_days,
+                    ProTrialPolicy.DURATION_DAYS,
+                    ProTrialPolicy.DURATION_DAYS,
+                ),
+            )
+        }
+        OutlinedButton(onClick = onPurchase, enabled = offer != null && !state.isPurchasing, modifier = Modifier.fillMaxWidth()) {
+            Text(text = stringResource(offer.buyNowLabelRes()))
+        }
+    }
+}
+
 @Composable
 private fun SuccessContent(feature: ProFeature) {
     Column(
@@ -491,6 +523,15 @@ private fun ProOfferUi?.ctaLabel(): String = when {
     else -> stringResource(R.string.paywall_cta_lifetime)
 }
 
+private fun ProOfferUi?.buyNowLabelRes(): Int =
+    if (this?.plan == ProPlan.LIFETIME) R.string.paywall_cta_lifetime else R.string.paywall_cta_subscribe
+
+private fun ProFeature.taglineRes(): Int = when (this) {
+    ProFeature.GENERAL -> R.string.paywall_tagline
+    ProFeature.FREE_TRIAL -> R.string.paywall_trial_intro_tagline
+    else -> R.string.paywall_context_tagline
+}
+
 private fun ProPlan.titleRes(): Int =
     if (this == ProPlan.LIFETIME) R.string.paywall_plan_lifetime else R.string.paywall_plan_yearly
 
@@ -504,6 +545,7 @@ private fun ProFeature.headlineRes(): Int = when (this) {
     ProFeature.NOTE_STYLES -> R.string.paywall_context_note_styles
     ProFeature.FOLDERS -> R.string.paywall_context_folders
     ProFeature.BACKUP_AUDIO -> R.string.paywall_context_backup_audio
+    ProFeature.FREE_TRIAL -> R.string.paywall_trial_intro_title
 }
 
 private fun openLink(context: Context, url: String) {

@@ -61,7 +61,11 @@ struct PaywallView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 8)
             }
-            bottomActions
+            if state.feature == .freeTrial {
+                trialIntroActions
+            } else {
+                bottomActions
+            }
         }
     }
 
@@ -113,13 +117,38 @@ struct PaywallView: View {
                 .font(.title2.bold())
                 .multilineTextAlignment(.center)
                 .padding(.top, 4)
-            Text(state.feature == .general
-                ? String(localized: "Get more out of every recording.")
-                : String(localized: "Part of Offhand Pro. Get more out of every recording."))
+            Text(PaywallCopy.tagline(for: state.feature))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
+    }
+
+    // The welcome to the fourteen free days: starting them is the main
+    // action and costs nothing, buying a plan right away sits under it.
+    private var trialIntroActions: some View {
+        VStack(spacing: 8) {
+            Button {
+                Haptics.confirm()
+                viewModel.onClosed()
+            } label: {
+                Text(PaywallCopy.startTrial).frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .disabled(state.isPurchasing)
+            Button {
+                viewModel.onPurchaseClicked()
+            } label: {
+                Text(PaywallCopy.buyNow(for: state.selectedOffer)).frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.large)
+            .disabled(state.selectedOffer == nil || state.isPurchasing)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(.bar)
     }
 
     @ViewBuilder
@@ -224,7 +253,24 @@ private enum PaywallCopy {
         case .noteStyles: return String(localized: "Choose a different summary style")
         case .folders: return String(localized: "Keep more than two folders")
         case .backupAudio: return String(localized: "Back up your recordings too")
+        case .freeTrial: return String(localized: "Try Offhand Pro free for 14 days")
         }
+    }
+
+    static func tagline(for feature: ProFeature) -> String {
+        switch feature {
+        case .general: return String(localized: "Get more out of every recording.")
+        case .freeTrial: return String(localized: "Everything in Pro is unlocked from today. No payment and no account. After 14 days you keep the free version unless you upgrade.")
+        default: return String(localized: "Part of Offhand Pro. Get more out of every recording.")
+        }
+    }
+
+    static var startTrial: String {
+        String.localizedStringWithFormat(String(localized: "Start %d-day free trial"), Int(ProTrialPolicy.shared.DURATION_DAYS))
+    }
+
+    static func buyNow(for offer: ProOfferUi?) -> String {
+        offer?.plan == .lifetime ? String(localized: "Buy lifetime") : String(localized: "Subscribe")
     }
 
     static func cta(for offer: ProOfferUi?) -> String {

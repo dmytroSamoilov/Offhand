@@ -164,6 +164,46 @@
         }
       }
     },
+    "Everything in Pro is unlocked from today. No payment and no account. After 14 days you keep the free version unless you upgrade." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles aus Pro ist ab heute freigeschaltet. Ohne Zahlung, ohne Konto. Nach 14 Tagen behältst du die kostenlose Version, außer du upgradest."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo lo de Pro está desbloqueado desde hoy. Sin pago y sin cuenta. Después de 14 días te quedas con la versión gratis, salvo que mejores."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro की हर सुविधा आज से खुली है। कोई भुगतान नहीं, कोई खाता नहीं। 14 दिन बाद आपके पास मुफ़्त संस्करण रहेगा, जब तक आप अपग्रेड न करें।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tudo do Pro está liberado a partir de hoje. Sem pagamento e sem conta. Depois de 14 dias você fica com a versão grátis, a menos que faça upgrade."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все возможности Pro открыты с сегодняшнего дня. Без оплаты и без аккаунта. Через 14 дней у вас останется бесплатная версия, если вы не перейдёте на Pro."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Усі можливості Pro відкрито від сьогодні. Без оплати й без облікового запису. Через 14 днів у вас залишиться безкоштовна версія, якщо ви не перейдете на Pro."
+          }
+        }
+      }
+    },
     "Free trial: %d days left" : {
       "localizations" : {
         "de" : {
@@ -966,6 +1006,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Цю нотатку призупинено до її завершення. Не закривайте Offhand, і вона продовжиться."
+          }
+        }
+      }
+    },
+    "Try Offhand Pro free for 14 days" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teste Offhand Pro 14 Tage kostenlos"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba Offhand Pro gratis durante 14 días"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand Pro 14 दिन मुफ़्त आज़माएँ"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Experimente o Offhand Pro grátis por 14 dias"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Попробуйте Offhand Pro бесплатно 14 дней"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спробуйте Offhand Pro безкоштовно 14 днів"
           }
         }
       }

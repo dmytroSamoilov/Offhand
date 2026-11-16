@@ -23,9 +23,18 @@ enum class ProTrialNotice {
     REMOVED,
 }
 
+// What one cold start owes the user: the welcome to a trial that has just
+// started, or the message that it ended or was removed.
+data class ProTrialSettlement(
+    val isTrialOffered: Boolean = false,
+    val notice: ProTrialNotice? = null,
+)
+
 object ProTrialPolicy {
 
-    val DURATION_MS = 14.days.inWholeMilliseconds
+    const val DURATION_DAYS = 14
+
+    val DURATION_MS = DURATION_DAYS.days.inWholeMilliseconds
 
     // A clock that reads earlier than the trial's start by more than this was
     // set back, which would stretch the trial past its fourteen days.

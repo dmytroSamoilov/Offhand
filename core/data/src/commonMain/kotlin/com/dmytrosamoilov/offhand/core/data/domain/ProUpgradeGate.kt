@@ -6,7 +6,8 @@ import kotlinx.coroutines.flow.StateFlow
 // screen shows the paywall while requestedFeature is set and reports back
 // through onPaywallClosed(), after which requirePro() answers with the status
 // the store reports now. showBenefits() opens the paywall whatever the status,
-// so a subscriber can look at what the plan includes.
+// so a subscriber can look at what the plan includes, and showTrialOffer()
+// opens it once as the welcome to a trial that has just started.
 interface ProUpgradeGate {
 
     val requestedFeature: StateFlow<ProFeature?>
@@ -14,6 +15,8 @@ interface ProUpgradeGate {
     suspend fun requirePro(feature: ProFeature): Boolean
 
     fun showBenefits()
+
+    fun showTrialOffer()
 
     fun onPaywallClosed()
 }

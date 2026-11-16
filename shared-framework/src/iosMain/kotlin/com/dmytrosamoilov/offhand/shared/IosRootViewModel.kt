@@ -125,11 +125,17 @@ class IosRootViewModel(
         launchSafely(showLoading = false) {
             phase.first { it == IosRootPhase.READY }
             decideEarlyAdopterPro()
-            mutableTrialNotice.value = settleProTrial()
+            settleProTrialOnColdStart()
             resumeInterruptedNotes()
             sweepOrphanedRecordings()
             clearShareCache()
         }
+    }
+
+    private suspend fun settleProTrialOnColdStart() {
+        val settlement = settleProTrial()
+        mutableTrialNotice.value = settlement.notice
+        if (settlement.isTrialOffered) proUpgradeGate.showTrialOffer()
     }
 
     // A trial record from before a reinstall can arrive from iCloud after

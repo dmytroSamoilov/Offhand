@@ -6,6 +6,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProTrialNotice
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialPolicy
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialRecord
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialSettlement
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialState
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvent
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
@@ -17,7 +18,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Test
 
 class SettleProTrialUseCaseTest {
@@ -37,10 +37,20 @@ class SettleProTrialUseCaseTest {
 
     @Test
     fun `an install with no record starts its trial now`() = runTest {
-        assertNull(useCase())
+        every { proStatus.observeStatus() } returns flowOf(ProStatus.trial(endsAtMs = now))
+
+        assertEquals(ProTrialSettlement(isTrialOffered = true), useCase())
 
         assertEquals(ProTrialRecord(startedAtMs = now), trial.record)
         assertEquals(listOf("pro_trial_started"), tracked)
+    }
+
+    @Test
+    fun `a buyer is not welcomed to the trial that starts under their plan`() = runTest {
+        every { proStatus.observeStatus() } returns flowOf(ProStatus.LIFETIME)
+
+        assertEquals(ProTrialSettlement(), useCase())
+        assertEquals(ProTrialRecord(startedAtMs = now), trial.record)
     }
 
     @Test
@@ -48,7 +58,7 @@ class SettleProTrialUseCaseTest {
         trial.record = ProTrialRecord(startedAtMs = now)
         now += 5.days.inWholeMilliseconds
 
-        assertNull(useCase())
+        assertEquals(ProTrialSettlement(), useCase())
 
         assertEquals(ProTrialRecord(startedAtMs = 1_000_000_000_000L), trial.record)
         assertEquals(emptyList<String>(), tracked)
@@ -59,10 +69,10 @@ class SettleProTrialUseCaseTest {
         trial.record = ProTrialRecord(startedAtMs = now)
         now += 14.days.inWholeMilliseconds
 
-        assertEquals(ProTrialNotice.ENDED, useCase())
+        assertEquals(ProTrialNotice.ENDED, useCase().notice)
         trial.markNoticeSeen(ProTrialNotice.ENDED)
 
-        assertNull(useCase())
+        assertEquals(ProTrialSettlement(), useCase())
         assertEquals(listOf("pro_trial_ended"), tracked)
     }
 
@@ -72,10 +82,10 @@ class SettleProTrialUseCaseTest {
         trial.record = ProTrialRecord(startedAtMs = now)
         now += 20.days.inWholeMilliseconds
 
-        assertNull(useCase())
+        assertEquals(ProTrialSettlement(), useCase())
 
         every { proStatus.observeStatus() } returns flowOf(ProStatus.FREE)
-        assertNull(useCase())
+        assertEquals(ProTrialSettlement(), useCase())
     }
 
     @Test
@@ -83,12 +93,12 @@ class SettleProTrialUseCaseTest {
         trial.record = ProTrialRecord(startedAtMs = now)
         now -= 72.hours.inWholeMilliseconds + 1
 
-        assertEquals(ProTrialNotice.REMOVED, useCase())
+        assertEquals(ProTrialNotice.REMOVED, useCase().notice)
         assertEquals(true, trial.record?.isRevoked)
         assertEquals(listOf("pro_trial_revoked"), tracked)
 
         now += 10.days.inWholeMilliseconds
-        assertEquals(ProTrialNotice.REMOVED, useCase())
+        assertEquals(ProTrialNotice.REMOVED, useCase().notice)
         assertEquals(listOf("pro_trial_revoked"), tracked)
     }
 
@@ -97,7 +107,7 @@ class SettleProTrialUseCaseTest {
         trial.record = ProTrialRecord(startedAtMs = now)
         now -= 72.hours.inWholeMilliseconds
 
-        assertNull(useCase())
+        assertEquals(ProTrialSettlement(), useCase())
         assertEquals(false, trial.record?.isRevoked)
     }
 }

@@ -82,4 +82,6 @@
         <item quantity="other">Менше %d років річної підписки</item>
     </plurals>
     <string name="paywall_benefits_body">Усе з колонки Pro вже ваше.</string>
+    <string name="paywall_trial_intro_title">Спробуйте Offhand Pro безкоштовно 14 днів</string>
+    <string name="paywall_trial_intro_tagline">Усі можливості Pro відкрито від сьогодні. Без оплати й без облікового запису. Через 14 днів у вас залишиться безкоштовна версія, якщо ви не перейдете на Pro.</string>
 </resources>

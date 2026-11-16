@@ -123,7 +123,7 @@ class RootViewModel(
         launchSafely(showLoading = false) {
             uiState.first { it.phase == RootPhase.READY }
             decideEarlyAdopterPro.value.invoke()
-            trialNotice.value = settleProTrial()
+            settleProTrialOnColdStart()
             resumeInterruptedNotes.value.invoke()
             sweepOrphanedRecordings.value.invoke()
             clearShareCache()
@@ -139,6 +139,12 @@ class RootViewModel(
                 resumeInterruptedNotes.value.invoke()
             }
         }
+    }
+
+    private suspend fun settleProTrialOnColdStart() {
+        val settlement = settleProTrial()
+        trialNotice.value = settlement.notice
+        if (settlement.isTrialOffered) proUpgradeGate.showTrialOffer()
     }
 
     private fun keepProTrialInSyncWhenReady() {
