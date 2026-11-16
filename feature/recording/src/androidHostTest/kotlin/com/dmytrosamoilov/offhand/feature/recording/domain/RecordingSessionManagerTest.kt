@@ -111,7 +111,7 @@ class RecordingSessionManagerTest {
         coJustRun { this@mockk.invoke() }
     }
     private val saveNoteTranscript: SaveNoteTranscriptUseCase = mockk {
-        coJustRun { this@mockk.invoke(any(), any(), any()) }
+        coJustRun { this@mockk.invoke(any(), any(), any(), any()) }
     }
     private val getTranscriptionCheckpoint: GetTranscriptionCheckpointUseCase = mockk {
         coEvery { this@mockk.invoke(any()) } returns null
@@ -267,6 +267,7 @@ class RecordingSessionManagerTest {
                 noteId = 42L,
                 transcript = "first part of the meeting\n\nsecond part of the meeting",
                 transcriptionTimeMs = 400,
+                startsMs = any(),
             )
         }
         coVerify {
@@ -914,7 +915,8 @@ class RecordingSessionManagerTest {
 
         coVerify { saveTranscriptionCheckpoint(TranscriptionCheckpoint(7L, windowBytes.toLong(), 200)) }
         coVerify { saveTranscriptionCheckpoint(TranscriptionCheckpoint(7L, (windowBytes * 2).toLong(), 400)) }
-        coVerify { saveNoteTranscript(7L, "words", 200) }
+        coVerify { saveNoteTranscript(7L, "words", 200, listOf(0L)) }
+        coVerify { saveNoteTranscript(7L, "words\n\nwords", 400, listOf(0L, 29_000L)) }
         coVerify { clearTranscriptionCheckpoint(7L) }
     }
 

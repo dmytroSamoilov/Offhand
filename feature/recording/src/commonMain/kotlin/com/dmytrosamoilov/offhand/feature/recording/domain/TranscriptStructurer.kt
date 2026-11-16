@@ -124,7 +124,7 @@ class TranscriptStructurer(
         val result = polishSafely(prompt, merged.replace('"', '\'')) ?: return null
         val note = parseNoteJson(result.text)
         val overview = normalizeOverview(listOf(note.overview), spec)
-        if (overview.length < merged.length * MIN_POLISH_RETAIN) return null
+        if (overview.isBlank() || (!spec.isCondensedByPolish && overview.length < merged.length * MIN_POLISH_RETAIN)) return null
         return PolishedNote(note.title, overview, result.processingTimeMs, result.hardwareBackend)
     }
 
@@ -156,7 +156,7 @@ class TranscriptStructurer(
         normalizeOverview(parts.mapNotNull { it.overview.ifBlank { null } }, spec)
 
     private fun normalizeOverview(overviews: List<String>, spec: NoteStyleSpec): String =
-        NoteSectionMerger.merge(overviews, spec.sections, spec.proseSections)
+        NoteSectionMerger.merge(overviews, spec.sections, spec.proseSections + spec.paragraphSections, spec.headingTranslations)
 
     private fun parseNoteJson(raw: String): ParsedNote {
         val cleaned = ModelResponseCleaner.stripThinking(raw)

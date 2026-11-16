@@ -15,6 +15,7 @@ class ProTrialUsageEventsTest {
         assertEquals(once(ProTrialUsage.MEETING_NOTES), AnalyticsEvents.noteRecorded(1_000, meeting).proTrialUsage())
         assertEquals(once(ProTrialUsage.LEGAL_NOTES), AnalyticsEvents.noteStyleChanged(NoteStyleRef.BuiltIn(NotePreset.LEGAL)).proTrialUsage())
         assertEquals(once(ProTrialUsage.VISIT_NOTES), AnalyticsEvents.noteRecorded(1_000, NoteStyleRef.BuiltIn(NotePreset.VISIT)).proTrialUsage())
+        assertEquals(once(ProTrialUsage.EMAIL_NOTES), AnalyticsEvents.noteRecorded(1_000, NoteStyleRef.BuiltIn(NotePreset.EMAIL)).proTrialUsage())
         assertEquals(once(ProTrialUsage.CUSTOM_STYLE_NOTES), AnalyticsEvents.noteRecorded(1_000, NoteStyleRef.Custom(4)).proTrialUsage())
         assertNull(AnalyticsEvents.noteRecorded(1_000, NoteStyleRef.DEFAULT).proTrialUsage())
     }

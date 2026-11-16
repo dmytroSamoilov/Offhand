@@ -23,7 +23,7 @@ struct NoteStylesView: View {
             onCreateStyle: { openEditor(styleId: 0) },
             onEdit: { openEditor(styleId: $0) }
         )
-        .navigationTitle(String(localized: "Summary styles"))
+        .navigationTitle(String(localized: "Writing styles"))
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $isEditorVisible) {
             NoteStyleEditorView(styleId: editorStyleId)

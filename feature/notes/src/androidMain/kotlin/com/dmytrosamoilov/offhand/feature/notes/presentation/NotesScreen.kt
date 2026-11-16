@@ -9,6 +9,11 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
+import androidx.compose.ui.semantics.selected
+import androidx.compose.foundation.combinedClickable
+import androidx.activity.compose.BackHandler
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -318,6 +323,15 @@ fun NotesScreen(
                         customStyles = state.customStyles,
                         modelPreparation = state.modelPreparation,
                         isWaitingForAi = state.isWaitingForAi,
+                        isNotesLoaded = state.isNotesLoaded,
+                        isUnsortedShown = state.isUnsortedShown,
+                        selection = NoteSelectionUi(
+                            selectedIds = state.selectedNoteIds,
+                            onToggle = viewModel::onNoteSelectionToggled,
+                            onClear = viewModel::onNoteSelectionCleared,
+                            onMove = { viewModel.onBulkActionRequested(BulkNoteActionUi.MOVE) },
+                            onDelete = { viewModel.onBulkActionRequested(BulkNoteActionUi.DELETE) },
+                        ),
                         onDownloadOnMobileData = viewModel::onDownloadOnMobileDataClicked,
                         onNoteClick = { id ->
                             focusManager.clearFocus()
@@ -364,6 +378,22 @@ fun NotesScreen(
             onConfirm = viewModel::onDeleteFolderConfirmed,
             onDismiss = viewModel::onDeleteFolderDismissed,
         )
+    }
+
+    when (state.bulkAction) {
+        BulkNoteActionUi.MOVE -> MoveToFolderSheet(
+            folders = state.folders,
+            currentFolderId = null,
+            onMove = viewModel::onBulkMoveConfirmed,
+            onDismiss = viewModel::onBulkActionDismissed,
+        )
+        BulkNoteActionUi.DELETE -> DeleteConfirmationDialog(
+            onConfirm = viewModel::onBulkDeleteConfirmed,
+            onDismiss = viewModel::onBulkActionDismissed,
+            titleRes = R.string.notes_bulk_delete_title,
+            bodyRes = R.string.notes_bulk_delete_body,
+        )
+        null -> Unit
     }
 
     state.moveToFolder?.let { target ->
@@ -720,6 +750,9 @@ private fun NotesListPane(
     customStyles: List<NoteStyleOptionUi>,
     modelPreparation: ModelPreparationUi?,
     isWaitingForAi: Boolean,
+    isNotesLoaded: Boolean,
+    isUnsortedShown: Boolean,
+    selection: NoteSelectionUi,
     onDownloadOnMobileData: () -> Unit,
     onNoteClick: (Long) -> Unit,
     onDeleteRequested: (Long) -> Unit,
@@ -735,17 +768,24 @@ private fun NotesListPane(
         }
     }
     val haptics = haptics()
+    BackHandler(enabled = selection.isActive, onBack = selection.onClear)
     Scaffold(
         topBar = {
-            AppTopBar(title = stringResource(R.string.notes_title))
+            if (selection.isActive) {
+                NoteSelectionBar(selection = selection)
+            } else {
+                AppTopBar(title = stringResource(R.string.notes_title))
+            }
         },
         floatingActionButton = {
-            RecordButton(
-                onClick = {
-                    haptics.confirm()
-                    onNewRecording()
-                },
-            )
+            if (!selection.isActive) {
+                RecordButton(
+                    onClick = {
+                        haptics.confirm()
+                        onNewRecording()
+                    },
+                )
+            }
         },
         contentWindowInsets = WindowInsets(0.dp),
     ) { innerPadding ->
@@ -758,7 +798,9 @@ private fun NotesListPane(
             ModelPreparationBanner(preparation = modelPreparation, onDownloadOnMobileData = onDownloadOnMobileData)
             val isLibraryEmpty = sections.isEmpty() && folders.isEmpty() &&
                 searchQuery.isBlank() && selectedFolderId == null
-            if (isLibraryEmpty) {
+            if (!isNotesLoaded) {
+                NotesLoadingState()
+            } else if (isLibraryEmpty) {
                 EmptyNotesState(kind = EmptyNotesKind.LIBRARY, modifier = Modifier.fillMaxSize())
             } else {
                 LazyColumn(
@@ -779,6 +821,7 @@ private fun NotesListPane(
                         FolderChips(
                             folders = folders,
                             selectedFolderId = selectedFolderId,
+                            isUnsortedShown = isUnsortedShown,
                             onFolderSelected = onFolderSelected,
                             onNewFolder = onNewFolder,
                             onRenameFolder = onRenameFolder,
@@ -793,7 +836,7 @@ private fun NotesListPane(
                     if (sections.isEmpty()) {
                         item(key = EMPTY_SEARCH_ITEM_KEY, contentType = "empty") {
                             EmptyNotesState(
-                                kind = emptyNotesKind(searchQuery, selectedFolderId),
+                                kind = emptyNotesKind(searchQuery, selectedFolderId, isUnsortedShown),
                                 modifier = Modifier.fillParentMaxHeight(EMPTY_STATE_HEIGHT_FRACTION),
                             )
                         }
@@ -806,12 +849,18 @@ private fun NotesListPane(
                             SwipeableNoteCard(
                                 onDeleteRequested = { onDeleteRequested(note.id) },
                                 onMoveRequested = { onMoveRequested(note.id) },
+                                isSwipeEnabled = !selection.isActive,
                                 modifier = Modifier.animateItem(),
                             ) {
                                 NoteCard(
                                     note = note,
                                     isWaitingForAi = isWaitingForAi,
-                                    onClick = { onNoteClick(note.id) },
+                                    isSelected = note.id in selection.selectedIds,
+                                    onClick = { if (selection.isActive) selection.onToggle(note.id) else onNoteClick(note.id) },
+                                    onLongClick = {
+                                        haptics.confirm()
+                                        selection.onToggle(note.id)
+                                    },
                                 )
                             }
                         }
@@ -820,6 +869,43 @@ private fun NotesListPane(
             }
         }
     }
+}
+
+@Immutable
+private data class NoteSelectionUi(
+    val selectedIds: Set<Long>,
+    val onToggle: (Long) -> Unit,
+    val onClear: () -> Unit,
+    val onMove: () -> Unit,
+    val onDelete: () -> Unit,
+) {
+    val isActive: Boolean get() = selectedIds.isNotEmpty()
+}
+
+// Replaces the title bar while notes are selected: how many, and what can
+// be done with all of them at once.
+@Composable
+private fun NoteSelectionBar(selection: NoteSelectionUi) {
+    AppTopBar(
+        title = stringResource(R.string.notes_selection_count, selection.selectedIds.size),
+        navigationIcon = {
+            IconButton(onClick = selection.onClear) {
+                Icon(imageVector = Icons.Filled.Close, contentDescription = stringResource(R.string.notes_selection_cancel))
+            }
+        },
+        actions = {
+            IconButton(onClick = selection.onMove) {
+                Icon(imageVector = Icons.Filled.Folder, contentDescription = stringResource(R.string.notes_move_to_folder))
+            }
+            IconButton(onClick = selection.onDelete) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = stringResource(R.string.notes_delete_dialog_confirm),
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            }
+        },
+    )
 }
 
 private const val SEARCH_ITEM_KEY = "search"
@@ -831,12 +917,14 @@ private const val EMPTY_STATE_HEIGHT_FRACTION = 0.7f
 private enum class EmptyNotesKind(val icon: ImageVector, val titleRes: Int, val hintRes: Int?) {
     LIBRARY(Icons.Filled.Mic, R.string.notes_empty_title, R.string.notes_empty_hint),
     FOLDER(Icons.Filled.Folder, R.string.notes_folder_empty_state, null),
+    UNSORTED(Icons.Filled.Folder, R.string.notes_unsorted_empty_title, R.string.notes_unsorted_empty_hint),
     SEARCH(Icons.Filled.Search, R.string.notes_search_empty_state, null),
 }
 
-private fun emptyNotesKind(searchQuery: String, selectedFolderId: Long?): EmptyNotesKind = when {
+private fun emptyNotesKind(searchQuery: String, selectedFolderId: Long?, isUnsortedShown: Boolean): EmptyNotesKind = when {
     searchQuery.isNotBlank() -> EmptyNotesKind.SEARCH
     selectedFolderId != null -> EmptyNotesKind.FOLDER
+    isUnsortedShown -> EmptyNotesKind.UNSORTED
     else -> EmptyNotesKind.LIBRARY
 }
 
@@ -868,6 +956,7 @@ private fun RecordButton(onClick: () -> Unit) {
 private fun FolderChips(
     folders: List<FolderUi>,
     selectedFolderId: Long?,
+    isUnsortedShown: Boolean,
     onFolderSelected: (Long?) -> Unit,
     onNewFolder: () -> Unit,
     onRenameFolder: (Long) -> Unit,
@@ -891,7 +980,9 @@ private fun FolderChips(
             FilterChip(
                 selected = selectedFolderId == null,
                 onClick = { onFolderSelected(null) },
-                label = { Text(text = stringResource(R.string.notes_folder_all)) },
+                label = {
+                    Text(text = stringResource(if (isUnsortedShown) R.string.notes_folder_unsorted else R.string.notes_folder_all))
+                },
             )
         }
         items(folders, key = { it.id }) { folder ->
@@ -1232,6 +1323,29 @@ private fun FolderChoiceRow(label: String, isSelected: Boolean, onClick: () -> U
     }
 }
 
+// Shown until the database has answered, so a cold start never flashes the
+// empty library at someone who has notes.
+@Composable
+private fun NotesLoadingState() {
+    val description = stringResource(R.string.notes_loading_description)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .semantics { contentDescription = description },
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        repeat(LOADING_CARD_COUNT) {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                SkeletonLines(modifier = Modifier.padding(20.dp), lineWidths = LOADING_CARD_LINES)
+            }
+        }
+    }
+}
+
+private const val LOADING_CARD_COUNT = 4
+private val LOADING_CARD_LINES = listOf(0.55f, 0.3f, 1f, 0.8f)
+
 @Composable
 private fun EmptyNotesState(kind: EmptyNotesKind, modifier: Modifier = Modifier) {
     Column(
@@ -1480,6 +1594,7 @@ private fun SectionHeader(dayLabel: NoteDayLabelUi) {
 private fun SwipeableNoteCard(
     onDeleteRequested: () -> Unit,
     onMoveRequested: () -> Unit,
+    isSwipeEnabled: Boolean,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
@@ -1506,6 +1621,8 @@ private fun SwipeableNoteCard(
         state = dismissState,
         backgroundContent = { SwipeBackground(direction = dismissState.dismissDirection) },
         modifier = modifier,
+        enableDismissFromStartToEnd = isSwipeEnabled,
+        enableDismissFromEndToStart = isSwipeEnabled,
     ) {
         content()
     }
@@ -1535,9 +1652,24 @@ private fun SwipeBackground(direction: SwipeToDismissBoxValue) {
 private fun NoteCard(
     note: NoteCardUi,
     isWaitingForAi: Boolean,
+    isSelected: Boolean,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
 ) {
-    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+    val selectLabel = stringResource(R.string.notes_select_action)
+    Card(
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+        colors = if (isSelected) {
+            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        } else {
+            CardDefaults.cardColors()
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(CardDefaults.shape)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick, onLongClickLabel = selectLabel)
+            .semantics { selected = isSelected },
+    ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 NoteCardIcon(status = note.status)
@@ -1707,6 +1839,8 @@ private fun NoteDetailPane(
             isRetranscribeAvailable = state.isRetranscribeAvailable,
             progressPercent = state.noteProgress[selected.id],
             isWaitingForAi = state.isWaitingForAi,
+            isTranscribing = state.isTranscribing,
+            onTranscriptTime = viewModel::onTranscriptTimeSelected,
             onBack = viewModel::onDetailClosed,
             onEdit = viewModel::onEditStarted,
             onShareRequested = viewModel::onShareRequested,
@@ -1754,6 +1888,8 @@ private fun NoteDetail(
     isRetranscribeAvailable: Boolean,
     progressPercent: Int?,
     isWaitingForAi: Boolean,
+    isTranscribing: Boolean,
+    onTranscriptTime: (Long) -> Unit,
     onBack: () -> Unit,
     onEdit: () -> Unit,
     onShareRequested: () -> Unit,
@@ -1794,6 +1930,8 @@ private fun NoteDetail(
             showMetrics = showMetrics,
             progressPercent = progressPercent,
             isWaitingForAi = isWaitingForAi,
+            isTranscribing = isTranscribing,
+            onTranscriptTime = onTranscriptTime,
             onPlayPause = onPlayPause,
             onSeek = onSeek,
             onRetryTranscription = onRetryTranscription,
@@ -1991,6 +2129,8 @@ private fun NoteDetailContent(
     showMetrics: Boolean,
     progressPercent: Int?,
     isWaitingForAi: Boolean,
+    isTranscribing: Boolean,
+    onTranscriptTime: (Long) -> Unit,
     onPlayPause: () -> Unit,
     onSeek: (Float) -> Unit,
     onRetryTranscription: () -> Unit,
@@ -2074,6 +2214,8 @@ private fun NoteDetailContent(
                 note = note,
                 progressPercent = progressPercent,
                 isWaitingForAi = isWaitingForAi,
+                isTranscribing = isTranscribing,
+                onTimeSelected = onTranscriptTime.takeIf { note.hasAudio && playback.isAvailable },
                 onRetryTranscription = onRetryTranscription,
                 onResumeProcessing = onResumeProcessing,
                 onCopied = onCopied,
@@ -2157,7 +2299,6 @@ private fun SummaryTab(
         )
         NoteStatusUi.INTERRUPTED -> InterruptedDetailCard(onResume = onResumeProcessing)
         NoteStatusUi.READY -> NoteTextCard(
-            text = note.body,
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             actions = listOfNotNull(
@@ -2169,7 +2310,7 @@ private fun SummaryTab(
                     onCopied = { onCopied(NoteSection.OVERVIEW) },
                 ),
             ),
-        )
+        ) { MarkdownText(markdown = note.body) }
     }
     if (smartSuggestions != null) {
         Spacer(modifier = Modifier.height(16.dp))
@@ -2182,24 +2323,23 @@ private fun TranscriptTab(
     note: NoteDetailUi,
     progressPercent: Int?,
     isWaitingForAi: Boolean,
+    isTranscribing: Boolean,
+    onTimeSelected: ((Long) -> Unit)?,
     onRetryTranscription: () -> Unit,
     onResumeProcessing: () -> Unit,
     onCopied: (NoteSection) -> Unit,
 ) {
     when {
-        note.transcript.isNotBlank() -> NoteTextCard(
-            text = note.transcript,
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-            actions = listOf(
-                rememberCopyAction(
-                    text = note.transcript,
-                    clipboardLabel = stringResource(R.string.notes_transcript_heading),
-                    contentDescription = stringResource(R.string.notes_copy_transcript_description),
-                    onCopied = { onCopied(NoteSection.TRANSCRIPT) },
-                ),
-            ),
-        )
+        note.transcript.isNotBlank() -> Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            TranscriptCard(note = note, onTimeSelected = onTimeSelected, onCopied = onCopied)
+            if (isTranscribing) {
+                SkeletonStatusCard(
+                    text = stringResource(R.string.notes_transcript_more_coming),
+                    percent = progressPercent,
+                    isWorking = true,
+                )
+            }
+        }
         note.status == NoteStatusUi.PROCESSING -> SkeletonStatusCard(
             text = stringResource(transcriptWritingText(isWaitingForAi)),
             percent = progressPercent,
@@ -2216,11 +2356,72 @@ private fun TranscriptTab(
 }
 
 @Composable
+private fun TranscriptCard(note: NoteDetailUi, onTimeSelected: ((Long) -> Unit)?, onCopied: (NoteSection) -> Unit) {
+    val copyAction = rememberCopyAction(
+        text = note.transcript,
+        clipboardLabel = stringResource(R.string.notes_transcript_heading),
+        contentDescription = stringResource(R.string.notes_copy_transcript_description),
+        onCopied = { onCopied(NoteSection.TRANSCRIPT) },
+    )
+    NoteTextCard(
+        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        actions = listOf(copyAction),
+    ) {
+        if (note.transcriptParts.isEmpty()) {
+            MarkdownText(markdown = note.transcript)
+        } else {
+            TimedTranscript(parts = note.transcriptParts, onTimeSelected = onTimeSelected)
+        }
+    }
+}
+
+// Each paragraph is one stretch of the recording; tapping it, its text or
+// its time mark, plays the note from there when the note still has its audio.
+@Composable
+private fun TimedTranscript(parts: List<TranscriptPartUi>, onTimeSelected: ((Long) -> Unit)?) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        parts.forEach { part ->
+            val description = stringResource(R.string.notes_transcript_time_description, part.time)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(MaterialTheme.shapes.small)
+                    .then(
+                        if (onTimeSelected == null) {
+                            Modifier
+                        } else {
+                            Modifier.clickable(onClickLabel = description) { onTimeSelected(part.startMs) }
+                        },
+                    )
+                    .padding(vertical = 4.dp),
+            ) {
+                TranscriptTimeMark(time = part.time)
+                MarkdownText(markdown = part.text)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TranscriptTimeMark(time: String) {
+    Text(
+        text = time,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(50))
+            .padding(horizontal = 10.dp, vertical = 4.dp),
+    )
+}
+
+@Composable
 private fun NoteTextCard(
-    text: String,
     containerColor: Color,
     contentColor: Color,
     actions: List<PillAction>,
+    content: @Composable () -> Unit,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 20.dp)) {
@@ -2233,7 +2434,7 @@ private fun NoteTextCard(
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
-            MarkdownText(markdown = text)
+            content()
         }
     }
 }
@@ -2551,11 +2752,13 @@ private fun NoteEditor(
 private fun DeleteConfirmationDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
+    titleRes: Int = R.string.notes_delete_dialog_title,
+    bodyRes: Int = R.string.notes_delete_dialog_body,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(R.string.notes_delete_dialog_title)) },
-        text = { Text(text = stringResource(R.string.notes_delete_dialog_body)) },
+        title = { Text(text = stringResource(titleRes)) },
+        text = { Text(text = stringResource(bodyRes)) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text(

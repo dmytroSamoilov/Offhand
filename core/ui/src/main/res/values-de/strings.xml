@@ -3,7 +3,7 @@
     <string name="core_ui_error_title">Etwas ist schiefgelaufen</string>
     <string name="core_ui_error_confirm">OK</string>
     <string name="core_ui_note_preset_summary">Zusammenfassung</string>
-    <string name="core_ui_note_preset_summary_description">Hauptthemen, wichtige Entscheidungen, Aufgaben und ein kurzer Überblick.</string>
+    <string name="core_ui_note_preset_summary_description">Ein bis drei Sätze darüber, worum es in der Aufnahme geht.</string>
     <string name="core_ui_note_preset_meeting">Meeting-Notizen</string>
     <string name="core_ui_note_preset_meeting_description">Diskussion, Entscheidungen, Aufgaben und offene Fragen.</string>
     <string name="core_ui_note_preset_visit">Besuchsbericht</string>
@@ -15,4 +15,6 @@
     <string name="core_ui_styles_new_button">Neu</string>
     <string name="core_ui_styles_default_option">Standard</string>
     <string name="core_ui_styles_default_option_description">Der in den Einstellungen gewählte Stil</string>
+    <string name="core_ui_note_preset_email">E-Mail</string>
+    <string name="core_ui_note_preset_email_description">Betreff und eine versandfertige E-Mail.</string>
 </resources>

@@ -638,6 +638,7 @@ private fun ProTrialUsage.labelRes(): Int = when (this) {
     ProTrialUsage.MEETING_NOTES -> CoreUiR.string.core_ui_note_preset_meeting
     ProTrialUsage.VISIT_NOTES -> CoreUiR.string.core_ui_note_preset_visit
     ProTrialUsage.LEGAL_NOTES -> CoreUiR.string.core_ui_note_preset_legal
+    ProTrialUsage.EMAIL_NOTES -> CoreUiR.string.core_ui_note_preset_email
     ProTrialUsage.CUSTOM_STYLE_NOTES -> R.string.paywall_usage_custom_styles
     ProTrialUsage.PDF_EXPORTS -> R.string.paywall_usage_pdf
     ProTrialUsage.WORD_EXPORTS -> R.string.paywall_usage_word

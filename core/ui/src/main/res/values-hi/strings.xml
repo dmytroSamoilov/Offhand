@@ -3,7 +3,7 @@
     <string name="core_ui_error_title">कुछ गड़बड़ हो गई</string>
     <string name="core_ui_error_confirm">ठीक है</string>
     <string name="core_ui_note_preset_summary">सारांश</string>
-    <string name="core_ui_note_preset_summary_description">मुख्य विषय, प्रमुख निर्णय, कार्य बिंदु और एक संक्षिप्त अवलोकन।</string>
+    <string name="core_ui_note_preset_summary_description">रिकॉर्डिंग किस बारे में है, यह एक से तीन वाक्यों में।</string>
     <string name="core_ui_note_preset_meeting">मीटिंग नोट्स</string>
     <string name="core_ui_note_preset_meeting_description">चर्चा, फ़ैसले, एक्शन आइटम और खुले सवाल।</string>
     <string name="core_ui_note_preset_visit">विज़िट रिपोर्ट</string>
@@ -15,4 +15,6 @@
     <string name="core_ui_styles_new_button">नया</string>
     <string name="core_ui_styles_default_option">डिफ़ॉल्ट</string>
     <string name="core_ui_styles_default_option_description">सेटिंग्स में चुना गया स्टाइल</string>
+    <string name="core_ui_note_preset_email">ईमेल</string>
+    <string name="core_ui_note_preset_email_description">विषय पंक्ति और भेजने के लिए तैयार ईमेल।</string>
 </resources>

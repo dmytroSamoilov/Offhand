@@ -205,7 +205,7 @@ private struct BackupSheet: View {
                     viewModel.onIncludeAudioChanged(enabled: !state.includeAudio)
                 }
                 SettingsSwitchRow(
-                    title: String(localized: "Include summary styles"),
+                    title: String(localized: "Include writing styles"),
                     isOn: state.includeStyles
                 ) {
                     viewModel.onIncludeStylesChanged(enabled: !state.includeStyles)

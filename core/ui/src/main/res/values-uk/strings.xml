@@ -3,7 +3,7 @@
     <string name="core_ui_error_title">Щось пішло не так</string>
     <string name="core_ui_error_confirm">ОК</string>
     <string name="core_ui_note_preset_summary">Резюме</string>
-    <string name="core_ui_note_preset_summary_description">Основні теми, ключові рішення, завдання та короткий огляд.</string>
+    <string name="core_ui_note_preset_summary_description">Від одного до трьох речень про те, про що запис.</string>
     <string name="core_ui_note_preset_meeting">Нотатки зі зустрічі</string>
     <string name="core_ui_note_preset_meeting_description">Обговорення, рішення, завдання й відкриті питання.</string>
     <string name="core_ui_note_preset_visit">Звіт про візит</string>
@@ -15,4 +15,6 @@
     <string name="core_ui_styles_new_button">Новий</string>
     <string name="core_ui_styles_default_option">За замовчуванням</string>
     <string name="core_ui_styles_default_option_description">Стиль, обраний у налаштуваннях</string>
+    <string name="core_ui_note_preset_email">Лист</string>
+    <string name="core_ui_note_preset_email_description">Тема й готовий до надсилання лист.</string>
 </resources>

@@ -276,6 +276,7 @@ private enum PaywallCopy {
         case .meetingNotes: return String(localized: "Meeting notes")
         case .visitNotes: return String(localized: "Visit report")
         case .legalNotes: return String(localized: "Legal note")
+        case .emailNotes: return String(localized: "Email")
         case .customStyleNotes: return String(localized: "Notes in your own styles")
         case .pdfExports: return String(localized: "PDFs shared")
         case .wordExports: return String(localized: "Word documents shared")
@@ -289,12 +290,12 @@ private enum PaywallCopy {
     static func headline(for feature: ProFeature) -> String {
         switch feature {
         case .general: return String(localized: "Offhand Pro")
-        case .customStyles: return String(localized: "Save your own summary style")
+        case .customStyles: return String(localized: "Save your own writing style")
         case .documentExport: return String(localized: "Share this note as PDF or Word")
         case .smartSuggestions: return String(localized: "Find dates and to-dos in your notes")
         case .audioImport: return String(localized: "Turn recordings and videos into notes")
-        case .folderStyles: return String(localized: "Give this folder its own summary style")
-        case .noteStyles: return String(localized: "Choose a different summary style")
+        case .folderStyles: return String(localized: "Give this folder its own writing style")
+        case .noteStyles: return String(localized: "Choose a different writing style")
         case .folders: return String(localized: "Keep more than two folders")
         case .backupAudio: return String(localized: "Back up your recordings too")
         case .freeTrial: return String(localized: "Try Offhand Pro free for 14 days")
@@ -390,7 +391,7 @@ private struct ComparisonTable: View {
             Row(id: 6, title: String(localized: "Share polished documents"), hint: String(localized: "PDF and Word, ready for clients, email and print"), features: [.documentExport]),
             Row(id: 7, title: String(localized: "Never miss a follow-up"), hint: String(localized: "Dates and to-dos straight into your calendar"), features: [.smartSuggestions]),
             Row(id: 8, title: String(localized: "Turn any recording or video into a note"), hint: String(localized: "Voice memos, calls, screen recordings and video files without limit (three are free to try)"), features: [.audioImport]),
-            Row(id: 9, title: String(localized: "As many folders as you need"), hint: String(localized: "Each with its own summary style"), features: [.folderStyles, .folders]),
+            Row(id: 9, title: String(localized: "As many folders as you need"), hint: String(localized: "Each with its own writing style"), features: [.folderStyles, .folders]),
             Row(id: 10, title: String(localized: "Backups with your recordings"), hint: String(localized: "Audio included, still encrypted"), features: [.backupAudio]),
         ]
     }

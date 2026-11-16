@@ -47,6 +47,9 @@ struct RecordSheetView: View {
             Spacer()
         }
         .padding()
+        .overlay(alignment: .topTrailing) {
+            if state.phase == .recording && !hasSavedNote { cancelButton }
+        }
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)
         .interactiveDismissDisabled(state.phase == .recording)
@@ -175,61 +178,70 @@ struct RecordSheetView: View {
                     .foregroundStyle(.secondary)
                     .padding(.top, 12)
             }
-            HStack(alignment: .top, spacing: 16) {
+            HStack(spacing: 12) {
                 pauseResumeButton
                 saveNoteButton
             }
             .padding(.top, 28)
-            Button(String(localized: "Discard recording"), role: .destructive) {
-                isDiscardConfirmationVisible = true
-            }
-            .font(.subheadline)
-            .padding(.top, 8)
         }
     }
 
+    // Cancelling sits apart from the two main actions, in the sheet's corner,
+    // and always asks before anything is thrown away.
+    private var cancelButton: some View {
+        Button(String(localized: "Cancel")) {
+            isDiscardConfirmationVisible = true
+        }
+        .font(.body)
+        .padding(.horizontal, 20)
+        .padding(.top, 14)
+        .accessibilityLabel(String(localized: "Discard recording"))
+    }
+
+    // Both controls are pills as wide as their content, icon first, so the
+    // button follows its label when Pause turns into Resume.
     private var pauseResumeButton: some View {
         Button {
             Haptics.tap()
             state.isPaused ? viewModel.onResumeRecording() : viewModel.onPauseRecording()
         } label: {
-            VStack(spacing: 6) {
-                Image(systemName: state.isPaused ? "play.fill" : "pause.fill")
-                    .font(.title2)
-                    .foregroundStyle(Brand.primary)
-                    .frame(width: 64, height: 64)
-                    .background(Brand.primaryContainer, in: Circle())
-                Text(state.isPaused ? String(localized: "Resume") : String(localized: "Pause"))
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.secondary)
-            }
+            controlLabel(
+                icon: state.isPaused ? "play.fill" : "pause.fill",
+                text: state.isPaused ? String(localized: "Resume") : String(localized: "Pause")
+            )
+            .foregroundStyle(Brand.primary)
+            .background(Brand.primaryContainer, in: Capsule())
         }
         .buttonStyle(.plain)
+        .animation(.default, value: state.isPaused)
         .accessibilityLabel(
             state.isPaused ? String(localized: "Resume recording") : String(localized: "Pause recording")
         )
     }
 
-    // Mirrors Android: the main action is a labelled "Save note" pill, not a
-    // bare stop icon, so it is clear which button keeps the recording.
     private var saveNoteButton: some View {
         Button {
             Haptics.confirm()
             viewModel.onStopRecording()
             askForNotificationsIfPending()
         } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "checkmark")
-                    .font(.title3.weight(.semibold))
-                Text(String(localized: "Save note"))
-                    .font(.headline)
-            }
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .frame(height: 64)
-            .background(Brand.primary, in: Capsule())
+            controlLabel(icon: "stop.fill", text: String(localized: "Save note"))
+                .foregroundStyle(.white)
+                .background(Brand.primary, in: Capsule())
         }
         .buttonStyle(.plain)
+    }
+
+    private func controlLabel(icon: String, text: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.body.weight(.semibold))
+            Text(text)
+                .font(.headline)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 22)
+        .frame(height: 56)
     }
 
     @ViewBuilder

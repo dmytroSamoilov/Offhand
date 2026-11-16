@@ -56,7 +56,7 @@ struct NoteDetailView: View {
                         Button {
                             viewModel.onPresetSheetRequested()
                         } label: {
-                            Label(String(localized: "Change summary style"), systemImage: "gearshape")
+                            Label(String(localized: "Change writing style"), systemImage: "gearshape")
                         }
                     }
                     if detail.hasAudio && state.isRetranscribeAvailable {
@@ -172,9 +172,16 @@ struct NoteDetailView: View {
                 text: detail.transcript,
                 copyLabel: String(localized: "Copy transcript"),
                 onCopy: { viewModel.onNoteCopied(section: .transcript) },
+                timedParts: detail.transcriptParts,
+                onTimeSelected: detail.hasAudio && state.playback.isAvailable
+                    ? { viewModel.onTranscriptTimeSelected(startMs: $0) }
+                    : nil,
                 actionBackground: Brand.tertiaryContainer,
                 actionForeground: Brand.onTertiaryContainer
             )
+            if state.isTranscribing {
+                writingCard(text: String(localized: "Still transcribing the rest…"))
+            }
         } else if detail.status == .processing {
             writingCard(text: transcriptWritingText)
         } else if detail.status == .interrupted {
@@ -454,6 +461,8 @@ private struct NoteTextSection: View {
     let copyLabel: String
     let onCopy: () -> Void
     var onRestyle: (() -> Void)?
+    var timedParts: [TranscriptPartUi] = []
+    var onTimeSelected: ((Int64) -> Void)?
     let actionBackground: Color
     let actionForeground: Color
 
@@ -462,16 +471,58 @@ private struct NoteTextSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             actions
-            MarkdownBlocks(raw: text)
-                .textSelection(.enabled)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
+            if timedParts.isEmpty {
+                textBlock(text)
+            } else {
+                timedTranscript
+            }
         }
         .padding(.horizontal, 20)
         .padding(.top, 16)
         .padding(.bottom, 20)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
+    }
+
+    private func textBlock(_ raw: String) -> some View {
+        MarkdownBlocks(raw: raw)
+            .textSelection(.enabled)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    // Each paragraph is one stretch of the recording; tapping it, its text or
+    // its time mark, plays the note from there when the note still has its audio.
+    private var timedTranscript: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            ForEach(timedParts, id: \.startMs) { part in
+                Button {
+                    onTimeSelected?(part.startMs)
+                } label: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        timeMark(part.time)
+                        MarkdownBlocks(raw: part.text)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .multilineTextAlignment(.leading)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .allowsHitTesting(onTimeSelected != nil)
+                .accessibilityHint(String(format: String(localized: "Play from %@"), part.time))
+            }
+        }
+    }
+
+    private func timeMark(_ time: String) -> some View {
+        Text(time)
+            .font(.caption.weight(.semibold))
+            .monospacedDigit()
+            .foregroundStyle(Brand.primary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(Brand.primary.opacity(0.1), in: Capsule())
     }
 
     private var actions: some View {
@@ -486,7 +537,7 @@ private struct NoteTextSection: View {
                         .foregroundStyle(actionForeground)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(String(localized: "Change summary style"))
+                .accessibilityLabel(String(localized: "Change writing style"))
             }
             CopySectionButton(
                 text: text,
@@ -499,17 +550,17 @@ private struct NoteTextSection: View {
     }
 }
 
-private struct SkeletonLines: View {
+struct SkeletonLines: View {
+    var widths: [CGFloat] = [0.45, 1, 0.94, 0.98, 0.7, 1, 0.88, 0.5]
     @State private var isShimmering = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private static let widths: [CGFloat] = [0.45, 1, 0.94, 0.98, 0.7, 1, 0.88, 0.5]
     private static let lineHeight: CGFloat = 14
     private static let spacing: CGFloat = 12
     private static let shimmerShare: CGFloat = 0.6
 
-    private static var height: CGFloat {
-        CGFloat(widths.count) * lineHeight + CGFloat(widths.count - 1) * spacing
+    private var height: CGFloat {
+        CGFloat(widths.count) * Self.lineHeight + CGFloat(widths.count - 1) * Self.spacing
     }
 
     var body: some View {
@@ -527,7 +578,7 @@ private struct SkeletonLines: View {
                     .mask(lines(width: width, color: .black))
                 }
         }
-        .frame(height: Self.height)
+        .frame(height: height)
         .accessibilityHidden(true)
         .onAppear {
             guard !reduceMotion else { return }
@@ -537,10 +588,10 @@ private struct SkeletonLines: View {
 
     private func lines(width: CGFloat, color: Color) -> some View {
         VStack(alignment: .leading, spacing: Self.spacing) {
-            ForEach(Self.widths.indices, id: \.self) { index in
+            ForEach(widths.indices, id: \.self) { index in
                 Capsule()
                     .fill(color)
-                    .frame(width: width * Self.widths[index], height: Self.lineHeight)
+                    .frame(width: width * widths[index], height: Self.lineHeight)
             }
         }
         .frame(width: width, alignment: .leading)
@@ -702,7 +753,7 @@ private struct NoteStyleSheet: View {
                 onSelect: { viewModel.onStyleSelected(style: $0) },
                 onCreateStyle: onCreateStyle
             )
-            .navigationTitle(String(localized: "Change summary style"))
+            .navigationTitle(String(localized: "Change writing style"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

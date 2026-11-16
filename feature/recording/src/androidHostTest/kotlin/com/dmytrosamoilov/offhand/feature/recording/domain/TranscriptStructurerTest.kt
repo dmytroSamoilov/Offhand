@@ -152,16 +152,29 @@ class TranscriptStructurerTest {
 
     @Test
     fun `polish output that loses most of the note is discarded`() = runTest {
+        coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(BuiltInNoteStyles.spec(NotePreset.MEETING)), any()) } returns
+            result(
+                """{"title": "Budget review", "overview": "## Discussion\nI reviewed the quarterly budget with the finance team and we agreed to move four thousand into marketing for October."}""",
+            )
+        stubPolish(NotePreset.MEETING, """{"title": "Budget", "overview": "Reviewed."}""")
+
+        val note = structurer.structure(listOf("budget talk"), NoteStyleRef.BuiltIn(NotePreset.MEETING))
+
+        assertEquals("Budget review", note.title)
+        assertTrue(note.overview.contains("I reviewed the quarterly budget"))
+    }
+
+    @Test
+    fun `the summary style lets the polish pass shorten the draft to a few sentences`() = runTest {
         coEvery { aiBackend.processText(ModelPromptSet.Gemma4.structureNote(BuiltInNoteStyles.spec(NotePreset.SUMMARY)), any()) } returns
             result(
-                """{"title": "Budget review", "overview": "I reviewed the quarterly budget with the finance team and we agreed to move four thousand into marketing for October."}""",
+                """{"title": "Budget review", "overview": "I reviewed the quarterly budget with the finance team and we agreed to move four thousand into marketing for October, and then we went through every single line of the travel costs one by one."}""",
             )
-        stubPolish(NotePreset.SUMMARY, """{"title": "Budget", "overview": "Reviewed."}""")
+        stubPolish(NotePreset.SUMMARY, """{"title": "Budget", "overview": "Budget review with finance."}""")
 
         val note = structurer.structure(listOf("budget talk"), NoteStyleRef.BuiltIn(NotePreset.SUMMARY))
 
-        assertEquals("Budget review", note.title)
-        assertTrue(note.overview.startsWith("I reviewed the quarterly budget"))
+        assertEquals("Budget review with finance.", note.overview)
     }
 
     @Test

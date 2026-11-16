@@ -21,6 +21,7 @@ private fun styleUsage(style: Any?): ProTrialUsage? = when (style) {
     "meeting" -> ProTrialUsage.MEETING_NOTES
     "visit" -> ProTrialUsage.VISIT_NOTES
     "legal" -> ProTrialUsage.LEGAL_NOTES
+    "email" -> ProTrialUsage.EMAIL_NOTES
     "custom" -> ProTrialUsage.CUSTOM_STYLE_NOTES
     else -> null
 }

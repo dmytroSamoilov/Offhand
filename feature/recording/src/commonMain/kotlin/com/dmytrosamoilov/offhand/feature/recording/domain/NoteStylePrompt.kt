@@ -8,15 +8,18 @@ internal object NoteStylePrompt {
         FIELD_RULES_HEADER,
         TITLE_RULE,
         "$OVERVIEW_RULE_PREFIX${spec.overviewRule}",
-        EMPTY_SECTION_RULE,
-    ).joinToString(LINE_BREAK)
+        EMPTY_SECTION_RULE.takeIf { spec.sections.isNotEmpty() },
+        TRANSLATED_HEADINGS_RULE.takeIf { spec.headingTranslations.isNotEmpty() },
+    ).filterNotNull().joinToString(LINE_BREAK)
 
     fun polishStructureRule(spec: NoteStyleSpec): String = listOf(
         userInstructionsPolishRule(spec.userInstructions),
         proseSectionsPolishRule(spec.proseSections),
         sectionPolishRule(spec.sections),
+        TRANSLATED_HEADINGS_POLISH_RULE.takeIf { spec.headingTranslations.isNotEmpty() }.orEmpty(),
         listSectionsPolishRule(spec.listSections),
-        EMPTY_HEADING_POLISH_RULE,
+        EMPTY_HEADING_POLISH_RULE.takeIf { spec.sections.isNotEmpty() }.orEmpty(),
+        spec.polishRules.joinToString(LINE_BREAK),
     ).filter { it.isNotBlank() }.joinToString(LINE_BREAK)
 
     fun polishFieldRules(): String = listOf(
@@ -49,7 +52,10 @@ internal object NoteStylePrompt {
     fun quoteList(sections: List<String>): String =
         sections.joinToString(SECTION_LIST_SEPARATOR) { "\"$it\"" }
 
-    private fun sectionPolishRule(sections: List<String>): String = listOf(
+    private fun sectionPolishRule(sections: List<String>): String =
+        if (sections.isEmpty()) NO_STRUCTURE_POLISH_RULE else headingsPolishRule(sections)
+
+    private fun headingsPolishRule(sections: List<String>): String = listOf(
         "- Keep only these section headings: ${quoteList(sections)}. Never use any other heading.",
         "- Move a point that sits under the wrong heading to the heading where it belongs. " +
             "When a point clearly belongs under one of the allowed headings that the draft " +
@@ -76,6 +82,18 @@ internal object NoteStylePrompt {
         "- \"title\": a short title for the note, at most 8 words."
     private const val OVERVIEW_RULE_PREFIX = "- \"overview\": "
     private const val POLISHED_OVERVIEW_RULE = "the full polished note and nothing else."
+    // The headings are given in English; a note in another language gets them
+    // in that language, so the whole note reads as one.
+    private const val TRANSLATED_HEADINGS_RULE =
+        "- The section headings above are given in English. When the recording is spoken in another " +
+            "language, write each heading translated into that language, keeping the ## in front of it, " +
+            "and never mix headings of two languages in one note."
+    private const val TRANSLATED_HEADINGS_POLISH_RULE =
+        "- The allowed headings are listed in English. When the draft is written in another language, " +
+            "its headings are those same headings translated into that language: keep them in the " +
+            "draft's language and never turn them back into English."
+    private const val NO_STRUCTURE_POLISH_RULE =
+        "- Write plain running text: no headings, no \"- \" lines and no other Markdown."
     private const val EMPTY_HEADING_POLISH_RULE =
         "- Remove a heading that has nothing under it as well as lines that only say none or not mentioned."
     private const val EMPTY_SECTION_RULE =

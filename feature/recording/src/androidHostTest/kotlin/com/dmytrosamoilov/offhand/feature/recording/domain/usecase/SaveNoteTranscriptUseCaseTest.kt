@@ -43,6 +43,22 @@ class SaveNoteTranscriptUseCaseTest {
     }
 
     @Test
+    fun `saves where each paragraph starts and keeps the stored starts when none are given`() = runTest {
+        val timed = processingNote(5L).copy(transcriptStartsMs = listOf(0L, 29_000L))
+        coEvery { notesRepository.getNote(5L) } returns timed
+
+        useCase(noteId = 5L, transcript = "one\n\ntwo\n\nthree", transcriptionTimeMs = 900, startsMs = listOf(0L, 29_000L, 58_000L))
+        useCase(noteId = 5L, transcript = "one\n\ntwo", transcriptionTimeMs = 900)
+
+        coVerify {
+            notesRepository.updateNote(
+                timed.copy(transcript = "one\n\ntwo\n\nthree", transcriptionTimeMs = 900, transcriptStartsMs = listOf(0L, 29_000L, 58_000L)),
+            )
+        }
+        coVerify { notesRepository.updateNote(timed.copy(transcript = "one\n\ntwo", transcriptionTimeMs = 900)) }
+    }
+
+    @Test
     fun `does nothing when the note was deleted meanwhile`() = runTest {
         coEvery { notesRepository.getNote(5L) } returns null
 

@@ -3,7 +3,7 @@
     <string name="core_ui_error_title">Algo ha salido mal</string>
     <string name="core_ui_error_confirm">Aceptar</string>
     <string name="core_ui_note_preset_summary">Resumen</string>
-    <string name="core_ui_note_preset_summary_description">Temas principales, decisiones clave, tareas y un breve resumen.</string>
+    <string name="core_ui_note_preset_summary_description">De una a tres frases sobre de qué trata la grabación.</string>
     <string name="core_ui_note_preset_meeting">Notas de reunión</string>
     <string name="core_ui_note_preset_meeting_description">Debate, decisiones, tareas y preguntas abiertas.</string>
     <string name="core_ui_note_preset_visit">Informe de visita</string>
@@ -15,4 +15,6 @@
     <string name="core_ui_styles_new_button">Nuevo</string>
     <string name="core_ui_styles_default_option">Predeterminado</string>
     <string name="core_ui_styles_default_option_description">El estilo elegido en Ajustes</string>
+    <string name="core_ui_note_preset_email">Correo</string>
+    <string name="core_ui_note_preset_email_description">Asunto y un correo listo para enviar.</string>
 </resources>

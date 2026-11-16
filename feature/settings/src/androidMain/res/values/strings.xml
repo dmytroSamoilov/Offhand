@@ -29,14 +29,14 @@
 
     <string name="settings_note_style_note">The selected style is used for new recordings. You can change the style of any note from the note itself.</string>
     <string name="settings_note_styles_default_value">Default: %1$s</string>
-    <string name="settings_note_styles_title">Summary styles</string>
+    <string name="settings_note_styles_title">Writing styles</string>
     <string name="settings_note_styles_edit">Edit</string>
     <string name="settings_note_styles_delete">Delete style</string>
     <string name="settings_note_styles_delete_dialog_title">Delete this style?</string>
     <string name="settings_note_styles_delete_dialog_body">Notes written with it are kept. They switch to the Summary style the next time they are rewritten.</string>
     <string name="settings_note_styles_delete_dialog_confirm">Delete</string>
-    <string name="settings_note_style_editor_new_title">New summary style</string>
-    <string name="settings_note_style_editor_edit_title">Edit summary style</string>
+    <string name="settings_note_style_editor_new_title">New writing style</string>
+    <string name="settings_note_style_editor_edit_title">Edit writing style</string>
     <string name="settings_note_style_editor_back">Back</string>
     <string name="settings_note_style_editor_save">Save</string>
     <string name="settings_note_style_editor_name">Name</string>

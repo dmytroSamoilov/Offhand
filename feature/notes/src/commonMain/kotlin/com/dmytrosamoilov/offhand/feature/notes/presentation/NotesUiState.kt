@@ -35,7 +35,19 @@ data class NotesUiState(
     val isRetranscribeAvailable: Boolean = false,
     val detailTab: NoteDetailTabUi = NoteDetailTabUi.SUMMARY,
     val isSummaryReadyMarked: Boolean = false,
-)
+    val isNotesLoaded: Boolean = false,
+    val isUnsortedShown: Boolean = false,
+    val isTranscribing: Boolean = false,
+    val selectedNoteIds: Set<Long> = emptySet(),
+    val bulkAction: BulkNoteActionUi? = null,
+) {
+    val isSelectingNotes: Boolean get() = selectedNoteIds.isNotEmpty()
+}
+
+enum class BulkNoteActionUi {
+    MOVE,
+    DELETE,
+}
 
 sealed interface SmartSuggestionsUi {
     data object Locked : SmartSuggestionsUi
@@ -150,6 +162,13 @@ data class NoteDetailUi(
     val style: NoteStyleRef,
     val folderId: Long? = null,
     val folderName: String? = null,
+    val transcriptParts: List<TranscriptPartUi> = emptyList(),
+)
+
+data class TranscriptPartUi(
+    val startMs: Long,
+    val time: String,
+    val text: String,
 )
 
 enum class NoteStatusUi {

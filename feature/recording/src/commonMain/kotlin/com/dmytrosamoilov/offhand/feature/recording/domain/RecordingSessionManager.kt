@@ -98,6 +98,9 @@ class RecordingSessionManager(
     private val mutableSuggestingNoteIds = MutableStateFlow<Set<Long>>(emptySet())
     val suggestingNoteIds: StateFlow<Set<Long>> = mutableSuggestingNoteIds.asStateFlow()
 
+    private val mutableTranscribingNoteIds = MutableStateFlow<Set<Long>>(emptySet())
+    val transcribingNoteIds: StateFlow<Set<Long>> = mutableTranscribingNoteIds.asStateFlow()
+
     private val mutableNoteProgress = MutableStateFlow<Map<Long, Int>>(emptyMap())
     val noteProgress: StateFlow<Map<Long, Int>> = mutableNoteProgress.asStateFlow()
 
@@ -117,6 +120,7 @@ class RecordingSessionManager(
     val externalMicName: StateFlow<String?> = recorder.externalInputName
 
     private val transcripts = mutableMapOf<Int, String>()
+    private val chunkStartsMs = mutableMapOf<Int, Long>()
     private var transcriptionTimeMs = 0L
     private var recordedBytes = 0L
 
@@ -144,6 +148,7 @@ class RecordingSessionManager(
         if (mutableSession.value.phase.isActive()) return
         sessionFolderId = folderId
         transcripts.clear()
+        chunkStartsMs.clear()
         transcriptionTimeMs = 0
         recordedBytes = 0
         isDiscardRequested = false
@@ -230,9 +235,11 @@ class RecordingSessionManager(
     private suspend fun resumePoint(note: Note): ResumePoint {
         val checkpoint = getTranscriptionCheckpoint(note.id) ?: return ResumePoint.START
         Logger.withTag(LOG_TAG).i { "Resuming transcription of note ${note.id} from ${checkpoint.transcribedBytes} bytes" }
+        val texts = transcriptStructurer.splitStoredTranscript(note.transcript)
         return ResumePoint(
             skipBytes = checkpoint.transcribedBytes,
-            texts = transcriptStructurer.splitStoredTranscript(note.transcript),
+            texts = texts,
+            startsMs = note.transcriptStartsMs.takeIf { it.size == texts.size },
             transcriptionTimeMs = checkpoint.transcriptionTimeMs,
         )
     }
@@ -400,6 +407,7 @@ class RecordingSessionManager(
         resumePoint: ResumePoint,
         onProgress: (Float) -> Unit,
     ): StoredTranscription = try {
+        mutableTranscribingNoteIds.update { it + noteId }
         speechToText.prepare()
         val approxTotalBytes = audioStore.sizeOf(audioFileName).coerceAtLeast(1L)
         if (audioBackup.openRead(audioFileName)) {
@@ -418,6 +426,7 @@ class RecordingSessionManager(
         Logger.withTag(LOG_TAG).e(t) { "Stored audio transcription failed" }
         StoredTranscription(texts = emptyList(), transcriptionTimeMs = 0)
     } finally {
+        mutableTranscribingNoteIds.update { it - noteId }
         speechToText.release()
     }
 
@@ -440,17 +449,22 @@ class RecordingSessionManager(
     ): StoredTranscription {
         val window = ByteArray((RETRY_CHUNK_MS * BYTES_PER_MS).toInt())
         val texts = resumePoint.texts.toMutableList()
+        val startsMs = resumePoint.startsMs?.toMutableList()
         var totalTimeMs = resumePoint.transcriptionTimeMs
         var bytesRead = resumePoint.skipBytes
         while (true) {
             val read = readWindow(window)
             if (read <= 0) break
+            val windowStartMs = bytesRead / BYTES_PER_MS
             bytesRead += read
             transcribeWindow(wrapWindow(window, read))?.let { result ->
                 totalTimeMs += result.processingTimeMs
-                result.text.trim().takeIf { it.isNotBlank() }?.let(texts::add)
+                result.text.trim().takeIf { it.isNotBlank() }?.let { text ->
+                    texts.add(text)
+                    startsMs?.add(windowStartMs)
+                }
             }
-            checkpoint(noteId, bytesRead, texts, totalTimeMs)
+            checkpoint(noteId, bytesRead, texts.toList(), startsMs?.toList().orEmpty(), totalTimeMs)
             onProgress((bytesRead.toFloat() / approxTotalBytes).coerceAtMost(1f))
             if (read < window.size) break
         }
@@ -467,8 +481,14 @@ class RecordingSessionManager(
 
     // Every finished window is written down, so an interrupted transcription
     // continues from the last window instead of starting over.
-    private suspend fun checkpoint(noteId: Long, transcribedBytes: Long, texts: List<String>, transcriptionTimeMs: Long) {
-        persistTranscript(noteId, texts, transcriptionTimeMs)
+    private suspend fun checkpoint(
+        noteId: Long,
+        transcribedBytes: Long,
+        texts: List<String>,
+        startsMs: List<Long>,
+        transcriptionTimeMs: Long,
+    ) {
+        persistTranscript(noteId, texts, transcriptionTimeMs, startsMs)
         saveTranscriptionCheckpoint(TranscriptionCheckpoint(noteId, transcribedBytes, transcriptionTimeMs))
     }
 
@@ -502,10 +522,11 @@ class RecordingSessionManager(
     private data class ResumePoint(
         val skipBytes: Long,
         val texts: List<String>,
+        val startsMs: List<Long>?,
         val transcriptionTimeMs: Long,
     ) {
         companion object {
-            val START = ResumePoint(skipBytes = 0L, texts = emptyList(), transcriptionTimeMs = 0L)
+            val START = ResumePoint(skipBytes = 0L, texts = emptyList(), startsMs = emptyList(), transcriptionTimeMs = 0L)
         }
     }
 
@@ -551,6 +572,7 @@ class RecordingSessionManager(
         }
         mutableActiveRecordingNoteId.value = null
         transcripts.clear()
+        chunkStartsMs.clear()
         isDiscardRequested = false
         mutableSession.value = RecordingSession()
     }
@@ -643,6 +665,7 @@ class RecordingSessionManager(
     }
 
     private suspend fun transcribeChunk(chunk: AudioChunk) {
+        chunkStartsMs[chunk.id] = recordedBytes / BYTES_PER_MS
         recordedBytes += chunk.durationMs * BYTES_PER_MS
         if (chunk.speechMs < MIN_CHUNK_SPEECH_MS) {
             updateChunk(chunk.id) { it.copy(state = ChunkState.DONE) }
@@ -668,7 +691,7 @@ class RecordingSessionManager(
 
     private suspend fun persistSessionTranscript() {
         val noteId = mutableActiveRecordingNoteId.value ?: return
-        persistTranscript(noteId, sortedTranscripts(), transcriptionTimeMs)
+        persistTranscript(noteId, sortedTranscripts(), transcriptionTimeMs, sortedStartsMs())
     }
 
     // A recording killed mid-way resumes from the last finished chunk, so the
@@ -680,6 +703,10 @@ class RecordingSessionManager(
 
     private fun sortedTranscripts(): List<String> =
         transcripts.entries.sortedBy { it.key }.map { it.value }.filter { it.isNotBlank() }
+
+    // One start per paragraph of the saved transcript, in the same order.
+    private fun sortedStartsMs(): List<Long> =
+        transcripts.entries.sortedBy { it.key }.filter { it.value.isNotBlank() }.map { chunkStartsMs[it.key] ?: 0L }
 
     private suspend fun finishRecordedSession() {
         val noteId = mutableSession.value.noteId
@@ -719,6 +746,7 @@ class RecordingSessionManager(
         noteId?.let { discardEmptyNote(it) } ?: deleteAudioBackup()
         mutableActiveRecordingNoteId.value = null
         transcripts.clear()
+        chunkStartsMs.clear()
         mutableSession.value = RecordingSession()
     }
 
@@ -746,12 +774,14 @@ class RecordingSessionManager(
         noteId: Long,
         transcripts: List<String>,
         transcriptionMs: Long,
+        startsMs: List<Long>? = null,
     ) {
         if (transcripts.isEmpty()) return
         saveNoteTranscript(
             noteId = noteId,
             transcript = transcriptStructurer.joinChunks(transcripts),
             transcriptionTimeMs = transcriptionMs,
+            startsMs = startsMs,
         )
     }
 

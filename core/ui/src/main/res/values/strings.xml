@@ -3,7 +3,7 @@
     <string name="core_ui_error_title">Something went wrong</string>
     <string name="core_ui_error_confirm">OK</string>
     <string name="core_ui_note_preset_summary">Summary</string>
-    <string name="core_ui_note_preset_summary_description">Main topics, key decisions, action items and a short overview.</string>
+    <string name="core_ui_note_preset_summary_description">One to three sentences on what the recording is about.</string>
     <string name="core_ui_note_preset_meeting">Meeting notes</string>
     <string name="core_ui_note_preset_meeting_description">Discussion, decisions, action items and open questions.</string>
     <string name="core_ui_note_preset_visit">Visit report</string>
@@ -15,4 +15,6 @@
     <string name="core_ui_styles_new_button">New</string>
     <string name="core_ui_styles_default_option">Default</string>
     <string name="core_ui_styles_default_option_description">The style chosen in Settings</string>
+    <string name="core_ui_note_preset_email">Email</string>
+    <string name="core_ui_note_preset_email_description">A subject line and an email that is ready to send.</string>
 </resources>

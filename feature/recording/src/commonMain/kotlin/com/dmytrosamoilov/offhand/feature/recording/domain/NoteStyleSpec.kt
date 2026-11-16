@@ -12,6 +12,10 @@ internal data class NoteStyleSpec(
     val userInstructions: List<SectionInstruction> = emptyList(),
     val listSections: List<String> = emptyList(),
     val proseSections: List<String> = emptyList(),
+    val paragraphSections: List<String> = emptyList(),
+    val polishRules: List<String> = emptyList(),
+    val headingTranslations: Map<String, List<String>> = emptyMap(),
+    val isCondensedByPolish: Boolean = false,
 )
 
 internal data class SectionInstruction(

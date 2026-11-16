@@ -83,7 +83,7 @@
     <string name="notes_share_duration_label">Duration</string>
     <string name="notes_share_created_with">Created with Offhand</string>
     <string name="notes_share_exported_label">Exported</string>
-    <string name="notes_preset_description">Change summary style</string>
+    <string name="notes_preset_description">Change writing style</string>
     <string name="notes_fake_review_title" translatable="false">In-app review · dev build</string>
     <string name="notes_fake_review_body" translatable="false">Google Play would show its rating dialog here. Rules: %1$d recording(s) · attempt gap %2$d min · burst window %3$d min · cooldown %4$d min. Tapping outside counts the attempt, like the real dialog.</string>
     <string name="notes_fake_review_success" translatable="false">Count attempt</string>
@@ -101,8 +101,8 @@
     <string name="notes_folder_options_description">Folder options</string>
     <string name="notes_folder_rename">Rename folder</string>
     <string name="notes_folder_delete">Delete folder</string>
-    <string name="notes_folder_style">Summary style</string>
-    <string name="notes_folder_style_title">Summary style for %1$s</string>
+    <string name="notes_folder_style">Writing style</string>
+    <string name="notes_folder_style_title">Writing style for %1$s</string>
     <string name="notes_folder_style_body">New recordings in this folder use it, and notes moved here are rewritten in it.</string>
     <string name="notes_folder_style_default">Default</string>
     <string name="notes_folder_name_label">Folder name</string>
@@ -111,7 +111,7 @@
     <string name="notes_folder_error_too_long">Use at most %1$d characters.</string>
     <string name="notes_folder_error_duplicate">A folder with this name already exists.</string>
     <string name="notes_folder_delete_dialog_title">Delete this folder?</string>
-    <string name="notes_folder_delete_dialog_body">Its notes are kept and go back to All notes.</string>
+    <string name="notes_folder_delete_dialog_body">Its notes are kept, just without a folder.</string>
     <string name="notes_folder_empty_state">No notes in this folder yet</string>
     <string name="notes_move_to_folder">Move to folder</string>
     <string name="notes_folder_none">No folder</string>
@@ -131,4 +131,15 @@
     <string name="notes_suggestions_added">Added</string>
     <string name="notes_suggestions_dismiss">Dismiss suggestion</string>
     <string name="notes_suggestions_locked">Offhand Pro finds calendar events and to-dos in your notes.</string>
+    <string name="notes_folder_unsorted">Unsorted</string>
+    <string name="notes_unsorted_empty_title">No unsorted notes</string>
+    <string name="notes_unsorted_empty_hint">Notes outside your folders appear here.</string>
+    <string name="notes_loading_description">Loading your notes</string>
+    <string name="notes_transcript_more_coming">Still transcribing the rest…</string>
+    <string name="notes_transcript_time_description">Play from %1$s</string>
+    <string name="notes_selection_count">%1$d selected</string>
+    <string name="notes_selection_cancel">Cancel selection</string>
+    <string name="notes_select_action">Select</string>
+    <string name="notes_bulk_delete_title">Delete the selected notes?</string>
+    <string name="notes_bulk_delete_body">They will be permanently removed from your phone. This cannot be undone.</string>
 </resources>

@@ -123,7 +123,9 @@ class NotesViewModel(
     private var noteSuggestions: NoteSuggestions? = null
     private var pendingSuggestionIndex: Int? = null
     private val selectedNoteId = MutableStateFlow<Long?>(null)
-    private val allNotes = MutableStateFlow<List<Note>>(emptyList())
+    // Null until the database has answered, so a library that is still
+    // being read is not mistaken for an empty one.
+    private val allNotes = MutableStateFlow<List<Note>?>(null)
     private val folders = MutableStateFlow<List<Folder>>(emptyList())
     private val selectedFolderId = MutableStateFlow<Long?>(null)
     private val searchQuery = MutableStateFlow("")
@@ -149,6 +151,10 @@ class NotesViewModel(
         viewModelScope.launch {
             combine(allNotes, folders, selectedFolderId, searchQuery, ::listContent)
                 .collect { content -> mutableUiState.update { content(it) } }
+        }
+        viewModelScope.launch {
+            combine(selectedNoteId, sessionManager.transcribingNoteIds) { noteId, transcribing -> noteId in transcribing }
+                .collect { isTranscribing -> mutableUiState.update { it.copy(isTranscribing = isTranscribing) } }
         }
         viewModelScope.launch {
             audioPlayer.state.collect { playback ->
@@ -223,7 +229,7 @@ class NotesViewModel(
             sessionManager.suggestingNoteIds.map { noteId in it },
             isCalendarSuggestionsAvailable(),
             isSmartSuggestionsEnabled(),
-            allNotes.map { notes -> notes.firstOrNull { it.id == noteId }?.status },
+            allNotes.map { notes -> notes.orEmpty().firstOrNull { it.id == noteId }?.status },
         ) { suggestions: NoteSuggestions?, isSuggesting: Boolean, unlocked: Boolean, enabled: Boolean, status: NoteStatus? ->
             noteSuggestions = suggestions
             suggestions.toSmartSuggestionsUi(isSuggesting, unlocked, enabled, status)
@@ -246,15 +252,33 @@ class NotesViewModel(
     }
 
     private fun listContent(
-        notes: List<Note>,
+        loadedNotes: List<Note>?,
         folders: List<Folder>,
         folderId: Long?,
         query: String,
     ): (NotesUiState) -> NotesUiState {
-        val inFolder = if (folderId == null) notes else notes.filter { it.folderId == folderId }
-        val sections = searchNotes(inFolder, query).toSectionsUi(dateLabelFormatter, folders.namesById())
+        val notes = loadedNotes.orEmpty()
+        val sections = searchNotes(notes.shownFor(folders, folderId, query), query)
+            .toSectionsUi(dateLabelFormatter, folders.namesById())
         val foldersUi = folders.toFoldersUi(notes)
-        return { state -> state.copy(sections = sections, folders = foldersUi, selectedFolderId = folderId) }
+        return { state ->
+            state.copy(
+                sections = sections,
+                folders = foldersUi,
+                selectedFolderId = folderId,
+                isUnsortedShown = folders.isNotEmpty(),
+                isNotesLoaded = loadedNotes != null,
+            )
+        }
+    }
+
+    // Once there are folders the first chip holds only the notes outside
+    // them; a search from there still looks through every note, so nothing
+    // filed away becomes hard to find.
+    private fun List<Note>.shownFor(folders: List<Folder>, folderId: Long?, query: String): List<Note> = when {
+        folderId != null -> filter { it.folderId == folderId }
+        folders.isEmpty() || query.isNotBlank() -> this
+        else -> filter { it.folderId == null }
     }
 
     private fun List<Folder>.namesById(): Map<Long, String> = associate { it.id to it.name }
@@ -363,7 +387,7 @@ class NotesViewModel(
     }
 
     fun onMoveToFolderRequested(noteId: Long) {
-        val note = allNotes.value.firstOrNull { it.id == noteId } ?: selectedNote?.takeIf { it.id == noteId } ?: return
+        val note = allNotes.value.orEmpty().firstOrNull { it.id == noteId } ?: selectedNote?.takeIf { it.id == noteId } ?: return
         mutableUiState.update {
             it.copy(moveToFolder = MoveToFolderUi(noteId = note.id, currentFolderId = note.folderId))
         }
@@ -380,6 +404,52 @@ class NotesViewModel(
             moveNoteToFolder(target.noteId, folderId)
             analyticsTracker.track(AnalyticsEvents.noteMoved())
         }
+    }
+
+    // Holding a note starts a selection; from then on a tap adds or removes a
+    // note, and the selection ends by itself when its last note is removed.
+    fun onNoteSelectionToggled(id: Long) {
+        mutableUiState.update { state ->
+            state.copy(selectedNoteIds = if (id in state.selectedNoteIds) state.selectedNoteIds - id else state.selectedNoteIds + id)
+        }
+    }
+
+    fun onNoteSelectionCleared() {
+        mutableUiState.update { it.copy(selectedNoteIds = emptySet(), bulkAction = null) }
+    }
+
+    fun onBulkActionRequested(action: BulkNoteActionUi) {
+        if (mutableUiState.value.isSelectingNotes) mutableUiState.update { it.copy(bulkAction = action) }
+    }
+
+    fun onBulkActionDismissed() {
+        mutableUiState.update { it.copy(bulkAction = null) }
+    }
+
+    fun onBulkMoveConfirmed(folderId: Long?) {
+        val noteIds = takeSelection()
+        launchSafely(showLoading = false) {
+            noteIds.forEach { noteId ->
+                moveNoteToFolder(noteId, folderId)
+                analyticsTracker.track(AnalyticsEvents.noteMoved())
+            }
+        }
+    }
+
+    fun onBulkDeleteConfirmed() {
+        val noteIds = takeSelection()
+        launchSafely {
+            noteIds.forEach { noteId ->
+                deleteNote(noteId)
+                analyticsTracker.track(AnalyticsEvents.noteDeleted())
+            }
+        }
+    }
+
+    private fun takeSelection(): Set<Long> {
+        val noteIds = mutableUiState.value.selectedNoteIds
+        mutableUiState.update { it.copy(selectedNoteIds = emptySet(), bulkAction = null) }
+        return noteIds
     }
 
     // One event per search, when typing starts, never the text itself.
@@ -549,6 +619,15 @@ class NotesViewModel(
     fun onSeekRequested(fraction: Float) {
         val durationMs = audioPlayer.state.value.durationMs
         audioPlayer.seekTo((durationMs * fraction).toLong())
+    }
+
+    fun onTranscriptTimeSelected(startMs: Long) {
+        if (!audioPlayer.state.value.isLoaded) return
+        audioPlayer.seekTo(startMs)
+        if (!audioPlayer.state.value.isPlaying) {
+            audioPlayer.play()
+            analyticsTracker.track(AnalyticsEvents.notePlayed())
+        }
     }
 
     private fun loadAudio(note: Note) {

@@ -48,6 +48,10 @@ enum class NotePresetOption(
         labelRes = R.string.core_ui_note_preset_legal,
         descriptionRes = R.string.core_ui_note_preset_legal_description,
     ),
+    EMAIL(
+        labelRes = R.string.core_ui_note_preset_email,
+        descriptionRes = R.string.core_ui_note_preset_email_description,
+    ),
 }
 
 fun NotePreset.toUi(): NotePresetOption = when (this) {
@@ -55,6 +59,7 @@ fun NotePreset.toUi(): NotePresetOption = when (this) {
     NotePreset.MEETING -> NotePresetOption.MEETING
     NotePreset.VISIT -> NotePresetOption.VISIT
     NotePreset.LEGAL -> NotePresetOption.LEGAL
+    NotePreset.EMAIL -> NotePresetOption.EMAIL
 }
 
 fun NotePresetOption.toDomain(): NotePreset = when (this) {
@@ -62,6 +67,7 @@ fun NotePresetOption.toDomain(): NotePreset = when (this) {
     NotePresetOption.MEETING -> NotePreset.MEETING
     NotePresetOption.VISIT -> NotePreset.VISIT
     NotePresetOption.LEGAL -> NotePreset.LEGAL
+    NotePresetOption.EMAIL -> NotePreset.EMAIL
 }
 
 @Composable

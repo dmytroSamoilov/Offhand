@@ -33,7 +33,7 @@ struct SettingsView: View {
                         NoteStylesView()
                     } label: {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(String(localized: "Summary styles"))
+                            Text(String(localized: "Writing styles"))
                             Text(
                                 String(
                                     format: String(localized: "Default: %@"),

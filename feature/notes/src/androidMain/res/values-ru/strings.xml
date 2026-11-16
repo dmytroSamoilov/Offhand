@@ -76,7 +76,7 @@
     <string name="notes_share_duration_label">Длительность</string>
     <string name="notes_share_created_with">Создано в Offhand</string>
     <string name="notes_share_exported_label">Экспортировано</string>
-    <string name="notes_preset_description">Изменить стиль резюме</string>
+    <string name="notes_preset_description">Изменить стиль письма</string>
     <string name="notes_preset_sheet_body">Запись сохраняется. Название и резюме будут написаны заново по расшифровке в выбранном стиле.</string>
     <string name="notes_copy_summary_description">Скопировать резюме</string>
     <string name="notes_copy_transcript_description">Скопировать расшифровку</string>
@@ -90,8 +90,8 @@
     <string name="notes_folder_options_description">Параметры папки</string>
     <string name="notes_folder_rename">Переименовать папку</string>
     <string name="notes_folder_delete">Удалить папку</string>
-    <string name="notes_folder_style">Стиль резюме</string>
-    <string name="notes_folder_style_title">Стиль резюме для %1$s</string>
+    <string name="notes_folder_style">Стиль письма</string>
+    <string name="notes_folder_style_title">Стиль письма для %1$s</string>
     <string name="notes_folder_style_body">Новые записи в этой папке используют его, а перемещённые сюда заметки переписываются в нём.</string>
     <string name="notes_folder_style_default">По умолчанию</string>
     <string name="notes_folder_name_label">Название папки</string>
@@ -100,7 +100,7 @@
     <string name="notes_folder_error_too_long">Не более %1$d символов.</string>
     <string name="notes_folder_error_duplicate">Папка с таким названием уже существует.</string>
     <string name="notes_folder_delete_dialog_title">Удалить эту папку?</string>
-    <string name="notes_folder_delete_dialog_body">Заметки из неё сохранятся и вернутся во «Все заметки».</string>
+    <string name="notes_folder_delete_dialog_body">Заметки из неё сохранятся, просто без папки.</string>
     <string name="notes_folder_empty_state">В этой папке пока нет заметок</string>
     <string name="notes_move_to_folder">Переместить в папку</string>
     <string name="notes_folder_none">Без папки</string>
@@ -120,4 +120,15 @@
     <string name="notes_suggestions_added">Добавлено</string>
     <string name="notes_suggestions_dismiss">Скрыть подсказку</string>
     <string name="notes_suggestions_locked">Offhand Pro находит события календаря и задачи в ваших заметках.</string>
+    <string name="notes_folder_unsorted">Без папки</string>
+    <string name="notes_unsorted_empty_title">Нет заметок без папки</string>
+    <string name="notes_unsorted_empty_hint">Здесь появляются заметки, которые не лежат ни в одной папке.</string>
+    <string name="notes_loading_description">Загружаем заметки</string>
+    <string name="notes_transcript_more_coming">Остальное ещё расшифровывается…</string>
+    <string name="notes_transcript_time_description">Воспроизвести с %1$s</string>
+    <string name="notes_selection_count">Выбрано: %1$d</string>
+    <string name="notes_selection_cancel">Отменить выбор</string>
+    <string name="notes_select_action">Выбрать</string>
+    <string name="notes_bulk_delete_title">Удалить выбранные заметки?</string>
+    <string name="notes_bulk_delete_body">Они будут навсегда удалены с телефона. Это действие нельзя отменить.</string>
 </resources>

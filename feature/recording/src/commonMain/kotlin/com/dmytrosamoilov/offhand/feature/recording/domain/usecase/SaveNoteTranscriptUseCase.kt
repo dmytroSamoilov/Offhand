@@ -9,12 +9,14 @@ class SaveNoteTranscriptUseCase(
         noteId: Long,
         transcript: String,
         transcriptionTimeMs: Long,
+        startsMs: List<Long>? = null,
     ) {
         val note = notesRepository.getNote(noteId) ?: return
         notesRepository.updateNote(
             note.copy(
                 transcript = transcript,
                 transcriptionTimeMs = transcriptionTimeMs,
+                transcriptStartsMs = startsMs ?: note.transcriptStartsMs,
             ),
         )
     }

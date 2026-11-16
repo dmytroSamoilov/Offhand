@@ -19,4 +19,5 @@ internal data class NoteEntity(
     val preset: String,
     val folderId: Long?,
     val customStyleId: Long?,
+    val transcriptStartsMs: String? = null,
 )

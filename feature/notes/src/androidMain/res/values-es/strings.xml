@@ -75,7 +75,7 @@
     <string name="notes_share_duration_label">Duración</string>
     <string name="notes_share_created_with">Creado con Offhand</string>
     <string name="notes_share_exported_label">Exportado</string>
-    <string name="notes_preset_description">Cambiar estilo de resumen</string>
+    <string name="notes_preset_description">Cambiar estilo de escritura</string>
     <string name="notes_preset_sheet_body">La grabación se conserva. El título y el resumen se escriben de nuevo a partir de la transcripción, en el estilo que elijas.</string>
     <string name="notes_copy_summary_description">Copiar resumen</string>
     <string name="notes_copy_transcript_description">Copiar transcripción</string>
@@ -89,8 +89,8 @@
     <string name="notes_folder_options_description">Opciones de carpeta</string>
     <string name="notes_folder_rename">Renombrar carpeta</string>
     <string name="notes_folder_delete">Eliminar carpeta</string>
-    <string name="notes_folder_style">Estilo de resumen</string>
-    <string name="notes_folder_style_title">Estilo de resumen para %1$s</string>
+    <string name="notes_folder_style">Estilo de escritura</string>
+    <string name="notes_folder_style_title">Estilo de escritura para %1$s</string>
     <string name="notes_folder_style_body">Las grabaciones nuevas de esta carpeta lo usan, y las notas movidas aquí se reescriben con él.</string>
     <string name="notes_folder_style_default">Predeterminado</string>
     <string name="notes_folder_name_label">Nombre de la carpeta</string>
@@ -99,7 +99,7 @@
     <string name="notes_folder_error_too_long">Usa como máximo %1$d caracteres.</string>
     <string name="notes_folder_error_duplicate">Ya existe una carpeta con este nombre.</string>
     <string name="notes_folder_delete_dialog_title">¿Eliminar esta carpeta?</string>
-    <string name="notes_folder_delete_dialog_body">Sus notas se conservan y vuelven a Todas las notas.</string>
+    <string name="notes_folder_delete_dialog_body">Sus notas se conservan, solo que sin carpeta.</string>
     <string name="notes_folder_empty_state">Aún no hay notas en esta carpeta</string>
     <string name="notes_move_to_folder">Mover a carpeta</string>
     <string name="notes_folder_none">Sin carpeta</string>
@@ -119,4 +119,15 @@
     <string name="notes_suggestions_added">Añadido</string>
     <string name="notes_suggestions_dismiss">Descartar sugerencia</string>
     <string name="notes_suggestions_locked">Offhand Pro encuentra eventos de calendario y tareas en tus notas.</string>
+    <string name="notes_folder_unsorted">Sin carpeta</string>
+    <string name="notes_unsorted_empty_title">No hay notas sin carpeta</string>
+    <string name="notes_unsorted_empty_hint">Aquí aparecen las notas que no están en ninguna carpeta.</string>
+    <string name="notes_loading_description">Cargando tus notas</string>
+    <string name="notes_transcript_more_coming">Aún se está transcribiendo el resto…</string>
+    <string name="notes_transcript_time_description">Reproducir desde %1$s</string>
+    <string name="notes_selection_count">Seleccionadas: %1$d</string>
+    <string name="notes_selection_cancel">Cancelar selección</string>
+    <string name="notes_select_action">Seleccionar</string>
+    <string name="notes_bulk_delete_title">¿Eliminar las notas seleccionadas?</string>
+    <string name="notes_bulk_delete_body">Se eliminarán de forma permanente de tu teléfono. Esta acción no se puede deshacer.</string>
 </resources>

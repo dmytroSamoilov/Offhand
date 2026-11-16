@@ -74,7 +74,7 @@
     <string name="notes_share_duration_label">Dauer</string>
     <string name="notes_share_created_with">Erstellt mit Offhand</string>
     <string name="notes_share_exported_label">Exportiert</string>
-    <string name="notes_preset_description">Zusammenfassungsstil ändern</string>
+    <string name="notes_preset_description">Schreibstil ändern</string>
     <string name="notes_preset_sheet_body">Die Aufnahme bleibt erhalten. Titel und Zusammenfassung werden aus dem Transkript neu geschrieben — im Stil, den du wählst.</string>
     <string name="notes_copy_summary_description">Zusammenfassung kopieren</string>
     <string name="notes_copy_transcript_description">Transkript kopieren</string>
@@ -88,8 +88,8 @@
     <string name="notes_folder_options_description">Ordneroptionen</string>
     <string name="notes_folder_rename">Ordner umbenennen</string>
     <string name="notes_folder_delete">Ordner löschen</string>
-    <string name="notes_folder_style">Zusammenfassungsstil</string>
-    <string name="notes_folder_style_title">Zusammenfassungsstil für %1$s</string>
+    <string name="notes_folder_style">Schreibstil</string>
+    <string name="notes_folder_style_title">Schreibstil für %1$s</string>
     <string name="notes_folder_style_body">Neue Aufnahmen in diesem Ordner nutzen ihn, und hierher verschobene Notizen werden damit neu geschrieben.</string>
     <string name="notes_folder_style_default">Standard</string>
     <string name="notes_folder_name_label">Ordnername</string>
@@ -98,7 +98,7 @@
     <string name="notes_folder_error_too_long">Höchstens %1$d Zeichen.</string>
     <string name="notes_folder_error_duplicate">Ein Ordner mit diesem Namen existiert bereits.</string>
     <string name="notes_folder_delete_dialog_title">Diesen Ordner löschen?</string>
-    <string name="notes_folder_delete_dialog_body">Die Notizen bleiben erhalten und landen wieder unter „Alle Notizen“.</string>
+    <string name="notes_folder_delete_dialog_body">Die Notizen bleiben erhalten, nur ohne Ordner.</string>
     <string name="notes_folder_empty_state">In diesem Ordner sind noch keine Notizen</string>
     <string name="notes_move_to_folder">In Ordner verschieben</string>
     <string name="notes_folder_none">Kein Ordner</string>
@@ -118,4 +118,15 @@
     <string name="notes_suggestions_added">Hinzugefügt</string>
     <string name="notes_suggestions_dismiss">Vorschlag ausblenden</string>
     <string name="notes_suggestions_locked">Offhand Pro findet Kalendertermine und Aufgaben in deinen Notizen.</string>
+    <string name="notes_folder_unsorted">Unsortiert</string>
+    <string name="notes_unsorted_empty_title">Keine unsortierten Notizen</string>
+    <string name="notes_unsorted_empty_hint">Notizen ohne Ordner erscheinen hier.</string>
+    <string name="notes_loading_description">Deine Notizen werden geladen</string>
+    <string name="notes_transcript_more_coming">Der Rest wird noch transkribiert…</string>
+    <string name="notes_transcript_time_description">Ab %1$s abspielen</string>
+    <string name="notes_selection_count">%1$d ausgewählt</string>
+    <string name="notes_selection_cancel">Auswahl aufheben</string>
+    <string name="notes_select_action">Auswählen</string>
+    <string name="notes_bulk_delete_title">Ausgewählte Notizen löschen?</string>
+    <string name="notes_bulk_delete_body">Sie werden dauerhaft von deinem Smartphone entfernt. Das lässt sich nicht rückgängig machen.</string>
 </resources>

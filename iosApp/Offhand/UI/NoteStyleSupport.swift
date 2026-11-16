@@ -14,16 +14,18 @@ enum NoteStyleLabels {
         case .meeting: return String(localized: "Meeting notes")
         case .visit: return String(localized: "Visit report")
         case .legal: return String(localized: "Legal note")
+        case .email: return String(localized: "Email")
         default: return String(localized: "Summary")
         }
     }
 
     static func details(for preset: NotePreset) -> String {
         switch preset {
-        case .summary: return String(localized: "Main topics, key decisions, action items and a short overview.")
+        case .summary: return String(localized: "One to three sentences on what the recording is about.")
         case .meeting: return String(localized: "Discussion, decisions, action items and open questions.")
         case .visit: return String(localized: "Who the visit was about, observations, what was done and follow-ups.")
         case .legal: return String(localized: "Matter, facts stated, instructions, advice given and next steps.")
+        case .email: return String(localized: "A subject line and an email that is ready to send.")
         default: return ""
         }
     }
@@ -106,7 +108,7 @@ struct NoteStyleList: View {
                 }
             }
             Section {
-                ForEach([NotePreset.summary, .meeting, .visit, .legal], id: \.self) { preset in
+                ForEach([NotePreset.summary, .meeting, .visit, .legal, .email], id: \.self) { preset in
                     StyleOptionRow(
                         title: NoteStyleLabels.label(for: preset),
                         details: NoteStyleLabels.details(for: preset),

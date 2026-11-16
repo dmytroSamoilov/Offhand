@@ -6,11 +6,13 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,7 +25,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.HeadsetMic
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Pause
@@ -32,7 +34,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -58,6 +60,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -289,6 +294,7 @@ private fun RecordingContent(
 ) {
     var isDiscardDialogVisible by remember { mutableStateOf(false) }
 
+    CancelRecordingButton(onClick = { isDiscardDialogVisible = true })
     WaveformVisualizer(
         levels = state.waveform,
         isPaused = state.isPaused,
@@ -318,8 +324,8 @@ private fun RecordingContent(
     Spacer(modifier = Modifier.height(28.dp))
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         PauseResumeButton(
             isPaused = state.isPaused,
@@ -328,28 +334,12 @@ private fun RecordingContent(
         )
         Button(
             onClick = onStopClick,
-            modifier = Modifier
-                .weight(1f)
-                .height(64.dp),
+            modifier = Modifier.height(CONTROL_HEIGHT),
             shape = CircleShape,
+            contentPadding = CONTROL_PADDING,
         ) {
-            Icon(
-                imageVector = Icons.Filled.Check,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = stringResource(R.string.recording_save_note_button),
-                style = MaterialTheme.typography.titleMedium,
-            )
+            ControlLabel(icon = Icons.Filled.Stop, text = stringResource(R.string.recording_save_note_button))
         }
-    }
-    TextButton(onClick = { isDiscardDialogVisible = true }) {
-        Text(
-            text = stringResource(R.string.recording_discard_button),
-            color = MaterialTheme.colorScheme.error,
-        )
     }
 
     if (isDiscardDialogVisible) {
@@ -363,40 +353,55 @@ private fun RecordingContent(
     }
 }
 
+// Cancelling sits apart from the two main actions, in the sheet's corner,
+// and always asks before anything is thrown away. It keeps the description
+// "Discard recording", which is what a screen reader and the UI tests use.
+@Composable
+private fun CancelRecordingButton(onClick: () -> Unit) {
+    val description = stringResource(R.string.recording_discard_button)
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        TextButton(onClick = onClick, modifier = Modifier.semantics { contentDescription = description }) {
+            Text(text = stringResource(R.string.recording_discard_dialog_cancel))
+        }
+    }
+}
+
+// Both controls are pills as wide as their content, icon first, so the
+// button follows its label when Pause turns into Resume.
 @Composable
 private fun PauseResumeButton(
     isPaused: Boolean,
     onPauseClick: () -> Unit,
     onResumeClick: () -> Unit,
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        FilledTonalIconButton(
-            onClick = if (isPaused) onResumeClick else onPauseClick,
-            modifier = Modifier.size(64.dp),
-            shape = CircleShape,
-        ) {
-            Icon(
-                imageVector = if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
-                contentDescription = stringResource(
-                    if (isPaused) {
-                        R.string.recording_resume_description
-                    } else {
-                        R.string.recording_pause_description
-                    },
-                ),
-                modifier = Modifier.size(28.dp),
-            )
-        }
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            text = stringResource(
-                if (isPaused) R.string.recording_resume_label else R.string.recording_pause_label,
-            ),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+    val description = stringResource(
+        if (isPaused) R.string.recording_resume_description else R.string.recording_pause_description,
+    )
+    FilledTonalButton(
+        onClick = if (isPaused) onResumeClick else onPauseClick,
+        modifier = Modifier
+            .height(CONTROL_HEIGHT)
+            .animateContentSize()
+            .semantics { contentDescription = description },
+        shape = CircleShape,
+        contentPadding = CONTROL_PADDING,
+    ) {
+        ControlLabel(
+            icon = if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
+            text = stringResource(if (isPaused) R.string.recording_resume_label else R.string.recording_pause_label),
         )
     }
 }
+
+@Composable
+private fun ControlLabel(icon: ImageVector, text: String) {
+    Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(24.dp))
+    Spacer(modifier = Modifier.width(8.dp))
+    Text(text = text, style = MaterialTheme.typography.titleMedium, maxLines = 1)
+}
+
+private val CONTROL_HEIGHT = 56.dp
+private val CONTROL_PADDING = PaddingValues(start = 20.dp, end = 24.dp)
 
 @Composable
 private fun DiscardConfirmationDialog(

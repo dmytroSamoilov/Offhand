@@ -91,6 +91,7 @@ class NotesViewModelTest {
     )
 
     private val observeNotes: ObserveNotesUseCase = mockk()
+    private val transcribingNoteIds = MutableStateFlow<Set<Long>>(emptySet())
     private val observeFolders: ObserveFoldersUseCase = mockk {
         every { this@mockk() } returns flowOf(emptyList())
     }
@@ -155,6 +156,7 @@ class NotesViewModelTest {
         every { noteProgress } returns MutableStateFlow(emptyMap())
         every { events } returns MutableSharedFlow()
         every { suggestingNoteIds } returns this@NotesViewModelTest.suggestingNoteIds
+        every { transcribingNoteIds } returns this@NotesViewModelTest.transcribingNoteIds
     }
     private val modelState = MutableStateFlow<ModelState>(ModelState.Ready)
     private val modelManager: ModelManager = mockk {
@@ -304,6 +306,95 @@ class NotesViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(NoteDetailTabUi.SUMMARY, viewModel.uiState.value.detailTab)
+    }
+
+    @Test
+    fun `the library reads as loading until the notes have arrived`() = runTest(dispatcher) {
+        val notes = MutableSharedFlow<List<Note>>()
+        every { observeNotes() } returns notes
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.isNotesLoaded)
+
+        notes.emit(emptyList())
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isNotesLoaded)
+        assertTrue(viewModel.uiState.value.sections.isEmpty())
+    }
+
+    @Test
+    fun `with folders the first chip holds only unsorted notes and a search still covers all`() = runTest(dispatcher) {
+        every { observeFolders() } returns flowOf(listOf(Folder(1, "Work", 0)))
+        every { observeNotes() } returns flowOf(listOf(note, note.copy(id = 6, title = "Filed away", folderId = 1)))
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isUnsortedShown)
+        assertEquals(listOf(5L), viewModel.uiState.value.sections.flatMap { it.notes }.map { it.id })
+
+        viewModel.onSearchQueryChanged("Filed")
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(listOf(6L), viewModel.uiState.value.sections.flatMap { it.notes }.map { it.id })
+
+        viewModel.onSearchQueryChanged("")
+        viewModel.onFolderSelected(1)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(listOf(6L), viewModel.uiState.value.sections.flatMap { it.notes }.map { it.id })
+    }
+
+    @Test
+    fun `an open note says so while the rest of its recording is still being transcribed`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.isTranscribing)
+
+        transcribingNoteIds.value = setOf(5L)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isTranscribing)
+    }
+
+    @Test
+    fun `holding notes selects them and a bulk move files every one and ends the selection`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onNoteSelectionToggled(5)
+        viewModel.onNoteSelectionToggled(6)
+        viewModel.onNoteSelectionToggled(7)
+        viewModel.onNoteSelectionToggled(7)
+        assertEquals(setOf(5L, 6L), viewModel.uiState.value.selectedNoteIds)
+
+        viewModel.onBulkActionRequested(BulkNoteActionUi.MOVE)
+        assertEquals(BulkNoteActionUi.MOVE, viewModel.uiState.value.bulkAction)
+        viewModel.onBulkMoveConfirmed(folderId = 1)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { moveNoteToFolder(5, 1) }
+        coVerify { moveNoteToFolder(6, 1) }
+        assertFalse(viewModel.uiState.value.isSelectingNotes)
+        assertNull(viewModel.uiState.value.bulkAction)
+    }
+
+    @Test
+    fun `a bulk delete removes only the selected notes and a dismissed one removes nothing`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onBulkActionRequested(BulkNoteActionUi.DELETE)
+        assertNull(viewModel.uiState.value.bulkAction)
+
+        viewModel.onNoteSelectionToggled(5)
+        viewModel.onBulkActionRequested(BulkNoteActionUi.DELETE)
+        viewModel.onBulkActionDismissed()
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify(exactly = 0) { deleteNote(any()) }
+        assertEquals(setOf(5L), viewModel.uiState.value.selectedNoteIds)
+
+        viewModel.onBulkActionRequested(BulkNoteActionUi.DELETE)
+        viewModel.onBulkDeleteConfirmed()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { deleteNote(5) }
+        assertFalse(viewModel.uiState.value.isSelectingNotes)
     }
 
     @Test

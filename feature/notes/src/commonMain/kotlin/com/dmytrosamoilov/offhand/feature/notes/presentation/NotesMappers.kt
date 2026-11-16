@@ -108,7 +108,20 @@ internal fun Note.toDetailUi(
     style = style,
     folderId = folderId,
     folderName = folderId?.let(folderNames::get),
+    transcriptParts = toTranscriptPartsUi(),
 )
+
+// Time marks are only shown while there is exactly one per paragraph: an
+// edited transcript or a note from before the marks existed has none.
+internal fun Note.toTranscriptPartsUi(): List<TranscriptPartUi> {
+    val paragraphs = transcript.split(TRANSCRIPT_PARAGRAPH_SEPARATOR).filter { it.isNotBlank() }
+    if (paragraphs.isEmpty() || paragraphs.size != transcriptStartsMs.size) return emptyList()
+    return paragraphs.zip(transcriptStartsMs) { text, startMs ->
+        TranscriptPartUi(startMs = startMs, time = formatClock(startMs), text = text.trim())
+    }
+}
+
+private const val TRANSCRIPT_PARAGRAPH_SEPARATOR = "\n\n"
 
 private fun Note.createdAtLocalDateTime(): LocalDateTime =
     Instant.fromEpochMilliseconds(createdAtEpochMs).toLocalDateTime(TimeZone.currentSystemDefault())

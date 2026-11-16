@@ -10,7 +10,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: Android
     commands:
       - tapOn: "Settings"
-      - tapOn: "Summary styles"
+      - tapOn: "Writing styles"
       - tapOn: "New"
       - tapOn: "Describe it and let the AI fill the form"
       - tapOn: "For example.*"
@@ -36,7 +36,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - tapOn: "Settings"
-      - tapOn: "Summary styles"
+      - tapOn: "Writing styles"
       - tapOn: "New"
       - tapOn: "Describe it and let the AI fill the form"
       - tapOn: "For example.*"

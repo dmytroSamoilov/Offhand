@@ -75,7 +75,7 @@
     <string name="notes_share_duration_label">Duração</string>
     <string name="notes_share_created_with">Criado com o Offhand</string>
     <string name="notes_share_exported_label">Exportado</string>
-    <string name="notes_preset_description">Mudar estilo de resumo</string>
+    <string name="notes_preset_description">Mudar estilo de escrita</string>
     <string name="notes_preset_sheet_body">A gravação é mantida. O título e o resumo são escritos de novo a partir da transcrição, no estilo que você escolher.</string>
     <string name="notes_copy_summary_description">Copiar resumo</string>
     <string name="notes_copy_transcript_description">Copiar transcrição</string>
@@ -89,8 +89,8 @@
     <string name="notes_folder_options_description">Opções da pasta</string>
     <string name="notes_folder_rename">Renomear pasta</string>
     <string name="notes_folder_delete">Excluir pasta</string>
-    <string name="notes_folder_style">Estilo de resumo</string>
-    <string name="notes_folder_style_title">Estilo de resumo para %1$s</string>
+    <string name="notes_folder_style">Estilo de escrita</string>
+    <string name="notes_folder_style_title">Estilo de escrita para %1$s</string>
     <string name="notes_folder_style_body">As novas gravações desta pasta usam esse estilo, e as notas movidas para cá são reescritas nele.</string>
     <string name="notes_folder_style_default">Padrão</string>
     <string name="notes_folder_name_label">Nome da pasta</string>
@@ -99,7 +99,7 @@
     <string name="notes_folder_error_too_long">Use no máximo %1$d caracteres.</string>
     <string name="notes_folder_error_duplicate">Já existe uma pasta com esse nome.</string>
     <string name="notes_folder_delete_dialog_title">Excluir esta pasta?</string>
-    <string name="notes_folder_delete_dialog_body">As notas dela são mantidas e voltam para Todas as notas.</string>
+    <string name="notes_folder_delete_dialog_body">As notas dela são mantidas, só que sem pasta.</string>
     <string name="notes_folder_empty_state">Ainda não há notas nesta pasta</string>
     <string name="notes_move_to_folder">Mover para pasta</string>
     <string name="notes_folder_none">Sem pasta</string>
@@ -119,4 +119,15 @@
     <string name="notes_suggestions_added">Adicionado</string>
     <string name="notes_suggestions_dismiss">Descartar sugestão</string>
     <string name="notes_suggestions_locked">O Offhand Pro encontra eventos de agenda e tarefas nas suas notas.</string>
+    <string name="notes_folder_unsorted">Sem pasta</string>
+    <string name="notes_unsorted_empty_title">Não há notas sem pasta</string>
+    <string name="notes_unsorted_empty_hint">As notas que não estão em nenhuma pasta aparecem aqui.</string>
+    <string name="notes_loading_description">Carregando suas notas</string>
+    <string name="notes_transcript_more_coming">O restante ainda está sendo transcrito…</string>
+    <string name="notes_transcript_time_description">Reproduzir a partir de %1$s</string>
+    <string name="notes_selection_count">Selecionadas: %1$d</string>
+    <string name="notes_selection_cancel">Cancelar seleção</string>
+    <string name="notes_select_action">Selecionar</string>
+    <string name="notes_bulk_delete_title">Excluir as notas selecionadas?</string>
+    <string name="notes_bulk_delete_body">Elas serão removidas permanentemente do seu celular. Não é possível desfazer.</string>
 </resources>

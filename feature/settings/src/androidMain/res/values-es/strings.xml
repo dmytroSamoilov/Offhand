@@ -28,14 +28,14 @@
 
     <string name="settings_note_style_note">El estilo elegido se usa para las grabaciones nuevas. Puedes cambiar el estilo de cualquier nota desde la propia nota.</string>
     <string name="settings_note_styles_default_value">Predeterminado: %1$s</string>
-    <string name="settings_note_styles_title">Estilos de resumen</string>
+    <string name="settings_note_styles_title">Estilos de escritura</string>
     <string name="settings_note_styles_edit">Editar</string>
     <string name="settings_note_styles_delete">Eliminar estilo</string>
     <string name="settings_note_styles_delete_dialog_title">¿Eliminar este estilo?</string>
     <string name="settings_note_styles_delete_dialog_body">Las notas escritas con él se conservan. Pasarán al estilo Resumen la próxima vez que se reescriban.</string>
     <string name="settings_note_styles_delete_dialog_confirm">Eliminar</string>
-    <string name="settings_note_style_editor_new_title">Nuevo estilo de resumen</string>
-    <string name="settings_note_style_editor_edit_title">Editar estilo de resumen</string>
+    <string name="settings_note_style_editor_new_title">Nuevo estilo de escritura</string>
+    <string name="settings_note_style_editor_edit_title">Editar estilo de escritura</string>
     <string name="settings_note_style_editor_back">Atrás</string>
     <string name="settings_note_style_editor_save">Guardar</string>
     <string name="settings_note_style_editor_name">Nombre</string>

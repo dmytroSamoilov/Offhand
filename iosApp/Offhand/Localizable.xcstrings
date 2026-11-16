@@ -124,42 +124,42 @@
         }
       }
     },
-    "Each with its own summary style" : {
+    "Each with its own writing style" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Jeder mit eigenem Zusammenfassungsstil"
+            "value" : "Jeder mit eigenem Schreibstil"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cada una con su propio estilo de resumen"
+            "value" : "Cada una con su propio estilo de escritura"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "हर एक की अपनी सारांश शैली"
+            "value" : "हर एक की अपनी लेखन शैली"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cada uma com seu próprio estilo de resumo"
+            "value" : "Cada uma com seu próprio estilo de escrita"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "У каждой свой стиль резюме"
+            "value" : "У каждой свой стиль письма"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "У кожної свій стиль резюме"
+            "value" : "У кожної свій стиль письма"
           }
         }
       }
@@ -530,42 +530,82 @@
         }
       }
     },
-    "Give this folder its own summary style" : {
+    "Give this folder its own writing style" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Diesem Ordner einen eigenen Zusammenfassungsstil geben"
+            "value" : "Diesem Ordner einen eigenen Schreibstil geben"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dale a esta carpeta su propio estilo de resumen"
+            "value" : "Dale a esta carpeta su propio estilo de escritura"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "इस फ़ोल्डर को अपनी सारांश शैली दें"
+            "value" : "इस फ़ोल्डर को अपनी लेखन शैली दें"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dê a esta pasta o próprio estilo de resumo"
+            "value" : "Dê a esta pasta o próprio estilo de escrita"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Задайте этой папке собственный стиль резюме"
+            "value" : "Задайте этой папке собственный стиль письма"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Задайте цій папці власний стиль резюме"
+            "value" : "Задайте цій папці власний стиль письма"
+          }
+        }
+      }
+    },
+    "Its notes are kept, just without a folder." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Notizen bleiben erhalten, nur ohne Ordner."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sus notas se conservan, solo que sin carpeta."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "इसके नोट्स सुरक्षित रहेंगे, बस किसी फ़ोल्डर में नहीं होंगे।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As notas dela são mantidas, só que sem pasta."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заметки из неё сохранятся, просто без папки."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нотатки з неї збережуться, просто без папки."
           }
         }
       }
@@ -606,6 +646,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Не закривайте Offhand, доки вашу нотатку не буде готово."
+          }
+        }
+      }
+    },
+    "Loading your notes" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Notizen werden geladen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando tus notas"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपके नोट्स लोड हो रहे हैं"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carregando suas notas"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Загружаем заметки"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завантажуємо нотатки"
           }
         }
       }
@@ -770,6 +850,46 @@
         }
       }
     },
+    "No unsorted notes" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine unsortierten Notizen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay notas sin carpeta"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "बिना फ़ोल्डर का कोई नोट नहीं"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não há notas sem pasta"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет заметок без папки"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Немає нотаток без папки"
+          }
+        }
+      }
+    },
     "Notes in your own styles" : {
       "localizations" : {
         "de" : {
@@ -806,6 +926,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Нотатки у ваших стилях"
+          }
+        }
+      }
+    },
+    "Notes outside your folders appear here." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notizen ohne Ordner erscheinen hier."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aquí aparecen las notas que no están en ninguna carpeta."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "जो नोट्स किसी फ़ोल्डर में नहीं हैं, वे यहां दिखते हैं।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As notas que não estão em nenhuma pasta aparecem aqui."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Здесь появляются заметки, которые не лежат ни в одной папке."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тут зʼявляються нотатки, які не лежать у жодній папці."
           }
         }
       }
@@ -1050,6 +1210,46 @@
         }
       }
     },
+    "Play from %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ab %@ abspielen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproducir desde %@"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ से चलाएं"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduzir a partir de %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Воспроизвести с %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відтворити з %@"
+          }
+        }
+      }
+    },
     "Record" : {
       "localizations" : {
         "de" : {
@@ -1290,6 +1490,46 @@
         }
       }
     },
+    "Still transcribing the rest…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Rest wird noch transkribiert…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún se está transcribiendo el resto…"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "बाकी हिस्सा अभी ट्रांसक्राइब हो रहा है…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O restante ainda está sendo transcrito…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Остальное ещё расшифровывается…"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Решта ще розшифровується…"
+          }
+        }
+      }
+    },
     "Summary is ready" : {
       "localizations" : {
         "de" : {
@@ -1330,122 +1570,122 @@
         }
       }
     },
-    "Summary style" : {
+    "Writing style" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zusammenfassungsstil"
+            "value" : "Schreibstil"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estilo de resumen"
+            "value" : "Estilo de escritura"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "सारांश शैली"
+            "value" : "लेखन शैली"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estilo de resumo"
+            "value" : "Estilo de escrita"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Стиль резюме"
+            "value" : "Стиль письма"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Стиль резюме"
+            "value" : "Стиль письма"
           }
         }
       }
     },
-    "Summary style (Pro)" : {
+    "Writing style (Pro)" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zusammenfassungsstil (Pro)"
+            "value" : "Schreibstil (Pro)"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estilo de resumen (Pro)"
+            "value" : "Estilo de escritura (Pro)"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "सारांश शैली (Pro)"
+            "value" : "लेखन शैली (Pro)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estilo de resumo (Pro)"
+            "value" : "Estilo de escrita (Pro)"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Стиль резюме (Pro)"
+            "value" : "Стиль письма (Pro)"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Стиль резюме (Pro)"
+            "value" : "Стиль письма (Pro)"
           }
         }
       }
     },
-    "Summary style for %@" : {
+    "Writing style for %@" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zusammenfassungsstil für %@"
+            "value" : "Schreibstil für %@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estilo de resumen para %@"
+            "value" : "Estilo de escritura para %@"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ के लिए सारांश शैली"
+            "value" : "%@ के लिए लेखन शैली"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estilo de resumo para %@"
+            "value" : "Estilo de escrita para %@"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Стиль резюме для %@"
+            "value" : "Стиль письма для %@"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Стиль резюме для %@"
+            "value" : "Стиль письма для %@"
           }
         }
       }
@@ -1806,6 +2046,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Перетворюємо ваш запис на нотатку"
+          }
+        }
+      }
+    },
+    "Unsorted" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unsortiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin carpeta"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "बिना फ़ोल्डर"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem pasta"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без папки"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без папки"
           }
         }
       }
@@ -4075,42 +4355,42 @@
         }
       }
     },
-    "Change summary style" : {
+    "Change writing style" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zusammenfassungsstil ändern"
+            "value" : "Schreibstil ändern"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cambiar estilo de resumen"
+            "value" : "Cambiar estilo de escritura"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "सारांश शैली बदलें"
+            "value" : "लेखन शैली बदलें"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mudar estilo de resumo"
+            "value" : "Mudar estilo de escrita"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Изменить стиль резюме"
+            "value" : "Изменить стиль письма"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Змінити стиль резюме"
+            "value" : "Змінити стиль письма"
           }
         }
       }
@@ -5643,42 +5923,42 @@
         }
       }
     },
-    "Edit summary style" : {
+    "Edit writing style" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zusammenfassungsstil bearbeiten"
+            "value" : "Schreibstil bearbeiten"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Editar estilo de resumen"
+            "value" : "Editar estilo de escritura"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "सारांश शैली संपादित करें"
+            "value" : "लेखन शैली संपादित करें"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Editar estilo de resumo"
+            "value" : "Editar estilo de escrita"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Изменить стиль резюме"
+            "value" : "Изменить стиль письма"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Змінити стиль резюме"
+            "value" : "Змінити стиль письма"
           }
         }
       }
@@ -6926,42 +7206,42 @@
         }
       }
     },
-    "Include summary styles" : {
+    "Include writing styles" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zusammenfassungsstile einschließen"
+            "value" : "Schreibstile einschließen"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Incluir estilos de resumen"
+            "value" : "Incluir estilos de escritura"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "सारांश शैलियाँ शामिल करें"
+            "value" : "लेखन शैलियाँ शामिल करें"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Incluir estilos de resumo"
+            "value" : "Incluir estilos de escrita"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Включить стили резюме"
+            "value" : "Включить стили письма"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Включити стилі резюме"
+            "value" : "Включити стилі письма"
           }
         }
       }
@@ -7003,46 +7283,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Обробка триватиме на цьому пристрої. Це вікно можна закрити."
-          }
-        }
-      }
-    },
-    "Its notes are kept and go back to All notes." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Notizen bleiben erhalten und landen wieder unter „Alle Notizen“."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sus notas se conservan y vuelven a Todas las notas."
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "इसके नोट्स सुरक्षित रहेंगे और सभी नोट्स में वापस आ जाएंगे।"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "As notas dela são mantidas e voltam para Todas as notas."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Заметки из неё сохранятся и вернутся во «Все заметки»."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нотатки з неї збережуться й повернуться до «Усі нотатки»."
           }
         }
       }
@@ -7646,42 +7886,42 @@
         }
       }
     },
-    "Main topics, key decisions, action items and a short overview." : {
+    "One to three sentences on what the recording is about." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hauptthemen, wichtige Entscheidungen, Aufgaben und ein kurzer Überblick."
+            "value" : "Ein bis drei Sätze darüber, worum es in der Aufnahme geht."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Temas principales, decisiones clave, tareas y un breve resumen."
+            "value" : "De una a tres frases sobre de qué trata la grabación."
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "मुख्य विषय, प्रमुख निर्णय, कार्य बिंदु और एक संक्षिप्त अवलोकन।"
+            "value" : "रिकॉर्डिंग किस बारे में है, यह एक से तीन वाक्यों में।"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tópicos principais, decisões-chave, tarefas e uma breve visão geral."
+            "value" : "De uma a três frases sobre o assunto da gravação."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Основные темы, ключевые решения, задачи и краткий обзор."
+            "value" : "От одного до трёх предложений о том, о чём запись."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Основні теми, ключові рішення, завдання та короткий огляд."
+            "value" : "Від одного до трьох речень про те, про що запис."
           }
         }
       }
@@ -8367,42 +8607,42 @@
         }
       }
     },
-    "New summary style" : {
+    "New writing style" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Neuer Zusammenfassungsstil"
+            "value" : "Neuer Schreibstil"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nuevo estilo de resumen"
+            "value" : "Nuevo estilo de escritura"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "नई सारांश शैली"
+            "value" : "नई लेखन शैली"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Novo estilo de resumo"
+            "value" : "Novo estilo de escrita"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Новый стиль резюме"
+            "value" : "Новый стиль письма"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Новий стиль резюме"
+            "value" : "Новий стиль письма"
           }
         }
       }
@@ -11363,42 +11603,42 @@
         }
       }
     },
-    "Save your own summary style" : {
+    "Save your own writing style" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Deinen eigenen Zusammenfassungsstil speichern"
+            "value" : "Deinen eigenen Schreibstil speichern"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Guarda tu propio estilo de resumen"
+            "value" : "Guarda tu propio estilo de escritura"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "अपनी सारांश शैली सहेजें"
+            "value" : "अपनी लेखन शैली सहेजें"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salve seu próprio estilo de resumo"
+            "value" : "Salve seu próprio estilo de escrita"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сохранить свой стиль резюме"
+            "value" : "Сохранить свой стиль письма"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Зберегти власний стиль резюме"
+            "value" : "Зберегти власний стиль письма"
           }
         }
       }
@@ -12695,42 +12935,42 @@
         }
       }
     },
-    "Summary styles" : {
+    "Writing styles" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zusammenfassungsstile"
+            "value" : "Schreibstile"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estilos de resumen"
+            "value" : "Estilos de escritura"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "सारांश शैलियाँ"
+            "value" : "लेखन शैलियाँ"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estilos de resumo"
+            "value" : "Estilos de escrita"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Стили резюме"
+            "value" : "Стили письма"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Стилі резюме"
+            "value" : "Стилі письма"
           }
         }
       }
@@ -15680,42 +15920,42 @@
         }
       }
     },
-    "Choose a different summary style" : {
+    "Choose a different writing style" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Einen anderen Zusammenfassungsstil wählen"
+            "value" : "Einen anderen Schreibstil wählen"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elige otro estilo de resumen"
+            "value" : "Elige otro estilo de escritura"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "कोई दूसरी सारांश शैली चुनें"
+            "value" : "कोई दूसरी लेखन शैली चुनें"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Escolha outro estilo de resumo"
+            "value" : "Escolha outro estilo de escrita"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Выбрать другой стиль резюме"
+            "value" : "Выбрать другой стиль письма"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Вибрати інший стиль резюме"
+            "value" : "Вибрати інший стиль письма"
           }
         }
       }
@@ -16196,6 +16436,286 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Розшифровка та резюме до кожної нотатки"
+          }
+        }
+      }
+    },
+    "Email" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E-Mail"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correo"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ईमेल"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E-mail"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Письмо"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лист"
+          }
+        }
+      }
+    },
+    "A subject line and an email that is ready to send." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Betreff und eine versandfertige E-Mail."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Asunto y un correo listo para enviar."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "विषय पंक्ति और भेजने के लिए तैयार ईमेल।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assunto e um e-mail pronto para enviar."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тема и готовое к отправке письмо."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тема й готовий до надсилання лист."
+          }
+        }
+      }
+    },
+    "%lld selected" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ausgewählt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleccionadas: %lld"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld चुने गए"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecionadas: %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрано: %lld"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вибрано: %lld"
+          }
+        }
+      }
+    },
+    "Cancel selection" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auswahl aufheben"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar selección"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "चयन रद्द करें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar seleção"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отменить выбор"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скасувати вибір"
+          }
+        }
+      }
+    },
+    "Select" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auswählen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleccionar"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "चुनें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecionar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрать"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вибрати"
+          }
+        }
+      }
+    },
+    "Delete the selected notes?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgewählte Notizen löschen?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar las notas seleccionadas?"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "चुने गए नोट हटाएं?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir as notas selecionadas?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить выбранные заметки?"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видалити вибрані нотатки?"
+          }
+        }
+      }
+    },
+    "They will be permanently removed from your iPhone. This cannot be undone." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sie werden dauerhaft von deinem iPhone entfernt. Das lässt sich nicht rückgängig machen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se eliminarán de forma permanente de tu iPhone. Esta acción no se puede deshacer."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ये आपके iPhone से हमेशा के लिए हट जाएंगे। इसे वापस नहीं किया जा सकता।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elas serão removidas permanentemente do seu iPhone. Não é possível desfazer."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Они будут навсегда удалены с iPhone. Это действие нельзя отменить."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Їх буде назавжди видалено з iPhone. Цю дію не можна скасувати."
           }
         }
       }

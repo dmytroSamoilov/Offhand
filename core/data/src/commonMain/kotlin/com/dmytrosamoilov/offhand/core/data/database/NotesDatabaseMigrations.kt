@@ -94,3 +94,11 @@ internal val MIGRATION_10_11 = object : Migration(10, 11) {
         )
     }
 }
+
+// Where each paragraph of a transcript starts in the recording, so the
+// transcript can show its time marks; older notes simply have none.
+internal val MIGRATION_11_12 = object : Migration(11, 12) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE notes ADD COLUMN transcriptStartsMs TEXT")
+    }
+}

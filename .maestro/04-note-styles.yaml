@@ -10,7 +10,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: Android
     commands:
       - tapOn: "Settings"
-      - tapOn: "Summary styles"
+      - tapOn: "Writing styles"
       - assertVisible: "Built in"
       - tapOn: "New"
 
@@ -60,7 +60,7 @@ appId: com.dmytrosamoilov.offhand.uitest
           commands:
             - tapOn: "COUNT ATTEMPT"
       - tapOn: "More actions"
-      - tapOn: "Change summary style"
+      - tapOn: "Change writing style"
       - assertVisible: "Your styles"
       - tapOn: "Sales debrief"
       - extendedWaitUntil:
@@ -70,7 +70,7 @@ appId: com.dmytrosamoilov.offhand.uitest
 
       # Delete the style; the note survives
       - tapOn: "Settings"
-      - tapOn: "Summary styles"
+      - tapOn: "Writing styles"
       - tapOn: "Edit"
       - scrollUntilVisible:
           element: "Delete style"
@@ -87,7 +87,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - tapOn: "Settings"
-      - tapOn: "Summary styles"
+      - tapOn: "Writing styles"
       - assertVisible: "Built in"
       - tapOn: "New"
 
@@ -143,7 +143,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       - swipe:
           start: "1%,50%"
           end: "70%,50%"
-      - tapOn: "Summary styles"
+      - tapOn: "Writing styles"
       - tapOn: "Sales debrief"
       - assertVisible: "Sales debrief"
       - swipe:
@@ -157,7 +157,7 @@ appId: com.dmytrosamoilov.offhand.uitest
           index: 1
       - tapOn: "Smoke test note"
       - tapOn: "More actions"
-      - tapOn: "Change summary style"
+      - tapOn: "Change writing style"
       - scrollUntilVisible:
           element: "Your styles"
       - tapOn: "Sales debrief"
@@ -170,7 +170,7 @@ appId: com.dmytrosamoilov.offhand.uitest
 
       # Delete the style; the note survives
       - tapOn: "Settings"
-      - tapOn: "Summary styles"
+      - tapOn: "Writing styles"
       - tapOn: "Edit"
       - scrollUntilVisible:
           element: "Delete style"

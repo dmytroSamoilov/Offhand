@@ -20,6 +20,7 @@ internal fun NoteEntity.toDomain(): Note = Note(
     status = NoteStatus.entries.firstOrNull { it.name == status } ?: NoteStatus.READY,
     style = customStyleId?.let(NoteStyleRef::Custom) ?: NoteStyleRef.BuiltIn(NotePreset.fromName(preset)),
     folderId = folderId,
+    transcriptStartsMs = transcriptStartsMs.orEmpty().split(STARTS_SEPARATOR).mapNotNull(String::toLongOrNull),
 )
 
 internal fun Note.toEntity(): NoteEntity = NoteEntity(
@@ -37,7 +38,10 @@ internal fun Note.toEntity(): NoteEntity = NoteEntity(
     preset = (style as? NoteStyleRef.BuiltIn)?.preset?.name ?: NotePreset.DEFAULT.name,
     folderId = folderId,
     customStyleId = (style as? NoteStyleRef.Custom)?.id,
+    transcriptStartsMs = transcriptStartsMs.takeIf { it.isNotEmpty() }?.joinToString(STARTS_SEPARATOR),
 )
+
+private const val STARTS_SEPARATOR = ","
 
 internal fun FolderEntity.toDomain(): Folder = Folder(
     id = id,

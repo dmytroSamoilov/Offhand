@@ -7,6 +7,7 @@ enum class ProTrialUsage {
     MEETING_NOTES,
     VISIT_NOTES,
     LEGAL_NOTES,
+    EMAIL_NOTES,
     CUSTOM_STYLE_NOTES,
     PDF_EXPORTS,
     WORD_EXPORTS,

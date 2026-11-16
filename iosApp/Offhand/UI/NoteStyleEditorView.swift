@@ -33,7 +33,7 @@ struct NoteStyleEditorView: View {
             }
         }
         .scrollDismissesKeyboard(.immediately)
-        .navigationTitle(state.isNew ? String(localized: "New summary style") : String(localized: "Edit summary style"))
+        .navigationTitle(state.isNew ? String(localized: "New writing style") : String(localized: "Edit writing style"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {

@@ -46,19 +46,19 @@ appId: com.dmytrosamoilov.offhand.uitest
     commands:
       - scrollUntilVisible:
           element:
-            text: "Summary styles"
+            text: "Writing styles"
           direction: UP
 - extendedWaitUntil:
     visible: "Default: Summary"
     timeout: 5000
 - waitForAnimationToEnd:
     timeout: 3000
-- tapOn: "Summary styles"
+- tapOn: "Writing styles"
 - extendedWaitUntil:
     visible: "Built in"
     timeout: 5000
 - tapOn: "Meeting notes"
-- assertVisible: "Choose a different summary style"
+- assertVisible: "Choose a different writing style"
 - tapOn: "Close"
 - runFlow:
     when:
@@ -139,7 +139,7 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "Delete folder"
 - tapOn: "Delete"
 - assertNotVisible: "Second"
-- tapOn: "All notes"
+- tapOn: "All notes|Unsorted"
 
 # Restyling a note and exporting it as PDF
 - tapOn: "Smoke test note"
@@ -149,9 +149,9 @@ appId: com.dmytrosamoilov.offhand.uitest
     commands:
       - tapOn: "COUNT ATTEMPT"
 - tapOn: "More actions"
-- tapOn: "Change summary style"
+- tapOn: "Change writing style"
 - tapOn: "Meeting notes"
-- assertVisible: "Choose a different summary style"
+- assertVisible: "Choose a different writing style"
 - tapOn: "Close"
 - extendedWaitUntil:
     visible: "Summary"
