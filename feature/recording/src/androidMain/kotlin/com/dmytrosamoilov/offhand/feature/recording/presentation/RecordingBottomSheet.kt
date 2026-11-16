@@ -66,6 +66,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -313,6 +314,10 @@ private fun RecordingContent(
         style = MaterialTheme.typography.bodyLarge,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
+    if (state.isLiveTranscriptShown) {
+        Spacer(modifier = Modifier.height(12.dp))
+        LiveTranscript(text = state.liveTranscript)
+    }
     if (state.isDeveloperMode && state.chunks.isNotEmpty()) {
         Spacer(modifier = Modifier.height(12.dp))
         ChunkPills(chunks = state.chunks)
@@ -352,6 +357,25 @@ private fun RecordingContent(
         )
     }
 }
+
+// The last words that were transcribed, a few seconds behind the speaker.
+// The lines are reserved from the start: a sheet whose content grows after
+// opening can stay stuck at its first height.
+@Composable
+private fun LiveTranscript(text: String) {
+    Text(
+        text = text.ifBlank { stringResource(R.string.recording_live_placeholder) },
+        style = MaterialTheme.typography.bodyMedium,
+        color = if (text.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+        textAlign = TextAlign.Center,
+        minLines = LIVE_TRANSCRIPT_LINES,
+        maxLines = LIVE_TRANSCRIPT_LINES,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+private const val LIVE_TRANSCRIPT_LINES = 3
 
 // Cancelling sits apart from the two main actions, in the sheet's corner,
 // and always asks before anything is thrown away. It keeps the description

@@ -49,10 +49,10 @@ class IosAudioRecorder(
     override fun recordStream(pcmSink: (ByteArray) -> Unit): Flow<AudioChunk> = callbackFlow {
         val chunker = AudioChunker(
             sampleRate = AudioRecorder.SAMPLE_RATE,
-            minChunkMs = MIN_CHUNK_MS,
-            maxChunkMs = MAX_CHUNK_MS,
-            silenceGapMs = SILENCE_GAP_MS,
-            silenceDb = SILENCE_DB,
+            minChunkMs = AudioChunker.LIVE_MIN_CHUNK_MS,
+            maxChunkMs = AudioChunker.LIVE_MAX_CHUNK_MS,
+            silenceGapMs = AudioChunker.LIVE_SILENCE_GAP_MS,
+            silenceDb = AudioChunker.LIVE_SILENCE_DB,
         )
         paused.store(false)
         mutableVad.value = VadSnapshot()
@@ -93,11 +93,4 @@ class IosAudioRecorder(
         speechMs = speechMs,
         reason = reason,
     )
-
-    private companion object {
-        const val MIN_CHUNK_MS = 20_000L
-        const val MAX_CHUNK_MS = 29_000L
-        const val SILENCE_GAP_MS = 300L
-        const val SILENCE_DB = -45f
-    }
 }

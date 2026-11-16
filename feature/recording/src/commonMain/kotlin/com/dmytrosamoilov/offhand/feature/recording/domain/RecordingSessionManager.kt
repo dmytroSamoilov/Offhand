@@ -550,6 +550,7 @@ class RecordingSessionManager(
         sessionStyle = getNoteStyle(sessionFolderId)
         isSessionTranscribed = getNoteFeatures().isTranscriptionEnabled
         isTranscribingLive = isSessionTranscribed && speechToText.downloadState.value is SpeechModelState.Downloaded
+        mutableSession.update { it.copy(isTranscribedLive = isTranscribingLive) }
         openAudioBackup()
         mutableActiveRecordingNoteId.value = createSessionNote()
         val queue = Channel<AudioChunk>(Channel.UNLIMITED)
@@ -689,7 +690,9 @@ class RecordingSessionManager(
             val result = speechToText.transcribe(chunk.wav)
             transcripts[chunk.id] = result.text.trim()
             transcriptionTimeMs += result.processingTimeMs
-            mutableSession.update { it.copy(transcriptionTimeMs = transcriptionTimeMs) }
+            mutableSession.update {
+                it.copy(transcriptionTimeMs = transcriptionTimeMs, liveTranscript = sortedTranscripts().joinToString(" "))
+            }
             updateChunk(chunk.id) { it.copy(state = ChunkState.DONE) }
             persistSessionTranscript()
             checkpointSession()
@@ -964,7 +967,9 @@ class RecordingSessionManager(
         const val BYTES_PER_MS = AudioRecorder.SAMPLE_RATE * 2 / 1000L
         const val RETRY_WHISPER_SHARE = 0.6f
         const val IMPORT_DECODE_SHARE = 0.15f
-        const val MIN_CHUNK_SPEECH_MS = 1_000L
+        // Pieces are a few seconds long now, so a short answer must not be
+        // dropped as silence; below this a piece is noise more often than a word.
+        const val MIN_CHUNK_SPEECH_MS = 500L
         const val SKIP_BUFFER_BYTES = 64 * 1024
     }
 }

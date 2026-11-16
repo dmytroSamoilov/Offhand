@@ -39,4 +39,5 @@
     <string name="recording_notification_note_failed_text">Запись сохранена. Нажмите, чтобы открыть её и повторить попытку.</string>
     <string name="recording_notification_note_paused_title">Ваша заметка приостановлена</string>
     <string name="recording_notification_note_paused_text">Откройте Offhand, и она завершится.</string>
+    <string name="recording_live_placeholder">Ваши слова появляются здесь, пока вы говорите.</string>
 </resources>

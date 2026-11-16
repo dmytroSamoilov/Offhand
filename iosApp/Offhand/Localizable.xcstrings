@@ -16919,6 +16919,46 @@
           }
         }
       }
+    },
+    "Your words appear here as you speak." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Worte erscheinen hier, während du sprichst."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus palabras aparecen aquí mientras hablas."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपके बोलते ही आपके शब्द यहां दिखते हैं।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suas palavras aparecem aqui enquanto você fala."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваши слова появляются здесь, пока вы говорите."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваші слова зʼявляються тут, поки ви говорите."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

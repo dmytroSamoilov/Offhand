@@ -39,4 +39,5 @@
     <string name="recording_notification_note_failed_text">Die Aufnahme ist gespeichert. Tippe, um sie zu öffnen und es erneut zu versuchen.</string>
     <string name="recording_notification_note_paused_title">Deine Notiz ist pausiert</string>
     <string name="recording_notification_note_paused_text">Öffne Offhand, dann wird sie fertig.</string>
+    <string name="recording_live_placeholder">Deine Worte erscheinen hier, während du sprichst.</string>
 </resources>

@@ -12,6 +12,8 @@ data class RecordingUiState(
     val isDeveloperMode: Boolean = false,
     val externalMicName: String? = null,
     val isNotificationPromptRequested: Boolean = false,
+    val isLiveTranscriptShown: Boolean = false,
+    val liveTranscript: String = "",
 )
 
 enum class RecordingPhaseUi {

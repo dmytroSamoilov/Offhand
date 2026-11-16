@@ -20,7 +20,9 @@ struct RecordSheetView: View {
         savedNoteId: nil,
         isDeveloperMode: false,
         externalMicName: nil,
-        isNotificationPromptRequested: false
+        isNotificationPromptRequested: false,
+        isLiveTranscriptShown: false,
+        liveTranscript: ""
     )
     @State private var isPermissionDenied = false
     @State private var isDiscardConfirmationVisible = false
@@ -170,6 +172,17 @@ struct RecordSheetView: View {
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .padding(.top, 4)
+            if state.isLiveTranscriptShown {
+                // The last words that were transcribed, a few seconds behind
+                // the speaker; the lines are reserved so the sheet stays still.
+                Text(state.liveTranscript.isEmpty ? String(localized: "Your words appear here as you speak.") : state.liveTranscript)
+                    .font(.subheadline)
+                    .foregroundStyle(state.liveTranscript.isEmpty ? .secondary : .primary)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3, reservesSpace: true)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 12)
+            }
             chunkPills
                 .padding(.top, 12)
             if let mic = state.externalMicName {
