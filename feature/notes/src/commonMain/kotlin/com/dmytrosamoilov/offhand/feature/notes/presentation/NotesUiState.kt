@@ -33,6 +33,8 @@ data class NotesUiState(
     val isProStylesUnlocked: Boolean = false,
     val pendingCalendarEvent: CalendarEventSuggestion? = null,
     val isRetranscribeAvailable: Boolean = false,
+    val detailTab: NoteDetailTabUi = NoteDetailTabUi.SUMMARY,
+    val isSummaryReadyMarked: Boolean = false,
 )
 
 sealed interface SmartSuggestionsUi {

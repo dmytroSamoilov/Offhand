@@ -131,7 +131,7 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "New folder"
 - inputText: "Second"
 - tapOn: "Save"
-- assertVisible: "No notes in this folder."
+- assertVisible: "No notes in this folder yet"
 - tapOn: "New folder"
 - assertVisible: "Keep more than two folders"
 - tapOn: "Close"

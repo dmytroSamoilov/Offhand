@@ -5,6 +5,8 @@
     <string name="recording_stop_description">रिकॉर्डिंग बंद करें</string>
     <string name="recording_pause_description">रिकॉर्डिंग पॉज़ करें</string>
     <string name="recording_resume_description">रिकॉर्डिंग जारी रखें</string>
+    <string name="recording_pause_label">रोकें</string>
+    <string name="recording_resume_label">जारी रखें</string>
     <string name="recording_paused_label">पॉज़ पर</string>
     <string name="recording_active_label">रिकॉर्डिंग हो रही है…</string>
     <string name="recording_save_note_button">नोट सहेजें</string>

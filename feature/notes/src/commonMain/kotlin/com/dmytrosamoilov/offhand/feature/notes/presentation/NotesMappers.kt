@@ -113,7 +113,7 @@ internal fun Note.toDetailUi(
 private fun Note.createdAtLocalDateTime(): LocalDateTime =
     Instant.fromEpochMilliseconds(createdAtEpochMs).toLocalDateTime(TimeZone.currentSystemDefault())
 
-private fun NoteStatus.toUi(): NoteStatusUi = when (this) {
+internal fun NoteStatus.toUi(): NoteStatusUi = when (this) {
     NoteStatus.RECORDING -> NoteStatusUi.PROCESSING
     NoteStatus.PROCESSING -> NoteStatusUi.PROCESSING
     NoteStatus.INTERRUPTED -> NoteStatusUi.INTERRUPTED

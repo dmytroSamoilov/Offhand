@@ -10,7 +10,7 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "New folder"
 - inputText: "Calls"
 - tapOn: "Save"
-- assertVisible: "No notes in this folder."
+- assertVisible: "No notes in this folder yet"
 
 # Record through the fake microphone while the folder is open
 - runFlow:
@@ -33,11 +33,16 @@ appId: com.dmytrosamoilov.offhand.uitest
     timeout: 15000
 - tapOn: "Save note"
 
-# Saving opens the new note; wait for processing, then go back to the list
+# Saving opens the new note on its Transcript tab; the Summary tab is marked
+# when the summary is written and is only opened by a tap. A note that was
+# already finished when it opened is on its Summary tab with nothing to mark.
 - extendedWaitUntil:
-    visible: "Summary"
+    visible: "Summary is ready|Copy summary"
     timeout: 30000
+- tapOn: "Summary"
+- assertVisible: "Copy summary"
 - assertVisible: "Smoke test note"
+# Back to the list
 - runFlow:
     when:
       platform: Android
@@ -55,4 +60,4 @@ appId: com.dmytrosamoilov.offhand.uitest
 - extendedWaitUntil:
     visible: "Smoke test note"
     timeout: 30000
-- assertNotVisible: "No notes in this folder."
+- assertNotVisible: "No notes in this folder yet"

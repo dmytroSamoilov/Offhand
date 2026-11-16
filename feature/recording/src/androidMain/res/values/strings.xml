@@ -5,6 +5,8 @@
     <string name="recording_stop_description">Stop recording</string>
     <string name="recording_pause_description">Pause recording</string>
     <string name="recording_resume_description">Resume recording</string>
+    <string name="recording_pause_label">Pause</string>
+    <string name="recording_resume_label">Resume</string>
     <string name="recording_paused_label">Paused</string>
     <string name="recording_active_label">Recording…</string>
     <string name="recording_save_note_button">Save note</string>

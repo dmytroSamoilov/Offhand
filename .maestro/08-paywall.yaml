@@ -25,7 +25,11 @@ appId: com.dmytrosamoilov.offhand.uitest
           direction: UP
       - assertVisible: "Offhand Pro"
       - tapOn: "Upgrade"
-      - assertVisible: "Never miss a follow-up"
+      # The comparison opens collapsed; the rest of it is behind this control
+      - tapOn: "See everything in Pro"
+      - scrollUntilVisible:
+          element: "Never miss a follow-up"
+          direction: DOWN
       - assertVisible: "Start 14-day free trial"
       - tapOn: "Close"
       - assertNotVisible: "Start 14-day free trial"
@@ -75,7 +79,11 @@ appId: com.dmytrosamoilov.offhand.uitest
           element: "Upgrade"
           direction: UP
       - tapOn: "Upgrade"
-      - assertVisible: "Never miss a follow-up"
+      # The comparison opens collapsed; the rest of it is behind this control
+      - tapOn: "See everything in Pro"
+      - scrollUntilVisible:
+          element: "Never miss a follow-up"
+          direction: DOWN
       - assertVisible: "Start 14-day free trial"
       - tapOn: "Close"
       - assertNotVisible: "Start 14-day free trial"

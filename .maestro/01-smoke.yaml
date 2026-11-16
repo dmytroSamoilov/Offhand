@@ -74,11 +74,16 @@ appId: com.dmytrosamoilov.offhand.uitest
           text: "^Allow$"
           optional: true
 
-# Saving opens the new note; wait for processing, then go back to the list
+# Saving opens the new note on its Transcript tab; the Summary tab is marked
+# when the summary is written and is only opened by a tap. A note that was
+# already finished when it opened is on its Summary tab with nothing to mark.
 - extendedWaitUntil:
-    visible: "Summary"
+    visible: "Summary is ready|Copy summary"
     timeout: 30000
+- tapOn: "Summary"
+- assertVisible: "Copy summary"
 - assertVisible: "Smoke test note"
+# Back to the list
 - runFlow:
     when:
       platform: Android
@@ -101,18 +106,19 @@ appId: com.dmytrosamoilov.offhand.uitest
 - assertVisible: "Smoke test note"
 - assertVisible: ".*quarterly budget.*"
 
-# Detail renders both sections (debug builds show a fake in-app review first)
+# A finished note opens on its Summary tab and the Transcript is one tap away
+# (debug builds show a fake in-app review first)
 - tapOn: "Smoke test note"
 - runFlow:
     when:
       visible: "In-app review · dev build"
     commands:
       - tapOn: "COUNT ATTEMPT"
-- assertVisible: "Summary"
-- scrollUntilVisible:
-    element: "Transcript"
-    direction: DOWN
-- assertVisible: "Transcript"
+- assertVisible: "Copy summary"
+- assertNotVisible: "Summary is ready"
+- tapOn: "Transcript"
+- assertVisible: "Copy transcript"
+- assertVisible: ".*quarterly budget.*"
 
 # Going back must not hand focus to the search field (regression: keyboard popped up)
 - runFlow:

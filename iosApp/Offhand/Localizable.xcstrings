@@ -730,6 +730,46 @@
         }
       }
     },
+    "No notes in this folder yet" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In diesem Ordner sind noch keine Notizen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay notas en esta carpeta"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "इस फ़ोल्डर में अभी कोई नोट नहीं है"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não há notas nesta pasta"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В этой папке пока нет заметок"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У цій папці поки немає нотаток"
+          }
+        }
+      }
+    },
     "Notes in your own styles" : {
       "localizations" : {
         "de" : {
@@ -890,6 +930,46 @@
         }
       }
     },
+    "Pause" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausar"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "रोकें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пауза"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пауза"
+          }
+        }
+      }
+    },
     "Paused. Open the note to continue." : {
       "localizations" : {
         "de" : {
@@ -966,6 +1046,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Надіслано PDF"
+          }
+        }
+      }
+    },
+    "Record" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnehmen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grabar"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "रिकॉर्ड करें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gravar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записать"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записати"
           }
         }
       }
@@ -1050,6 +1170,46 @@
         }
       }
     },
+    "Resume" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fortsetzen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reanudar"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "जारी रखें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retomar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продолжить"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продовжити"
+          }
+        }
+      }
+    },
     "See everything in Pro" : {
       "localizations" : {
         "de" : {
@@ -1126,6 +1286,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Переглянути Offhand Pro"
+          }
+        }
+      }
+    },
+    "Summary is ready" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusammenfassung ist fertig"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El resumen está listo"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "सारांश तैयार है"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O resumo está pronto"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Резюме готово"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Резюме готове"
           }
         }
       }
@@ -1246,6 +1446,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Стиль резюме для %@"
+          }
+        }
+      }
+    },
+    "Tap Record to capture your first note." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe auf „Aufnehmen“, um deine erste Notiz aufzunehmen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca Grabar para crear tu primera nota."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "अपना पहला नोट बनाने के लिए “रिकॉर्ड करें” पर टैप करें।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque em Gravar para criar sua primeira nota."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите «Записать», чтобы создать первую заметку."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Натисніть «Записати», щоб створити першу нотатку."
           }
         }
       }
@@ -1410,6 +1650,46 @@
         }
       }
     },
+    "This note has no transcript." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Notiz hat kein Transkript."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta nota no tiene transcripción."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "इस नोट का कोई ट्रांसक्रिप्ट नहीं है।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta nota não tem transcrição."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У этой заметки нет расшифровки."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ця нотатка не має розшифровки."
+          }
+        }
+      }
+    },
     "This note was paused before it was finished. Keep Offhand open and it will continue." : {
       "localizations" : {
         "de" : {
@@ -1530,6 +1810,46 @@
         }
       }
     },
+    "We were unable to create a summary for this note. The transcript is saved." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wir konnten für diese Notiz keine Zusammenfassung erstellen. Das Transkript ist gespeichert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hemos podido crear un resumen para esta nota. La transcripción está guardada."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "हम इस नोट के लिए सारांश नहीं बना सके। ट्रांसक्रिप्ट सहेजा गया है।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível criar um resumo para esta nota. A transcrição está salva."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нам не удалось создать резюме для этой заметки. Расшифровка сохранена."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нам не вдалося створити резюме для цієї нотатки. Розшифровку збережено."
+          }
+        }
+      }
+    },
     "Word documents shared" : {
       "localizations" : {
         "de" : {
@@ -1566,6 +1886,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Надіслано документів Word"
+          }
+        }
+      }
+    },
+    "Writing your summary…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Zusammenfassung wird geschrieben…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribiendo tu resumen…"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपका सारांश लिखा जा रहा है…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escrevendo seu resumo…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пишем ваше резюме…"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пишемо ваше резюме…"
           }
         }
       }
@@ -8247,46 +8607,6 @@
         }
       }
     },
-    "No notes in this folder." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine Notizen in diesem Ordner."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No hay notas en esta carpeta."
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "इस फ़ोल्डर में कोई नोट नहीं है।"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não há notas nesta pasta."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "В этой папке нет заметок."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "У цій папці немає нотаток."
-          }
-        }
-      }
-    },
     "No notes yet" : {
       "localizations" : {
         "de" : {
@@ -11772,46 +12092,6 @@
         }
       }
     },
-    "Show more" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mehr anzeigen"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar más"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "और दिखाएं"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar mais"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Развернуть"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Розгорнути"
-          }
-        }
-      }
-    },
     "Show smart suggestions" : {
       "localizations" : {
         "de" : {
@@ -12451,46 +12731,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Стилі резюме"
-          }
-        }
-      }
-    },
-    "Tap the microphone to record your first note." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tippe auf das Mikrofon, um deine erste Notiz aufzunehmen."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toca el micrófono para grabar tu primera nota."
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "पहला नोट रिकॉर्ड करने के लिए माइक्रोफ़ोन पर टैप करें।"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toque no microfone para gravar sua primeira nota."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нажмите на микрофон, чтобы записать первую заметку."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Торкніться мікрофона, щоб записати першу нотатку."
           }
         }
       }
@@ -14511,46 +14751,6 @@
         }
       }
     },
-    "We were unable to create a summary for this note. The transcript is saved below." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wir konnten für diese Notiz keine Zusammenfassung erstellen. Das Transkript ist unten gespeichert."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No hemos podido crear un resumen para esta nota. La transcripción está guardada abajo."
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "हम इस नोट के लिए सारांश नहीं बना सके। ट्रांसक्रिप्ट नीचे सहेजा गया है।"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não foi possível criar um resumo para esta nota. A transcrição está salva abaixo."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нам не удалось создать резюме для этой заметки. Расшифровка сохранена ниже."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нам не вдалося створити резюме для цієї нотатки. Розшифровку збережено нижче."
-          }
-        }
-      }
-    },
     "What goes here" : {
       "localizations" : {
         "de" : {
@@ -14787,46 +14987,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Файл Word"
-          }
-        }
-      }
-    },
-    "Writing your summary" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Deine Zusammenfassung wird geschrieben"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Escribiendo tu resumen"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "आपका सारांश लिखा जा रहा है"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Escrevendo seu resumo"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Пишем ваше резюме"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Пишемо ваше резюме"
           }
         }
       }

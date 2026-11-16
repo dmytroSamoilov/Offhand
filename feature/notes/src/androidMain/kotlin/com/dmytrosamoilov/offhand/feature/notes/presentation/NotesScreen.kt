@@ -66,7 +66,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -118,16 +118,17 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
-import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCard
+import com.dmytrosamoilov.offhand.core.designsystem.component.PillAction
+import com.dmytrosamoilov.offhand.core.designsystem.component.PillIconButton
+import com.dmytrosamoilov.offhand.core.designsystem.component.SkeletonLines
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
 import androidx.compose.material3.FilterChip
 import com.dmytrosamoilov.offhand.core.designsystem.component.LabelPill
 import com.dmytrosamoilov.offhand.core.designsystem.component.ProBadge
 import androidx.compose.runtime.Immutable
-import com.dmytrosamoilov.offhand.core.designsystem.component.CollapsibleCardAction
 import com.dmytrosamoilov.offhand.core.designsystem.component.MarkdownText
-import com.dmytrosamoilov.offhand.core.ui.rememberSensitiveClipboard
 import com.dmytrosamoilov.offhand.core.designsystem.component.MorphingLoadingIndicator
+import com.dmytrosamoilov.offhand.core.ui.rememberSensitiveClipboard
 import com.dmytrosamoilov.offhand.core.designsystem.component.RoundedCheckbox
 import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
@@ -739,22 +740,12 @@ private fun NotesListPane(
             AppTopBar(title = stringResource(R.string.notes_title))
         },
         floatingActionButton = {
-            FloatingActionButton(
+            RecordButton(
                 onClick = {
                     haptics.confirm()
                     onNewRecording()
                 },
-                modifier = Modifier.size(80.dp),
-                shape = MaterialTheme.shapes.large,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Mic,
-                    contentDescription = stringResource(R.string.notes_record_fab_description),
-                    modifier = Modifier.size(28.dp),
-                )
-            }
+            )
         },
         contentWindowInsets = WindowInsets(0.dp),
     ) { innerPadding ->
@@ -768,7 +759,7 @@ private fun NotesListPane(
             val isLibraryEmpty = sections.isEmpty() && folders.isEmpty() &&
                 searchQuery.isBlank() && selectedFolderId == null
             if (isLibraryEmpty) {
-                EmptyListMessage(text = stringResource(R.string.notes_empty_state))
+                EmptyNotesState(kind = EmptyNotesKind.LIBRARY, modifier = Modifier.fillMaxSize())
             } else {
                 LazyColumn(
                     state = listState,
@@ -801,7 +792,10 @@ private fun NotesListPane(
                     }
                     if (sections.isEmpty()) {
                         item(key = EMPTY_SEARCH_ITEM_KEY, contentType = "empty") {
-                            EmptyListMessage(text = stringResource(emptyMessageRes(searchQuery, selectedFolderId)))
+                            EmptyNotesState(
+                                kind = emptyNotesKind(searchQuery, selectedFolderId),
+                                modifier = Modifier.fillParentMaxHeight(EMPTY_STATE_HEIGHT_FRACTION),
+                            )
                         }
                     }
                     sections.forEach { section ->
@@ -832,10 +826,40 @@ private const val SEARCH_ITEM_KEY = "search"
 private const val FOLDERS_ITEM_KEY = "folders"
 private const val EMPTY_SEARCH_ITEM_KEY = "empty-search"
 
-private fun emptyMessageRes(searchQuery: String, selectedFolderId: Long?): Int = when {
-    searchQuery.isNotBlank() -> R.string.notes_search_empty_state
-    selectedFolderId != null -> R.string.notes_folder_empty_state
-    else -> R.string.notes_empty_state
+private const val EMPTY_STATE_HEIGHT_FRACTION = 0.7f
+
+private enum class EmptyNotesKind(val icon: ImageVector, val titleRes: Int, val hintRes: Int?) {
+    LIBRARY(Icons.Filled.Mic, R.string.notes_empty_title, R.string.notes_empty_hint),
+    FOLDER(Icons.Filled.Folder, R.string.notes_folder_empty_state, null),
+    SEARCH(Icons.Filled.Search, R.string.notes_search_empty_state, null),
+}
+
+private fun emptyNotesKind(searchQuery: String, selectedFolderId: Long?): EmptyNotesKind = when {
+    searchQuery.isNotBlank() -> EmptyNotesKind.SEARCH
+    selectedFolderId != null -> EmptyNotesKind.FOLDER
+    else -> EmptyNotesKind.LIBRARY
+}
+
+// Maestro does not see the label of an extended floating button, so the
+// button carries its description itself.
+@Composable
+private fun RecordButton(onClick: () -> Unit) {
+    val description = stringResource(R.string.notes_record_fab_description)
+    ExtendedFloatingActionButton(
+        onClick = onClick,
+        modifier = Modifier
+            .height(64.dp)
+            .semantics { contentDescription = description },
+        shape = MaterialTheme.shapes.large,
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        icon = {
+            Icon(imageVector = Icons.Filled.Mic, contentDescription = null, modifier = Modifier.size(28.dp))
+        },
+        text = {
+            Text(text = stringResource(R.string.notes_record_fab_label), style = MaterialTheme.typography.titleMedium)
+        },
+    )
 }
 
 // A long press picks a chip up; dragging it over another folder swaps them
@@ -1209,18 +1233,39 @@ private fun FolderChoiceRow(label: String, isSelected: Boolean, onClick: () -> U
 }
 
 @Composable
-private fun EmptyListMessage(text: String) {
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center,
+private fun EmptyNotesState(kind: EmptyNotesKind, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            modifier = Modifier.size(88.dp),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(imageVector = kind.icon, contentDescription = null, modifier = Modifier.size(40.dp))
+            }
+        }
+        Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = text,
-            style = MaterialTheme.typography.bodyLarge,
+            text = stringResource(kind.titleRes),
+            style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(32.dp),
         )
+        if (kind.hintRes != null) {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = stringResource(kind.hintRes),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -1653,6 +1698,11 @@ private fun NoteDetailPane(
             note = selected,
             playback = state.playback,
             smartSuggestions = state.smartSuggestions,
+            tabs = NoteDetailTabsUi(
+                selected = state.detailTab,
+                isSummaryReadyMarked = state.isSummaryReadyMarked,
+                onSelected = viewModel::onDetailTabSelected,
+            ),
             showMetrics = state.isDeveloperMode,
             isRetranscribeAvailable = state.isRetranscribeAvailable,
             progressPercent = state.noteProgress[selected.id],
@@ -1699,6 +1749,7 @@ private fun NoteDetail(
     note: NoteDetailUi,
     playback: AudioPlaybackUi,
     smartSuggestions: SmartSuggestionsUi?,
+    tabs: NoteDetailTabsUi,
     showMetrics: Boolean,
     isRetranscribeAvailable: Boolean,
     progressPercent: Int?,
@@ -1739,6 +1790,7 @@ private fun NoteDetail(
             playback = playback,
             smartSuggestions = smartSuggestions,
             suggestionActions = suggestionActions,
+            tabs = tabs,
             showMetrics = showMetrics,
             progressPercent = progressPercent,
             isWaitingForAi = isWaitingForAi,
@@ -1935,6 +1987,7 @@ private fun NoteDetailContent(
     playback: AudioPlaybackUi,
     smartSuggestions: SmartSuggestionsUi?,
     suggestionActions: SuggestionActions,
+    tabs: NoteDetailTabsUi,
     showMetrics: Boolean,
     progressPercent: Int?,
     isWaitingForAi: Boolean,
@@ -2003,67 +2056,202 @@ private fun NoteDetailContent(
         }
         Spacer(modifier = Modifier.height(16.dp))
         ProcessingHaptics(noteId = note.id, status = note.status)
-        when (note.status) {
-            NoteStatusUi.PROCESSING -> DetailStatusCard(
-                text = stringResource(note.processingText(isWaitingForAi)),
-                percent = progressPercent,
-            )
-            NoteStatusUi.FAILED -> FailedDetailCard(
-                hasTranscript = note.transcript.isNotBlank(),
-                hasAudio = note.hasAudio,
+        NoteDetailTabs(tabs = tabs)
+        Spacer(modifier = Modifier.height(16.dp))
+        when (tabs.selected) {
+            NoteDetailTabUi.SUMMARY -> SummaryTab(
+                note = note,
+                smartSuggestions = smartSuggestions,
+                suggestionActions = suggestionActions,
+                progressPercent = progressPercent,
+                isWaitingForAi = isWaitingForAi,
                 onRetryTranscription = onRetryTranscription,
+                onResumeProcessing = onResumeProcessing,
+                onPresetRequested = onPresetRequested,
+                onCopied = onCopied,
             )
-            NoteStatusUi.INTERRUPTED -> InterruptedDetailCard(onResume = onResumeProcessing)
-            NoteStatusUi.READY -> key(note.id) {
-                CollapsibleCard(
-                    title = stringResource(R.string.notes_summary_heading),
-                    labelContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    labelContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    initiallyExpanded = true,
-                    actions = listOfNotNull(
-                        restyleAction(onPresetRequested).takeIf { note.transcript.isNotBlank() },
-                        rememberCopyAction(
-                            text = note.body,
-                            clipboardLabel = stringResource(R.string.notes_summary_heading),
-                            contentDescription = stringResource(R.string.notes_copy_summary_description),
-                            onCopied = { onCopied(NoteSection.OVERVIEW) },
-                        ),
-                    ),
-                ) {
-                    MarkdownText(markdown = note.body)
-                }
-            }
+            NoteDetailTabUi.TRANSCRIPT -> TranscriptTab(
+                note = note,
+                progressPercent = progressPercent,
+                isWaitingForAi = isWaitingForAi,
+                onRetryTranscription = onRetryTranscription,
+                onResumeProcessing = onResumeProcessing,
+                onCopied = onCopied,
+            )
         }
-        if (smartSuggestions != null) {
-            Spacer(modifier = Modifier.height(16.dp))
-            SmartSuggestionsCard(suggestions = smartSuggestions, actions = suggestionActions)
-        }
-        if (note.transcript.isNotBlank()) {
-            Spacer(modifier = Modifier.height(16.dp))
-            key(note.id) {
-                CollapsibleCard(
-                    title = stringResource(R.string.notes_transcript_heading),
-                    labelContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    labelContentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    initiallyExpanded = note.status != NoteStatusUi.READY,
-                    actions = listOf(
-                        rememberCopyAction(
-                        text = note.transcript,
-                        clipboardLabel = stringResource(R.string.notes_transcript_heading),
-                        contentDescription = stringResource(R.string.notes_copy_transcript_description),
-                        onCopied = { onCopied(NoteSection.TRANSCRIPT) },
-                        ),
-                    ),
-                ) {
-                    MarkdownText(markdown = note.transcript)
-                }
+    }
+}
+
+@Immutable
+private data class NoteDetailTabsUi(
+    val selected: NoteDetailTabUi,
+    val isSummaryReadyMarked: Boolean,
+    val onSelected: (NoteDetailTabUi) -> Unit,
+)
+
+@Composable
+private fun NoteDetailTabs(tabs: NoteDetailTabsUi) {
+    val haptics = haptics()
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        NoteDetailTabUi.entries.forEachIndexed { index, tab ->
+            SegmentedButton(
+                selected = tab == tabs.selected,
+                onClick = {
+                    haptics.tick()
+                    tabs.onSelected(tab)
+                },
+                shape = SegmentedButtonDefaults.itemShape(index = index, count = NoteDetailTabUi.entries.size),
+            ) {
+                NoteDetailTabLabel(
+                    text = stringResource(tab.labelRes()),
+                    isMarked = tab == NoteDetailTabUi.SUMMARY && tabs.isSummaryReadyMarked,
+                )
             }
         }
     }
 }
 
 @Composable
-private fun restyleAction(onClick: () -> Unit): CollapsibleCardAction = CollapsibleCardAction(
+private fun NoteDetailTabLabel(text: String, isMarked: Boolean) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(text = text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        if (isMarked) {
+            val description = stringResource(R.string.notes_summary_ready_description)
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    .semantics { contentDescription = description },
+            )
+        }
+    }
+}
+
+private fun NoteDetailTabUi.labelRes(): Int = when (this) {
+    NoteDetailTabUi.SUMMARY -> R.string.notes_summary_heading
+    NoteDetailTabUi.TRANSCRIPT -> R.string.notes_transcript_heading
+}
+
+@Composable
+private fun SummaryTab(
+    note: NoteDetailUi,
+    smartSuggestions: SmartSuggestionsUi?,
+    suggestionActions: SuggestionActions,
+    progressPercent: Int?,
+    isWaitingForAi: Boolean,
+    onRetryTranscription: () -> Unit,
+    onResumeProcessing: () -> Unit,
+    onPresetRequested: () -> Unit,
+    onCopied: (NoteSection) -> Unit,
+) {
+    when (note.status) {
+        NoteStatusUi.PROCESSING -> SkeletonStatusCard(
+            text = stringResource(note.summaryWritingText(isWaitingForAi)),
+            percent = progressPercent,
+            isWorking = !isWaitingForAi,
+        )
+        NoteStatusUi.FAILED -> FailedDetailCard(
+            hasTranscript = note.transcript.isNotBlank(),
+            hasAudio = note.hasAudio,
+            onRetryTranscription = onRetryTranscription,
+        )
+        NoteStatusUi.INTERRUPTED -> InterruptedDetailCard(onResume = onResumeProcessing)
+        NoteStatusUi.READY -> NoteTextCard(
+            text = note.body,
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            actions = listOfNotNull(
+                restyleAction(onPresetRequested).takeIf { note.transcript.isNotBlank() },
+                rememberCopyAction(
+                    text = note.body,
+                    clipboardLabel = stringResource(R.string.notes_summary_heading),
+                    contentDescription = stringResource(R.string.notes_copy_summary_description),
+                    onCopied = { onCopied(NoteSection.OVERVIEW) },
+                ),
+            ),
+        )
+    }
+    if (smartSuggestions != null) {
+        Spacer(modifier = Modifier.height(16.dp))
+        SmartSuggestionsCard(suggestions = smartSuggestions, actions = suggestionActions)
+    }
+}
+
+@Composable
+private fun TranscriptTab(
+    note: NoteDetailUi,
+    progressPercent: Int?,
+    isWaitingForAi: Boolean,
+    onRetryTranscription: () -> Unit,
+    onResumeProcessing: () -> Unit,
+    onCopied: (NoteSection) -> Unit,
+) {
+    when {
+        note.transcript.isNotBlank() -> NoteTextCard(
+            text = note.transcript,
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+            actions = listOf(
+                rememberCopyAction(
+                    text = note.transcript,
+                    clipboardLabel = stringResource(R.string.notes_transcript_heading),
+                    contentDescription = stringResource(R.string.notes_copy_transcript_description),
+                    onCopied = { onCopied(NoteSection.TRANSCRIPT) },
+                ),
+            ),
+        )
+        note.status == NoteStatusUi.PROCESSING -> SkeletonStatusCard(
+            text = stringResource(transcriptWritingText(isWaitingForAi)),
+            percent = progressPercent,
+            isWorking = !isWaitingForAi,
+        )
+        note.status == NoteStatusUi.FAILED -> FailedDetailCard(
+            hasTranscript = false,
+            hasAudio = note.hasAudio,
+            onRetryTranscription = onRetryTranscription,
+        )
+        note.status == NoteStatusUi.INTERRUPTED -> InterruptedDetailCard(onResume = onResumeProcessing)
+        else -> EmptyTranscriptCard()
+    }
+}
+
+@Composable
+private fun NoteTextCard(
+    text: String,
+    containerColor: Color,
+    contentColor: Color,
+    actions: List<PillAction>,
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 20.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+            ) {
+                actions.forEach { action ->
+                    PillIconButton(action = action, containerColor = containerColor, contentColor = contentColor)
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            MarkdownText(markdown = text)
+        }
+    }
+}
+
+@Composable
+private fun EmptyTranscriptCard() {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.notes_transcript_empty),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(24.dp),
+        )
+    }
+}
+
+@Composable
+private fun restyleAction(onClick: () -> Unit): PillAction = PillAction(
     icon = Icons.Filled.Settings,
     contentDescription = stringResource(R.string.notes_preset_description),
     onClick = onClick,
@@ -2075,13 +2263,13 @@ private fun rememberCopyAction(
     clipboardLabel: String,
     contentDescription: String,
     onCopied: () -> Unit,
-): CollapsibleCardAction {
+): PillAction {
     val clipboard = rememberSensitiveClipboard()
     val haptics = haptics()
     val copiedMessage = stringResource(R.string.notes_copied)
     val currentOnCopied by rememberUpdatedState(onCopied)
     return remember(text, clipboardLabel, contentDescription, copiedMessage) {
-        CollapsibleCardAction(
+        PillAction(
             icon = Icons.Filled.ContentCopy,
             contentDescription = contentDescription,
             onClick = {
@@ -2137,12 +2325,14 @@ private fun TrustBadge(icon: ImageVector, label: String) {
     }
 }
 
-private fun NoteDetailUi.processingText(isWaitingForAi: Boolean): Int = when {
+private fun NoteDetailUi.summaryWritingText(isWaitingForAi: Boolean): Int = when {
     isWaitingForAi && transcript.isBlank() -> R.string.notes_processing_waiting_transcribing
     isWaitingForAi -> R.string.notes_processing_waiting_structuring
-    transcript.isBlank() -> R.string.notes_processing_transcribing
     else -> R.string.notes_processing_structuring
 }
+
+private fun transcriptWritingText(isWaitingForAi: Boolean): Int =
+    if (isWaitingForAi) R.string.notes_processing_waiting_transcribing else R.string.notes_processing_transcribing
 
 @Composable
 private fun NoteDetailUi.detailTitle(): String = when (status) {
@@ -2211,29 +2401,27 @@ private fun InterruptedDetailCard(onResume: () -> Unit) {
 }
 
 @Composable
-private fun DetailStatusCard(text: String, percent: Int?) {
+private fun SkeletonStatusCard(text: String, percent: Int?, isWorking: Boolean) {
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            MorphingLoadingIndicator()
-            if (percent != null) {
-                Spacer(modifier = Modifier.height(12.dp))
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    text = stringResource(R.string.notes_processing_percent, percent),
-                    style = MaterialTheme.typography.titleMedium,
+                    text = text,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
                 )
+                if (percent != null) {
+                    Text(
+                        text = stringResource(R.string.notes_processing_percent, percent),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            if (isWorking) {
+                Spacer(modifier = Modifier.height(20.dp))
+                SkeletonLines()
+            }
         }
     }
 }

@@ -19,39 +19,15 @@ struct NoteDetailView: View {
                 if detail.hasAudio && state.playback.isAvailable {
                     playbackCard
                 }
-                if detail.status == .processing {
-                    processingCard
-                } else if detail.status == .interrupted {
-                    interruptedCard
-                } else if detail.status == .failed {
-                    failedCard
+                NoteDetailTabs(
+                    selected: state.detailTab,
+                    isSummaryReadyMarked: state.isSummaryReadyMarked,
+                    onSelect: { viewModel.onDetailTabSelected(tab: $0) }
+                )
+                if state.detailTab == .summary {
+                    summaryTab
                 } else {
-                    CollapsibleSection(
-                        title: String(localized: "Summary"),
-                        copyLabel: String(localized: "Copy summary"),
-                        onCopy: { viewModel.onNoteCopied(section: .overview) },
-                        onRestyle: detail.transcript.isEmpty ? nil : { viewModel.onPresetSheetRequested() },
-                        text: detail.body,
-                        labelBackground: Brand.primaryContainer,
-                        labelForeground: Brand.onPrimaryContainer,
-                        initiallyExpanded: true
-                    )
-                    .id(detail.id)
-                    if let suggestions = state.smartSuggestions {
-                        SmartSuggestionsSection(viewModel: viewModel, suggestions: suggestions)
-                    }
-                }
-                if !detail.transcript.isEmpty {
-                    CollapsibleSection(
-                        title: String(localized: "Transcript"),
-                        copyLabel: String(localized: "Copy transcript"),
-                        onCopy: { viewModel.onNoteCopied(section: .transcript) },
-                        text: detail.transcript,
-                        labelBackground: Brand.tertiaryContainer,
-                        labelForeground: Brand.onTertiaryContainer,
-                        initiallyExpanded: detail.status != .ready
-                    )
-                    .id(detail.id)
+                    transcriptTab
                 }
             }
             .padding()
@@ -163,6 +139,57 @@ struct NoteDetailView: View {
         }
     }
 
+    @ViewBuilder
+    private var summaryTab: some View {
+        switch detail.status {
+        case .processing:
+            writingCard(text: summaryWritingText)
+        case .interrupted:
+            interruptedCard
+        case .failed:
+            failedCard
+        default:
+            NoteTextSection(
+                text: detail.body,
+                copyLabel: String(localized: "Copy summary"),
+                onCopy: { viewModel.onNoteCopied(section: .overview) },
+                onRestyle: detail.transcript.isEmpty ? nil : { viewModel.onPresetSheetRequested() },
+                actionBackground: Brand.primaryContainer,
+                actionForeground: Brand.onPrimaryContainer
+            )
+        }
+        if let suggestions = state.smartSuggestions {
+            SmartSuggestionsSection(viewModel: viewModel, suggestions: suggestions)
+        }
+    }
+
+    // The transcript is shown as soon as its first part is saved; the status
+    // cards only stand in while there is no text at all.
+    @ViewBuilder
+    private var transcriptTab: some View {
+        if !detail.transcript.isEmpty {
+            NoteTextSection(
+                text: detail.transcript,
+                copyLabel: String(localized: "Copy transcript"),
+                onCopy: { viewModel.onNoteCopied(section: .transcript) },
+                actionBackground: Brand.tertiaryContainer,
+                actionForeground: Brand.onTertiaryContainer
+            )
+        } else if detail.status == .processing {
+            writingCard(text: transcriptWritingText)
+        } else if detail.status == .interrupted {
+            interruptedCard
+        } else if detail.status == .failed {
+            failedCard
+        } else {
+            Text(String(localized: "This note has no transcript."))
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(20)
+                .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
+        }
+    }
+
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(detail.title)
@@ -216,26 +243,25 @@ struct NoteDetailView: View {
         return parts.joined(separator: " · ")
     }
 
-    private var processingCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
-                ProgressView()
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(processingStage)
-                    if let percent = state.noteProgress[KotlinLong(value: detail.id)]?.intValue {
-                        Text("\(percent)%")
-                            .font(.caption)
-                            .monospacedDigit()
-                            .foregroundStyle(.secondary)
-                    }
+    private func writingCard(text: String) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text(text)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                if let percent = state.noteProgress[KotlinLong(value: detail.id)]?.intValue {
+                    Text("\(percent)%")
+                        .font(.subheadline.weight(.semibold))
+                        .monospacedDigit()
                 }
             }
             if !state.isWaitingForAi {
+                SkeletonLines()
                 KeepOpenHint()
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
+        .padding(20)
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
     }
 
@@ -257,13 +283,16 @@ struct NoteDetailView: View {
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
     }
 
-    private var processingStage: String {
-        if state.isWaitingForAi {
-            return String(localized: "Waiting for your on-device AI to finish downloading")
-        }
-        return detail.transcript.isEmpty
-            ? String(localized: "Transcribing your recording")
-            : String(localized: "Writing your summary")
+    private var summaryWritingText: String {
+        state.isWaitingForAi
+            ? String(localized: "Waiting for your on-device AI to finish downloading")
+            : String(localized: "Writing your summary…")
+    }
+
+    private var transcriptWritingText: String {
+        state.isWaitingForAi
+            ? String(localized: "Waiting for your on-device AI to finish downloading")
+            : String(localized: "Transcribing your recording")
     }
 
     private var failedCard: some View {
@@ -271,7 +300,7 @@ struct NoteDetailView: View {
             Label(
                 detail.transcript.isEmpty
                     ? String(localized: "We were unable to create a summary and transcript for this note.")
-                    : String(localized: "We were unable to create a summary for this note. The transcript is saved below."),
+                    : String(localized: "We were unable to create a summary for this note. The transcript is saved."),
                 systemImage: "exclamationmark.triangle"
             )
             .foregroundStyle(.secondary)
@@ -380,81 +409,81 @@ struct NoteDetailView: View {
     }
 }
 
-private struct CollapsibleSection: View {
-    let title: String
-    let copyLabel: String
-    let onCopy: () -> Void
-    let onRestyle: (() -> Void)?
-    let text: String
-    let labelBackground: Color
-    let labelForeground: Color
-    @State private var isExpanded: Bool
-    @State private var contentHeight: CGFloat = 0
-
-    private static let collapsedMaxHeight: CGFloat = 168
-    private static let fadeHeight: CGFloat = 56
-    static let pillHeight: CGFloat = 32
-    private let cardBackground = Color(.secondarySystemGroupedBackground)
-
-    init(
-        title: String,
-        copyLabel: String,
-        onCopy: @escaping () -> Void,
-        onRestyle: (() -> Void)? = nil,
-        text: String,
-        labelBackground: Color,
-        labelForeground: Color,
-        initiallyExpanded: Bool
-    ) {
-        self.title = title
-        self.copyLabel = copyLabel
-        self.onCopy = onCopy
-        self.onRestyle = onRestyle
-        self.text = text
-        self.labelBackground = labelBackground
-        self.labelForeground = labelForeground
-        _isExpanded = State(initialValue: initiallyExpanded)
-    }
-
-    private var isOverflowing: Bool { contentHeight > Self.collapsedMaxHeight }
+// The dot sits on the Summary segment when the summary arrived while the
+// transcript was open; a segmented control cannot draw it inside a segment.
+private struct NoteDetailTabs: View {
+    let selected: NoteDetailTabUi
+    let isSummaryReadyMarked: Bool
+    let onSelect: (NoteDetailTabUi) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionHeader
-            sectionContent
+        Picker(String(localized: "Summary"), selection: selection) {
+            Text(String(localized: "Summary")).tag(NoteDetailTabUi.summary)
+            Text(String(localized: "Transcript")).tag(NoteDetailTabUi.transcript)
         }
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(cardBackground, in: RoundedRectangle(cornerRadius: Brand.cardRadius))
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .overlay {
+            if isSummaryReadyMarked {
+                GeometryReader { geometry in
+                    Circle()
+                        .fill(Brand.primary)
+                        .frame(width: 8, height: 8)
+                        .position(x: geometry.size.width / 2 - 12, y: 9)
+                        .accessibilityElement()
+                        .accessibilityLabel(String(localized: "Summary is ready"))
+                }
+                .allowsHitTesting(false)
+            }
+        }
     }
 
-    private var sectionHeader: some View {
-        HStack(spacing: 8) {
-            Text(title)
-                .font(.footnote.weight(.semibold))
-                .padding(.horizontal, 14)
-                .frame(height: Self.pillHeight)
-                .background(labelBackground, in: Capsule())
-                .foregroundStyle(labelForeground)
-            if isOverflowing {
-                Button(action: toggle) {
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .font(.caption.weight(.semibold))
-                        .frame(width: Self.pillHeight, height: Self.pillHeight)
-                        .background(labelBackground, in: Circle())
-                        .foregroundStyle(labelForeground)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(isExpanded ? String(localized: "Show less") : String(localized: "Show more"))
+    private var selection: Binding<NoteDetailTabUi> {
+        Binding(
+            get: { selected },
+            set: { tab in
+                Haptics.tap()
+                onSelect(tab)
             }
+        )
+    }
+}
+
+private struct NoteTextSection: View {
+    let text: String
+    let copyLabel: String
+    let onCopy: () -> Void
+    var onRestyle: (() -> Void)?
+    let actionBackground: Color
+    let actionForeground: Color
+
+    static let actionSize: CGFloat = 32
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            actions
+            MarkdownBlocks(raw: text)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .padding(.bottom, 20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
+    }
+
+    private var actions: some View {
+        HStack(spacing: 8) {
             Spacer()
             if let onRestyle {
                 Button(action: onRestyle) {
                     Image(systemName: "gearshape")
                         .font(.caption.weight(.semibold))
-                        .frame(width: Self.pillHeight, height: Self.pillHeight)
-                        .background(labelBackground, in: Circle())
-                        .foregroundStyle(labelForeground)
+                        .frame(width: Self.actionSize, height: Self.actionSize)
+                        .background(actionBackground, in: Circle())
+                        .foregroundStyle(actionForeground)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(String(localized: "Change summary style"))
@@ -463,36 +492,58 @@ private struct CollapsibleSection: View {
                 text: text,
                 onCopy: onCopy,
                 accessibilityLabel: copyLabel,
-                background: labelBackground,
-                foreground: labelForeground
+                background: actionBackground,
+                foreground: actionForeground
             )
         }
     }
+}
 
-    private var sectionContent: some View {
-        ZStack(alignment: .bottom) {
-            MarkdownBlocks(raw: text)
-                .textSelection(.enabled)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
-                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
-                .frame(maxHeight: isExpanded ? nil : Self.collapsedMaxHeight, alignment: .top)
-                .clipped()
-            if !isExpanded && isOverflowing {
-                LinearGradient(
-                    colors: [cardBackground.opacity(0), cardBackground],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: Self.fadeHeight)
-                .allowsHitTesting(false)
-            }
+private struct SkeletonLines: View {
+    @State private var isShimmering = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private static let widths: [CGFloat] = [0.45, 1, 0.94, 0.98, 0.7, 1, 0.88, 0.5]
+    private static let lineHeight: CGFloat = 14
+    private static let spacing: CGFloat = 12
+    private static let shimmerShare: CGFloat = 0.6
+
+    private static var height: CGFloat {
+        CGFloat(widths.count) * lineHeight + CGFloat(widths.count - 1) * spacing
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width
+            lines(width: width, color: Color.primary.opacity(0.08))
+                .overlay {
+                    LinearGradient(
+                        colors: [.clear, Color.primary.opacity(0.12), .clear],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .frame(width: width * Self.shimmerShare)
+                    .offset(x: isShimmering ? width : -width)
+                    .mask(lines(width: width, color: .black))
+                }
+        }
+        .frame(height: Self.height)
+        .accessibilityHidden(true)
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.linear(duration: 1.4).repeatForever(autoreverses: false)) { isShimmering = true }
         }
     }
 
-    private func toggle() {
-        Haptics.tap()
-        withAnimation(.easeInOut(duration: 0.3)) { isExpanded.toggle() }
+    private func lines(width: CGFloat, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: Self.spacing) {
+            ForEach(Self.widths.indices, id: \.self) { index in
+                Capsule()
+                    .fill(color)
+                    .frame(width: width * Self.widths[index], height: Self.lineHeight)
+            }
+        }
+        .frame(width: width, alignment: .leading)
     }
 }
 
@@ -512,7 +563,7 @@ private struct CopySectionButton: View {
         } label: {
             Image(systemName: copiedAt == nil ? "doc.on.doc" : "checkmark")
                 .font(.caption.weight(.semibold))
-                .frame(width: CollapsibleSection.pillHeight, height: CollapsibleSection.pillHeight)
+                .frame(width: NoteTextSection.actionSize, height: NoteTextSection.actionSize)
                 .background(background, in: Circle())
                 .foregroundStyle(foreground)
         }

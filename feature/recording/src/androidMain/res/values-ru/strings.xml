@@ -5,6 +5,8 @@
     <string name="recording_stop_description">Остановить запись</string>
     <string name="recording_pause_description">Приостановить запись</string>
     <string name="recording_resume_description">Возобновить запись</string>
+    <string name="recording_pause_label">Пауза</string>
+    <string name="recording_resume_label">Продолжить</string>
     <string name="recording_paused_label">Пауза</string>
     <string name="recording_active_label">Идёт запись…</string>
     <string name="recording_save_note_button">Сохранить заметку</string>

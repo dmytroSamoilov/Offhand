@@ -64,7 +64,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       - assertVisible: "Your styles"
       - tapOn: "Sales debrief"
       - extendedWaitUntil:
-          visible: "Summary"
+          visible: "Copy summary"
           timeout: 60000
       - back
 
@@ -162,7 +162,7 @@ appId: com.dmytrosamoilov.offhand.uitest
           element: "Your styles"
       - tapOn: "Sales debrief"
       - extendedWaitUntil:
-          visible: "Summary"
+          visible: "Copy summary"
           timeout: 60000
       - swipe:
           start: "1%,50%"

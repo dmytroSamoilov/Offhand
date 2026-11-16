@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="notes_title">नोट्स</string>
-    <string name="notes_empty_state">अभी कोई नोट नहीं है। पहला नोट रिकॉर्ड करने के लिए माइक्रोफ़ोन बटन दबाएं।</string>
+    <string name="notes_empty_title">अभी कोई नोट नहीं है</string>
+    <string name="notes_empty_hint">अपना पहला नोट बनाने के लिए “रिकॉर्ड करें” पर टैप करें।</string>
+    <string name="notes_record_fab_label">रिकॉर्ड करें</string>
     <string name="notes_model_banner_title">आपका ऑन-डिवाइस AI सेट हो रहा है</string>
     <string name="notes_model_banner_subtitle">बैकग्राउंड में डाउनलोड हो रहा है</string>
     <string name="notes_model_banner_waiting_title">आपका ऑन-डिवाइस AI डाउनलोड के लिए तैयार है</string>
@@ -24,20 +26,22 @@
     <string name="notes_pause_description">प्लेबैक रोकें</string>
     <string name="notes_processing_title">प्रोसेस हो रहा है…</string>
     <string name="notes_processing_preview">आपके फ़ोन पर ट्रांसक्राइब और सारांश तैयार हो रहा है। आप रिकॉर्डिंग अभी चला सकते हैं।</string>
-    <string name="notes_processing_transcribing">ट्रांसक्रिप्ट प्रोसेस हो रहा है… यह यहां अपने-आप दिखेगा।</string>
-    <string name="notes_processing_structuring">सारांश लिखा जा रहा है… ट्रांसक्रिप्ट पहले से नीचे मौजूद है।</string>
+    <string name="notes_processing_transcribing">आपकी रिकॉर्डिंग ट्रांसक्राइब हो रही है… टेक्स्ट यहां अपने-आप दिखेगा।</string>
+    <string name="notes_processing_structuring">आपका सारांश लिखा जा रहा है…</string>
     <string name="notes_processing_waiting_preview">आपके ऑन-डिवाइस AI के डाउनलोड होने का इंतज़ार है। आप रिकॉर्डिंग अभी चला सकते हैं।</string>
     <string name="notes_processing_waiting_transcribing">आपका ऑन-डिवाइस AI डाउनलोड होते ही आपका नोट लिखा जाएगा। यह यहां अपने-आप दिखेगा।</string>
-    <string name="notes_processing_waiting_structuring">आपका ऑन-डिवाइस AI डाउनलोड होते ही सारांश लिखा जाएगा। ट्रांसक्रिप्ट पहले से नीचे मौजूद है।</string>
+    <string name="notes_processing_waiting_structuring">आपका ऑन-डिवाइस AI डाउनलोड होते ही सारांश लिखा जाएगा।</string>
     <string name="notes_recording_fallback_title">रिकॉर्डिंग</string>
     <string name="notes_failed_description">हम इस नोट के लिए सारांश और ट्रांसक्रिप्ट नहीं बना सके।</string>
-    <string name="notes_failed_summary_description">हम इस नोट के लिए सारांश नहीं बना सके। ट्रांसक्रिप्ट नीचे सहेजा गया है।</string>
+    <string name="notes_failed_summary_description">हम इस नोट के लिए सारांश नहीं बना सके। ट्रांसक्रिप्ट सहेजा गया है।</string>
     <string name="notes_try_again_button">फिर से कोशिश करें</string>
     <string name="notes_interrupted_description">यह नोट पूरा होने से पहले रुक गया था। Offhand को खुला रखें, यह आगे बढ़ेगा।</string>
     <string name="notes_interrupted_preview">रुका हुआ। जारी रखने के लिए नोट खोलें।</string>
     <string name="notes_continue_button">जारी रखें</string>
     <string name="notes_summary_heading">सारांश</string>
     <string name="notes_transcript_heading">ट्रांसक्रिप्ट</string>
+    <string name="notes_summary_ready_description">सारांश तैयार है</string>
+    <string name="notes_transcript_empty">इस नोट का कोई ट्रांसक्रिप्ट नहीं है।</string>
     <string name="notes_edit_description">नोट में बदलाव करें</string>
     <string name="notes_share_description">नोट शेयर करें</string>
     <string name="notes_delete_description">नोट हटाएं</string>
@@ -95,7 +99,7 @@
     <string name="notes_folder_error_duplicate">इस नाम का फ़ोल्डर पहले से मौजूद है।</string>
     <string name="notes_folder_delete_dialog_title">यह फ़ोल्डर हटाएं?</string>
     <string name="notes_folder_delete_dialog_body">इसके नोट्स सुरक्षित रहेंगे और सभी नोट्स में वापस आ जाएंगे।</string>
-    <string name="notes_folder_empty_state">इस फ़ोल्डर में कोई नोट नहीं है।</string>
+    <string name="notes_folder_empty_state">इस फ़ोल्डर में अभी कोई नोट नहीं है</string>
     <string name="notes_move_to_folder">फ़ोल्डर में ले जाएं</string>
     <string name="notes_folder_none">कोई फ़ोल्डर नहीं</string>
     <string name="notes_import_error_title">यह फ़ाइल आयात नहीं हो सकी</string>

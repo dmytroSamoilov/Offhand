@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="notes_title">Notas</string>
-    <string name="notes_empty_state">Aún no hay notas. Toca el botón del micrófono para grabar la primera.</string>
+    <string name="notes_empty_title">Aún no hay notas</string>
+    <string name="notes_empty_hint">Toca Grabar para crear tu primera nota.</string>
+    <string name="notes_record_fab_label">Grabar</string>
     <string name="notes_model_banner_title">Configurando tu IA en el dispositivo</string>
     <string name="notes_model_banner_subtitle">Descargando en segundo plano</string>
     <string name="notes_model_banner_waiting_title">Tu IA en el dispositivo está lista para descargarse</string>
@@ -25,20 +27,22 @@
     <string name="notes_pause_description">Pausar reproducción</string>
     <string name="notes_processing_title">Procesando…</string>
     <string name="notes_processing_preview">Transcribiendo y resumiendo en tu teléfono. Ya puedes reproducir la grabación.</string>
-    <string name="notes_processing_transcribing">Procesando la transcripción… Aparecerá aquí automáticamente.</string>
-    <string name="notes_processing_structuring">Escribiendo el resumen… La transcripción ya está abajo.</string>
+    <string name="notes_processing_transcribing">Transcribiendo tu grabación… El texto aparecerá aquí automáticamente.</string>
+    <string name="notes_processing_structuring">Escribiendo tu resumen…</string>
     <string name="notes_processing_waiting_preview">Esperando a que termine de descargarse tu IA en el dispositivo. Ya puedes reproducir la grabación.</string>
     <string name="notes_processing_waiting_transcribing">Tu nota se escribirá cuando termine de descargarse tu IA en el dispositivo. Aparecerá aquí automáticamente.</string>
-    <string name="notes_processing_waiting_structuring">El resumen se escribirá cuando termine de descargarse tu IA en el dispositivo. La transcripción ya está abajo.</string>
+    <string name="notes_processing_waiting_structuring">El resumen se escribirá cuando termine de descargarse tu IA en el dispositivo.</string>
     <string name="notes_recording_fallback_title">Grabación</string>
     <string name="notes_failed_description">No hemos podido crear un resumen ni una transcripción para esta nota.</string>
-    <string name="notes_failed_summary_description">No hemos podido crear un resumen para esta nota. La transcripción está guardada abajo.</string>
+    <string name="notes_failed_summary_description">No hemos podido crear un resumen para esta nota. La transcripción está guardada.</string>
     <string name="notes_try_again_button">Reintentar</string>
     <string name="notes_interrupted_description">Esta nota se pausó antes de terminar. Mantén Offhand abierto y continuará.</string>
     <string name="notes_interrupted_preview">Pausada. Abre la nota para continuar.</string>
     <string name="notes_continue_button">Continuar</string>
     <string name="notes_summary_heading">Resumen</string>
     <string name="notes_transcript_heading">Transcripción</string>
+    <string name="notes_summary_ready_description">El resumen está listo</string>
+    <string name="notes_transcript_empty">Esta nota no tiene transcripción.</string>
     <string name="notes_edit_description">Editar nota</string>
     <string name="notes_share_description">Compartir nota</string>
     <string name="notes_delete_description">Eliminar nota</string>
@@ -96,7 +100,7 @@
     <string name="notes_folder_error_duplicate">Ya existe una carpeta con este nombre.</string>
     <string name="notes_folder_delete_dialog_title">¿Eliminar esta carpeta?</string>
     <string name="notes_folder_delete_dialog_body">Sus notas se conservan y vuelven a Todas las notas.</string>
-    <string name="notes_folder_empty_state">No hay notas en esta carpeta.</string>
+    <string name="notes_folder_empty_state">Aún no hay notas en esta carpeta</string>
     <string name="notes_move_to_folder">Mover a carpeta</string>
     <string name="notes_folder_none">Sin carpeta</string>
     <string name="notes_import_error_title">No se pudo importar este archivo</string>

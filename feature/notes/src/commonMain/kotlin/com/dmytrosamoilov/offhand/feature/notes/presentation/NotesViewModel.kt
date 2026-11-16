@@ -392,15 +392,17 @@ class NotesViewModel(
     fun onNoteSelected(id: Long) {
         launchSafely(showLoading = false) {
             val note = getNote(id) ?: return@launchSafely
+            val isAlreadyOpen = selectedNote?.id == note.id
             selectedNote = note
             selectedNoteId.value = note.id
             loadAudio(note)
             mutableUiState.update {
+                val tabs = if (isAlreadyOpen) it.detailTabs() else NoteDetailTabState.openedFor(note.status.toUi())
                 it.copy(
                     selected = note.toDetailUi(dateLabelFormatter, folders.value.namesById()),
                     editor = null,
                     pendingDeleteNoteId = null,
-                )
+                ).withDetailTabs(tabs)
             }
         }
     }
@@ -426,12 +428,20 @@ class NotesViewModel(
         if (refreshed == null || refreshed == current) return
         selectedNote = refreshed
         mutableUiState.update { state ->
+            val tabs = state.detailTabs().onStatusChanged(current.status.toUi(), refreshed.status.toUi())
             if (state.editor != null) {
-                state
+                state.withDetailTabs(tabs)
             } else {
                 state.copy(selected = refreshed.toDetailUi(dateLabelFormatter, folders.value.namesById()))
+                    .withDetailTabs(tabs)
             }
         }
+    }
+
+    // The tab only ever changes on a tap: a summary that arrives while the
+    // transcript is being read marks its tab instead of taking the screen.
+    fun onDetailTabSelected(tab: NoteDetailTabUi) {
+        mutableUiState.update { it.withDetailTabs(it.detailTabs().onTabSelected(tab)) }
     }
 
     fun onDetailClosed() {
@@ -449,7 +459,7 @@ class NotesViewModel(
                 moveToFolder = null,
                 pendingShare = null,
                 pendingCalendarEvent = null,
-            )
+            ).withDetailTabs(NoteDetailTabState())
         }
     }
 

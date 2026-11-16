@@ -175,7 +175,7 @@ struct RecordSheetView: View {
                     .foregroundStyle(.secondary)
                     .padding(.top, 12)
             }
-            HStack(spacing: 16) {
+            HStack(alignment: .top, spacing: 16) {
                 pauseResumeButton
                 saveNoteButton
             }
@@ -184,7 +184,7 @@ struct RecordSheetView: View {
                 isDiscardConfirmationVisible = true
             }
             .font(.subheadline)
-            .padding(.top, 12)
+            .padding(.top, 8)
         }
     }
 
@@ -193,11 +193,16 @@ struct RecordSheetView: View {
             Haptics.tap()
             state.isPaused ? viewModel.onResumeRecording() : viewModel.onPauseRecording()
         } label: {
-            Image(systemName: state.isPaused ? "play.fill" : "pause.fill")
-                .font(.title2)
-                .foregroundStyle(Brand.primary)
-                .frame(width: 64, height: 64)
-                .background(Brand.primaryContainer, in: Circle())
+            VStack(spacing: 6) {
+                Image(systemName: state.isPaused ? "play.fill" : "pause.fill")
+                    .font(.title2)
+                    .foregroundStyle(Brand.primary)
+                    .frame(width: 64, height: 64)
+                    .background(Brand.primaryContainer, in: Circle())
+                Text(state.isPaused ? String(localized: "Resume") : String(localized: "Pause"))
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+            }
         }
         .buttonStyle(.plain)
         .accessibilityLabel(

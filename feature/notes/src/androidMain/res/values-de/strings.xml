@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="notes_title">Notizen</string>
-    <string name="notes_empty_state">Noch keine Notizen. Tippe auf das Mikrofon, um deine erste aufzunehmen.</string>
+    <string name="notes_empty_title">Noch keine Notizen</string>
+    <string name="notes_empty_hint">Tippe auf „Aufnehmen“, um deine erste Notiz aufzunehmen.</string>
+    <string name="notes_record_fab_label">Aufnehmen</string>
     <string name="notes_model_banner_title">Deine KI auf dem Gerät wird eingerichtet</string>
     <string name="notes_model_banner_subtitle">Wird im Hintergrund heruntergeladen</string>
     <string name="notes_model_banner_waiting_title">Deine KI auf dem Gerät ist bereit zum Download</string>
@@ -24,20 +26,22 @@
     <string name="notes_pause_description">Wiedergabe pausieren</string>
     <string name="notes_processing_title">Wird verarbeitet…</string>
     <string name="notes_processing_preview">Wird auf deinem Handy transkribiert und zusammengefasst. Du kannst die Aufnahme schon abspielen.</string>
-    <string name="notes_processing_transcribing">Das Transkript wird verarbeitet… Es erscheint hier automatisch.</string>
-    <string name="notes_processing_structuring">Die Zusammenfassung wird geschrieben… Das Transkript steht schon unten.</string>
+    <string name="notes_processing_transcribing">Deine Aufnahme wird transkribiert… Der Text erscheint hier automatisch.</string>
+    <string name="notes_processing_structuring">Deine Zusammenfassung wird geschrieben…</string>
     <string name="notes_processing_waiting_preview">Wartet, bis deine KI auf dem Gerät heruntergeladen ist. Du kannst die Aufnahme schon abspielen.</string>
     <string name="notes_processing_waiting_transcribing">Deine Notiz wird geschrieben, sobald deine KI auf dem Gerät heruntergeladen ist. Sie erscheint hier automatisch.</string>
-    <string name="notes_processing_waiting_structuring">Die Zusammenfassung wird geschrieben, sobald deine KI auf dem Gerät heruntergeladen ist. Das Transkript steht schon unten.</string>
+    <string name="notes_processing_waiting_structuring">Die Zusammenfassung wird geschrieben, sobald deine KI auf dem Gerät heruntergeladen ist.</string>
     <string name="notes_recording_fallback_title">Aufnahme</string>
     <string name="notes_failed_description">Wir konnten für diese Notiz keine Zusammenfassung und kein Transkript erstellen.</string>
-    <string name="notes_failed_summary_description">Wir konnten für diese Notiz keine Zusammenfassung erstellen. Das Transkript ist unten gespeichert.</string>
+    <string name="notes_failed_summary_description">Wir konnten für diese Notiz keine Zusammenfassung erstellen. Das Transkript ist gespeichert.</string>
     <string name="notes_try_again_button">Erneut versuchen</string>
     <string name="notes_interrupted_description">Diese Notiz wurde angehalten, bevor sie fertig war. Lass Offhand geöffnet, dann macht sie weiter.</string>
     <string name="notes_interrupted_preview">Angehalten. Öffne die Notiz, um fortzufahren.</string>
     <string name="notes_continue_button">Fortsetzen</string>
     <string name="notes_summary_heading">Zusammenfassung</string>
     <string name="notes_transcript_heading">Transkript</string>
+    <string name="notes_summary_ready_description">Zusammenfassung ist fertig</string>
+    <string name="notes_transcript_empty">Diese Notiz hat kein Transkript.</string>
     <string name="notes_edit_description">Notiz bearbeiten</string>
     <string name="notes_share_description">Notiz teilen</string>
     <string name="notes_delete_description">Notiz löschen</string>
@@ -95,7 +99,7 @@
     <string name="notes_folder_error_duplicate">Ein Ordner mit diesem Namen existiert bereits.</string>
     <string name="notes_folder_delete_dialog_title">Diesen Ordner löschen?</string>
     <string name="notes_folder_delete_dialog_body">Die Notizen bleiben erhalten und landen wieder unter „Alle Notizen“.</string>
-    <string name="notes_folder_empty_state">Keine Notizen in diesem Ordner.</string>
+    <string name="notes_folder_empty_state">In diesem Ordner sind noch keine Notizen</string>
     <string name="notes_move_to_folder">In Ordner verschieben</string>
     <string name="notes_folder_none">Kein Ordner</string>
     <string name="notes_import_error_title">Diese Datei konnte nicht importiert werden</string>

@@ -34,7 +34,9 @@ struct NotesListView: View {
         isDocumentExportUnlocked: false,
         isProStylesUnlocked: false,
         pendingCalendarEvent: nil,
-        isRetranscribeAvailable: false
+        isRetranscribeAvailable: false,
+        detailTab: .summary,
+        isSummaryReadyMarked: false
     )
     @State private var recordSheetRequest: RecordSheetRequest?
     @ObservedObject private var shortcuts = ShortcutRequests.shared
@@ -240,14 +242,14 @@ struct NotesListView: View {
                     ContentUnavailableView.search(text: searchQuery)
                 } else if state.selectedFolderId != nil {
                     ContentUnavailableView(
-                        String(localized: "No notes in this folder."),
+                        String(localized: "No notes in this folder yet"),
                         systemImage: "folder"
                     )
                 } else {
                     ContentUnavailableView(
                         String(localized: "No notes yet"),
                         systemImage: "mic",
-                        description: Text(String(localized: "Tap the microphone to record your first note."))
+                        description: Text(String(localized: "Tap Record to capture your first note."))
                     )
                 }
             }
@@ -350,12 +352,17 @@ struct NotesListView: View {
             Haptics.confirm()
             recordSheetRequest = RecordSheetRequest(folderId: state.selectedFolderId?.int64Value)
         } label: {
-            Image(systemName: "mic.fill")
-                .font(.title2)
-                .foregroundStyle(Brand.onPrimary)
-                .frame(width: 60, height: 60)
-                .background(Brand.primary, in: Circle())
-                .shadow(color: .black.opacity(0.25), radius: 10, y: 4)
+            HStack(spacing: 8) {
+                Image(systemName: "mic.fill")
+                    .font(.title3)
+                Text(String(localized: "Record"))
+                    .font(.headline)
+            }
+            .foregroundStyle(Brand.onPrimary)
+            .padding(.horizontal, 22)
+            .frame(height: 60)
+            .background(Brand.primary, in: Capsule())
+            .shadow(color: .black.opacity(0.25), radius: 10, y: 4)
         }
         .accessibilityLabel(String(localized: "Record a note"))
         .padding(.trailing, 20)

@@ -12,6 +12,7 @@ import com.dmytrosamoilov.offhand.core.common.ModelDownloadPolicy
 import com.dmytrosamoilov.offhand.core.common.NetworkMonitor
 import com.dmytrosamoilov.offhand.core.data.domain.CalendarEventSuggestion
 import com.dmytrosamoilov.offhand.core.data.domain.Note
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
@@ -249,6 +250,60 @@ class NotesViewModelTest {
         viewModel.onNewFolderRequested()
         dispatcher.scheduler.advanceUntilIdle()
         assertEquals(FolderEditorUi(folderId = null, name = ""), viewModel.uiState.value.folderEditor)
+    }
+
+    @Test
+    fun `a processing note opens on the transcript and is not switched when the summary arrives`() = runTest(dispatcher) {
+        val processing = note.copy(status = NoteStatus.PROCESSING, body = "")
+        val notes = MutableStateFlow(listOf(processing))
+        every { observeNotes() } returns notes
+        coEvery { getNote(5) } returns processing
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(NoteDetailTabUi.TRANSCRIPT, viewModel.uiState.value.detailTab)
+        assertFalse(viewModel.uiState.value.isSummaryReadyMarked)
+
+        notes.value = listOf(note)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(NoteStatusUi.READY, viewModel.uiState.value.selected?.status)
+        assertEquals(NoteDetailTabUi.TRANSCRIPT, viewModel.uiState.value.detailTab)
+        assertTrue(viewModel.uiState.value.isSummaryReadyMarked)
+
+        viewModel.onDetailTabSelected(NoteDetailTabUi.SUMMARY)
+        assertEquals(NoteDetailTabUi.SUMMARY, viewModel.uiState.value.detailTab)
+        assertFalse(viewModel.uiState.value.isSummaryReadyMarked)
+    }
+
+    @Test
+    fun `a ready note opens on the summary and a restyle keeps the tab the user is on`() = runTest(dispatcher) {
+        val notes = MutableStateFlow(listOf(note))
+        every { observeNotes() } returns notes
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(NoteDetailTabUi.SUMMARY, viewModel.uiState.value.detailTab)
+
+        notes.value = listOf(note.copy(status = NoteStatus.PROCESSING))
+        dispatcher.scheduler.advanceUntilIdle()
+        notes.value = listOf(note.copy(body = "Rewritten"))
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(NoteDetailTabUi.SUMMARY, viewModel.uiState.value.detailTab)
+        assertFalse(viewModel.uiState.value.isSummaryReadyMarked)
+    }
+
+    @Test
+    fun `closing a note forgets its tab so the next note opens by its own status`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+        viewModel.onDetailTabSelected(NoteDetailTabUi.TRANSCRIPT)
+
+        viewModel.onDetailClosed()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(NoteDetailTabUi.SUMMARY, viewModel.uiState.value.detailTab)
     }
 
     @Test

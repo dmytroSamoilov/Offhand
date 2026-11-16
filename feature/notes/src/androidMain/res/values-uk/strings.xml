@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="notes_title">Нотатки</string>
-    <string name="notes_empty_state">Нотаток поки немає. Натисніть кнопку мікрофона, щоб записати першу.</string>
+    <string name="notes_empty_title">Нотаток поки немає</string>
+    <string name="notes_empty_hint">Натисніть «Записати», щоб створити першу нотатку.</string>
+    <string name="notes_record_fab_label">Записати</string>
     <string name="notes_model_banner_title">Налаштовуємо ШІ на пристрої</string>
     <string name="notes_model_banner_subtitle">Завантажується у фоні</string>
     <string name="notes_model_banner_waiting_title">ШІ на пристрої готовий до завантаження</string>
@@ -26,20 +28,22 @@
     <string name="notes_pause_description">Призупинити відтворення</string>
     <string name="notes_processing_title">Обробка…</string>
     <string name="notes_processing_preview">Розшифровуємо й узагальнюємо на вашому телефоні. Запис уже можна прослухати.</string>
-    <string name="notes_processing_transcribing">Триває розшифровка… Вона зʼявиться тут автоматично.</string>
-    <string name="notes_processing_structuring">Пишемо резюме… Розшифровка вже нижче.</string>
+    <string name="notes_processing_transcribing">Розшифровуємо запис… Текст зʼявиться тут автоматично.</string>
+    <string name="notes_processing_structuring">Пишемо ваше резюме…</string>
     <string name="notes_processing_waiting_preview">Чекаємо, доки завантажиться ШІ на пристрої. Запис уже можна прослухати.</string>
     <string name="notes_processing_waiting_transcribing">Нотатка буде готова, коли завантажиться ШІ на пристрої. Вона зʼявиться тут автоматично.</string>
-    <string name="notes_processing_waiting_structuring">Резюме буде написано, коли завантажиться ШІ на пристрої. Розшифровка вже нижче.</string>
+    <string name="notes_processing_waiting_structuring">Резюме буде написано, коли завантажиться ШІ на пристрої.</string>
     <string name="notes_recording_fallback_title">Запис</string>
     <string name="notes_failed_description">Нам не вдалося створити резюме і розшифровку для цієї нотатки.</string>
-    <string name="notes_failed_summary_description">Нам не вдалося створити резюме для цієї нотатки. Розшифровку збережено нижче.</string>
+    <string name="notes_failed_summary_description">Нам не вдалося створити резюме для цієї нотатки. Розшифровку збережено.</string>
     <string name="notes_try_again_button">Повторити</string>
     <string name="notes_interrupted_description">Цю нотатку призупинено до її завершення. Не закривайте Offhand, і вона продовжиться.</string>
     <string name="notes_interrupted_preview">Призупинено. Відкрийте нотатку, щоб продовжити.</string>
     <string name="notes_continue_button">Продовжити</string>
     <string name="notes_summary_heading">Резюме</string>
     <string name="notes_transcript_heading">Розшифровка</string>
+    <string name="notes_summary_ready_description">Резюме готове</string>
+    <string name="notes_transcript_empty">Ця нотатка не має розшифровки.</string>
     <string name="notes_edit_description">Редагувати нотатку</string>
     <string name="notes_share_description">Поділитися нотаткою</string>
     <string name="notes_delete_description">Видалити нотатку</string>
@@ -97,7 +101,7 @@
     <string name="notes_folder_error_duplicate">Папка з такою назвою вже існує.</string>
     <string name="notes_folder_delete_dialog_title">Видалити цю папку?</string>
     <string name="notes_folder_delete_dialog_body">Нотатки з неї збережуться й повернуться до «Усі нотатки».</string>
-    <string name="notes_folder_empty_state">У цій папці немає нотаток.</string>
+    <string name="notes_folder_empty_state">У цій папці поки немає нотаток</string>
     <string name="notes_move_to_folder">Перемістити в папку</string>
     <string name="notes_folder_none">Без папки</string>
     <string name="notes_import_error_title">Не вдалося імпортувати цей файл</string>

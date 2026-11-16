@@ -319,7 +319,7 @@ private fun RecordingContent(
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Top,
     ) {
         PauseResumeButton(
             isPaused = state.isPaused,
@@ -345,7 +345,6 @@ private fun RecordingContent(
             )
         }
     }
-    Spacer(modifier = Modifier.height(8.dp))
     TextButton(onClick = { isDiscardDialogVisible = true }) {
         Text(
             text = stringResource(R.string.recording_discard_button),
@@ -370,21 +369,31 @@ private fun PauseResumeButton(
     onPauseClick: () -> Unit,
     onResumeClick: () -> Unit,
 ) {
-    FilledTonalIconButton(
-        onClick = if (isPaused) onResumeClick else onPauseClick,
-        modifier = Modifier.size(64.dp),
-        shape = CircleShape,
-    ) {
-        Icon(
-            imageVector = if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
-            contentDescription = stringResource(
-                if (isPaused) {
-                    R.string.recording_resume_description
-                } else {
-                    R.string.recording_pause_description
-                },
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        FilledTonalIconButton(
+            onClick = if (isPaused) onResumeClick else onPauseClick,
+            modifier = Modifier.size(64.dp),
+            shape = CircleShape,
+        ) {
+            Icon(
+                imageVector = if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
+                contentDescription = stringResource(
+                    if (isPaused) {
+                        R.string.recording_resume_description
+                    } else {
+                        R.string.recording_pause_description
+                    },
+                ),
+                modifier = Modifier.size(28.dp),
+            )
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = stringResource(
+                if (isPaused) R.string.recording_resume_label else R.string.recording_pause_label,
             ),
-            modifier = Modifier.size(28.dp),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

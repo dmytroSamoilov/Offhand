@@ -5,6 +5,8 @@
     <string name="recording_stop_description">Parar gravação</string>
     <string name="recording_pause_description">Pausar gravação</string>
     <string name="recording_resume_description">Retomar gravação</string>
+    <string name="recording_pause_label">Pausar</string>
+    <string name="recording_resume_label">Retomar</string>
     <string name="recording_paused_label">Em pausa</string>
     <string name="recording_active_label">Gravando…</string>
     <string name="recording_save_note_button">Salvar nota</string>

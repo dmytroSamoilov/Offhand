@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="notes_title">Notas</string>
-    <string name="notes_empty_state">Ainda não há notas. Toque no botão do microfone para gravar a primeira.</string>
+    <string name="notes_empty_title">Ainda não há notas</string>
+    <string name="notes_empty_hint">Toque em Gravar para criar sua primeira nota.</string>
+    <string name="notes_record_fab_label">Gravar</string>
     <string name="notes_model_banner_title">Configurando sua IA no dispositivo</string>
     <string name="notes_model_banner_subtitle">Baixando em segundo plano</string>
     <string name="notes_model_banner_waiting_title">Sua IA no dispositivo está pronta para baixar</string>
@@ -25,20 +27,22 @@
     <string name="notes_pause_description">Pausar reprodução</string>
     <string name="notes_processing_title">Processando…</string>
     <string name="notes_processing_preview">Transcrevendo e resumindo no seu celular. Você já pode ouvir a gravação.</string>
-    <string name="notes_processing_transcribing">Processando a transcrição… Ela vai aparecer aqui automaticamente.</string>
-    <string name="notes_processing_structuring">Escrevendo o resumo… A transcrição já está abaixo.</string>
+    <string name="notes_processing_transcribing">Transcrevendo sua gravação… O texto vai aparecer aqui automaticamente.</string>
+    <string name="notes_processing_structuring">Escrevendo seu resumo…</string>
     <string name="notes_processing_waiting_preview">Aguardando o download da sua IA no dispositivo terminar. Você já pode ouvir a gravação.</string>
     <string name="notes_processing_waiting_transcribing">Sua nota será escrita quando o download da sua IA no dispositivo terminar. Ela vai aparecer aqui automaticamente.</string>
-    <string name="notes_processing_waiting_structuring">O resumo será escrito quando o download da sua IA no dispositivo terminar. A transcrição já está abaixo.</string>
+    <string name="notes_processing_waiting_structuring">O resumo será escrito quando o download da sua IA no dispositivo terminar.</string>
     <string name="notes_recording_fallback_title">Gravação</string>
     <string name="notes_failed_description">Não foi possível criar um resumo e uma transcrição para esta nota.</string>
-    <string name="notes_failed_summary_description">Não foi possível criar um resumo para esta nota. A transcrição está salva abaixo.</string>
+    <string name="notes_failed_summary_description">Não foi possível criar um resumo para esta nota. A transcrição está salva.</string>
     <string name="notes_try_again_button">Tentar novamente</string>
     <string name="notes_interrupted_description">Esta nota foi pausada antes de ficar pronta. Mantenha o Offhand aberto e ela continuará.</string>
     <string name="notes_interrupted_preview">Pausada. Abra a nota para continuar.</string>
     <string name="notes_continue_button">Continuar</string>
     <string name="notes_summary_heading">Resumo</string>
     <string name="notes_transcript_heading">Transcrição</string>
+    <string name="notes_summary_ready_description">O resumo está pronto</string>
+    <string name="notes_transcript_empty">Esta nota não tem transcrição.</string>
     <string name="notes_edit_description">Editar nota</string>
     <string name="notes_share_description">Compartilhar nota</string>
     <string name="notes_delete_description">Excluir nota</string>
@@ -96,7 +100,7 @@
     <string name="notes_folder_error_duplicate">Já existe uma pasta com esse nome.</string>
     <string name="notes_folder_delete_dialog_title">Excluir esta pasta?</string>
     <string name="notes_folder_delete_dialog_body">As notas dela são mantidas e voltam para Todas as notas.</string>
-    <string name="notes_folder_empty_state">Não há notas nesta pasta.</string>
+    <string name="notes_folder_empty_state">Ainda não há notas nesta pasta</string>
     <string name="notes_move_to_folder">Mover para pasta</string>
     <string name="notes_folder_none">Sem pasta</string>
     <string name="notes_import_error_title">Não foi possível importar este arquivo</string>

@@ -9,7 +9,7 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "New folder"
 - inputText: "Work"
 - tapOn: "Save"
-- assertVisible: "No notes in this folder."
+- assertVisible: "No notes in this folder yet"
 
 # Give the folder its own summary style (Pro; the uitest store is Pro):
 # tapping the selected chip opens the folder menu on both platforms

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="notes_title">Notes</string>
-    <string name="notes_empty_state">No notes yet. Tap the microphone button to record your first one.</string>
+    <string name="notes_empty_title">No notes yet</string>
+    <string name="notes_empty_hint">Tap Record to capture your first note.</string>
+    <string name="notes_record_fab_label">Record</string>
     <string name="notes_model_banner_title">Setting up your on-device AI</string>
     <string name="notes_model_banner_subtitle">Downloading in the background</string>
     <string name="notes_model_banner_waiting_title">Your on-device AI is ready to download</string>
@@ -28,20 +30,22 @@
     <string name="notes_playback_position" translatable="false">%1$s / %2$s</string>
     <string name="notes_processing_title">Processing…</string>
     <string name="notes_processing_preview">Transcribing and summarizing on your phone. You can play the recording already.</string>
-    <string name="notes_processing_transcribing">Processing the transcript… It will appear here automatically.</string>
-    <string name="notes_processing_structuring">Writing the summary… The transcript is already below.</string>
+    <string name="notes_processing_transcribing">Transcribing your recording… The text will appear here automatically.</string>
+    <string name="notes_processing_structuring">Writing your summary…</string>
     <string name="notes_processing_waiting_preview">Waiting for your on-device AI to finish downloading. You can play the recording already.</string>
     <string name="notes_processing_waiting_transcribing">Your note will be written when your on-device AI finishes downloading. It will appear here automatically.</string>
-    <string name="notes_processing_waiting_structuring">Your summary will be written when your on-device AI finishes downloading. The transcript is already below.</string>
+    <string name="notes_processing_waiting_structuring">Your summary will be written when your on-device AI finishes downloading.</string>
     <string name="notes_recording_fallback_title">Recording</string>
     <string name="notes_failed_description">We were unable to create a summary and transcript for this note.</string>
-    <string name="notes_failed_summary_description">We were unable to create a summary for this note. The transcript is saved below.</string>
+    <string name="notes_failed_summary_description">We were unable to create a summary for this note. The transcript is saved.</string>
     <string name="notes_try_again_button">Try again</string>
     <string name="notes_interrupted_description">This note was paused before it was finished. Keep Offhand open and it will continue.</string>
     <string name="notes_interrupted_preview">Paused. Open the note to continue.</string>
     <string name="notes_continue_button">Continue</string>
     <string name="notes_summary_heading">Summary</string>
     <string name="notes_transcript_heading">Transcript</string>
+    <string name="notes_summary_ready_description">Summary is ready</string>
+    <string name="notes_transcript_empty">This note has no transcript.</string>
     <string name="notes_edit_description">Edit note</string>
     <string name="notes_share_description">Share note</string>
     <string name="notes_delete_description">Delete note</string>
@@ -108,7 +112,7 @@
     <string name="notes_folder_error_duplicate">A folder with this name already exists.</string>
     <string name="notes_folder_delete_dialog_title">Delete this folder?</string>
     <string name="notes_folder_delete_dialog_body">Its notes are kept and go back to All notes.</string>
-    <string name="notes_folder_empty_state">No notes in this folder.</string>
+    <string name="notes_folder_empty_state">No notes in this folder yet</string>
     <string name="notes_move_to_folder">Move to folder</string>
     <string name="notes_folder_none">No folder</string>
     <string name="notes_import_error_title">Could not import this file</string>
