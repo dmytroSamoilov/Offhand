@@ -27,6 +27,7 @@ sealed interface ProStatusUi {
     // The fourteen free days: elapsed is the share of the trial already used.
     data class AppTrial(val daysLeft: Int, val elapsed: Float) : ProStatusUi
     data class Yearly(val renewsAtMs: Long?) : ProStatusUi
+    data class Monthly(val renewsAtMs: Long?) : ProStatusUi
     data object Lifetime : ProStatusUi
     data object Included : ProStatusUi
 }

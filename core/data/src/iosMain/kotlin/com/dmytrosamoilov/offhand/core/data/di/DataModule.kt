@@ -52,6 +52,9 @@ import com.dmytrosamoilov.offhand.core.data.repository.RoomNotesRepository
 import com.dmytrosamoilov.offhand.core.data.repository.StoreProStatusRepository
 import com.dmytrosamoilov.offhand.core.data.repository.ICloudProTrialRecordStore
 import com.dmytrosamoilov.offhand.core.data.repository.StoredProTrialRepository
+import com.dmytrosamoilov.offhand.core.data.repository.DataStoreProTrialUsageRepository
+import com.dmytrosamoilov.offhand.core.data.repository.TrialUsageCountingTracker
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialUsageRepository
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialRecordStore
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialRepository
 import com.dmytrosamoilov.offhand.core.security.excludeFromBackup
@@ -126,8 +129,10 @@ val coreDataModule = module {
     singleOf(::ProUpgradeCoordinator) bind ProUpgradeGate::class
     singleOf(::ModelDownloadPolicy)
     singleOf(::ModelDownloadLauncher)
+    single<ProTrialUsageRepository> { DataStoreProTrialUsageRepository(get()) }
     single<AnalyticsTracker> {
-        ConsentGatedAnalyticsTracker(get(), get(), get(), CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        TrialUsageCountingTracker(ConsentGatedAnalyticsTracker(get(), get(), get(), scope), get(), get(), scope)
     }
     single<DataStore<Preferences>> { createUserPreferencesDataStore() }
     single<UserPreferencesRepository> { DataStoreUserPreferencesRepository(get(), get()) }

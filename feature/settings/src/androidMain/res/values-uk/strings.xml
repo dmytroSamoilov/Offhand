@@ -147,4 +147,6 @@
         <item quantity="many">Пробний період: залишилося %d днів</item>
         <item quantity="other">Пробний період: залишилося %d дня</item>
     </plurals>
+    <string name="settings_subscription_monthly">Місячна</string>
+    <string name="settings_subscription_monthly_renews">Місячна, поновиться %1$s</string>
 </resources>

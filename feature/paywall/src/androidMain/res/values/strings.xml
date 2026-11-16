@@ -80,4 +80,21 @@
     <string name="paywall_benefits_body">Everything in the Pro column is yours.</string>
     <string name="paywall_trial_intro_title">Try Offhand Pro free for 14 days</string>
     <string name="paywall_trial_intro_tagline">Everything in Pro is unlocked from today. No payment and no account. After 14 days you keep the free version unless you upgrade.</string>
+    <string name="paywall_plan_monthly">Monthly</string>
+    <string name="paywall_plan_monthly_price">%1$s / month</string>
+    <string name="paywall_plan_monthly_renews">Renews every month</string>
+    <string name="paywall_monthly_disclosure">%1$s per month, renews automatically. Cancel anytime in your store account.</string>
+    <string name="paywall_benefits_expand">See everything in Pro</string>
+    <string name="paywall_benefits_collapse">Show less</string>
+    <string name="paywall_trial_ended_title">Your Pro trial has ended</string>
+    <string name="paywall_trial_ended_body">Your 14 days of Offhand Pro are over. Your notes, folders and styles are all still here. You can keep using the free version, or upgrade to keep everything in Pro.</string>
+    <string name="paywall_trial_recap_title">Your 14 days with Offhand Pro</string>
+    <string name="paywall_trial_recap_tagline">Your trial has ended. Keep all of this with Pro.</string>
+    <string name="paywall_usage_custom_styles">Notes in your own styles</string>
+    <string name="paywall_usage_pdf">PDFs shared</string>
+    <string name="paywall_usage_word">Word documents shared</string>
+    <string name="paywall_usage_imports">Recordings and videos imported</string>
+    <string name="paywall_usage_calendar">Events added to your calendar</string>
+    <string name="paywall_usage_folder_styles">Folders with their own style</string>
+    <string name="paywall_usage_backups">Backups with your recordings</string>
 </resources>

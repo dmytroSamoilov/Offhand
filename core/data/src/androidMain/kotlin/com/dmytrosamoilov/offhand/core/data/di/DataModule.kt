@@ -49,6 +49,9 @@ import com.dmytrosamoilov.offhand.core.data.repository.RoomNotesRepository
 import com.dmytrosamoilov.offhand.core.data.repository.StoreProStatusRepository
 import com.dmytrosamoilov.offhand.core.data.repository.BlockStoreProTrialRecordStore
 import com.dmytrosamoilov.offhand.core.data.repository.StoredProTrialRepository
+import com.dmytrosamoilov.offhand.core.data.repository.DataStoreProTrialUsageRepository
+import com.dmytrosamoilov.offhand.core.data.repository.TrialUsageCountingTracker
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialUsageRepository
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialRecordStore
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialRepository
 import com.dmytrosamoilov.offhand.core.security.DatabasePassphraseProvider
@@ -116,7 +119,7 @@ val coreDataModule = module {
     singleOf(::RoomNoteSuggestionsRepository) bind NoteSuggestionsRepository::class
     singleOf(::RoomTranscriptionCheckpointRepository) bind TranscriptionCheckpointRepository::class
     single { ForegroundActivityHolder() }
-    single<ProStore>(named(PLATFORM_PRO_STORE)) { PlayProStore(androidContext(), get()) }
+    single<ProStore>(named(PLATFORM_PRO_STORE)) { PlayProStore(androidContext(), get(), get()) }
     single<ProStore> { DebugOverrideProStore(get(named(PLATFORM_PRO_STORE)), get()) }
     single<ProStatusCache> { DataStoreProStatusCache(get()) }
     single<ProTrialRecordStore> { BlockStoreProTrialRecordStore(androidContext()) }
@@ -125,8 +128,10 @@ val coreDataModule = module {
     singleOf(::ProUpgradeCoordinator) bind ProUpgradeGate::class
     singleOf(::ModelDownloadPolicy)
     singleOf(::ModelDownloadLauncher)
+    single<ProTrialUsageRepository> { DataStoreProTrialUsageRepository(get()) }
     single<AnalyticsTracker> {
-        ConsentGatedAnalyticsTracker(get(), get(), get(), CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        TrialUsageCountingTracker(ConsentGatedAnalyticsTracker(get(), get(), get(), scope), get(), get(), scope)
     }
     single<DataStore<Preferences>> { createUserPreferencesDataStore(androidContext()) }
     single<UserPreferencesRepository> { DataStoreUserPreferencesRepository(get(), get()) }

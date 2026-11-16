@@ -11,7 +11,8 @@ struct PaywallView: View {
         isPurchasing: false,
         isPro: false,
         mode: .opening,
-        message: nil
+        message: nil,
+        trialRecap: []
     )
 
     private static let successDismissDelay: Duration = .milliseconds(1600)
@@ -54,7 +55,8 @@ struct PaywallView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     header
-                    ComparisonTable(highlighted: state.feature)
+                    if !state.trialRecap.isEmpty { trialRecap }
+                    ComparisonTable(highlighted: state.feature, isCollapsible: true)
                     planSection
                     legalRow
                 }
@@ -85,7 +87,7 @@ struct PaywallView: View {
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                     }
-                    ComparisonTable(highlighted: .general)
+                    ComparisonTable(highlighted: .general, isCollapsible: false)
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 20)
@@ -113,15 +115,32 @@ struct PaywallView: View {
     private var header: some View {
         VStack(spacing: 6) {
             ProCrown(size: 48)
-            Text(PaywallCopy.headline(for: state.feature))
+            Text(PaywallCopy.headline(for: state))
                 .font(.title2.bold())
                 .multilineTextAlignment(.center)
                 .padding(.top, 4)
-            Text(PaywallCopy.tagline(for: state.feature))
+            Text(PaywallCopy.tagline(for: state))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
+    }
+
+    // What the free trial was used for, shown back on the paywall that
+    // follows it.
+    private var trialRecap: some View {
+        VStack(spacing: 8) {
+            ForEach(state.trialRecap, id: \.usage) { line in
+                HStack {
+                    Text(PaywallCopy.label(for: line.usage))
+                    Spacer(minLength: 12)
+                    Text("\(line.count)").font(.title2.bold())
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Brand.proGold.opacity(0.12), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
     }
 
     // The welcome to the fourteen free days: starting them is the main
@@ -164,15 +183,13 @@ struct PaywallView: View {
                 Button(String(localized: "Try again")) { viewModel.onRetryOffers() }
             }
         } else {
-            HStack(spacing: 12) {
+            VStack(spacing: 8) {
                 ForEach(state.offers, id: \.plan) { offer in
                     PlanCard(offer: offer, isSelected: offer.plan == state.selectedPlan) {
                         viewModel.onPlanSelected(plan: offer.plan)
                     }
                 }
             }
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.top, PlanCard.badgeOverhang)
         }
     }
 
@@ -242,6 +259,33 @@ struct PaywallView: View {
 }
 
 private enum PaywallCopy {
+    static func headline(for state: PaywallUiState) -> String {
+        guard state.feature == .trialEnded, !state.trialRecap.isEmpty else { return headline(for: state.feature) }
+        return String(localized: "Your 14 days with Offhand Pro")
+    }
+
+    static func tagline(for state: PaywallUiState) -> String {
+        guard state.feature == .trialEnded else { return tagline(for: state.feature) }
+        return state.trialRecap.isEmpty
+            ? String(localized: "Your 14 days of Offhand Pro are over. Your notes, folders and styles are all still here. You can keep using the free version, or upgrade to keep everything in Pro.")
+            : String(localized: "Your trial has ended. Keep all of this with Pro.")
+    }
+
+    static func label(for usage: ProTrialUsage) -> String {
+        switch usage {
+        case .meetingNotes: return String(localized: "Meeting notes")
+        case .visitNotes: return String(localized: "Visit report")
+        case .legalNotes: return String(localized: "Legal note")
+        case .customStyleNotes: return String(localized: "Notes in your own styles")
+        case .pdfExports: return String(localized: "PDFs shared")
+        case .wordExports: return String(localized: "Word documents shared")
+        case .imports: return String(localized: "Recordings and videos imported")
+        case .calendarEvents: return String(localized: "Events added to your calendar")
+        case .folderStyles: return String(localized: "Folders with their own style")
+        case .audioBackups: return String(localized: "Backups with your recordings")
+        }
+    }
+
     static func headline(for feature: ProFeature) -> String {
         switch feature {
         case .general: return String(localized: "Offhand Pro")
@@ -254,6 +298,7 @@ private enum PaywallCopy {
         case .folders: return String(localized: "Keep more than two folders")
         case .backupAudio: return String(localized: "Back up your recordings too")
         case .freeTrial: return String(localized: "Try Offhand Pro free for 14 days")
+        case .trialEnded: return String(localized: "Your Pro trial has ended")
         }
     }
 
@@ -283,7 +328,10 @@ private enum PaywallCopy {
     }
 
     static func disclosure(for offer: ProOfferUi?) -> String? {
-        guard let offer, offer.plan == .yearly else { return nil }
+        guard let offer, offer.plan == .yearly || offer.plan == .monthly else { return nil }
+        if offer.plan == .monthly {
+            return String(format: String(localized: "%@ per month, renews automatically. Cancel anytime in your store account."), offer.price)
+        }
         if offer.trialDays > 0 {
             let terms = String.localizedStringWithFormat(
                 String(localized: "Free for %1$d days, then %2$@ per year. Cancel anytime in your store account."),
@@ -298,6 +346,11 @@ private enum PaywallCopy {
 
 private struct ComparisonTable: View {
     let highlighted: ProFeature
+    let isCollapsible: Bool
+
+    @State private var isExpanded = false
+
+    private static let collapsedHeight: CGFloat = 200
 
     private struct Row: Identifiable {
         let id: Int
@@ -310,7 +363,22 @@ private struct ComparisonTable: View {
 
     private static let columnWidth: CGFloat = 52
 
+    // The row the paywall was opened for and the Pro rows come first, so the
+    // part that shows while collapsed is worth reading.
     private var rows: [Row] {
+        allRows.enumerated().sorted { first, second in
+            let firstRank = rank(of: first.element)
+            let secondRank = rank(of: second.element)
+            return firstRank == secondRank ? first.offset < second.offset : firstRank < secondRank
+        }.map(\.element)
+    }
+
+    private func rank(of row: Row) -> Int {
+        if row.features.contains(highlighted) { return 0 }
+        return row.isPro ? 1 : 2
+    }
+
+    private var allRows: [Row] {
         [
             Row(id: 11, title: String(localized: "Transcript and Summary on every note"), hint: nil, features: []),
             Row(id: 0, title: String(localized: "Private by design"), hint: nil, features: []),
@@ -327,11 +395,67 @@ private struct ComparisonTable: View {
         ]
     }
 
+    private var isCollapsed: Bool { isCollapsible && !isExpanded }
+
+    // Collapsed, the table shows its first rows fading out under a "see
+    // everything" control, so the plans sit higher on the screen.
     var body: some View {
         VStack(spacing: 0) {
+            tableContent
+                .frame(height: isCollapsed ? Self.collapsedHeight : nil, alignment: .top)
+                .clipped()
+                .overlay(alignment: .bottom) {
+                    if isCollapsed { expandControl }
+                }
+            if isCollapsible && isExpanded {
+                Button {
+                    withAnimation { isExpanded = false }
+                } label: {
+                    Label(String(localized: "Show less"), systemImage: "chevron.up")
+                        .labelStyle(.titleAndIcon)
+                        .font(.footnote.weight(.semibold))
+                }
+                .padding(.bottom, 10)
+            }
+        }
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
+        .clipShape(RoundedRectangle(cornerRadius: Brand.cardRadius))
+    }
+
+    private var expandControl: some View {
+        Button {
+            withAnimation { isExpanded = true }
+        } label: {
+            HStack(spacing: 4) {
+                Text(String(localized: "See everything in Pro"))
+                Image(systemName: "chevron.down")
+            }
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(Brand.primary)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+            .padding(.bottom, 10)
+            .background(
+                LinearGradient(
+                    stops: [
+                        .init(color: Color(.secondarySystemGroupedBackground).opacity(0), location: 0.3),
+                        .init(color: Color(.secondarySystemGroupedBackground), location: 0.8),
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var tableContent: some View {
+        VStack(spacing: 0) {
             tableHeader
-            ForEach(rows) { row in
-                if row.id == 5 { Divider().padding(.horizontal, 12).padding(.vertical, 4) }
+            ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
+                if index > 0 && row.isPro != rows[index - 1].isPro {
+                    Divider().padding(.horizontal, 12).padding(.vertical, 4)
+                }
                 tableRow(row)
             }
             Text(String(localized: "New Pro features are included as they ship"))
@@ -348,7 +472,7 @@ private struct ComparisonTable: View {
                 .padding(.bottom, 8)
         }
         .padding(.vertical, 6)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var tableHeader: some View {
@@ -397,44 +521,40 @@ private struct ComparisonTable: View {
 }
 
 private struct PlanCard: View {
-    static let badgeOverhang: CGFloat = 10
-
     let offer: ProOfferUi
     let isSelected: Bool
     let action: () -> Void
 
-    // Both cards share one row structure and the tallest card's height, and
-    // the "Best value" badge rides the top edge so it never competes with the
-    // title or the checkmark for the card's width.
+    // One row per plan, stacked, so a third plan and long prices in any
+    // language still fit: the selection mark, the plan with what it means,
+    // and the price at the end.
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Text(title).font(.subheadline.weight(.semibold)).lineLimit(1)
-                    Spacer(minLength: 0)
-                    Image(systemName: "checkmark")
-                        .font(.footnote.weight(.bold))
-                        .foregroundStyle(Brand.primary)
-                        .opacity(isSelected ? 1 : 0)
+            HStack(spacing: 12) {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .foregroundStyle(isSelected ? Brand.primary : Color(.systemGray3))
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 8) {
+                        Text(title).font(.subheadline.weight(.semibold)).lineLimit(1)
+                        if offer.plan == .lifetime { bestValueBadge }
+                    }
+                    Text(hint).font(.caption).foregroundStyle(.secondary)
+                    if let second = secondHint {
+                        Text(second).font(.caption).foregroundStyle(.secondary)
+                    }
                 }
-                Text(price).font(.headline).fixedSize(horizontal: false, vertical: true)
-                Text(hint).font(.caption).foregroundStyle(.secondary)
-                if let second = secondHint {
-                    Text(second).font(.caption).foregroundStyle(.secondary)
-                }
+                Spacer(minLength: 8)
+                Text(price).font(.headline).multilineTextAlignment(.trailing)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
             .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
             .overlay(
                 RoundedRectangle(cornerRadius: Brand.cardRadius)
                     .strokeBorder(isSelected ? Brand.primary : Color(.systemGray4), lineWidth: isSelected ? 2 : 1)
             )
-            .overlay(alignment: .top) {
-                if offer.plan == .lifetime {
-                    bestValueBadge.offset(y: -Self.badgeOverhang)
-                }
-            }
         }
         .buttonStyle(.plain)
         .foregroundStyle(.primary)
@@ -449,15 +569,22 @@ private struct PlanCard: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 3)
             .background(Brand.proGold.opacity(0.18), in: Capsule())
-            .background(Color(.secondarySystemGroupedBackground), in: Capsule())
     }
 
     private var title: String {
-        offer.plan == .lifetime ? String(localized: "Lifetime") : String(localized: "Yearly")
+        switch offer.plan {
+        case .lifetime: return String(localized: "Lifetime")
+        case .monthly: return String(localized: "Monthly")
+        default: return String(localized: "Yearly")
+        }
     }
 
     private var price: String {
-        offer.plan == .lifetime ? offer.price : String(format: String(localized: "%@ / year"), offer.price)
+        switch offer.plan {
+        case .lifetime: return offer.price
+        case .monthly: return String(format: String(localized: "%@ / month"), offer.price)
+        default: return String(format: String(localized: "%@ / year"), offer.price)
+        }
     }
 
     private var hint: String {
@@ -465,7 +592,7 @@ private struct PlanCard: View {
         if offer.trialDays > 0 {
             return String.localizedStringWithFormat(String(localized: "%d-day free trial"), offer.trialDays)
         }
-        return String(localized: "Renews every year")
+        return offer.plan == .monthly ? String(localized: "Renews every month") : String(localized: "Renews every year")
     }
 
     private var secondHint: String? {

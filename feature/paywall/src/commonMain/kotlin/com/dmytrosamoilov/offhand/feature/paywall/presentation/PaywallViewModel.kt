@@ -9,6 +9,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.GetProTrialRecapUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.LoadProOffersUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.ObserveProStatusUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.PurchaseProUseCase
@@ -25,6 +26,7 @@ class PaywallViewModel(
     private val purchasePro: PurchaseProUseCase,
     private val restoreProPurchases: RestoreProPurchasesUseCase,
     private val observeProStatus: ObserveProStatusUseCase,
+    private val getProTrialRecap: GetProTrialRecapUseCase,
     private val proUpgradeGate: ProUpgradeGate,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
@@ -58,11 +60,15 @@ class PaywallViewModel(
                 message = null,
                 isPurchasing = false,
                 mode = PaywallMode.OPENING,
+                trialRecap = emptyList(),
             )
         }
         launchSafely(showLoading = false) {
             val isPro = observeProStatus().first().isProForGood
-            mutableUiState.update { it.copy(isPro = isPro, mode = if (isPro) PaywallMode.BENEFITS else PaywallMode.OFFER) }
+            val recap = if (feature == ProFeature.TRIAL_ENDED) getProTrialRecap() else emptyList()
+            mutableUiState.update {
+                it.copy(isPro = isPro, mode = if (isPro) PaywallMode.BENEFITS else PaywallMode.OFFER, trialRecap = recap)
+            }
             if (isPro) return@launchSafely
             analyticsTracker.track(AnalyticsEvents.paywallShown(feature))
             loadOffers()

@@ -190,6 +190,7 @@ private fun ProStatus.toUi(): ProStatusUi = when {
     plan == ProPlan.LIFETIME -> ProStatusUi.Lifetime
     plan == ProPlan.INCLUDED -> ProStatusUi.Included
     plan == ProPlan.TRIAL -> appTrialUi(endsAtMs = renewsAtMs ?: 0L, nowMs = Clock.System.now().toEpochMilliseconds())
+    plan == ProPlan.MONTHLY -> ProStatusUi.Monthly(renewsAtMs)
     plan == ProPlan.YEARLY && isTrial -> ProStatusUi.Trial(renewsAtMs)
     plan == ProPlan.YEARLY -> ProStatusUi.Yearly(renewsAtMs)
     else -> ProStatusUi.Free

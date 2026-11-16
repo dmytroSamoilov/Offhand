@@ -67,6 +67,30 @@
           "referenceName" : "Offhand Pro Yearly",
           "subscriptionGroupID" : "5B7E9C2D-1A4F-4C8B-9E6D-3F2A7B8C1D5E",
           "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "3.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "654DCFE2-FDA6-4EA2-B824-9D1B45CBE932",
+          "localizations" : [
+            {
+              "description" : "Every Pro feature, renewed monthly.",
+              "displayName" : "Offhand Pro Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "offhand_pro_monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Offhand Pro Monthly",
+          "subscriptionGroupID" : "5B7E9C2D-1A4F-4C8B-9E6D-3F2A7B8C1D5E",
+          "type" : "RecurringSubscription"
         }
       ]
     }

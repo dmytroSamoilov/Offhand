@@ -76,4 +76,21 @@
     <string name="paywall_benefits_body">Pro कॉलम की हर सुविधा आपकी है।</string>
     <string name="paywall_trial_intro_title">Offhand Pro 14 दिन मुफ़्त आज़माएँ</string>
     <string name="paywall_trial_intro_tagline">Pro की हर सुविधा आज से खुली है। कोई भुगतान नहीं, कोई खाता नहीं। 14 दिन बाद आपके पास मुफ़्त संस्करण रहेगा, जब तक आप अपग्रेड न करें।</string>
+    <string name="paywall_plan_monthly">मासिक</string>
+    <string name="paywall_plan_monthly_price">%1$s / माह</string>
+    <string name="paywall_plan_monthly_renews">हर महीने नवीनीकृत होता है</string>
+    <string name="paywall_monthly_disclosure">%1$s प्रति माह, अपने आप नवीनीकृत होता है। स्टोर खाते से कभी भी रद्द करें।</string>
+    <string name="paywall_benefits_expand">Pro की सभी सुविधाएँ देखें</string>
+    <string name="paywall_benefits_collapse">कम दिखाएँ</string>
+    <string name="paywall_trial_ended_title">आपका Pro ट्रायल समाप्त हो गया है</string>
+    <string name="paywall_trial_ended_body">Offhand Pro के आपके 14 दिन पूरे हो गए हैं। आपके नोट्स, फ़ोल्डर और स्टाइल सब यहीं हैं। आप मुफ़्त संस्करण इस्तेमाल करते रह सकते हैं या Pro की सभी सुविधाएँ रखने के लिए अपग्रेड कर सकते हैं।</string>
+    <string name="paywall_trial_recap_title">Offhand Pro के साथ आपके 14 दिन</string>
+    <string name="paywall_trial_recap_tagline">आपका ट्रायल समाप्त हो गया है। Pro के साथ यह सब बनाए रखें।</string>
+    <string name="paywall_usage_custom_styles">आपकी अपनी शैलियों में नोट्स</string>
+    <string name="paywall_usage_pdf">साझा किए गए PDF</string>
+    <string name="paywall_usage_word">साझा किए गए Word दस्तावेज़</string>
+    <string name="paywall_usage_imports">आयात की गई रिकॉर्डिंग और वीडियो</string>
+    <string name="paywall_usage_calendar">कैलेंडर में जोड़े गए इवेंट</string>
+    <string name="paywall_usage_folder_styles">अपनी शैली वाले फ़ोल्डर</string>
+    <string name="paywall_usage_backups">आपकी रिकॉर्डिंग वाले बैकअप</string>
 </resources>

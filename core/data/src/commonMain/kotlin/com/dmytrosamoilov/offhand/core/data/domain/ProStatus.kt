@@ -4,6 +4,7 @@ package com.dmytrosamoilov.offhand.core.data.domain
 // TRIAL is the fourteen free days every install starts with.
 enum class ProPlan {
     NONE,
+    MONTHLY,
     YEARLY,
     LIFETIME,
     INCLUDED,

@@ -250,7 +250,7 @@ struct SettingsView: View {
     private var isUpgradeOffered: Bool {
         switch onEnum(of: state.pro) {
         case .free, .appTrial: return true
-        case .lifetime, .included, .trial, .yearly: return false
+        case .lifetime, .included, .trial, .yearly, .monthly: return false
         }
     }
 
@@ -269,6 +269,9 @@ struct SettingsView: View {
         case .trial(let trial):
             guard let endsAt = trial.endsAtMs else { return String(localized: "Free trial") }
             return String(format: String(localized: "Free trial until %@"), formatDate(endsAt.int64Value))
+        case .monthly(let monthly):
+            guard let renewsAt = monthly.renewsAtMs else { return String(localized: "Monthly") }
+            return String(format: String(localized: "Monthly, renews on %@"), formatDate(renewsAt.int64Value))
         case .yearly(let yearly):
             guard let renewsAt = yearly.renewsAtMs else { return String(localized: "Yearly") }
             return String(format: String(localized: "Yearly, renews on %@"), formatDate(renewsAt.int64Value))
@@ -277,7 +280,7 @@ struct SettingsView: View {
 
     private func isSubscription(_ status: ProStatusUi) -> Bool {
         switch onEnum(of: status) {
-        case .yearly, .trial: return true
+        case .yearly, .monthly, .trial: return true
         case .free, .lifetime, .included, .appTrial: return false
         }
     }

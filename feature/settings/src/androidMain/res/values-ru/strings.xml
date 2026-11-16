@@ -147,4 +147,6 @@
         <item quantity="many">Пробный период: осталось %d дней</item>
         <item quantity="other">Пробный период: осталось %d дня</item>
     </plurals>
+    <string name="settings_subscription_monthly">Месячная</string>
+    <string name="settings_subscription_monthly_renews">Месячная, продлится %1$s</string>
 </resources>

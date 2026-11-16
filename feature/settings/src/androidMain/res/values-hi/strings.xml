@@ -143,4 +143,6 @@
         <item quantity="one">मुफ़्त ट्रायल: %d दिन बाकी</item>
         <item quantity="other">मुफ़्त ट्रायल: %d दिन बाकी</item>
     </plurals>
+    <string name="settings_subscription_monthly">मासिक</string>
+    <string name="settings_subscription_monthly_renews">मासिक, %1$s को नवीनीकृत होगी</string>
 </resources>

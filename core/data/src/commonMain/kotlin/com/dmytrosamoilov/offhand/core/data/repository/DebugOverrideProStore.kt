@@ -38,6 +38,7 @@ internal class DebugOverrideProStore(
         val offers = platform.loadOffers()
         if (offers.isNotEmpty() || currentOverride() == ProOverride.STORE) return offers
         return listOf(
+            ProOffer(ProPlan.MONTHLY, SAMPLE_MONTHLY_PLAN_PRICE, priceMicros = SAMPLE_MONTHLY_PLAN_MICROS),
             ProOffer(ProPlan.YEARLY, SAMPLE_YEARLY_PRICE, SAMPLE_TRIAL_DAYS, SAMPLE_YEARLY_MICROS, SAMPLE_MONTHLY_PRICE),
             ProOffer(ProPlan.LIFETIME, SAMPLE_LIFETIME_PRICE, priceMicros = SAMPLE_LIFETIME_MICROS),
         )
@@ -60,6 +61,8 @@ internal class DebugOverrideProStore(
     private suspend fun currentOverride(): ProOverride = override.first()
 
     private companion object {
+        const val SAMPLE_MONTHLY_PLAN_PRICE = "$3.99"
+        const val SAMPLE_MONTHLY_PLAN_MICROS = 3_990_000L
         const val SAMPLE_YEARLY_PRICE = "$24.99"
         const val SAMPLE_LIFETIME_PRICE = "$59.99"
         const val SAMPLE_TRIAL_DAYS = 14

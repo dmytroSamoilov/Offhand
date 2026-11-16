@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.paywall.presentation
 
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialUsageCount
 
 data class PaywallUiState(
     val feature: ProFeature = ProFeature.GENERAL,
@@ -12,6 +13,8 @@ data class PaywallUiState(
     val isPro: Boolean = false,
     val mode: PaywallMode = PaywallMode.OPENING,
     val message: PaywallMessageUi? = null,
+    // What was used during the free trial, only on the paywall that follows it.
+    val trialRecap: List<ProTrialUsageCount> = emptyList(),
 ) {
     val selectedOffer: ProOfferUi?
         get() = offers.firstOrNull { it.plan == selectedPlan }

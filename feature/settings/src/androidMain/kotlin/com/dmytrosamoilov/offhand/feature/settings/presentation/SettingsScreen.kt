@@ -203,7 +203,7 @@ private fun ProSection(
             is ProStatusUi.AppTrial -> TrialRow(status = status, onClick = onProCardClick)
             else -> PlanRow(status = status, onClick = onProCardClick)
         }
-        if (status is ProStatusUi.Yearly || status is ProStatusUi.Trial) {
+        if (status is ProStatusUi.Yearly || status is ProStatusUi.Monthly || status is ProStatusUi.Trial) {
             SettingsLinkRow(
                 title = stringResource(R.string.settings_subscription_manage),
                 subtitle = null,
@@ -341,6 +341,8 @@ private fun ProStatusUi.statusLabel(): String = when (this) {
     is ProStatusUi.AppTrial -> pluralStringResource(R.plurals.settings_subscription_app_trial_days_left, daysLeft, daysLeft)
     is ProStatusUi.Trial -> endsAtMs?.let { stringResource(R.string.settings_subscription_trial_until, formatDate(it)) }
         ?: stringResource(R.string.settings_subscription_trial)
+    is ProStatusUi.Monthly -> renewsAtMs?.let { stringResource(R.string.settings_subscription_monthly_renews, formatDate(it)) }
+        ?: stringResource(R.string.settings_subscription_monthly)
     is ProStatusUi.Yearly -> renewsAtMs?.let { stringResource(R.string.settings_subscription_yearly_renews, formatDate(it)) }
         ?: stringResource(R.string.settings_subscription_yearly)
 }

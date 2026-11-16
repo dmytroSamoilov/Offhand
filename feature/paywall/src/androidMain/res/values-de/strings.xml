@@ -76,4 +76,21 @@
     <string name="paywall_benefits_body">Alles in der Pro-Spalte gehört dir.</string>
     <string name="paywall_trial_intro_title">Teste Offhand Pro 14 Tage kostenlos</string>
     <string name="paywall_trial_intro_tagline">Alles aus Pro ist ab heute freigeschaltet. Ohne Zahlung, ohne Konto. Nach 14 Tagen behältst du die kostenlose Version, außer du upgradest.</string>
+    <string name="paywall_plan_monthly">Monatlich</string>
+    <string name="paywall_plan_monthly_price">%1$s / Monat</string>
+    <string name="paywall_plan_monthly_renews">Verlängert sich jeden Monat</string>
+    <string name="paywall_monthly_disclosure">%1$s pro Monat, verlängert sich automatisch. Jederzeit im Store-Konto kündbar.</string>
+    <string name="paywall_benefits_expand">Alles in Pro ansehen</string>
+    <string name="paywall_benefits_collapse">Weniger anzeigen</string>
+    <string name="paywall_trial_ended_title">Deine Pro-Testphase ist beendet</string>
+    <string name="paywall_trial_ended_body">Deine 14 Tage Offhand Pro sind vorbei. Deine Notizen, Ordner und Stile sind alle noch da. Du kannst die kostenlose Version weiter nutzen oder upgraden, um alles aus Pro zu behalten.</string>
+    <string name="paywall_trial_recap_title">Deine 14 Tage mit Offhand Pro</string>
+    <string name="paywall_trial_recap_tagline">Deine Testphase ist beendet. Behalte all das mit Pro.</string>
+    <string name="paywall_usage_custom_styles">Notizen in eigenen Stilen</string>
+    <string name="paywall_usage_pdf">Geteilte PDFs</string>
+    <string name="paywall_usage_word">Geteilte Word-Dokumente</string>
+    <string name="paywall_usage_imports">Importierte Aufnahmen und Videos</string>
+    <string name="paywall_usage_calendar">Termine im Kalender eingetragen</string>
+    <string name="paywall_usage_folder_styles">Ordner mit eigenem Stil</string>
+    <string name="paywall_usage_backups">Backups mit deinen Aufnahmen</string>
 </resources>

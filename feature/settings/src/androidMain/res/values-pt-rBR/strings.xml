@@ -145,4 +145,6 @@
         <item quantity="many">Teste grátis: restam %d dias</item>
         <item quantity="other">Teste grátis: restam %d dias</item>
     </plurals>
+    <string name="settings_subscription_monthly">Mensal</string>
+    <string name="settings_subscription_monthly_renews">Mensal, renova em %1$s</string>
 </resources>

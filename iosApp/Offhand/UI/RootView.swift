@@ -69,12 +69,11 @@ struct RootView: View {
         }
         .task {
             for await notice in viewModel.trialNotice {
-                trialNotice = notice.map(TrialNoticeItem.init)
+                trialNotice = notice == .removed ? TrialNoticeItem(notice: .removed) : nil
             }
         }
         .sheet(item: trialNoticeBinding, onDismiss: showOfferIfRequested) { item in
-            TrialNoticeSheet(
-                notice: item.notice,
+            TrialRemovedSheet(
                 onUpgrade: {
                     showsOfferAfterTrialNotice = true
                     viewModel.onTrialNoticeDismissed()
@@ -379,10 +378,10 @@ private struct TrialNoticeItem: Identifiable {
     var id: String { notice.name }
 }
 
-// Shown once, on the first launch after the free trial ran out or was
-// removed: the free version stays, and Pro is one tap away.
-private struct TrialNoticeSheet: View {
-    let notice: ProTrialNotice
+// Shown once, on the first launch after the clock check removed the free
+// trial: the free version stays, and Pro is one tap away. A trial that
+// simply ran out is announced by the paywall instead.
+private struct TrialRemovedSheet: View {
     let onUpgrade: () -> Void
     let onDismiss: () -> Void
 
@@ -411,16 +410,10 @@ private struct TrialNoticeSheet: View {
         .padding(24)
     }
 
-    private var title: String {
-        notice == .removed
-            ? String(localized: "Your Pro trial was removed")
-            : String(localized: "Your Pro trial has ended")
-    }
+    private var title: String { String(localized: "Your Pro trial was removed") }
 
     private var message: String {
-        notice == .removed
-            ? String(localized: "The date on this iPhone was set back past the start of your trial, so the trial has ended. You can keep using the free version or upgrade to Offhand Pro.")
-            : String(localized: "Your 14 days of Offhand Pro are over. Your notes, folders and styles are all still here. You can keep using the free version, or upgrade to keep everything in Pro.")
+        String(localized: "The date on this iPhone was set back past the start of your trial, so the trial has ended. You can keep using the free version or upgrade to Offhand Pro.")
     }
 }
 

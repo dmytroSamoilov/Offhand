@@ -38,7 +38,7 @@ class DebugOverrideProStoreTest {
         preferences.override.value = ProOverride.FREE
 
         assertEquals(ProStatus.FREE, store.status.first())
-        assertEquals(2, store.loadOffers().size)
+        assertEquals(listOf(ProPlan.MONTHLY, ProPlan.YEARLY, ProPlan.LIFETIME), store.loadOffers().map { it.plan })
         assertEquals(PurchaseOutcome.PURCHASED, store.purchase(ProPlan.LIFETIME))
         assertEquals(ProOverride.PRO, preferences.override.value)
         assertEquals(ProStatus.LIFETIME, store.status.first())

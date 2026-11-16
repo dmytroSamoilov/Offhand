@@ -84,4 +84,21 @@
     <string name="paywall_benefits_body">Усе з колонки Pro вже ваше.</string>
     <string name="paywall_trial_intro_title">Спробуйте Offhand Pro безкоштовно 14 днів</string>
     <string name="paywall_trial_intro_tagline">Усі можливості Pro відкрито від сьогодні. Без оплати й без облікового запису. Через 14 днів у вас залишиться безкоштовна версія, якщо ви не перейдете на Pro.</string>
+    <string name="paywall_plan_monthly">Місяць</string>
+    <string name="paywall_plan_monthly_price">%1$s / місяць</string>
+    <string name="paywall_plan_monthly_renews">Поновлюється щомісяця</string>
+    <string name="paywall_monthly_disclosure">%1$s на місяць, поновлюється автоматично. Скасувати можна будь-коли в обліковому записі магазину.</string>
+    <string name="paywall_benefits_expand">Усі можливості Pro</string>
+    <string name="paywall_benefits_collapse">Згорнути</string>
+    <string name="paywall_trial_ended_title">Пробний період Pro закінчився</string>
+    <string name="paywall_trial_ended_body">Ваші 14 днів Offhand Pro минули. Усі нотатки, папки та стилі залишилися на місці. Ви можете користуватися безкоштовною версією або перейти на Pro, щоб зберегти всі можливості.</string>
+    <string name="paywall_trial_recap_title">Ваші 14 днів з Offhand Pro</string>
+    <string name="paywall_trial_recap_tagline">Пробний період закінчився. Збережіть усе це з Pro.</string>
+    <string name="paywall_usage_custom_styles">Нотатки у ваших стилях</string>
+    <string name="paywall_usage_pdf">Надіслано PDF</string>
+    <string name="paywall_usage_word">Надіслано документів Word</string>
+    <string name="paywall_usage_imports">Імпортовано записів і відео</string>
+    <string name="paywall_usage_calendar">Подій додано до календаря</string>
+    <string name="paywall_usage_folder_styles">Папок із власним стилем</string>
+    <string name="paywall_usage_backups">Резервних копій із записами</string>
 </resources>

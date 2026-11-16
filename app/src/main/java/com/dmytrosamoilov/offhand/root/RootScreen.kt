@@ -41,9 +41,8 @@ fun RootScreen(
                 onDismiss = viewModel::onEarlyAdopterThanksDismissed,
             )
         }
-        state.trialNotice?.let { notice ->
-            TrialNoticeDialog(
-                notice = notice,
+        if (state.trialNotice == ProTrialNotice.REMOVED) {
+            TrialRemovedDialog(
                 onUpgrade = viewModel::onTrialUpgradeRequested,
                 onDismiss = viewModel::onTrialNoticeDismissed,
             )
@@ -69,20 +68,16 @@ private fun EarlyAdopterThanksDialog(onShowBenefits: () -> Unit, onDismiss: () -
     )
 }
 
-// Shown once, on the first launch after the free trial ran out or was
-// removed: the free version stays, and Pro is one tap away.
+// Shown once, on the first launch after the clock check removed the free
+// trial: the free version stays, and Pro is one tap away. A trial that
+// simply ran out is announced by the paywall instead.
 @Composable
-private fun TrialNoticeDialog(notice: ProTrialNotice, onUpgrade: () -> Unit, onDismiss: () -> Unit) {
-    val isRemoved = notice == ProTrialNotice.REMOVED
+private fun TrialRemovedDialog(onUpgrade: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { ProCrown(size = 48.dp) },
-        title = {
-            Text(text = stringResource(if (isRemoved) R.string.trial_removed_title else R.string.trial_ended_title))
-        },
-        text = {
-            Text(text = stringResource(if (isRemoved) R.string.trial_removed_body else R.string.trial_ended_body))
-        },
+        title = { Text(text = stringResource(R.string.trial_removed_title)) },
+        text = { Text(text = stringResource(R.string.trial_removed_body)) },
         confirmButton = {
             Button(onClick = onUpgrade) { Text(text = stringResource(R.string.trial_notice_upgrade)) }
         },

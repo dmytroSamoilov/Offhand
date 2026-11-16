@@ -143,4 +143,6 @@
         <item quantity="one">Kostenlose Testphase: noch %d Tag</item>
         <item quantity="other">Kostenlose Testphase: noch %d Tage</item>
     </plurals>
+    <string name="settings_subscription_monthly">Monatlich</string>
+    <string name="settings_subscription_monthly_renews">Monatlich, verlängert sich am %1$s</string>
 </resources>

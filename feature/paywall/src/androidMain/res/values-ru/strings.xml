@@ -84,4 +84,21 @@
     <string name="paywall_benefits_body">Всё из колонки Pro уже ваше.</string>
     <string name="paywall_trial_intro_title">Попробуйте Offhand Pro бесплатно 14 дней</string>
     <string name="paywall_trial_intro_tagline">Все возможности Pro открыты с сегодняшнего дня. Без оплаты и без аккаунта. Через 14 дней у вас останется бесплатная версия, если вы не перейдёте на Pro.</string>
+    <string name="paywall_plan_monthly">Месяц</string>
+    <string name="paywall_plan_monthly_price">%1$s / месяц</string>
+    <string name="paywall_plan_monthly_renews">Продлевается каждый месяц</string>
+    <string name="paywall_monthly_disclosure">%1$s в месяц, продлевается автоматически. Отменить можно в любой момент в аккаунте магазина.</string>
+    <string name="paywall_benefits_expand">Все возможности Pro</string>
+    <string name="paywall_benefits_collapse">Свернуть</string>
+    <string name="paywall_trial_ended_title">Пробный период Pro закончился</string>
+    <string name="paywall_trial_ended_body">Ваши 14 дней Offhand Pro истекли. Все заметки, папки и стили остались на месте. Вы можете пользоваться бесплатной версией или перейти на Pro, чтобы сохранить все возможности.</string>
+    <string name="paywall_trial_recap_title">Ваши 14 дней с Offhand Pro</string>
+    <string name="paywall_trial_recap_tagline">Пробный период закончился. Сохраните всё это с Pro.</string>
+    <string name="paywall_usage_custom_styles">Заметки в ваших стилях</string>
+    <string name="paywall_usage_pdf">Отправлено PDF</string>
+    <string name="paywall_usage_word">Отправлено документов Word</string>
+    <string name="paywall_usage_imports">Импортировано записей и видео</string>
+    <string name="paywall_usage_calendar">Событий добавлено в календарь</string>
+    <string name="paywall_usage_folder_styles">Папок со своим стилем</string>
+    <string name="paywall_usage_backups">Резервных копий с записями</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.paywall.di
 
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.AcknowledgeProTrialNoticeUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.GetProTrialRecapUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.KeepProTrialInSyncUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.LoadProOffersUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.ObserveProStatusUseCase
@@ -20,5 +21,6 @@ val featurePaywallModule = module {
     factory { SettleProTrialUseCase(get(), get(), get()) }
     factoryOf(::AcknowledgeProTrialNoticeUseCase)
     factoryOf(::KeepProTrialInSyncUseCase)
+    factoryOf(::GetProTrialRecapUseCase)
     viewModelOf(::PaywallViewModel)
 }

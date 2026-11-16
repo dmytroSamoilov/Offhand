@@ -149,4 +149,6 @@
         <item quantity="one">Free trial: %d day left</item>
         <item quantity="other">Free trial: %d days left</item>
     </plurals>
+    <string name="settings_subscription_monthly">Monthly</string>
+    <string name="settings_subscription_monthly_renews">Monthly, renews on %1$s</string>
 </resources>

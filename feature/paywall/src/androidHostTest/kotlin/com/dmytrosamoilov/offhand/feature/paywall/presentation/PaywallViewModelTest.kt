@@ -4,6 +4,9 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProOffer
 import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialUsage
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialUsageCount
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.GetProTrialRecapUseCase
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.LoadProOffersUseCase
@@ -39,6 +42,7 @@ class PaywallViewModelTest {
     private val purchasePro: PurchaseProUseCase = mockk()
     private val restoreProPurchases: RestoreProPurchasesUseCase = mockk()
     private val observeProStatus: ObserveProStatusUseCase = mockk()
+    private val getProTrialRecap: GetProTrialRecapUseCase = mockk()
     private val gate: ProUpgradeGate = mockk(relaxed = true)
 
     @Before
@@ -64,6 +68,31 @@ class PaywallViewModelTest {
         assertEquals(14, state.selectedOffer?.trialDays)
         assertEquals("$2.08", state.selectedOffer?.monthlyPrice)
         assertEquals(3, state.offers.last().yearsOfYearly)
+    }
+
+    @Test
+    fun `the paywall after the trial shows what was used and still offers the plans`() = runTest {
+        val recap = listOf(ProTrialUsageCount(ProTrialUsage.MEETING_NOTES, 3), ProTrialUsageCount(ProTrialUsage.PDF_EXPORTS, 2))
+        every { gate.requestedFeature } returns MutableStateFlow(ProFeature.TRIAL_ENDED)
+        coEvery { getProTrialRecap() } returns recap
+        val viewModel = createViewModel()
+
+        viewModel.onOpened()
+
+        assertEquals(recap, viewModel.uiState.value.trialRecap)
+        assertEquals(PaywallMode.OFFER, viewModel.uiState.value.mode)
+    }
+
+    @Test
+    fun `someone on the free trial is shown the offer and no recap`() = runTest {
+        status.value = ProStatus.trial(endsAtMs = 1L)
+        every { gate.requestedFeature } returns MutableStateFlow(ProFeature.FREE_TRIAL)
+        val viewModel = createViewModel()
+
+        viewModel.onOpened()
+
+        assertEquals(PaywallMode.OFFER, viewModel.uiState.value.mode)
+        assertEquals(emptyList<ProTrialUsageCount>(), viewModel.uiState.value.trialRecap)
     }
 
     @Test
@@ -163,6 +192,7 @@ class PaywallViewModelTest {
         purchasePro = purchasePro,
         restoreProPurchases = restoreProPurchases,
         observeProStatus = observeProStatus,
+        getProTrialRecap = getProTrialRecap,
         proUpgradeGate = gate,
         analyticsTracker = tracker,
     )

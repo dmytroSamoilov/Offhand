@@ -14,8 +14,6 @@
     <string name="framework_unsupported_title">Offhand no puede funcionar en este teléfono</string>
     <string name="framework_unsupported_body">El software del sistema de este teléfono está modificado e indica una versión de Android más reciente de la que realmente tiene. Offhand necesita un Android 12 o posterior sin modificar.</string>
     <string name="framework_unsupported_close">Cerrar</string>
-    <string name="trial_ended_title">Tu prueba de Pro ha terminado</string>
-    <string name="trial_ended_body">Tus 14 días de Offhand Pro han terminado. Tus notas, carpetas y estilos siguen aquí. Puedes seguir con la versión gratis o mejorar para conservar todo lo de Pro.</string>
     <string name="trial_removed_title">Tu prueba de Pro se ha eliminado</string>
     <string name="trial_removed_body">La fecha de este teléfono se cambió a antes del inicio de tu prueba, así que la prueba ha terminado. Puedes seguir con la versión gratis o pasar a Offhand Pro.</string>
     <string name="trial_notice_upgrade">Ver Offhand Pro</string>
