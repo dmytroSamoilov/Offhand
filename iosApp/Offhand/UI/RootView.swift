@@ -335,7 +335,9 @@ struct RootView: View {
         let session = sessionManager.session.value
         let hasPendingWork = !sessionManager.processingNoteIds.value.isEmpty || session.phase == .draining
         if hasPendingWork {
-            notifications.remindToKeepOpen()
+            // With a system task carrying the work there is nothing to come
+            // back for; if that task is cut short, its own notice says so.
+            if !NoteFinishCoordinator.isContinuingInBackground { notifications.remindToKeepOpen() }
             finishCoordinator.appEnteredBackgroundWhileProcessing()
             finishCoordinator.appEnteredBackgroundWithPendingWork()
         } else {

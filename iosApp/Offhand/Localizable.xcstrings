@@ -14675,46 +14675,6 @@
         }
       }
     },
-    "Turning your recording into a note" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aus deiner Aufnahme wird eine Notiz"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Convirtiendo tu grabación en una nota"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "आपकी रिकॉर्डिंग को नोट में बदला जा रहा है"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transformando sua gravação em uma nota"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Превращаем вашу запись в заметку"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Перетворюємо ваш запис на нотатку"
-          }
-        }
-      }
-    },
     "Turns what you say into text. When off, a note is only its recording." : {
       "localizations" : {
         "de" : {
@@ -16961,6 +16921,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ваші слова зʼявляються тут, поки ви говорите."
+          }
+        }
+      }
+    },
+    "Processing your note" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Notiz wird verarbeitet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Procesando tu nota"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपका नोट प्रोसेस हो रहा है"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Processando sua nota"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обрабатываем заметку"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обробляємо нотатку"
+          }
+        }
+      }
+    },
+    "Open Offhand to finish it faster" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne Offhand, damit es schneller geht"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre Offhand para terminar más rápido"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "जल्दी पूरा करने के लिए Offhand खोलें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abra o Offhand para terminar mais rápido"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Откройте Offhand, чтобы закончить быстрее"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відкрийте Offhand, щоб закінчити швидше"
           }
         }
       }

@@ -4,6 +4,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.AiBackend
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackendException
 import com.dmytrosamoilov.offhand.core.ai.api.AiResult
 import com.dmytrosamoilov.offhand.core.ai.api.TokenEstimator
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.TimeSource
 
 class IosAiBackend(
@@ -19,7 +20,9 @@ class IosAiBackend(
         modelManager.awaitReadyEngine()
         val start = TimeSource.Monotonic.markNow()
         val response = try {
-            gemmaEngine.generate(systemPrompt, userText)
+            generate(systemPrompt, userText)
+        } catch (cancellation: CancellationException) {
+            throw cancellation
         } catch (t: Throwable) {
             throw AiBackendException(t.message ?: "Generation failed", t)
         }
@@ -28,7 +31,17 @@ class IosAiBackend(
             processingTimeMs = start.elapsedNow().inWholeMilliseconds,
             inputTokens = TokenEstimator.approxText(systemPrompt) + TokenEstimator.approxText(userText),
             outputTokens = TokenEstimator.approxText(response),
-            hardwareBackend = modelManager.activeBackend.value,
+            hardwareBackend = modelManager.engineBackend,
         )
+    }
+
+    private suspend fun generate(systemPrompt: String, userText: String): String = try {
+        gemmaEngine.generate(systemPrompt, userText)
+    } catch (cancellation: CancellationException) {
+        throw cancellation
+    } catch (t: Throwable) {
+        if (!modelManager.reloadForBackground()) throw t
+        modelManager.awaitReadyEngine()
+        gemmaEngine.generate(systemPrompt, userText)
     }
 }
