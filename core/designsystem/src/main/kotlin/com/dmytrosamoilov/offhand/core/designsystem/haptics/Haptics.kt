@@ -24,8 +24,10 @@ class Haptics(private val view: View) {
         }
     }
 
+    // Nothing is felt while the app is not on screen: a loop that outlives the
+    // foreground, such as the tick of a note being prepared, stays silent.
     private fun perform(constant: Int) {
-        view.performHapticFeedback(constant)
+        if (view.windowVisibility == View.VISIBLE) view.performHapticFeedback(constant)
     }
 }
 

@@ -120,6 +120,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
@@ -2546,12 +2547,17 @@ private fun rememberCopyAction(
 private fun ProcessingHaptics(noteId: Long, status: NoteStatusUi) {
     val haptics = haptics()
     var previousStatus by remember(noteId) { mutableStateOf(status) }
-    LaunchedEffect(noteId, status) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(noteId, status, lifecycleOwner) {
         if (previousStatus == NoteStatusUi.PROCESSING && status == NoteStatusUi.READY) haptics.confirm()
         previousStatus = status
-        while (status == NoteStatusUi.PROCESSING) {
-            delay(PROCESSING_TICK_MS)
-            haptics.tick()
+        if (status != NoteStatusUi.PROCESSING) return@LaunchedEffect
+        // The tick stops with the screen and starts again when it is back.
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            while (true) {
+                delay(PROCESSING_TICK_MS)
+                haptics.tick()
+            }
         }
     }
 }
