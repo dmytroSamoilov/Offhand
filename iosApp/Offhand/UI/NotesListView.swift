@@ -490,7 +490,7 @@ struct NotesListView<BottomBarContent: View>: View {
     private func metaLine(_ note: NoteCardUi, day: String?) -> String {
         let time = [day, note.time].compactMap { $0 }.joined(separator: " ")
         if isSearching, let match = matchText(note) {
-            return [time, match, note.folderName].compactMap { $0 }.joined(separator: " · ")
+            return [time, match].joined(separator: " · ")
         }
         return [time, note.durationText, note.folderName].compactMap { $0 }.joined(separator: " · ")
     }

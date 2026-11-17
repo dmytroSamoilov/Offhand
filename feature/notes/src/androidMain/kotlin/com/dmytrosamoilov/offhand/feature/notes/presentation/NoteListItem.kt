@@ -189,7 +189,7 @@ private fun NoteCardUi.rowState(isWaitingForAi: Boolean, writesSummary: Boolean,
 
 @Composable
 private fun NoteCardUi.meta(showsDay: Boolean): String {
-    val parts = if (showsDay) listOfNotNull("${dayLabel.text()} $time", matchLabel(), folderName) else listOfNotNull(time, durationText, folderName)
+    val parts = if (showsDay) listOfNotNull("${dayLabel.text()} $time", matchLabel()) else listOfNotNull(time, durationText, folderName)
     return parts.joinToString(separator = " ${stringResource(R.string.notes_metadata_separator)} ")
 }
 
