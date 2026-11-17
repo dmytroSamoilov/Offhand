@@ -15,6 +15,7 @@ enum class ProFeature {
     FOLDER_STYLES,
     FOLDERS,
     BACKUP_AUDIO,
+    WIDGET,
     FREE_TRIAL,
     TRIAL_ENDED,
 }

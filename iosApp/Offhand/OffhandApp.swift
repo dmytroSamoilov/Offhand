@@ -50,6 +50,7 @@ struct OffhandApp: App {
             useSmokeFakes: Self.useSmokeFakes
         )
         TelemetryController.shared.start(isDeveloperBuild: Self.isDeveloperBuild)
+        RecordWidgetBridge.shared.start()
     }
 
     var body: some Scene {

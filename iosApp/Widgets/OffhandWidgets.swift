@@ -7,6 +7,7 @@ struct OffhandWidgetsBundle: WidgetBundle {
     var body: some Widget {
         NoteActivityWidget()
         AiCoreDownloadActivityWidget()
+        RecordWidget()
     }
 }
 

@@ -19,6 +19,7 @@ import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStyleEditorV
 import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStylesViewModel
 import com.dmytrosamoilov.offhand.feature.settings.presentation.SettingsViewModel
 import com.dmytrosamoilov.offhand.feature.settings.presentation.SharedAudioImportViewModel
+import kotlinx.coroutines.flow.Flow
 import org.koin.core.parameter.parametersOf
 import org.koin.mp.KoinPlatform
 
@@ -53,6 +54,8 @@ object SharedGraph {
     fun noteStyleEditor(styleId: Long): NoteStyleEditorHandle = NoteStyleEditorHandle(styleId)
 
     fun sessionManager(): RecordingSessionManager = KoinPlatform.getKoin().get()
+
+    fun recordWidgetState(): Flow<RecordWidgetState> = KoinPlatform.getKoin().get<IosRecordWidgetState>().state
 
     // Called from the iOS background resume task, outside any screen.
     suspend fun resumeInterruptedNotes() = KoinPlatform.getKoin().get<ResumeInterruptedNotesUseCase>().invoke()

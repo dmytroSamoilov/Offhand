@@ -664,6 +664,7 @@ private fun ProFeature.headlineRes(): Int = when (this) {
     ProFeature.NOTE_STYLES -> R.string.paywall_context_note_styles
     ProFeature.FOLDERS -> R.string.paywall_context_folders
     ProFeature.BACKUP_AUDIO -> R.string.paywall_context_backup_audio
+    ProFeature.WIDGET -> R.string.paywall_context_widget
     ProFeature.FREE_TRIAL -> R.string.paywall_trial_intro_title
     ProFeature.TRIAL_ENDED -> R.string.paywall_trial_ended_title
 }

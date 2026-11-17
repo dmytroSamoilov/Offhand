@@ -40,4 +40,11 @@
     <string name="recording_notification_note_paused_title">Tu nota está en pausa</string>
     <string name="recording_notification_note_paused_text">Abre Offhand y se terminará.</string>
     <string name="recording_live_placeholder">Tus palabras aparecen aquí mientras hablas.</string>
+    <string name="record_widget_name">Grabar una nota</string>
+    <string name="record_widget_description">Inicia o detén una grabación desde la pantalla de inicio.</string>
+    <string name="record_widget_record">Grabar</string>
+    <string name="record_widget_stop">Detener</string>
+    <string name="record_widget_no_folder">Sin carpeta</string>
+    <string name="record_widget_config_title">Guardar las grabaciones en</string>
+    <string name="record_widget_config_save">Guardar</string>
 </resources>

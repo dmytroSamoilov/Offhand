@@ -101,4 +101,5 @@
     <string name="paywall_usage_calendar">Событий добавлено в календарь</string>
     <string name="paywall_usage_folder_styles">Папок со своим стилем</string>
     <string name="paywall_usage_backups">Резервных копий с записями</string>
+    <string name="paywall_context_widget">Записывайте с главного экрана</string>
 </resources>

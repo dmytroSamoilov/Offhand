@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.root
 
+import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
@@ -50,12 +51,14 @@ class RootViewModel(
 ) : BaseViewModel() {
 
     private val trialNotice = MutableStateFlow<ProTrialNotice?>(null)
+    private val recordingRequest = MutableStateFlow<RecordingRequestUi?>(null)
 
     val uiState: StateFlow<RootUiState> = combine(
         observeUserPreferences(),
         appLockManager.lockState,
         trialNotice,
-    ) { preferences, lockState, trialNotice ->
+        recordingRequest,
+    ) { preferences, lockState, trialNotice, recordingRequest ->
         val phase = when {
             !preferences.onboardingCompleted -> RootPhase.ONBOARDING
             preferences.appLockEnabled && lockState == AppLockState.LOCKED -> RootPhase.LOCKED
@@ -66,6 +69,7 @@ class RootViewModel(
             isDynamicColorEnabled = preferences.dynamicColor,
             isEarlyAdopterThanksShown = phase == RootPhase.READY && preferences.isEarlyAdopterThanksPending,
             trialNotice = trialNotice.takeIf { phase == RootPhase.READY },
+            recordingRequest = recordingRequest,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -104,6 +108,19 @@ class RootViewModel(
             markEarlyAdopterThanked()
             proUpgradeGate.showBenefits()
         }
+    }
+
+    // The widget opens the app when it cannot record by itself: without Pro
+    // the paywall comes first, and the record sheet asks for the microphone.
+    fun onRecordingRequested(folderId: Long?) {
+        launchSafely(showLoading = false) {
+            if (!proUpgradeGate.requirePro(ProFeature.WIDGET)) return@launchSafely
+            recordingRequest.value = RecordingRequestUi(folderId)
+        }
+    }
+
+    fun onRecordingRequestConsumed() {
+        recordingRequest.value = null
     }
 
     fun onUnlockAuthenticated() {

@@ -14,6 +14,29 @@
             android:name=".service.RecordingService"
             android:exported="false"
             android:foregroundServiceType="microphone|dataSync|mediaProcessing" />
+
+        <!-- Exported because the launcher, not this app, sends the widget
+             broadcasts and opens the widget's folder picker. -->
+        <receiver
+            android:name=".widget.RecordWidgetProvider"
+            android:exported="true"
+            android:label="@string/record_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/record_widget_info" />
+        </receiver>
+
+        <activity
+            android:name=".widget.RecordWidgetConfigActivity"
+            android:exported="true"
+            android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

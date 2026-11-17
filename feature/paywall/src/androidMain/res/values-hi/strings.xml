@@ -93,4 +93,5 @@
     <string name="paywall_usage_calendar">कैलेंडर में जोड़े गए इवेंट</string>
     <string name="paywall_usage_folder_styles">अपनी शैली वाले फ़ोल्डर</string>
     <string name="paywall_usage_backups">आपकी रिकॉर्डिंग वाले बैकअप</string>
+    <string name="paywall_context_widget">होम स्क्रीन से रिकॉर्ड करें</string>
 </resources>

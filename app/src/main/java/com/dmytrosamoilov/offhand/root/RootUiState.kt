@@ -7,7 +7,11 @@ data class RootUiState(
     val isDynamicColorEnabled: Boolean = false,
     val isEarlyAdopterThanksShown: Boolean = false,
     val trialNotice: ProTrialNotice? = null,
+    val recordingRequest: RecordingRequestUi? = null,
 )
+
+// A recording asked for from outside the app, by the home-screen widget.
+data class RecordingRequestUi(val folderId: Long?)
 
 enum class RootPhase {
     LOADING,

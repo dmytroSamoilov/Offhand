@@ -104,6 +104,7 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
     single<NetworkMonitor> { IosNetworkMonitor(deps.network) }
     single { IosFileDownloader(get()) }
     single { IosModelManager(get(), get(), get()) } bind ModelManager::class
+    single { IosRecordWidgetState(get(), get(), get()) }
     single<AiBackend> { IosAiBackend(get(), get()) }
     single<SpeechToText> { IosWhisperSpeechToText(get(), get(), get()) }
     single<AudioRecorder> { IosAudioRecorder(deps.audioSource) }

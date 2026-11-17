@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.navigation
 
+import com.dmytrosamoilov.offhand.root.RecordingRequestUi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -42,6 +43,8 @@ import com.dmytrosamoilov.offhand.feature.settings.presentation.SharedAudioImpor
 fun OffhandApp(
     requestedNoteId: Long?,
     onRequestedNoteConsumed: () -> Unit,
+    recordingRequest: RecordingRequestUi?,
+    onRecordingRequestConsumed: () -> Unit,
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -49,6 +52,14 @@ fun OffhandApp(
     var isRecordingSheetVisible by rememberSaveable { mutableStateOf(false) }
     var recordingFolderId by rememberSaveable { mutableStateOf<Long?>(null) }
     var recordedNoteId by rememberSaveable { mutableStateOf<Long?>(null) }
+
+    LaunchedEffect(recordingRequest) {
+        if (recordingRequest != null) {
+            recordingFolderId = recordingRequest.folderId
+            isRecordingSheetVisible = true
+            onRecordingRequestConsumed()
+        }
+    }
 
     LaunchedEffect(requestedNoteId) {
         if (requestedNoteId != null) {

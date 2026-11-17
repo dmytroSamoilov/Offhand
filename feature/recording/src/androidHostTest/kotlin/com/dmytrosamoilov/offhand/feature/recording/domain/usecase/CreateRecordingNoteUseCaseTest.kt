@@ -1,5 +1,8 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
+import kotlinx.coroutines.flow.flowOf
+import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
+import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
@@ -18,7 +21,21 @@ class CreateRecordingNoteUseCaseTest {
 
     private val notesRepository: NotesRepository = mockk()
     private val defaultNoteTitleProvider: DefaultNoteTitleProvider = mockk()
-    private val useCase = CreateRecordingNoteUseCase(defaultNoteTitleProvider, notesRepository)
+    private val foldersRepository: FoldersRepository = mockk {
+        every { observeFolders() } returns flowOf(listOf(Folder(5, "Work", 0)))
+    }
+    private val useCase = CreateRecordingNoteUseCase(defaultNoteTitleProvider, notesRepository, foldersRepository)
+
+    @Test
+    fun `a folder that no longer exists is dropped so the note stays findable`() = runTest {
+        coEvery { notesRepository.countNotes() } returns 0
+        every { defaultNoteTitleProvider.titleFor(1) } returns "Recording 1"
+        coEvery { notesRepository.createNote(any()) } returns 1L
+
+        useCase("audio.pcm.enc", NoteStyleRef.DEFAULT, folderId = 99L)
+
+        coVerify { notesRepository.createNote(withArg { note -> assertNull(note.folderId) }) }
+    }
 
     @Test
     fun `creates a recording note titled with the next recording number`() = runTest {

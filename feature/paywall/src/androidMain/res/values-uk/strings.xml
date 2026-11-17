@@ -101,4 +101,5 @@
     <string name="paywall_usage_calendar">Подій додано до календаря</string>
     <string name="paywall_usage_folder_styles">Папок із власним стилем</string>
     <string name="paywall_usage_backups">Резервних копій із записами</string>
+    <string name="paywall_context_widget">Записуйте з головного екрана</string>
 </resources>

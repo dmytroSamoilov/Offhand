@@ -96,6 +96,7 @@ struct RootView: View {
         // CFBundleDocumentTypes); the share sheet gave no hint that import is
         // Pro, so a free user is asked before the paywall.
         .onOpenURL { url in
+            if openRecordRequest(url) { return }
             guard url.isFileURL else { return }
             let staged = AudioFileStaging.stage(url)
             sharedAudioImport.onSharedAudioReceived(
@@ -154,6 +155,26 @@ struct RootView: View {
                 break
             }
         }
+    }
+
+    // The home-screen widget's Record opens the app with this link: without
+    // Pro the paywall comes first, and the record sheet asks for the
+    // microphone and starts recording into the widget's folder. Only the widget's own scheme and host are
+    // accepted, and the folder is a number or nothing.
+    private func openRecordRequest(_ url: URL) -> Bool {
+        guard !RecordWidgetShared.urlScheme.isEmpty,
+              url.scheme == RecordWidgetShared.urlScheme,
+              url.host == RecordWidgetShared.recordHost else { return false }
+        let folderId = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+            .queryItems?
+            .first { $0.name == RecordWidgetShared.folderQueryItem }?
+            .value
+            .flatMap { Int64($0) }
+        viewModel.onWidgetRecordingRequested {
+            shortcuts.requestedFolder = folderId.map { .folder($0) } ?? .unsorted
+            shortcuts.pending = .startRecording
+        }
+        return true
     }
 
     // A shortcut fired while the app was locked or still loading waits here

@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.shared
 
+import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
@@ -99,6 +100,14 @@ class IosRootViewModel(
     // paywall cover itself.
     fun onProBenefitsRequested() {
         proUpgradeGate.showBenefits()
+    }
+
+    // The widget opens the app when it cannot record by itself; without Pro
+    // the paywall comes first, and the recording starts once it is passed.
+    fun onWidgetRecordingRequested(onAllowed: () -> Unit) {
+        launchSafely(showLoading = false) {
+            if (proUpgradeGate.requirePro(ProFeature.WIDGET)) onAllowed()
+        }
     }
 
     fun onUnlockAuthenticated() {

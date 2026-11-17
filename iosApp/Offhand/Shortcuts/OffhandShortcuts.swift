@@ -18,6 +18,24 @@ final class ShortcutRequests: ObservableObject {
     // Bumped for every start request, so the notes list opens the record
     // sheet even when the previous request was the same.
     @Published var recordSheetRequestId = 0
+
+    // Where the next requested recording goes. Siri and Shortcuts leave it
+    // empty and the open folder is used; the widget names its own.
+    enum RequestedFolder {
+        case unsorted
+        case folder(Int64)
+    }
+
+    var requestedFolder: RequestedFolder?
+
+    func takeRequestedFolder(fallback: Int64?) -> Int64? {
+        defer { requestedFolder = nil }
+        switch requestedFolder {
+        case .unsorted: return nil
+        case .folder(let id): return id
+        case nil: return fallback
+        }
+    }
 }
 
 struct StartRecordingIntent: AppIntent {

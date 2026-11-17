@@ -298,6 +298,7 @@ private enum PaywallCopy {
         case .noteStyles: return String(localized: "Choose a different writing style")
         case .folders: return String(localized: "Keep more than two folders")
         case .backupAudio: return String(localized: "Back up your recordings too")
+        case .widget: return String(localized: "Record from your Home Screen")
         case .freeTrial: return String(localized: "Try Offhand Pro free for 14 days")
         case .trialEnded: return String(localized: "Your Pro trial has ended")
         }

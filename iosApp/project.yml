@@ -103,10 +103,21 @@ targets:
       properties:
         com.apple.developer.kernel.increased-memory-limit: true
         com.apple.developer.ubiquity-kvstore-identifier: $(TeamIdentifierPrefix)$(CFBundleIdentifier)
+        # Shared with the widget extension: the record widget reads the folder
+        # list and the recording state the app writes there.
+        com.apple.security.application-groups:
+          - group.com.dmytrosamoilov.offhand$(APP_ID_SUFFIX)
     info:
       path: Offhand/Info.plist
       properties:
         CFBundleDisplayName: $(APP_DISPLAY_NAME)
+        # The record widget opens the app through this scheme when it cannot
+        # record by itself; the bundle id keeps the flavors apart.
+        CFBundleURLTypes:
+          - CFBundleURLName: $(PRODUCT_BUNDLE_IDENTIFIER)
+            CFBundleURLSchemes: [com.dmytrosamoilov.offhand$(APP_ID_SUFFIX)]
+        OffhandAppGroup: group.com.dmytrosamoilov.offhand$(APP_ID_SUFFIX)
+        OffhandURLScheme: com.dmytrosamoilov.offhand$(APP_ID_SUFFIX)
         # Lists Offhand in the share sheet and "Open in" for audio and video
         # files; iOS hands the copy in Documents/Inbox to RootView.onOpenURL.
         CFBundleDocumentTypes:
@@ -159,10 +170,17 @@ targets:
         DEVELOPMENT_TEAM: S5UT57PQ2J
         SKIP_INSTALL: true
         SWIFT_EMIT_LOC_STRINGS: true
+    entitlements:
+      path: Widgets/OffhandWidgets.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.dmytrosamoilov.offhand$(APP_ID_SUFFIX)
     info:
       path: Widgets/Info.plist
       properties:
         CFBundleDisplayName: $(APP_DISPLAY_NAME) Widgets
+        OffhandAppGroup: group.com.dmytrosamoilov.offhand$(APP_ID_SUFFIX)
+        OffhandURLScheme: com.dmytrosamoilov.offhand$(APP_ID_SUFFIX)
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:

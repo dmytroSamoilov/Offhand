@@ -60,7 +60,9 @@ struct NotesListView: View {
         layout
         .onChange(of: shortcuts.recordSheetRequestId) {
             guard recordSheetRequest == nil else { return }
-            recordSheetRequest = RecordSheetRequest(folderId: state.selectedFolderId?.int64Value)
+            recordSheetRequest = RecordSheetRequest(
+                folderId: shortcuts.takeRequestedFolder(fallback: state.selectedFolderId?.int64Value)
+            )
         }
         .sheet(item: $recordSheetRequest, onDismiss: openRecordedNote) { request in
             RecordSheetView(autoStart: true, folderId: request.folderId) { recordedNoteId = $0 }

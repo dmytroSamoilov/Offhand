@@ -25,5 +25,9 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
+	<key>OffhandAppGroup</key>
+	<string>group.com.dmytrosamoilov.offhand$(APP_ID_SUFFIX)</string>
+	<key>OffhandURLScheme</key>
+	<string>com.dmytrosamoilov.offhand$(APP_ID_SUFFIX)</string>
 </dict>
 </plist>

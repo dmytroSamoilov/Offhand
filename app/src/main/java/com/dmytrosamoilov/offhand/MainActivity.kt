@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand
 
+import com.dmytrosamoilov.offhand.root.RecordingRequestUi
 import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
@@ -37,6 +38,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class MainActivity : FragmentActivity() {
 
     private var requestedNoteId by mutableStateOf<Long?>(null)
+    private var requestedRecording by mutableStateOf<RecordingRequestUi?>(null)
     private val analyticsTracker: AnalyticsTracker by inject()
     private val importIntake: AudioImportIntake by inject()
     // Activity-scoped so the dialog host inside RootScreen observes the same instance.
@@ -59,6 +61,7 @@ class MainActivity : FragmentActivity() {
         }
         enableEdgeToEdge()
         consumeNoteIdExtra(intent)
+        consumeRecordRequest(intent)
         consumeSharedAudio(intent)
         setContent {
             val viewModel: RootViewModel = koinViewModel()
@@ -75,6 +78,8 @@ class MainActivity : FragmentActivity() {
                             viewModel = viewModel,
                             requestedNoteId = requestedNoteId,
                             onRequestedNoteConsumed = { requestedNoteId = null },
+                            requestedRecording = requestedRecording,
+                            onRequestedRecordingConsumed = { requestedRecording = null },
                         )
                     }
                 }
@@ -85,6 +90,7 @@ class MainActivity : FragmentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         consumeNoteIdExtra(intent)
+        consumeRecordRequest(intent)
         consumeSharedAudio(intent)
     }
 
@@ -94,6 +100,17 @@ class MainActivity : FragmentActivity() {
             requestedNoteId = noteId
             intent.removeExtra(RecordingService.EXTRA_NOTE_ID)
         }
+    }
+
+    // Sent by the home-screen widget when it cannot start the recording
+    // itself. The extras are a flag and a folder id; an id that no longer
+    // exists is dropped where the note is created.
+    private fun consumeRecordRequest(intent: Intent?) {
+        if (intent?.getBooleanExtra(RecordingService.EXTRA_RECORD_REQUEST, false) != true) return
+        val folderId = intent.getLongExtra(RecordingService.EXTRA_RECORD_FOLDER_ID, RecordingService.NO_FOLDER_ID)
+        requestedRecording = RecordingRequestUi(folderId.takeIf { it != RecordingService.NO_FOLDER_ID })
+        intent.removeExtra(RecordingService.EXTRA_RECORD_REQUEST)
+        intent.removeExtra(RecordingService.EXTRA_RECORD_FOLDER_ID)
     }
 
     private fun openImportPicker(allowMultiple: Boolean) {

@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.root
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -21,9 +22,17 @@ import org.koin.androidx.compose.koinViewModel
 fun RootScreen(
     requestedNoteId: Long?,
     onRequestedNoteConsumed: () -> Unit,
+    requestedRecording: RecordingRequestUi?,
+    onRequestedRecordingConsumed: () -> Unit,
     viewModel: RootViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(requestedRecording) {
+        if (requestedRecording != null) {
+            viewModel.onRecordingRequested(requestedRecording.folderId)
+            onRequestedRecordingConsumed()
+        }
+    }
 
     BaseComposeScreen(viewModel = viewModel) {
         when (state.phase) {
@@ -33,6 +42,8 @@ fun RootScreen(
             RootPhase.READY -> OffhandApp(
                 requestedNoteId = requestedNoteId,
                 onRequestedNoteConsumed = onRequestedNoteConsumed,
+                recordingRequest = state.recordingRequest,
+                onRecordingRequestConsumed = viewModel::onRecordingRequestConsumed,
             )
         }
         if (state.isEarlyAdopterThanksShown) {
