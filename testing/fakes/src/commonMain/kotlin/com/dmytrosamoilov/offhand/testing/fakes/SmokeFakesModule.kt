@@ -23,8 +23,13 @@ val smokeFakesModule = module {
     single<InAppReviewRules> { neverPromptForReview }
 }
 
+val deviceTestModule = module {
+    single<ProStore>(named(PLATFORM_PRO_STORE)) { FakeProStore() }
+    single<InAppReviewRules> { neverPromptForReview }
+}
+
 // The debug rules ask for a review five minutes after install, which is
-// mid-suite for the Maestro flows, and the store's prompt covers the screen.
+// mid-suite for the Maestro flows (emulator and device suites), and the store's prompt covers the screen.
 private val neverPromptForReview = InAppReviewRules(
     minSavedRecordings = Int.MAX_VALUE,
     burstWindowMs = 0L,

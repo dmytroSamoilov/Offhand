@@ -1,0 +1,29 @@
+# Gets the devicetest build to the notes list with its on-device AI on the phone.
+# Never clears state: that would delete the 2.6 GB model. A fresh install
+# downloads it here on Wi-Fi, which can take a while.
+appId: com.dmytrosamoilov.offhand.devicetest
+tags:
+  - setup
+---
+- launchApp:
+    permissions:
+      all: allow
+- runFlow:
+    when:
+      visible: "Not now, look around first"
+    commands:
+      - tapOn: "Not now, look around first"
+- extendedWaitUntil:
+    visible:
+      id: "tab_notes"
+    timeout: 30000
+- runFlow:
+    when:
+      visible: "Download on mobile data"
+    commands:
+      - assertTrue:
+          condition: ${false}
+          label: "The phone is not on Wi-Fi, so the on-device AI will not download"
+- extendedWaitUntil:
+    notVisible: "Setting up your on-device AI"
+    timeout: 3600000

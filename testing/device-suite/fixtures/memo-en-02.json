@@ -1,0 +1,15 @@
+{
+  "id": "memo-en-02",
+  "language": "en",
+  "voice": "Samantha",
+  "rate": 175,
+  "text": "A quick reminder for myself. Buy a birthday present for my sister, book the train tickets to Berlin, and call the dentist to move my appointment to next week. Also, ask the landlord about the broken window in the kitchen.",
+  "livePhrase": "landlord|broken window|kitchen",
+  "maxWerAcoustic": 0.25,
+  "maxWerImport": 0.12,
+  "summaryMustMention": [
+    "birthday",
+    "train",
+    "dentist"
+  ]
+}
