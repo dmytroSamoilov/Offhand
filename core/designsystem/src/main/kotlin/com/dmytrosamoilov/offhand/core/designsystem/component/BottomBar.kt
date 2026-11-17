@@ -3,6 +3,7 @@ package com.dmytrosamoilov.offhand.core.designsystem.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,14 +48,15 @@ fun BottomBar(
     settingsModifier: Modifier = Modifier,
 ) {
     val colors = OffhandTheme.colors
-    Column(modifier = modifier.fillMaxWidth().background(colors.ground)) {
+    BoxWithConstraints(modifier = modifier.fillMaxWidth().background(colors.ground)) {
+        val sidePadding = if (maxWidth < COMPACT_BAR_WIDTH) COMPACT_SIDE_PADDING else SIDE_PADDING
         Hairline()
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
                 .height(BAR_HEIGHT)
-                .padding(horizontal = 28.dp),
+                .padding(horizontal = sidePadding),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -140,4 +142,7 @@ fun EmptyState(
 }
 
 private val BAR_HEIGHT = 84.dp
+private val COMPACT_BAR_WIDTH = 360.dp
+private val SIDE_PADDING = 28.dp
+private val COMPACT_SIDE_PADDING = 8.dp
 private const val EMPTY_WAVE_SEED = 7L

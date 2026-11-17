@@ -187,6 +187,7 @@ struct NotesListView<BottomBarContent: View>: View {
                 NavigationStack {
                     notesRoot
                 }
+                .navigationSplitViewColumnWidth(min: 360, ideal: 400, max: 520)
             } detail: {
                 NavigationStack {
                     if let detail = state.selected {

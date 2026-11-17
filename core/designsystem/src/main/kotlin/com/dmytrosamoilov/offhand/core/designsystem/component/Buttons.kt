@@ -155,7 +155,14 @@ fun RecordPill(
         contentPadding = PaddingValues(start = 24.dp, end = 28.dp),
     ) {
         Box(Modifier.size(10.dp).clip(CircleShape).background(colors.record))
-        Text(text = text, style = OffhandTheme.type.button, color = colors.onInk, modifier = Modifier.padding(start = 12.dp))
+        Text(
+            text = text,
+            style = OffhandTheme.type.button,
+            color = colors.onInk,
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier.padding(start = 12.dp),
+        )
     }
 }
 

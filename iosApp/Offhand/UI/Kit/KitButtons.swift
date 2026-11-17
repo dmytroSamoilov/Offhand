@@ -300,6 +300,8 @@ struct RecordPill: View {
                     .fill(OffhandColor.record)
                     .frame(width: 10, height: 10)
                 Text(text)
+                    .lineLimit(1)
+                    .fixedSize()
             }
             .padding(.trailing, 4)
         }
