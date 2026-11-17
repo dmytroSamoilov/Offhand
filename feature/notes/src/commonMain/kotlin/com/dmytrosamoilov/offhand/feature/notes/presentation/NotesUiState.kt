@@ -35,6 +35,7 @@ data class NotesUiState(
     val pendingCalendarEvent: CalendarEventSuggestion? = null,
     val isRetranscribeAvailable: Boolean = false,
     val detailTab: NoteDetailTabUi = NoteDetailTabUi.SUMMARY,
+    val detailWaveform: List<Float> = emptyList(),
     val isSummaryReadyMarked: Boolean = false,
     val isNotesLoaded: Boolean = false,
     val isUnsortedShown: Boolean = false,
@@ -176,6 +177,7 @@ data class NoteCardUi(
     val matchLocation: MatchLocationUi? = null,
     val matchTime: String? = null,
     val matchParagraph: Int? = null,
+    val waveform: List<Float> = emptyList(),
 )
 
 enum class MatchLocationUi {

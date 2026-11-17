@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.core.data.repository
 
 import com.dmytrosamoilov.offhand.core.data.database.NoteDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteSuggestionsDao
+import com.dmytrosamoilov.offhand.core.data.database.NoteWaveformDao
 import com.dmytrosamoilov.offhand.core.data.database.TranscriptionCheckpointDao
 import com.dmytrosamoilov.offhand.core.data.database.toDomain
 import com.dmytrosamoilov.offhand.core.data.database.toEntity
@@ -15,6 +16,7 @@ internal class RoomNotesRepository(
     private val noteDao: NoteDao,
     private val noteSuggestionsDao: NoteSuggestionsDao,
     private val transcriptionCheckpointDao: TranscriptionCheckpointDao,
+    private val noteWaveformDao: NoteWaveformDao,
     private val audioStore: EncryptedAudioStore,
 ) : NotesRepository {
 
@@ -33,6 +35,7 @@ internal class RoomNotesRepository(
         noteDao.getById(id)?.audioFileName?.let(audioStore::delete)
         noteSuggestionsDao.deleteByNoteId(id)
         transcriptionCheckpointDao.deleteByNoteId(id)
+        noteWaveformDao.deleteByNoteId(id)
         noteDao.deleteById(id)
     }
 

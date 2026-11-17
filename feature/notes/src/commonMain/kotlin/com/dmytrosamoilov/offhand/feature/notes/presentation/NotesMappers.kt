@@ -35,6 +35,7 @@ private val WHITESPACE_RUNS = Regex("\\s+")
 internal fun List<NoteSearchResult>.toSectionsUi(
     dateLabelFormatter: DateLabelFormatter,
     folderNames: Map<Long, String> = emptyMap(),
+    waveforms: Map<Long, List<Int>> = emptyMap(),
 ): List<NotesSectionUi> {
     val zone = TimeZone.currentSystemDefault()
     val today = Clock.System.now().toLocalDateTime(zone).date
@@ -42,7 +43,7 @@ internal fun List<NoteSearchResult>.toSectionsUi(
         .map { (date, results) ->
             NotesSectionUi(
                 dayLabel = date.toDayLabel(today, dateLabelFormatter),
-                notes = results.map { it.toCardUi(zone, today, dateLabelFormatter, folderNames) },
+                notes = results.map { it.toCardUi(zone, today, dateLabelFormatter, folderNames, waveforms) },
             )
         }
 }
@@ -63,6 +64,7 @@ private fun NoteSearchResult.toCardUi(
     today: LocalDate,
     dateLabelFormatter: DateLabelFormatter,
     folderNames: Map<Long, String>,
+    waveforms: Map<Long, List<Int>>,
 ): NoteCardUi {
     val createdAt = Instant.fromEpochMilliseconds(note.createdAtEpochMs).toLocalDateTime(zone)
     return NoteCardUi(
@@ -79,6 +81,7 @@ private fun NoteSearchResult.toCardUi(
         matchLocation = location?.toUi(),
         matchTime = transcriptParagraph?.let { note.toTranscriptPartsUi().getOrNull(it)?.time },
         matchParagraph = transcriptParagraph,
+        waveform = waveforms[note.id].orEmpty().toWaveformUi(LIST_WAVE_BARS),
     )
 }
 

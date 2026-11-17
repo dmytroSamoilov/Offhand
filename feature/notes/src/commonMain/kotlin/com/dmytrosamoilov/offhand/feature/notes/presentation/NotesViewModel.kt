@@ -43,6 +43,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNote
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteWaveformsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
@@ -77,6 +78,7 @@ class NotesViewModel(
     private val recordingProcessController: RecordingProcessController,
     private val dateLabelFormatter: DateLabelFormatter,
     observeNotes: ObserveNotesUseCase,
+    observeNoteWaveforms: ObserveNoteWaveformsUseCase,
     observeFolders: ObserveFoldersUseCase,
     private val searchNotes: SearchNotesUseCase,
     private val createFolder: CreateFolderUseCase,
@@ -134,6 +136,7 @@ class NotesViewModel(
     private val folders = MutableStateFlow<List<Folder>>(emptyList())
     private val selectedFolderId = MutableStateFlow<Long?>(null)
     private val searchQuery = MutableStateFlow("")
+    private val waveforms = MutableStateFlow<Map<Long, List<Int>>>(emptyMap())
 
     init {
         viewModelScope.launch {
@@ -155,8 +158,15 @@ class NotesViewModel(
             }
         }
         viewModelScope.launch {
-            combine(allNotes, folders, selectedFolderId, searchQuery, ::listContent)
+            observeNoteWaveforms().collect { latest -> waveforms.value = latest }
+        }
+        viewModelScope.launch {
+            combine(allNotes, folders, selectedFolderId, searchQuery, waveforms, ::listContent)
                 .collect { content -> mutableUiState.update { content(it) } }
+        }
+        viewModelScope.launch {
+            combine(selectedNoteId, waveforms) { noteId, all -> noteId?.let(all::get).orEmpty().toWaveformUi() }
+                .collect { waveform -> mutableUiState.update { it.copy(detailWaveform = waveform) } }
         }
         viewModelScope.launch {
             combine(selectedNoteId, sessionManager.transcribingNoteIds) { noteId, transcribing -> noteId in transcribing }
@@ -278,10 +288,11 @@ class NotesViewModel(
         folders: List<Folder>,
         folderId: Long?,
         query: String,
+        waveforms: Map<Long, List<Int>>,
     ): (NotesUiState) -> NotesUiState {
         val notes = loadedNotes.orEmpty()
         val sections = searchNotes(notes.shownFor(folders, folderId, query), query)
-            .toSectionsUi(dateLabelFormatter, folders.namesById())
+            .toSectionsUi(dateLabelFormatter, folders.namesById(), waveforms)
         val foldersUi = folders.toFoldersUi(notes)
         return { state ->
             state.copy(

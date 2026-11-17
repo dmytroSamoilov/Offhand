@@ -3,6 +3,7 @@ package com.dmytrosamoilov.offhand.feature.recording.di
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleDrafter
 import com.dmytrosamoilov.offhand.feature.recording.domain.CalendarEventExtractor
 import com.dmytrosamoilov.offhand.feature.recording.domain.NoteStyleResolver
+import com.dmytrosamoilov.offhand.feature.recording.domain.NoteWaveformFiller
 import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinator
 import com.dmytrosamoilov.offhand.feature.recording.domain.SpeechWarmUp
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
@@ -27,11 +28,13 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownl
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsSpeechModelDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveImportAllowanceUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveNotesWithoutWaveformUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RefundFreeImportUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RememberModelDownloadProgressUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsCalendarSuggestionsAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsThinkingEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteProcessingUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MeasureNoteWaveformUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNoteRecordedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNotificationsPromptedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveDeveloperOptionsUseCase
@@ -65,6 +68,9 @@ val featureRecordingModule = module {
     singleOf(::CalendarEventExtractor)
     singleOf(::SpeechWarmUp)
     singleOf(::PendingNotesCoordinator)
+    singleOf(::NoteWaveformFiller)
+    factoryOf(::MeasureNoteWaveformUseCase)
+    factoryOf(::ObserveNotesWithoutWaveformUseCase)
     singleOf(::ResumeInterruptedNotesUseCase)
     single {
         RecordingSessionManager(

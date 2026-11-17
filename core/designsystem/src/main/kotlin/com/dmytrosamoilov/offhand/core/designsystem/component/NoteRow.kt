@@ -35,6 +35,7 @@ fun NoteRow(
     meta: String?,
     waveSeed: Long,
     modifier: Modifier = Modifier,
+    waveform: List<Float> = emptyList(),
     leading: @Composable () -> Unit = {},
     trailing: @Composable () -> Unit = {},
     showWave: Boolean = true,
@@ -58,7 +59,7 @@ fun NoteRow(
             NoteRowBody(state, previewLines)
             meta?.let { MetaText(text = it, modifier = Modifier.padding(top = 2.dp)) }
         }
-        if (showWave && state is NoteRowState.Ready) WaveGlyph(seed = waveSeed)
+        if (showWave && state is NoteRowState.Ready) WaveGlyph(seed = waveSeed, levels = waveform)
         trailing()
     }
 }
@@ -90,8 +91,13 @@ private fun NoteRowBody(state: NoteRowState, previewLines: Int) {
 }
 
 @Composable
-fun WaveGlyph(seed: Long, modifier: Modifier = Modifier, color: Color = OffhandTheme.colors.wave) {
-    val bars = remember(seed) { waveBars(seed, GLYPH_BARS) }
+fun WaveGlyph(
+    seed: Long,
+    modifier: Modifier = Modifier,
+    levels: List<Float> = emptyList(),
+    color: Color = OffhandTheme.colors.wave,
+) {
+    val bars = remember(seed, levels) { levels.toBarHeights().ifEmpty { waveBars(seed, GLYPH_BARS) } }
     Canvas(modifier = modifier.size(44.dp, 24.dp)) {
         val step = size.width / bars.size
         val stroke = 2.dp.toPx()
@@ -102,6 +108,8 @@ fun WaveGlyph(seed: Long, modifier: Modifier = Modifier, color: Color = OffhandT
         }
     }
 }
+
+fun List<Float>.toBarHeights(): List<Float> = map { level -> MIN_BAR + level.coerceIn(0f, 1f) * (1f - MIN_BAR) }
 
 fun waveBars(seed: Long, count: Int): List<Float> {
     val random = Random(seed)

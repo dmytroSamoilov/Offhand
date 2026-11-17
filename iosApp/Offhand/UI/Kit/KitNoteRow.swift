@@ -11,6 +11,7 @@ struct NoteRow<Leading: View, Trailing: View>: View {
     let state: NoteRowState
     let meta: String?
     let waveSeed: Int64
+    var waveform: [CGFloat] = []
     var showsWave = true
     var previewLines = 1
     @ViewBuilder let leading: () -> Leading
@@ -31,7 +32,7 @@ struct NoteRow<Leading: View, Trailing: View>: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             if showsGlyph {
-                WaveGlyph(seed: waveSeed)
+                WaveGlyph(seed: waveSeed, levels: waveform)
             }
             trailing()
         }
@@ -65,6 +66,7 @@ extension NoteRow where Trailing == EmptyView {
         state: NoteRowState,
         meta: String?,
         waveSeed: Int64,
+        waveform: [CGFloat] = [],
         showsWave: Bool = true,
         previewLines: Int = 1,
         @ViewBuilder leading: @escaping () -> Leading
@@ -74,6 +76,7 @@ extension NoteRow where Trailing == EmptyView {
             state: state,
             meta: meta,
             waveSeed: waveSeed,
+            waveform: waveform,
             showsWave: showsWave,
             previewLines: previewLines,
             leading: leading,
@@ -112,13 +115,14 @@ private struct NoteRowBody: View {
 
 struct WaveGlyph: View {
     let seed: Int64
+    var levels: [CGFloat] = []
     var color: Color = OffhandColor.wave
     var size = CGSize(width: 44, height: 24)
     var barCount = 9
     var lineWidth: CGFloat = 2
 
     var body: some View {
-        let bars = waveBars(seed: seed, count: barCount)
+        let bars = levels.isEmpty ? waveBars(seed: seed, count: barCount) : waveHeights(levels)
         Canvas { context, canvasSize in
             context.stroke(
                 waveBarPath(bars: bars, size: canvasSize, lineWidth: lineWidth) { _ in true },
@@ -129,6 +133,10 @@ struct WaveGlyph: View {
         .frame(width: size.width, height: size.height)
         .accessibilityHidden(true)
     }
+}
+
+func waveHeights(_ levels: [CGFloat]) -> [CGFloat] {
+    levels.map { WaveShape.minBar + min(max($0, 0), 1) * (1 - WaveShape.minBar) }
 }
 
 func waveBars(seed: Int64, count: Int) -> [CGFloat] {

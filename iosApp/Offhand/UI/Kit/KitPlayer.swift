@@ -8,6 +8,7 @@ struct Player: View {
     let pauseLabel: String
     let seekLabel: String
     let waveSeed: Int64
+    var waveform: [CGFloat] = []
     let onToggle: () -> Void
     let onSeek: (Double) -> Void
 
@@ -20,7 +21,7 @@ struct Player: View {
                 isFilled: true,
                 action: onToggle
             )
-            PlayerWaveform(progress: progress, waveSeed: waveSeed, seekLabel: seekLabel, onSeek: onSeek)
+            PlayerWaveform(progress: progress, waveSeed: waveSeed, waveform: waveform, seekLabel: seekLabel, onSeek: onSeek)
             Text(elapsedLabel)
                 .font(.offhandMonoSmall)
                 .foregroundStyle(OffhandColor.ink2)
@@ -32,6 +33,7 @@ struct Player: View {
 private struct PlayerWaveform: View {
     let progress: Double
     let waveSeed: Int64
+    let waveform: [CGFloat]
     let seekLabel: String
     let onSeek: (Double) -> Void
     @State private var width: CGFloat = 0
@@ -41,7 +43,7 @@ private struct PlayerWaveform: View {
     private static let accessibilityStep = 0.05
 
     var body: some View {
-        let bars = waveBars(seed: waveSeed, count: Self.barCount)
+        let bars = waveform.isEmpty ? waveBars(seed: waveSeed, count: Self.barCount) : waveHeights(waveform)
         Canvas { context, size in
             draw(bars: bars, in: &context, size: size)
         }

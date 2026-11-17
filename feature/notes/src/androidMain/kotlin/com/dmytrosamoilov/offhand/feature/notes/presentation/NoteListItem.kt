@@ -86,6 +86,7 @@ private fun SelectableNoteRow(
         meta = note.meta(showsDay = context.isSearching),
         previewLines = if (context.isSearching) SEARCH_PREVIEW_LINES else 1,
         waveSeed = note.id,
+        waveform = note.waveform,
         showWave = !selection.isActive,
         leading = { if (selection.isActive) ChoiceMark(isSelected = isSelected, size = 24.dp) },
         modifier = Modifier

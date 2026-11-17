@@ -183,6 +183,7 @@ struct NoteDetailView: View {
             pauseLabel: String(localized: "Pause playback"),
             seekLabel: String(localized: "Playback position"),
             waveSeed: detail.id,
+            waveform: state.detailWaveform.map { CGFloat($0.floatValue) },
             onToggle: {
                 Haptics.confirm()
                 viewModel.onPlayPauseClicked()

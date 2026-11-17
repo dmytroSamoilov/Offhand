@@ -31,6 +31,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttempt
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.OfferProTrialUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteWaveformsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
@@ -73,6 +74,7 @@ val featureNotesModule = module {
     factoryOf(::ObserveDeveloperOptionsUseCase)
     factoryOf(::ObserveNoteSuggestionsUseCase)
     factoryOf(::ObserveNotesUseCase)
+    factoryOf(::ObserveNoteWaveformsUseCase)
     factoryOf(::SearchNotesUseCase)
     factoryOf(::ShouldRequestReviewUseCase)
     factoryOf(::UpdateNoteUseCase)
@@ -82,6 +84,7 @@ val featureNotesModule = module {
             recordingProcessController = get(),
             dateLabelFormatter = get(),
             observeNotes = get(),
+            observeNoteWaveforms = get(),
             observeFolders = get(),
             searchNotes = get(),
             createFolder = get(),

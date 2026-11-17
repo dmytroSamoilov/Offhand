@@ -38,6 +38,7 @@ struct NotesListView<BottomBarContent: View>: View {
         pendingCalendarEvent: nil,
         isRetranscribeAvailable: false,
         detailTab: .summary,
+        detailWaveform: [],
         isSummaryReadyMarked: false,
         isNotesLoaded: false,
         isUnsortedShown: false,
@@ -412,6 +413,7 @@ struct NotesListView<BottomBarContent: View>: View {
                 state: rowState(note),
                 meta: metaLine(note, day: day),
                 waveSeed: note.id,
+                waveform: note.waveform.map { CGFloat($0.floatValue) },
                 previewLines: isSearching ? 2 : 1
             ) {
                 if state.isSelectingNotes {

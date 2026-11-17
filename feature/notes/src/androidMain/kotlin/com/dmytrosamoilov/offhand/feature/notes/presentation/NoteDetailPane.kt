@@ -91,7 +91,7 @@ private fun NoteDetail(state: NotesUiState, viewModel: NotesViewModel, note: Not
             leading = { if (showsBack) BackButton(onBack = viewModel::onDetailClosed) },
             trailing = { NoteOverflowMenu(note = note, state = state, viewModel = viewModel) },
         )
-        NoteDetailHeader(note = note, playback = state.playback, tabs = tabs, viewModel = viewModel)
+        NoteDetailHeader(note = note, playback = state.playback, waveform = state.detailWaveform, tabs = tabs, viewModel = viewModel)
         NoteDetailBody(state = state, viewModel = viewModel, note = note, tabs = tabs, modifier = Modifier.weight(1f))
         NoteDetailFooter(note = note, tab = tabs.selected, onShare = viewModel::onShareRequested, onCopied = viewModel::onNoteCopied)
     }
@@ -103,7 +103,13 @@ private fun BackButton(onBack: () -> Unit) {
 }
 
 @Composable
-private fun NoteDetailHeader(note: NoteDetailUi, playback: AudioPlaybackUi, tabs: NoteDetailTabsUi, viewModel: NotesViewModel) {
+private fun NoteDetailHeader(
+    note: NoteDetailUi,
+    playback: AudioPlaybackUi,
+    waveform: List<Float>,
+    tabs: NoteDetailTabsUi,
+    viewModel: NotesViewModel,
+) {
     val hasPlayer = note.hasAudio && playback.isAvailable
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
         Text(
@@ -119,13 +125,13 @@ private fun NoteDetailHeader(note: NoteDetailUi, playback: AudioPlaybackUi, tabs
                 .joinToString(separator = " ${stringResource(R.string.notes_metadata_separator)} "),
             modifier = Modifier.padding(top = 8.dp),
         )
-        if (hasPlayer) NotePlayer(playback = playback, noteId = note.id, viewModel = viewModel)
+        if (hasPlayer) NotePlayer(playback = playback, noteId = note.id, waveform = waveform, viewModel = viewModel)
         if (tabs.visible.size > 1) NoteDetailTabs(tabs = tabs)
     }
 }
 
 @Composable
-private fun NotePlayer(playback: AudioPlaybackUi, noteId: Long, viewModel: NotesViewModel) {
+private fun NotePlayer(playback: AudioPlaybackUi, noteId: Long, waveform: List<Float>, viewModel: NotesViewModel) {
     val haptics = haptics()
     Player(
         isPlaying = playback.isPlaying,
@@ -135,6 +141,7 @@ private fun NotePlayer(playback: AudioPlaybackUi, noteId: Long, viewModel: Notes
         pauseDescription = stringResource(R.string.notes_pause_description),
         seekDescription = stringResource(R.string.notes_seek_description),
         waveSeed = noteId,
+        waveform = waveform,
         onToggle = {
             haptics.confirm()
             viewModel.onPlayPauseClicked()

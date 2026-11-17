@@ -37,6 +37,7 @@ fun Player(
     onToggle: () -> Unit,
     onSeek: (Float) -> Unit,
     modifier: Modifier = Modifier,
+    waveform: List<Float> = emptyList(),
     enabled: Boolean = true,
 ) {
     Row(
@@ -55,6 +56,7 @@ fun Player(
         Waveform(
             progress = progress,
             waveSeed = waveSeed,
+            waveform = waveform,
             seekDescription = seekDescription,
             onSeek = onSeek,
             enabled = enabled,
@@ -68,13 +70,14 @@ fun Player(
 private fun Waveform(
     progress: Float,
     waveSeed: Long,
+    waveform: List<Float>,
     seekDescription: String,
     onSeek: (Float) -> Unit,
     enabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val colors = OffhandTheme.colors
-    val bars = remember(waveSeed) { waveBars(waveSeed, PLAYER_BARS) }
+    val bars = remember(waveSeed, waveform) { waveform.toBarHeights().ifEmpty { waveBars(waveSeed, PLAYER_BARS) } }
     val currentOnSeek by rememberUpdatedState(onSeek)
     val seekModifier = if (enabled) {
         Modifier

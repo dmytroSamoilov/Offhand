@@ -18,6 +18,7 @@ import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserP
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.AcknowledgeProTrialNoticeUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.KeepProTrialInSyncUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SettleProTrialUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.NoteWaveformFiller
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
@@ -40,6 +41,7 @@ class RootViewModel(
     private val modelDownloadLauncher: ModelDownloadLauncher,
     private val resumeInterruptedNotes: Lazy<ResumeInterruptedNotesUseCase>,
     private val sweepOrphanedRecordings: Lazy<SweepOrphanedRecordingsUseCase>,
+    private val noteWaveformFiller: Lazy<NoteWaveformFiller>,
     private val clearShareCache: ClearShareCacheUseCase,
     private val decideEarlyAdopterPro: Lazy<DecideEarlyAdopterProUseCase>,
     private val markEarlyAdopterThanked: MarkEarlyAdopterThankedUseCase,
@@ -147,6 +149,7 @@ class RootViewModel(
             settleProTrialOnColdStart()
             resumeInterruptedNotes.value.invoke()
             sweepOrphanedRecordings.value.invoke()
+            noteWaveformFiller.value.start()
             clearShareCache()
         }
     }

@@ -17,6 +17,7 @@ import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.AcknowledgeProT
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.KeepProTrialInSyncUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SettleProTrialUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinator
+import com.dmytrosamoilov.offhand.feature.recording.domain.NoteWaveformFiller
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
@@ -42,6 +43,7 @@ class IosRootViewModel(
     private val modelDownloadLauncher: ModelDownloadLauncher,
     private val resumeInterruptedNotes: ResumeInterruptedNotesUseCase,
     private val sweepOrphanedRecordings: SweepOrphanedRecordingsUseCase,
+    private val noteWaveformFiller: NoteWaveformFiller,
     private val clearShareCache: ClearShareCacheUseCase,
     private val decideEarlyAdopterPro: DecideEarlyAdopterProUseCase,
     private val markEarlyAdopterThanked: MarkEarlyAdopterThankedUseCase,
@@ -137,6 +139,7 @@ class IosRootViewModel(
             settleProTrialOnColdStart()
             resumeInterruptedNotes()
             sweepOrphanedRecordings()
+            noteWaveformFiller.start()
             clearShareCache()
         }
     }

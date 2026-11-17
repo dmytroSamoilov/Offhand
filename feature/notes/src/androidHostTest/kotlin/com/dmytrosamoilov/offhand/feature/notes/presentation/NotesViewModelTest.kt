@@ -208,6 +208,7 @@ class NotesViewModelTest {
         recordingProcessController = recordingProcessController,
         dateLabelFormatter = dateLabelFormatter,
         observeNotes = observeNotes,
+        observeNoteWaveforms = mockk { every { this@mockk() } returns flowOf(emptyMap()) },
         observeFolders = observeFolders,
         searchNotes = SearchNotesUseCase(),
         createFolder = createFolder,

@@ -15,6 +15,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DecideEarlyAdopte
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
 import com.dmytrosamoilov.offhand.lifecycle.ProcessForegroundState
+import com.dmytrosamoilov.offhand.feature.recording.domain.NoteWaveformFiller
 import com.dmytrosamoilov.offhand.root.RootViewModel
 import com.dmytrosamoilov.offhand.telemetry.TelemetryController
 import com.dmytrosamoilov.offhand.telemetry.FirebaseAnalyticsSink
@@ -40,6 +41,7 @@ val appModule = module {
             modelDownloadLauncher = get(),
             resumeInterruptedNotes = lazy { get<ResumeInterruptedNotesUseCase>() },
             sweepOrphanedRecordings = lazy { get<SweepOrphanedRecordingsUseCase>() },
+            noteWaveformFiller = lazy { get<NoteWaveformFiller>() },
             clearShareCache = get<ClearShareCacheUseCase>(),
             decideEarlyAdopterPro = lazy { get<DecideEarlyAdopterProUseCase>() },
             markEarlyAdopterThanked = get(),
