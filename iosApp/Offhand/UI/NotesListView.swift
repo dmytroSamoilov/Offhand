@@ -10,7 +10,7 @@ struct NotesListView<BottomBarContent: View>: View {
         sections: [],
         selected: nil,
         editor: nil,
-        playback: AudioPlaybackUi(isAvailable: false, isPlaying: false, progress: 0, positionText: "0:00", durationText: "0:00"),
+        playback: AudioPlaybackUi(isAvailable: false, isPlaying: false, progress: 0, positionText: "0:00", durationText: "0:00", positionMs: 0),
         pendingDeleteNoteId: nil,
         isRetranscribeConfirmationVisible: false,
         isShareDialogVisible: false,
@@ -45,7 +45,9 @@ struct NotesListView<BottomBarContent: View>: View {
         selectedNoteIds: [],
         bulkAction: nil,
         isTranscriptionEnabled: true,
-        isSummaryEnabled: true
+        isSummaryEnabled: true,
+        isSummaryAvailable: true,
+        transcriptFocusIndex: nil
     )
     @State private var longPressedNoteId: Int64?
     @State private var recordSheetRequest: RecordSheetRequest?
@@ -93,7 +95,8 @@ struct NotesListView<BottomBarContent: View>: View {
                 folders: state.folders,
                 initialChoice: FolderChoice(folderId: state.moveToFolder?.currentFolderId?.int64Value),
                 isNewFolderGated: state.isFolderLimitReached,
-                styleLabel: styleLabel,
+                styleLabel: folderStyleLabel,
+                rewriteNotice: { rewriteNotice(folderId: $0, noteCount: 1) },
                 onMove: { viewModel.onMoveToFolder(folderId: $0.map { KotlinLong(value: $0) }) },
                 onNewFolder: {
                     isNewFolderRequestedAfterMove = true
@@ -108,7 +111,8 @@ struct NotesListView<BottomBarContent: View>: View {
                 folders: state.folders,
                 initialChoice: nil,
                 isNewFolderGated: state.isFolderLimitReached,
-                styleLabel: styleLabel,
+                styleLabel: folderStyleLabel,
+                rewriteNotice: { rewriteNotice(folderId: $0, noteCount: state.selectedNoteIds.count) },
                 onMove: { viewModel.onBulkMoveConfirmed(folderId: $0.map { KotlinLong(value: $0) }) },
                 onNewFolder: {
                     isNewFolderRequestedAfterMove = true
@@ -287,6 +291,7 @@ struct NotesListView<BottomBarContent: View>: View {
             selectedFolderId: state.selectedFolderId?.int64Value,
             isUnsortedShown: state.isUnsortedShown,
             isFolderStylesUnlocked: state.isFolderStylesUnlocked,
+            isFolderStyleShown: state.isSummaryAvailable,
             isFolderLimitReached: state.isFolderLimitReached,
             onSelect: { viewModel.onFolderSelected(folderId: $0.map { KotlinLong(value: $0) }) },
             onNew: { viewModel.onNewFolderRequested() },
@@ -380,7 +385,9 @@ struct NotesListView<BottomBarContent: View>: View {
         } else {
             EmptyState(
                 title: String(localized: "No notes yet"),
-                message: String(localized: "Tap Record and speak. Offhand writes the transcript and a summary on your iPhone.")
+                message: state.isSummaryAvailable
+                    ? String(localized: "Tap Record and speak. Offhand writes the transcript and a summary on your iPhone.")
+                    : String(localized: "Tap Record and speak. Offhand writes the transcript on your iPhone.")
             )
         }
     }
@@ -397,7 +404,7 @@ struct NotesListView<BottomBarContent: View>: View {
         let isSelected = isNoteSelected(note.id)
         let isOpen = isRegularWidth && state.selected?.id == note.id
         return Button {
-            onRowTapped(note.id)
+            onRowTapped(note)
         } label: {
             NoteRow(
                 title: highlighted(note.title, note.titleHighlights),
@@ -464,19 +471,39 @@ struct NotesListView<BottomBarContent: View>: View {
             if state.isWaitingForAi {
                 return .processing(text: String(localized: "Waiting for your on-device AI to finish downloading"), progress: nil)
             }
-            return .processing(text: String(localized: "Preparing your note"), progress: progress.map { Double($0) / 100 })
+            return .processing(text: processingText, progress: progress.map { Double($0) / 100 })
         case .interrupted:
             return .attention(text: String(localized: "Paused. Open the note to continue."))
         case .failed:
-            return .attention(text: String(localized: "We were unable to create a summary and transcript for this note."))
+            return .attention(text: state.isSummaryAvailable
+                ? String(localized: "We were unable to create a summary and transcript for this note.")
+                : String(localized: "We were unable to create a transcript for this note."))
         default:
             return .ready(preview: note.preview.isEmpty ? nil : highlighted(note.preview, note.previewHighlights))
         }
     }
 
+    private var processingText: String {
+        state.isSummaryAvailable ? String(localized: "Preparing your note") : String(localized: "Transcribing your recording")
+    }
+
     private func metaLine(_ note: NoteCardUi, day: String?) -> String {
         let time = [day, note.time].compactMap { $0 }.joined(separator: " ")
+        if isSearching, let match = matchText(note) {
+            return [time, match, note.folderName].compactMap { $0 }.joined(separator: " · ")
+        }
         return [time, note.durationText, note.folderName].compactMap { $0 }.joined(separator: " · ")
+    }
+
+    private func matchText(_ note: NoteCardUi) -> String? {
+        switch note.matchLocation {
+        case .title: return String(localized: "In title")
+        case .summary: return String(localized: "In summary")
+        case .transcript:
+            guard let time = note.matchTime else { return String(localized: "In transcript") }
+            return String(format: String(localized: "In transcript at %@"), time)
+        default: return nil
+        }
     }
 
     private func highlighted(_ text: String, _ ranges: [TextRangeUi]) -> AttributedString {
@@ -497,6 +524,20 @@ struct NotesListView<BottomBarContent: View>: View {
     private func styleLabel(_ style: NoteStyleRef) -> String {
         if let preset = style.builtInPreset { return NoteStyleLabels.label(for: preset) }
         return state.customStyles.first { $0.id == style.customId }?.name ?? NoteStyleLabels.label(for: .summary)
+    }
+
+    private func folderStyleLabel(_ style: NoteStyleRef) -> String? {
+        state.isSummaryAvailable ? styleLabel(style) : nil
+    }
+
+    private func rewriteNotice(folderId: Int64?, noteCount: Int) -> String? {
+        guard state.rewritesNotesMovedTo(folderId: folderId.map { KotlinLong(value: $0) }),
+              let folder = state.folders.first(where: { $0.id == folderId }),
+              let style = folder.style else { return nil }
+        let format = noteCount == 1
+            ? String(localized: "%1$@ writes notes in the %2$@ style, so this note will be rewritten. Your transcript does not change.")
+            : String(localized: "%1$@ writes notes in the %2$@ style, so these notes will be rewritten. Your transcripts do not change.")
+        return String(format: format, folder.name, styleLabel(style))
     }
 
     private func closeSearch() {
@@ -529,13 +570,15 @@ struct NotesListView<BottomBarContent: View>: View {
         state.selectedNoteIds.contains(KotlinLong(value: id))
     }
 
-    private func onRowTapped(_ id: Int64) {
-        if longPressedNoteId == id {
+    private func onRowTapped(_ note: NoteCardUi) {
+        if longPressedNoteId == note.id {
             longPressedNoteId = nil
         } else if state.isSelectingNotes {
-            viewModel.onNoteSelectionToggled(id: id)
+            viewModel.onNoteSelectionToggled(id: note.id)
+        } else if isSearching && note.matchLocation != nil {
+            viewModel.onSearchResultSelected(id: note.id)
         } else {
-            viewModel.onNoteSelected(id: id)
+            viewModel.onNoteSelected(id: note.id)
         }
     }
 
@@ -644,6 +687,7 @@ private struct FolderTabs: View {
     let selectedFolderId: Int64?
     let isUnsortedShown: Bool
     let isFolderStylesUnlocked: Bool
+    let isFolderStyleShown: Bool
     let isFolderLimitReached: Bool
     let onSelect: (Int64?) -> Void
     let onNew: () -> Void
@@ -712,10 +756,12 @@ private struct FolderTabs: View {
 
     @ViewBuilder
     private func folderMenuItems(_ folder: FolderUi) -> some View {
-        Button {
-            onStyle(folder.id)
-        } label: {
-            Label(styleMenuTitle, systemImage: "text.alignleft")
+        if isFolderStyleShown {
+            Button {
+                onStyle(folder.id)
+            } label: {
+                Label(styleMenuTitle, systemImage: "text.alignleft")
+            }
         }
         Button {
             onRename(folder.id)
@@ -785,7 +831,8 @@ private struct MoveToFolderSheet: View {
     let folders: [FolderUi]
     let initialChoice: FolderChoice?
     let isNewFolderGated: Bool
-    let styleLabel: (NoteStyleRef) -> String
+    let styleLabel: (NoteStyleRef) -> String?
+    let rewriteNotice: (Int64?) -> String?
     let onMove: (Int64?) -> Void
     let onNewFolder: () -> Void
     let onCancel: () -> Void
@@ -801,6 +848,13 @@ private struct MoveToFolderSheet: View {
                     .frame(height: Self.rowHeight * CGFloat(Self.maxVisibleRows))
             } else {
                 rows
+            }
+            if let notice = choice.flatMap(notice(for:)) {
+                Text(notice)
+                    .offhandText(.caption)
+                    .foregroundStyle(OffhandColor.ink3)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 10)
             }
             HStack(spacing: OffhandSpacing.controls) {
                 SecondaryButton(String(localized: "Cancel"), fillsWidth: true, action: onCancel)
@@ -845,10 +899,15 @@ private struct MoveToFolderSheet: View {
         }
     }
 
+    private func notice(for choice: FolderChoice) -> String? {
+        guard choice != initialChoice else { return nil }
+        return rewriteNotice(choice.folderId)
+    }
+
     private func hint(for folder: FolderUi) -> String {
         let count = String(folder.noteCount)
-        guard let style = folder.style else { return count }
-        return "\(styleLabel(style).localizedUppercase) · \(count)"
+        guard let label = folder.style.flatMap(styleLabel) else { return count }
+        return "\(label.localizedUppercase) · \(count)"
     }
 }
 

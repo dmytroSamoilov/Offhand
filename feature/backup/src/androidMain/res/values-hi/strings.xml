@@ -40,4 +40,6 @@
     <string name="backup_save_button">बैकअप सहेजें</string>
     <string name="backup_done">हो गया</string>
     <string name="backup_subtitle">Offhand एक एन्क्रिप्टेड फ़ाइल बनाता है। उसे कहाँ रखना है, यह आप तय करते हैं।</string>
+    <string name="backup_size_estimate">लगभग %1$s</string>
+    <string name="backup_include_audio_size">लगभग %1$s और जुड़ेंगे</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.backup.presentation
 
+import android.text.format.Formatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -22,8 +23,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.BarIconButton
+import com.dmytrosamoilov.offhand.core.designsystem.component.Hairline
 import com.dmytrosamoilov.offhand.core.designsystem.component.OffhandDialog
 import com.dmytrosamoilov.offhand.core.designsystem.component.OffhandIcons
 import com.dmytrosamoilov.offhand.core.designsystem.component.OffhandSheet
@@ -59,6 +63,11 @@ fun BackupScreen(
         uri?.let { viewModel.onRestoreSourceChosen(UriBackupFile(contentResolver, it)) }
     }
 
+    LifecycleResumeEffect(Unit) {
+        viewModel.refreshSizeEstimate()
+        onPauseOrDispose { }
+    }
+
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopBar(
@@ -70,7 +79,11 @@ fun BackupScreen(
                     )
                 },
             )
-            BackupContent(onBackup = viewModel::onBackupFlowStarted, onRestore = { openDocument.launch(arrayOf(ANY_MIME_TYPE)) })
+            BackupContent(
+                estimatedBytes = state.estimatedBytes,
+                onBackup = viewModel::onBackupFlowStarted,
+                onRestore = { openDocument.launch(arrayOf(ANY_MIME_TYPE)) },
+            )
         }
     }
 
@@ -90,7 +103,7 @@ fun BackupScreen(
 }
 
 @Composable
-private fun BackupContent(onBackup: () -> Unit, onRestore: () -> Unit) {
+private fun BackupContent(estimatedBytes: Long?, onBackup: () -> Unit, onRestore: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -100,6 +113,7 @@ private fun BackupContent(onBackup: () -> Unit, onRestore: () -> Unit) {
     ) {
         ScreenTitle(title = stringResource(R.string.backup_title), subtitle = stringResource(R.string.backup_subtitle))
         GroupLabel(text = stringResource(R.string.backup_create_title))
+        estimatedBytes?.let { SizeEstimateLine(bytes = it) }
         PrimaryButton(text = stringResource(R.string.backup_start_button), onClick = onBackup, modifier = Modifier.fillMaxWidth())
         Hint(text = stringResource(R.string.backup_create_body))
         GroupLabel(text = stringResource(R.string.backup_restore_title))
@@ -107,6 +121,22 @@ private fun BackupContent(onBackup: () -> Unit, onRestore: () -> Unit) {
         Hint(text = stringResource(R.string.backup_restore_body))
     }
 }
+
+@Composable
+private fun SizeEstimateLine(bytes: Long) {
+    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+        Text(
+            text = stringResource(R.string.backup_size_estimate, fileSize(bytes)),
+            style = OffhandTheme.type.number.copy(fontSize = 12.sp, lineHeight = 18.sp),
+            color = OffhandTheme.colors.ink2,
+            modifier = Modifier.padding(bottom = 12.dp),
+        )
+        Hairline()
+    }
+}
+
+@Composable
+private fun fileSize(bytes: Long): String = Formatter.formatShortFileSize(LocalContext.current, bytes)
 
 @Composable
 private fun GroupLabel(text: String) {
@@ -208,7 +238,8 @@ private fun OptionsStep(state: BackupUiState, viewModel: BackupViewModel, onSave
     SurfaceCard {
         SwitchRow(
             title = stringResource(R.string.backup_include_audio_label),
-            subtitle = stringResource(R.string.backup_include_audio_description),
+            subtitle = state.recordingBytes?.let { stringResource(R.string.backup_include_audio_size, fileSize(it)) }
+                ?: stringResource(R.string.backup_include_audio_description),
             checked = state.includeAudio,
             onCheckedChange = viewModel::onIncludeAudioChanged,
             showProBadge = !state.isAudioUnlocked,

@@ -9,6 +9,7 @@ data class SettingsUiState(
     val isDynamicColorEnabled: Boolean = false,
     val isAppLockEnabled: Boolean = false,
     val isTelemetryEnabled: Boolean = false,
+    val isSummaryAvailable: Boolean = true,
     val isDeviceSecure: Boolean = false,
     val isAudioImportUnlocked: Boolean = false,
     val freeImportsLeft: Int? = null,

@@ -95,6 +95,8 @@ private fun MoveSheets(state: NotesUiState, viewModel: NotesViewModel) {
         bulkCount = state.selectedNoteIds.size.takeIf { isBulk },
         currentFolderId = target?.currentFolderId,
         isFolderLimitReached = state.isFolderLimitReached,
+        rewritesNotesMovedTo = state::rewritesNotesMovedTo,
+        showsFolderStyles = state.isSummaryAvailable,
         onMove = if (isBulk) viewModel::onBulkMoveConfirmed else viewModel::onMoveToFolder,
         onNewFolder = viewModel::onNewFolderRequested,
         onDismiss = if (isBulk) viewModel::onBulkActionDismissed else viewModel::onMoveToFolderDismissed,

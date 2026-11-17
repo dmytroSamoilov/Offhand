@@ -20,6 +20,7 @@
     <string name="notes_pause_description">Призупинити відтворення</string>
     <string name="notes_processing_title">Обробка…</string>
     <string name="notes_processing_preview">Розшифровуємо й узагальнюємо на вашому телефоні. Запис уже можна прослухати.</string>
+    <string name="notes_processing_preview_transcript">Розшифровуємо на вашому телефоні. Запис уже можна прослухати.</string>
     <string name="notes_processing_transcribing">Розшифровуємо запис… Текст зʼявиться тут автоматично.</string>
     <string name="notes_processing_structuring">Пишемо ваше резюме…</string>
     <string name="notes_processing_waiting_preview">Чекаємо, доки завантажиться ШІ на пристрої. Запис уже можна прослухати.</string>
@@ -139,4 +140,14 @@
         <item quantity="many">Перемістити %1$d нотаток</item>
         <item quantity="other">Перемістити %1$d нотатки</item>
     </plurals>
+    <plurals name="notes_move_rewrite_caption">
+        <item quantity="one">У папці «%1$s» нотатки пишуться в стилі «%2$s», тому %3$d нотатку буде переписано. Розшифровка не зміниться.</item>
+        <item quantity="few">У папці «%1$s» нотатки пишуться в стилі «%2$s», тому %3$d нотатки буде переписано. Розшифровки не зміняться.</item>
+        <item quantity="many">У папці «%1$s» нотатки пишуться в стилі «%2$s», тому %3$d нотаток буде переписано. Розшифровки не зміняться.</item>
+        <item quantity="other">У папці «%1$s» нотатки пишуться в стилі «%2$s», тому %3$d нотатки буде переписано. Розшифровки не зміняться.</item>
+    </plurals>
+    <string name="notes_match_title">У назві</string>
+    <string name="notes_match_summary">У резюме</string>
+    <string name="notes_match_transcript">У розшифровці</string>
+    <string name="notes_match_transcript_at">У розшифровці на %1$s</string>
 </resources>

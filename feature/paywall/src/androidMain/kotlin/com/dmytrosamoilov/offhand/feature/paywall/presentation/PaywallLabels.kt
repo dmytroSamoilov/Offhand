@@ -6,30 +6,72 @@ import androidx.compose.ui.res.stringResource
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialUsage
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialUsageCount
 import com.dmytrosamoilov.offhand.core.ui.R as CoreUiR
 import com.dmytrosamoilov.offhand.feature.paywall.R
 
-internal data class ComparisonRow(val titleRes: Int, val hintRes: Int?, val features: Set<ProFeature>) {
+internal data class ComparisonRow(
+    val titleRes: Int,
+    val hintRes: Int?,
+    val features: Set<ProFeature>,
+    val needsSummary: Boolean = false,
+    val isHintAboutStyles: Boolean = false,
+) {
     val isPro: Boolean get() = features.isNotEmpty()
+
+    fun forPhone(isSummaryAvailable: Boolean): ComparisonRow? = when {
+        isSummaryAvailable -> this
+        needsSummary -> null
+        isHintAboutStyles -> copy(hintRes = null)
+        else -> this
+    }
 }
 
 private val comparisonRows = listOf(
-    ComparisonRow(R.string.paywall_free_summary, null, emptySet()),
+    ComparisonRow(R.string.paywall_free_summary, null, emptySet(), needsSummary = true),
     ComparisonRow(R.string.paywall_free_private, null, emptySet()),
     ComparisonRow(R.string.paywall_free_offline, null, emptySet()),
     ComparisonRow(R.string.paywall_free_no_ads, null, emptySet()),
     ComparisonRow(R.string.paywall_free_unlimited, null, emptySet()),
     ComparisonRow(R.string.paywall_free_backup, null, emptySet()),
-    ComparisonRow(R.string.paywall_pro_styles, R.string.paywall_pro_styles_hint, setOf(ProFeature.CUSTOM_STYLES, ProFeature.NOTE_STYLES)),
+    ComparisonRow(
+        R.string.paywall_pro_styles,
+        R.string.paywall_pro_styles_hint,
+        setOf(ProFeature.CUSTOM_STYLES, ProFeature.NOTE_STYLES),
+        needsSummary = true,
+    ),
     ComparisonRow(R.string.paywall_pro_export, R.string.paywall_pro_export_hint, setOf(ProFeature.DOCUMENT_EXPORT)),
-    ComparisonRow(R.string.paywall_pro_suggestions, R.string.paywall_pro_suggestions_hint, setOf(ProFeature.SMART_SUGGESTIONS)),
+    ComparisonRow(
+        R.string.paywall_pro_suggestions,
+        R.string.paywall_pro_suggestions_hint,
+        setOf(ProFeature.SMART_SUGGESTIONS),
+        needsSummary = true,
+    ),
     ComparisonRow(R.string.paywall_pro_import, R.string.paywall_pro_import_hint, setOf(ProFeature.AUDIO_IMPORT)),
-    ComparisonRow(R.string.paywall_pro_folders, R.string.paywall_pro_folders_hint, setOf(ProFeature.FOLDER_STYLES, ProFeature.FOLDERS)),
+    ComparisonRow(
+        R.string.paywall_pro_folders,
+        R.string.paywall_pro_folders_hint,
+        setOf(ProFeature.FOLDER_STYLES, ProFeature.FOLDERS),
+        isHintAboutStyles = true,
+    ),
     ComparisonRow(R.string.paywall_pro_backup, R.string.paywall_pro_backup_hint, setOf(ProFeature.BACKUP_AUDIO)),
 )
 
-internal fun sortedRows(highlighted: ProFeature): List<ComparisonRow> =
-    comparisonRows.sortedWith(compareBy({ highlighted !in it.features }, { !it.isPro }))
+internal fun sortedRows(highlighted: ProFeature, isSummaryAvailable: Boolean): List<ComparisonRow> =
+    comparisonRows
+        .mapNotNull { it.forPhone(isSummaryAvailable) }
+        .sortedWith(compareBy({ highlighted !in it.features }, { !it.isPro }))
+
+internal val PaywallUiState.shownTrialRecap: List<ProTrialUsageCount>
+    get() = if (isSummaryAvailable) trialRecap else trialRecap.filterNot { it.usage.needsSummary }
+
+private val ProTrialUsage.needsSummary: Boolean
+    get() = when (this) {
+        ProTrialUsage.PDF_EXPORTS, ProTrialUsage.WORD_EXPORTS, ProTrialUsage.IMPORTS, ProTrialUsage.AUDIO_BACKUPS -> false
+        ProTrialUsage.MEETING_NOTES, ProTrialUsage.VISIT_NOTES, ProTrialUsage.LEGAL_NOTES, ProTrialUsage.EMAIL_NOTES,
+        ProTrialUsage.CUSTOM_STYLE_NOTES, ProTrialUsage.CALENDAR_EVENTS, ProTrialUsage.FOLDER_STYLES,
+        -> true
+    }
 
 @Composable
 internal fun ProOfferUi.priceLabel(): String = when (plan) {
@@ -75,7 +117,7 @@ internal fun ProOfferUi?.buyNowLabelRes(): Int =
 
 internal fun PaywallUiState.headlineRes(): Int = when {
     feature != ProFeature.TRIAL_ENDED -> feature.headlineRes()
-    trialRecap.isEmpty() -> R.string.paywall_trial_ended_title
+    shownTrialRecap.isEmpty() -> R.string.paywall_trial_ended_title
     else -> R.string.paywall_trial_recap_title
 }
 
@@ -83,7 +125,7 @@ internal fun PaywallUiState.taglineRes(): Int = when {
     feature == ProFeature.GENERAL -> R.string.paywall_tagline
     feature == ProFeature.FREE_TRIAL -> R.string.paywall_trial_intro_tagline
     feature != ProFeature.TRIAL_ENDED -> R.string.paywall_context_tagline
-    trialRecap.isEmpty() -> R.string.paywall_trial_ended_body
+    shownTrialRecap.isEmpty() -> R.string.paywall_trial_ended_body
     else -> R.string.paywall_trial_recap_tagline
 }
 

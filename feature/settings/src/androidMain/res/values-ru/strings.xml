@@ -149,4 +149,9 @@
         <item quantity="other">осталось %d дня</item>
     </plurals>
     <string name="settings_plan_trial_body">Во время пробного периода открыто всё из Pro. Потом Offhand остаётся бесплатным, со стилем «Резюме» и двумя папками.</string>
+    <string name="settings_not_on_this_phone">Недоступно на этом телефоне</string>
+    <string name="settings_summary_unavailable_note">Для резюме, стилей письма и умных подсказок нужно больше памяти, чем есть в этом телефоне. Запись, расшифровки, папки, поиск и отправка заметок работают как обычно.</string>
+    <string name="settings_widget_title">Виджет на главном экране</string>
+    <string name="settings_widget_subtitle">Запись одним касанием</string>
+    <string name="settings_widget_body">Одно касание виджета начинает запись в папку, которую вы для него выберете. Коснитесь ещё раз, чтобы остановить и сохранить.\n\nЧтобы добавить его, нажмите и удерживайте главный экран, выберите «Виджеты» и найдите Offhand.</string>
 </resources>

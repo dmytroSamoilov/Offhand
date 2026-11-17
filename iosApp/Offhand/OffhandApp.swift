@@ -20,6 +20,9 @@ struct OffhandApp: App {
 
     init() {
         OffhandFonts.register()
+        #if UI_TEST
+        SharedModulesKt.requestSmokeDeviceTier(value: Self.smokeDeviceTier)
+        #endif
         NoteFinishCoordinator.registerResumeTask()
         SharedModulesKt.startSharedKoin(
             deps: IosPlatformDeps(
@@ -53,6 +56,15 @@ struct OffhandApp: App {
         TelemetryController.shared.start(isDeveloperBuild: Self.isDeveloperBuild)
         RecordWidgetBridge.shared.start()
     }
+
+    #if UI_TEST
+    private static var smokeDeviceTier: String? {
+        let arguments = ProcessInfo.processInfo.arguments
+        let flagIndex = arguments.firstIndex { $0 == "-smokeDeviceTier" || $0 == "smokeDeviceTier" }
+        if let flagIndex, arguments.indices.contains(flagIndex + 1) { return arguments[flagIndex + 1] }
+        return UserDefaults.standard.string(forKey: "smokeDeviceTier")
+    }
+    #endif
 
     var body: some Scene {
         WindowGroup {

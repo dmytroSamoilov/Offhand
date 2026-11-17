@@ -39,6 +39,7 @@ import com.dmytrosamoilov.offhand.feature.notes.R
 @Immutable
 internal data class NoteRowContext(
     val selection: NoteSelectionUi,
+    val writesSummary: Boolean,
     val openNoteId: Long?,
     val isSearching: Boolean,
     val onOpen: (Long) -> Unit,
@@ -81,7 +82,7 @@ private fun SelectableNoteRow(
     val isSelected = note.id in selection.selectedIds
     NoteRow(
         title = note.rowTitle().highlighted(note.titleHighlights),
-        state = note.rowState(isWaitingForAi = isWaitingForAi, progressPercent = progressPercent),
+        state = note.rowState(isWaitingForAi = isWaitingForAi, writesSummary = context.writesSummary, progressPercent = progressPercent),
         meta = note.meta(showsDay = context.isSearching),
         previewLines = if (context.isSearching) SEARCH_PREVIEW_LINES else 1,
         waveSeed = note.id,
@@ -175,10 +176,10 @@ private fun NoteCardUi.rowTitle(): String = when (status) {
 }
 
 @Composable
-private fun NoteCardUi.rowState(isWaitingForAi: Boolean, progressPercent: Int?): NoteRowState = when (status) {
+private fun NoteCardUi.rowState(isWaitingForAi: Boolean, writesSummary: Boolean, progressPercent: Int?): NoteRowState = when (status) {
     NoteStatusUi.PROCESSING if isWaitingForAi -> NoteRowState.Attention(stringResource(R.string.notes_processing_waiting_preview))
     NoteStatusUi.PROCESSING -> NoteRowState.Processing(
-        text = stringResource(R.string.notes_processing_preview),
+        text = stringResource(if (writesSummary) R.string.notes_processing_preview else R.string.notes_processing_preview_transcript),
         progress = progressPercent?.let { it / PERCENT },
     )
     NoteStatusUi.FAILED -> NoteRowState.Attention(stringResource(R.string.notes_failed_description))
@@ -188,9 +189,17 @@ private fun NoteCardUi.rowState(isWaitingForAi: Boolean, progressPercent: Int?):
 
 @Composable
 private fun NoteCardUi.meta(showsDay: Boolean): String {
-    val time = if (showsDay) "${dayLabel.text()} $time" else time
-    return listOfNotNull(time, durationText, folderName)
-        .joinToString(separator = " ${stringResource(R.string.notes_metadata_separator)} ")
+    val parts = if (showsDay) listOfNotNull("${dayLabel.text()} $time", matchLabel(), folderName) else listOfNotNull(time, durationText, folderName)
+    return parts.joinToString(separator = " ${stringResource(R.string.notes_metadata_separator)} ")
+}
+
+@Composable
+private fun NoteCardUi.matchLabel(): String? = when (matchLocation) {
+    null -> null
+    MatchLocationUi.TITLE -> stringResource(R.string.notes_match_title)
+    MatchLocationUi.SUMMARY -> stringResource(R.string.notes_match_summary)
+    MatchLocationUi.TRANSCRIPT -> matchTime?.let { stringResource(R.string.notes_match_transcript_at, it) }
+        ?: stringResource(R.string.notes_match_transcript)
 }
 
 @Composable

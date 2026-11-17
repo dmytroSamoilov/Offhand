@@ -106,6 +106,8 @@ private fun SettingsEffects(state: SettingsUiState, viewModel: SettingsViewModel
 @Composable
 private fun WritingSection(state: SettingsUiState, viewModel: SettingsViewModel, onStylesClick: () -> Unit) {
     val choices = state.customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) }
+    val isAvailable = state.isSummaryAvailable
+    val unavailable = stringResource(R.string.settings_not_on_this_phone)
     SettingsSection(label = stringResource(R.string.settings_group_writes)) {
         SwitchRow(
             title = stringResource(R.string.settings_transcription_label),
@@ -115,29 +117,33 @@ private fun WritingSection(state: SettingsUiState, viewModel: SettingsViewModel,
         )
         SwitchRow(
             title = stringResource(R.string.settings_summary_label),
-            subtitle = stringResource(R.string.settings_summary_description),
+            subtitle = if (isAvailable) stringResource(R.string.settings_summary_description) else unavailable,
             checked = state.isSummaryEnabled,
             onCheckedChange = viewModel::onSummaryChanged,
-            enabled = state.isTranscriptionEnabled,
+            enabled = state.isTranscriptionEnabled && isAvailable,
         )
         LinkRow(
             title = stringResource(R.string.settings_note_styles_title),
-            subtitle = stringResource(R.string.settings_note_styles_default_value, state.noteStyle.label(choices)),
+            subtitle = if (isAvailable) stringResource(R.string.settings_note_styles_default_value, state.noteStyle.label(choices)) else unavailable,
             onClick = onStylesClick,
+            enabled = isAvailable,
         )
         SwitchRow(
             title = stringResource(R.string.settings_smart_suggestions_label),
-            subtitle = stringResource(R.string.settings_smart_suggestions_description),
-            checked = state.isSmartSuggestionsEnabled,
+            subtitle = if (isAvailable) stringResource(R.string.settings_smart_suggestions_description) else unavailable,
+            checked = state.isSmartSuggestionsEnabled && isAvailable,
             onCheckedChange = viewModel::onSmartSuggestionsChanged,
-            showProBadge = !state.isSmartSuggestionsUnlocked,
+            enabled = isAvailable,
+            showProBadge = !state.isSmartSuggestionsUnlocked && isAvailable,
             showDivider = false,
         )
     }
+    if (!isAvailable) SettingsFootnote(text = stringResource(R.string.settings_summary_unavailable_note))
 }
 
 @Composable
 private fun InAndOutSection(state: SettingsUiState, onBackupClick: () -> Unit, onImportClick: () -> Unit) {
+    var isWidgetHelpVisible by remember { mutableStateOf(false) }
     SettingsSection(label = stringResource(R.string.settings_group_in_out)) {
         LinkRow(
             title = stringResource(R.string.settings_import_audio_title),
@@ -147,12 +153,30 @@ private fun InAndOutSection(state: SettingsUiState, onBackupClick: () -> Unit, o
             showProBadge = !state.isAudioImportUnlocked,
         )
         LinkRow(
+            title = stringResource(R.string.settings_widget_title),
+            subtitle = stringResource(R.string.settings_widget_subtitle),
+            onClick = { isWidgetHelpVisible = true },
+            showProBadge = state.pro == ProStatusUi.Free,
+        )
+        LinkRow(
             title = stringResource(R.string.settings_backup_title),
             subtitle = stringResource(R.string.settings_backup_subtitle),
             onClick = onBackupClick,
             showDivider = false,
         )
     }
+    if (isWidgetHelpVisible) WidgetHelpDialog(onDismiss = { isWidgetHelpVisible = false })
+}
+
+@Composable
+private fun WidgetHelpDialog(onDismiss: () -> Unit) {
+    OffhandDialog(
+        title = stringResource(R.string.settings_widget_title),
+        body = stringResource(R.string.settings_widget_body),
+        onDismissRequest = onDismiss,
+        confirmLabel = stringResource(R.string.settings_import_dismiss),
+        onConfirm = onDismiss,
+    )
 }
 
 @Composable

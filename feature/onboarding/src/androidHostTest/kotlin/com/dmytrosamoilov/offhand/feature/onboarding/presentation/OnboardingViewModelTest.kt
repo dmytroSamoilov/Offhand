@@ -31,8 +31,10 @@ class OnboardingViewModelTest {
 
     private val capableDevice =
         DeviceCapability(totalRamMb = 12 * 1024, availableRamMb = 6 * 1024, cpuCores = 8)
+    private val midDevice =
+        DeviceCapability(totalRamMb = 3_660, availableRamMb = 1_800, cpuCores = 8)
     private val weakDevice =
-        DeviceCapability(totalRamMb = 4 * 1024, availableRamMb = 2 * 1024, cpuCores = 4)
+        DeviceCapability(totalRamMb = 1_850, availableRamMb = 900, cpuCores = 4)
 
     private val deviceCapabilityChecker: DeviceCapabilityChecker = mockk()
     private val setAppLockEnabled: SetAppLockEnabledUseCase = mockk(relaxed = true)
@@ -74,8 +76,9 @@ class OnboardingViewModelTest {
 
         val state = viewModel.uiState.value
         assertEquals(OnboardingStep.DEVICE_INCOMPATIBLE, state.step)
-        assertEquals("4.0", state.deviceSpecs?.totalRamGb)
-        assertEquals("5.0", state.deviceSpecs?.requiredRamGb)
+        assertEquals("1.8", state.deviceSpecs?.totalRamGb)
+        assertEquals("3", state.deviceSpecs?.requiredRamGb)
+        assertEquals(false, state.deviceSpecs?.isRamSatisfied)
         assertEquals(listOf("device_unsupported"), tracked.map { it.name })
         verify(exactly = 0) { modelDownloadLauncher.startIfAllowed() }
     }
@@ -86,6 +89,24 @@ class OnboardingViewModelTest {
 
         assertEquals(OnboardingStep.WELCOME, viewModel.uiState.value.step)
         verify(exactly = 1) { modelDownloadLauncher.startIfAllowed() }
+    }
+
+    @Test
+    fun `a middle-tier phone first learns that summaries are off, then reaches the welcome screen`() = runTest(dispatcher) {
+        val viewModel = viewModel(midDevice)
+
+        assertEquals(OnboardingStep.TRANSCRIPTS_ONLY, viewModel.uiState.value.step)
+        assertEquals(false, viewModel.uiState.value.isSummaryAvailable)
+        verify(exactly = 1) { modelDownloadLauncher.startIfAllowed() }
+
+        viewModel.onContinueWithTranscriptsClicked()
+
+        assertEquals(OnboardingStep.WELCOME, viewModel.uiState.value.step)
+        assertEquals(
+            listOf("device_transcripts_only", "onboarding_step"),
+            tracked.map { it.name },
+        )
+        assertEquals(AnalyticsEvents.onboardingStep("transcripts_only"), tracked.last())
     }
 
     @Test

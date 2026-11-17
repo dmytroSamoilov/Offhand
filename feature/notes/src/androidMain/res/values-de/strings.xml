@@ -20,6 +20,7 @@
     <string name="notes_pause_description">Wiedergabe pausieren</string>
     <string name="notes_processing_title">Wird verarbeitet…</string>
     <string name="notes_processing_preview">Wird auf deinem Handy transkribiert und zusammengefasst. Du kannst die Aufnahme schon abspielen.</string>
+    <string name="notes_processing_preview_transcript">Wird auf deinem Handy transkribiert. Du kannst die Aufnahme schon abspielen.</string>
     <string name="notes_processing_transcribing">Deine Aufnahme wird transkribiert… Der Text erscheint hier automatisch.</string>
     <string name="notes_processing_structuring">Deine Zusammenfassung wird geschrieben…</string>
     <string name="notes_processing_waiting_preview">Wartet, bis deine KI auf dem Gerät heruntergeladen ist. Du kannst die Aufnahme schon abspielen.</string>
@@ -135,4 +136,12 @@
         <item quantity="one">%1$d Notiz verschieben</item>
         <item quantity="other">%1$d Notizen verschieben</item>
     </plurals>
+    <plurals name="notes_move_rewrite_caption">
+        <item quantity="one">%1$s schreibt Notizen im Stil „%2$s“, deshalb wird diese Notiz neu geschrieben. Dein Transkript bleibt, wie es ist.</item>
+        <item quantity="other">%1$s schreibt Notizen im Stil „%2$s“, deshalb werden diese %3$d Notizen neu geschrieben. Deine Transkripte bleiben, wie sie sind.</item>
+    </plurals>
+    <string name="notes_match_title">Im Titel</string>
+    <string name="notes_match_summary">In der Zusammenfassung</string>
+    <string name="notes_match_transcript">Im Transkript</string>
+    <string name="notes_match_transcript_at">Im Transkript bei %1$s</string>
 </resources>

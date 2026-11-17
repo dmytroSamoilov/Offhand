@@ -5,7 +5,9 @@ import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.device.DeviceCapabilityChecker
-import com.dmytrosamoilov.offhand.core.device.isLocalLlmCapable
+import com.dmytrosamoilov.offhand.core.device.DeviceCapability
+import com.dmytrosamoilov.offhand.core.device.DeviceTier
+import com.dmytrosamoilov.offhand.core.device.tier
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.CompleteOnboardingUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetAppLockEnabledUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +30,12 @@ class OnboardingViewModel(
         evaluateDevice()
     }
 
+    fun onContinueWithTranscriptsClicked() {
+        if (uiState.value.step != OnboardingStep.TRANSCRIPTS_ONLY) return
+        analyticsTracker.track(AnalyticsEvents.onboardingStep(OnboardingChoice.TRANSCRIPTS_ONLY.analyticsName))
+        mutableUiState.update { it.copy(step = OnboardingStep.WELCOME) }
+    }
+
     fun onRecordFirstNoteClicked() {
         finish(OnboardingChoice.RECORD_FIRST_NOTE)
     }
@@ -48,18 +56,27 @@ class OnboardingViewModel(
 
     private fun evaluateDevice() {
         val capability = deviceCapabilityChecker.snapshot()
-        if (capability.isLocalLlmCapable()) {
-            modelDownloadLauncher.startIfAllowed()
-            mutableUiState.update { it.copy(step = OnboardingStep.WELCOME) }
-            return
-        }
-        analyticsTracker.track(
-            AnalyticsEvents.deviceUnsupported(capability.totalRamMb / MB_PER_GB, capability.cpuCores),
-        )
-        mutableUiState.update {
-            it.copy(step = OnboardingStep.DEVICE_INCOMPATIBLE, deviceSpecs = capability.toDeviceSpecsUi())
+        when (capability.tier()) {
+            DeviceTier.FULL -> startWith(OnboardingStep.WELCOME, isSummaryAvailable = true)
+            DeviceTier.TRANSCRIPTS_ONLY -> {
+                analyticsTracker.track(AnalyticsEvents.deviceTranscriptsOnly(capability.ramGb(), capability.cpuCores))
+                startWith(OnboardingStep.TRANSCRIPTS_ONLY, isSummaryAvailable = false)
+            }
+            DeviceTier.UNSUPPORTED -> {
+                analyticsTracker.track(AnalyticsEvents.deviceUnsupported(capability.ramGb(), capability.cpuCores))
+                mutableUiState.update {
+                    it.copy(step = OnboardingStep.DEVICE_INCOMPATIBLE, deviceSpecs = capability.toDeviceSpecsUi())
+                }
+            }
         }
     }
+
+    private fun startWith(step: OnboardingStep, isSummaryAvailable: Boolean) {
+        modelDownloadLauncher.startIfAllowed()
+        mutableUiState.update { it.copy(step = step, isSummaryAvailable = isSummaryAvailable) }
+    }
+
+    private fun DeviceCapability.ramGb(): Long = totalRamMb / MB_PER_GB
 }
 
 private const val MB_PER_GB = 1024L

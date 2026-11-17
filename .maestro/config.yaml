@@ -21,4 +21,5 @@ executionOrder:
     - 16-settings
     - 17-delete-note
     - 19-record-without-ai
+    - 20-transcripts-only
     - 18-onboarding-branches

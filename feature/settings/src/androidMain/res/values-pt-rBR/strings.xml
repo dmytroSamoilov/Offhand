@@ -147,4 +147,9 @@
         <item quantity="other">restam %d dias</item>
     </plurals>
     <string name="settings_plan_trial_body">Durante o teste grátis tudo do Pro fica liberado. Depois o Offhand continua grátis, com o estilo Resumo e duas pastas.</string>
+    <string name="settings_not_on_this_phone">Indisponível neste celular</string>
+    <string name="settings_summary_unavailable_note">Resumos, estilos de escrita e sugestões inteligentes precisam de mais memória do que este celular tem. Gravação, transcrições, pastas, busca e compartilhamento funcionam normalmente.</string>
+    <string name="settings_widget_title">Widget da tela inicial</string>
+    <string name="settings_widget_subtitle">Grave com um toque</string>
+    <string name="settings_widget_body">Um toque no widget começa a gravar, na pasta que você escolher para ele. Toque de novo para parar e salvar.\n\nPara adicionar, toque e segure a tela inicial, toque em Widgets e procure o Offhand.</string>
 </resources>

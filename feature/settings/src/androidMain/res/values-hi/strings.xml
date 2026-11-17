@@ -145,4 +145,9 @@
         <item quantity="other">%d दिन बाकी</item>
     </plurals>
     <string name="settings_plan_trial_body">मुफ़्त ट्रायल के दौरान Pro की हर सुविधा खुली है। उसके बाद Offhand मुफ़्त रहता है, सारांश स्टाइल और दो फ़ोल्डर के साथ।</string>
+    <string name="settings_not_on_this_phone">इस फ़ोन पर उपलब्ध नहीं</string>
+    <string name="settings_summary_unavailable_note">सारांश, लेखन शैलियों और स्मार्ट सुझावों के लिए इस फ़ोन से ज़्यादा मेमोरी चाहिए। रिकॉर्डिंग, ट्रांसक्रिप्ट, फ़ोल्डर, खोज और शेयर करना सब काम करते हैं।</string>
+    <string name="settings_widget_title">होम स्क्रीन विजेट</string>
+    <string name="settings_widget_subtitle">एक टैप में रिकॉर्ड करें</string>
+    <string name="settings_widget_body">विजेट पर एक टैप से रिकॉर्डिंग शुरू होती है, उस फ़ोल्डर में जो आप उसके लिए चुनते हैं। रोककर सहेजने के लिए फिर से टैप करें।\n\nइसे जोड़ने के लिए होम स्क्रीन को दबाकर रखें, विजेट पर टैप करें और Offhand ढूंढें।</string>
 </resources>

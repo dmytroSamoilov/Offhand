@@ -145,4 +145,9 @@
         <item quantity="other">noch %d Tage</item>
     </plurals>
     <string name="settings_plan_trial_body">Während deiner kostenlosen Testphase ist alles aus Pro freigeschaltet. Danach bleibt Offhand kostenlos, mit dem Stil Zusammenfassung und zwei Ordnern.</string>
+    <string name="settings_not_on_this_phone">Auf diesem Handy nicht verfügbar</string>
+    <string name="settings_summary_unavailable_note">Zusammenfassungen, Schreibstile und smarte Vorschläge brauchen mehr Arbeitsspeicher, als dieses Handy hat. Aufnehmen, Transkripte, Ordner, Suche und Teilen funktionieren wie gewohnt.</string>
+    <string name="settings_widget_title">Widget für den Startbildschirm</string>
+    <string name="settings_widget_subtitle">Mit einem Tipp aufnehmen</string>
+    <string name="settings_widget_body">Ein Tipp auf das Widget startet eine Aufnahme, in den Ordner, den du dafür auswählst. Tippe noch einmal, um zu stoppen und zu speichern.\n\nSo fügst du es hinzu: Halte den Startbildschirm gedrückt, tippe auf Widgets und suche Offhand.</string>
 </resources>

@@ -23,6 +23,7 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColo
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsSummaryAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.presentation.AboutSupportViewModel
 import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStyleEditorViewModel
@@ -59,6 +60,7 @@ val featureSettingsModule = module {
     factoryOf(::SetProOverrideUseCase)
     factoryOf(::SetSmartSuggestionsEnabledUseCase)
     factoryOf(::SetTelemetryConsentUseCase)
+    factoryOf(::IsSummaryAvailableUseCase)
     viewModel {
         SettingsViewModel(
             observeDynamicColor = get(),

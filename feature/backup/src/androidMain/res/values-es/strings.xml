@@ -40,4 +40,6 @@
     <string name="backup_save_button">Guardar copia</string>
     <string name="backup_done">Listo</string>
     <string name="backup_subtitle">Offhand crea un único archivo cifrado. Tú decides dónde se guarda.</string>
+    <string name="backup_size_estimate">Unos %1$s</string>
+    <string name="backup_include_audio_size">Añade unos %1$s</string>
 </resources>

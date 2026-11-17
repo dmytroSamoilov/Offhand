@@ -147,4 +147,9 @@
         <item quantity="other">quedan %d días</item>
     </plurals>
     <string name="settings_plan_trial_body">Durante la prueba gratis todo lo de Pro está desbloqueado. Después Offhand sigue siendo gratis, con el estilo Resumen y dos carpetas.</string>
+    <string name="settings_not_on_this_phone">No disponible en este teléfono</string>
+    <string name="settings_summary_unavailable_note">Los resúmenes, los estilos de escritura y las sugerencias inteligentes necesitan más memoria de la que tiene este teléfono. Grabar, las transcripciones, las carpetas, la búsqueda y compartir funcionan como siempre.</string>
+    <string name="settings_widget_title">Widget de la pantalla de inicio</string>
+    <string name="settings_widget_subtitle">Graba con un toque</string>
+    <string name="settings_widget_body">Un toque en el widget empieza a grabar, en la carpeta que elijas para él. Tócalo otra vez para detener y guardar.\n\nPara añadirlo, mantén pulsada la pantalla de inicio, toca Widgets y busca Offhand.</string>
 </resources>

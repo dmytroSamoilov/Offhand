@@ -41,4 +41,6 @@
     <string name="backup_save_button">Save backup</string>
     <string name="backup_done">Done</string>
     <string name="backup_subtitle">Offhand makes one encrypted file. You decide where it is kept.</string>
+    <string name="backup_size_estimate">About %1$s</string>
+    <string name="backup_include_audio_size">Adds about %1$s</string>
 </resources>

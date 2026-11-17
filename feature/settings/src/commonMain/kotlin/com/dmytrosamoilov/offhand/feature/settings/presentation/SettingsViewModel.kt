@@ -87,7 +87,11 @@ class SettingsViewModel(
         collect(observeImportAllowance()) { allowance -> withImportAllowance(allowance) }
         collect(observeSmartSuggestionsEnabled()) { enabled -> copy(isSmartSuggestionsEnabled = enabled) }
         collect(observeNoteFeatures()) { features ->
-            copy(isTranscriptionEnabled = features.isTranscriptionEnabled, isSummaryEnabled = features.writesSummary)
+            copy(
+                isTranscriptionEnabled = features.isTranscriptionEnabled,
+                isSummaryEnabled = features.writesSummary,
+                isSummaryAvailable = features.isSummaryAvailable,
+            )
         }
         collect(observeProStatus()) { status -> copy(pro = status.toUi(), isSmartSuggestionsUnlocked = status.isPro) }
         if (buildInfo.isDeveloperBuild) collect(observeProOverride()) { override -> copy(proOverride = override) }
@@ -128,7 +132,8 @@ class SettingsViewModel(
     // A summary is written from the transcript, so its switch only counts
     // while transcription is on.
     fun onSummaryChanged(enabled: Boolean) {
-        if (mutableUiState.value.isTranscriptionEnabled) setNoteFeature(NoteFeature.SUMMARY, enabled)
+        val state = mutableUiState.value
+        if (state.isTranscriptionEnabled && state.isSummaryAvailable) setNoteFeature(NoteFeature.SUMMARY, enabled)
     }
 
     private fun setNoteFeature(feature: NoteFeature, enabled: Boolean) {
@@ -140,6 +145,7 @@ class SettingsViewModel(
 
     // Off is free for everyone; switching it on is the Pro action.
     fun onSmartSuggestionsChanged(enabled: Boolean) {
+        if (!mutableUiState.value.isSummaryAvailable) return
         launchSafely(showLoading = false) {
             if (enabled && !proUpgradeGate.requirePro(ProFeature.SMART_SUGGESTIONS)) return@launchSafely
             setSmartSuggestionsEnabled(enabled)

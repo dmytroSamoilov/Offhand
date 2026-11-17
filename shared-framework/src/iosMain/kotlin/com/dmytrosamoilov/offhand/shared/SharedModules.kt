@@ -9,6 +9,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsSink
 import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
 import com.dmytrosamoilov.offhand.core.common.NetworkMonitor
+import com.dmytrosamoilov.offhand.core.device.DeviceTierProvider
 import com.dmytrosamoilov.offhand.core.data.di.PLATFORM_PRO_STORE
 import com.dmytrosamoilov.offhand.core.data.di.coreDataModule
 import com.dmytrosamoilov.offhand.core.data.domain.ProStore
@@ -31,6 +32,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportStaging
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioRecorder
 import com.dmytrosamoilov.offhand.feature.recording.domain.DefaultNoteTitleProvider
 import com.dmytrosamoilov.offhand.feature.settings.di.featureSettingsModule
+import com.dmytrosamoilov.offhand.testing.fakes.SmokeDeviceTier
 import com.dmytrosamoilov.offhand.testing.fakes.smokeFakesModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -71,6 +73,10 @@ fun startSharedKoin(deps: IosPlatformDeps, useSmokeFakes: Boolean) {
     startKoin {
         modules(sharedIosModules(deps) + if (useSmokeFakes) listOf(smokeFakesModule) else emptyList())
     }
+}
+
+fun requestSmokeDeviceTier(value: String?) {
+    SmokeDeviceTier.requested = value
 }
 
 fun sharedIosModules(deps: IosPlatformDeps): List<Module> = listOf(
@@ -118,6 +124,7 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
         IosModelDownloadController(
             get(),
             get(),
+            get(),
             CoroutineScope(SupervisorJob() + Dispatchers.Default),
         )
     }
@@ -147,6 +154,7 @@ class IosNoteShareLabelsProvider(
 class IosModelDownloadController(
     private val modelManager: ModelManager,
     private val speechToText: SpeechToText,
+    private val deviceTier: DeviceTierProvider,
     private val scope: CoroutineScope,
 ) : ModelDownloadController {
 
@@ -159,7 +167,7 @@ class IosModelDownloadController(
         if (run?.isActive == true) return
         run = scope.launch {
             runCatching { speechToText.download() }
-            runCatching { modelManager.ensureModelAvailable() }
+            if (deviceTier.writesSummaries()) runCatching { modelManager.ensureModelAvailable() }
         }
     }
 }

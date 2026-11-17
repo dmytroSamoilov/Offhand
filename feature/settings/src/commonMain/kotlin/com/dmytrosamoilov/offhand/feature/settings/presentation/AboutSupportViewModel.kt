@@ -7,6 +7,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.ModelState
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDeveloperOptionsUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsSummaryAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.core.common.DecimalFormatter
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,10 +20,11 @@ class AboutSupportViewModel(
     private val modelManager: ModelManager,
     observeDeveloperOptions: ObserveDeveloperOptionsUseCase,
     private val setDeveloperOptions: SetDeveloperOptionsUseCase,
+    isSummaryAvailable: IsSummaryAvailableUseCase,
     buildInfo: BuildInfo,
 ) : BaseViewModel() {
 
-    private val mutableUiState = MutableStateFlow(AboutSupportUiState())
+    private val mutableUiState = MutableStateFlow(AboutSupportUiState(isSummaryAvailable = isSummaryAvailable()))
     val uiState: StateFlow<AboutSupportUiState> = mutableUiState.asStateFlow()
 
     init {

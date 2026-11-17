@@ -8,6 +8,7 @@ data class AboutSupportUiState(
     val isDeveloperSectionVisible: Boolean = false,
     val isDeveloperOptionsEnabled: Boolean = false,
     val isDeleteModelConfirmationVisible: Boolean = false,
+    val isSummaryAvailable: Boolean = true,
 )
 
 data class ModelOptionUi(

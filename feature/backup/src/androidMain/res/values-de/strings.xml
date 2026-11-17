@@ -40,4 +40,6 @@
     <string name="backup_save_button">Sicherung speichern</string>
     <string name="backup_done">Fertig</string>
     <string name="backup_subtitle">Offhand erstellt eine verschlüsselte Datei. Du entscheidest, wo sie liegt.</string>
+    <string name="backup_size_estimate">Etwa %1$s</string>
+    <string name="backup_include_audio_size">Fügt etwa %1$s hinzu</string>
 </resources>

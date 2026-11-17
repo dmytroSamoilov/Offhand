@@ -60,8 +60,10 @@ internal fun ProLabel() {
 }
 
 @Composable
-internal fun BenefitLines(highlighted: ProFeature) {
-    val rows = remember(highlighted) { sortedRows(highlighted).filter { it.isPro }.take(BENEFIT_LINES) }
+internal fun BenefitLines(highlighted: ProFeature, isSummaryAvailable: Boolean) {
+    val rows = remember(highlighted, isSummaryAvailable) {
+        sortedRows(highlighted, isSummaryAvailable).filter { it.isPro }.take(BENEFIT_LINES)
+    }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         rows.forEach { row ->
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -176,10 +178,10 @@ private fun PlanTitle(offer: ProOfferUi) {
 private fun ProOfferUi.hints(): String = listOfNotNull(hintLabel(), secondHintLabel()).joinToString(separator = " · ")
 
 @Composable
-internal fun ComparisonTable(highlighted: ProFeature, isCollapsible: Boolean) {
+internal fun ComparisonTable(highlighted: ProFeature, isSummaryAvailable: Boolean, isCollapsible: Boolean) {
     var isExpanded by rememberSaveable { mutableStateOf(!isCollapsible) }
     Column(modifier = Modifier.fillMaxWidth().animateContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        if (isExpanded) ComparisonCard(highlighted = highlighted)
+        if (isExpanded) ComparisonCard(highlighted = highlighted, isSummaryAvailable = isSummaryAvailable)
         if (isCollapsible) {
             PlainTextButton(
                 text = stringResource(if (isExpanded) R.string.paywall_benefits_collapse else R.string.paywall_benefits_expand),
@@ -190,8 +192,8 @@ internal fun ComparisonTable(highlighted: ProFeature, isCollapsible: Boolean) {
 }
 
 @Composable
-private fun ComparisonCard(highlighted: ProFeature) {
-    val rows = remember(highlighted) { sortedRows(highlighted) }
+private fun ComparisonCard(highlighted: ProFeature, isSummaryAvailable: Boolean) {
+    val rows = remember(highlighted, isSummaryAvailable) { sortedRows(highlighted, isSummaryAvailable) }
     SurfaceCard {
         Column(modifier = Modifier.padding(vertical = 8.dp)) {
             TableHeader()

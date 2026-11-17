@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
+import com.dmytrosamoilov.offhand.core.device.DeviceTierProvider
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
@@ -18,7 +19,18 @@ class GetFolderStyleUseCaseTest {
 
     private val folders: FoldersRepository = mockk()
     private val entitlements: ProStatusRepository = mockk()
-    private val useCase = GetFolderStyleUseCase(folders, entitlements)
+    private var writesSummaries = true
+    private val deviceTier: DeviceTierProvider = mockk { every { writesSummaries() } answers { writesSummaries } }
+    private val useCase = GetFolderStyleUseCase(folders, entitlements, deviceTier)
+
+    @Test
+    fun `a transcripts-only phone never hands out a folder style`() = runTest {
+        writesSummaries = false
+        every { folders.observeFolders() } returns flowOf(listOf(meetings))
+        every { entitlements.observeStatus() } returns flowOf(ProStatus.LIFETIME)
+
+        assertNull(useCase(3L))
+    }
     private val meetings = Folder(id = 3, name = "Meetings", createdAtEpochMs = 0, style = NoteStyleRef.BuiltIn(NotePreset.MEETING))
 
     @Test

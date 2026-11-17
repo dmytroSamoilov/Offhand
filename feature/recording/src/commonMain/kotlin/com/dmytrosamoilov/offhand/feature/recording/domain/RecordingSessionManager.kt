@@ -256,7 +256,7 @@ class RecordingSessionManager(
         if (!claimProcessing(noteId)) return
         scope.launch {
             processingMutex.withLock {
-                val note = getNote(noteId)?.takeIf { it.transcript.isNotBlank() }
+                val note = getNote(noteId)?.takeIf { it.transcript.isNotBlank() && getNoteFeatures().isSummaryAvailable }
                 if (note == null || markNoteProcessing(noteId) == null) {
                     mutableProcessingNoteIds.update { it - noteId }
                     return@withLock
@@ -327,7 +327,7 @@ class RecordingSessionManager(
         scope.launch {
             processingMutex.withLock {
                 try {
-                    suggestEventsLocked(noteId)
+                    if (getNoteFeatures().isSummaryAvailable) suggestEventsLocked(noteId)
                 } finally {
                     mutableProcessingNoteIds.update { it - noteId }
                 }

@@ -49,7 +49,7 @@ fun AboutSupportScreen(
             if (state.isDeveloperSectionVisible) {
                 DeveloperSection(isEnabled = state.isDeveloperOptionsEnabled, onEnabledChanged = viewModel::onDeveloperOptionsChanged)
             }
-            if (state.isDeveloperOptionsEnabled) DeveloperTools(state = state, viewModel = viewModel)
+            if (state.isDeveloperOptionsEnabled && state.isSummaryAvailable) DeveloperTools(state = state, viewModel = viewModel)
             AboutSection()
         }
     }

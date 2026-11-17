@@ -15,6 +15,7 @@ data class PaywallUiState(
     val message: PaywallMessageUi? = null,
     val trialRecap: List<ProTrialUsageCount> = emptyList(),
     val trialDaysLeft: Int? = null,
+    val isSummaryAvailable: Boolean = true,
 ) {
     val selectedOffer: ProOfferUi?
         get() = offers.firstOrNull { it.plan == selectedPlan }

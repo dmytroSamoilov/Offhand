@@ -11,6 +11,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.GetProTrialDaysLeftUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.GetProTrialRecapUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.IsSummaryAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.LoadProOffersUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.ObserveProStatusUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.PurchaseProUseCase
@@ -29,11 +30,12 @@ class PaywallViewModel(
     private val observeProStatus: ObserveProStatusUseCase,
     private val getProTrialRecap: GetProTrialRecapUseCase,
     private val getProTrialDaysLeft: GetProTrialDaysLeftUseCase,
+    isSummaryAvailable: IsSummaryAvailableUseCase,
     private val proUpgradeGate: ProUpgradeGate,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
-    private val mutableUiState = MutableStateFlow(PaywallUiState())
+    private val mutableUiState = MutableStateFlow(PaywallUiState(isSummaryAvailable = isSummaryAvailable()))
     private var isDismissalTracked = false
 
     val uiState: StateFlow<PaywallUiState> = mutableUiState.asStateFlow()

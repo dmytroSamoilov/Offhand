@@ -10,9 +10,13 @@ enum class NoteFeature {
 data class NoteFeatures(
     val isTranscriptionEnabled: Boolean = true,
     val isSummaryEnabled: Boolean = true,
+    val isSummaryAvailable: Boolean = true,
 ) {
-    val writesSummary: Boolean get() = isTranscriptionEnabled && isSummaryEnabled
+    val writesSummary: Boolean get() = isTranscriptionEnabled && isSummaryEnabled && isSummaryAvailable
 }
 
-val UserPreferences.noteFeatures: NoteFeatures
-    get() = NoteFeatures(isTranscriptionEnabled = transcriptionEnabled, isSummaryEnabled = summaryEnabled)
+fun UserPreferences.noteFeatures(isSummaryAvailable: Boolean): NoteFeatures = NoteFeatures(
+    isTranscriptionEnabled = transcriptionEnabled,
+    isSummaryEnabled = summaryEnabled,
+    isSummaryAvailable = isSummaryAvailable,
+)

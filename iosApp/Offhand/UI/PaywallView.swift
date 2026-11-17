@@ -13,7 +13,8 @@ struct PaywallView: View {
         mode: .opening,
         message: nil,
         trialRecap: [],
-        trialDaysLeft: nil
+        trialDaysLeft: nil,
+        isSummaryAvailable: true
     )
     @State private var isComparisonExpanded = false
 
@@ -55,11 +56,14 @@ struct PaywallView: View {
             topBar(showsRestore: true)
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    PaywallHeader(title: PaywallCopy.headline(for: state), message: PaywallCopy.tagline(for: state))
-                    if !state.trialRecap.isEmpty {
-                        TrialRecap(lines: state.trialRecap).padding(.top, 22)
+                    PaywallHeader(
+                        title: PaywallCopy.headline(for: state, recap: trialRecap),
+                        message: PaywallCopy.tagline(for: state.feature, recap: trialRecap)
+                    )
+                    if !trialRecap.isEmpty {
+                        TrialRecap(lines: trialRecap).padding(.top, 22)
                     }
-                    BenefitLines(titles: ComparisonRows.sorted(for: state.feature).filter(\.isPro).prefix(3).map(\.title))
+                    BenefitLines(titles: comparisonRows.filter(\.isPro).prefix(3).map(\.title))
                         .padding(.top, 22)
                     planSection.padding(.top, OffhandSpacing.screen)
                     comparison.padding(.top, 12)
@@ -85,12 +89,24 @@ struct PaywallView: View {
                         title: String(localized: "You're on Offhand Pro"),
                         message: String(localized: "Everything in the Pro column is yours.")
                     )
-                    ComparisonTable(highlighted: .general).padding(.top, OffhandSpacing.screen)
+                    ComparisonTable(
+                        rows: ComparisonRows.sorted(for: .general, isSummaryAvailable: state.isSummaryAvailable),
+                        highlighted: .general
+                    )
+                    .padding(.top, OffhandSpacing.screen)
                 }
                 .padding(.horizontal, OffhandSpacing.screen)
                 .padding(.bottom, OffhandSpacing.screen)
             }
         }
+    }
+
+    private var comparisonRows: [ComparisonRows.Row] {
+        ComparisonRows.sorted(for: state.feature, isSummaryAvailable: state.isSummaryAvailable)
+    }
+
+    private var trialRecap: [ProTrialUsageCount] {
+        state.isSummaryAvailable ? state.trialRecap : state.trialRecap.filter { !PaywallCopy.needsSummaries($0.usage) }
     }
 
     private func topBar(showsRestore: Bool) -> some View {
@@ -137,7 +153,7 @@ struct PaywallView: View {
     private var comparison: some View {
         if isComparisonExpanded {
             VStack(spacing: 4) {
-                ComparisonTable(highlighted: state.feature)
+                ComparisonTable(rows: comparisonRows, highlighted: state.feature)
                 PlainTextButton(String(localized: "Show less"), tone: .muted, systemImage: "chevron.up") {
                     withAnimation(OffhandMotion.state) { isComparisonExpanded = false }
                 }
@@ -367,12 +383,12 @@ private struct PlanRow: View {
 }
 
 private struct ComparisonTable: View {
+    let rows: [ComparisonRows.Row]
     let highlighted: ProFeature
 
     private static let columnWidth: CGFloat = 60
 
     var body: some View {
-        let rows = ComparisonRows.sorted(for: highlighted)
         SurfaceCard {
             header
             ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
@@ -450,12 +466,14 @@ private enum ComparisonRows {
         let title: String
         let hint: String?
         let features: Set<ProFeature>
+        var needsSummaries = false
 
         var isPro: Bool { !features.isEmpty }
     }
 
-    static func sorted(for highlighted: ProFeature) -> [Row] {
-        all.enumerated().sorted { first, second in
+    static func sorted(for highlighted: ProFeature, isSummaryAvailable: Bool) -> [Row] {
+        let rows = isSummaryAvailable ? all : transcriptsOnly
+        return rows.enumerated().sorted { first, second in
             let firstRank = rank(of: first.element, highlighted: highlighted)
             let secondRank = rank(of: second.element, highlighted: highlighted)
             return firstRank == secondRank ? first.offset < second.offset : firstRank < secondRank
@@ -467,17 +485,25 @@ private enum ComparisonRows {
         return row.isPro ? 1 : 2
     }
 
+    private static var transcriptsOnly: [Row] {
+        all.filter { !$0.needsSummaries }.map { row in
+            row.features.contains(.folderStyles)
+                ? Row(id: row.id, title: row.title, hint: nil, features: row.features)
+                : row
+        }
+    }
+
     private static var all: [Row] {
         [
-            Row(id: 11, title: String(localized: "Transcript and Summary on every note"), hint: nil, features: []),
+            Row(id: 11, title: String(localized: "Transcript and Summary on every note"), hint: nil, features: [], needsSummaries: true),
             Row(id: 0, title: String(localized: "Private by design"), hint: nil, features: []),
             Row(id: 1, title: String(localized: "Fully offline"), hint: nil, features: []),
             Row(id: 2, title: String(localized: "No ads, no account"), hint: nil, features: []),
             Row(id: 3, title: String(localized: "Unlimited notes and recordings"), hint: nil, features: []),
             Row(id: 4, title: String(localized: "Encrypted backup, search and two folders"), hint: nil, features: []),
-            Row(id: 5, title: String(localized: "Notes in your format"), hint: String(localized: "Meeting notes, Visit report, Legal note, your own styles, and a new style for any note"), features: [.customStyles, .noteStyles]),
+            Row(id: 5, title: String(localized: "Notes in your format"), hint: String(localized: "Meeting notes, Visit report, Legal note, your own styles, and a new style for any note"), features: [.customStyles, .noteStyles], needsSummaries: true),
             Row(id: 6, title: String(localized: "Share polished documents"), hint: String(localized: "PDF and Word, ready for clients, email and print"), features: [.documentExport]),
-            Row(id: 7, title: String(localized: "Never miss a follow-up"), hint: String(localized: "Dates and to-dos straight into your calendar"), features: [.smartSuggestions]),
+            Row(id: 7, title: String(localized: "Never miss a follow-up"), hint: String(localized: "Dates and to-dos straight into your calendar"), features: [.smartSuggestions], needsSummaries: true),
             Row(id: 8, title: String(localized: "Turn any recording or video into a note"), hint: String(localized: "Voice memos, calls, screen recordings and video files without limit (three are free to try)"), features: [.audioImport]),
             Row(id: 9, title: String(localized: "As many folders as you need"), hint: String(localized: "Each with its own writing style"), features: [.folderStyles, .folders]),
             Row(id: 10, title: String(localized: "Backups with your recordings"), hint: String(localized: "Audio included, still encrypted"), features: [.backupAudio]),
@@ -486,19 +512,28 @@ private enum ComparisonRows {
 }
 
 private enum PaywallCopy {
-    static func headline(for state: PaywallUiState) -> String {
+    static func headline(for state: PaywallUiState, recap: [ProTrialUsageCount]) -> String {
         if state.feature == .freeTrial, let daysLeft = state.trialDaysLeft {
             return String.localizedStringWithFormat(String(localized: "Offhand Pro is yours free for %lld more days"), daysLeft.int64Value)
         }
-        guard state.feature == .trialEnded, !state.trialRecap.isEmpty else { return headline(for: state.feature) }
+        guard state.feature == .trialEnded, !recap.isEmpty else { return headline(for: state.feature) }
         return String(localized: "Your 14 days with Offhand Pro")
     }
 
-    static func tagline(for state: PaywallUiState) -> String {
-        guard state.feature == .trialEnded else { return tagline(for: state.feature) }
-        return state.trialRecap.isEmpty
+    static func tagline(for feature: ProFeature, recap: [ProTrialUsageCount]) -> String {
+        guard feature == .trialEnded else { return tagline(for: feature) }
+        return recap.isEmpty
             ? String(localized: "Your 14 days of Offhand Pro are over. Your notes, folders and styles are all still here. You can keep using the free version, or upgrade to keep everything in Pro.")
             : String(localized: "Your trial has ended. Keep all of this with Pro.")
+    }
+
+    static func needsSummaries(_ usage: ProTrialUsage) -> Bool {
+        switch usage {
+        case .meetingNotes, .visitNotes, .legalNotes, .emailNotes, .customStyleNotes, .calendarEvents, .folderStyles:
+            return true
+        case .pdfExports, .wordExports, .imports, .audioBackups:
+            return false
+        }
     }
 
     static func label(for usage: ProTrialUsage) -> String {

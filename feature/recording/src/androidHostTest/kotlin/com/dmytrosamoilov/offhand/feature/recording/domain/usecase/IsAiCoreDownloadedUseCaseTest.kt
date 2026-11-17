@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
+import com.dmytrosamoilov.offhand.core.device.DeviceTierProvider
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechModelState
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
@@ -21,7 +22,17 @@ class IsAiCoreDownloadedUseCaseTest {
     private val speechToText: SpeechToText = mockk {
         every { downloadState } returns speechState
     }
-    private val useCase = IsAiCoreDownloadedUseCase(modelManager, speechToText)
+    private var writesSummaries = true
+    private val deviceTier: DeviceTierProvider = mockk { every { writesSummaries() } answers { writesSummaries } }
+    private val useCase = IsAiCoreDownloadedUseCase(modelManager, speechToText, deviceTier)
+
+    @Test
+    fun `a transcripts-only phone needs only the speech model`() = runTest {
+        writesSummaries = false
+        coEvery { modelManager.isModelDownloaded() } returns false
+
+        assertTrue(useCase())
+    }
 
     @Test
     fun `true when both models are on disk`() = runTest {

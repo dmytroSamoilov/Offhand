@@ -11,7 +11,12 @@ data class BackupUiState(
     val backupStep: BackupStepUi? = null,
     val backupFileName: String = "",
     val operation: BackupOperationUi? = null,
+    val textBytes: Long? = null,
+    val recordingBytes: Long? = null,
 ) {
+    val estimatedBytes: Long?
+        get() = textBytes?.let { text -> text + if (includeAudio) recordingBytes ?: 0L else 0L }
+
     val canStartBackup: Boolean
         get() = passphrase.length >= MIN_PASSPHRASE_LENGTH && passphrase == passphraseConfirmation
 

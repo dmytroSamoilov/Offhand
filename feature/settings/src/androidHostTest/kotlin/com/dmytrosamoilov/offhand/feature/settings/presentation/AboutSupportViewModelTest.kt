@@ -78,6 +78,7 @@ class AboutSupportViewModelTest {
         modelManager = modelManager,
         observeDeveloperOptions = observeDeveloperOptions,
         setDeveloperOptions = setDeveloperOptions,
+        isSummaryAvailable = mockk { every { this@mockk.invoke() } returns true },
         buildInfo = BuildInfo(isDeveloperBuild = isDeveloperBuild),
     )
 

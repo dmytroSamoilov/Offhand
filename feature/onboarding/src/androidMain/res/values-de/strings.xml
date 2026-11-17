@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="onboarding_incompatible_title">Dieses Handy kann Offhand nicht ausführen</string>
-    <string name="onboarding_incompatible_body">Offhand lässt seine KI komplett auf deinem Handy laufen, deshalb wird nie etwas hochgeladen. Dieses Handy erfüllt die Mindestanforderungen nicht.</string>
-    <string name="onboarding_incompatible_ram_label">Arbeitsspeicher (RAM):</string>
-    <string name="onboarding_incompatible_ram_value">%1$s GB — benötigt %2$s GB</string>
-    <string name="onboarding_incompatible_cores_label">CPU-Kerne:</string>
-    <string name="onboarding_incompatible_cores_value">%1$d — benötigt %2$d</string>
 
     <string name="onboarding_notification_download_channel_name">Downloads der KI auf dem Gerät</string>
     <string name="onboarding_notification_status_channel_name">Status der KI auf dem Gerät</string>
@@ -25,4 +19,23 @@
     <string name="onboarding_record_first_note">Erste Notiz aufnehmen</string>
     <string name="onboarding_microphone_hint">Offhand fragt nach Zugriff auf dein Mikrofon.</string>
     <string name="onboarding_look_around">Jetzt nicht, erst umsehen</string>
+    <string name="onboarding_incompatible_title">Offhand läuft nicht auf diesem Handy</string>
+    <string name="onboarding_incompatible_body">Offhand erledigt alles direkt auf dem Handy, und dafür braucht es mehr Arbeitsspeicher, als dieses hat. Wir sagen es dir lieber jetzt, als dir eine App zu geben, die hängt.</string>
+    <string name="onboarding_this_phone">Dieses Handy</string>
+    <string name="onboarding_needs">Offhand braucht</string>
+    <string name="onboarding_memory_value">%1$s GB Arbeitsspeicher</string>
+    <string name="onboarding_needs_value">%1$s GB oder mehr</string>
+    <string name="onboarding_cores_value">%1$d CPU-Kerne</string>
+    <string name="onboarding_needs_cores_value">%1$d CPU-Kerne oder mehr</string>
+    <string name="onboarding_nothing_stored">Auf diesem Handy wurde nichts aufgenommen oder gespeichert.</string>
+    <string name="onboarding_close">Offhand schließen</string>
+    <string name="onboarding_about_phone">Über dieses Handy</string>
+    <string name="onboarding_lite_title">Jedes Wort aufgeschrieben. Zusammenfassungen brauchen ein größeres Handy.</string>
+    <string name="onboarding_lite_body">Offhand nimmt auf diesem Handy auf und transkribiert hier. Eine Zusammenfassung braucht mehr Arbeitsspeicher, als dieses Handy hat, deshalb ist dieser Teil ausgeschaltet.</string>
+    <string name="onboarding_row_recording">Aufnahme und Transkript</string>
+    <string name="onboarding_row_folders">Ordner, Suche, Teilen</string>
+    <string name="onboarding_row_summaries">Zusammenfassungen und Schreibstile</string>
+    <string name="onboarding_included">Enthalten</string>
+    <string name="onboarding_not_here">Nicht auf diesem Handy</string>
+    <string name="onboarding_lite_continue">Mit Transkripten weiter</string>
 </resources>

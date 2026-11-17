@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="onboarding_incompatible_title">Este teléfono no puede ejecutar Offhand</string>
-    <string name="onboarding_incompatible_body">Offhand ejecuta su IA por completo en tu teléfono, así que nunca se sube nada. Este teléfono no cumple los requisitos mínimos.</string>
-    <string name="onboarding_incompatible_ram_label">Memoria (RAM):</string>
-    <string name="onboarding_incompatible_ram_value">%1$s GB — necesita %2$s GB</string>
-    <string name="onboarding_incompatible_cores_label">Núcleos de CPU:</string>
-    <string name="onboarding_incompatible_cores_value">%1$d — necesita %2$d</string>
 
     <string name="onboarding_notification_download_channel_name">Descargas de IA en el dispositivo</string>
     <string name="onboarding_notification_status_channel_name">Estado de la IA en el dispositivo</string>
@@ -25,4 +19,23 @@
     <string name="onboarding_record_first_note">Graba tu primera nota</string>
     <string name="onboarding_microphone_hint">Offhand te pedirá permiso para usar el micrófono.</string>
     <string name="onboarding_look_around">Ahora no, primero quiero echar un vistazo</string>
+    <string name="onboarding_incompatible_title">Offhand no puede funcionar en este teléfono</string>
+    <string name="onboarding_incompatible_body">Offhand hace todo su trabajo en el propio teléfono, y para eso necesita más memoria de la que tiene este. Preferimos decírtelo ahora antes que darte una app que se atasca.</string>
+    <string name="onboarding_this_phone">Este teléfono</string>
+    <string name="onboarding_needs">Offhand necesita</string>
+    <string name="onboarding_memory_value">%1$s GB de memoria</string>
+    <string name="onboarding_needs_value">%1$s GB o más</string>
+    <string name="onboarding_cores_value">%1$d núcleos de CPU</string>
+    <string name="onboarding_needs_cores_value">%1$d núcleos de CPU o más</string>
+    <string name="onboarding_nothing_stored">No se ha grabado ni guardado nada en este teléfono.</string>
+    <string name="onboarding_close">Cerrar Offhand</string>
+    <string name="onboarding_about_phone">Sobre este teléfono</string>
+    <string name="onboarding_lite_title">Cada palabra, por escrito. Los resúmenes necesitan un teléfono más grande.</string>
+    <string name="onboarding_lite_body">Offhand graba y transcribe en este teléfono. Escribir un resumen necesita más memoria de la que tiene este teléfono, así que esa parte está desactivada.</string>
+    <string name="onboarding_row_recording">Grabación y transcripción</string>
+    <string name="onboarding_row_folders">Carpetas, búsqueda, compartir</string>
+    <string name="onboarding_row_summaries">Resúmenes y estilos de escritura</string>
+    <string name="onboarding_included">Incluido</string>
+    <string name="onboarding_not_here">No en este teléfono</string>
+    <string name="onboarding_lite_continue">Continuar con transcripciones</string>
 </resources>

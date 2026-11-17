@@ -65,9 +65,9 @@ fun NotesScreen(
                         state = state,
                         viewModel = viewModel,
                         openNoteId = state.selected?.id?.takeIf { isTwoPane },
-                        onNoteClick = { id ->
+                        onNoteClick = { id, isSearchResult ->
                             focusManager.clearFocus()
-                            viewModel.onNoteSelected(id)
+                            if (isSearchResult) viewModel.onSearchResultSelected(id) else viewModel.onNoteSelected(id)
                             paneScope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) }
                         },
                         bottomBar = { bottomBar { onNewRecording(state.selectedFolderId) } },

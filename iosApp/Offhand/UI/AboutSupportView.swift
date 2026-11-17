@@ -11,7 +11,8 @@ struct AboutSupportView: View {
         selectedModelId: nil,
         isDeveloperSectionVisible: false,
         isDeveloperOptionsEnabled: false,
-        isDeleteModelConfirmationVisible: false
+        isDeleteModelConfirmationVisible: false,
+        isSummaryAvailable: true
     )
 
     var body: some View {
@@ -23,7 +24,7 @@ struct AboutSupportView: View {
                     .padding(.horizontal, 8)
                     .padding(.top, 8)
                     .accessibilityAddTraits(.isHeader)
-                if state.isDeveloperOptionsEnabled {
+                if state.isDeveloperOptionsEnabled && state.isSummaryAvailable {
                     modelGroup
                 }
                 feedbackGroup

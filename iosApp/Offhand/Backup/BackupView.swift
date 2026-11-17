@@ -14,7 +14,9 @@ struct BackupView: View {
         isRestorePassphraseRequested: false,
         backupStep: nil,
         backupFileName: "",
-        operation: nil
+        operation: nil,
+        textBytes: nil,
+        recordingBytes: nil
     )
     @State private var isImporterPresented = false
 
@@ -31,6 +33,9 @@ struct BackupView: View {
                     .foregroundStyle(OffhandColor.ink2)
                     .padding(.top, 8)
                 BackupSectionLabel(text: String(localized: "Make a backup"))
+                if let size = BackupSize.text(state.estimatedBytes) {
+                    BackupSizeLine(text: String(format: String(localized: "About %@"), size))
+                }
                 PrimaryButton(String(localized: "Create backup file"), fillsWidth: true) { viewModel.onBackupFlowStarted() }
                 BackupHint(text: String(localized: "Save an encrypted copy of your notes, folders and recordings to a file. You will need the passphrase to restore it, and it cannot be recovered."))
                 BackupSectionLabel(text: String(localized: "Restore")).padding(.top, 8)
@@ -68,6 +73,7 @@ struct BackupView: View {
                 ProgressOverlay(percent: Int(running.percent))
             }
         }
+        .onAppear { viewModel.refreshSizeEstimate() }
         .task {
             for await newState in viewModel.uiState {
                 state = newState
@@ -136,6 +142,27 @@ private struct BackupSectionLabel: View {
         SectionLabel(text)
             .padding(.top, 26)
             .padding(.bottom, 10)
+    }
+}
+
+private enum BackupSize {
+    static func text(_ bytes: KotlinLong?) -> String? {
+        guard let bytes, bytes.int64Value > 0 else { return nil }
+        return ByteCountFormatter.string(fromByteCount: bytes.int64Value, countStyle: .file)
+    }
+}
+
+private struct BackupSizeLine: View {
+    let text: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(text)
+                .font(.offhandMonoSmall)
+                .foregroundStyle(OffhandColor.ink2)
+            Hairline()
+        }
+        .padding(.bottom, 16)
     }
 }
 
@@ -217,7 +244,7 @@ private struct BackupSheet: View {
         SurfaceCard {
             SwitchRow(
                 title: String(localized: "Include audio recordings"),
-                subtitle: String(localized: "Recordings make the file much larger."),
+                subtitle: recordingsSubtitle,
                 isOn: state.includeAudio,
                 showsProBadge: !state.isAudioUnlocked
             ) { viewModel.onIncludeAudioChanged(enabled: $0) }
@@ -248,6 +275,13 @@ private struct BackupSheet: View {
             .foregroundStyle(OffhandColor.ink2)
         PrimaryButton(String(localized: "Done"), fillsWidth: true) { viewModel.onBackupFlowDismissed() }
             .padding(.top, 8)
+    }
+
+    private var recordingsSubtitle: String {
+        guard let size = BackupSize.text(state.recordingBytes) else {
+            return String(localized: "Recordings make the file much larger.")
+        }
+        return String(format: String(localized: "Adds about %@"), size)
     }
 
     private var sheetTitle: String {

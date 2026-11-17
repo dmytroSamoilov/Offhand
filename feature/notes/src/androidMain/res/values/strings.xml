@@ -22,6 +22,7 @@
     <string name="notes_pause_description">Pause playback</string>
     <string name="notes_processing_title">Processing…</string>
     <string name="notes_processing_preview">Transcribing and summarizing on your phone. You can play the recording already.</string>
+    <string name="notes_processing_preview_transcript">Transcribing on your phone. You can play the recording already.</string>
     <string name="notes_processing_transcribing">Transcribing your recording… The text will appear here automatically.</string>
     <string name="notes_processing_structuring">Writing your summary…</string>
     <string name="notes_processing_waiting_preview">Waiting for your on-device AI to finish downloading. You can play the recording already.</string>
@@ -148,4 +149,12 @@
         <item quantity="one">Move %1$d note</item>
         <item quantity="other">Move %1$d notes</item>
     </plurals>
+    <plurals name="notes_move_rewrite_caption">
+        <item quantity="one">%1$s writes notes in the %2$s style, so this note will be rewritten. Your transcript does not change.</item>
+        <item quantity="other">%1$s writes notes in the %2$s style, so these %3$d notes will be rewritten. Your transcripts do not change.</item>
+    </plurals>
+    <string name="notes_match_title">In title</string>
+    <string name="notes_match_summary">In summary</string>
+    <string name="notes_match_transcript">In transcript</string>
+    <string name="notes_match_transcript_at">In transcript at %1$s</string>
 </resources>

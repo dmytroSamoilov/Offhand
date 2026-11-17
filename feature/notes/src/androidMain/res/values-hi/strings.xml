@@ -20,6 +20,7 @@
     <string name="notes_pause_description">प्लेबैक रोकें</string>
     <string name="notes_processing_title">प्रोसेस हो रहा है…</string>
     <string name="notes_processing_preview">आपके फ़ोन पर ट्रांसक्राइब और सारांश तैयार हो रहा है। आप रिकॉर्डिंग अभी चला सकते हैं।</string>
+    <string name="notes_processing_preview_transcript">आपके फ़ोन पर ट्रांसक्राइब हो रहा है। आप रिकॉर्डिंग अभी चला सकते हैं।</string>
     <string name="notes_processing_transcribing">आपकी रिकॉर्डिंग ट्रांसक्राइब हो रही है… टेक्स्ट यहां अपने-आप दिखेगा।</string>
     <string name="notes_processing_structuring">आपका सारांश लिखा जा रहा है…</string>
     <string name="notes_processing_waiting_preview">आपके ऑन-डिवाइस AI के डाउनलोड होने का इंतज़ार है। आप रिकॉर्डिंग अभी चला सकते हैं।</string>
@@ -135,4 +136,12 @@
         <item quantity="one">%1$d नोट ले जाएं</item>
         <item quantity="other">%1$d नोट ले जाएं</item>
     </plurals>
+    <plurals name="notes_move_rewrite_caption">
+        <item quantity="one">%1$s नोट %2$s शैली में लिखता है, इसलिए यह नोट दोबारा लिखा जाएगा। आपका ट्रांसक्रिप्ट नहीं बदलेगा।</item>
+        <item quantity="other">%1$s नोट %2$s शैली में लिखता है, इसलिए ये %3$d नोट दोबारा लिखे जाएंगे। आपके ट्रांसक्रिप्ट नहीं बदलेंगे।</item>
+    </plurals>
+    <string name="notes_match_title">शीर्षक में</string>
+    <string name="notes_match_summary">सारांश में</string>
+    <string name="notes_match_transcript">ट्रांसक्रिप्ट में</string>
+    <string name="notes_match_transcript_at">ट्रांसक्रिप्ट में %1$s पर</string>
 </resources>

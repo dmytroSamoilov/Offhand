@@ -117,6 +117,19 @@ private fun FolderTabWithMenu(folder: FolderUi, state: NotesUiState, viewModel: 
 
 @Composable
 private fun FolderMenuItems(folder: FolderUi, state: NotesUiState, viewModel: NotesViewModel, onDismiss: () -> Unit) {
+    if (state.isSummaryAvailable) FolderStyleMenuItem(folder = folder, state = state, viewModel = viewModel, onDismiss = onDismiss)
+    NotesMenuItem(text = stringResource(R.string.notes_folder_rename), icon = OffhandIcons.Edit, onClick = {
+        onDismiss()
+        viewModel.onRenameFolderRequested(folder.id)
+    })
+    NotesMenuItem(text = stringResource(R.string.notes_folder_delete), icon = OffhandIcons.Trash, isDanger = true, onClick = {
+        onDismiss()
+        viewModel.onDeleteFolderRequested(folder.id)
+    })
+}
+
+@Composable
+private fun FolderStyleMenuItem(folder: FolderUi, state: NotesUiState, viewModel: NotesViewModel, onDismiss: () -> Unit) {
     NotesMenuItem(
         text = stringResource(R.string.notes_folder_style),
         subtitle = folder.style?.label(state.customStyles.toChoices()) ?: stringResource(R.string.notes_folder_style_default),
@@ -127,14 +140,6 @@ private fun FolderMenuItems(folder: FolderUi, state: NotesUiState, viewModel: No
             viewModel.onFolderStyleRequested(folder.id)
         },
     )
-    NotesMenuItem(text = stringResource(R.string.notes_folder_rename), icon = OffhandIcons.Edit, onClick = {
-        onDismiss()
-        viewModel.onRenameFolderRequested(folder.id)
-    })
-    NotesMenuItem(text = stringResource(R.string.notes_folder_delete), icon = OffhandIcons.Trash, isDanger = true, onClick = {
-        onDismiss()
-        viewModel.onDeleteFolderRequested(folder.id)
-    })
 }
 
 @Composable

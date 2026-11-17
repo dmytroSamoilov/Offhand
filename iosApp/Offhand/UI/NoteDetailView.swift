@@ -14,14 +14,31 @@ struct NoteDetailView: View {
     var body: some View {
         VStack(spacing: 0) {
             pinnedHeader
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    tabContent
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        tabContent
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, OffhandSpacing.screen)
+                    .padding(.top, 14)
+                    .padding(.bottom, OffhandSpacing.screen)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, OffhandSpacing.screen)
-                .padding(.top, 14)
-                .padding(.bottom, OffhandSpacing.screen)
+                .onChange(of: playingPartIndex) {
+                    guard let playingPartIndex, state.shownDetailTab == .transcript else { return }
+                    withAnimation(OffhandMotion.sheet) {
+                        proxy.scrollTo(TimedTranscript.rowId(playingPartIndex), anchor: .center)
+                    }
+                }
+                .task(id: transcriptFocusIndex) {
+                    guard let transcriptFocusIndex else { return }
+                    try? await Task.sleep(for: Self.focusDelay)
+                    guard !Task.isCancelled else { return }
+                    withAnimation(OffhandMotion.sheet) {
+                        proxy.scrollTo(TimedTranscript.rowId(transcriptFocusIndex), anchor: .top)
+                    }
+                    viewModel.onTranscriptFocusHandled()
+                }
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -192,7 +209,7 @@ struct NoteDetailView: View {
             } label: {
                 Label(String(localized: "Edit note"), systemImage: "pencil")
             }
-            if !detail.transcript.isEmpty {
+            if !detail.transcript.isEmpty && state.isSummaryAvailable {
                 Button {
                     viewModel.onPresetSheetRequested()
                 } label: {
@@ -266,6 +283,7 @@ struct NoteDetailView: View {
             } else {
                 TimedTranscript(
                     parts: detail.transcriptParts,
+                    playingIndex: playingPartIndex,
                     onTimeSelected: isPlayerShown ? { viewModel.onTranscriptTimeSelected(startMs: $0) } : nil
                 )
             }
@@ -282,6 +300,16 @@ struct NoteDetailView: View {
         } else {
             PlainNotice(text: String(localized: "This note has no transcript."))
         }
+    }
+
+    private static let focusDelay: Duration = .milliseconds(250)
+
+    private var playingPartIndex: Int? {
+        state.playingPartIndex?.intValue
+    }
+
+    private var transcriptFocusIndex: Int? {
+        state.transcriptFocusIndex?.intValue
     }
 
     private var percent: Int? {
@@ -322,12 +350,7 @@ struct NoteDetailView: View {
     }
 
     private var failedCard: some View {
-        MessageCard(
-            title: String(localized: "The summary could not be written"),
-            message: detail.transcript.isEmpty
-                ? String(localized: "We were unable to create a summary and transcript for this note.")
-                : String(localized: "We were unable to create a summary for this note. The transcript is saved.")
-        ) {
+        MessageCard(title: failedTitle, message: failedMessage) {
             if detail.hasAudio {
                 SecondaryButton(String(localized: "Try again"), fillsWidth: true, height: 48) {
                     viewModel.onRetryTranscriptionRequested()
@@ -335,6 +358,21 @@ struct NoteDetailView: View {
                 .padding(.top, 10)
             }
         }
+    }
+
+    private var failedTitle: String {
+        state.isSummaryAvailable
+            ? String(localized: "The summary could not be written")
+            : String(localized: "The transcript could not be written")
+    }
+
+    private var failedMessage: String {
+        if !state.isSummaryAvailable {
+            return String(localized: "We were unable to create a transcript for this note.")
+        }
+        return detail.transcript.isEmpty
+            ? String(localized: "We were unable to create a summary and transcript for this note.")
+            : String(localized: "We were unable to create a summary for this note. The transcript is saved.")
     }
 
     private var summaryWritingText: String {
@@ -507,34 +545,46 @@ private struct PlainNotice: View {
 
 private struct TimedTranscript: View {
     let parts: [TranscriptPartUi]
+    let playingIndex: Int?
     let onTimeSelected: ((Int64) -> Void)?
 
     private static let inset: CGFloat = 12
 
+    static func rowId(_ index: Int) -> String { "transcript-part-\(index)" }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            ForEach(parts, id: \.startMs) { part in
-                Button {
-                    onTimeSelected?(part.startMs)
-                } label: {
-                    VStack(alignment: .leading, spacing: 6) {
-                        TimeMark(text: part.time)
-                        Text(part.text)
-                            .offhandText(.body)
-                            .foregroundStyle(OffhandColor.ink)
-                            .multilineTextAlignment(.leading)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, Self.inset)
-                    .contentShape(RoundedRectangle(cornerRadius: OffhandRadius.field, style: .continuous))
-                }
-                .buttonStyle(.offhandPress)
-                .allowsHitTesting(onTimeSelected != nil)
-                .padding(.horizontal, -Self.inset)
-                .accessibilityHint(String(format: String(localized: "Play from %@"), part.time))
+            ForEach(Array(parts.enumerated()), id: \.element.startMs) { index, part in
+                partRow(part, isPlaying: index == playingIndex)
+                    .id(Self.rowId(index))
             }
         }
+    }
+
+    private func partRow(_ part: TranscriptPartUi, isPlaying: Bool) -> some View {
+        let shape = RoundedRectangle(cornerRadius: OffhandRadius.field, style: .continuous)
+        return Button {
+            onTimeSelected?(part.startMs)
+        } label: {
+            VStack(alignment: .leading, spacing: 6) {
+                TimeMark(text: part.time, isActive: isPlaying)
+                Text(part.text)
+                    .offhandText(.body)
+                    .foregroundStyle(OffhandColor.ink)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(.vertical, 10)
+            .padding(.horizontal, Self.inset)
+            .background(isPlaying ? OffhandColor.accentSoft : .clear, in: shape)
+            .contentShape(shape)
+            .animation(OffhandMotion.state, value: isPlaying)
+        }
+        .buttonStyle(.offhandPress)
+        .allowsHitTesting(onTimeSelected != nil)
+        .padding(.horizontal, -Self.inset)
+        .accessibilityAddTraits(isPlaying ? .isSelected : [])
+        .accessibilityHint(String(format: String(localized: "Play from %@"), part.time))
     }
 }
 

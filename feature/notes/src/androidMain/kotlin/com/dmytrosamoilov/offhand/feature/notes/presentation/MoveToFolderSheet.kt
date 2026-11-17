@@ -47,6 +47,8 @@ internal fun MoveToFolderSheet(
     bulkCount: Int?,
     currentFolderId: Long?,
     isFolderLimitReached: Boolean,
+    rewritesNotesMovedTo: (Long?) -> Boolean,
+    showsFolderStyles: Boolean,
     onMove: (Long?) -> Unit,
     onNewFolder: () -> Unit,
     onDismiss: () -> Unit,
@@ -62,7 +64,7 @@ internal fun MoveToFolderSheet(
             folders.forEach { folder ->
                 ChoiceRow(
                     title = folder.name,
-                    subtitle = folder.style?.label(customStyles),
+                    subtitle = folder.style?.takeIf { showsFolderStyles }?.label(customStyles),
                     hint = folder.noteCount.toString(),
                     isSelected = choice == FolderChoice(folder.id),
                     onClick = { choice = FolderChoice(folder.id) },
@@ -76,6 +78,10 @@ internal fun MoveToFolderSheet(
                 },
             )
         }
+        choice?.folderId
+            ?.takeIf { it != currentFolderId && rewritesNotesMovedTo(it) }
+            ?.let { folderId -> folders.firstOrNull { it.id == folderId } }
+            ?.let { folder -> RewriteCaption(folder = folder, customStyles = customStyles, noteCount = bulkCount ?: 1) }
         MoveActions(
             isMoveEnabled = choice != null,
             onCancel = onDismiss,
@@ -91,6 +97,17 @@ private fun moveTitle(bulkCount: Int?): String =
     } else {
         pluralStringResource(R.plurals.notes_move_notes_title, bulkCount, bulkCount)
     }
+
+@Composable
+private fun RewriteCaption(folder: FolderUi, customStyles: List<NoteStyleChoice>, noteCount: Int) {
+    val style = folder.style ?: return
+    Text(
+        text = pluralStringResource(R.plurals.notes_move_rewrite_caption, noteCount, folder.name, style.label(customStyles), noteCount),
+        style = OffhandTheme.type.caption,
+        color = OffhandTheme.colors.ink2,
+        modifier = Modifier.padding(top = 10.dp),
+    )
+}
 
 @Composable
 private fun NewFolderRow(showProBadge: Boolean, onClick: () -> Unit) {

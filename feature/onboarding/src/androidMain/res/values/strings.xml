@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="onboarding_incompatible_title">This phone can\'t run Offhand</string>
-    <string name="onboarding_incompatible_body">Offhand runs its on-device AI entirely on your phone, so nothing is uploaded, ever. This phone does not meet the minimum requirements.</string>
-    <string name="onboarding_incompatible_ram_label">Memory (RAM):</string>
-    <string name="onboarding_incompatible_ram_value">%1$s GB — needs %2$s GB</string>
-    <string name="onboarding_incompatible_cores_label">CPU cores:</string>
-    <string name="onboarding_incompatible_cores_value">%1$d — needs %2$d</string>
 
     <string name="onboarding_notification_download_channel_name">On-device AI downloads</string>
     <string name="onboarding_notification_status_channel_name">On-device AI status</string>
@@ -26,4 +20,23 @@
     <string name="onboarding_microphone_hint">Offhand will ask to use your microphone.</string>
     <string name="onboarding_look_around">Not now, look around first</string>
     <string name="onboarding_wordmark" translatable="false">Offhand</string>
+    <string name="onboarding_incompatible_title">Offhand can\'t run on this phone</string>
+    <string name="onboarding_incompatible_body">Offhand does all its work on the phone itself, and that needs more memory than this one has. We would rather tell you now than give you an app that stalls.</string>
+    <string name="onboarding_this_phone">This phone</string>
+    <string name="onboarding_needs">Offhand needs</string>
+    <string name="onboarding_memory_value">%1$s GB memory</string>
+    <string name="onboarding_needs_value">%1$s GB or more</string>
+    <string name="onboarding_cores_value">%1$d CPU cores</string>
+    <string name="onboarding_needs_cores_value">%1$d CPU cores or more</string>
+    <string name="onboarding_nothing_stored">Nothing was recorded or stored on this phone.</string>
+    <string name="onboarding_close">Close Offhand</string>
+    <string name="onboarding_about_phone">About this phone</string>
+    <string name="onboarding_lite_title">Every word, written down. Summaries need a bigger phone.</string>
+    <string name="onboarding_lite_body">Offhand records and transcribes on this phone. Writing a summary needs more memory than this phone has, so that part is switched off.</string>
+    <string name="onboarding_row_recording">Recording and transcript</string>
+    <string name="onboarding_row_folders">Folders, search, sharing</string>
+    <string name="onboarding_row_summaries">Summaries and writing styles</string>
+    <string name="onboarding_included">Included</string>
+    <string name="onboarding_not_here">Not on this phone</string>
+    <string name="onboarding_lite_continue">Continue with transcripts</string>
 </resources>

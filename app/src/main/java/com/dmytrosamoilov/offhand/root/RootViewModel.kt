@@ -2,7 +2,6 @@ package com.dmytrosamoilov.offhand.root
 
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import androidx.lifecycle.viewModelScope
-import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
@@ -19,6 +18,7 @@ import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserP
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.AcknowledgeProTrialNoticeUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.KeepProTrialInSyncUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SettleProTrialUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +36,7 @@ class RootViewModel(
     observeUserPreferences: ObserveUserPreferencesUseCase,
     private val appLockManager: AppLockManager,
     private val passphraseProvider: DatabasePassphraseProvider,
-    private val modelManager: ModelManager,
+    private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
     private val modelDownloadLauncher: ModelDownloadLauncher,
     private val resumeInterruptedNotes: Lazy<ResumeInterruptedNotesUseCase>,
     private val sweepOrphanedRecordings: Lazy<SweepOrphanedRecordingsUseCase>,
@@ -184,7 +184,7 @@ class RootViewModel(
     private fun resumeModelDownloadWhenReady() {
         launchSafely(showLoading = false) {
             uiState.first { it.phase == RootPhase.READY }
-            if (!modelManager.isModelDownloaded()) {
+            if (!isAiCoreDownloaded()) {
                 modelDownloadLauncher.startWhenAllowed()
             }
         }

@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="onboarding_incompatible_title">Este celular não consegue rodar o Offhand</string>
-    <string name="onboarding_incompatible_body">O Offhand roda sua IA inteiramente no seu celular, então nada é enviado, nunca. Este celular não atende aos requisitos mínimos.</string>
-    <string name="onboarding_incompatible_ram_label">Memória (RAM):</string>
-    <string name="onboarding_incompatible_ram_value">%1$s GB — precisa de %2$s GB</string>
-    <string name="onboarding_incompatible_cores_label">Núcleos de CPU:</string>
-    <string name="onboarding_incompatible_cores_value">%1$d — precisa de %2$d</string>
 
     <string name="onboarding_notification_download_channel_name">Downloads da IA no dispositivo</string>
     <string name="onboarding_notification_status_channel_name">Status da IA no dispositivo</string>
@@ -25,4 +19,23 @@
     <string name="onboarding_record_first_note">Grave sua primeira nota</string>
     <string name="onboarding_microphone_hint">O Offhand vai pedir para usar o microfone.</string>
     <string name="onboarding_look_around">Agora não, quero explorar primeiro</string>
+    <string name="onboarding_incompatible_title">O Offhand não funciona neste celular</string>
+    <string name="onboarding_incompatible_body">O Offhand faz todo o trabalho no próprio celular, e para isso precisa de mais memória do que este tem. Preferimos avisar agora a te dar um app que trava.</string>
+    <string name="onboarding_this_phone">Este celular</string>
+    <string name="onboarding_needs">O Offhand precisa de</string>
+    <string name="onboarding_memory_value">%1$s GB de memória</string>
+    <string name="onboarding_needs_value">%1$s GB ou mais</string>
+    <string name="onboarding_cores_value">%1$d núcleos de CPU</string>
+    <string name="onboarding_needs_cores_value">%1$d núcleos de CPU ou mais</string>
+    <string name="onboarding_nothing_stored">Nada foi gravado ou salvo neste celular.</string>
+    <string name="onboarding_close">Fechar o Offhand</string>
+    <string name="onboarding_about_phone">Sobre este celular</string>
+    <string name="onboarding_lite_title">Cada palavra, por escrito. Resumos precisam de um celular maior.</string>
+    <string name="onboarding_lite_body">O Offhand grava e transcreve neste celular. Escrever um resumo precisa de mais memória do que este celular tem, então essa parte fica desligada.</string>
+    <string name="onboarding_row_recording">Gravação e transcrição</string>
+    <string name="onboarding_row_folders">Pastas, busca, compartilhamento</string>
+    <string name="onboarding_row_summaries">Resumos e estilos de escrita</string>
+    <string name="onboarding_included">Incluído</string>
+    <string name="onboarding_not_here">Não neste celular</string>
+    <string name="onboarding_lite_continue">Continuar com transcrições</string>
 </resources>

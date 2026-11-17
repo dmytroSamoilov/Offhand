@@ -12,6 +12,7 @@ struct SettingsView<BottomBarContent: View>: View {
         isDynamicColorEnabled: false,
         isAppLockEnabled: false,
         isTelemetryEnabled: true,
+        isSummaryAvailable: true,
         isDeviceSecure: false,
         isAudioImportUnlocked: false,
         freeImportsLeft: nil,
@@ -28,6 +29,7 @@ struct SettingsView<BottomBarContent: View>: View {
     )
     @State private var isAudioImporterPresented = false
     @State private var destination: SettingsDestination?
+    @State private var isWidgetInfoShown = false
 
     init(@ViewBuilder bottomBar: () -> BottomBarContent) {
         self.bottomBar = bottomBar()
@@ -43,7 +45,7 @@ struct SettingsView<BottomBarContent: View>: View {
                         .padding(.horizontal, 8)
                         .padding(.top, 12)
                         .accessibilityAddTraits(.isHeader)
-                    PlanCard(pro: state.pro, onOpen: viewModel.onProCardClicked)
+                    PlanCard(pro: state.pro, isSummaryAvailable: state.isSummaryAvailable, onOpen: viewModel.onProCardClicked)
                         .padding(.top, OffhandSpacing.card)
                     writingGroup
                     notesInAndOutGroup
@@ -96,6 +98,18 @@ struct SettingsView<BottomBarContent: View>: View {
                 onDismiss: { viewModel.onImportNoticeDismissed() }
             )
         }
+        .offhandDialog(isPresented: $isWidgetInfoShown) {
+            OffhandDialog(
+                title: String(localized: "Home-screen widget"),
+                message: [
+                    String(localized: "One tap on the widget opens Offhand and starts recording, into a folder you pick. Tap Stop on the widget to end the recording."),
+                    String(localized: "To add it, touch and hold the Home Screen, tap Edit, then Add Widget, and choose Offhand."),
+                ].joined(separator: "\n\n"),
+                confirmLabel: String(localized: "OK"),
+                onConfirm: { isWidgetInfoShown = false },
+                onDismiss: { isWidgetInfoShown = false }
+            )
+        }
         .task {
             viewModel.onScreenShown()
             for await newState in viewModel.uiState {
@@ -104,13 +118,26 @@ struct SettingsView<BottomBarContent: View>: View {
         }
     }
 
+    @ViewBuilder
     private var writingGroup: some View {
+        if state.isSummaryAvailable {
+            fullWritingGroup
+        } else {
+            transcriptsOnlyWritingGroup
+        }
+    }
+
+    private var transcribeRow: some View {
+        SwitchRow(
+            title: String(localized: "Transcribe recordings"),
+            subtitle: String(localized: "Turns what you say into text"),
+            isOn: state.isTranscriptionEnabled
+        ) { viewModel.onTranscriptionChanged(enabled: $0) }
+    }
+
+    private var fullWritingGroup: some View {
         SettingsGroup(label: String(localized: "What Offhand writes")) {
-            SwitchRow(
-                title: String(localized: "Transcribe recordings"),
-                subtitle: String(localized: "Turns what you say into text"),
-                isOn: state.isTranscriptionEnabled
-            ) { viewModel.onTranscriptionChanged(enabled: $0) }
+            transcribeRow
             SwitchRow(
                 title: String(localized: "Write a summary"),
                 subtitle: String(localized: "From the transcript, in your writing style"),
@@ -132,6 +159,26 @@ struct SettingsView<BottomBarContent: View>: View {
         }
     }
 
+    private var transcriptsOnlyWritingGroup: some View {
+        let unavailable = String(localized: "Not available on this iPhone")
+        return VStack(alignment: .leading, spacing: 0) {
+            SettingsGroup(label: String(localized: "What Offhand writes")) {
+                transcribeRow
+                Group {
+                    SwitchRow(title: String(localized: "Write a summary"), subtitle: unavailable, isOn: false) { _ in }
+                    LinkRow(title: String(localized: "Writing style"), subtitle: unavailable, action: {}) { EmptyView() }
+                    SwitchRow(title: String(localized: "Smart suggestions"), subtitle: unavailable, isOn: false, showsDivider: false) { _ in }
+                }
+                .disabled(true)
+            }
+            Text(String(localized: "Summaries, writing styles and smart suggestions need more memory than this iPhone has. Recording, transcripts, folders, search and sharing all work."))
+                .offhandText(.caption)
+                .foregroundStyle(OffhandColor.ink2)
+                .padding(.horizontal, OffhandSpacing.card)
+                .padding(.top, 12)
+        }
+    }
+
     private var notesInAndOutGroup: some View {
         SettingsGroup(label: String(localized: "Getting notes in and out")) {
             LinkRow(
@@ -139,6 +186,11 @@ struct SettingsView<BottomBarContent: View>: View {
                 subtitle: importSubtitle,
                 showsProBadge: !state.isAudioImportUnlocked
             ) { viewModel.onImportAudioClicked() }
+            LinkRow(
+                title: String(localized: "Home-screen widget"),
+                subtitle: String(localized: "Start a recording from your Home Screen"),
+                showsProBadge: !isPro
+            ) { isWidgetInfoShown = true }
             LinkRow(
                 title: String(localized: "Backup & restore"),
                 subtitle: String(localized: "One encrypted file that you keep"),
@@ -239,6 +291,11 @@ struct SettingsView<BottomBarContent: View>: View {
         )
     }
 
+    private var isPro: Bool {
+        if case .free = onEnum(of: state.pro) { return false }
+        return true
+    }
+
     private func isSubscription(_ status: ProStatusUi) -> Bool {
         switch onEnum(of: status) {
         case .yearly, .monthly, .trial: return true
@@ -264,6 +321,7 @@ private struct ProOverrideChoice {
 
 private struct PlanCard: View {
     let pro: ProStatusUi
+    let isSummaryAvailable: Bool
     let onOpen: () -> Void
     @Environment(\.colorScheme) private var colorScheme
 
@@ -304,9 +362,7 @@ private struct PlanCard: View {
             if let trial {
                 GoldProgress(fraction: CGFloat(trial.elapsed)).padding(.top, 14)
             }
-            Text(trial == nil
-                ? String(localized: "Styles, PDF and Word export, smart suggestions, audio and video import and unlimited folders")
-                : String(localized: "Everything is unlocked for now. After that Offhand stays free, with the Summary style and two folders."))
+            Text(upgradeMessage)
                 .offhandText(.caption)
                 .foregroundStyle(OffhandColor.ink2)
                 .padding(.top, 12)
@@ -319,6 +375,19 @@ private struct PlanCard: View {
         }
         .contentShape(Rectangle())
         .onTapGesture(perform: onOpen)
+    }
+
+    private var upgradeMessage: String {
+        switch (trial == nil, isSummaryAvailable) {
+        case (true, true):
+            return String(localized: "Styles, PDF and Word export, smart suggestions, audio and video import and unlimited folders")
+        case (true, false):
+            return String(localized: "PDF and Word export, audio and video import, unlimited folders and backups with your recordings")
+        case (false, true):
+            return String(localized: "Everything is unlocked for now. After that Offhand stays free, with the Summary style and two folders.")
+        case (false, false):
+            return String(localized: "Everything is unlocked for now. After that Offhand stays free, with two folders.")
+        }
     }
 
     private var planContent: some View {

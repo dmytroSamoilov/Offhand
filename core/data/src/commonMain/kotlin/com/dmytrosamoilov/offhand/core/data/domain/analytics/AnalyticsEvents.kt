@@ -134,6 +134,9 @@ object AnalyticsEvents {
     fun deviceUnsupported(ramGb: Long, cpuCores: Int): AnalyticsEvent =
         event("device_unsupported", "ram_gb" to ramGb, "cores" to cpuCores.toLong())
 
+    fun deviceTranscriptsOnly(ramGb: Long, cpuCores: Int): AnalyticsEvent =
+        event("device_transcripts_only", "ram_gb" to ramGb, "cores" to cpuCores.toLong())
+
     fun frameworkUnsupported(): AnalyticsEvent = event("framework_unsupported")
 
     fun modelDownloadStarted(network: String): AnalyticsEvent = event("model_download_started", "network" to network)

@@ -89,7 +89,7 @@ private fun NoteDetail(state: NotesUiState, viewModel: NotesViewModel, note: Not
     Column(modifier = Modifier.fillMaxSize().background(OffhandTheme.colors.ground)) {
         TopBar(
             leading = { if (showsBack) BackButton(onBack = viewModel::onDetailClosed) },
-            trailing = { NoteOverflowMenu(note = note, isRetranscribeAvailable = state.isRetranscribeAvailable, viewModel = viewModel) },
+            trailing = { NoteOverflowMenu(note = note, state = state, viewModel = viewModel) },
         )
         NoteDetailHeader(note = note, playback = state.playback, tabs = tabs, viewModel = viewModel)
         NoteDetailBody(state = state, viewModel = viewModel, note = note, tabs = tabs, modifier = Modifier.weight(1f))
@@ -171,7 +171,7 @@ private fun NoteDetailTabUi.labelRes(): Int = when (this) {
 }
 
 @Composable
-private fun NoteOverflowMenu(note: NoteDetailUi, isRetranscribeAvailable: Boolean, viewModel: NotesViewModel) {
+private fun NoteOverflowMenu(note: NoteDetailUi, state: NotesUiState, viewModel: NotesViewModel) {
     var expanded by remember { mutableStateOf(false) }
     Box {
         BarIconButton(
@@ -180,7 +180,7 @@ private fun NoteOverflowMenu(note: NoteDetailUi, isRetranscribeAvailable: Boolea
             onClick = { expanded = true },
         )
         NotesMenu(expanded = expanded, onDismiss = { expanded = false }) {
-            noteMenuActions(note, isRetranscribeAvailable, viewModel).forEach { action ->
+            noteMenuActions(note, state, viewModel).forEach { action ->
                 NotesMenuItem(
                     text = stringResource(action.textRes),
                     icon = action.icon,
@@ -202,16 +202,16 @@ private data class NoteMenuAction(
     val isDanger: Boolean = false,
 )
 
-private fun noteMenuActions(note: NoteDetailUi, isRetranscribeAvailable: Boolean, viewModel: NotesViewModel): List<NoteMenuAction> {
+private fun noteMenuActions(note: NoteDetailUi, state: NotesUiState, viewModel: NotesViewModel): List<NoteMenuAction> {
     val delete = NoteMenuAction(R.string.notes_delete_description, OffhandIcons.Trash, { viewModel.onDeleteRequested(note.id) }, isDanger = true)
     if (note.status != NoteStatusUi.READY) return listOf(delete)
     return listOfNotNull(
         NoteMenuAction(R.string.notes_edit_description, OffhandIcons.Edit, viewModel::onEditStarted),
         NoteMenuAction(R.string.notes_move_to_folder, OffhandIcons.Folder, viewModel::onMoveToFolderRequested),
         NoteMenuAction(R.string.notes_preset_description, OffhandIcons.Sparkle, viewModel::onPresetSheetRequested)
-            .takeIf { note.transcript.isNotBlank() },
+            .takeIf { note.transcript.isNotBlank() && state.isSummaryAvailable },
         NoteMenuAction(R.string.notes_retranscribe_description, OffhandIcons.Mic, viewModel::onRetranscribeRequested)
-            .takeIf { note.hasAudio && isRetranscribeAvailable },
+            .takeIf { note.hasAudio && state.isRetranscribeAvailable },
         delete,
     )
 }

@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="onboarding_incompatible_title">Этот телефон не может запустить Offhand</string>
-    <string name="onboarding_incompatible_body">Offhand запускает ИИ полностью на вашем телефоне, поэтому ничего никогда не загружается. Этот телефон не соответствует минимальным требованиям.</string>
-    <string name="onboarding_incompatible_ram_label">Память (RAM):</string>
-    <string name="onboarding_incompatible_ram_value">%1$s ГБ — нужно %2$s ГБ</string>
-    <string name="onboarding_incompatible_cores_label">Ядра процессора:</string>
-    <string name="onboarding_incompatible_cores_value">%1$d — нужно %2$d</string>
 
     <string name="onboarding_notification_download_channel_name">Загрузки ИИ на устройстве</string>
     <string name="onboarding_notification_status_channel_name">Состояние ИИ на устройстве</string>
@@ -25,4 +19,23 @@
     <string name="onboarding_record_first_note">Записать первую заметку</string>
     <string name="onboarding_microphone_hint">Offhand попросит доступ к микрофону.</string>
     <string name="onboarding_look_around">Не сейчас, сначала осмотрюсь</string>
+    <string name="onboarding_incompatible_title">Offhand не может работать на этом телефоне</string>
+    <string name="onboarding_incompatible_body">Offhand выполняет всю работу на самом телефоне, а для этого нужно больше памяти, чем есть у этого. Лучше сказать об этом сразу, чем дать вам приложение, которое зависает.</string>
+    <string name="onboarding_this_phone">Этот телефон</string>
+    <string name="onboarding_needs">Offhand нужно</string>
+    <string name="onboarding_memory_value">%1$s ГБ памяти</string>
+    <string name="onboarding_needs_value">%1$s ГБ или больше</string>
+    <string name="onboarding_cores_value">Ядер процессора: %1$d</string>
+    <string name="onboarding_needs_cores_value">Ядер процессора: %1$d или больше</string>
+    <string name="onboarding_nothing_stored">На этом телефоне ничего не записано и не сохранено.</string>
+    <string name="onboarding_close">Закрыть Offhand</string>
+    <string name="onboarding_about_phone">Об этом телефоне</string>
+    <string name="onboarding_lite_title">Каждое слово записано. Для кратких содержаний нужен телефон помощнее.</string>
+    <string name="onboarding_lite_body">Offhand записывает и расшифровывает на этом телефоне. Для краткого содержания нужно больше памяти, чем есть у этого телефона, поэтому эта часть выключена.</string>
+    <string name="onboarding_row_recording">Запись и расшифровка</string>
+    <string name="onboarding_row_folders">Папки, поиск, отправка</string>
+    <string name="onboarding_row_summaries">Краткое содержание и стили письма</string>
+    <string name="onboarding_included">Есть</string>
+    <string name="onboarding_not_here">Не на этом телефоне</string>
+    <string name="onboarding_lite_continue">Продолжить с расшифровками</string>
 </resources>

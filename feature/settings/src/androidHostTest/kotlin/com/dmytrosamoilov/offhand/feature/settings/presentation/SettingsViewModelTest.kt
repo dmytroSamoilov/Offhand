@@ -346,4 +346,20 @@ class SettingsViewModelTest {
 
         coVerify { setTelemetryConsent(false) }
     }
+
+    @Test
+    fun `a transcripts-only phone shows the summary as unavailable and ignores its switches`() = runTest(dispatcher) {
+        noteFeatures.value = NoteFeatures(isSummaryAvailable = false)
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isSummaryAvailable)
+        assertFalse(viewModel.uiState.value.isSummaryEnabled)
+        viewModel.onSummaryChanged(true)
+        viewModel.onSmartSuggestionsChanged(true)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { setNoteFeatureEnabled(NoteFeature.SUMMARY, any()) }
+        coVerify(exactly = 0) { setSmartSuggestionsEnabled(any()) }
+    }
 }

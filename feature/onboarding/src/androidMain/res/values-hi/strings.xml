@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="onboarding_incompatible_title">यह फ़ोन Offhand नहीं चला सकता</string>
-    <string name="onboarding_incompatible_body">Offhand अपना ऑन-डिवाइस AI पूरी तरह आपके फ़ोन पर चलाता है, इसलिए कुछ भी कभी अपलोड नहीं होता। यह फ़ोन न्यूनतम आवश्यकताएँ पूरी नहीं करता।</string>
-    <string name="onboarding_incompatible_ram_label">मेमोरी (RAM):</string>
-    <string name="onboarding_incompatible_ram_value">%1$s GB — %2$s GB चाहिए</string>
-    <string name="onboarding_incompatible_cores_label">CPU कोर:</string>
-    <string name="onboarding_incompatible_cores_value">%1$d — %2$d चाहिए</string>
 
     <string name="onboarding_notification_download_channel_name">ऑन-डिवाइस AI डाउनलोड</string>
     <string name="onboarding_notification_status_channel_name">ऑन-डिवाइस AI की स्थिति</string>
@@ -25,4 +19,23 @@
     <string name="onboarding_record_first_note">अपना पहला नोट रिकॉर्ड करें</string>
     <string name="onboarding_microphone_hint">Offhand आपका माइक्रोफ़ोन इस्तेमाल करने की अनुमति मांगेगा।</string>
     <string name="onboarding_look_around">अभी नहीं, पहले देख लूं</string>
+    <string name="onboarding_incompatible_title">Offhand इस फ़ोन पर नहीं चल सकता</string>
+    <string name="onboarding_incompatible_body">Offhand अपना सारा काम फ़ोन पर ही करता है, और इसके लिए इस फ़ोन से ज़्यादा मेमोरी चाहिए। हम आपको अभी बताना बेहतर समझते हैं, बजाय ऐसा ऐप देने के जो अटकता रहे।</string>
+    <string name="onboarding_this_phone">यह फ़ोन</string>
+    <string name="onboarding_needs">Offhand को चाहिए</string>
+    <string name="onboarding_memory_value">%1$s GB मेमोरी</string>
+    <string name="onboarding_needs_value">%1$s GB या उससे ज़्यादा</string>
+    <string name="onboarding_cores_value">%1$d CPU कोर</string>
+    <string name="onboarding_needs_cores_value">%1$d CPU कोर या उससे ज़्यादा</string>
+    <string name="onboarding_nothing_stored">इस फ़ोन पर कुछ भी रिकॉर्ड या सेव नहीं हुआ।</string>
+    <string name="onboarding_close">Offhand बंद करें</string>
+    <string name="onboarding_about_phone">इस फ़ोन के बारे में</string>
+    <string name="onboarding_lite_title">हर शब्द लिखा हुआ। सारांश के लिए बड़ा फ़ोन चाहिए।</string>
+    <string name="onboarding_lite_body">Offhand इस फ़ोन पर रिकॉर्ड और ट्रांसक्राइब करता है। सारांश लिखने के लिए इस फ़ोन से ज़्यादा मेमोरी चाहिए, इसलिए वह हिस्सा बंद है।</string>
+    <string name="onboarding_row_recording">रिकॉर्डिंग और ट्रांसक्रिप्ट</string>
+    <string name="onboarding_row_folders">फ़ोल्डर, खोज, शेयर करना</string>
+    <string name="onboarding_row_summaries">सारांश और लेखन शैलियाँ</string>
+    <string name="onboarding_included">शामिल</string>
+    <string name="onboarding_not_here">इस फ़ोन पर नहीं</string>
+    <string name="onboarding_lite_continue">ट्रांसक्रिप्ट के साथ जारी रखें</string>
 </resources>

@@ -17,6 +17,7 @@ kotlin {
         androidMain.dependencies {
             implementation(project(":core:ai-api"))
             implementation(libs.androidx.core.ktx)
+            implementation(libs.androidx.activity.compose)
             implementation(libs.timber)
         }
     }

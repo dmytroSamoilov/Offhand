@@ -20,6 +20,7 @@
     <string name="notes_pause_description">Pausar reprodução</string>
     <string name="notes_processing_title">Processando…</string>
     <string name="notes_processing_preview">Transcrevendo e resumindo no seu celular. Você já pode ouvir a gravação.</string>
+    <string name="notes_processing_preview_transcript">Transcrevendo no seu celular. Você já pode ouvir a gravação.</string>
     <string name="notes_processing_transcribing">Transcrevendo sua gravação… O texto vai aparecer aqui automaticamente.</string>
     <string name="notes_processing_structuring">Escrevendo seu resumo…</string>
     <string name="notes_processing_waiting_preview">Aguardando o download da sua IA no dispositivo terminar. Você já pode ouvir a gravação.</string>
@@ -137,4 +138,13 @@
         <item quantity="many">Mover %1$d notas</item>
         <item quantity="other">Mover %1$d notas</item>
     </plurals>
+    <plurals name="notes_move_rewrite_caption">
+        <item quantity="one">%1$s escreve as notas no estilo %2$s, então esta nota será reescrita. Sua transcrição não muda.</item>
+        <item quantity="many">%1$s escreve as notas no estilo %2$s, então estas %3$d notas serão reescritas. Suas transcrições não mudam.</item>
+        <item quantity="other">%1$s escreve as notas no estilo %2$s, então estas %3$d notas serão reescritas. Suas transcrições não mudam.</item>
+    </plurals>
+    <string name="notes_match_title">No título</string>
+    <string name="notes_match_summary">No resumo</string>
+    <string name="notes_match_transcript">Na transcrição</string>
+    <string name="notes_match_transcript_at">Na transcrição, em %1$s</string>
 </resources>

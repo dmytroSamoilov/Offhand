@@ -15,6 +15,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlaybackState
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.FolderNameError
+import com.dmytrosamoilov.offhand.feature.notes.domain.MatchLocation
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteSearchResult
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareBundle
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteTextCleaner
@@ -75,7 +76,16 @@ private fun NoteSearchResult.toCardUi(
         titleHighlights = titleMatches.map(TextMatch::toUi),
         previewHighlights = snippetMatches.map(TextMatch::toUi),
         folderName = note.folderId?.let(folderNames::get),
+        matchLocation = location?.toUi(),
+        matchTime = transcriptParagraph?.let { note.toTranscriptPartsUi().getOrNull(it)?.time },
+        matchParagraph = transcriptParagraph,
     )
+}
+
+private fun MatchLocation.toUi(): MatchLocationUi = when (this) {
+    MatchLocation.TITLE -> MatchLocationUi.TITLE
+    MatchLocation.SUMMARY -> MatchLocationUi.SUMMARY
+    MatchLocation.TRANSCRIPT -> MatchLocationUi.TRANSCRIPT
 }
 
 private fun TextMatch.toUi(): TextRangeUi = TextRangeUi(start = start, end = end)
@@ -156,6 +166,7 @@ internal fun AudioPlaybackState.toUi(): AudioPlaybackUi = AudioPlaybackUi(
     },
     positionText = formatClock(positionMs),
     durationText = formatClock(durationMs),
+    positionMs = positionMs,
 )
 
 internal fun formatClock(ms: Long): String {

@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.onboarding.presentation
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,7 +32,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.Hairline
 import com.dmytrosamoilov.offhand.core.designsystem.component.MetaText
 import com.dmytrosamoilov.offhand.core.designsystem.component.PlainTextButton
+import com.dmytrosamoilov.offhand.core.designsystem.component.PrimaryButton
 import com.dmytrosamoilov.offhand.core.designsystem.component.RecordPill
+import com.dmytrosamoilov.offhand.core.designsystem.component.SecondaryButton
+import com.dmytrosamoilov.offhand.core.designsystem.component.WaveGlyph
 import com.dmytrosamoilov.offhand.core.designsystem.component.Skeleton
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandSpacing
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
@@ -54,6 +58,7 @@ fun OnboardingScreen(
                 viewModel.onRecordFirstNoteClicked()
             },
             onLookAround = viewModel::onLookAroundClicked,
+            onContinueWithTranscripts = viewModel::onContinueWithTranscriptsClicked,
         )
     }
 }
@@ -63,6 +68,7 @@ private fun OnboardingContent(
     state: OnboardingUiState,
     onRecordFirstNote: () -> Unit,
     onLookAround: () -> Unit,
+    onContinueWithTranscripts: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -78,7 +84,12 @@ private fun OnboardingContent(
         when (state.step) {
             OnboardingStep.DEVICE_CHECK -> Skeleton(modifier = Modifier.padding(top = 56.dp))
             OnboardingStep.DEVICE_INCOMPATIBLE -> DeviceIncompatible(state.deviceSpecs)
-            OnboardingStep.WELCOME -> Welcome(onRecordFirstNote = onRecordFirstNote, onLookAround = onLookAround)
+            OnboardingStep.TRANSCRIPTS_ONLY -> TranscriptsOnly(onContinue = onContinueWithTranscripts)
+            OnboardingStep.WELCOME -> Welcome(
+                isSummaryAvailable = state.isSummaryAvailable,
+                onRecordFirstNote = onRecordFirstNote,
+                onLookAround = onLookAround,
+            )
         }
     }
 }
@@ -94,12 +105,18 @@ private fun Wordmark() {
 }
 
 @Composable
-private fun ColumnScope.Welcome(onRecordFirstNote: () -> Unit, onLookAround: () -> Unit) {
+private fun ColumnScope.Welcome(isSummaryAvailable: Boolean, onRecordFirstNote: () -> Unit, onLookAround: () -> Unit) {
     Headline(text = stringResource(R.string.onboarding_welcome_title))
     Column(modifier = Modifier.padding(top = OffhandSpacing.screen)) {
-        StageRow(R.string.onboarding_step_recorded, showDivider = true)
-        StageRow(R.string.onboarding_step_transcribed, showDivider = true)
-        StageRow(R.string.onboarding_step_summarised, showDivider = false)
+        StageRow(stringResource(R.string.onboarding_step_recorded), stringResource(R.string.onboarding_on_your_phone))
+        Hairline()
+        StageRow(stringResource(R.string.onboarding_step_transcribed), stringResource(R.string.onboarding_on_your_phone))
+        Hairline()
+        StageRow(
+            label = stringResource(R.string.onboarding_step_summarised),
+            meta = stringResource(if (isSummaryAvailable) R.string.onboarding_on_your_phone else R.string.onboarding_not_here),
+            isMuted = !isSummaryAvailable,
+        )
     }
     Text(
         text = stringResource(R.string.onboarding_privacy_line),
@@ -128,18 +145,52 @@ private fun ColumnScope.Welcome(onRecordFirstNote: () -> Unit, onLookAround: () 
 }
 
 @Composable
-private fun StageRow(labelRes: Int, showDivider: Boolean) {
-    Column {
-        Row(
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(stringResource(labelRes), style = OffhandTheme.type.body, color = OffhandTheme.colors.ink)
-            MetaText(text = stringResource(R.string.onboarding_on_your_phone))
-        }
-        if (showDivider) Hairline()
+private fun StageRow(label: String, meta: String, isMuted: Boolean = false) {
+    val color = if (isMuted) OffhandTheme.colors.ink3 else OffhandTheme.colors.ink
+    Row(
+        modifier = Modifier.fillMaxWidth().height(52.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(label, style = OffhandTheme.type.body, color = color, modifier = Modifier.weight(1f))
+        Text(meta.uppercase(), style = OffhandTheme.type.meta, color = color, maxLines = 1)
     }
+}
+
+@Composable
+private fun ColumnScope.TranscriptsOnly(onContinue: () -> Unit) {
+    MetaText(text = stringResource(R.string.onboarding_about_phone), modifier = Modifier.padding(top = 56.dp))
+    Text(
+        text = stringResource(R.string.onboarding_lite_title),
+        style = OffhandTheme.type.display,
+        color = OffhandTheme.colors.ink,
+        modifier = Modifier.padding(top = 12.dp).semantics { heading() },
+    )
+    Text(
+        text = stringResource(R.string.onboarding_lite_body),
+        style = OffhandTheme.type.body,
+        color = OffhandTheme.colors.ink2,
+        modifier = Modifier.padding(top = 16.dp),
+    )
+    Column(modifier = Modifier.padding(top = 28.dp)) {
+        StageRow(stringResource(R.string.onboarding_row_recording), stringResource(R.string.onboarding_included))
+        Hairline()
+        StageRow(stringResource(R.string.onboarding_row_folders), stringResource(R.string.onboarding_included))
+        Hairline()
+        StageRow(stringResource(R.string.onboarding_row_summaries), stringResource(R.string.onboarding_not_here), isMuted = true)
+    }
+    Text(
+        text = stringResource(R.string.onboarding_privacy_line),
+        style = OffhandTheme.type.bodySmall,
+        color = OffhandTheme.colors.ink2,
+        modifier = Modifier.padding(top = 16.dp),
+    )
+    Spacer(Modifier.weight(1f).heightIn(min = 40.dp))
+    PrimaryButton(
+        text = stringResource(R.string.onboarding_lite_continue),
+        onClick = onContinue,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
@@ -153,36 +204,63 @@ private fun Headline(text: String) {
 }
 
 @Composable
-private fun DeviceIncompatible(specs: DeviceSpecsUi?) {
-    Headline(text = stringResource(R.string.onboarding_incompatible_title))
+private fun ColumnScope.DeviceIncompatible(specs: DeviceSpecsUi?) {
+    val activity = LocalActivity.current
+    WaveGlyph(seed = UNSUPPORTED_WAVE_SEED, modifier = Modifier.padding(top = 88.dp))
+    Text(
+        text = stringResource(R.string.onboarding_incompatible_title),
+        style = OffhandTheme.type.display,
+        color = OffhandTheme.colors.ink,
+        modifier = Modifier.padding(top = 40.dp).semantics { heading() },
+    )
     Text(
         text = stringResource(R.string.onboarding_incompatible_body),
         style = OffhandTheme.type.body,
         color = OffhandTheme.colors.ink2,
-        modifier = Modifier.padding(top = 12.dp),
+        modifier = Modifier.padding(top = 16.dp),
     )
     specs?.let { SpecRows(it) }
+    Text(
+        text = stringResource(R.string.onboarding_nothing_stored),
+        style = OffhandTheme.type.bodySmall,
+        color = OffhandTheme.colors.ink2,
+        modifier = Modifier.padding(top = 16.dp),
+    )
+    Spacer(Modifier.weight(1f).heightIn(min = 40.dp))
+    SecondaryButton(
+        text = stringResource(R.string.onboarding_close),
+        onClick = { activity?.finish() },
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
 private fun SpecRows(specs: DeviceSpecsUi) {
-    Column(modifier = Modifier.padding(top = OffhandSpacing.screen)) {
+    Column(modifier = Modifier.padding(top = 28.dp)) {
         SpecRow(
-            label = stringResource(R.string.onboarding_incompatible_ram_label),
-            value = stringResource(R.string.onboarding_incompatible_ram_value, specs.totalRamGb, specs.requiredRamGb),
-            isSatisfied = specs.isRamSatisfied,
+            label = stringResource(R.string.onboarding_this_phone),
+            value = if (specs.isCoresSatisfied) {
+                stringResource(R.string.onboarding_memory_value, specs.totalRamGb)
+            } else {
+                stringResource(R.string.onboarding_cores_value, specs.cpuCores)
+            },
+            isEmphasised = false,
         )
         Hairline()
         SpecRow(
-            label = stringResource(R.string.onboarding_incompatible_cores_label),
-            value = stringResource(R.string.onboarding_incompatible_cores_value, specs.cpuCores, specs.requiredCpuCores),
-            isSatisfied = specs.isCoresSatisfied,
+            label = stringResource(R.string.onboarding_needs),
+            value = if (specs.isCoresSatisfied) {
+                stringResource(R.string.onboarding_needs_value, specs.requiredRamGb)
+            } else {
+                stringResource(R.string.onboarding_needs_cores_value, specs.requiredCpuCores)
+            },
+            isEmphasised = true,
         )
     }
 }
 
 @Composable
-private fun SpecRow(label: String, value: String, isSatisfied: Boolean) {
+private fun SpecRow(label: String, value: String, isEmphasised: Boolean) {
     Row(
         modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -190,9 +268,9 @@ private fun SpecRow(label: String, value: String, isSatisfied: Boolean) {
     ) {
         Text(label, style = OffhandTheme.type.body, color = OffhandTheme.colors.ink, modifier = Modifier.weight(1f))
         Text(
-            text = value,
+            text = value.uppercase(),
             style = OffhandTheme.type.number,
-            color = if (isSatisfied) OffhandTheme.colors.ink2 else OffhandTheme.colors.danger,
+            color = if (isEmphasised) OffhandTheme.colors.ink else OffhandTheme.colors.ink2,
         )
     }
 }
@@ -201,8 +279,14 @@ private fun SpecRow(label: String, value: String, isSatisfied: Boolean) {
 @Composable
 private fun WelcomePreview() {
     OffhandTheme {
-        OnboardingContent(state = OnboardingUiState(step = OnboardingStep.WELCOME), onRecordFirstNote = {}, onLookAround = {})
+        OnboardingContent(
+            state = OnboardingUiState(step = OnboardingStep.WELCOME),
+            onRecordFirstNote = {},
+            onLookAround = {},
+            onContinueWithTranscripts = {},
+        )
     }
 }
 
 private val MAX_CONTENT_WIDTH = 560.dp
+private const val UNSUPPORTED_WAVE_SEED = 3L

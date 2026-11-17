@@ -64,7 +64,7 @@ fun PaywallScreen(viewModel: PaywallViewModel = koinViewModel()) {
         Box(modifier = Modifier.fillMaxSize().background(OffhandTheme.colors.ground)) {
             when {
                 state.mode == PaywallMode.OPENING -> Unit
-                state.mode == PaywallMode.BENEFITS -> BenefitsContent(onClose = viewModel::onClosed)
+                state.mode == PaywallMode.BENEFITS -> BenefitsContent(isSummaryAvailable = state.isSummaryAvailable, onClose = viewModel::onClosed)
                 state.isPro -> SuccessContent(feature = state.feature)
                 else -> OfferContent(state = state, viewModel = viewModel)
             }
@@ -88,10 +88,10 @@ private fun OfferContent(state: PaywallUiState, viewModel: PaywallViewModel) {
         }
         ScrollingBody {
             OfferHeader(state = state)
-            if (state.trialRecap.isNotEmpty()) TrialRecap(lines = state.trialRecap)
-            BenefitLines(highlighted = state.feature)
+            if (state.shownTrialRecap.isNotEmpty()) TrialRecap(lines = state.shownTrialRecap)
+            BenefitLines(highlighted = state.feature, isSummaryAvailable = state.isSummaryAvailable)
             PlanSection(state = state, onPlanSelected = viewModel::onPlanSelected, onRetry = viewModel::onRetryOffers)
-            ComparisonTable(highlighted = state.feature, isCollapsible = true)
+            ComparisonTable(highlighted = state.feature, isSummaryAvailable = state.isSummaryAvailable, isCollapsible = true)
             LegalLinksRow()
         }
         if (state.feature == ProFeature.FREE_TRIAL) {
@@ -213,7 +213,7 @@ private fun Disclosure(text: String) {
 }
 
 @Composable
-private fun BenefitsContent(onClose: () -> Unit) {
+private fun BenefitsContent(isSummaryAvailable: Boolean, onClose: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
         PaywallTopBar(onClose = onClose)
         ScrollingBody {
@@ -230,7 +230,7 @@ private fun BenefitsContent(onClose: () -> Unit) {
                     color = OffhandTheme.colors.ink2,
                 )
             }
-            ComparisonTable(highlighted = ProFeature.GENERAL, isCollapsible = false)
+            ComparisonTable(highlighted = ProFeature.GENERAL, isSummaryAvailable = isSummaryAvailable, isCollapsible = false)
         }
     }
 }

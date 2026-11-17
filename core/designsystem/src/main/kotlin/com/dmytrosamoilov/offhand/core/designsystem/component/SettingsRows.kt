@@ -77,6 +77,7 @@ fun LinkRow(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     value: String? = null,
+    enabled: Boolean = true,
     showProBadge: Boolean = false,
     showDivider: Boolean = true,
     trailing: @Composable () -> Unit = { RowChevron() },
@@ -86,7 +87,9 @@ fun LinkRow(
         subtitle = subtitle,
         showProBadge = showProBadge,
         showDivider = showDivider,
-        modifier = modifier.clickable(role = Role.Button, onClick = onClick),
+        modifier = modifier
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .alpha(if (enabled) 1f else DISABLED_ALPHA),
     ) {
         value?.let { Text(text = it, style = OffhandTheme.type.bodySmall, color = OffhandTheme.colors.ink2) }
         trailing()

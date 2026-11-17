@@ -165,7 +165,11 @@ class NotesViewModel(
         viewModelScope.launch {
             observeNoteFeatures().collect { features ->
                 mutableUiState.update {
-                    it.copy(isTranscriptionEnabled = features.isTranscriptionEnabled, isSummaryEnabled = features.writesSummary)
+                    it.copy(
+                        isTranscriptionEnabled = features.isTranscriptionEnabled,
+                        isSummaryEnabled = features.writesSummary,
+                        isSummaryAvailable = features.isSummaryAvailable,
+                    )
                 }
             }
         }
@@ -477,7 +481,19 @@ class NotesViewModel(
         mutableUiState.update { it.copy(searchQuery = query) }
     }
 
-    fun onNoteSelected(id: Long) {
+    fun onNoteSelected(id: Long) = openNote(id, opensTranscript = false, transcriptFocus = null)
+
+    fun onSearchResultSelected(id: Long) {
+        val card = mutableUiState.value.sections.flatMap { it.notes }.firstOrNull { it.id == id }
+        val isTranscriptMatch = card?.matchLocation == MatchLocationUi.TRANSCRIPT
+        openNote(id, opensTranscript = isTranscriptMatch, transcriptFocus = card?.matchParagraph.takeIf { isTranscriptMatch })
+    }
+
+    fun onTranscriptFocusHandled() {
+        mutableUiState.update { it.copy(transcriptFocusIndex = null) }
+    }
+
+    private fun openNote(id: Long, opensTranscript: Boolean, transcriptFocus: Int?) {
         launchSafely(showLoading = false) {
             val note = getNote(id) ?: return@launchSafely
             val isAlreadyOpen = selectedNote?.id == note.id
@@ -485,18 +501,21 @@ class NotesViewModel(
             selectedNoteId.value = note.id
             loadAudio(note)
             mutableUiState.update {
-                val tabs = if (isAlreadyOpen) it.detailTabs() else NoteDetailTabState.openedFor(note.status.toUi())
+                val tabs = when {
+                    opensTranscript -> NoteDetailTabState(tab = NoteDetailTabUi.TRANSCRIPT)
+                    isAlreadyOpen -> it.detailTabs()
+                    else -> NoteDetailTabState.openedFor(note.status.toUi())
+                }
                 it.copy(
                     selected = note.toDetailUi(dateLabelFormatter, folders.value.namesById()),
                     editor = null,
                     pendingDeleteNoteId = null,
+                    transcriptFocusIndex = transcriptFocus,
                 ).withDetailTabs(tabs)
             }
         }
     }
 
-    // The one moment a review is asked for: the user stopped a recording in the
-    // app and it was saved.
     private fun offerProTrialBackOnTheList() {
         launchSafely(showLoading = false) {
             combine(allNotes, selectedNoteId) { notes, noteId ->
@@ -506,6 +525,8 @@ class NotesViewModel(
         }
     }
 
+    // The one moment a review is asked for: the user stopped a recording in the
+    // app and it was saved.
     private suspend fun requestReviewIfDue() {
         if (shouldRequestReview()) {
             analyticsTracker.track(AnalyticsEvents.reviewRequested())
@@ -571,6 +592,7 @@ class NotesViewModel(
     // Rewriting a finished note is Pro whatever the target style, Summary included.
     fun onStyleSelected(style: NoteStyleRef) {
         val note = selectedNote ?: return
+        if (!uiState.value.isSummaryAvailable) return
         mutableUiState.update { it.copy(isPresetSheetVisible = false) }
         launchSafely(showLoading = false) {
             val feature = style.requiredProFeature() ?: ProFeature.NOTE_STYLES

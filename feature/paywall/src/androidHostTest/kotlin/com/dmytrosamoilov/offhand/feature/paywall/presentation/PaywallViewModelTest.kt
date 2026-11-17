@@ -199,6 +199,7 @@ class PaywallViewModelTest {
         observeProStatus = observeProStatus,
         getProTrialRecap = getProTrialRecap,
         getProTrialDaysLeft = getProTrialDaysLeft,
+        isSummaryAvailable = mockk { every { this@mockk.invoke() } returns true },
         proUpgradeGate = gate,
         analyticsTracker = tracker,
     )

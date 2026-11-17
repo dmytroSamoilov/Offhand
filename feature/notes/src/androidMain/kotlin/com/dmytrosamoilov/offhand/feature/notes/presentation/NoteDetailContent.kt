@@ -1,7 +1,11 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,9 +20,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,6 +39,7 @@ import com.dmytrosamoilov.offhand.core.designsystem.component.SecondaryButton
 import com.dmytrosamoilov.offhand.core.designsystem.component.Skeleton
 import com.dmytrosamoilov.offhand.core.designsystem.component.TimeMark
 import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandMotion
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.feature.notes.R
 import kotlinx.coroutines.delay
@@ -109,6 +116,11 @@ private fun TranscriptTab(state: NotesUiState, viewModel: NotesViewModel, note: 
         note.transcript.isNotBlank() -> {
             TranscriptText(
                 note = note,
+                marks = TranscriptMarks(
+                    playingIndex = state.playingPartIndex,
+                    focusIndex = state.transcriptFocusIndex,
+                    onFocusHandled = viewModel::onTranscriptFocusHandled,
+                ),
                 onTimeSelected = (viewModel::onTranscriptTimeSelected).takeIf { note.hasAudio && state.playback.isAvailable },
             )
             if (state.isTranscribing) {
@@ -119,6 +131,9 @@ private fun TranscriptTab(state: NotesUiState, viewModel: NotesViewModel, note: 
                     modifier = contentModifier.padding(top = 24.dp),
                 )
             }
+            if (NoteDetailTabUi.SUMMARY !in state.visibleDetailTabs) {
+                StoppedCard(note = note, viewModel = viewModel, modifier = contentModifier.padding(top = 24.dp))
+            }
         }
         note.status == NoteStatusUi.PROCESSING -> WorkingState(
             text = stringResource(transcriptWritingText(state.isWaitingForSpeech)),
@@ -126,38 +141,83 @@ private fun TranscriptTab(state: NotesUiState, viewModel: NotesViewModel, note: 
             isWorking = !state.isWaitingForSpeech,
             modifier = contentModifier,
         )
-        note.status == NoteStatusUi.FAILED -> FailedCard(note = note, onRetry = viewModel::onRetryTranscriptionRequested, modifier = contentModifier)
-        note.status == NoteStatusUi.INTERRUPTED -> PausedCard(onResume = viewModel::onResumeProcessingRequested, modifier = contentModifier)
+        note.status == NoteStatusUi.FAILED || note.status == NoteStatusUi.INTERRUPTED ->
+            StoppedCard(note = note, viewModel = viewModel, modifier = contentModifier)
         else -> PlainNotice(text = stringResource(R.string.notes_transcript_empty))
     }
 }
 
 @Composable
-private fun TranscriptText(note: NoteDetailUi, onTimeSelected: ((Long) -> Unit)?) {
+private fun StoppedCard(note: NoteDetailUi, viewModel: NotesViewModel, modifier: Modifier = Modifier) {
+    when (note.status) {
+        NoteStatusUi.FAILED -> FailedCard(note = note, onRetry = viewModel::onRetryTranscriptionRequested, modifier = modifier)
+        NoteStatusUi.INTERRUPTED -> PausedCard(onResume = viewModel::onResumeProcessingRequested, modifier = modifier)
+        NoteStatusUi.PROCESSING, NoteStatusUi.READY -> Unit
+    }
+}
+
+private class TranscriptMarks(
+    val playingIndex: Int?,
+    val focusIndex: Int?,
+    val onFocusHandled: () -> Unit,
+)
+
+@Composable
+private fun TranscriptText(note: NoteDetailUi, marks: TranscriptMarks, onTimeSelected: ((Long) -> Unit)?) {
     if (note.transcriptParts.isEmpty()) {
+        LaunchedEffect(marks.focusIndex) { if (marks.focusIndex != null) marks.onFocusHandled() }
         MarkdownText(markdown = note.transcript, modifier = Modifier.padding(horizontal = 24.dp))
         return
     }
     Column(modifier = Modifier.padding(horizontal = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        note.transcriptParts.forEach { part -> TranscriptParagraph(part = part, onTimeSelected = onTimeSelected) }
+        note.transcriptParts.forEachIndexed { index, part ->
+            TranscriptParagraph(
+                part = part,
+                isPlaying = index == marks.playingIndex,
+                isFocused = index == marks.focusIndex,
+                onFocusHandled = marks.onFocusHandled,
+                onTimeSelected = onTimeSelected,
+            )
+        }
     }
 }
 
 @Composable
-private fun TranscriptParagraph(part: TranscriptPartUi, onTimeSelected: ((Long) -> Unit)?) {
+private fun TranscriptParagraph(
+    part: TranscriptPartUi,
+    isPlaying: Boolean,
+    isFocused: Boolean,
+    onFocusHandled: () -> Unit,
+    onTimeSelected: ((Long) -> Unit)?,
+) {
     val description = stringResource(R.string.notes_transcript_time_description, part.time)
+    val ground by animateColorAsState(
+        targetValue = if (isPlaying) OffhandTheme.colors.accentSoft else Color.Transparent,
+        animationSpec = OffhandMotion.state(),
+        label = "transcript-paragraph",
+    )
+    val bringIntoView = remember { BringIntoViewRequester() }
+    LaunchedEffect(isPlaying) { if (isPlaying) bringIntoView.bringIntoView() }
+    LaunchedEffect(isFocused) {
+        if (!isFocused) return@LaunchedEffect
+        withFrameNanos { }
+        bringIntoView.bringIntoView()
+        onFocusHandled()
+    }
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .bringIntoViewRequester(bringIntoView)
             .clip(RoundedCornerShape(14.dp))
+            .background(ground)
             .then(
                 onTimeSelected?.let { onSelected -> Modifier.clickable(onClickLabel = description) { onSelected(part.startMs) } }
                     ?: Modifier,
             )
             .padding(horizontal = 12.dp, vertical = 10.dp),
     ) {
-        TimeMark(text = part.time)
+        TimeMark(text = part.time, isActive = isPlaying)
         MarkdownText(markdown = part.text)
     }
 }

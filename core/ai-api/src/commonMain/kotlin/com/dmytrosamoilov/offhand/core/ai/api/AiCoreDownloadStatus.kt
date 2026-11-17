@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.core.ai.api
 
 import com.dmytrosamoilov.offhand.core.common.ModelDownloadPolicy
+import com.dmytrosamoilov.offhand.core.device.DeviceTierProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -18,6 +19,7 @@ class AiCoreDownloadStatus(
     private val modelManager: ModelManager,
     speechToText: SpeechToText,
     downloadPolicy: ModelDownloadPolicy,
+    private val deviceTier: DeviceTierProvider,
 ) {
 
     val state: Flow<AiCoreDownloadState> =
@@ -30,7 +32,7 @@ class AiCoreDownloadStatus(
     // on until it is false.
     val isMissing: Flow<Boolean> =
         combine(modelManager.modelState, speechToText.downloadState) { modelState, speechState ->
-            modelState.isNotOnDisk() || speechState !is SpeechModelState.Downloaded
+            (deviceTier.writesSummaries() && modelState.isNotOnDisk()) || speechState !is SpeechModelState.Downloaded
         }.distinctUntilChanged()
 
     // The speech part is the small one and is downloaded first: once it is on
@@ -47,18 +49,20 @@ class AiCoreDownloadStatus(
         speechState: SpeechModelState,
         canStart: Boolean,
     ): AiCoreDownloadState {
+        val includesModel = deviceTier.writesSummaries()
         val isDownloading =
-            modelState is ModelState.Downloading || speechState is SpeechModelState.Downloading
-        val modelBytesTotal = modelManager.model.sizeInBytes
+            (includesModel && modelState is ModelState.Downloading) || speechState is SpeechModelState.Downloading
+        val modelBytesTotal = if (includesModel) modelManager.model.sizeInBytes else 0L
         val speechBytesTotal = modelManager.speechModelSizeInBytes
         val bytesTotal = modelBytesTotal + speechBytesTotal
         if (!isDownloading) {
-            val isMissing = modelState is ModelState.NotDownloaded || speechState is SpeechModelState.NotDownloaded
+            val isMissing = (includesModel && modelState is ModelState.NotDownloaded) ||
+                speechState is SpeechModelState.NotDownloaded
             return if (isMissing && !canStart) AiCoreDownloadState.WaitingForMobileData(bytesTotal) else AiCoreDownloadState.Idle
         }
         if (bytesTotal <= 0) return AiCoreDownloadState.Downloading(progressPercent = 0)
 
-        val bytesDownloaded = modelState.downloadedBytes(modelBytesTotal) +
+        val bytesDownloaded = (if (includesModel) modelState.downloadedBytes(modelBytesTotal) else 0L) +
             speechState.downloadedBytes(speechBytesTotal)
         return AiCoreDownloadState.Downloading(
             progressPercent = (bytesDownloaded * 100 / bytesTotal).toInt().coerceIn(0, 100),

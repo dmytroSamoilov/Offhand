@@ -151,4 +151,9 @@
         <item quantity="other">%d days left</item>
     </plurals>
     <string name="settings_plan_trial_body">Everything in Pro is unlocked during your free trial. After that Offhand stays free, with the Summary style and two folders.</string>
+    <string name="settings_not_on_this_phone">Not available on this phone</string>
+    <string name="settings_summary_unavailable_note">Summaries, writing styles and smart suggestions need more memory than this phone has. Recording, transcripts, folders, search and sharing all work.</string>
+    <string name="settings_widget_title">Home-screen widget</string>
+    <string name="settings_widget_subtitle">Record with one tap</string>
+    <string name="settings_widget_body">One tap on the widget starts a recording, into the folder you pick for it. Tap it again to stop and save.\n\nTo add it, touch and hold your home screen, tap Widgets and find Offhand.</string>
 </resources>

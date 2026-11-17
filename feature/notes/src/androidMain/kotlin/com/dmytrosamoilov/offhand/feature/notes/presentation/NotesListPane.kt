@@ -43,7 +43,7 @@ internal fun NotesListPane(
     state: NotesUiState,
     viewModel: NotesViewModel,
     openNoteId: Long?,
-    onNoteClick: (Long) -> Unit,
+    onNoteClick: (id: Long, isSearchResult: Boolean) -> Unit,
     bottomBar: @Composable () -> Unit,
 ) {
     val selection = rememberNoteSelection(state = state, viewModel = viewModel)
@@ -65,7 +65,13 @@ internal fun NotesListPane(
         NotesListBody(
             state = state,
             viewModel = viewModel,
-            row = NoteRowContext(selection = selection, openNoteId = openNoteId, isSearching = isSearching, onOpen = onNoteClick),
+            row = NoteRowContext(
+                selection = selection,
+                writesSummary = state.isSummaryEnabled,
+                openNoteId = openNoteId,
+                isSearching = isSearching,
+                onOpen = { id -> onNoteClick(id, state.searchQuery.isNotEmpty()) },
+            ),
             modifier = Modifier.weight(1f),
         )
         when {
