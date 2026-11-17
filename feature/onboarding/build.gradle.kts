@@ -17,7 +17,6 @@ kotlin {
         androidMain.dependencies {
             implementation(project(":core:ai-api"))
             implementation(libs.androidx.core.ktx)
-            implementation(libs.androidx.material.icons.extended)
             implementation(libs.timber)
         }
     }

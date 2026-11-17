@@ -1,89 +1,59 @@
 package com.dmytrosamoilov.offhand.feature.onboarding.presentation
 
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
-import android.provider.Settings
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dmytrosamoilov.offhand.core.designsystem.R as DesignR
-import com.dmytrosamoilov.offhand.core.designsystem.component.MorphingLoadingIndicator
+import com.dmytrosamoilov.offhand.core.designsystem.component.Hairline
+import com.dmytrosamoilov.offhand.core.designsystem.component.MetaText
+import com.dmytrosamoilov.offhand.core.designsystem.component.PlainTextButton
+import com.dmytrosamoilov.offhand.core.designsystem.component.RecordPill
+import com.dmytrosamoilov.offhand.core.designsystem.component.Skeleton
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandSpacing
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.feature.onboarding.R
 import org.koin.androidx.compose.koinViewModel
-import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 
 @Composable
 fun OnboardingScreen(
+    onRecordFirstNote: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: OnboardingViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-
-    LifecycleResumeEffect(Unit) {
-        viewModel.onDeviceLockRecheck()
-        onPauseOrDispose { }
-    }
-
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
         OnboardingContent(
             state = state,
-            onDeviceLockSetup = { openSecuritySettings(context) },
-            onAppLockToggled = viewModel::onAppLockToggled,
-            onTelemetryToggled = viewModel::onTelemetryToggled,
-            onContinue = { step ->
-                when (step) {
-                    OnboardingStep.PRIVACY -> viewModel.onPrivacyContinue()
-                    OnboardingStep.DEVICE_LOCK -> viewModel.onDeviceLockContinue()
-                    OnboardingStep.TELEMETRY_CONSENT -> viewModel.onConsentContinue()
-                    else -> Unit
-                }
+            onRecordFirstNote = {
+                onRecordFirstNote()
+                viewModel.onRecordFirstNoteClicked()
             },
+            onLookAround = viewModel::onLookAroundClicked,
         )
     }
 }
@@ -91,432 +61,148 @@ fun OnboardingScreen(
 @Composable
 private fun OnboardingContent(
     state: OnboardingUiState,
-    onDeviceLockSetup: () -> Unit,
-    onAppLockToggled: (Boolean) -> Unit,
-    onTelemetryToggled: (Boolean) -> Unit,
-    onContinue: (OnboardingStep) -> Unit,
-) {
-    when (state.step) {
-        OnboardingStep.DEVICE_CHECK -> CenteredPane { MorphingLoadingIndicator() }
-        OnboardingStep.DEVICE_INCOMPATIBLE -> CenteredPane {
-            DeviceIncompatibleStep(state.deviceSpecs)
-        }
-        else -> WizardPage(
-            state = state,
-            onDeviceLockSetup = onDeviceLockSetup,
-            onAppLockToggled = onAppLockToggled,
-            onTelemetryToggled = onTelemetryToggled,
-            onContinue = onContinue,
-        )
-    }
-}
-
-@Composable
-private fun CenteredPane(content: @Composable () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .systemBarsPadding()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        content()
-    }
-}
-
-@Composable
-private fun WizardPage(
-    state: OnboardingUiState,
-    onDeviceLockSetup: () -> Unit,
-    onAppLockToggled: (Boolean) -> Unit,
-    onTelemetryToggled: (Boolean) -> Unit,
-    onContinue: (OnboardingStep) -> Unit,
+    onRecordFirstNote: () -> Unit,
+    onLookAround: () -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(OffhandTheme.colors.ground)
             .systemBarsPadding()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+            .verticalScroll(rememberScrollState())
+            .wrapContentWidth()
+            .widthIn(max = MAX_CONTENT_WIDTH)
+            .padding(start = OffhandSpacing.screen, end = OffhandSpacing.screen, top = 12.dp, bottom = 28.dp),
     ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                WizardStepContent(
-                    state = state,
-                            onDeviceLockSetup = onDeviceLockSetup,
-                    onAppLockToggled = onAppLockToggled,
-                    onTelemetryToggled = onTelemetryToggled,
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-        PageIndicator(currentPage = state.currentPage, pageCount = state.pageCount)
-        Spacer(modifier = Modifier.height(20.dp))
-        PrimaryStepButton(
-            text = stringResource(state.continueLabelRes()),
-            onClick = { onContinue(state.step) },
-        )
-    }
-}
-
-@Composable
-private fun WizardStepContent(
-    state: OnboardingUiState,
-    onDeviceLockSetup: () -> Unit,
-    onAppLockToggled: (Boolean) -> Unit,
-    onTelemetryToggled: (Boolean) -> Unit,
-) {
-    when (state.step) {
-        OnboardingStep.PRIVACY -> PrivacyStep()
-        OnboardingStep.DEVICE_LOCK -> if (state.isDeviceSecure) {
-            AppLockStep(
-                isAppLockEnabled = state.isAppLockEnabled,
-                onAppLockToggled = onAppLockToggled,
-            )
-        } else {
-            DeviceLockStep(onSetup = onDeviceLockSetup)
-        }
-        OnboardingStep.TELEMETRY_CONSENT -> TelemetryConsentStep(
-            isTelemetryEnabled = state.isTelemetryEnabled,
-            onTelemetryToggled = onTelemetryToggled,
-        )
-        else -> Unit
-    }
-}
-
-private fun OnboardingUiState.continueLabelRes(): Int =
-    if (step == OnboardingStep.DEVICE_LOCK && !isDeviceSecure) {
-        R.string.onboarding_lock_skip
-    } else {
-        R.string.onboarding_continue
-    }
-
-@Composable
-private fun PageIndicator(currentPage: Int, pageCount: Int) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-    ) {
-        repeat(pageCount) { index ->
-            PageDot(isActive = index == currentPage)
+        Wordmark()
+        when (state.step) {
+            OnboardingStep.DEVICE_CHECK -> Skeleton(modifier = Modifier.padding(top = 56.dp))
+            OnboardingStep.DEVICE_INCOMPATIBLE -> DeviceIncompatible(state.deviceSpecs)
+            OnboardingStep.WELCOME -> Welcome(onRecordFirstNote = onRecordFirstNote, onLookAround = onLookAround)
         }
     }
 }
 
 @Composable
-private fun PageDot(isActive: Boolean) {
-    val width by animateDpAsState(targetValue = if (isActive) 24.dp else 8.dp)
-    val color by animateColorAsState(
-        targetValue = if (isActive) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.outlineVariant
-        },
-    )
-    Box(
-        modifier = Modifier
-            .height(8.dp)
-            .width(width)
-            .clip(CircleShape)
-            .background(color),
-    )
-}
-
-@Composable
-private fun PrivacyStep() {
-    Image(
-        painter = painterResource(DesignR.drawable.ic_offhand_logo),
-        contentDescription = null,
-        modifier = Modifier.size(96.dp),
-    )
-    Spacer(modifier = Modifier.height(28.dp))
-    StepTitle(text = stringResource(R.string.onboarding_privacy_title))
-    StepBody(text = stringResource(R.string.onboarding_privacy_body))
-}
-
-@Composable
-private fun DeviceLockStep(onSetup: () -> Unit) {
-    Icon(
-        imageVector = Icons.Filled.Lock,
-        contentDescription = null,
-        modifier = Modifier.size(64.dp),
-        tint = MaterialTheme.colorScheme.primary,
-    )
-    Spacer(modifier = Modifier.height(28.dp))
-    StepTitle(text = stringResource(R.string.onboarding_lock_title))
-    StepBody(text = stringResource(R.string.onboarding_lock_body))
-    Spacer(modifier = Modifier.height(28.dp))
-    Button(onClick = onSetup) {
-        Text(text = stringResource(R.string.onboarding_lock_setup))
-    }
-}
-
-@Composable
-private fun AppLockStep(
-    isAppLockEnabled: Boolean,
-    onAppLockToggled: (Boolean) -> Unit,
-) {
-    val haptics = haptics()
-    Icon(
-        imageVector = Icons.Filled.Lock,
-        contentDescription = null,
-        modifier = Modifier.size(64.dp),
-        tint = MaterialTheme.colorScheme.primary,
-    )
-    Spacer(modifier = Modifier.height(28.dp))
-    StepTitle(text = stringResource(R.string.onboarding_lock_enable_title))
-    StepBody(text = stringResource(R.string.onboarding_lock_enable_body))
-    Spacer(modifier = Modifier.height(28.dp))
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .toggleable(
-                value = isAppLockEnabled,
-                role = Role.Switch,
-                onValueChange = { isOn ->
-                    haptics.toggle(isOn)
-                    onAppLockToggled(isOn)
-                },
-            ),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(R.string.onboarding_lock_enable_label),
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f),
-            )
-            Switch(checked = isAppLockEnabled, onCheckedChange = null)
-        }
-    }
-    Spacer(modifier = Modifier.height(16.dp))
+private fun Wordmark() {
     Text(
-        text = stringResource(R.string.onboarding_lock_enable_description),
-        style = MaterialTheme.typography.bodyMedium,
-        textAlign = TextAlign.Center,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        text = stringResource(R.string.onboarding_wordmark),
+        style = OffhandTheme.type.heading.copy(fontSize = OffhandTheme.type.rowTitle.fontSize),
+        color = OffhandTheme.colors.ink,
+        modifier = Modifier.heightIn(min = OffhandSpacing.touchTarget).padding(top = 10.dp),
     )
 }
 
 @Composable
-private fun TelemetryConsentStep(
-    isTelemetryEnabled: Boolean,
-    onTelemetryToggled: (Boolean) -> Unit,
-) {
-    val haptics = haptics()
-    StepTitle(text = stringResource(R.string.onboarding_consent_title))
-    StepBody(text = stringResource(R.string.onboarding_consent_body))
-    Spacer(modifier = Modifier.height(28.dp))
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .toggleable(
-                value = isTelemetryEnabled,
-                role = Role.Switch,
-                onValueChange = { isOn ->
-                    haptics.toggle(isOn)
-                    onTelemetryToggled(isOn)
-                },
-            ),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant),
-    ) {
+private fun ColumnScope.Welcome(onRecordFirstNote: () -> Unit, onLookAround: () -> Unit) {
+    Headline(text = stringResource(R.string.onboarding_welcome_title))
+    Column(modifier = Modifier.padding(top = OffhandSpacing.screen)) {
+        StageRow(R.string.onboarding_step_recorded, showDivider = true)
+        StageRow(R.string.onboarding_step_transcribed, showDivider = true)
+        StageRow(R.string.onboarding_step_summarised, showDivider = false)
+    }
+    Text(
+        text = stringResource(R.string.onboarding_privacy_line),
+        style = OffhandTheme.type.bodySmall,
+        color = OffhandTheme.colors.ink2,
+        modifier = Modifier.padding(top = 16.dp),
+    )
+    Spacer(Modifier.weight(1f).heightIn(min = 40.dp))
+    RecordPill(
+        text = stringResource(R.string.onboarding_record_first_note),
+        onClick = onRecordFirstNote,
+        modifier = Modifier.fillMaxWidth(),
+    )
+    Text(
+        text = stringResource(R.string.onboarding_microphone_hint),
+        style = OffhandTheme.type.caption,
+        color = OffhandTheme.colors.ink2,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+    )
+    PlainTextButton(
+        text = stringResource(R.string.onboarding_look_around),
+        onClick = onLookAround,
+        modifier = Modifier.align(Alignment.CenterHorizontally),
+    )
+}
+
+@Composable
+private fun StageRow(labelRes: Int, showDivider: Boolean) {
+    Column {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 10.dp),
+            modifier = Modifier.fillMaxWidth().height(52.dp),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
-                text = stringResource(R.string.onboarding_consent_toggle_label),
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f),
-            )
-            Switch(checked = isTelemetryEnabled, onCheckedChange = null)
+            Text(stringResource(labelRes), style = OffhandTheme.type.body, color = OffhandTheme.colors.ink)
+            MetaText(text = stringResource(R.string.onboarding_on_your_phone))
         }
+        if (showDivider) Hairline()
     }
 }
 
+@Composable
+private fun Headline(text: String) {
+    Text(
+        text = text,
+        style = OffhandTheme.type.display,
+        color = OffhandTheme.colors.ink,
+        modifier = Modifier.padding(top = 56.dp).semantics { heading() },
+    )
+}
 
 @Composable
-private fun DeviceIncompatibleStep(specs: DeviceSpecsUi?) {
-    StepTitle(text = stringResource(R.string.onboarding_incompatible_title))
-    StepBody(text = stringResource(R.string.onboarding_incompatible_body))
-    if (specs != null) {
-        Spacer(modifier = Modifier.height(24.dp))
+private fun DeviceIncompatible(specs: DeviceSpecsUi?) {
+    Headline(text = stringResource(R.string.onboarding_incompatible_title))
+    Text(
+        text = stringResource(R.string.onboarding_incompatible_body),
+        style = OffhandTheme.type.body,
+        color = OffhandTheme.colors.ink2,
+        modifier = Modifier.padding(top = 12.dp),
+    )
+    specs?.let { SpecRows(it) }
+}
+
+@Composable
+private fun SpecRows(specs: DeviceSpecsUi) {
+    Column(modifier = Modifier.padding(top = OffhandSpacing.screen)) {
         SpecRow(
             label = stringResource(R.string.onboarding_incompatible_ram_label),
-            value = stringResource(
-                R.string.onboarding_incompatible_ram_value,
-                specs.totalRamGb,
-                specs.requiredRamGb,
-            ),
+            value = stringResource(R.string.onboarding_incompatible_ram_value, specs.totalRamGb, specs.requiredRamGb),
             isSatisfied = specs.isRamSatisfied,
         )
+        Hairline()
         SpecRow(
             label = stringResource(R.string.onboarding_incompatible_cores_label),
-            value = stringResource(
-                R.string.onboarding_incompatible_cores_value,
-                specs.cpuCores,
-                specs.requiredCpuCores,
-            ),
+            value = stringResource(R.string.onboarding_incompatible_cores_value, specs.cpuCores, specs.requiredCpuCores),
             isSatisfied = specs.isCoresSatisfied,
         )
     }
 }
 
 @Composable
-private fun PrimaryStepButton(text: String, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
-        shape = CircleShape,
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleMedium,
-        )
-    }
-}
-
-
-private fun openSecuritySettings(context: Context) {
-    try {
-        context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
-    } catch (notFound: ActivityNotFoundException) {
-        context.startActivity(Intent(Settings.ACTION_SETTINGS))
-    }
-}
-
-@Composable
-private fun StepTitle(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.headlineMedium,
-        textAlign = TextAlign.Center,
-    )
-    Spacer(modifier = Modifier.height(16.dp))
-}
-
-@Composable
-private fun StepBody(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyLarge,
-        textAlign = TextAlign.Center,
-    )
-}
-
-@Composable
 private fun SpecRow(label: String, value: String, isSatisfied: Boolean) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-        Text(text = label, style = MaterialTheme.typography.bodyMedium)
-        Spacer(modifier = Modifier.width(8.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(label, style = OffhandTheme.type.body, color = OffhandTheme.colors.ink, modifier = Modifier.weight(1f))
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (isSatisfied) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.error
-            },
+            style = OffhandTheme.type.number,
+            color = if (isSatisfied) OffhandTheme.colors.ink2 else OffhandTheme.colors.danger,
         )
     }
 }
 
-private val previewPages = listOf(
-    OnboardingStep.PRIVACY,
-    OnboardingStep.DEVICE_LOCK,
-    OnboardingStep.TELEMETRY_CONSENT,
-)
-
+@Preview
 @Composable
-private fun OnboardingStatePreview(state: OnboardingUiState) {
+private fun WelcomePreview() {
     OffhandTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background,
-        ) {
-            OnboardingContent(
-                state = state,
-                onDeviceLockSetup = {},
-                onAppLockToggled = {},
-                onTelemetryToggled = {},
-                onContinue = {},
-            )
-        }
+        OnboardingContent(state = OnboardingUiState(step = OnboardingStep.WELCOME), onRecordFirstNote = {}, onLookAround = {})
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun DeviceCheckPreview() {
-    OnboardingStatePreview(OnboardingUiState(step = OnboardingStep.DEVICE_CHECK))
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PrivacyPreview() {
-    OnboardingStatePreview(
-        OnboardingUiState(step = OnboardingStep.PRIVACY, currentPage = 0, pages = previewPages),
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun DeviceLockPreview() {
-    OnboardingStatePreview(
-        OnboardingUiState(step = OnboardingStep.DEVICE_LOCK, currentPage = 1, pages = previewPages),
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun DeviceIncompatiblePreview() {
-    OnboardingStatePreview(
-        OnboardingUiState(
-            step = OnboardingStep.DEVICE_INCOMPATIBLE,
-            deviceSpecs = DeviceSpecsUi(
-                totalRamGb = "4.0",
-                requiredRamGb = "5.0",
-                isRamSatisfied = false,
-                cpuCores = 4,
-                requiredCpuCores = 4,
-                isCoresSatisfied = true,
-            ),
-        ),
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun TelemetryConsentPreview() {
-    OnboardingStatePreview(
-        OnboardingUiState(
-            step = OnboardingStep.TELEMETRY_CONSENT,
-            currentPage = 2,
-            pages = previewPages,
-        ),
-    )
-}
-
+private val MAX_CONTENT_WIDTH = 560.dp

@@ -119,6 +119,10 @@ class RootViewModel(
         }
     }
 
+    fun onFirstRecordingRequested() {
+        recordingRequest.value = RecordingRequestUi(folderId = null)
+    }
+
     fun onRecordingRequestConsumed() {
         recordingRequest.value = null
     }
@@ -160,11 +164,7 @@ class RootViewModel(
 
     private suspend fun settleProTrialOnColdStart() {
         val settlement = settleProTrial()
-        when {
-            settlement.isTrialOffered -> proUpgradeGate.showTrialOffer()
-            settlement.notice == ProTrialNotice.ENDED -> showTrialEnded()
-            else -> trialNotice.value = settlement.notice
-        }
+        if (settlement.notice == ProTrialNotice.ENDED) showTrialEnded() else trialNotice.value = settlement.notice
     }
 
     // The end of the trial is told by the paywall itself, with what was used.

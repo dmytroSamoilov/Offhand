@@ -38,6 +38,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsFolderStylesAva
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsUnlimitedFoldersAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.OfferProTrialUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
@@ -148,6 +149,7 @@ class NotesViewModelTest {
         coEvery { requirePro(any()) } returns true
     }
     private val clearShareCache: ClearShareCacheUseCase = mockk(relaxed = true)
+    private val offerProTrial: OfferProTrialUseCase = mockk(relaxed = true)
     private val recordingsSavedInApp = MutableSharedFlow<Unit>()
     private val shouldRequestReview: ShouldRequestReviewUseCase = mockk {
         coEvery { this@mockk.invoke() } returns false
@@ -238,6 +240,7 @@ class NotesViewModelTest {
         modelDownloadLauncher = mockk(relaxed = true),
         clearTranscriptionCheckpoint = mockk(relaxed = true),
         resumeInterruptedNotes = mockk(relaxed = true),
+        offerProTrial = offerProTrial,
         buildInfo = BuildInfo(isDeveloperBuild = true),
         analyticsTracker = mockk(relaxed = true),
     )
@@ -751,5 +754,31 @@ class NotesViewModelTest {
 
         coVerify(exactly = 0) { deleteNote(any()) }
         assertNull(viewModel.uiState.value.pendingDeleteNoteId)
+    }
+
+    @Test
+    fun `the trial is offered once a finished note exists and no note is open`() = runTest(dispatcher) {
+        val notes = MutableStateFlow(listOf(note.copy(status = NoteStatus.PROCESSING)))
+        every { observeNotes() } returns notes
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        notes.value = listOf(note)
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify(exactly = 0) { offerProTrial() }
+
+        viewModel.onDetailClosed()
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify(exactly = 1) { offerProTrial() }
+    }
+
+    @Test
+    fun `no offer while the library has no finished note`() = runTest(dispatcher) {
+        every { observeNotes() } returns flowOf(listOf(note.copy(status = NoteStatus.PROCESSING)))
+        viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { offerProTrial() }
     }
 }

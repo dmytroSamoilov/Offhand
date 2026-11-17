@@ -143,11 +143,7 @@ class IosRootViewModel(
 
     private suspend fun settleProTrialOnColdStart() {
         val settlement = settleProTrial()
-        when {
-            settlement.isTrialOffered -> proUpgradeGate.showTrialOffer()
-            settlement.notice == ProTrialNotice.ENDED -> showTrialEnded()
-            else -> mutableTrialNotice.value = settlement.notice
-        }
+        if (settlement.notice == ProTrialNotice.ENDED) showTrialEnded() else mutableTrialNotice.value = settlement.notice
     }
 
     // The end of the trial is told by the paywall itself, with what was used.

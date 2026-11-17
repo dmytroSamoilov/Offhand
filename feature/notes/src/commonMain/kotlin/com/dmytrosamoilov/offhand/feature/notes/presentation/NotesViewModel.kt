@@ -38,6 +38,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestion
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteFeaturesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.OfferProTrialUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
@@ -65,6 +66,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -110,6 +112,7 @@ class NotesViewModel(
     private val modelDownloadLauncher: ModelDownloadLauncher,
     private val clearTranscriptionCheckpoint: ClearTranscriptionCheckpointUseCase,
     private val resumeInterruptedNotes: ResumeInterruptedNotesUseCase,
+    private val offerProTrial: OfferProTrialUseCase,
     buildInfo: BuildInfo,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
@@ -142,6 +145,7 @@ class NotesViewModel(
         viewModelScope.launch {
             sessionManager.recordingsSavedInApp.collect { requestReviewIfDue() }
         }
+        offerProTrialBackOnTheList()
         viewModelScope.launch {
             observeFolders().collect { latest ->
                 folders.value = latest
@@ -493,6 +497,15 @@ class NotesViewModel(
 
     // The one moment a review is asked for: the user stopped a recording in the
     // app and it was saved.
+    private fun offerProTrialBackOnTheList() {
+        launchSafely(showLoading = false) {
+            combine(allNotes, selectedNoteId) { notes, noteId ->
+                noteId == null && notes.orEmpty().any { it.status == NoteStatus.READY }
+            }.first { it }
+            offerProTrial()
+        }
+    }
+
     private suspend fun requestReviewIfDue() {
         if (shouldRequestReview()) {
             analyticsTracker.track(AnalyticsEvents.reviewRequested())

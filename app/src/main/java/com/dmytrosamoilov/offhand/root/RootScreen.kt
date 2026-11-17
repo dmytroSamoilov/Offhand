@@ -36,7 +36,7 @@ fun RootScreen(
     BaseComposeScreen(viewModel = viewModel) {
         when (state.phase) {
             RootPhase.LOADING -> Unit
-            RootPhase.ONBOARDING -> OnboardingScreen()
+            RootPhase.ONBOARDING -> OnboardingScreen(onRecordFirstNote = viewModel::onFirstRecordingRequested)
             RootPhase.LOCKED -> LockScreen(onAuthenticated = viewModel::onUnlockAuthenticated)
             RootPhase.READY -> OffhandApp(
                 requestedNoteId = requestedNoteId,

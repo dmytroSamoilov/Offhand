@@ -28,6 +28,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestion
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteFeaturesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteDocumentBuilder
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.OfferProTrialUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
@@ -50,6 +51,7 @@ val featureNotesModule = module {
     factoryOf(::CreateFolderUseCase)
     factoryOf(::DecideEarlyAdopterProUseCase)
     factoryOf(::MarkEarlyAdopterThankedUseCase)
+    factoryOf(::OfferProTrialUseCase)
     factoryOf(::DeleteFolderUseCase)
     factoryOf(::MoveNoteToFolderUseCase)
     factoryOf(::ObserveCustomNoteStylesUseCase)
@@ -115,6 +117,7 @@ val featureNotesModule = module {
             aiCoreDownloadStatus = get(),
             clearTranscriptionCheckpoint = get(),
             resumeInterruptedNotes = get(),
+            offerProTrial = get(),
             buildInfo = get(),
             analyticsTracker = get(),
         )

@@ -3,328 +3,139 @@ import SwiftUI
 
 struct OnboardingView: View {
     let onFinished: () -> Void
-    @Environment(\.scenePhase) private var scenePhase
     private let viewModel = AppViewModels.onboarding
-    @State private var visiblePage = 0
-    @State private var state = OnboardingUiState(
-        step: .deviceCheck,
-        deviceSpecs: nil,
-        isDeviceSecure: false,
-        isAppLockEnabled: true,
-        isTelemetryEnabled: true,
-        currentPage: 0,
-        pages: [],
-        furthestPage: 0
-    )
+    @State private var state = OnboardingUiState(step: .deviceCheck, deviceSpecs: nil)
 
     var body: some View {
-        content
-            .background(Brand.surface.ignoresSafeArea())
-            .onChange(of: scenePhase) {
-                if scenePhase == .active { viewModel.onDeviceLockRecheck() }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(verbatim: "Offhand")
+                    .font(.offhand(.tightSemibold, size: 17, relativeTo: .headline))
+                    .foregroundStyle(OffhandColor.ink)
+                    .frame(minHeight: OffhandSpacing.touchTarget)
+                content
             }
-            .task {
-                for await newState in viewModel.uiState {
-                    state = newState
-                }
+            .padding(.horizontal, OffhandSpacing.screen)
+            .padding(.bottom, 28)
+            .frame(maxWidth: 560)
+            .frame(maxWidth: .infinity)
+            .containerRelativeFrame(.vertical, alignment: .top) { height, _ in height }
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .background(OffhandColor.ground.ignoresSafeArea())
+        .task {
+            for await newState in viewModel.uiState {
+                state = newState
             }
+        }
     }
 
     @ViewBuilder
     private var content: some View {
         switch state.step {
-        case .deviceCheck:
-            ProgressView()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .welcome:
+            welcome
         case .deviceIncompatible:
-            incompatibleScreen
+            incompatible
         default:
-            wizard
+            Skeleton()
+                .padding(.top, 56)
         }
     }
 
-    // All pages sit in the pager up front — growing it while a fling settles
-    // makes the leftover momentum cascade across several pages at once. Paged
-    // scrolling moves one card per gesture, so settling past the furthest
-    // unlocked page acts as Continue for the card just crossed; only the final
-    // consent card is button-only, because its Continue ends onboarding. The
-    // dots and the continue button stay put.
-    private var wizard: some View {
-        VStack(spacing: 0) {
-            TabView(selection: $visiblePage) {
-                ForEach(Array(state.pages.enumerated()), id: \.offset) { index, step in
-                    stepCard(for: step)
-                        .padding(.horizontal, 24)
-                        .tag(index)
-                }
+    private var welcome: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            headline(String(localized: "Speak. Offhand writes it down, on your iPhone."))
+            VStack(spacing: 0) {
+                stageRow(String(localized: "Recorded"))
+                Hairline()
+                stageRow(String(localized: "Transcribed"))
+                Hairline()
+                stageRow(String(localized: "Summarised"))
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .onChange(of: visiblePage) {
-                if visiblePage > Int(state.furthestPage) {
-                    continueAction(for: state.pages[visiblePage - 1])?()
-                } else {
-                    viewModel.onPageSelected(page: Int32(visiblePage))
-                }
-            }
-            .onChange(of: state.currentPage) {
-                guard visiblePage != Int(state.currentPage) else { return }
-                withAnimation(.easeInOut(duration: 0.28)) {
-                    visiblePage = Int(state.currentPage)
-                }
-            }
-            if state.pageCount > 1 {
-                PageDots(currentPage: Int(state.currentPage), pageCount: Int(state.pageCount))
-                    .padding(.top, 24)
-            }
-            if let continueAction = continueAction(for: state.step) {
-                Button(action: continueAction) {
-                    Text(continueTitle)
-                        .font(.headline)
-                        .foregroundStyle(Brand.onPrimary)
-                        .frame(maxWidth: .infinity, minHeight: 56)
-                        .background(Brand.primary, in: Capsule())
-                        .contentShape(Capsule())
-                }
-                .buttonStyle(.plain)
-                .padding(.top, 20)
-                .padding(.horizontal, 24)
-            }
-        }
-        .padding(.vertical, 24)
-    }
-
-    @ViewBuilder
-    private func stepCard(for step: OnboardingStep) -> some View {
-        switch step {
-        case .privacy:
-            StepCard(
-                icon: "lock.shield.fill",
-                title: String(localized: "Private by design"),
-                message: String(localized: "Everything stays on your iPhone. Recordings, transcripts and notes are encrypted, and the on-device AI that processes them runs right there. Nothing is uploaded, ever.")
-            )
-        case .deviceLock:
-            if state.isDeviceSecure {
-                StepCard(
-                    icon: "faceid",
-                    title: String(localized: "Lock Offhand?"),
-                    message: String(localized: "Offhand can ask for Face ID, Touch ID, or your passcode every time it opens, so your notes stay private even if someone else is holding an unlocked iPhone."),
-                    content: {
-                        VStack(spacing: 16) {
-                            ToggleCard(
-                                label: String(localized: "Require unlock to open Offhand"),
-                                isOn: Binding(
-                                    get: { state.isAppLockEnabled },
-                                    set: { viewModel.onAppLockToggled(enabled: $0) }
-                                )
-                            )
-                            Text(String(localized: "You can change this any time in Settings."))
-                                .font(.footnote)
-                                .foregroundStyle(Brand.onSurfaceVariant)
-                                .multilineTextAlignment(.center)
-                        }
-                    }
-                )
-            } else {
-                StepCard(
-                    icon: "lock.slash",
-                    title: String(localized: "Add a device passcode"),
-                    message: String(localized: "This iPhone has no passcode, so Offhand has nothing to lock your notes with. Set one in Settings to use Face ID or Touch ID here.")
-                )
-            }
-        case .telemetryConsent:
-            StepCard(
-                icon: "chart.bar.fill",
-                title: String(localized: "Share usage & stability reports?"),
-                message: String(localized: "Anonymous usage statistics and crash reports — things like app opens, device model and app version. Never your notes, audio, or any personal data."),
-                content: {
-                    ToggleCard(
-                        label: String(localized: "Share usage & stability reports"),
-                        isOn: Binding(
-                            get: { state.isTelemetryEnabled },
-                            set: { viewModel.onTelemetryToggled(granted: $0) }
-                        )
-                    )
-                }
-            )
-        default:
-            EmptyView()
-        }
-    }
-
-    private var continueTitle: String {
-        if state.step == .deviceLock && !state.isDeviceSecure {
-            return String(localized: "Continue without a lock")
-        }
-        return String(localized: "Continue")
-    }
-
-    private func continueAction(for step: OnboardingStep) -> (() -> Void)? {
-        switch step {
-        case .privacy:
-            return { viewModel.onPrivacyContinue() }
-        case .deviceLock:
-            return {
-                guard state.isDeviceSecure && state.isAppLockEnabled else {
-                    viewModel.onDeviceLockContinue()
-                    return
-                }
-                // The first biometric check doubles as the system's Face ID
-                // permission ask; running it here keeps that prompt on the card
-                // that explains it, and proves the unlock works before the app
-                // commits to locking. A cancelled check pulls a forward swipe
-                // back to this card instead of advancing.
-                DeviceAuthenticator.confirmOwner(
-                    reason: String(localized: "Confirm it's you to turn on the app lock.")
-                ) { confirmed in
-                    if confirmed {
-                        viewModel.onDeviceLockContinue()
-                    } else {
-                        withAnimation(.easeInOut(duration: 0.28)) {
-                            visiblePage = Int(state.currentPage)
-                        }
-                    }
-                }
-            }
-        case .telemetryConsent:
-            return {
-                viewModel.onConsentContinue()
+            .padding(.top, OffhandSpacing.screen)
+            Text(String(localized: "Everything stays on your iPhone. Nothing is uploaded, ever."))
+                .offhandText(.bodySmall)
+                .foregroundStyle(OffhandColor.ink2)
+                .padding(.top, 16)
+            Spacer(minLength: 40)
+            RecordPill(String(localized: "Record your first note")) {
+                ShortcutRequests.shared.requestedFolder = .unsorted
+                ShortcutRequests.shared.pending = .startRecording
+                viewModel.onRecordFirstNoteClicked()
                 onFinished()
             }
-        default:
-            return nil
+            .frame(maxWidth: .infinity)
+            Text(String(localized: "Offhand will ask to use your microphone."))
+                .offhandText(.caption)
+                .foregroundStyle(OffhandColor.ink2)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 12)
+            PlainTextButton(String(localized: "Not now, look around first")) {
+                viewModel.onLookAroundClicked()
+                onFinished()
+            }
+            .frame(maxWidth: .infinity)
         }
+        .frame(maxHeight: .infinity, alignment: .top)
     }
 
-    private var incompatibleScreen: some View {
-        StepCard(
-            icon: "iphone.slash",
-            iconTint: .orange,
-            title: String(localized: "This iPhone can't run Offhand"),
-            message: String(localized: "Offhand needs more memory to run its on-device AI."),
-            content: {
-                if let specs = state.deviceSpecs {
-                    VStack(alignment: .leading, spacing: 12) {
-                        specRow(
-                            label: String(localized: "Memory"),
-                            value: "\(specs.totalRamGb) GB / \(specs.requiredRamGb) GB",
-                            satisfied: specs.isRamSatisfied
-                        )
-                        specRow(
-                            label: String(localized: "CPU cores"),
-                            value: "\(specs.cpuCores) / \(specs.requiredCpuCores)",
-                            satisfied: specs.isCoresSatisfied
-                        )
-                    }
-                    .padding()
-                    .background(Brand.surface, in: RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(Color(.systemGray4), lineWidth: 1)
+    private func headline(_ text: String) -> some View {
+        Text(text)
+            .offhandText(.display)
+            .foregroundStyle(OffhandColor.ink)
+            .accessibilityAddTraits(.isHeader)
+            .padding(.top, 56)
+    }
+
+    private func stageRow(_ label: String) -> some View {
+        HStack {
+            Text(label)
+                .offhandText(.body)
+                .foregroundStyle(OffhandColor.ink)
+            Spacer()
+            MetaText(String(localized: "On your iPhone"))
+        }
+        .frame(minHeight: 52)
+    }
+
+    private var incompatible: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            headline(String(localized: "This iPhone can't run Offhand"))
+            Text(String(localized: "Offhand needs more memory to run its on-device AI."))
+                .offhandText(.body)
+                .foregroundStyle(OffhandColor.ink2)
+                .padding(.top, 12)
+            if let specs = state.deviceSpecs {
+                VStack(spacing: 0) {
+                    specRow(
+                        label: String(localized: "Memory"),
+                        value: "\(specs.totalRamGb) GB / \(specs.requiredRamGb) GB",
+                        satisfied: specs.isRamSatisfied
+                    )
+                    Hairline()
+                    specRow(
+                        label: String(localized: "CPU cores"),
+                        value: "\(specs.cpuCores) / \(specs.requiredCpuCores)",
+                        satisfied: specs.isCoresSatisfied
                     )
                 }
+                .padding(.top, OffhandSpacing.screen)
             }
-        )
-        .padding(24)
+        }
     }
 
     private func specRow(label: String, value: String, satisfied: Bool) -> some View {
         HStack {
-            Image(systemName: satisfied ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundStyle(satisfied ? Brand.primary : .red)
             Text(label)
+                .offhandText(.body)
+                .foregroundStyle(OffhandColor.ink)
             Spacer()
-            Text(value).foregroundStyle(Brand.onSurfaceVariant)
+            Text(value)
+                .offhandText(.number)
+                .foregroundStyle(satisfied ? OffhandColor.ink2 : OffhandColor.danger)
         }
-    }
-}
-
-private struct StepCard<Content: View>: View {
-    let icon: String
-    var iconTint: Color = Brand.primary
-    let title: String
-    let message: String
-    @ViewBuilder var content: () -> Content
-
-    init(
-        icon: String,
-        iconTint: Color = Brand.primary,
-        title: String,
-        message: String,
-        @ViewBuilder content: @escaping () -> Content = { EmptyView() }
-    ) {
-        self.icon = icon
-        self.iconTint = iconTint
-        self.title = title
-        self.message = message
-        self.content = content
-    }
-
-    var body: some View {
-        GeometryReader { geometry in
-            ScrollView {
-                VStack(spacing: 16) {
-                    Image(systemName: icon)
-                        .font(.system(size: 56))
-                        .foregroundStyle(iconTint)
-                        .padding(.bottom, 12)
-                    Text(title)
-                        .font(.title.bold())
-                        .foregroundStyle(Brand.onSurface)
-                        .multilineTextAlignment(.center)
-                    Text(message)
-                        .font(.body)
-                        .foregroundStyle(Brand.onSurface)
-                        .multilineTextAlignment(.center)
-                    content()
-                        .padding(.top, 8)
-                }
-                .padding(24)
-                .frame(maxWidth: .infinity, minHeight: geometry.size.height)
-            }
-            .scrollBounceBehavior(.basedOnSize)
-        }
-        .background(Brand.surfaceContainer, in: RoundedRectangle(cornerRadius: 12))
-    }
-}
-
-private struct PageDots: View {
-    let currentPage: Int
-    let pageCount: Int
-
-    var body: some View {
-        HStack(spacing: 8) {
-            ForEach(0..<pageCount, id: \.self) { index in
-                Capsule()
-                    .fill(index == currentPage ? Brand.primary : Color(.systemGray4))
-                    .frame(width: index == currentPage ? 24 : 8, height: 8)
-            }
-        }
-        .animation(.easeInOut(duration: 0.2), value: currentPage)
-        .accessibilityLabel(
-            String(
-                format: String(localized: "Step %d of %d"),
-                currentPage + 1,
-                pageCount
-            )
-        )
-    }
-}
-
-private struct ToggleCard: View {
-    let label: String
-    @Binding var isOn: Bool
-
-    var body: some View {
-        Toggle(label, isOn: $isOn)
-            .tint(Brand.toggle)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 14)
-            .background(Brand.surface, in: RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(Color(.systemGray4), lineWidth: 1)
-            )
-            .contentShape(Rectangle())
-            .onTapGesture { isOn.toggle() }
+        .frame(minHeight: 52)
     }
 }

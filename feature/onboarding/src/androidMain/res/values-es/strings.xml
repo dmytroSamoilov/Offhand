@@ -7,20 +7,6 @@
     <string name="onboarding_incompatible_cores_label">Núcleos de CPU:</string>
     <string name="onboarding_incompatible_cores_value">%1$d — necesita %2$d</string>
 
-    <string name="onboarding_privacy_title">Privado por diseño</string>
-    <string name="onboarding_privacy_body">Todo se queda en tu teléfono. Las grabaciones, transcripciones y notas están cifradas, y la IA que las procesa se ejecuta ahí mismo. Nunca se sube nada.</string>
-    <string name="onboarding_continue">Continuar</string>
-
-
-    <string name="onboarding_lock_title">Protege tus notas</string>
-    <string name="onboarding_lock_body">Tus notas se cifran con una clave guardada en el hardware seguro de este teléfono. Este teléfono no tiene bloqueo de pantalla, así que cualquiera que lo coja puede abrir Offhand. Configura un PIN, un patrón o una huella para mantener tus notas en privado.</string>
-    <string name="onboarding_lock_setup">Configurar bloqueo de pantalla</string>
-    <string name="onboarding_lock_skip">Continuar sin bloqueo</string>
-    <string name="onboarding_lock_enable_title">¿Bloquear Offhand?</string>
-    <string name="onboarding_lock_enable_body">Offhand puede pedir tu huella, tu cara o tu bloqueo de pantalla cada vez que se abre, para que tus notas sigan siendo privadas aunque otra persona tenga el teléfono desbloqueado en la mano.</string>
-    <string name="onboarding_lock_enable_label">Pedir desbloqueo al abrir Offhand</string>
-    <string name="onboarding_lock_enable_description">Puedes cambiarlo en cualquier momento en Ajustes.</string>
-
     <string name="onboarding_notification_download_channel_name">Descargas de IA en el dispositivo</string>
     <string name="onboarding_notification_status_channel_name">Estado de la IA en el dispositivo</string>
     <string name="onboarding_notification_downloading_title">Descargar IA en el dispositivo</string>
@@ -30,7 +16,13 @@
     <string name="onboarding_notification_failed_title">La descarga de la IA en el dispositivo no ha terminado</string>
     <string name="onboarding_notification_failed_text">Comprueba tu conexión. Offhand reanudará la descarga cuando grabes tu próxima nota.</string>
 
-    <string name="onboarding_consent_title">¿Quieres ayudar a mejorar Offhand?</string>
-    <string name="onboarding_consent_body">Comparte estadísticas de uso anónimas e informes de errores —cosas como aperturas de la app, modelo del dispositivo y versión de la app— para que podamos mantener la app rápida y fiable. Esto nunca incluye tus notas, grabaciones, transcripciones ni datos personales: todo lo que grabas se queda en este dispositivo. Puedes cambiarlo cuando quieras en Ajustes.</string>
-    <string name="onboarding_consent_toggle_label">Compartir informes anónimos</string>
+    <string name="onboarding_welcome_title">Habla. Offhand lo escribe, en tu teléfono.</string>
+    <string name="onboarding_step_recorded">Grabado</string>
+    <string name="onboarding_step_transcribed">Transcrito</string>
+    <string name="onboarding_step_summarised">Resumido</string>
+    <string name="onboarding_on_your_phone">En tu teléfono</string>
+    <string name="onboarding_privacy_line">Todo se queda en tu teléfono. Nunca se sube nada.</string>
+    <string name="onboarding_record_first_note">Graba tu primera nota</string>
+    <string name="onboarding_microphone_hint">Offhand te pedirá permiso para usar el micrófono.</string>
+    <string name="onboarding_look_around">Ahora no, primero quiero echar un vistazo</string>
 </resources>

@@ -3,22 +3,17 @@ package com.dmytrosamoilov.offhand.feature.onboarding.presentation
 data class OnboardingUiState(
     val step: OnboardingStep = OnboardingStep.DEVICE_CHECK,
     val deviceSpecs: DeviceSpecsUi? = null,
-    val isDeviceSecure: Boolean = false,
-    val isAppLockEnabled: Boolean = true,
-    val isTelemetryEnabled: Boolean = true,
-    val currentPage: Int = 0,
-    val pages: List<OnboardingStep> = emptyList(),
-    val furthestPage: Int = 0,
-) {
-    val pageCount: Int get() = pages.size
-}
+)
 
 enum class OnboardingStep {
     DEVICE_CHECK,
     DEVICE_INCOMPATIBLE,
-    PRIVACY,
-    DEVICE_LOCK,
-    TELEMETRY_CONSENT,
+    WELCOME,
+}
+
+enum class OnboardingChoice(val analyticsName: String) {
+    RECORD_FIRST_NOTE("record_first_note"),
+    LOOK_AROUND("look_around"),
 }
 
 data class DeviceSpecsUi(

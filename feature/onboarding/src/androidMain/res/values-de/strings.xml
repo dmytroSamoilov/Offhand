@@ -7,20 +7,6 @@
     <string name="onboarding_incompatible_cores_label">CPU-Kerne:</string>
     <string name="onboarding_incompatible_cores_value">%1$d — benötigt %2$d</string>
 
-    <string name="onboarding_privacy_title">Privat von Grund auf</string>
-    <string name="onboarding_privacy_body">Alles bleibt auf deinem Handy. Aufnahmen, Transkripte und Notizen sind verschlüsselt, und die KI, die sie verarbeitet, läuft direkt auf dem Gerät. Nichts wird jemals hochgeladen.</string>
-    <string name="onboarding_continue">Weiter</string>
-
-
-    <string name="onboarding_lock_title">Schütze deine Notizen</string>
-    <string name="onboarding_lock_body">Deine Notizen werden mit einem Schlüssel verschlüsselt, der in der sicheren Hardware dieses Smartphones liegt. Dieses Smartphone hat keine Displaysperre, also kann jeder, der es in die Hand nimmt, Offhand öffnen. Richte eine PIN, ein Muster oder einen Fingerabdruck ein, damit deine Notizen privat bleiben.</string>
-    <string name="onboarding_lock_setup">Displaysperre einrichten</string>
-    <string name="onboarding_lock_skip">Ohne Sperre fortfahren</string>
-    <string name="onboarding_lock_enable_title">Offhand sperren?</string>
-    <string name="onboarding_lock_enable_body">Offhand kann bei jedem Öffnen nach Fingerabdruck, Gesicht oder Displaysperre fragen, damit deine Notizen privat bleiben — selbst wenn jemand anderes das entsperrte Smartphone in der Hand hält.</string>
-    <string name="onboarding_lock_enable_label">Entsperren beim Öffnen von Offhand verlangen</string>
-    <string name="onboarding_lock_enable_description">Du kannst das jederzeit in den Einstellungen ändern.</string>
-
     <string name="onboarding_notification_download_channel_name">Downloads der KI auf dem Gerät</string>
     <string name="onboarding_notification_status_channel_name">Status der KI auf dem Gerät</string>
     <string name="onboarding_notification_downloading_title">KI auf dem Gerät herunterladen</string>
@@ -30,7 +16,13 @@
     <string name="onboarding_notification_failed_title">Download der KI auf dem Gerät nicht abgeschlossen</string>
     <string name="onboarding_notification_failed_text">Prüfe deine Verbindung. Offhand setzt den Download fort, wenn du deine nächste Notiz aufnimmst.</string>
 
-    <string name="onboarding_consent_title">Hilfst du mit, Offhand zu verbessern?</string>
-    <string name="onboarding_consent_body">Teile anonyme Nutzungsstatistiken und Absturzberichte — Dinge wie App-Starts, Gerätemodell und App-Version —, damit wir die App schnell und zuverlässig halten können. Das umfasst niemals deine Notizen, Aufnahmen, Transkripte oder persönliche Daten — alles, was du aufnimmst, bleibt auf diesem Gerät. Du kannst das jederzeit in den Einstellungen ändern.</string>
-    <string name="onboarding_consent_toggle_label">Anonyme Berichte teilen</string>
+    <string name="onboarding_welcome_title">Sprich. Offhand schreibt es auf, auf deinem Handy.</string>
+    <string name="onboarding_step_recorded">Aufgenommen</string>
+    <string name="onboarding_step_transcribed">Transkribiert</string>
+    <string name="onboarding_step_summarised">Zusammengefasst</string>
+    <string name="onboarding_on_your_phone">Auf deinem Handy</string>
+    <string name="onboarding_privacy_line">Alles bleibt auf deinem Handy. Nichts wird jemals hochgeladen.</string>
+    <string name="onboarding_record_first_note">Erste Notiz aufnehmen</string>
+    <string name="onboarding_microphone_hint">Offhand fragt nach Zugriff auf dein Mikrofon.</string>
+    <string name="onboarding_look_around">Jetzt nicht, erst umsehen</string>
 </resources>

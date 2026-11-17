@@ -1,68 +1,26 @@
-# Runs last: it clears the app. Covers the onboarding branches the smoke flow
-# does not take: no lock, consent declined (the About & support switch ends up
-# off), and recording without the microphone permission, which shows the
-# fallback instead of the sheet.
+# Runs last: it clears the app. Covers the onboarding branch the smoke flow
+# does not take ("Not now"), the consent switch in Settings, and recording
+# without the microphone permission, which shows the fallback.
 appId: com.dmytrosamoilov.offhand.uitest
 ---
 - launchApp:
     clearState: true
     permissions:
       microphone: deny
-- tapOn: "Continue"
-- runFlow:
-    when:
-      visible: "Continue without a lock"
-    commands:
-      - tapOn: "Continue without a lock"
-# The lock switch starts on where the device has a credential; switch it off
-- runFlow:
-    when:
-      visible: "Lock Offhand?"
-    commands:
-      - tapOn: "Require unlock to open Offhand"
-      - tapOn: "Continue"
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - tapOn: "Share anonymous reports"
-- runFlow:
-    when:
-      platform: iOS
-    commands:
-      - tapOn: "Share usage & stability reports"
-- tapOn: "Continue"
-- assertVisible: "Notes"
+- tapOn: "Not now, look around first"
+- assertVisible: "No notes yet"
 
-# The consent switch is reachable in Settings (its state is not exposed to Maestro)
-- tapOn: "Settings"
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - scrollUntilVisible:
-          element:
-            text: "About & support"
-          direction: DOWN
-      - tapOn: "About & support"
-      - assertVisible: "Anonymous usage & stability reports"
-      - back
-      - tapOn:
-          id: "tab_notes"
-- runFlow:
-    when:
-      platform: iOS
-    commands:
-      - scrollUntilVisible:
-          element: "About & support"
-      - tapOn: "About & support"
-      - assertVisible: "Share usage & stability reports"
-      - swipe:
-          start: "1%,50%"
-          end: "70%,50%"
-      - tapOn:
-          id: "list.bullet"
-          text: "Notes"
+# Consent is on until it is switched off in Settings (its state is not exposed to Maestro)
+- tapOn:
+    id: "tab_settings"
+- scrollUntilVisible:
+    element:
+      text: "Share anonymous usage"
+    centerElement: true
+    direction: DOWN
+- tapOn: "Share anonymous usage"
+- tapOn:
+    id: "tab_notes"
 
 # Without the microphone the record sheet shows the fallback
 - runFlow:

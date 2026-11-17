@@ -112,6 +112,7 @@ internal class StoredProTrialRepository(
     }
 
     private fun ProTrialNotice.key(): Preferences.Key<Boolean> = when (this) {
+        ProTrialNotice.OFFERED -> KEY_OFFER_SEEN
         ProTrialNotice.ENDED -> KEY_ENDED_SEEN
         ProTrialNotice.REMOVED -> KEY_REMOVED_SEEN
     }
@@ -120,6 +121,7 @@ internal class StoredProTrialRepository(
         val KEY_STARTED_AT_MS = longPreferencesKey("pro_trial_started_at_ms")
         val KEY_REVOKED = booleanPreferencesKey("pro_trial_revoked")
         val KEY_LAST_SEEN_AT_MS = longPreferencesKey("pro_trial_last_seen_at_ms")
+        val KEY_OFFER_SEEN = booleanPreferencesKey("pro_trial_offer_seen")
         val KEY_ENDED_SEEN = booleanPreferencesKey("pro_trial_ended_seen")
         val KEY_REMOVED_SEEN = booleanPreferencesKey("pro_trial_removed_seen")
     }

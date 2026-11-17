@@ -7,20 +7,6 @@
     <string name="onboarding_incompatible_cores_label">Ядра процессора:</string>
     <string name="onboarding_incompatible_cores_value">%1$d — нужно %2$d</string>
 
-    <string name="onboarding_privacy_title">Приватность по умолчанию</string>
-    <string name="onboarding_privacy_body">Всё остаётся на вашем телефоне. Записи, расшифровки и заметки зашифрованы, а ИИ, который их обрабатывает, работает прямо на устройстве. Ничего никогда не загружается.</string>
-    <string name="onboarding_continue">Продолжить</string>
-
-
-    <string name="onboarding_lock_title">Защитите свои заметки</string>
-    <string name="onboarding_lock_body">Ваши заметки шифруются ключом, который хранится в защищённом оборудовании этого телефона. На этом телефоне нет блокировки экрана, поэтому любой, кто возьмёт его в руки, сможет открыть Offhand. Настройте PIN-код, графический ключ или отпечаток пальца, чтобы заметки остались личными.</string>
-    <string name="onboarding_lock_setup">Настроить блокировку экрана</string>
-    <string name="onboarding_lock_skip">Продолжить без блокировки</string>
-    <string name="onboarding_lock_enable_title">Заблокировать Offhand?</string>
-    <string name="onboarding_lock_enable_body">Offhand может запрашивать отпечаток пальца, лицо или блокировку экрана при каждом открытии, чтобы ваши заметки оставались личными, даже если разблокированный телефон окажется в чужих руках.</string>
-    <string name="onboarding_lock_enable_label">Требовать разблокировку при открытии Offhand</string>
-    <string name="onboarding_lock_enable_description">Это можно изменить в любой момент в настройках.</string>
-
     <string name="onboarding_notification_download_channel_name">Загрузки ИИ на устройстве</string>
     <string name="onboarding_notification_status_channel_name">Состояние ИИ на устройстве</string>
     <string name="onboarding_notification_downloading_title">Скачать ИИ на устройстве</string>
@@ -30,7 +16,13 @@
     <string name="onboarding_notification_failed_title">Загрузка ИИ на устройстве не завершилась</string>
     <string name="onboarding_notification_failed_text">Проверьте подключение. Offhand возобновит скачивание, когда вы запишете следующую заметку.</string>
 
-    <string name="onboarding_consent_title">Помочь улучшить Offhand?</string>
-    <string name="onboarding_consent_body">Делитесь анонимной статистикой использования и отчётами о сбоях — например, запусками приложения, моделью устройства и версией приложения, — чтобы приложение оставалось быстрым и надёжным. Сюда никогда не входят ваши заметки, записи, расшифровки или личные данные — всё, что вы записываете, остаётся на этом устройстве. Это можно изменить в любой момент в настройках.</string>
-    <string name="onboarding_consent_toggle_label">Делиться анонимными отчётами</string>
+    <string name="onboarding_welcome_title">Говорите. Offhand всё запишет — прямо на телефоне.</string>
+    <string name="onboarding_step_recorded">Запись</string>
+    <string name="onboarding_step_transcribed">Расшифровка</string>
+    <string name="onboarding_step_summarised">Краткое содержание</string>
+    <string name="onboarding_on_your_phone">На вашем телефоне</string>
+    <string name="onboarding_privacy_line">Всё остаётся на вашем телефоне. Ничего никогда не загружается.</string>
+    <string name="onboarding_record_first_note">Записать первую заметку</string>
+    <string name="onboarding_microphone_hint">Offhand попросит доступ к микрофону.</string>
+    <string name="onboarding_look_around">Не сейчас, сначала осмотрюсь</string>
 </resources>
