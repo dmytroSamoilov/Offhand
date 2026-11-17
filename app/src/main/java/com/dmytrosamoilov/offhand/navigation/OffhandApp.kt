@@ -2,11 +2,15 @@ package com.dmytrosamoilov.offhand.navigation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -32,6 +36,7 @@ import com.dmytrosamoilov.offhand.core.designsystem.component.BottomBarLabels
 import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.feature.backup.presentation.BackupScreen
+import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesBottomBarState
 import com.dmytrosamoilov.offhand.feature.notes.presentation.NotesScreen
 import com.dmytrosamoilov.offhand.feature.paywall.presentation.PaywallHost
 import com.dmytrosamoilov.offhand.feature.recording.presentation.RecordingSheetHost
@@ -55,6 +60,11 @@ fun OffhandApp(
     var isRecordingSheetVisible by rememberSaveable { mutableStateOf(false) }
     var recordingFolderId by rememberSaveable { mutableStateOf<Long?>(null) }
     var recordedNoteId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var notesBottomBar by remember { mutableStateOf(NotesBottomBarState()) }
+    val destination = backStackEntry?.destination
+    val isSettingsRoot = destination?.hasRoute(SettingsRoute::class) == true
+    val isNotesRoot = destination?.hasRoute(NotesRoute::class) == true
+    val isBottomBarShown = isSettingsRoot || (isNotesRoot && notesBottomBar.isVisible)
 
     LaunchedEffect(recordingRequest) {
         if (recordingRequest != null) {
@@ -84,7 +94,9 @@ fun OffhandApp(
         NavHost(
             navController = navController,
             startDestination = NotesGraphRoute,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .then(if (isBottomBarShown) Modifier.consumeWindowInsets(WindowInsets.navigationBars) else Modifier),
         ) {
             notesGraph(
                 navController = navController,
@@ -93,13 +105,16 @@ fun OffhandApp(
                     recordedNoteId = null
                     onRequestedNoteConsumed()
                 },
-                onNewRecording = startRecording,
-                onNavigate = navigateToTopLevel,
+                onBottomBarStateChange = { notesBottomBar = it },
             )
             settingsGraph(navController = navController)
         }
-        if (backStackEntry?.destination?.hasRoute(SettingsRoute::class) == true) {
-            AppBottomBar(selected = TopLevelDestination.SETTINGS, onNavigate = navigateToTopLevel, onRecord = { startRecording(null) })
+        if (isBottomBarShown) {
+            AppBottomBar(
+                selected = if (isSettingsRoot) TopLevelDestination.SETTINGS else TopLevelDestination.NOTES,
+                onNavigate = navigateToTopLevel,
+                onRecord = { startRecording(notesBottomBar.folderId.takeIf { isNotesRoot }) },
+            )
         }
     }
 
@@ -117,8 +132,7 @@ private fun NavGraphBuilder.notesGraph(
     navController: NavController,
     requestedNoteId: () -> Long?,
     onRequestedNoteConsumed: () -> Unit,
-    onNewRecording: (Long?) -> Unit,
-    onNavigate: (TopLevelDestination) -> Unit,
+    onBottomBarStateChange: (NotesBottomBarState) -> Unit,
 ) {
     navigation<NotesGraphRoute>(startDestination = NotesRoute) {
         composable<NotesRoute> {
@@ -126,10 +140,7 @@ private fun NavGraphBuilder.notesGraph(
                 requestedNoteId = requestedNoteId(),
                 onRequestedNoteConsumed = onRequestedNoteConsumed,
                 onCreateNoteStyle = { navController.navigate(NewNoteStyleFromNoteRoute) },
-                onNewRecording = onNewRecording,
-                bottomBar = { onRecord ->
-                    AppBottomBar(selected = TopLevelDestination.NOTES, onNavigate = onNavigate, onRecord = onRecord)
-                },
+                onBottomBarStateChange = onBottomBarStateChange,
             )
         }
         composable<NewNoteStyleFromNoteRoute> {

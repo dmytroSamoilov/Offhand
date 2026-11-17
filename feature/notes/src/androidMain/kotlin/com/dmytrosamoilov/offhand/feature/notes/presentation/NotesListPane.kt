@@ -44,7 +44,7 @@ internal fun NotesListPane(
     viewModel: NotesViewModel,
     openNoteId: Long?,
     onNoteClick: (id: Long, isSearchResult: Boolean) -> Unit,
-    bottomBar: @Composable () -> Unit,
+    onBottomBarWantedChange: (Boolean) -> Unit,
 ) {
     val selection = rememberNoteSelection(state = state, viewModel = viewModel)
     var isSearchOpen by rememberSaveable { mutableStateOf(false) }
@@ -53,6 +53,8 @@ internal fun NotesListPane(
         isSearchOpen = false
         viewModel.onSearchQueryChanged("")
     }
+    val isBottomBarWanted = !selection.isActive && !isSearching
+    LaunchedEffect(isBottomBarWanted) { onBottomBarWantedChange(isBottomBarWanted) }
     BackHandler(enabled = selection.isActive, onBack = selection.onClear)
     BackHandler(enabled = isSearching && !selection.isActive, onBack = closeSearch)
     Column(modifier = Modifier.fillMaxSize().background(OffhandTheme.colors.ground).userInitiatedFocusOnly()) {
@@ -74,10 +76,7 @@ internal fun NotesListPane(
             ),
             modifier = Modifier.weight(1f),
         )
-        when {
-            selection.isActive -> SelectionFooter(selection = selection)
-            !isSearching -> bottomBar()
-        }
+        if (selection.isActive) SelectionFooter(selection = selection)
     }
 }
 

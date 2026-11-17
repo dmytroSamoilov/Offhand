@@ -32,11 +32,10 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun NotesScreen(
-    onNewRecording: (folderId: Long?) -> Unit,
+    onBottomBarStateChange: (NotesBottomBarState) -> Unit,
     onCreateNoteStyle: () -> Unit,
     requestedNoteId: Long?,
     onRequestedNoteConsumed: () -> Unit,
-    bottomBar: @Composable (onRecord: () -> Unit) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: NotesViewModel = koinViewModel(),
 ) {
@@ -56,6 +55,10 @@ fun NotesScreen(
     )
     val isTwoPane = navigator.scaffoldValue[ListDetailPaneScaffoldRole.List] == PaneAdaptedValue.Expanded &&
         navigator.scaffoldValue[ListDetailPaneScaffoldRole.Detail] == PaneAdaptedValue.Expanded
+    val isListShown = navigator.scaffoldValue[ListDetailPaneScaffoldRole.List] != PaneAdaptedValue.Hidden
+    var isListBarWanted by rememberSaveable { mutableStateOf(true) }
+    val bottomBarState = NotesBottomBarState(isVisible = isListShown && isListBarWanted, folderId = state.selectedFolderId)
+    LaunchedEffect(bottomBarState) { onBottomBarStateChange(bottomBarState) }
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
         NavigableListDetailPaneScaffold(
             navigator = navigator,
@@ -70,7 +73,7 @@ fun NotesScreen(
                             if (isSearchResult) viewModel.onSearchResultSelected(id) else viewModel.onNoteSelected(id)
                             paneScope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) }
                         },
-                        bottomBar = { bottomBar { onNewRecording(state.selectedFolderId) } },
+                        onBottomBarWantedChange = { isListBarWanted = it },
                     )
                 }
             },
