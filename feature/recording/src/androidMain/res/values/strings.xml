@@ -40,7 +40,6 @@
     <string name="recording_notification_note_failed_text">The recording is saved. Tap to open it and try again.</string>
     <string name="recording_notification_note_paused_title">Your note is paused</string>
     <string name="recording_notification_note_paused_text">Open Offhand and it will finish.</string>
-    <string name="recording_live_placeholder">Your words appear here as you speak.</string>
     <string name="record_widget_name">Record a note</string>
     <string name="record_widget_description">Start or stop a recording from your home screen.</string>
     <string name="record_widget_record">Record</string>

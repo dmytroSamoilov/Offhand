@@ -53,7 +53,7 @@ fun Skeleton(
 }
 
 @Composable
-private fun isReducedMotion(): Boolean {
+fun isReducedMotion(): Boolean {
     val resolver = LocalContext.current.contentResolver
     return remember(resolver) {
         Settings.Global.getFloat(resolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f

@@ -8,6 +8,7 @@ struct RecordSheetView: View {
     var folderId: Int64?
     var onNoteSaved: (Int64) -> Void = { _ in }
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private let viewModel = AppViewModels.recording
     @State private var state = RecordingUiState(
         phase: .idle,
@@ -225,11 +226,26 @@ struct RecordSheetView: View {
     private var liveTranscript: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionLabel(String(localized: "Live transcript"))
-            Text(state.liveTranscript.isEmpty ? String(localized: "Your words appear here as you speak.") : state.liveTranscript)
-                .offhandText(.body)
-                .foregroundStyle(state.liveTranscript.isEmpty ? OffhandColor.ink3 : OffhandColor.ink)
-                .lineLimit(3, reservesSpace: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            TimelineView(.periodic(from: .now, by: 0.35)) { timeline in
+                liveText(activeDot: activeDot(at: timeline.date))
+                    .offhandText(.body)
+                    .lineLimit(3, reservesSpace: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityLabel(state.liveTranscript)
+            }
+        }
+    }
+
+    private func activeDot(at date: Date) -> Int {
+        reduceMotion ? -1 : Int(date.timeIntervalSinceReferenceDate / 0.35) % 3
+    }
+
+    private func liveText(activeDot: Int) -> Text {
+        let words = Text(state.liveTranscript).foregroundStyle(OffhandColor.ink)
+        guard !state.isPaused else { return words }
+        let gap = Text(state.liveTranscript.isEmpty ? "" : " ")
+        return (0..<3).reduce(words + gap) { text, index in
+            text + Text("\u{2022}").foregroundStyle(index == activeDot ? OffhandColor.ink : OffhandColor.ink3)
         }
     }
 

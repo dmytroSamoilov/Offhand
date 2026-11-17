@@ -94,7 +94,7 @@ internal fun ColumnScope.RecordingContent(state: RecordingUiState, actions: Reco
         levels = state.waveform,
         modifier = Modifier.fillMaxWidth().padding(top = 44.dp),
     )
-    if (state.isLiveTranscriptShown) LiveTranscript(text = state.liveTranscript)
+    if (state.isLiveTranscriptShown) LiveTranscript(text = state.liveTranscript, isWorking = !state.isPaused)
     if (state.isDeveloperMode) ChunkStates(chunks = state.chunks)
     Spacer(modifier = Modifier.weight(1f))
     RecordingFooter(
@@ -175,22 +175,6 @@ private fun ExternalMicLine(name: String) {
         text = name.ifBlank { stringResource(R.string.recording_external_mic_generic) },
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
     )
-}
-
-@Composable
-private fun LiveTranscript(text: String) {
-    Column(modifier = Modifier.padding(top = 40.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        SectionLabel(text = stringResource(R.string.recording_live_label))
-        Text(
-            text = text.ifBlank { stringResource(R.string.recording_live_placeholder) },
-            style = OffhandTheme.type.body,
-            color = if (text.isBlank()) OffhandTheme.colors.ink3 else OffhandTheme.colors.ink,
-            minLines = LIVE_TRANSCRIPT_LINES,
-            maxLines = LIVE_TRANSCRIPT_LINES,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
 }
 
 @Composable
@@ -294,7 +278,6 @@ private fun StatusMessage(title: String, body: String?) {
 
 private val SAVE_HEIGHT = 64.dp
 private val STATUS_TRACKING = 0.12.em
-private const val LIVE_TRANSCRIPT_LINES = 3
 private const val MS_PER_SECOND = 1000L
 private const val SECONDS_PER_MINUTE = 60
 private const val SECONDS_PER_HOUR = 3600

@@ -38,7 +38,6 @@
     <string name="recording_notification_note_failed_text">A gravação está salva. Toque para abri-la e tentar de novo.</string>
     <string name="recording_notification_note_paused_title">Sua nota está pausada</string>
     <string name="recording_notification_note_paused_text">Abra o Offhand e ela será concluída.</string>
-    <string name="recording_live_placeholder">Suas palavras aparecem aqui enquanto você fala.</string>
     <string name="record_widget_name">Gravar uma nota</string>
     <string name="record_widget_description">Inicie ou pare uma gravação na tela inicial.</string>
     <string name="record_widget_record">Gravar</string>
