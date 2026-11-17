@@ -63,13 +63,14 @@ appId: com.dmytrosamoilov.offhand.uitest
       - tapOn: "OK"
       - tapOn:
           id: "tab_notes"
-# The placeholder named after the file turns into the fourth note written by
-# the fake engines (smoke, audio import, folder recording came before)
+# The placeholder named after the file turns into the third unsorted note
+# written by the fake engines (smoke and audio import came before; the folder
+# recording of 09 is not listed under "Unsorted")
 - extendedWaitUntil:
     notVisible: "import-sample.*"
     timeout: 90000
 - scrollUntilVisible:
     element:
       text: "Smoke test note"
-      index: 3
+      index: 2
     direction: DOWN

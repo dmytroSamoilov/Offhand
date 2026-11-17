@@ -369,7 +369,7 @@ private struct PlanRow: View {
 private struct ComparisonTable: View {
     let highlighted: ProFeature
 
-    private static let columnWidth: CGFloat = 52
+    private static let columnWidth: CGFloat = 60
 
     var body: some View {
         let rows = ComparisonRows.sorted(for: highlighted)
@@ -397,6 +397,8 @@ private struct ComparisonTable: View {
             Spacer()
             Text(String(localized: "Offhand"))
                 .foregroundStyle(OffhandColor.ink2)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
                 .frame(width: Self.columnWidth)
             Text(verbatim: "Pro")
                 .foregroundStyle(OffhandColor.gold)

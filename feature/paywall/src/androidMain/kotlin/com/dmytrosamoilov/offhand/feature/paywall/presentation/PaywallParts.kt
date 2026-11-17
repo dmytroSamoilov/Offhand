@@ -221,6 +221,8 @@ private fun ColumnHeading(text: String, color: Color) {
         style = OffhandTheme.type.label,
         color = color,
         textAlign = TextAlign.Center,
+        maxLines = 1,
+        softWrap = false,
         modifier = Modifier.width(COLUMN_WIDTH),
     )
 }
@@ -271,5 +273,5 @@ private fun TableFootnote(text: String) {
     )
 }
 
-private val COLUMN_WIDTH = 56.dp
+private val COLUMN_WIDTH = 68.dp
 private const val BENEFIT_LINES = 3

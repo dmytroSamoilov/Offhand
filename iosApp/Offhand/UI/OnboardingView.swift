@@ -59,13 +59,12 @@ struct OnboardingView: View {
                 .foregroundStyle(OffhandColor.ink2)
                 .padding(.top, 16)
             Spacer(minLength: 40)
-            RecordPill(String(localized: "Record your first note")) {
+            RecordPill(String(localized: "Record your first note"), fillsWidth: true) {
                 ShortcutRequests.shared.requestedFolder = .unsorted
                 ShortcutRequests.shared.pending = .startRecording
                 viewModel.onRecordFirstNoteClicked()
                 onFinished()
             }
-            .frame(maxWidth: .infinity)
             Text(String(localized: "Offhand will ask to use your microphone."))
                 .offhandText(.caption)
                 .foregroundStyle(OffhandColor.ink2)

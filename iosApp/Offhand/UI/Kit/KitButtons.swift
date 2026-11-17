@@ -275,6 +275,7 @@ struct RecordPill: View {
     private let text: String
     private let accessibilityText: String?
     private let height: CGFloat
+    private let fillsWidth: Bool
     private let action: () -> Void
     @Environment(\.colorScheme) private var colorScheme
 
@@ -282,11 +283,13 @@ struct RecordPill: View {
         _ text: String,
         accessibilityLabel: String? = nil,
         height: CGFloat = OffhandSpacing.control,
+        fillsWidth: Bool = false,
         action: @escaping () -> Void
     ) {
         self.text = text
         self.accessibilityText = accessibilityLabel
         self.height = height
+        self.fillsWidth = fillsWidth
         self.action = action
     }
 
@@ -300,7 +303,7 @@ struct RecordPill: View {
             }
             .padding(.trailing, 4)
         }
-        .buttonStyle(OffhandPillButtonStyle(kind: .primary, height: height))
+        .buttonStyle(OffhandPillButtonStyle(kind: .primary, fillsWidth: fillsWidth, height: height))
         .shadow(color: colorScheme == .dark ? .clear : OffhandColor.ink.opacity(0.2), radius: 12, x: 0, y: 10)
         .accessibilityLabel(accessibilityText ?? text)
     }
