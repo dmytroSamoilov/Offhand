@@ -46,7 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLimits
 import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
-import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
@@ -396,9 +396,9 @@ private fun guidanceWarning(guidance: String): (@Composable () -> Unit)? {
     return {
         Text(
             text = stringResource(R.string.settings_note_style_editor_guidance_warning),
-            color = MaterialTheme.extendedColors.onWarningContainer,
+            color = OffhandTheme.colors.ink,
             modifier = Modifier
-                .background(MaterialTheme.extendedColors.warningContainer, MaterialTheme.shapes.small)
+                .background(OffhandTheme.colors.well, MaterialTheme.shapes.small)
                 .padding(horizontal = 8.dp, vertical = 4.dp),
         )
     }

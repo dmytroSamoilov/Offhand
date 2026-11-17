@@ -52,7 +52,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
 import com.dmytrosamoilov.offhand.core.designsystem.component.ProBadge
 import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
-import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.feature.backup.R
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupFileNames
@@ -250,8 +250,8 @@ private fun BackupResultContent(operation: BackupOperationUi, onDone: () -> Unit
 private fun WarningBox(text: String) {
     Surface(
         shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.extendedColors.warningContainer,
-        contentColor = MaterialTheme.extendedColors.onWarningContainer,
+        color = OffhandTheme.colors.well,
+        contentColor = OffhandTheme.colors.ink,
     ) {
         Row(
             modifier = Modifier.padding(16.dp),

@@ -19,6 +19,7 @@ struct OffhandApp: App {
     #endif
 
     init() {
+        OffhandFonts.register()
         NoteFinishCoordinator.registerResumeTask()
         SharedModulesKt.startSharedKoin(
             deps: IosPlatformDeps(

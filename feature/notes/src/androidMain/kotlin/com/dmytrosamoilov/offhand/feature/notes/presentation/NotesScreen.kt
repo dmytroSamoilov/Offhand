@@ -136,7 +136,7 @@ import com.dmytrosamoilov.offhand.core.designsystem.component.MarkdownText
 import com.dmytrosamoilov.offhand.core.designsystem.component.MorphingLoadingIndicator
 import com.dmytrosamoilov.offhand.core.ui.rememberSensitiveClipboard
 import com.dmytrosamoilov.offhand.core.designsystem.component.RoundedCheckbox
-import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.core.ui.component.NotePresetOption
 import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleChoice
@@ -1338,7 +1338,7 @@ private fun NotesLoadingState() {
     ) {
         repeat(LOADING_CARD_COUNT) {
             Card(modifier = Modifier.fillMaxWidth()) {
-                SkeletonLines(modifier = Modifier.padding(20.dp), lineWidths = LOADING_CARD_LINES)
+                Skeleton(modifier = Modifier.padding(20.dp), lineWidths = LOADING_CARD_LINES)
             }
         }
     }
@@ -1749,7 +1749,7 @@ private fun MetadataText(text: String) {
 @Composable
 private fun NoteCardIcon(status: NoteStatusUi) {
     val containerColor = when (status) {
-        NoteStatusUi.FAILED -> MaterialTheme.extendedColors.warningContainer
+        NoteStatusUi.FAILED -> OffhandTheme.colors.well
         else -> MaterialTheme.colorScheme.tertiaryContainer
     }
     Box(
@@ -1771,7 +1771,7 @@ private fun NoteCardIcon(status: NoteStatusUi) {
             NoteStatusUi.FAILED -> Icon(
                 imageVector = Icons.Filled.WarningAmber,
                 contentDescription = null,
-                tint = MaterialTheme.extendedColors.onWarningContainer,
+                tint = OffhandTheme.colors.ink,
             )
             NoteStatusUi.INTERRUPTED -> Icon(
                 imageVector = Icons.Filled.Pause,
@@ -1804,7 +1804,7 @@ private fun NoteCardUi.cardPreview(isWaitingForAi: Boolean): AnnotatedString = w
 
 @Composable
 private fun String.highlighted(ranges: List<TextRangeUi>): AnnotatedString {
-    val style = SpanStyle(background = MaterialTheme.extendedColors.searchHighlight)
+    val style = SpanStyle(background = OffhandTheme.colors.accentSoft)
     return buildAnnotatedString {
         append(this@highlighted)
         ranges.forEach { range -> addStyle(style, range.start, range.end.coerceAtMost(length)) }
@@ -2693,7 +2693,7 @@ private fun SkeletonStatusCard(text: String, percent: Int?, isWorking: Boolean) 
             }
             if (isWorking) {
                 Spacer(modifier = Modifier.height(20.dp))
-                SkeletonLines()
+                Skeleton()
             }
         }
     }

@@ -4,6 +4,10 @@ import WidgetKit
 
 @main
 struct OffhandWidgetsBundle: WidgetBundle {
+    init() {
+        OffhandFonts.register()
+    }
+
     var body: some Widget {
         NoteActivityWidget()
         AiCoreDownloadActivityWidget()
