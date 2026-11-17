@@ -43,6 +43,8 @@ data class OffhandTextStyles(
     val tab: TextStyle,
     val settingTitle: TextStyle,
     val caption: TextStyle,
+    val dialogBody: TextStyle,
+    val emptyTitle: TextStyle,
     val number: TextStyle,
     val timer: TextStyle,
 )
@@ -85,6 +87,8 @@ internal val QuietInkTextStyles = OffhandTextStyles(
     tab = inter(15, 22, FontWeight.Medium),
     settingTitle = inter(15, 21, FontWeight.Medium),
     caption = inter(13, 20, FontWeight.Normal),
+    dialogBody = inter(15, 23, FontWeight.Normal),
+    emptyTitle = tight(24, 30, -0.01),
     number = mono(13, 18),
     timer = mono(68, 72, -0.04),
 )

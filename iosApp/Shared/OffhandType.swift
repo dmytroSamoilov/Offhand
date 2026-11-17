@@ -22,6 +22,7 @@ enum OffhandFonts {
 enum OffhandTextStyle {
     case display, title, heading, rowTitle, body, bodySmall, label, meta
     case button, buttonSmall, tab, tabSelected, settingTitle, caption, number, timer
+    case dialogBody, emptyTitle
 
     var spec: OffhandTextSpec {
         switch self {
@@ -41,6 +42,8 @@ enum OffhandTextStyle {
         case .caption: OffhandTextSpec(face: .interRegular, size: 13, line: 20, tracking: 0, relativeTo: .footnote)
         case .number: OffhandTextSpec(face: .monoRegular, size: 13, line: 18, tracking: 0, relativeTo: .footnote)
         case .timer: OffhandTextSpec(face: .monoRegular, size: 68, line: 72, tracking: -0.04, relativeTo: .largeTitle)
+        case .dialogBody: OffhandTextSpec(face: .interRegular, size: 15, line: 23, tracking: 0, relativeTo: .subheadline)
+        case .emptyTitle: OffhandTextSpec(face: .tightSemibold, size: 24, line: 30, tracking: -0.01, relativeTo: .title2)
         }
     }
 }
@@ -65,6 +68,10 @@ struct OffhandTextSpec {
     var isCaps = false
 
     var font: Font { .custom(face.rawValue, size: size, relativeTo: relativeTo) }
+
+    func with(face: OffhandFace) -> OffhandTextSpec {
+        OffhandTextSpec(face: face, size: size, line: line, tracking: tracking, relativeTo: relativeTo, isCaps: isCaps)
+    }
 
     var uiFont: UIFont {
         let base = UIFont(name: face.rawValue, size: size) ?? .systemFont(ofSize: size)
@@ -95,6 +102,10 @@ private struct OffhandTextModifier: ViewModifier {
 extension View {
     func offhandText(_ style: OffhandTextStyle) -> some View {
         modifier(OffhandTextModifier(spec: style.spec))
+    }
+
+    func offhandText(_ style: OffhandTextStyle, face: OffhandFace) -> some View {
+        modifier(OffhandTextModifier(spec: style.spec.with(face: face)))
     }
 }
 

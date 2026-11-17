@@ -20,12 +20,12 @@ struct ProCrown: View {
 struct ProBadge: View {
     var body: some View {
         Text(verbatim: "PRO")
-            .font(.caption2.weight(.bold))
-            .kerning(0.6)
-            .foregroundStyle(Brand.proGold)
-            .padding(.horizontal, 6)
+            .font(.offhand(.interBold, size: 10, relativeTo: .caption2))
+            .tracking(0.8)
+            .foregroundStyle(OffhandColor.onGold)
+            .padding(.horizontal, 7)
             .padding(.vertical, 2)
-            .background(Brand.proGold.opacity(0.18), in: RoundedRectangle(cornerRadius: 6))
+            .background(OffhandColor.gold, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
             .accessibilityLabel(String(localized: "Offhand Pro"))
     }
 }
