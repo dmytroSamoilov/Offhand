@@ -38,4 +38,17 @@
     <string name="onboarding_included">Є</string>
     <string name="onboarding_not_here">Не на цьому телефоні</string>
     <string name="onboarding_lite_continue">Продовжити з розшифровками</string>
+    <string name="onboarding_analytics_title">Допоможете зробити Offhand кращим?</string>
+    <string name="onboarding_analytics_body">Offhand робить один розробник. Анонімна статистика використання показує мені, що виправити насамперед.</string>
+    <string name="onboarding_analytics_shared_label">Передається без вашого імені</string>
+    <string name="onboarding_analytics_shared_features">Які функції використовуються</string>
+    <string name="onboarding_analytics_shared_crashes">Збої та помилки</string>
+    <string name="onboarding_analytics_shared_device">Модель телефона і версія застосунку</string>
+    <string name="onboarding_analytics_private_label">Ніколи не залишає ваш телефон</string>
+    <string name="onboarding_analytics_private_recordings">Ваші записи</string>
+    <string name="onboarding_analytics_private_text">Ваші розшифровки та резюме</string>
+    <string name="onboarding_analytics_private_titles">Назви, імена папок і пошукові запити</string>
+    <string name="onboarding_analytics_share">Ділитися з розробником</string>
+    <string name="onboarding_analytics_dont_share">Не ділитися</string>
+    <string name="onboarding_analytics_settings_hint">Це можна змінити будь-коли в налаштуваннях.</string>
 </resources>

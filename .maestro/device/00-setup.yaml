@@ -10,6 +10,11 @@ tags:
       all: allow
 - runFlow:
     when:
+      visible: "Share with the developer"
+    commands:
+      - tapOn: "Don.t share"
+- runFlow:
+    when:
       visible: "Not now, look around first"
     commands:
       - tapOn: "Not now, look around first"

@@ -13,6 +13,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.NoteFeature
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
+import com.dmytrosamoilov.offhand.core.data.domain.TelemetryConsent
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
@@ -33,10 +34,7 @@ internal class DataStoreUserPreferencesRepository(
                 // until the onboarding step writes their answer.
                 appLockEnabled = preferences[KEY_APP_LOCK_ENABLED]
                     ?: preferences[KEY_ONBOARDING_COMPLETED] ?: false,
-                // On until the consent page says otherwise, so Firebase runs from
-                // the first launch and an install that never finishes onboarding
-                // still shows up.
-                telemetryConsent = preferences[KEY_TELEMETRY_CONSENT] ?: true,
+                telemetryConsent = telemetryConsent(preferences),
                 dynamicColor = preferences[KEY_DYNAMIC_COLOR] ?: false,
                 developerOptions = buildInfo.isDeveloperBuild &&
                     (preferences[KEY_DEVELOPER_OPTIONS] ?: false),
@@ -141,6 +139,19 @@ internal class DataStoreUserPreferencesRepository(
         val name = preferences[KEY_EARLY_ADOPTER_PRO] ?: return EarlyAdopterPro.UNDECIDED
         return EarlyAdopterPro.entries.firstOrNull { it.name == name } ?: EarlyAdopterPro.UNDECIDED
     }
+
+    // No stored answer on an install that finished onboarding means it was
+    // onboarded before the question was asked, when sharing was the default.
+    private fun telemetryConsent(preferences: Preferences): TelemetryConsent =
+        when (preferences[KEY_TELEMETRY_CONSENT]) {
+            true -> TelemetryConsent.SHARED
+            false -> TelemetryConsent.DECLINED
+            null -> if (preferences[KEY_ONBOARDING_COMPLETED] == true) {
+                TelemetryConsent.SHARED
+            } else {
+                TelemetryConsent.UNANSWERED
+            }
+        }
 
     private fun proOverride(preferences: Preferences): ProOverride {
         if (!buildInfo.isDeveloperBuild) return ProOverride.STORE

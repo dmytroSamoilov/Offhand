@@ -128,15 +128,17 @@ struct SegmentedControl: View {
 
 struct SectionLabel: View {
     private let text: String
+    private let isEmphasised: Bool
 
-    init(_ text: String) {
+    init(_ text: String, isEmphasised: Bool = false) {
         self.text = text
+        self.isEmphasised = isEmphasised
     }
 
     var body: some View {
         Text(text)
             .offhandText(.label)
-            .foregroundStyle(OffhandColor.ink3)
+            .foregroundStyle(isEmphasised ? OffhandColor.ink : OffhandColor.ink3)
             .accessibilityAddTraits(.isHeader)
     }
 }

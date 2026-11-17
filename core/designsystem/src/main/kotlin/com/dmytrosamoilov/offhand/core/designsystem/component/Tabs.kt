@@ -163,11 +163,11 @@ fun SegmentedControl(
 }
 
 @Composable
-fun SectionLabel(text: String, modifier: Modifier = Modifier) {
+fun SectionLabel(text: String, modifier: Modifier = Modifier, isEmphasised: Boolean = false) {
     Text(
         text = text.uppercase(),
         style = OffhandTheme.type.label,
-        color = OffhandTheme.colors.ink3,
+        color = if (isEmphasised) OffhandTheme.colors.ink else OffhandTheme.colors.ink3,
         modifier = modifier,
     )
 }

@@ -3,6 +3,7 @@ package com.dmytrosamoilov.offhand.feature.notes.domain.usecase
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
+import com.dmytrosamoilov.offhand.core.data.domain.TelemetryConsent
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import com.dmytrosamoilov.offhand.feature.notes.domain.review.InAppReviewPolicy
@@ -40,7 +41,7 @@ class ReviewRequestUseCasesTest {
     private fun preferences(savedRecordings: Int, notificationsPrompted: Boolean) = UserPreferences(
         onboardingCompleted = true,
         appLockEnabled = false,
-        telemetryConsent = true,
+        telemetryConsent = TelemetryConsent.SHARED,
         dynamicColor = false,
         developerOptions = false,
         savedRecordingsCount = savedRecordings,

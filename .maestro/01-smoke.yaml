@@ -8,7 +8,12 @@ appId: com.dmytrosamoilov.offhand.uitest
     permissions:
       all: allow
 
-# Onboarding is one screen: its Record pill opens the record sheet
+# Onboarding asks about anonymous usage first, then shows one screen whose
+# Record pill opens the record sheet
+- extendedWaitUntil:
+    visible: "Share with the developer"
+    timeout: 30000
+- tapOn: "Share with the developer"
 - tapOn: "Record your first note"
 - runFlow:
     when:

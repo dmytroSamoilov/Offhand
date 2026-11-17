@@ -33,6 +33,8 @@ struct OnboardingView: View {
     @ViewBuilder
     private var content: some View {
         switch state.step {
+        case .analyticsConsent:
+            analyticsConsent
         case .welcome:
             welcome
         case .transcriptsOnly:
@@ -84,6 +86,67 @@ struct OnboardingView: View {
             .frame(maxWidth: .infinity)
         }
         .frame(maxHeight: .infinity, alignment: .top)
+    }
+
+    private var analyticsConsent: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(String(localized: "Help make Offhand better?"))
+                .offhandText(.display)
+                .foregroundStyle(OffhandColor.ink)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityAddTraits(.isHeader)
+                .padding(.top, OffhandSpacing.section)
+            Text(String(localized: "Offhand is made by one developer. Anonymous usage numbers show me what to fix next."))
+                .offhandText(.dialogBody)
+                .foregroundStyle(OffhandColor.ink2)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 12)
+            SectionLabel(String(localized: "Shared, without your name"))
+                .padding(.top, OffhandSpacing.section)
+                .padding(.bottom, 4)
+            consentRows([
+                String(localized: "Which features get used"),
+                String(localized: "Crashes and errors"),
+                String(localized: "iPhone model and app version"),
+            ])
+            SectionLabel(String(localized: "Never leaves your iPhone"), isEmphasised: true)
+                .padding(.top, 20)
+                .padding(.bottom, 4)
+            consentRows([
+                String(localized: "Your recordings"),
+                String(localized: "Your transcripts and summaries"),
+                String(localized: "Titles, folder names and searches"),
+            ])
+            Spacer(minLength: 32)
+            PrimaryButton(String(localized: "Share with the developer"), fillsWidth: true) {
+                viewModel.onShareAnalyticsClicked()
+            }
+            SecondaryButton(String(localized: "Don’t share"), fillsWidth: true) {
+                viewModel.onDontShareAnalyticsClicked()
+            }
+            .padding(.top, 10)
+            Text(String(localized: "You can change this any time in Settings."))
+                .offhandText(.caption)
+                .foregroundStyle(OffhandColor.ink2)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 10)
+        }
+        .frame(maxHeight: .infinity, alignment: .top)
+    }
+
+    private func consentRows(_ labels: [String]) -> some View {
+        VStack(spacing: 0) {
+            ForEach(Array(labels.enumerated()), id: \.offset) { index, label in
+                if index > 0 {
+                    Hairline()
+                }
+                Text(label)
+                    .offhandText(.body)
+                    .foregroundStyle(OffhandColor.ink)
+                    .frame(maxWidth: .infinity, minHeight: OffhandSpacing.touchTarget, alignment: .leading)
+            }
+        }
     }
 
     private func headline(_ text: String) -> some View {

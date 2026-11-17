@@ -8,7 +8,9 @@ import com.dmytrosamoilov.offhand.core.device.DeviceCapabilityChecker
 import com.dmytrosamoilov.offhand.core.device.DeviceCapability
 import com.dmytrosamoilov.offhand.core.device.DeviceTier
 import com.dmytrosamoilov.offhand.core.device.tier
+import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.AnswerTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.CompleteOnboardingUseCase
+import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.GetTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetAppLockEnabledUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +22,8 @@ class OnboardingViewModel(
     private val deviceCapabilityChecker: DeviceCapabilityChecker,
     private val setAppLockEnabled: SetAppLockEnabledUseCase,
     private val completeOnboarding: CompleteOnboardingUseCase,
+    private val getTelemetryConsent: GetTelemetryConsentUseCase,
+    private val answerTelemetryConsent: AnswerTelemetryConsentUseCase,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
@@ -27,7 +31,21 @@ class OnboardingViewModel(
     val uiState: StateFlow<OnboardingUiState> = mutableUiState.asStateFlow()
 
     init {
-        evaluateDevice()
+        launchSafely(showLoading = false) {
+            if (getTelemetryConsent().isAnswered) {
+                evaluateDevice()
+            } else {
+                mutableUiState.update { it.copy(step = OnboardingStep.ANALYTICS_CONSENT) }
+            }
+        }
+    }
+
+    fun onShareAnalyticsClicked() {
+        answerAnalytics(isShared = true)
+    }
+
+    fun onDontShareAnalyticsClicked() {
+        answerAnalytics(isShared = false)
     }
 
     fun onContinueWithTranscriptsClicked() {
@@ -51,6 +69,18 @@ class OnboardingViewModel(
             setAppLockEnabled(false)
             completeOnboarding()
             analyticsTracker.track(AnalyticsEvents.onboardingCompleted())
+        }
+    }
+
+    private fun answerAnalytics(isShared: Boolean) {
+        if (uiState.value.step != OnboardingStep.ANALYTICS_CONSENT) return
+        mutableUiState.update { it.copy(step = OnboardingStep.DEVICE_CHECK) }
+        launchSafely(showLoading = false) {
+            answerTelemetryConsent(isShared)
+            if (isShared) {
+                analyticsTracker.track(AnalyticsEvents.onboardingStep(OnboardingChoice.ANALYTICS_SHARED.analyticsName))
+            }
+            evaluateDevice()
         }
     }
 

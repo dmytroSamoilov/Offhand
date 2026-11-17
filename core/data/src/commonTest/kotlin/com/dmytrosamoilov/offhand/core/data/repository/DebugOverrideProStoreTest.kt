@@ -10,6 +10,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
 import com.dmytrosamoilov.offhand.core.data.domain.ProStore
 import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
+import com.dmytrosamoilov.offhand.core.data.domain.TelemetryConsent
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
@@ -83,7 +84,7 @@ private class FakePreferences : UserPreferencesRepository {
         UserPreferences(
             onboardingCompleted = true,
             appLockEnabled = false,
-            telemetryConsent = false,
+            telemetryConsent = TelemetryConsent.DECLINED,
             dynamicColor = false,
             developerOptions = false,
             savedRecordingsCount = 0,

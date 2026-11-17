@@ -23,7 +23,7 @@ class TelemetryController(
     fun start() {
         scope.launch {
             userPreferences.preferences
-                .map { it.telemetryConsent }
+                .map { it.telemetryConsent.isShared }
                 .distinctUntilChanged()
                 .collect(::applyConsent)
         }

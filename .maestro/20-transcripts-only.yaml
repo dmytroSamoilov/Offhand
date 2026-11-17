@@ -10,6 +10,8 @@ appId: com.dmytrosamoilov.offhand.uitest
       all: allow
     arguments:
       smokeDeviceTier: transcripts
+# The analytics question comes before the device check
+- tapOn: "Share with the developer"
 - assertVisible: "Every word, written down.*"
 - tapOn: "Continue with transcripts"
 

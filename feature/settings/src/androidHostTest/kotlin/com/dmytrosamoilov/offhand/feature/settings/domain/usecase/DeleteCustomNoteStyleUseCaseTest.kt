@@ -5,6 +5,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
+import com.dmytrosamoilov.offhand.core.data.domain.TelemetryConsent
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import io.mockk.coJustRun
@@ -44,7 +45,7 @@ class DeleteCustomNoteStyleUseCaseTest {
     private fun preferences(style: NoteStyleRef) = UserPreferences(
         onboardingCompleted = true,
         appLockEnabled = false,
-        telemetryConsent = false,
+        telemetryConsent = TelemetryConsent.DECLINED,
         dynamicColor = false,
         developerOptions = false,
         savedRecordingsCount = 0,

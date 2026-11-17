@@ -38,4 +38,17 @@
     <string name="onboarding_included">शामिल</string>
     <string name="onboarding_not_here">इस फ़ोन पर नहीं</string>
     <string name="onboarding_lite_continue">ट्रांसक्रिप्ट के साथ जारी रखें</string>
+    <string name="onboarding_analytics_title">Offhand को बेहतर बनाने में मदद करेंगे?</string>
+    <string name="onboarding_analytics_body">Offhand को एक ही डेवलपर बनाता है। गुमनाम उपयोग के आंकड़े मुझे बताते हैं कि आगे क्या ठीक करना है।</string>
+    <string name="onboarding_analytics_shared_label">साझा होता है, आपके नाम के बिना</string>
+    <string name="onboarding_analytics_shared_features">कौन-सी सुविधाएँ इस्तेमाल होती हैं</string>
+    <string name="onboarding_analytics_shared_crashes">क्रैश और त्रुटियाँ</string>
+    <string name="onboarding_analytics_shared_device">फ़ोन मॉडल और ऐप वर्शन</string>
+    <string name="onboarding_analytics_private_label">आपके फ़ोन से कभी बाहर नहीं जाता</string>
+    <string name="onboarding_analytics_private_recordings">आपकी रिकॉर्डिंग</string>
+    <string name="onboarding_analytics_private_text">आपके ट्रांसक्रिप्ट और सारांश</string>
+    <string name="onboarding_analytics_private_titles">शीर्षक, फ़ोल्डर के नाम और खोजें</string>
+    <string name="onboarding_analytics_share">डेवलपर के साथ साझा करें</string>
+    <string name="onboarding_analytics_dont_share">साझा न करें</string>
+    <string name="onboarding_analytics_settings_hint">आप इसे कभी भी सेटिंग्स में बदल सकते हैं।</string>
 </resources>

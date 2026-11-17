@@ -10,6 +10,7 @@ appId: com.dmytrosamoilov.offhand.uitest
 ---
 - launchApp:
     clearState: true
+- tapOn: "Don.t share"
 - tapOn: "Not now, look around first"
 - tapOn:
     id: "tab_settings"

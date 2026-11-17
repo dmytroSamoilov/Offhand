@@ -39,4 +39,17 @@
     <string name="onboarding_included">Included</string>
     <string name="onboarding_not_here">Not on this phone</string>
     <string name="onboarding_lite_continue">Continue with transcripts</string>
+    <string name="onboarding_analytics_title">Help make Offhand better?</string>
+    <string name="onboarding_analytics_body">Offhand is made by one developer. Anonymous usage numbers show me what to fix next.</string>
+    <string name="onboarding_analytics_shared_label">Shared, without your name</string>
+    <string name="onboarding_analytics_shared_features">Which features get used</string>
+    <string name="onboarding_analytics_shared_crashes">Crashes and errors</string>
+    <string name="onboarding_analytics_shared_device">Phone model and app version</string>
+    <string name="onboarding_analytics_private_label">Never leaves your phone</string>
+    <string name="onboarding_analytics_private_recordings">Your recordings</string>
+    <string name="onboarding_analytics_private_text">Your transcripts and summaries</string>
+    <string name="onboarding_analytics_private_titles">Titles, folder names and searches</string>
+    <string name="onboarding_analytics_share">Share with the developer</string>
+    <string name="onboarding_analytics_dont_share">Don’t share</string>
+    <string name="onboarding_analytics_settings_hint">You can change this any time in Settings.</string>
 </resources>

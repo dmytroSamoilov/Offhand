@@ -1,16 +1,19 @@
-# Runs last: it clears the app. Covers the onboarding branch the smoke flow
-# does not take ("Not now"), the consent switch in Settings, and recording
-# without the microphone permission, which shows the fallback.
+# Runs last: it clears the app. Covers the onboarding branches the smoke flow
+# does not take ("Don't share" and "Not now"), the consent switch in Settings,
+# and recording without the microphone permission, which shows the fallback.
 appId: com.dmytrosamoilov.offhand.uitest
 ---
 - launchApp:
     clearState: true
     permissions:
       microphone: deny
+- assertVisible: "Never leaves your (phone|iPhone)"
+- tapOn: "Don.t share"
 - tapOn: "Not now, look around first"
 - assertVisible: "No notes yet"
 
-# Consent is on until it is switched off in Settings (its state is not exposed to Maestro)
+# "Don't share" left the Settings switch off: switched on, then off again
+# (its state is not exposed to Maestro)
 - tapOn:
     id: "tab_settings"
 - scrollUntilVisible:
@@ -18,6 +21,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       text: "Share anonymous usage"
     centerElement: true
     direction: DOWN
+- tapOn: "Share anonymous usage"
 - tapOn: "Share anonymous usage"
 - tapOn:
     id: "tab_notes"

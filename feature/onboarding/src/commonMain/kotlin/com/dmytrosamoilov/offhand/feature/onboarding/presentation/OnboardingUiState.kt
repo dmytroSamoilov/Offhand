@@ -8,12 +8,14 @@ data class OnboardingUiState(
 
 enum class OnboardingStep {
     DEVICE_CHECK,
+    ANALYTICS_CONSENT,
     DEVICE_INCOMPATIBLE,
     TRANSCRIPTS_ONLY,
     WELCOME,
 }
 
 enum class OnboardingChoice(val analyticsName: String) {
+    ANALYTICS_SHARED("analytics_shared"),
     TRANSCRIPTS_ONLY("transcripts_only"),
     RECORD_FIRST_NOTE("record_first_note"),
     LOOK_AROUND("look_around"),
