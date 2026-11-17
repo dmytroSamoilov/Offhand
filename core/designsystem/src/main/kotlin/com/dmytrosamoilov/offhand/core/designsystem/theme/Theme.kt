@@ -28,8 +28,8 @@ fun OffhandTheme(
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
-    val light = if (dynamicColor) LightQuietInk.withWallpaperAccent(dynamicLightColorScheme(context)) else LightQuietInk
-    val dark = if (dynamicColor) DarkQuietInk.withWallpaperAccent(dynamicDarkColorScheme(context)) else DarkQuietInk
+    val light = if (dynamicColor) LightQuietInk.withWallpaperColors(dynamicLightColorScheme(context)) else LightQuietInk
+    val dark = if (dynamicColor) DarkQuietInk.withWallpaperColors(dynamicDarkColorScheme(context)) else DarkQuietInk
     CompositionLocalProvider(LocalDarkPalette provides dark) {
         QuietInkScope(colors = if (darkTheme) dark else light, content = content)
     }
@@ -57,10 +57,21 @@ private fun QuietInkScope(colors: OffhandColors, content: @Composable () -> Unit
 
 private val LocalDarkPalette = staticCompositionLocalOf { DarkQuietInk }
 
-private fun OffhandColors.withWallpaperAccent(scheme: ColorScheme) = copy(
+private fun OffhandColors.withWallpaperColors(scheme: ColorScheme) = copy(
+    ground = if (isDark) scheme.surface else scheme.surfaceContainerLow,
+    surface = if (isDark) scheme.surfaceContainerHigh else scheme.surfaceContainerLowest,
+    ink = scheme.onSurface,
+    ink2 = scheme.onSurfaceVariant,
+    ink3 = scheme.outline,
+    hairline = if (isDark) scheme.surfaceContainerHigh else scheme.surfaceContainerHighest,
+    border = scheme.outlineVariant,
+    wave = scheme.outlineVariant,
+    well = if (isDark) scheme.surfaceContainerLow else scheme.surfaceContainerHigh,
+    wellSelected = if (isDark) scheme.surfaceContainerHighest else scheme.surfaceContainerLowest,
     accent = scheme.primary,
     onAccent = scheme.onPrimary,
     accentSoft = scheme.primaryContainer,
+    onInk = scheme.surface,
 )
 
 private fun OffhandColors.toColorScheme(): ColorScheme {
