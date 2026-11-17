@@ -1841,6 +1841,7 @@ private fun NoteDetailPane(
             isRetranscribeAvailable = state.isRetranscribeAvailable,
             progressPercent = state.noteProgress[selected.id],
             isWaitingForAi = state.isWaitingForAi,
+            isWaitingForSpeech = state.isWaitingForSpeech,
             isTranscribing = state.isTranscribing,
             onTranscriptTime = viewModel::onTranscriptTimeSelected,
             onBack = viewModel::onDetailClosed,
@@ -1890,6 +1891,7 @@ private fun NoteDetail(
     isRetranscribeAvailable: Boolean,
     progressPercent: Int?,
     isWaitingForAi: Boolean,
+    isWaitingForSpeech: Boolean,
     isTranscribing: Boolean,
     onTranscriptTime: (Long) -> Unit,
     onBack: () -> Unit,
@@ -1932,6 +1934,7 @@ private fun NoteDetail(
             showMetrics = showMetrics,
             progressPercent = progressPercent,
             isWaitingForAi = isWaitingForAi,
+            isWaitingForSpeech = isWaitingForSpeech,
             isTranscribing = isTranscribing,
             onTranscriptTime = onTranscriptTime,
             onPlayPause = onPlayPause,
@@ -2131,6 +2134,7 @@ private fun NoteDetailContent(
     showMetrics: Boolean,
     progressPercent: Int?,
     isWaitingForAi: Boolean,
+    isWaitingForSpeech: Boolean,
     isTranscribing: Boolean,
     onTranscriptTime: (Long) -> Unit,
     onPlayPause: () -> Unit,
@@ -2161,6 +2165,7 @@ private fun NoteDetailContent(
             showMetrics = showMetrics,
             progressPercent = progressPercent,
             isWaitingForAi = isWaitingForAi,
+            isWaitingForSpeech = isWaitingForSpeech,
             isTranscribing = isTranscribing,
             onTranscriptTime = onTranscriptTime,
             onRetryTranscription = onRetryTranscription,
@@ -2182,6 +2187,7 @@ private fun NoteDetailBody(
     showMetrics: Boolean,
     progressPercent: Int?,
     isWaitingForAi: Boolean,
+    isWaitingForSpeech: Boolean,
     isTranscribing: Boolean,
     onTranscriptTime: (Long) -> Unit,
     onRetryTranscription: () -> Unit,
@@ -2261,7 +2267,7 @@ private fun NoteDetailBody(
             NoteDetailTabUi.TRANSCRIPT -> TranscriptTab(
                 note = note,
                 progressPercent = progressPercent,
-                isWaitingForAi = isWaitingForAi,
+                isWaitingForSpeech = isWaitingForSpeech,
                 isTranscribing = isTranscribing,
                 onTimeSelected = onTranscriptTime.takeIf { note.hasAudio && playback.isAvailable },
                 onRetryTranscription = onRetryTranscription,
@@ -2371,7 +2377,7 @@ private fun SummaryTab(
 private fun TranscriptTab(
     note: NoteDetailUi,
     progressPercent: Int?,
-    isWaitingForAi: Boolean,
+    isWaitingForSpeech: Boolean,
     isTranscribing: Boolean,
     onTimeSelected: ((Long) -> Unit)?,
     onRetryTranscription: () -> Unit,
@@ -2390,9 +2396,9 @@ private fun TranscriptTab(
             }
         }
         note.status == NoteStatusUi.PROCESSING -> SkeletonStatusCard(
-            text = stringResource(transcriptWritingText(isWaitingForAi)),
+            text = stringResource(transcriptWritingText(isWaitingForSpeech)),
             percent = progressPercent,
-            isWorking = !isWaitingForAi,
+            isWorking = !isWaitingForSpeech,
         )
         note.status == NoteStatusUi.FAILED -> FailedDetailCard(
             hasTranscript = false,
@@ -2598,8 +2604,8 @@ private fun NoteDetailUi.summaryWritingText(isWaitingForAi: Boolean): Int = when
     else -> R.string.notes_processing_structuring
 }
 
-private fun transcriptWritingText(isWaitingForAi: Boolean): Int =
-    if (isWaitingForAi) R.string.notes_processing_waiting_transcribing else R.string.notes_processing_transcribing
+private fun transcriptWritingText(isWaitingForSpeech: Boolean): Int =
+    if (isWaitingForSpeech) R.string.notes_processing_waiting_transcribing else R.string.notes_processing_transcribing
 
 @Composable
 private fun NoteDetailUi.detailTitle(): String = when (status) {

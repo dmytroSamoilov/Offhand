@@ -18,10 +18,13 @@ import kotlin.time.TimeSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 // Reacts to the model download finishing: notes waiting for the AI core are
-// picked up, and the download time is reported (measured from when this
+// picked up (those waiting to be transcribed already when the speech part
+// lands, well before the rest), and the download time is reported (measured from when this
 // process saw the download running, so a restart mid-download shortens it).
 // The percent reached is remembered across starts: a download still pending
 // at a cold start is reported once: as abandoned with the model missing, as
@@ -55,6 +58,11 @@ class PendingNotesCoordinator(
             aiCoreDownloadStatus.state.collect { state ->
                 onDownloadState(state is AiCoreDownloadState.Downloading)
                 if (state is AiCoreDownloadState.Downloading) rememberProgress(state.progressPercent)
+            }
+        }
+        scope.launch {
+            aiCoreDownloadStatus.isSpeechMissing.drop(1).filter { isMissing -> !isMissing }.collect {
+                resumeInterruptedNotes()
             }
         }
         scope.launch {

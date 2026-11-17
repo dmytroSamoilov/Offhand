@@ -159,7 +159,7 @@ struct NoteDetailView: View {
     private var summaryTab: some View {
         switch detail.status {
         case .processing:
-            writingCard(text: summaryWritingText)
+            writingCard(text: summaryWritingText, isWaiting: state.isWaitingForAi)
         case .interrupted:
             interruptedCard
         case .failed:
@@ -196,10 +196,10 @@ struct NoteDetailView: View {
                 actionForeground: Brand.onTertiaryContainer
             )
             if state.isTranscribing {
-                writingCard(text: String(localized: "Still transcribing the rest…"))
+                writingCard(text: String(localized: "Still transcribing the rest…"), isWaiting: false)
             }
         } else if detail.status == .processing {
-            writingCard(text: transcriptWritingText)
+            writingCard(text: transcriptWritingText, isWaiting: state.isWaitingForSpeech)
         } else if detail.status == .interrupted {
             interruptedCard
         } else if detail.status == .failed {
@@ -266,7 +266,7 @@ struct NoteDetailView: View {
         return parts.joined(separator: " · ")
     }
 
-    private func writingCard(text: String) -> some View {
+    private func writingCard(text: String, isWaiting: Bool) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .firstTextBaseline, spacing: 12) {
                 Text(text)
@@ -278,7 +278,7 @@ struct NoteDetailView: View {
                         .monospacedDigit()
                 }
             }
-            if !state.isWaitingForAi {
+            if !isWaiting {
                 SkeletonLines()
                 KeepOpenHint()
             }
@@ -313,7 +313,7 @@ struct NoteDetailView: View {
     }
 
     private var transcriptWritingText: String {
-        state.isWaitingForAi
+        state.isWaitingForSpeech
             ? String(localized: "Waiting for your on-device AI to finish downloading")
             : String(localized: "Transcribing your recording")
     }

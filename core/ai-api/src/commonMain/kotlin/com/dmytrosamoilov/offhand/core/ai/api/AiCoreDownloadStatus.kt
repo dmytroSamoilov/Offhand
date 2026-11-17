@@ -4,6 +4,7 @@ import com.dmytrosamoilov.offhand.core.common.ModelDownloadPolicy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 sealed interface AiCoreDownloadState {
     data object Idle : AiCoreDownloadState
@@ -31,6 +32,12 @@ class AiCoreDownloadStatus(
         combine(modelManager.modelState, speechToText.downloadState) { modelState, speechState ->
             modelState.isNotOnDisk() || speechState !is SpeechModelState.Downloaded
         }.distinctUntilChanged()
+
+    // The speech part is the small one and is downloaded first: once it is on
+    // the phone recordings are transcribed, whatever the rest is doing.
+    val isSpeechMissing: Flow<Boolean> =
+        speechToText.downloadState.map { speechState -> speechState !is SpeechModelState.Downloaded }
+            .distinctUntilChanged()
 
     private fun ModelState.isNotOnDisk(): Boolean =
         this is ModelState.NotDownloaded || this is ModelState.Downloading

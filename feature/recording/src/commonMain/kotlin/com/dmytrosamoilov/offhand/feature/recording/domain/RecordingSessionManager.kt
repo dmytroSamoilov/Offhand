@@ -208,7 +208,7 @@ class RecordingSessionManager(
     fun retryNote(noteId: Long, audioFileName: String) {
         if (!claimProcessing(noteId)) return
         scope.launch {
-            if (!isAiCoreDownloaded()) {
+            if (!isSpeechOnDisk()) {
                 markNoteProcessing(noteId)
                 parkUntilAiCoreArrives(noteId)
                 return@launch
@@ -224,6 +224,7 @@ class RecordingSessionManager(
                     val stored = transcribeStoredAudio(noteId, audioFileName, resumePoint(note)) { fraction ->
                         updateProgress(noteId, fraction * RETRY_WHISPER_SHARE)
                     }
+                    if (isWaitingToBeWritten(noteId, stored)) return@trackingForeground
                     processNote(
                         noteId = noteId,
                         transcripts = stored.texts,
@@ -308,7 +309,7 @@ class RecordingSessionManager(
             completeAudioOnly(noteId, NoteSource.IMPORT)
             return
         }
-        if (!isAiCoreDownloaded()) {
+        if (!isSpeechOnDisk()) {
             parkUntilAiCoreArrives(noteId)
             return
         }
@@ -316,6 +317,7 @@ class RecordingSessionManager(
             val stored = transcribeStoredAudio(noteId, fileName, ResumePoint.START) { fraction ->
                 updateProgress(noteId, IMPORT_DECODE_SHARE + fraction * (RETRY_WHISPER_SHARE - IMPORT_DECODE_SHARE))
             }
+            if (isWaitingToBeWritten(noteId, stored)) return@trackingForeground
             processNote(noteId, stored.texts, stored.transcriptionTimeMs, RETRY_WHISPER_SHARE, style, NoteSource.IMPORT)
         }
     }
@@ -401,6 +403,22 @@ class RecordingSessionManager(
     // interruption event), so the check and the claim are one atomic update.
     private fun claimProcessing(noteId: Long): Boolean =
         noteId !in mutableProcessingNoteIds.getAndUpdate { it + noteId }
+
+    // The speech part of the on-device AI arrives long before the part that
+    // writes, so a note is transcribed as soon as the first is on disk.
+    private fun isSpeechOnDisk(): Boolean = speechToText.downloadState.value is SpeechModelState.Downloaded
+
+    // A note without a summary is finished from its transcript alone.
+    private suspend fun isReadyToWrite(): Boolean = !getNoteFeatures().writesSummary || isAiCoreDownloaded()
+
+    // The transcript is saved and shown; the summary is written when the rest
+    // of the on-device AI has arrived. An empty transcript has nothing to wait
+    // for and fails like any other.
+    private suspend fun isWaitingToBeWritten(noteId: Long, stored: StoredTranscription): Boolean {
+        if (stored.texts.isEmpty() || isReadyToWrite()) return false
+        parkUntilAiCoreArrives(noteId)
+        return true
+    }
 
     // The note stays PROCESSING with its audio or transcript, which is what
     // ResumeInterruptedNotesUseCase picks up when the download finishes.
@@ -787,7 +805,7 @@ class RecordingSessionManager(
     ) {
         mutableProcessingNoteIds.update { it + noteId }
         scope.launch {
-            if (!isAiCoreDownloaded()) {
+            if (!isReadyToWrite()) {
                 parkUntilAiCoreArrives(noteId)
                 return@launch
             }

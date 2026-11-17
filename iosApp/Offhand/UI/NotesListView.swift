@@ -19,6 +19,7 @@ struct NotesListView: View {
         noteProgress: [:],
         modelPreparation: nil,
         isWaitingForAi: false,
+        isWaitingForSpeech: false,
         searchQuery: "",
         folders: [],
         selectedFolderId: nil,

@@ -23,6 +23,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetTranscript
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.InterruptNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsSpeechModelDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveImportAllowanceUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RefundFreeImportUseCase
@@ -120,6 +121,7 @@ val featureRecordingModule = module {
     factoryOf(::SettleRememberedModelDownloadUseCase)
     factoryOf(::IsAudioImportAvailableUseCase)
     factoryOf(::IsAiCoreDownloadedUseCase)
+    factoryOf(::IsSpeechModelDownloadedUseCase)
     factoryOf(::IsCalendarSuggestionsAvailableUseCase)
     factoryOf(::IsThinkingEnabledUseCase)
     factoryOf(::MarkNoteProcessingUseCase)
