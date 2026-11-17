@@ -403,7 +403,8 @@ struct NotesListView<BottomBarContent: View>: View {
                 title: highlighted(note.title, note.titleHighlights),
                 state: rowState(note),
                 meta: metaLine(note, day: day),
-                waveSeed: note.id
+                waveSeed: note.id,
+                previewLines: isSearching ? 2 : 1
             ) {
                 if state.isSelectingNotes {
                     ChoiceMark(isSelected: isSelected, size: 24)

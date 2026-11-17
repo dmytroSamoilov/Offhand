@@ -92,7 +92,6 @@ internal fun ColumnScope.RecordingContent(state: RecordingUiState, actions: Reco
     state.externalMicName?.let { ExternalMicLine(name = it) }
     RecordingWaveform(
         levels = state.waveform,
-        isPaused = state.isPaused,
         modifier = Modifier.fillMaxWidth().padding(top = 44.dp),
     )
     if (state.isLiveTranscriptShown) LiveTranscript(text = state.liveTranscript)

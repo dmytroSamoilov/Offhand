@@ -81,6 +81,13 @@ private fun SummaryTab(state: NotesUiState, viewModel: NotesViewModel, note: Not
         NoteStatusUi.INTERRUPTED -> PausedCard(onResume = viewModel::onResumeProcessingRequested, modifier = contentModifier)
         NoteStatusUi.READY -> MarkdownText(markdown = note.body, modifier = contentModifier)
     }
+    if (state.styleChips.isNotEmpty()) {
+        StyleChipsRow(
+            chips = state.styleChips,
+            onStyleSelected = viewModel::onStyleSelected,
+            modifier = Modifier.padding(top = 28.dp),
+        )
+    }
     state.smartSuggestions?.let { suggestions ->
         SmartSuggestionsCard(
             suggestions = suggestions,

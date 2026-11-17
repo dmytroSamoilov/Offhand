@@ -325,7 +325,6 @@ private struct RecordingWaveform: View {
 
     private static let step: CGFloat = 8
     private static let lineWidth: CGFloat = 3
-    private static let recentBars = 12
     private static let minLevel: CGFloat = 0.06
 
     var body: some View {
@@ -339,10 +338,9 @@ private struct RecordingWaveform: View {
                 var path = Path()
                 path.move(to: CGPoint(x: x, y: (size.height - height) / 2))
                 path.addLine(to: CGPoint(x: x, y: (size.height + height) / 2))
-                let isRecent = index >= shown.count - Self.recentBars
                 context.stroke(
                     path,
-                    with: .color(isRecent ? OffhandColor.ink : OffhandColor.wave),
+                    with: .color(OffhandColor.ink2),
                     style: StrokeStyle(lineWidth: Self.lineWidth, lineCap: .round)
                 )
             }

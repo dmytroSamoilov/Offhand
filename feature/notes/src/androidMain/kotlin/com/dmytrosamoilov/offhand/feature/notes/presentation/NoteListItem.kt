@@ -83,6 +83,7 @@ private fun SelectableNoteRow(
         title = note.rowTitle().highlighted(note.titleHighlights),
         state = note.rowState(isWaitingForAi = isWaitingForAi, progressPercent = progressPercent),
         meta = note.meta(showsDay = context.isSearching),
+        previewLines = if (context.isSearching) SEARCH_PREVIEW_LINES else 1,
         waveSeed = note.id,
         showWave = !selection.isActive,
         leading = { if (selection.isActive) ChoiceMark(isSelected = isSelected, size = 24.dp) },
@@ -202,3 +203,5 @@ private fun String.highlighted(ranges: List<TextRangeUi>): AnnotatedString {
 }
 
 private const val PERCENT = 100f
+
+private const val SEARCH_PREVIEW_LINES = 2

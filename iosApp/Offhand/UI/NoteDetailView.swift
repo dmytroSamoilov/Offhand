@@ -247,6 +247,10 @@ struct NoteDetailView: View {
             MarkdownBlocks(raw: detail.body)
                 .textSelection(.enabled)
         }
+        if !state.styleChips.isEmpty {
+            StyleChipsRow(chips: state.styleChips) { viewModel.onStyleSelected(style: $0) }
+                .padding(.top, 28)
+        }
         if let suggestions = state.smartSuggestions {
             SmartSuggestionsSection(viewModel: viewModel, suggestions: suggestions)
                 .padding(.top, 28)
@@ -725,5 +729,32 @@ private struct DocumentExporter: UIViewControllerRepresentable {
         func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
             onComplete()
         }
+    }
+}
+
+private struct StyleChipsRow: View {
+    let chips: [StyleChipUi]
+    let onSelect: (NoteStyleRef) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionLabel(String(localized: "Writing style"))
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(chips, id: \.self) { chip in
+                        Chip(text: label(for: chip), isSelected: chip.isCurrent) {
+                            if !chip.isCurrent { onSelect(chip.style) }
+                        }
+                    }
+                }
+                .padding(.horizontal, OffhandSpacing.screen)
+            }
+            .padding(.horizontal, -OffhandSpacing.screen)
+        }
+    }
+
+    private func label(for chip: StyleChipUi) -> String {
+        if let name = chip.customName { return name }
+        return chip.style.builtInPreset.map { NoteStyleLabels.label(for: $0) } ?? ""
     }
 }

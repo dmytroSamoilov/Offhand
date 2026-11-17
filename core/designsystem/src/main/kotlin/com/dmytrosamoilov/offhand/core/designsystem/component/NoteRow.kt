@@ -38,6 +38,7 @@ fun NoteRow(
     leading: @Composable () -> Unit = {},
     trailing: @Composable () -> Unit = {},
     showWave: Boolean = true,
+    previewLines: Int = 1,
 ) {
     val colors = OffhandTheme.colors
     Row(
@@ -54,7 +55,7 @@ fun NoteRow(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-            NoteRowBody(state)
+            NoteRowBody(state, previewLines)
             meta?.let { MetaText(text = it, modifier = Modifier.padding(top = 2.dp)) }
         }
         if (showWave && state is NoteRowState.Ready) WaveGlyph(seed = waveSeed)
@@ -63,7 +64,7 @@ fun NoteRow(
 }
 
 @Composable
-private fun NoteRowBody(state: NoteRowState) {
+private fun NoteRowBody(state: NoteRowState, previewLines: Int) {
     val colors = OffhandTheme.colors
     when (state) {
         is NoteRowState.Ready -> state.preview?.let {
@@ -71,7 +72,7 @@ private fun NoteRowBody(state: NoteRowState) {
                 text = it,
                 style = OffhandTheme.type.bodySmall,
                 color = colors.ink2,
-                maxLines = 1,
+                maxLines = previewLines,
                 overflow = TextOverflow.Ellipsis,
             )
         }

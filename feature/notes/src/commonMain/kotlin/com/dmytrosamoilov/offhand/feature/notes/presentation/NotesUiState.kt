@@ -46,6 +46,8 @@ data class NotesUiState(
 ) {
     val isSelectingNotes: Boolean get() = selectedNoteIds.isNotEmpty()
 
+    val styleChips: List<StyleChipUi> get() = styleChips()
+
     // A tab is there while its feature is on or the note already has that
     // text; a failed or paused note keeps Summary, where its buttons are.
     val visibleDetailTabs: List<NoteDetailTabUi>

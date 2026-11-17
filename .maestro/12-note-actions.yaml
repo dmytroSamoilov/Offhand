@@ -77,3 +77,16 @@ appId: com.dmytrosamoilov.offhand.uitest
 - assertVisible: "Smoke test note"
 - tapOn: "Transcript"
 - assertVisible: "Copy transcript"
+
+# The writing-style chips under the summary restyle the note in place: the
+# current style is the first chip, Meeting the second, and the note is
+# written again on its tab
+- tapOn: "Summary"
+- scrollUntilVisible:
+    element:
+      text: "Meeting notes"
+    direction: DOWN
+- tapOn: "Meeting notes"
+- extendedWaitUntil:
+    visible: "Copy summary"
+    timeout: 60000

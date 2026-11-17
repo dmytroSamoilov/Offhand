@@ -49,16 +49,14 @@ internal fun IconLine(icon: ImageVector, text: String, modifier: Modifier = Modi
 }
 
 @Composable
-internal fun RecordingWaveform(levels: List<Float>, isPaused: Boolean, modifier: Modifier = Modifier) {
-    val colors = OffhandTheme.colors
-    val recentColor = if (isPaused) colors.wave else colors.ink
+internal fun RecordingWaveform(levels: List<Float>, modifier: Modifier = Modifier) {
+    val color = OffhandTheme.colors.ink2
     Canvas(modifier = modifier.height(WAVEFORM_HEIGHT)) {
         val step = BAR_STEP.toPx()
         val visible = levels.takeLast((size.width / step).toInt())
         val startX = size.width - visible.size * step + step / 2
         visible.forEachIndexed { index, level ->
-            val isRecent = index >= visible.size - RECENT_BARS
-            drawBar(x = startX + index * step, level = level, color = if (isRecent) recentColor else colors.wave)
+            drawBar(x = startX + index * step, level = level, color = color)
         }
     }
 }
@@ -103,5 +101,4 @@ private val WAVEFORM_HEIGHT = 120.dp
 private val BAR_WIDTH = 3.dp
 private val BAR_STEP = 8.dp
 private val MIN_BAR = 8.dp
-private const val RECENT_BARS = 12
 private const val MAX_CHUNKS_SHOWN = 6

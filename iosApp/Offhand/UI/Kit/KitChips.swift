@@ -3,6 +3,7 @@ import SwiftUI
 struct Chip<Trailing: View>: View {
     let text: String
     var systemImage: String? = nil
+    var isSelected = false
     let action: () -> Void
     @ViewBuilder let trailing: () -> Trailing
 
@@ -15,24 +16,25 @@ struct Chip<Trailing: View>: View {
                         .accessibilityHidden(true)
                 }
                 Text(text)
-                    .offhandText(.bodySmall, face: .interMedium)
+                    .offhandText(.bodySmall, face: isSelected ? .interSemibold : .interMedium)
                     .lineLimit(1)
                 trailing()
             }
-            .foregroundStyle(OffhandColor.ink)
+            .foregroundStyle(isSelected ? OffhandColor.onInk : OffhandColor.ink)
             .padding(.horizontal, 18)
             .frame(minHeight: OffhandSpacing.touchTarget)
-            .background(OffhandColor.surface, in: Capsule())
-            .overlay { Capsule().strokeBorder(OffhandColor.border, lineWidth: 1) }
+            .background(isSelected ? OffhandColor.ink : OffhandColor.surface, in: Capsule())
+            .overlay { Capsule().strokeBorder(isSelected ? .clear : OffhandColor.border, lineWidth: 1) }
             .contentShape(Capsule())
         }
         .buttonStyle(.offhandPress)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 
 extension Chip where Trailing == EmptyView {
-    init(text: String, systemImage: String? = nil, action: @escaping () -> Void) {
-        self.init(text: text, systemImage: systemImage, action: action, trailing: { EmptyView() })
+    init(text: String, systemImage: String? = nil, isSelected: Bool = false, action: @escaping () -> Void) {
+        self.init(text: text, systemImage: systemImage, isSelected: isSelected, action: action, trailing: { EmptyView() })
     }
 }
 

@@ -2,7 +2,7 @@ package com.dmytrosamoilov.offhand.core.designsystem.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -28,22 +28,30 @@ fun Chip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
+    isSelected: Boolean = false,
     trailing: @Composable () -> Unit = {},
 ) {
     val colors = OffhandTheme.colors
+    val content = if (isSelected) colors.onInk else colors.ink
     Row(
         modifier = modifier
             .height(OffhandSpacing.touchTarget)
             .clip(CircleShape)
-            .background(colors.surface)
-            .border(1.dp, colors.border, CircleShape)
-            .clickable(role = Role.Button, onClick = onClick)
+            .background(if (isSelected) colors.ink else colors.surface)
+            .then(if (isSelected) Modifier else Modifier.border(1.dp, colors.border, CircleShape))
+            .selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick)
             .padding(horizontal = 18.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        icon?.let { Icon(it, contentDescription = null, tint = colors.ink, modifier = Modifier.size(16.dp)) }
-        Text(text = text, style = OffhandTheme.type.bodySmall, fontWeight = FontWeight.Medium, color = colors.ink)
+        icon?.let { Icon(it, contentDescription = null, tint = content, modifier = Modifier.size(16.dp)) }
+        Text(
+            text = text,
+            style = OffhandTheme.type.bodySmall,
+            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+            color = content,
+            maxLines = 1,
+        )
         trailing()
     }
 }

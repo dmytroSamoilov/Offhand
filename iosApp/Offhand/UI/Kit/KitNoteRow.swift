@@ -12,6 +12,7 @@ struct NoteRow<Leading: View, Trailing: View>: View {
     let meta: String?
     let waveSeed: Int64
     var showsWave = true
+    var previewLines = 1
     @ViewBuilder let leading: () -> Leading
     @ViewBuilder let trailing: () -> Trailing
 
@@ -23,7 +24,7 @@ struct NoteRow<Leading: View, Trailing: View>: View {
                     .offhandText(.rowTitle)
                     .foregroundStyle(OffhandColor.ink)
                     .lineLimit(2)
-                NoteRowBody(state: state)
+                NoteRowBody(state: state, previewLines: previewLines)
                 if let meta {
                     MetaText(meta).padding(.top, 2)
                 }
@@ -65,6 +66,7 @@ extension NoteRow where Trailing == EmptyView {
         meta: String?,
         waveSeed: Int64,
         showsWave: Bool = true,
+        previewLines: Int = 1,
         @ViewBuilder leading: @escaping () -> Leading
     ) {
         self.init(
@@ -73,6 +75,7 @@ extension NoteRow where Trailing == EmptyView {
             meta: meta,
             waveSeed: waveSeed,
             showsWave: showsWave,
+            previewLines: previewLines,
             leading: leading,
             trailing: { EmptyView() }
         )
@@ -81,6 +84,7 @@ extension NoteRow where Trailing == EmptyView {
 
 private struct NoteRowBody: View {
     let state: NoteRowState
+    let previewLines: Int
 
     var body: some View {
         switch state {
@@ -89,7 +93,7 @@ private struct NoteRowBody: View {
                 Text(preview)
                     .offhandText(.bodySmall)
                     .foregroundStyle(OffhandColor.ink2)
-                    .lineLimit(1)
+                    .lineLimit(previewLines)
             }
         case .processing(let text, let progress):
             Text(text)
