@@ -16,6 +16,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardNoteUs
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardStagedAudioUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetFolderStyleUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveFolderNameUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteFeaturesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
@@ -109,6 +110,7 @@ val featureRecordingModule = module {
     factoryOf(::FailNoteUseCase)
     factoryOf(::InterruptNoteUseCase)
     factoryOf(::GetFolderStyleUseCase)
+    factoryOf(::ObserveFolderNameUseCase)
     factoryOf(::GetNoteFeaturesUseCase)
     factoryOf(::GetNoteStyleUseCase)
     factoryOf(::GetNoteUseCase)

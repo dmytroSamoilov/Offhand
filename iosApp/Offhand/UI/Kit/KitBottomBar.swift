@@ -27,6 +27,7 @@ struct BottomBar: View {
                 BottomBarItem(
                     label: labels.notes,
                     systemImage: "text.alignleft",
+                    identifier: "tab_notes",
                     isSelected: selected == .notes,
                     action: onNotes
                 )
@@ -36,6 +37,7 @@ struct BottomBar: View {
                 BottomBarItem(
                     label: labels.settings,
                     systemImage: "slider.horizontal.3",
+                    identifier: "tab_settings",
                     isSelected: selected == .settings,
                     action: onSettings
                 )
@@ -50,6 +52,7 @@ struct BottomBar: View {
 private struct BottomBarItem: View {
     let label: String
     let systemImage: String
+    let identifier: String
     let isSelected: Bool
     let action: () -> Void
 
@@ -59,7 +62,7 @@ private struct BottomBarItem: View {
                 Image(systemName: systemImage)
                     .font(.system(size: 22, weight: .regular))
                     .frame(height: 22)
-                    .accessibilityHidden(true)
+                    .accessibilityLabel(label)
                 Text(label)
                     .font(.offhand(isSelected ? .interSemibold : .interMedium, size: 11, relativeTo: .caption2))
                     .lineLimit(1)
@@ -69,6 +72,10 @@ private struct BottomBarItem: View {
             .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.offhandPress)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(label)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityIdentifier(identifier)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

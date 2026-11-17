@@ -4,6 +4,7 @@ struct SearchField: View {
     @Binding var query: String
     let placeholder: String
     let clearLabel: String
+    var focusesOnAppear = false
     var onSubmit: () -> Void = {}
     @FocusState private var isFocused: Bool
 
@@ -33,6 +34,7 @@ struct SearchField: View {
         }
         .contentShape(Capsule())
         .onTapGesture { isFocused = true }
+        .onAppear { if focusesOnAppear { isFocused = true } }
         .animation(OffhandMotion.state, value: isFocused)
     }
 }

@@ -74,8 +74,12 @@
         <item quantity="other">वार्षिक के %d साल से भी कम</item>
     </plurals>
     <string name="paywall_benefits_body">Pro कॉलम की हर सुविधा आपकी है।</string>
-    <string name="paywall_trial_intro_title">Offhand Pro 14 दिन मुफ़्त आज़माएँ</string>
-    <string name="paywall_trial_intro_tagline">Pro की हर सुविधा आज से खुली है। कोई भुगतान नहीं, कोई खाता नहीं। 14 दिन बाद आपके पास मुफ़्त संस्करण रहेगा, जब तक आप अपग्रेड न करें।</string>
+    <plurals name="paywall_trial_offer_title">
+        <item quantity="one">Offhand Pro अभी %d और दिन आपके लिए मुफ़्त है</item>
+        <item quantity="other">Offhand Pro अभी %d और दिन आपके लिए मुफ़्त है</item>
+    </plurals>
+    <string name="paywall_trial_intro_tagline">Pro की हर सुविधा पहले से खुली है। कोई भुगतान नहीं, कोई खाता नहीं। ट्रायल खत्म होने पर आपके पास मुफ़्त संस्करण रहेगा, जब तक आप अपग्रेड न करें।</string>
+    <string name="paywall_trial_offer_continue">Pro मुफ़्त में इस्तेमाल करते रहें</string>
     <string name="paywall_plan_monthly">मासिक</string>
     <string name="paywall_plan_monthly_price">%1$s / माह</string>
     <string name="paywall_plan_monthly_renews">हर महीने नवीनीकृत होता है</string>

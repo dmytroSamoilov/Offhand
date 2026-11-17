@@ -12,8 +12,10 @@ struct PaywallView: View {
         isPro: false,
         mode: .opening,
         message: nil,
-        trialRecap: []
+        trialRecap: [],
+        trialDaysLeft: nil
     )
+    @State private var isComparisonExpanded = false
 
     private static let successDismissDelay: Duration = .milliseconds(1600)
 
@@ -25,15 +27,14 @@ struct PaywallView: View {
             case .benefits:
                 benefitsContent
             case .offer:
-                if state.isPro { successContent } else { paywallContent }
+                if state.isPro { successContent } else { offerContent }
             }
         }
-        .background(Color(.systemGroupedBackground))
-        .alert(String(localized: "Offhand Pro"), isPresented: messageBinding) {
-            Button(String(localized: "OK")) { viewModel.onMessageDismissed() }
-        } message: {
-            if let message = state.message { Text(messageText(message)) }
-        }
+        .foregroundStyle(OffhandColor.ink)
+        .background(OffhandColor.ground.ignoresSafeArea())
+        .offhandDialog(isPresented: messageBinding) { messageDialog }
+        .environment(\.colorScheme, .dark)
+        .preferredColorScheme(.dark)
         .onAppear { viewModel.onOpened() }
         .onChange(of: state.isPro) {
             guard state.isPro, state.mode == .offer else { return }
@@ -49,143 +50,82 @@ struct PaywallView: View {
         }
     }
 
-    private var paywallContent: some View {
+    private var offerContent: some View {
         VStack(spacing: 0) {
-            closeRow
+            topBar(showsRestore: true)
             ScrollView {
-                VStack(spacing: 16) {
-                    header
-                    if !state.trialRecap.isEmpty { trialRecap }
-                    ComparisonTable(highlighted: state.feature, isCollapsible: true)
-                    planSection
-                    legalRow
+                VStack(alignment: .leading, spacing: 0) {
+                    PaywallHeader(title: PaywallCopy.headline(for: state), message: PaywallCopy.tagline(for: state))
+                    if !state.trialRecap.isEmpty {
+                        TrialRecap(lines: state.trialRecap).padding(.top, 22)
+                    }
+                    BenefitLines(titles: ComparisonRows.sorted(for: state.feature).filter(\.isPro).prefix(3).map(\.title))
+                        .padding(.top, 22)
+                    planSection.padding(.top, OffhandSpacing.screen)
+                    comparison.padding(.top, 12)
+                    legalLinks.padding(.top, 8)
                 }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
+                .padding(.horizontal, OffhandSpacing.screen)
+                .padding(.bottom, OffhandSpacing.card)
             }
             if state.feature == .freeTrial {
                 trialIntroActions
             } else {
-                bottomActions
+                offerActions
             }
         }
     }
 
     private var benefitsContent: some View {
         VStack(spacing: 0) {
-            closeRow
+            topBar(showsRestore: false)
             ScrollView {
-                VStack(spacing: 16) {
-                    VStack(spacing: 6) {
-                        ProCrown(size: 48)
-                        Text(String(localized: "You're on Offhand Pro"))
-                            .font(.title2.bold())
-                            .multilineTextAlignment(.center)
-                            .padding(.top, 4)
-                        Text(String(localized: "Everything in the Pro column is yours."))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    ComparisonTable(highlighted: .general, isCollapsible: false)
+                VStack(alignment: .leading, spacing: 0) {
+                    PaywallHeader(
+                        title: String(localized: "You're on Offhand Pro"),
+                        message: String(localized: "Everything in the Pro column is yours.")
+                    )
+                    ComparisonTable(highlighted: .general).padding(.top, OffhandSpacing.screen)
                 }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 20)
+                .padding(.horizontal, OffhandSpacing.screen)
+                .padding(.bottom, OffhandSpacing.screen)
             }
         }
     }
 
-    private var closeRow: some View {
+    private func topBar(showsRestore: Bool) -> some View {
         HStack {
+            BarIconButton(systemImage: "xmark", label: String(localized: "Close")) { viewModel.onClosed() }
             Spacer()
-            Button {
-                viewModel.onClosed()
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(.primary)
-                    .padding(6)
-            }
-            .modifier(CircleButton())
-            .accessibilityLabel(String(localized: "Close"))
-        }
-        .padding(.horizontal, 16)
-    }
-
-    private var header: some View {
-        VStack(spacing: 6) {
-            ProCrown(size: 48)
-            Text(PaywallCopy.headline(for: state))
-                .font(.title2.bold())
-                .multilineTextAlignment(.center)
-                .padding(.top, 4)
-            Text(PaywallCopy.tagline(for: state))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-        }
-    }
-
-    // What the free trial was used for, shown back on the paywall that
-    // follows it.
-    private var trialRecap: some View {
-        VStack(spacing: 8) {
-            ForEach(state.trialRecap, id: \.usage) { line in
-                HStack {
-                    Text(PaywallCopy.label(for: line.usage))
-                    Spacer(minLength: 12)
-                    Text("\(line.count)").font(.title2.bold())
-                }
+            if showsRestore {
+                Button(String(localized: "Restore purchases")) { viewModel.onRestoreClicked() }
+                    .buttonStyle(.offhandPlainText(.muted))
+                    .disabled(state.isPurchasing)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Brand.proGold.opacity(0.12), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
-    }
-
-    // The welcome to the fourteen free days: starting them is the main
-    // action and costs nothing, buying a plan right away sits under it.
-    private var trialIntroActions: some View {
-        VStack(spacing: 8) {
-            Button {
-                Haptics.confirm()
-                viewModel.onClosed()
-            } label: {
-                Text(PaywallCopy.startTrial).frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .disabled(state.isPurchasing)
-            Button {
-                viewModel.onPurchaseClicked()
-            } label: {
-                Text(PaywallCopy.buyNow(for: state.selectedOffer)).frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.large)
-            .disabled(state.selectedOffer == nil || state.isPurchasing)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(.bar)
+        .padding(.horizontal, 12)
+        .padding(.top, 4)
     }
 
     @ViewBuilder
     private var planSection: some View {
         if state.isLoadingOffers {
-            ProgressView().frame(maxWidth: .infinity).padding()
+            ProgressView()
+                .tint(OffhandColor.ink2)
+                .frame(maxWidth: .infinity, minHeight: 64)
         } else if state.offers.isEmpty {
-            VStack(spacing: 4) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(String(localized: "Prices could not be loaded. Check your connection and try again."))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                Button(String(localized: "Try again")) { viewModel.onRetryOffers() }
+                    .offhandText(.bodySmall)
+                    .foregroundStyle(OffhandColor.ink2)
+                PlainTextButton(String(localized: "Try again")) { viewModel.onRetryOffers() }
+                    .padding(.leading, -OffhandSpacing.controls)
             }
         } else {
             VStack(spacing: 8) {
                 ForEach(state.offers, id: \.plan) { offer in
-                    PlanCard(offer: offer, isSelected: offer.plan == state.selectedPlan) {
+                    PlanRow(offer: offer, isSelected: offer.plan == state.selectedPlan) {
+                        Haptics.selection()
                         viewModel.onPlanSelected(plan: offer.plan)
                     }
                 }
@@ -193,53 +133,97 @@ struct PaywallView: View {
         }
     }
 
-    private var bottomActions: some View {
-        VStack(spacing: 4) {
-            Button {
-                Haptics.confirm()
-                viewModel.onPurchaseClicked()
-            } label: {
-                Text(PaywallCopy.cta(for: state.selectedOffer)).frame(maxWidth: .infinity)
+    @ViewBuilder
+    private var comparison: some View {
+        if isComparisonExpanded {
+            VStack(spacing: 4) {
+                ComparisonTable(highlighted: state.feature)
+                PlainTextButton(String(localized: "Show less"), tone: .muted, systemImage: "chevron.up") {
+                    withAnimation(OffhandMotion.state) { isComparisonExpanded = false }
+                }
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .disabled(state.selectedOffer == nil || state.isPurchasing)
-            if let disclosure = PaywallCopy.disclosure(for: state.selectedOffer) {
-                Text(disclosure).font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
+        } else {
+            PlainTextButton(String(localized: "See everything in Pro"), systemImage: "chevron.down") {
+                withAnimation(OffhandMotion.state) { isComparisonExpanded = true }
             }
-            Button(String(localized: "Continue with the free version")) { viewModel.onClosed() }
-                .font(.footnote)
-                .padding(.top, 2)
+            .padding(.leading, -OffhandSpacing.controls)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(.bar)
     }
 
-    private var legalRow: some View {
-        HStack(spacing: 16) {
-            Button(String(localized: "Restore purchases")) { viewModel.onRestoreClicked() }
-                .disabled(state.isPurchasing)
+    private var legalLinks: some View {
+        HStack(spacing: 20) {
             Link(String(localized: "Terms"), destination: URL(string: LegalLinks.shared.TERMS)!)
             Link(String(localized: "Privacy"), destination: URL(string: LegalLinks.shared.PRIVACY_POLICY)!)
         }
-        .font(.footnote)
-        .frame(maxWidth: .infinity)
+        .offhandText(.caption, face: .interMedium)
+        .foregroundStyle(OffhandColor.ink3)
+        .frame(minHeight: OffhandSpacing.touchTarget)
+    }
+
+    private var offerActions: some View {
+        VStack(spacing: 4) {
+            GoldButton(PaywallCopy.cta(for: state.selectedOffer), fillsWidth: true) {
+                Haptics.confirm()
+                viewModel.onPurchaseClicked()
+            }
+            .disabled(state.selectedOffer == nil || state.isPurchasing)
+            PlainTextButton(String(localized: "Continue with the free version"), tone: .muted, fillsWidth: true) {
+                viewModel.onClosed()
+            }
+            if let disclosure = PaywallCopy.disclosure(for: state.selectedOffer) {
+                Text(disclosure)
+                    .font(.offhand(.interRegular, size: 12, relativeTo: .caption))
+                    .foregroundStyle(OffhandColor.ink3)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .padding(.horizontal, OffhandSpacing.screen)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+    }
+
+    private var trialIntroActions: some View {
+        VStack(spacing: 8) {
+            GoldButton(String(localized: "Keep using Pro for free"), fillsWidth: true) {
+                Haptics.confirm()
+                viewModel.onClosed()
+            }
+            .disabled(state.isPurchasing)
+            SecondaryButton(PaywallCopy.buyNow(for: state.selectedOffer), fillsWidth: true) {
+                viewModel.onPurchaseClicked()
+            }
+            .disabled(state.selectedOffer == nil || state.isPurchasing)
+        }
+        .padding(.horizontal, OffhandSpacing.screen)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
     }
 
     private var successContent: some View {
         VStack(spacing: 12) {
-            ProCrown(size: 72)
-            Text(String(localized: "You're on Offhand Pro")).font(.title2.bold()).multilineTextAlignment(.center)
+            ProCrown(size: 56)
+            Text(String(localized: "You're on Offhand Pro"))
+                .offhandText(.title)
             Text(state.feature == .general
                 ? String(localized: "Thank you for supporting an independent, private app.")
                 : String(localized: "What you started is on its way."))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+                .offhandText(.body)
+                .foregroundStyle(OffhandColor.ink2)
         }
+        .multilineTextAlignment(.center)
         .padding(32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var messageDialog: some View {
+        OffhandDialog(
+            title: String(localized: "Offhand Pro"),
+            message: state.message.map(messageText),
+            confirmLabel: String(localized: "OK"),
+            onConfirm: { viewModel.onMessageDismissed() },
+            onDismiss: { viewModel.onMessageDismissed() }
+        )
+        .environment(\.colorScheme, .dark)
     }
 
     private var messageBinding: Binding<Bool> {
@@ -258,8 +242,252 @@ struct PaywallView: View {
     }
 }
 
+private struct PaywallHeader: View {
+    let title: String
+    let message: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 10) {
+                ProCrown(size: 22).accessibilityHidden(true)
+                Text(String(localized: "Offhand Pro"))
+                    .offhandText(.label)
+                    .foregroundStyle(OffhandColor.gold)
+            }
+            .padding(.top, 20)
+            Text(title)
+                .offhandText(.title)
+                .padding(.top, 14)
+                .accessibilityAddTraits(.isHeader)
+            Text(message)
+                .offhandText(.body)
+                .foregroundStyle(OffhandColor.ink2)
+                .padding(.top, 10)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct BenefitLines: View {
+    let titles: [String]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(titles, id: \.self) { title in
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    GoldCheck()
+                    Text(title).offhandText(.dialogBody)
+                }
+            }
+        }
+    }
+}
+
+private struct GoldCheck: View {
+    var body: some View {
+        Image(systemName: "checkmark")
+            .font(.system(size: 14, weight: .bold))
+            .foregroundStyle(OffhandColor.gold)
+            .frame(width: 18)
+            .accessibilityHidden(true)
+    }
+}
+
+private struct TrialRecap: View {
+    let lines: [ProTrialUsageCount]
+
+    var body: some View {
+        SurfaceCard {
+            ForEach(Array(lines.enumerated()), id: \.element.usage) { index, line in
+                HStack(spacing: 12) {
+                    Text(PaywallCopy.label(for: line.usage))
+                        .offhandText(.settingTitle)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text(verbatim: "\(line.count)")
+                        .font(.offhand(.monoMedium, size: 20, relativeTo: .title3))
+                        .foregroundStyle(OffhandColor.gold)
+                }
+                .padding(.horizontal, OffhandSpacing.card)
+                .frame(minHeight: 52)
+                if index < lines.count - 1 { Hairline() }
+            }
+        }
+    }
+}
+
+private struct PlanRow: View {
+    let offer: ProOfferUi
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: 16, style: .continuous)
+        Button(action: action) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 8) {
+                        Text(PaywallCopy.planTitle(offer.plan))
+                            .offhandText(.body, face: .interSemibold)
+                        if offer.plan == .lifetime { bestValueTag }
+                    }
+                    Text(PaywallCopy.planHint(offer))
+                        .offhandText(.caption)
+                        .foregroundStyle(OffhandColor.ink2)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Text(offer.price)
+                    .font(.offhand(.monoRegular, size: 15, relativeTo: .subheadline))
+                    .multilineTextAlignment(.trailing)
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 10)
+            .frame(minHeight: 64)
+            .background(OffhandColor.well, in: shape)
+            .overlay {
+                shape.strokeBorder(isSelected ? OffhandColor.gold : OffhandColor.border, lineWidth: isSelected ? 1.5 : 1)
+            }
+            .contentShape(shape)
+        }
+        .buttonStyle(.offhandPress)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .animation(OffhandMotion.state, value: isSelected)
+    }
+
+    private var bestValueTag: some View {
+        Text(String(localized: "Best value"))
+            .font(.offhand(.monoMedium, size: 11, relativeTo: .caption2))
+            .textCase(.uppercase)
+            .foregroundStyle(OffhandColor.ink2)
+            .lineLimit(1)
+            .fixedSize()
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .overlay { RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(OffhandColor.border, lineWidth: 1) }
+    }
+}
+
+private struct ComparisonTable: View {
+    let highlighted: ProFeature
+
+    private static let columnWidth: CGFloat = 52
+
+    var body: some View {
+        let rows = ComparisonRows.sorted(for: highlighted)
+        SurfaceCard {
+            header
+            ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
+                if index > 0 && row.isPro != rows[index - 1].isPro {
+                    Hairline().padding(.vertical, 4)
+                }
+                tableRow(row)
+            }
+            VStack(alignment: .leading, spacing: 8) {
+                Text(String(localized: "New Pro features are included as they ship"))
+                Text(String(localized: "Payments go through the App Store. Offhand never sees your card, and your notes never leave your iPhone."))
+            }
+            .offhandText(.caption)
+            .foregroundStyle(OffhandColor.ink2)
+            .padding(.horizontal, OffhandSpacing.card)
+            .padding(.vertical, 12)
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: 0) {
+            Spacer()
+            Text(String(localized: "Offhand"))
+                .foregroundStyle(OffhandColor.ink2)
+                .frame(width: Self.columnWidth)
+            Text(verbatim: "Pro")
+                .foregroundStyle(OffhandColor.gold)
+                .frame(width: Self.columnWidth)
+        }
+        .offhandText(.caption, face: .interSemibold)
+        .padding(.horizontal, 8)
+        .padding(.top, 12)
+        .padding(.bottom, 4)
+    }
+
+    private func tableRow(_ row: ComparisonRows.Row) -> some View {
+        let isHighlighted = row.features.contains(highlighted)
+        return HStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(row.title)
+                    .offhandText(.settingTitle, face: isHighlighted ? .interSemibold : .interMedium)
+                if let hint = row.hint {
+                    Text(hint)
+                        .offhandText(.caption)
+                        .foregroundStyle(OffhandColor.ink2)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            checkCell(isIncluded: !row.isPro, color: OffhandColor.ink2)
+            checkCell(isIncluded: true, color: OffhandColor.gold)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(isHighlighted ? OffhandColor.well : .clear, in: RoundedRectangle(cornerRadius: OffhandRadius.control))
+        .padding(.horizontal, 6)
+    }
+
+    private func checkCell(isIncluded: Bool, color: Color) -> some View {
+        Group {
+            if isIncluded {
+                Image(systemName: "checkmark").font(.system(size: 13, weight: .bold)).foregroundStyle(color)
+            } else {
+                Text(verbatim: "–").foregroundStyle(OffhandColor.ink3)
+            }
+        }
+        .frame(width: Self.columnWidth)
+    }
+}
+
+private enum ComparisonRows {
+    struct Row: Identifiable {
+        let id: Int
+        let title: String
+        let hint: String?
+        let features: Set<ProFeature>
+
+        var isPro: Bool { !features.isEmpty }
+    }
+
+    static func sorted(for highlighted: ProFeature) -> [Row] {
+        all.enumerated().sorted { first, second in
+            let firstRank = rank(of: first.element, highlighted: highlighted)
+            let secondRank = rank(of: second.element, highlighted: highlighted)
+            return firstRank == secondRank ? first.offset < second.offset : firstRank < secondRank
+        }.map(\.element)
+    }
+
+    private static func rank(of row: Row, highlighted: ProFeature) -> Int {
+        if row.features.contains(highlighted) { return 0 }
+        return row.isPro ? 1 : 2
+    }
+
+    private static var all: [Row] {
+        [
+            Row(id: 11, title: String(localized: "Transcript and Summary on every note"), hint: nil, features: []),
+            Row(id: 0, title: String(localized: "Private by design"), hint: nil, features: []),
+            Row(id: 1, title: String(localized: "Fully offline"), hint: nil, features: []),
+            Row(id: 2, title: String(localized: "No ads, no account"), hint: nil, features: []),
+            Row(id: 3, title: String(localized: "Unlimited notes and recordings"), hint: nil, features: []),
+            Row(id: 4, title: String(localized: "Encrypted backup, search and two folders"), hint: nil, features: []),
+            Row(id: 5, title: String(localized: "Notes in your format"), hint: String(localized: "Meeting notes, Visit report, Legal note, your own styles, and a new style for any note"), features: [.customStyles, .noteStyles]),
+            Row(id: 6, title: String(localized: "Share polished documents"), hint: String(localized: "PDF and Word, ready for clients, email and print"), features: [.documentExport]),
+            Row(id: 7, title: String(localized: "Never miss a follow-up"), hint: String(localized: "Dates and to-dos straight into your calendar"), features: [.smartSuggestions]),
+            Row(id: 8, title: String(localized: "Turn any recording or video into a note"), hint: String(localized: "Voice memos, calls, screen recordings and video files without limit (three are free to try)"), features: [.audioImport]),
+            Row(id: 9, title: String(localized: "As many folders as you need"), hint: String(localized: "Each with its own writing style"), features: [.folderStyles, .folders]),
+            Row(id: 10, title: String(localized: "Backups with your recordings"), hint: String(localized: "Audio included, still encrypted"), features: [.backupAudio]),
+        ]
+    }
+}
+
 private enum PaywallCopy {
     static func headline(for state: PaywallUiState) -> String {
+        if state.feature == .freeTrial, let daysLeft = state.trialDaysLeft {
+            return String.localizedStringWithFormat(String(localized: "Offhand Pro is yours free for %lld more days"), daysLeft.int64Value)
+        }
         guard state.feature == .trialEnded, !state.trialRecap.isEmpty else { return headline(for: state.feature) }
         return String(localized: "Your 14 days with Offhand Pro")
     }
@@ -299,7 +527,7 @@ private enum PaywallCopy {
         case .folders: return String(localized: "Keep more than two folders")
         case .backupAudio: return String(localized: "Back up your recordings too")
         case .widget: return String(localized: "Record from your Home Screen")
-        case .freeTrial: return String(localized: "Try Offhand Pro free for 14 days")
+        case .freeTrial: return String(localized: "Offhand Pro")
         case .trialEnded: return String(localized: "Your Pro trial has ended")
         }
     }
@@ -307,13 +535,9 @@ private enum PaywallCopy {
     static func tagline(for feature: ProFeature) -> String {
         switch feature {
         case .general: return String(localized: "Get more out of every recording.")
-        case .freeTrial: return String(localized: "Everything in Pro is unlocked from today. No payment and no account. After 14 days you keep the free version unless you upgrade.")
+        case .freeTrial: return String(localized: "Everything in Pro is already unlocked. No payment and no account. When the trial ends you keep the free version unless you upgrade.")
         default: return String(localized: "Part of Offhand Pro. Get more out of every recording.")
         }
-    }
-
-    static var startTrial: String {
-        String.localizedStringWithFormat(String(localized: "Start %d-day free trial"), Int(ProTrialPolicy.shared.DURATION_DAYS))
     }
 
     static func buyNow(for offer: ProOfferUi?) -> String {
@@ -327,6 +551,25 @@ private enum PaywallCopy {
         case (_, true): return String.localizedStringWithFormat(String(localized: "Start %d-day free trial"), offer.trialDays)
         default: return String(localized: "Subscribe")
         }
+    }
+
+    static func planTitle(_ plan: ProPlan) -> String {
+        switch plan {
+        case .lifetime: return String(localized: "Lifetime")
+        case .monthly: return String(localized: "Monthly")
+        default: return String(localized: "Yearly")
+        }
+    }
+
+    static func planHint(_ offer: ProOfferUi) -> String {
+        if offer.plan == .lifetime { return String(localized: "Pay once, keep forever") }
+        if offer.plan == .yearly, let monthly = offer.monthlyPrice {
+            return String(format: String(localized: "About %@ a month"), monthly)
+        }
+        if offer.trialDays > 0 {
+            return String.localizedStringWithFormat(String(localized: "%d-day free trial"), offer.trialDays)
+        }
+        return offer.plan == .monthly ? String(localized: "Renews every month") : String(localized: "Renews every year")
     }
 
     static func disclosure(for offer: ProOfferUi?) -> String? {
@@ -343,279 +586,5 @@ private enum PaywallCopy {
             return String(localized: "No charge today") + "\n" + terms
         }
         return String(format: String(localized: "%@ per year, renews automatically. Cancel anytime in your store account."), offer.price)
-    }
-}
-
-private struct ComparisonTable: View {
-    let highlighted: ProFeature
-    let isCollapsible: Bool
-
-    @State private var isExpanded = false
-
-    private static let collapsedHeight: CGFloat = 200
-
-    private struct Row: Identifiable {
-        let id: Int
-        let title: String
-        let hint: String?
-        let features: Set<ProFeature>
-
-        var isPro: Bool { !features.isEmpty }
-    }
-
-    private static let columnWidth: CGFloat = 52
-
-    // The row the paywall was opened for and the Pro rows come first, so the
-    // part that shows while collapsed is worth reading.
-    private var rows: [Row] {
-        allRows.enumerated().sorted { first, second in
-            let firstRank = rank(of: first.element)
-            let secondRank = rank(of: second.element)
-            return firstRank == secondRank ? first.offset < second.offset : firstRank < secondRank
-        }.map(\.element)
-    }
-
-    private func rank(of row: Row) -> Int {
-        if row.features.contains(highlighted) { return 0 }
-        return row.isPro ? 1 : 2
-    }
-
-    private var allRows: [Row] {
-        [
-            Row(id: 11, title: String(localized: "Transcript and Summary on every note"), hint: nil, features: []),
-            Row(id: 0, title: String(localized: "Private by design"), hint: nil, features: []),
-            Row(id: 1, title: String(localized: "Fully offline"), hint: nil, features: []),
-            Row(id: 2, title: String(localized: "No ads, no account"), hint: nil, features: []),
-            Row(id: 3, title: String(localized: "Unlimited notes and recordings"), hint: nil, features: []),
-            Row(id: 4, title: String(localized: "Encrypted backup, search and two folders"), hint: nil, features: []),
-            Row(id: 5, title: String(localized: "Notes in your format"), hint: String(localized: "Meeting notes, Visit report, Legal note, your own styles, and a new style for any note"), features: [.customStyles, .noteStyles]),
-            Row(id: 6, title: String(localized: "Share polished documents"), hint: String(localized: "PDF and Word, ready for clients, email and print"), features: [.documentExport]),
-            Row(id: 7, title: String(localized: "Never miss a follow-up"), hint: String(localized: "Dates and to-dos straight into your calendar"), features: [.smartSuggestions]),
-            Row(id: 8, title: String(localized: "Turn any recording or video into a note"), hint: String(localized: "Voice memos, calls, screen recordings and video files without limit (three are free to try)"), features: [.audioImport]),
-            Row(id: 9, title: String(localized: "As many folders as you need"), hint: String(localized: "Each with its own writing style"), features: [.folderStyles, .folders]),
-            Row(id: 10, title: String(localized: "Backups with your recordings"), hint: String(localized: "Audio included, still encrypted"), features: [.backupAudio]),
-        ]
-    }
-
-    private var isCollapsed: Bool { isCollapsible && !isExpanded }
-
-    // Collapsed, the table shows its first rows fading out under a "see
-    // everything" control, so the plans sit higher on the screen.
-    var body: some View {
-        VStack(spacing: 0) {
-            tableContent
-                .frame(height: isCollapsed ? Self.collapsedHeight : nil, alignment: .top)
-                .clipped()
-                .overlay(alignment: .bottom) {
-                    if isCollapsed { expandControl }
-                }
-            if isCollapsible && isExpanded {
-                Button {
-                    withAnimation { isExpanded = false }
-                } label: {
-                    Label(String(localized: "Show less"), systemImage: "chevron.up")
-                        .labelStyle(.titleAndIcon)
-                        .font(.footnote.weight(.semibold))
-                }
-                .padding(.bottom, 10)
-            }
-        }
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
-        .clipShape(RoundedRectangle(cornerRadius: Brand.cardRadius))
-    }
-
-    private var expandControl: some View {
-        Button {
-            withAnimation { isExpanded = true }
-        } label: {
-            HStack(spacing: 4) {
-                Text(String(localized: "See everything in Pro"))
-                Image(systemName: "chevron.down")
-            }
-            .font(.footnote.weight(.semibold))
-            .foregroundStyle(Brand.primary)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-            .padding(.bottom, 10)
-            .background(
-                LinearGradient(
-                    stops: [
-                        .init(color: Color(.secondarySystemGroupedBackground).opacity(0), location: 0.3),
-                        .init(color: Color(.secondarySystemGroupedBackground), location: 0.8),
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-    }
-
-    private var tableContent: some View {
-        VStack(spacing: 0) {
-            tableHeader
-            ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
-                if index > 0 && row.isPro != rows[index - 1].isPro {
-                    Divider().padding(.horizontal, 12).padding(.vertical, 4)
-                }
-                tableRow(row)
-            }
-            Text(String(localized: "New Pro features are included as they ship"))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-            Text(String(localized: "Payments go through the App Store. Offhand never sees your card, and your notes never leave your iPhone."))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 12)
-                .padding(.bottom, 8)
-        }
-        .padding(.vertical, 6)
-        .fixedSize(horizontal: false, vertical: true)
-    }
-
-    private var tableHeader: some View {
-        HStack(spacing: 0) {
-            Spacer()
-            Text(String(localized: "Offhand")).font(.caption.weight(.medium)).foregroundStyle(.secondary).frame(width: Self.columnWidth)
-            HStack(spacing: 3) {
-                ProCrown(size: 13)
-                Text("Pro").font(.caption.weight(.semibold))
-            }
-            .frame(width: Self.columnWidth)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 4)
-    }
-
-    private func tableRow(_ row: Row) -> some View {
-        let isHighlighted = row.features.contains(highlighted)
-        return HStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(row.title).font(isHighlighted ? .subheadline.weight(.semibold) : .subheadline)
-                if let hint = row.hint {
-                    Text(hint).font(.caption).foregroundStyle(.secondary)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            checkCell(included: !row.isPro, color: Brand.primary)
-            checkCell(included: true, color: Brand.proGold)
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 7)
-        .background(isHighlighted ? Brand.primaryContainer : Color.clear, in: RoundedRectangle(cornerRadius: 10))
-        .padding(.horizontal, 6)
-    }
-
-    private func checkCell(included: Bool, color: Color) -> some View {
-        Group {
-            if included {
-                Image(systemName: "checkmark").font(.footnote.weight(.bold)).foregroundStyle(color)
-            } else {
-                Text("–").foregroundStyle(.tertiary)
-            }
-        }
-        .frame(width: Self.columnWidth)
-    }
-}
-
-private struct PlanCard: View {
-    let offer: ProOfferUi
-    let isSelected: Bool
-    let action: () -> Void
-
-    // One row per plan, stacked, so a third plan and long prices in any
-    // language still fit: the selection mark, the plan with what it means,
-    // and the price at the end.
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
-                    .foregroundStyle(isSelected ? Brand.primary : Color(.systemGray3))
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 8) {
-                        Text(title).font(.subheadline.weight(.semibold)).lineLimit(1)
-                        if offer.plan == .lifetime { bestValueBadge }
-                    }
-                    Text(hint).font(.caption).foregroundStyle(.secondary)
-                    if let second = secondHint {
-                        Text(second).font(.caption).foregroundStyle(.secondary)
-                    }
-                }
-                Spacer(minLength: 8)
-                Text(price).font(.headline).multilineTextAlignment(.trailing)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
-            .overlay(
-                RoundedRectangle(cornerRadius: Brand.cardRadius)
-                    .strokeBorder(isSelected ? Brand.primary : Color(.systemGray4), lineWidth: isSelected ? 2 : 1)
-            )
-        }
-        .buttonStyle(.plain)
-        .foregroundStyle(.primary)
-    }
-
-    private var bestValueBadge: some View {
-        Text(String(localized: "Best value"))
-            .font(.caption2.weight(.semibold))
-            .lineLimit(1)
-            .fixedSize()
-            .foregroundStyle(Brand.proGold)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(Brand.proGold.opacity(0.18), in: Capsule())
-    }
-
-    private var title: String {
-        switch offer.plan {
-        case .lifetime: return String(localized: "Lifetime")
-        case .monthly: return String(localized: "Monthly")
-        default: return String(localized: "Yearly")
-        }
-    }
-
-    private var price: String {
-        switch offer.plan {
-        case .lifetime: return offer.price
-        case .monthly: return String(format: String(localized: "%@ / month"), offer.price)
-        default: return String(format: String(localized: "%@ / year"), offer.price)
-        }
-    }
-
-    private var hint: String {
-        if offer.plan == .lifetime { return String(localized: "Pay once, keep forever") }
-        if offer.trialDays > 0 {
-            return String.localizedStringWithFormat(String(localized: "%d-day free trial"), offer.trialDays)
-        }
-        return offer.plan == .monthly ? String(localized: "Renews every month") : String(localized: "Renews every year")
-    }
-
-    private var secondHint: String? {
-        if offer.plan == .yearly, let monthly = offer.monthlyPrice {
-            return String(format: String(localized: "About %@ a month"), monthly)
-        }
-        if offer.plan == .lifetime, let years = offer.yearsOfYearly {
-            return String.localizedStringWithFormat(String(localized: "Less than %d years of yearly"), years.int32Value)
-        }
-        return nil
-    }
-}
-
-// The system toolbar draws its buttons as circles on glass; the paywall has
-// no toolbar, so its close button borrows the same shape.
-private struct CircleButton: ViewModifier {
-    func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
-            content.buttonStyle(.glass).buttonBorderShape(.circle)
-        } else {
-            content.buttonStyle(.bordered).buttonBorderShape(.circle)
-        }
     }
 }

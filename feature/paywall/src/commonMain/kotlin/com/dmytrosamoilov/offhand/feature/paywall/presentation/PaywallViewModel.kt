@@ -9,6 +9,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.GetProTrialDaysLeftUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.GetProTrialRecapUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.LoadProOffersUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.ObserveProStatusUseCase
@@ -27,6 +28,7 @@ class PaywallViewModel(
     private val restoreProPurchases: RestoreProPurchasesUseCase,
     private val observeProStatus: ObserveProStatusUseCase,
     private val getProTrialRecap: GetProTrialRecapUseCase,
+    private val getProTrialDaysLeft: GetProTrialDaysLeftUseCase,
     private val proUpgradeGate: ProUpgradeGate,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
@@ -61,13 +63,20 @@ class PaywallViewModel(
                 isPurchasing = false,
                 mode = PaywallMode.OPENING,
                 trialRecap = emptyList(),
+                trialDaysLeft = null,
             )
         }
         launchSafely(showLoading = false) {
             val isPro = observeProStatus().first().isProForGood
             val recap = if (feature == ProFeature.TRIAL_ENDED) getProTrialRecap() else emptyList()
+            val daysLeft = if (feature == ProFeature.FREE_TRIAL) getProTrialDaysLeft() else null
             mutableUiState.update {
-                it.copy(isPro = isPro, mode = if (isPro) PaywallMode.BENEFITS else PaywallMode.OFFER, trialRecap = recap)
+                it.copy(
+                    isPro = isPro,
+                    mode = if (isPro) PaywallMode.BENEFITS else PaywallMode.OFFER,
+                    trialRecap = recap,
+                    trialDaysLeft = daysLeft,
+                )
             }
             if (isPro) return@launchSafely
             analyticsTracker.track(AnalyticsEvents.paywallShown(feature))

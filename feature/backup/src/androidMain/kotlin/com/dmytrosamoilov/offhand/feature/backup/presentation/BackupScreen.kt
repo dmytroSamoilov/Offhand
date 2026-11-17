@@ -4,56 +4,41 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.WarningAmber
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
-import com.dmytrosamoilov.offhand.core.designsystem.component.ProBadge
-import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
+import com.dmytrosamoilov.offhand.core.designsystem.component.BarIconButton
+import com.dmytrosamoilov.offhand.core.designsystem.component.OffhandDialog
+import com.dmytrosamoilov.offhand.core.designsystem.component.OffhandIcons
+import com.dmytrosamoilov.offhand.core.designsystem.component.OffhandSheet
+import com.dmytrosamoilov.offhand.core.designsystem.component.PrimaryButton
+import com.dmytrosamoilov.offhand.core.designsystem.component.ProgressLine
+import com.dmytrosamoilov.offhand.core.designsystem.component.ScreenTitle
+import com.dmytrosamoilov.offhand.core.designsystem.component.SecondaryButton
+import com.dmytrosamoilov.offhand.core.designsystem.component.SurfaceCard
+import com.dmytrosamoilov.offhand.core.designsystem.component.SwitchRow
+import com.dmytrosamoilov.offhand.core.designsystem.component.TopBar
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandSpacing
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
+import com.dmytrosamoilov.offhand.core.ui.component.LabeledTextField
+import com.dmytrosamoilov.offhand.core.designsystem.component.SectionLabel
 import com.dmytrosamoilov.offhand.feature.backup.R
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupFileNames
 import com.dmytrosamoilov.offhand.feature.backup.domain.UriBackupFile
@@ -75,29 +60,17 @@ fun BackupScreen(
     }
 
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
-        Scaffold(
-            topBar = { BackupTopBar(onBack = onBack) },
-            contentWindowInsets = WindowInsets(0.dp),
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                SectionCard(title = stringResource(R.string.backup_create_title), body = stringResource(R.string.backup_create_body)) {
-                    Button(onClick = viewModel::onBackupFlowStarted, modifier = Modifier.fillMaxWidth()) {
-                        Text(text = stringResource(R.string.backup_start_button))
-                    }
-                }
-                SectionCard(title = stringResource(R.string.backup_restore_title), body = stringResource(R.string.backup_restore_body)) {
-                    FilledTonalButton(onClick = { openDocument.launch(arrayOf(ANY_MIME_TYPE)) }, modifier = Modifier.fillMaxWidth()) {
-                        Text(text = stringResource(R.string.backup_restore_button))
-                    }
-                }
-            }
+        Column(modifier = Modifier.fillMaxSize()) {
+            TopBar(
+                leading = {
+                    BarIconButton(
+                        icon = OffhandIcons.Back,
+                        contentDescription = stringResource(R.string.backup_back_description),
+                        onClick = onBack,
+                    )
+                },
+            )
+            BackupContent(onBackup = viewModel::onBackupFlowStarted, onRestore = { openDocument.launch(arrayOf(ANY_MIME_TYPE)) })
         }
     }
 
@@ -117,36 +90,37 @@ fun BackupScreen(
 }
 
 @Composable
-private fun BackupTopBar(onBack: () -> Unit) {
-    AppTopBar(
-        title = stringResource(R.string.backup_title),
-        navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.backup_back_description),
-                )
-            }
-        },
-    )
+private fun BackupContent(onBackup: () -> Unit, onRestore: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .navigationBarsPadding()
+            .padding(start = OffhandSpacing.screen, end = OffhandSpacing.screen, top = 8.dp, bottom = 32.dp),
+    ) {
+        ScreenTitle(title = stringResource(R.string.backup_title), subtitle = stringResource(R.string.backup_subtitle))
+        GroupLabel(text = stringResource(R.string.backup_create_title))
+        PrimaryButton(text = stringResource(R.string.backup_start_button), onClick = onBackup, modifier = Modifier.fillMaxWidth())
+        Hint(text = stringResource(R.string.backup_create_body))
+        GroupLabel(text = stringResource(R.string.backup_restore_title))
+        SecondaryButton(text = stringResource(R.string.backup_restore_button), onClick = onRestore, modifier = Modifier.fillMaxWidth())
+        Hint(text = stringResource(R.string.backup_restore_body))
+    }
 }
 
 @Composable
-private fun SectionCard(title: String, body: String, content: @Composable () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(text = title, style = MaterialTheme.typography.titleMedium)
-            Text(
-                text = body,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            content()
-        }
-    }
+private fun GroupLabel(text: String) {
+    SectionLabel(text = text, modifier = Modifier.padding(top = 26.dp, bottom = 10.dp))
+}
+
+@Composable
+private fun Hint(text: String) {
+    Text(
+        text = text,
+        style = OffhandTheme.type.caption,
+        color = OffhandTheme.colors.ink2,
+        modifier = Modifier.padding(top = 8.dp),
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -161,17 +135,16 @@ private fun BackupSheet(
         skipPartiallyExpanded = true,
         confirmValueChange = { !isRunning },
     )
-    ModalBottomSheet(onDismissRequest = viewModel::onBackupFlowDismissed, sheetState = sheetState) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            when (val operation = state.operation) {
+    val operation = state.operation
+    OffhandSheet(
+        onDismissRequest = viewModel::onBackupFlowDismissed,
+        sheetState = sheetState,
+        title = operation?.title() ?: state.backupStep?.title(),
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            when (operation) {
                 null -> BackupStepContent(state = state, viewModel = viewModel, onSave = onSave)
-                is BackupOperationUi.Running -> BackupProgressContent(percent = operation.percent)
+                is BackupOperationUi.Running -> RunningContent(percent = operation.percent)
                 else -> BackupResultContent(operation = operation, onDone = viewModel::onBackupFlowDismissed)
             }
         }
@@ -179,7 +152,15 @@ private fun BackupSheet(
 }
 
 @Composable
-private fun BackupStepContent(state: BackupUiState, viewModel: BackupViewModel, onSave: () -> Unit) {
+private fun BackupStepUi.title(): String = stringResource(
+    when (this) {
+        BackupStepUi.PASSPHRASE -> R.string.backup_step_passphrase_title
+        BackupStepUi.OPTIONS -> R.string.backup_step_options_title
+    },
+)
+
+@Composable
+private fun ColumnScope.BackupStepContent(state: BackupUiState, viewModel: BackupViewModel, onSave: () -> Unit) {
     when (state.backupStep) {
         BackupStepUi.PASSPHRASE -> PassphraseStep(state = state, viewModel = viewModel)
         BackupStepUi.OPTIONS -> OptionsStep(state = state, viewModel = viewModel, onSave = onSave)
@@ -189,7 +170,6 @@ private fun BackupStepContent(state: BackupUiState, viewModel: BackupViewModel, 
 
 @Composable
 private fun PassphraseStep(state: BackupUiState, viewModel: BackupViewModel) {
-    Text(text = stringResource(R.string.backup_step_passphrase_title), style = MaterialTheme.typography.titleLarge)
     PassphraseField(
         value = state.passphrase,
         onValueChange = viewModel::onPassphraseChanged,
@@ -201,67 +181,63 @@ private fun PassphraseStep(state: BackupUiState, viewModel: BackupViewModel) {
         onValueChange = viewModel::onPassphraseConfirmationChanged,
         label = stringResource(R.string.backup_passphrase_confirm_label),
         error = state.passphraseError?.takeIf { it == PassphraseErrorUi.MISMATCH },
+        help = stringResource(R.string.backup_warning),
     )
-    WarningBox(text = stringResource(R.string.backup_warning))
-    Button(onClick = viewModel::onBackupPassphraseContinued, modifier = Modifier.fillMaxWidth()) {
-        Text(text = stringResource(R.string.backup_continue))
-    }
+    PrimaryButton(
+        text = stringResource(R.string.backup_continue),
+        onClick = viewModel::onBackupPassphraseContinued,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
 private fun OptionsStep(state: BackupUiState, viewModel: BackupViewModel, onSave: () -> Unit) {
-    Text(text = stringResource(R.string.backup_step_options_title), style = MaterialTheme.typography.titleLarge)
-    OutlinedTextField(
+    LabeledTextField(
+        label = stringResource(R.string.backup_file_name_label),
         value = state.backupFileName,
         onValueChange = viewModel::onBackupFileNameChanged,
-        modifier = Modifier.fillMaxWidth(),
-        label = { Text(text = stringResource(R.string.backup_file_name_label)) },
-        suffix = { Text(text = BackupFileNames.EXTENSION) },
-        singleLine = true,
+        trailing = {
+            Text(
+                text = BackupFileNames.EXTENSION,
+                style = OffhandTheme.type.body,
+                color = OffhandTheme.colors.ink3,
+                modifier = Modifier.padding(end = 12.dp),
+            )
+        },
     )
-    IncludeAudioRow(
-        checked = state.includeAudio,
-        showProBadge = !state.isAudioUnlocked,
-        onCheckedChange = viewModel::onIncludeAudioChanged,
-    )
-    IncludeStylesRow(checked = state.includeStyles, onCheckedChange = viewModel::onIncludeStylesChanged)
-    Button(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
-        Text(text = stringResource(R.string.backup_save_button))
+    SurfaceCard {
+        SwitchRow(
+            title = stringResource(R.string.backup_include_audio_label),
+            subtitle = stringResource(R.string.backup_include_audio_description),
+            checked = state.includeAudio,
+            onCheckedChange = viewModel::onIncludeAudioChanged,
+            showProBadge = !state.isAudioUnlocked,
+        )
+        SwitchRow(
+            title = stringResource(R.string.backup_include_styles_label),
+            subtitle = stringResource(R.string.backup_include_styles_description),
+            checked = state.includeStyles,
+            onCheckedChange = viewModel::onIncludeStylesChanged,
+            showDivider = false,
+        )
     }
+    PrimaryButton(text = stringResource(R.string.backup_save_button), onClick = onSave, modifier = Modifier.fillMaxWidth())
 }
 
 @Composable
-private fun BackupProgressContent(percent: Int) {
-    Text(text = stringResource(R.string.backup_progress_backup), style = MaterialTheme.typography.titleLarge)
-    LinearProgressIndicator(progress = { percent / PERCENT_SCALE }, modifier = Modifier.fillMaxWidth())
-    Text(text = stringResource(R.string.backup_progress_percent, percent))
+private fun RunningContent(percent: Int) {
+    ProgressLine(progress = percent / PERCENT_SCALE, thickness = 3.dp)
+    Text(
+        text = stringResource(R.string.backup_progress_percent, percent),
+        style = OffhandTheme.type.number,
+        color = OffhandTheme.colors.ink2,
+    )
 }
 
 @Composable
 private fun BackupResultContent(operation: BackupOperationUi, onDone: () -> Unit) {
-    Text(text = operation.title(), style = MaterialTheme.typography.titleLarge)
     OperationBody(operation = operation)
-    Button(onClick = onDone, modifier = Modifier.fillMaxWidth()) {
-        Text(text = stringResource(R.string.backup_done))
-    }
-}
-
-@Composable
-private fun WarningBox(text: String) {
-    Surface(
-        shape = MaterialTheme.shapes.medium,
-        color = OffhandTheme.colors.well,
-        contentColor = OffhandTheme.colors.ink,
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(imageVector = Icons.Filled.WarningAmber, contentDescription = null)
-            Text(text = text, style = MaterialTheme.typography.bodyMedium)
-        }
-    }
+    PrimaryButton(text = stringResource(R.string.backup_done), onClick = onDone, modifier = Modifier.fillMaxWidth())
 }
 
 @Composable
@@ -270,17 +246,18 @@ private fun PassphraseField(
     onValueChange: (String) -> Unit,
     label: String,
     error: PassphraseErrorUi?,
+    help: String? = null,
+    focusesOnAppear: Boolean = false,
 ) {
-    OutlinedTextField(
+    LabeledTextField(
+        focusesOnAppear = focusesOnAppear,
+        label = label,
         value = value,
         onValueChange = onValueChange,
-        modifier = Modifier.fillMaxWidth(),
-        label = { Text(text = label) },
-        singleLine = true,
-        isError = error != null,
-        supportingText = error?.let { { Text(text = it.message()) } },
+        error = error?.message(),
+        help = help,
+        keyboardType = KeyboardType.Password,
         visualTransformation = PasswordVisualTransformation(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
     )
 }
 
@@ -291,118 +268,49 @@ private fun PassphraseErrorUi.message(): String = when (this) {
 }
 
 @Composable
-private fun IncludeAudioRow(checked: Boolean, showProBadge: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    OptionSwitchRow(
-        label = stringResource(R.string.backup_include_audio_label),
-        description = stringResource(R.string.backup_include_audio_description),
-        checked = checked,
-        onCheckedChange = onCheckedChange,
-        showProBadge = showProBadge,
-    )
-}
-
-@Composable
-private fun IncludeStylesRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    OptionSwitchRow(
-        label = stringResource(R.string.backup_include_styles_label),
-        description = stringResource(R.string.backup_include_styles_description),
-        checked = checked,
-        onCheckedChange = onCheckedChange,
-    )
-}
-
-@Composable
-private fun OptionSwitchRow(
-    label: String,
-    description: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    showProBadge: Boolean = false,
-) {
-    val haptics = haptics()
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .toggleable(
-                value = checked,
-                role = Role.Switch,
-                onValueChange = { isOn ->
-                    haptics.toggle(isOn)
-                    onCheckedChange(isOn)
-                },
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = label, style = MaterialTheme.typography.bodyLarge)
-                if (showProBadge) ProBadge()
-            }
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Spacer(modifier = Modifier.width(12.dp))
-        Switch(checked = checked, onCheckedChange = null)
-    }
-}
-
-@Composable
 private fun RestorePassphraseDialog(state: BackupUiState, viewModel: BackupViewModel) {
-    AlertDialog(
+    OffhandDialog(
+        title = stringResource(R.string.backup_restore_dialog_title),
         onDismissRequest = viewModel::onRestorePassphraseDismissed,
-        title = { Text(text = stringResource(R.string.backup_restore_dialog_title)) },
-        text = {
+        confirmLabel = stringResource(R.string.backup_restore_dialog_confirm),
+        onConfirm = viewModel::onRestoreConfirmed,
+        dismissLabel = stringResource(R.string.backup_cancel),
+    ) {
+        Column(modifier = Modifier.padding(top = 16.dp)) {
             PassphraseField(
                 value = state.passphrase,
                 onValueChange = viewModel::onPassphraseChanged,
                 label = stringResource(R.string.backup_passphrase_label),
                 error = state.passphraseError,
+                focusesOnAppear = true,
             )
-        },
-        confirmButton = {
-            TextButton(onClick = viewModel::onRestoreConfirmed) {
-                Text(text = stringResource(R.string.backup_restore_dialog_confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = viewModel::onRestorePassphraseDismissed) {
-                Text(text = stringResource(R.string.backup_cancel))
-            }
-        },
-    )
+        }
+    }
 }
 
 @Composable
 private fun RestoreOperationDialog(operation: BackupOperationUi, onDismiss: () -> Unit) {
     val isRunning = operation is BackupOperationUi.Running
-    AlertDialog(
+    OffhandDialog(
+        title = operation.title(),
         onDismissRequest = { if (!isRunning) onDismiss() },
-        properties = DialogProperties(dismissOnBackPress = !isRunning, dismissOnClickOutside = !isRunning),
-        title = { Text(text = operation.title()) },
-        text = { OperationBody(operation = operation) },
-        confirmButton = {
-            if (!isRunning) {
-                TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.backup_ok)) }
-            }
-        },
-    )
+        confirmLabel = if (isRunning) null else stringResource(R.string.backup_ok),
+        onConfirm = onDismiss,
+    ) {
+        Column(modifier = Modifier.padding(top = 10.dp)) { OperationBody(operation = operation) }
+    }
 }
 
 @Composable
 private fun OperationBody(operation: BackupOperationUi) {
     when (operation) {
-        is BackupOperationUi.Running -> Column {
-            LinearProgressIndicator(progress = { operation.percent / PERCENT_SCALE }, modifier = Modifier.fillMaxWidth())
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(text = stringResource(R.string.backup_progress_percent, operation.percent))
+        is BackupOperationUi.Running -> Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            RunningContent(percent = operation.percent)
         }
-        is BackupOperationUi.BackupCompleted -> Text(
+        is BackupOperationUi.BackupCompleted -> BodyText(
             text = stringResource(R.string.backup_done_backup_body, operation.notes, operation.folders),
         )
-        is BackupOperationUi.RestoreCompleted -> Text(
+        is BackupOperationUi.RestoreCompleted -> BodyText(
             text = stringResource(
                 R.string.backup_done_restore_body,
                 operation.notesRestored,
@@ -411,8 +319,13 @@ private fun OperationBody(operation: BackupOperationUi) {
                 operation.foldersReused,
             ),
         )
-        is BackupOperationUi.Failed -> Text(text = operation.error.message())
+        is BackupOperationUi.Failed -> BodyText(text = operation.error.message())
     }
+}
+
+@Composable
+private fun BodyText(text: String) {
+    Text(text = text, style = OffhandTheme.type.dialogBody, color = OffhandTheme.colors.ink2)
 }
 
 @Composable

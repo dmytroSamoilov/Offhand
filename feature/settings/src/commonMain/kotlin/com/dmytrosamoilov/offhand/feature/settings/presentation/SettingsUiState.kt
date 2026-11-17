@@ -8,6 +8,7 @@ data class SettingsUiState(
     val customStyles: List<CustomStyleOptionUi> = emptyList(),
     val isDynamicColorEnabled: Boolean = false,
     val isAppLockEnabled: Boolean = false,
+    val isTelemetryEnabled: Boolean = false,
     val isDeviceSecure: Boolean = false,
     val isAudioImportUnlocked: Boolean = false,
     val freeImportsLeft: Int? = null,

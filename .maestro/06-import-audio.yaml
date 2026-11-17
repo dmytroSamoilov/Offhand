@@ -72,10 +72,8 @@ appId: com.dmytrosamoilov.offhand.uitest
           timeout: 10000
       - assertVisible: "1 file is being imported.*"
       - tapOn: "OK"
-      # The Settings form has a "Notes" section header, so the tab is picked by its symbol
       - tapOn:
-          id: "list.bullet"
-          text: "Notes"
+          id: "tab_notes"
       - extendedWaitUntil:
           visible:
             text: "Smoke test note"

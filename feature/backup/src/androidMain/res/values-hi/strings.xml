@@ -39,4 +39,5 @@
     <string name="backup_file_name_label">फ़ाइल का नाम</string>
     <string name="backup_save_button">बैकअप सहेजें</string>
     <string name="backup_done">हो गया</string>
+    <string name="backup_subtitle">Offhand एक एन्क्रिप्टेड फ़ाइल बनाता है। उसे कहाँ रखना है, यह आप तय करते हैं।</string>
 </resources>

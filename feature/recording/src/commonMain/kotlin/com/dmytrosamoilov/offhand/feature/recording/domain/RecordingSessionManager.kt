@@ -161,7 +161,7 @@ class RecordingSessionManager(
         isDiscardRequested = false
         isStoppedInApp = false
         recorder.resetVad()
-        mutableSession.value = RecordingSession(phase = SessionPhase.RECORDING)
+        mutableSession.value = RecordingSession(phase = SessionPhase.RECORDING, folderId = folderId)
         scope.launch { runSession() }
     }
 

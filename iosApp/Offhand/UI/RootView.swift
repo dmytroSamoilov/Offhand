@@ -13,7 +13,7 @@ struct RootView: View {
     @State private var finishCoordinator = NoteFinishCoordinator()
     @State private var activeNoteId: Int64?
     @State private var phase: IosRootPhase = .loading
-    @State private var selectedTab = 0
+    @State private var selectedTab = BottomBarDestination.notes
     @State private var isPaywallPresented = false
     @State private var isEarlyAdopterThanksShown = false
     @State private var showsBenefitsAfterThanks = false
@@ -28,6 +28,9 @@ struct RootView: View {
             switch phase {
             case .loading:
                 ProgressView()
+                    .tint(OffhandColor.ink2)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(OffhandColor.ground.ignoresSafeArea())
             case .onboarding:
                 OnboardingView { viewModel.onReady() }
             case .locked:
@@ -65,7 +68,6 @@ struct RootView: View {
                 },
                 onDismiss: { viewModel.onEarlyAdopterThanksDismissed() }
             )
-            .presentationDetents([.fraction(0.66), .large])
         }
         .task {
             for await notice in viewModel.trialNotice {
@@ -80,7 +82,6 @@ struct RootView: View {
                 },
                 onDismiss: { viewModel.onTrialNoticeDismissed() }
             )
-            .presentationDetents([.medium, .large])
         }
         .task { await observeSession() }
         .task { await observeProcessingIds() }
@@ -104,18 +105,24 @@ struct RootView: View {
                 unreadableCount: staged == nil ? 1 : 0
             )
         }
-        .alert(String(localized: "Import with Offhand Pro"), isPresented: proImportBinding) {
-            Button(String(localized: "Upgrade")) { sharedAudioImport.onUpgradeClicked() }
-            Button(String(localized: "Cancel"), role: .cancel) { sharedAudioImport.onImportDeclined() }
-        } message: {
-            Text(String(localized: "Turning recordings and videos from other apps into notes is part of Offhand Pro. Upgrade to import the shared file."))
+        .offhandDialog(isPresented: proImportBinding) {
+            OffhandDialog(
+                title: String(localized: "Import with Offhand Pro"),
+                message: String(localized: "Turning recordings and videos from other apps into notes is part of Offhand Pro. Upgrade to import the shared file."),
+                confirmLabel: String(localized: "Upgrade"),
+                onConfirm: { sharedAudioImport.onUpgradeClicked() },
+                dismissLabel: String(localized: "Cancel"),
+                onDismiss: { sharedAudioImport.onImportDeclined() }
+            )
         }
-        .alert(sharedImportNoticeTitle, isPresented: sharedImportNoticeBinding) {
-            Button(String(localized: "OK")) { sharedAudioImport.onNoticeDismissed() }
-        } message: {
-            if let notice = sharedImportState.notice {
-                Text(ImportNoticeText.message(notice))
-            }
+        .offhandDialog(isPresented: sharedImportNoticeBinding) {
+            OffhandDialog(
+                title: sharedImportNoticeTitle,
+                message: sharedImportState.notice.map { ImportNoticeText.message($0) },
+                confirmLabel: String(localized: "OK"),
+                onConfirm: { sharedAudioImport.onNoticeDismissed() },
+                onDismiss: { sharedAudioImport.onNoticeDismissed() }
+            )
         }
         .onAppear {
             NoteFinishCoordinator.onExpired = { [activityController] in
@@ -128,7 +135,7 @@ struct RootView: View {
         .onChange(of: notifications.noteIdToOpen) {
             guard let noteId = notifications.noteIdToOpen else { return }
             notifications.noteIdToOpen = nil
-            selectedTab = 0
+            selectedTab = .notes
             AppViewModels.notes.onNoteSelected(id: noteId)
         }
         .onReceive(
@@ -184,7 +191,7 @@ struct RootView: View {
         shortcuts.pending = nil
         switch request {
         case .startRecording:
-            selectedTab = 0
+            selectedTab = .notes
             shortcuts.recordSheetRequestId += 1
         case .stopRecording:
             if sessionManager.session.value.phase != .idle {
@@ -380,18 +387,45 @@ struct RootView: View {
 }
 
 struct MainTabView: View {
-    @Binding var selectedTab: Int
+    @Binding var selectedTab: BottomBarDestination
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            NotesListView()
-                .tabItem { Label(String(localized: "Notes"), systemImage: "list.bullet") }
-                .tag(0)
-            SettingsView()
-                .tabItem { Label(String(localized: "Settings"), systemImage: "gearshape") }
-                .tag(1)
+        ZStack {
+            NotesListView { bottomBar }
+                .shownAsTab(selectedTab == .notes)
+            SettingsView { bottomBar }
+                .shownAsTab(selectedTab == .settings)
         }
-        .tint(Brand.primary)
+        .background(OffhandColor.ground.ignoresSafeArea())
+    }
+
+    private var bottomBar: some View {
+        BottomBar(
+            selected: selectedTab,
+            labels: BottomBarLabels(
+                notes: String(localized: "Notes"),
+                settings: String(localized: "Settings"),
+                record: String(localized: "Record"),
+                recordAccessibilityLabel: String(localized: "Record a note")
+            ),
+            onNotes: { selectedTab = .notes },
+            onRecord: startRecording,
+            onSettings: { selectedTab = .settings }
+        )
+    }
+
+    private func startRecording() {
+        Haptics.confirm()
+        selectedTab = .notes
+        ShortcutRequests.shared.recordSheetRequestId += 1
+    }
+}
+
+private extension View {
+    func shownAsTab(_ isShown: Bool) -> some View {
+        opacity(isShown ? 1 : 0)
+            .allowsHitTesting(isShown)
+            .accessibilityHidden(!isShown)
     }
 }
 
@@ -401,73 +435,63 @@ private struct TrialNoticeItem: Identifiable {
     var id: String { notice.name }
 }
 
-// Shown once, on the first launch after the clock check removed the free
-// trial: the free version stays, and Pro is one tap away. A trial that
-// simply ran out is announced by the paywall instead.
 private struct TrialRemovedSheet: View {
     let onUpgrade: () -> Void
     let onDismiss: () -> Void
 
     var body: some View {
-        VStack(spacing: 20) {
-            ProCrown(size: 56)
-                .padding(.top, 8)
-            Text(title)
-                .font(.title2.bold())
-                .multilineTextAlignment(.center)
-            Text(message)
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 0)
-            Button(String(localized: "See Offhand Pro"), action: onUpgrade)
-                .buttonStyle(.borderedProminent)
-                .tint(Brand.primary)
-                .controlSize(.large)
-                .frame(maxWidth: .infinity)
-            Button(String(localized: "Continue with the free version"), action: onDismiss)
-                .buttonStyle(.plain)
-                .foregroundStyle(Brand.primary)
-        }
-        .padding(24)
-    }
-
-    private var title: String { String(localized: "Your Pro trial was removed") }
-
-    private var message: String {
-        String(localized: "The date on this iPhone was set back past the start of your trial, so the trial has ended. You can keep using the free version or upgrade to Offhand Pro.")
+        ProNoticeSheet(
+            title: String(localized: "Your Pro trial was removed"),
+            message: String(localized: "The date on this iPhone was set back past the start of your trial, so the trial has ended. You can keep using the free version or upgrade to Offhand Pro."),
+            primaryLabel: String(localized: "See Offhand Pro"),
+            onPrimary: onUpgrade,
+            secondaryLabel: String(localized: "Continue with the free version"),
+            onSecondary: onDismiss
+        )
     }
 }
 
-// The early-adopter grant: the crown and a primary button keep it from being
-// tapped past, and the body says plainly that Pro stays on this iPhone only.
 private struct EarlyAdopterThanksSheet: View {
     let onShowBenefits: () -> Void
     let onDismiss: () -> Void
 
     var body: some View {
-        VStack(spacing: 20) {
-            ProCrown(size: 56)
-                .padding(.top, 8)
-            Text(String(localized: "Offhand Pro is yours"))
-                .font(.title2.bold())
-                .multilineTextAlignment(.center)
-            Text(String(localized: "You were here before 1.5, while Offhand was still rough. Thank you for testing it with me. As a thank-you, everything in Offhand Pro is unlocked on this iPhone, for good. No purchase, no account.\n\nOne thing to know: Pro lives on this iPhone only. If you delete or reinstall Offhand, or move to a new iPhone, it will not come back."))
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 0)
-            Button(String(localized: "Show Pro benefits"), action: onShowBenefits)
-                .buttonStyle(.borderedProminent)
-                .tint(Brand.primary)
-                .controlSize(.large)
-                .frame(maxWidth: .infinity)
-            Button(String(localized: "Got it"), action: onDismiss)
-                .buttonStyle(.plain)
-                .foregroundStyle(Brand.primary)
+        ProNoticeSheet(
+            title: String(localized: "Offhand Pro is yours"),
+            message: String(localized: "You were here before 1.5, while Offhand was still rough. Thank you for testing it with me. As a thank-you, everything in Offhand Pro is unlocked on this iPhone, for good. No purchase, no account.\n\nOne thing to know: Pro lives on this iPhone only. If you delete or reinstall Offhand, or move to a new iPhone, it will not come back."),
+            primaryLabel: String(localized: "Show Pro benefits"),
+            onPrimary: onShowBenefits,
+            secondaryLabel: String(localized: "Got it"),
+            onSecondary: onDismiss
+        )
+    }
+}
+
+private struct ProNoticeSheet: View {
+    let title: String
+    let message: String
+    let primaryLabel: String
+    let onPrimary: () -> Void
+    let secondaryLabel: String
+    let onSecondary: () -> Void
+
+    var body: some View {
+        OffhandSheet {
+            VStack(alignment: .leading, spacing: 0) {
+                ProCrown(size: 40)
+                    .padding(.top, 8)
+                SheetHeading(title)
+                    .padding(.top, 20)
+                Text(message)
+                    .offhandText(.dialogBody)
+                    .foregroundStyle(OffhandColor.ink2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 10)
+                PrimaryButton(primaryLabel, fillsWidth: true, action: onPrimary)
+                    .padding(.top, 24)
+                PlainTextButton(secondaryLabel, tone: .muted, fillsWidth: true, action: onSecondary)
+                    .padding(.top, 4)
+            }
         }
-        .padding(24)
     }
 }

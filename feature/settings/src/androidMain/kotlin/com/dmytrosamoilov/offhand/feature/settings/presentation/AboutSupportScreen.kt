@@ -7,26 +7,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -35,7 +18,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.common.LegalLinks
-import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
+import com.dmytrosamoilov.offhand.core.designsystem.component.LinkRow
+import com.dmytrosamoilov.offhand.core.designsystem.component.OffhandDialog
+import com.dmytrosamoilov.offhand.core.designsystem.component.PlainTextButton
+import com.dmytrosamoilov.offhand.core.designsystem.component.ProgressLine
+import com.dmytrosamoilov.offhand.core.designsystem.component.ScreenTitle
+import com.dmytrosamoilov.offhand.core.designsystem.component.SwitchRow
+import com.dmytrosamoilov.offhand.core.designsystem.component.TextButtonTone
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandSpacing
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.feature.settings.R
 import java.util.Locale
@@ -50,255 +41,167 @@ fun AboutSupportScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
-        Scaffold(
-            topBar = { AboutSupportTopBar(onBack = onBack) },
-            contentWindowInsets = WindowInsets(0.dp),
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                FeedbackSection()
-                PrivacySection(
-                    isTelemetryEnabled = state.isTelemetryEnabled,
-                    onTelemetryChanged = viewModel::onTelemetryChanged,
-                )
-                if (state.isDeveloperSectionVisible) {
-                    DeveloperSection(
-                        isEnabled = state.isDeveloperOptionsEnabled,
-                        onEnabledChanged = viewModel::onDeveloperOptionsChanged,
-                    )
-                }
-                if (state.isDeveloperOptionsEnabled) {
-                    ModelSection(
-                        model = state.model,
-                        modelOptions = state.modelOptions,
-                        selectedModelId = state.selectedModelId,
-                        onModelSelected = viewModel::onModelSelected,
-                        onDownload = viewModel::onDownloadModel,
-                        onDeleteRequested = viewModel::onDeleteModelRequested,
-                    )
-                    AccelerationSection(
-                        selected = state.selectedBackend,
-                        onSelected = viewModel::onBackendSelected,
-                    )
-                }
-                AboutSection()
+        SettingsPage(
+            topBar = { BackTopBar(backDescription = stringResource(R.string.settings_about_support_back), onBack = onBack) },
+        ) {
+            ScreenTitle(title = stringResource(R.string.settings_about_support_title), modifier = Modifier.padding(top = 8.dp))
+            FeedbackSection()
+            if (state.isDeveloperSectionVisible) {
+                DeveloperSection(isEnabled = state.isDeveloperOptionsEnabled, onEnabledChanged = viewModel::onDeveloperOptionsChanged)
             }
+            if (state.isDeveloperOptionsEnabled) DeveloperTools(state = state, viewModel = viewModel)
+            AboutSection()
         }
     }
 
     if (state.isDeleteModelConfirmationVisible) {
-        DeleteModelDialog(
-            onConfirm = viewModel::onDeleteModelConfirmed,
-            onDismiss = viewModel::onDeleteModelDismissed,
-        )
+        DeleteModelDialog(onConfirm = viewModel::onDeleteModelConfirmed, onDismiss = viewModel::onDeleteModelDismissed)
     }
 }
 
 @Composable
-private fun AboutSupportTopBar(onBack: () -> Unit) {
-    AppTopBar(
-        title = stringResource(R.string.settings_about_support_title),
-        navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.settings_about_support_back),
-                )
-            }
-        },
+private fun DeveloperTools(state: AboutSupportUiState, viewModel: AboutSupportViewModel) {
+    ModelSection(
+        state = state,
+        onModelSelected = viewModel::onModelSelected,
+        onDownload = viewModel::onDownloadModel,
+        onDeleteRequested = viewModel::onDeleteModelRequested,
     )
+    AccelerationSection(selected = state.selectedBackend, onSelected = viewModel::onBackendSelected)
 }
 
 @Composable
-private fun DeleteModelDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
+private fun DeleteModelDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    OffhandDialog(
+        title = stringResource(R.string.settings_delete_model_dialog_title),
+        body = stringResource(R.string.settings_delete_model_dialog_body),
         onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(R.string.settings_delete_model_dialog_title)) },
-        text = { Text(text = stringResource(R.string.settings_delete_model_dialog_body)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(text = stringResource(R.string.settings_delete_model_dialog_confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.settings_delete_model_dialog_cancel))
-            }
-        },
+        confirmLabel = stringResource(R.string.settings_delete_model_dialog_cancel),
+        onConfirm = onDismiss,
+        destructiveLabel = stringResource(R.string.settings_delete_model_dialog_confirm),
+        onDestructive = onConfirm,
     )
 }
 
 @Composable
-private fun AccelerationSection(
-    selected: BackendOptionUi,
-    onSelected: (BackendOptionUi) -> Unit,
-) {
-    SettingsCard(title = stringResource(R.string.settings_acceleration_title)) {
-        RadioOptionRow(
-            label = stringResource(R.string.settings_acceleration_cpu),
-            description = stringResource(R.string.settings_acceleration_cpu_description),
+private fun AccelerationSection(selected: BackendOptionUi, onSelected: (BackendOptionUi) -> Unit) {
+    SettingsSection(label = stringResource(R.string.settings_acceleration_title)) {
+        SettingsChoiceRow(
+            title = stringResource(R.string.settings_acceleration_cpu),
+            subtitle = stringResource(R.string.settings_acceleration_cpu_description),
             isSelected = selected == BackendOptionUi.CPU,
             onClick = { onSelected(BackendOptionUi.CPU) },
         )
-        RadioOptionRow(
-            label = stringResource(R.string.settings_acceleration_gpu),
-            description = stringResource(R.string.settings_acceleration_gpu_description),
+        SettingsChoiceRow(
+            title = stringResource(R.string.settings_acceleration_gpu),
+            subtitle = stringResource(R.string.settings_acceleration_gpu_description),
             isSelected = selected == BackendOptionUi.GPU,
             onClick = { onSelected(BackendOptionUi.GPU) },
+            showDivider = false,
         )
-        SettingsNote(text = stringResource(R.string.settings_acceleration_note))
     }
+    SettingsFootnote(text = stringResource(R.string.settings_acceleration_note))
 }
 
 @Composable
 private fun ModelSection(
-    model: ModelUi,
-    modelOptions: List<ModelOptionUi>,
-    selectedModelId: String?,
+    state: AboutSupportUiState,
     onModelSelected: (String?) -> Unit,
     onDownload: () -> Unit,
     onDeleteRequested: () -> Unit,
 ) {
-    SettingsCard(title = stringResource(R.string.settings_model_title)) {
-        RadioOptionRow(
-            label = stringResource(R.string.settings_model_picker_auto),
-            description = stringResource(R.string.settings_model_picker_auto_description),
-            isSelected = selectedModelId == null,
+    SettingsSection(label = stringResource(R.string.settings_model_title)) {
+        SettingsChoiceRow(
+            title = stringResource(R.string.settings_model_picker_auto),
+            subtitle = stringResource(R.string.settings_model_picker_auto_description),
+            isSelected = state.selectedModelId == null,
             onClick = { onModelSelected(null) },
         )
-        modelOptions.forEach { option ->
-            RadioOptionRow(
-                label = stringResource(
-                    R.string.settings_model_name,
-                    option.displayName,
-                    option.sizeGb,
-                ),
-                description = option.description,
-                isSelected = selectedModelId == option.id,
+        state.modelOptions.forEach { option ->
+            SettingsChoiceRow(
+                title = stringResource(R.string.settings_model_name, option.displayName, option.sizeGb),
+                subtitle = option.description,
+                isSelected = state.selectedModelId == option.id,
                 onClick = { onModelSelected(option.id) },
             )
         }
-        SettingsNote(text = stringResource(R.string.settings_model_picker_note))
+        ModelStatus(model = state.model, onDownload = onDownload, onDeleteRequested = onDeleteRequested)
+    }
+    SettingsFootnote(text = stringResource(R.string.settings_model_picker_note))
+}
+
+@Composable
+private fun ModelStatus(model: ModelUi, onDownload: () -> Unit, onDeleteRequested: () -> Unit) {
+    Column(modifier = Modifier.padding(OffhandSpacing.card)) {
         Text(
             text = stringResource(R.string.settings_model_name, model.displayName, model.sizeGb),
-            style = MaterialTheme.typography.bodyLarge,
+            style = OffhandTheme.type.settingTitle,
+            color = OffhandTheme.colors.ink,
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        ModelStatus(model = model, onDownload = onDownload, onDeleteRequested = onDeleteRequested)
+        if (model.status == ModelStatusUi.DOWNLOADING) {
+            ProgressLine(progress = model.downloadPercent / PERCENT, thickness = 3.dp, modifier = Modifier.padding(vertical = 8.dp))
+        }
+        StatusText(text = model.statusText(), isError = model.status == ModelStatusUi.ERROR)
+        ModelAction(status = model.status, onDownload = onDownload, onDeleteRequested = onDeleteRequested)
     }
 }
 
 @Composable
-private fun ModelStatus(
-    model: ModelUi,
-    onDownload: () -> Unit,
-    onDeleteRequested: () -> Unit,
-) {
-    when (model.status) {
-        ModelStatusUi.NOT_DOWNLOADED -> {
-            StatusText(text = stringResource(R.string.settings_model_status_not_downloaded))
-            TextButton(onClick = onDownload) {
-                Text(text = stringResource(R.string.settings_model_download))
-            }
-        }
-        ModelStatusUi.DOWNLOADING -> {
-            LinearProgressIndicator(
-                progress = { model.downloadPercent / 100f },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            StatusText(
-                text = stringResource(
-                    R.string.settings_model_status_downloading,
-                    model.downloadPercent,
-                ),
-            )
-        }
-        ModelStatusUi.LOADING -> StatusText(
-            text = stringResource(R.string.settings_model_status_loading),
+private fun ModelUi.statusText(): String = when (status) {
+    ModelStatusUi.NOT_DOWNLOADED -> stringResource(R.string.settings_model_status_not_downloaded)
+    ModelStatusUi.DOWNLOADING -> stringResource(R.string.settings_model_status_downloading, downloadPercent)
+    ModelStatusUi.LOADING -> stringResource(R.string.settings_model_status_loading)
+    ModelStatusUi.READY -> stringResource(R.string.settings_model_status_ready)
+    ModelStatusUi.ERROR -> errorMessage ?: stringResource(R.string.settings_model_status_error)
+}
+
+@Composable
+private fun ModelAction(status: ModelStatusUi, onDownload: () -> Unit, onDeleteRequested: () -> Unit) {
+    when (status) {
+        ModelStatusUi.NOT_DOWNLOADED ->
+            PlainTextButton(text = stringResource(R.string.settings_model_download), onClick = onDownload)
+        ModelStatusUi.READY -> PlainTextButton(
+            text = stringResource(R.string.settings_model_delete),
+            onClick = onDeleteRequested,
+            tone = TextButtonTone.Danger,
         )
-        ModelStatusUi.READY -> {
-            StatusText(text = stringResource(R.string.settings_model_status_ready))
-            TextButton(onClick = onDeleteRequested) {
-                Text(
-                    text = stringResource(R.string.settings_model_delete),
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-        }
-        ModelStatusUi.ERROR -> {
-            StatusText(
-                text = model.errorMessage
-                    ?: stringResource(R.string.settings_model_status_error),
-                isError = true,
-            )
-            TextButton(onClick = onDownload) {
-                Text(text = stringResource(R.string.settings_model_retry))
-            }
-        }
+        ModelStatusUi.ERROR -> PlainTextButton(text = stringResource(R.string.settings_model_retry), onClick = onDownload)
+        ModelStatusUi.DOWNLOADING, ModelStatusUi.LOADING -> Unit
     }
 }
 
 @Composable
-private fun StatusText(text: String, isError: Boolean = false) {
+private fun StatusText(text: String, isError: Boolean) {
     Text(
         text = text,
-        style = MaterialTheme.typography.bodyMedium,
-        color = if (isError) {
-            MaterialTheme.colorScheme.error
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        },
+        style = OffhandTheme.type.caption,
+        color = if (isError) OffhandTheme.colors.danger else OffhandTheme.colors.ink2,
     )
 }
 
-@Composable
-private fun PrivacySection(
-    isTelemetryEnabled: Boolean,
-    onTelemetryChanged: (Boolean) -> Unit,
-) {
-    SettingsCard(title = stringResource(R.string.settings_privacy_title)) {
-        SwitchRow(
-            label = stringResource(R.string.settings_telemetry_label),
-            description = stringResource(R.string.settings_telemetry_description),
-            checked = isTelemetryEnabled,
-            onCheckedChange = onTelemetryChanged,
-        )
-    }
-}
 
 @Composable
 private fun FeedbackSection() {
     val context = LocalContext.current
-    SettingsCard(title = stringResource(R.string.settings_feedback_title)) {
-        SettingsLinkRow(
+    SettingsSection(label = stringResource(R.string.settings_feedback_title)) {
+        LinkRow(
             title = stringResource(R.string.settings_feature_request_label),
             subtitle = stringResource(R.string.settings_feature_request_description),
             onClick = { sendFeatureRequest(context) },
+            showDivider = false,
         )
     }
 }
 
 @Composable
-private fun DeveloperSection(
-    isEnabled: Boolean,
-    onEnabledChanged: (Boolean) -> Unit,
-) {
-    SettingsCard(title = stringResource(R.string.settings_developer_title)) {
+private fun DeveloperSection(isEnabled: Boolean, onEnabledChanged: (Boolean) -> Unit) {
+    SettingsSection(label = stringResource(R.string.settings_developer_title)) {
         SwitchRow(
-            label = stringResource(R.string.settings_developer_label),
-            description = stringResource(R.string.settings_developer_description),
+            title = stringResource(R.string.settings_developer_label),
+            subtitle = stringResource(R.string.settings_developer_description),
             checked = isEnabled,
             onCheckedChange = onEnabledChanged,
+            showDivider = false,
         )
     }
 }
@@ -306,19 +209,18 @@ private fun DeveloperSection(
 @Composable
 private fun AboutSection() {
     val context = LocalContext.current
-    SettingsCard(title = stringResource(R.string.settings_about_title)) {
-        SettingsNote(text = stringResource(R.string.settings_about_version, appVersion(context)))
-        SettingsLinkRow(
+    SettingsSection(label = stringResource(R.string.settings_about_title)) {
+        LinkRow(
             title = stringResource(R.string.settings_about_terms),
-            subtitle = null,
             onClick = { openLink(context, LegalLinks.TERMS) },
         )
-        SettingsLinkRow(
+        LinkRow(
             title = stringResource(R.string.settings_about_privacy),
-            subtitle = null,
             onClick = { openLink(context, LegalLinks.PRIVACY_POLICY) },
+            showDivider = false,
         )
     }
+    SettingsFootnote(text = stringResource(R.string.settings_about_version, appVersion(context)))
 }
 
 private fun sendFeatureRequest(context: Context) {
@@ -375,4 +277,5 @@ internal fun appVersion(context: Context): String = runCatching {
     "${info.versionName}"
 }.getOrDefault("unknown")
 
+private const val PERCENT = 100f
 private const val FEEDBACK_EMAIL = "dmytro@dmytrosamoilov.com"

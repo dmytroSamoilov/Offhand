@@ -64,23 +64,19 @@
     <string name="settings_note_style_error_duplicate">Така назва вже використовується</string>
     <string name="settings_note_style_error_sections_too_many">Не більше %1$d розділів</string>
     <string name="settings_note_style_describe_button">Опишіть, і ШІ заповнить форму</string>
-    <string name="settings_note_style_describe_title">Опишіть свою нотатку</string>
-    <string name="settings_note_style_describe_body">Розкажіть, про що запис і що має бути в готовій нотатці. ШІ запропонує розділи, потім усе можна змінити.</string>
     <string name="settings_note_style_describe_hint">Наприклад: я треную футбольні команди. Після кожного тренування записую, що ми відпрацьовували, що вдалося, над чим працювати кожному гравцеві і що запланувати наступного разу.</string>
     <string name="settings_note_style_describe_build">Створити стиль</string>
     <string name="settings_note_style_describe_running">Продумуємо розділи…</string>
     <string name="settings_note_style_describe_failed">ШІ не зміг перетворити це на стиль. Спробуйте описати інакше.</string>
 
-    <string name="settings_security_title">Безпека</string>
-    <string name="settings_app_lock_label">Вимагати розблокування, щоб відкрити Offhand</string>
+    <string name="settings_app_lock_label">Блокування застосунку</string>
     <string name="settings_app_lock_description">Запитує відбиток пальця, обличчя або блокування екрана щоразу, коли відкривається Offhand.</string>
     <string name="settings_app_lock_unavailable">Налаштуйте блокування екрана на цьому телефоні, щоб користуватися цим.</string>
-    <string name="settings_appearance_title">Оформлення</string>
     <string name="settings_dynamic_color_label">Кольори шпалер</string>
     <string name="settings_dynamic_color_description">Фарбує застосунок у кольори ваших шпалер (Material You) замість вбудованої палітри.</string>
 
     <string name="settings_privacy_title">Конфіденційність</string>
-    <string name="settings_telemetry_label">Анонімні звіти про використання та стабільність</string>
+    <string name="settings_telemetry_label">Ділитися анонімною статистикою</string>
     <string name="settings_telemetry_description">Статистика використання і звіти про збої — наприклад, запуски застосунку, модель пристрою та версія застосунку. Ніколи — ваші нотатки, записи чи особисті дані.</string>
     <string name="settings_feedback_title">Зворотний звʼязок</string>
     <string name="settings_feature_request_label">Запропонувати функцію</string>
@@ -122,7 +118,6 @@
     </plurals>
     <string name="settings_pro_upgrade_subtitle">Стилі, експорт у PDF і Word, розумні підказки, імпорт аудіо й відео та папки без обмежень</string>
     <string name="settings_pro_upgrade">Перейти на Pro</string>
-    <string name="settings_subscription_title">Підписка</string>
     <string name="settings_subscription_lifetime">Назавжди, ваша без обмежень</string>
     <string name="settings_subscription_included">Включено на цьому пристрої. Не входить до резервних копій і не зберігається після перевстановлення.</string>
     <string name="settings_subscription_trial">Пробний період</string>
@@ -133,24 +128,25 @@
     <string name="settings_smart_suggestions_title">Розумні підказки</string>
     <string name="settings_smart_suggestions_label">Показувати розумні підказки</string>
     <string name="settings_smart_suggestions_description">Знаходить події календаря й завдання в кожній новій нотатці. Додає кілька секунд обробки.</string>
-    <string name="settings_notes_title">Нотатки</string>
-    <string name="settings_backup_section_title">Резервна копія</string>
-    <string name="settings_about_section_title">Про застосунок</string>
     <string name="settings_about_footer">Усе залишається на вашому телефоні. Нічого ніколи не завантажується.</string>
     <string name="settings_note_style_editor_no_sections">Без розділів нотатка стає вільним резюме.</string>
     <string name="settings_redeem_code">Ввести промокод</string>
     <string name="settings_redeem_code_body">Google Play відкриє річний план. Натисніть стрілку поруч зі способом оплати, виберіть «Активувати код» і введіть код. Його безкоштовний період замінить стандартний.</string>
     <string name="settings_redeem_code_confirm">Продовжити</string>
-    <plurals name="settings_subscription_app_trial_days_left">
-        <item quantity="one">Пробний період: залишився %d день</item>
-        <item quantity="few">Пробний період: залишилося %d дні</item>
-        <item quantity="many">Пробний період: залишилося %d днів</item>
-        <item quantity="other">Пробний період: залишилося %d дня</item>
-    </plurals>
     <string name="settings_subscription_monthly">Місячна</string>
     <string name="settings_subscription_monthly_renews">Місячна, поновиться %1$s</string>
     <string name="settings_transcription_label">Розшифровувати записи</string>
     <string name="settings_transcription_description">Перетворює сказане на текст. Якщо вимкнено, нотатка — це лише запис.</string>
     <string name="settings_summary_label">Писати резюме</string>
     <string name="settings_summary_description">Пише нотатку за розшифровкою у вашому стилі письма. Потрібна розшифровка.</string>
+    <string name="settings_group_writes">Що пише Offhand</string>
+    <string name="settings_group_in_out">Імпорт і перенесення нотаток</string>
+    <string name="settings_group_app">Застосунок</string>
+    <plurals name="settings_plan_days_left">
+        <item quantity="one">залишився %d день</item>
+        <item quantity="few">залишилося %d дні</item>
+        <item quantity="many">залишилося %d днів</item>
+        <item quantity="other">залишилося %d дня</item>
+    </plurals>
+    <string name="settings_plan_trial_body">Під час пробного періоду відкрито все з Pro. Потім Offhand лишається безкоштовним, зі стилем «Резюме» і двома папками.</string>
 </resources>

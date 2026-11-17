@@ -13,8 +13,8 @@ data class PaywallUiState(
     val isPro: Boolean = false,
     val mode: PaywallMode = PaywallMode.OPENING,
     val message: PaywallMessageUi? = null,
-    // What was used during the free trial, only on the paywall that follows it.
     val trialRecap: List<ProTrialUsageCount> = emptyList(),
+    val trialDaysLeft: Int? = null,
 ) {
     val selectedOffer: ProOfferUi?
         get() = offers.firstOrNull { it.plan == selectedPlan }

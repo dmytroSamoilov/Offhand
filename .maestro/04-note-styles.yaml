@@ -87,7 +87,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - tapOn: "Settings"
-      - tapOn: "Writing styles"
+      - tapOn: "Writing style"
       - assertVisible: "Built in"
       - tapOn: "New"
 
@@ -143,18 +143,16 @@ appId: com.dmytrosamoilov.offhand.uitest
       - swipe:
           start: "1%,50%"
           end: "70%,50%"
-      - tapOn: "Writing styles"
+      - tapOn: "Writing style"
       - tapOn: "Sales debrief"
       - assertVisible: "Sales debrief"
       - swipe:
           start: "1%,50%"
           end: "70%,50%"
 
-      # Rewrite the existing note with it; the Settings form has a "Notes"
-      # section header, so the tab is the second match
+      # Rewrite the existing note with it
       - tapOn:
-          text: "Notes"
-          index: 1
+          id: "tab_notes"
       - tapOn: "Smoke test note"
       - tapOn: "More actions"
       - tapOn: "Change writing style"
@@ -170,7 +168,7 @@ appId: com.dmytrosamoilov.offhand.uitest
 
       # Delete the style; the note survives
       - tapOn: "Settings"
-      - tapOn: "Writing styles"
+      - tapOn: "Writing style"
       - tapOn: "Edit"
       - scrollUntilVisible:
           element: "Delete style"
@@ -182,6 +180,5 @@ appId: com.dmytrosamoilov.offhand.uitest
           start: "1%,50%"
           end: "70%,50%"
       - tapOn:
-          text: "Notes"
-          index: 1
+          id: "tab_notes"
       - assertVisible: "Smoke test note"

@@ -33,6 +33,7 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "More actions"
 - tapOn: "Move to folder"
 - tapOn: "Work"
+- tapOn: "Move"
 - extendedWaitUntil:
     visible: "Summary"
     timeout: 30000
@@ -78,4 +79,5 @@ appId: com.dmytrosamoilov.offhand.uitest
           direction: RIGHT
       - assertVisible: "Move to folder"
 - tapOn: "No folder"
+- tapOn: "Move"
 - assertVisible: "Smoke test note"

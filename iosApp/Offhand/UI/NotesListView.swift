@@ -3,8 +3,9 @@ import StoreKit
 import SwiftUI
 import UIKit
 
-struct NotesListView: View {
+struct NotesListView<BottomBarContent: View>: View {
     private let viewModel = AppViewModels.notes
+    private let bottomBar: BottomBarContent
     @State private var state = NotesUiState(
         sections: [],
         selected: nil,
@@ -46,16 +47,20 @@ struct NotesListView: View {
         isTranscriptionEnabled: true,
         isSummaryEnabled: true
     )
-    // A long press also ends in the row's own tap; the tap that follows a
-    // long press is swallowed so the note is not toggled twice.
     @State private var longPressedNoteId: Int64?
     @State private var recordSheetRequest: RecordSheetRequest?
     @ObservedObject private var shortcuts = ShortcutRequests.shared
     @State private var recordedNoteId: Int64?
     @State private var searchQuery = ""
+    @State private var isSearching = false
     @State private var newStyleFolderId: Int64?
     @State private var folderStyleEditorFolderId: Int64?
+    @State private var isNewFolderRequestedAfterMove = false
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    init(@ViewBuilder bottomBar: () -> BottomBarContent) {
+        self.bottomBar = bottomBar()
+    }
 
     var body: some View {
         layout
@@ -68,8 +73,6 @@ struct NotesListView: View {
         .sheet(item: $recordSheetRequest, onDismiss: openRecordedNote) { request in
             RecordSheetView(autoStart: true, folderId: request.folderId) { recordedNoteId = $0 }
         }
-        // Like the note's restyle sheet, the folder picker closes before the
-        // editor is pushed and comes back for the same folder on return.
         .sheet(isPresented: folderStyleBinding, onDismiss: openRequestedFolderStyleEditor) {
             if let picker = state.folderStylePicker {
                 FolderStyleSheet(
@@ -84,45 +87,68 @@ struct NotesListView: View {
                 .presentationDetents([.medium, .large])
             }
         }
-        .sheet(isPresented: moveToFolderBinding) {
+        .sheet(isPresented: moveToFolderBinding, onDismiss: requestNewFolderAfterMove) {
             MoveToFolderSheet(
+                title: String(localized: "Move to folder"),
                 folders: state.folders,
-                currentFolderId: state.moveToFolder?.currentFolderId?.int64Value,
+                initialChoice: FolderChoice(folderId: state.moveToFolder?.currentFolderId?.int64Value),
+                isNewFolderGated: state.isFolderLimitReached,
+                styleLabel: styleLabel,
                 onMove: { viewModel.onMoveToFolder(folderId: $0.map { KotlinLong(value: $0) }) },
+                onNewFolder: {
+                    isNewFolderRequestedAfterMove = true
+                    viewModel.onMoveToFolderDismissed()
+                },
                 onCancel: { viewModel.onMoveToFolderDismissed() }
             )
-            .presentationDetents([.medium, .large])
         }
-        .sheet(isPresented: bulkBinding(.move)) {
+        .sheet(isPresented: bulkBinding(.move), onDismiss: requestNewFolderAfterMove) {
             MoveToFolderSheet(
+                title: String.localizedStringWithFormat(String(localized: "Move %lld notes"), state.selectedNoteIds.count),
                 folders: state.folders,
-                currentFolderId: nil,
+                initialChoice: nil,
+                isNewFolderGated: state.isFolderLimitReached,
+                styleLabel: styleLabel,
                 onMove: { viewModel.onBulkMoveConfirmed(folderId: $0.map { KotlinLong(value: $0) }) },
+                onNewFolder: {
+                    isNewFolderRequestedAfterMove = true
+                    viewModel.onBulkActionDismissed()
+                },
                 onCancel: { viewModel.onBulkActionDismissed() }
             )
-            .presentationDetents([.medium, .large])
         }
-        .alert(String(localized: "Delete the selected notes?"), isPresented: bulkBinding(.delete)) {
-            Button(String(localized: "Delete"), role: .destructive) { viewModel.onBulkDeleteConfirmed() }
-            Button(String(localized: "Cancel"), role: .cancel) { viewModel.onBulkActionDismissed() }
-        } message: {
-            Text(String(localized: "They will be permanently removed from your iPhone. This cannot be undone."))
+        .offhandDialog(isPresented: bulkBinding(.delete)) {
+            OffhandDialog(
+                title: String(localized: "Delete the selected notes?"),
+                message: String(localized: "They will be permanently removed from your iPhone. This cannot be undone."),
+                confirmLabel: String(localized: "Cancel"),
+                onConfirm: { viewModel.onBulkActionDismissed() },
+                destructiveLabel: String(localized: "Delete"),
+                onDestructive: { viewModel.onBulkDeleteConfirmed() },
+                onDismiss: { viewModel.onBulkActionDismissed() }
+            )
         }
-        .alert(String(localized: "Delete this note?"), isPresented: deleteBinding) {
-            Button(String(localized: "Delete"), role: .destructive) { viewModel.onDeleteConfirmed() }
-            Button(String(localized: "Cancel"), role: .cancel) { viewModel.onDeleteDismissed() }
-        } message: {
-            Text(String(localized: "The note will be permanently removed from your iPhone. This cannot be undone."))
+        .offhandDialog(isPresented: deleteBinding) {
+            OffhandDialog(
+                title: String(localized: "Delete this note?"),
+                message: String(localized: "The note will be permanently removed from your iPhone. This cannot be undone."),
+                confirmLabel: String(localized: "Cancel"),
+                onConfirm: { viewModel.onDeleteDismissed() },
+                destructiveLabel: String(localized: "Delete"),
+                onDestructive: { viewModel.onDeleteConfirmed() },
+                onDismiss: { viewModel.onDeleteDismissed() }
+            )
         }
-        .confirmationDialog(
-            String(localized: "Delete this folder?"),
-            isPresented: deleteFolderBinding,
-            titleVisibility: .visible
-        ) {
-            Button(String(localized: "Delete"), role: .destructive) { viewModel.onDeleteFolderConfirmed() }
-            Button(String(localized: "Cancel"), role: .cancel) { viewModel.onDeleteFolderDismissed() }
-        } message: {
-            Text(String(localized: "Its notes are kept, just without a folder."))
+        .offhandDialog(isPresented: deleteFolderBinding) {
+            OffhandDialog(
+                title: String(localized: "Delete this folder?"),
+                message: String(localized: "Its notes are kept, just without a folder."),
+                confirmLabel: String(localized: "Cancel"),
+                onConfirm: { viewModel.onDeleteFolderDismissed() },
+                destructiveLabel: String(localized: "Delete"),
+                onDestructive: { viewModel.onDeleteFolderConfirmed() },
+                onDismiss: { viewModel.onDeleteFolderDismissed() }
+            )
         }
         .alert(
             state.folderEditor?.folderId == nil ? String(localized: "New folder") : String(localized: "Rename folder"),
@@ -137,6 +163,7 @@ struct NotesListView: View {
                 Text(folderErrorMessage(error))
             }
         }
+        .tint(OffhandColor.ink)
         .task {
             for await newState in viewModel.uiState {
                 state = newState
@@ -149,31 +176,30 @@ struct NotesListView: View {
         }
     }
 
-    // The app ships for iPad, so give a regular width the two-pane layout Android
-    // gets from its list-detail scaffold instead of a phone-shaped push stack.
     @ViewBuilder
     private var layout: some View {
-        if horizontalSizeClass == .regular {
+        if isRegularWidth {
             NavigationSplitView {
                 NavigationStack {
-                    notesList
+                    notesRoot
                 }
             } detail: {
                 NavigationStack {
                     if let detail = state.selected {
                         NoteDetailView(viewModel: viewModel, detail: detail, state: state)
                     } else {
-                        ContentUnavailableView(
-                            String(localized: "No note selected"),
-                            systemImage: "doc.text",
-                            description: Text(String(localized: "Pick a note from the list to read it."))
+                        EmptyState(
+                            title: String(localized: "No note selected"),
+                            message: String(localized: "Pick a note from the list to read it.")
                         )
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(OffhandColor.ground)
                     }
                 }
             }
         } else {
             NavigationStack {
-                notesList
+                notesRoot
                     .navigationDestination(isPresented: detailBinding) {
                         if let detail = state.selected {
                             NoteDetailView(viewModel: viewModel, detail: detail, state: state)
@@ -183,140 +209,300 @@ struct NotesListView: View {
         }
     }
 
-    private var notesList: some View {
-        List {
-            if !state.noteProgress.isEmpty {
-                Section {
-                    KeepOpenBanner()
-                        .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.clear)
-                }
+    private var isRegularWidth: Bool { horizontalSizeClass == .regular }
+
+    private var notesRoot: some View {
+        VStack(spacing: 0) {
+            header
+            if !state.isSelectingNotes && !isSearching {
+                folderTabs.padding(.top, 12)
             }
-            Section {
-                FolderChips(
-                    folders: state.folders,
-                    selectedFolderId: state.selectedFolderId?.int64Value,
-                    isUnsortedShown: state.isUnsortedShown,
-                    isFolderStylesUnlocked: state.isFolderStylesUnlocked,
-                    isFolderLimitReached: state.isFolderLimitReached,
-                    onSelect: { viewModel.onFolderSelected(folderId: $0.map { KotlinLong(value: $0) }) },
-                    onNew: { viewModel.onNewFolderRequested() },
-                    onRename: { viewModel.onRenameFolderRequested(folderId: $0) },
-                    onDelete: { viewModel.onDeleteFolderRequested(folderId: $0) },
-                    onStyle: { viewModel.onFolderStyleRequested(folderId: $0) },
-                    onMove: { viewModel.onFolderMoved(fromIndex: Int32($0), toIndex: Int32($1)) }
-                )
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.clear)
-            }
-            ForEach(state.sections, id: \.self) { section in
-                Section(dayTitle(section.dayLabel)) {
-                    ForEach(section.notes, id: \.id) { note in
-                        Button {
-                            onRowTapped(note.id)
-                        } label: {
-                            HStack(spacing: 12) {
-                                if state.isSelectingNotes {
-                                    Image(systemName: isNoteSelected(note.id) ? "checkmark.circle.fill" : "circle")
-                                        .font(.title3)
-                                        .foregroundStyle(isNoteSelected(note.id) ? Brand.primary : Color(.systemGray3))
-                                }
-                                NoteCardRow(
-                                    note: note,
-                                    progress: state.noteProgress[KotlinLong(value: note.id)]?.intValue,
-                                    isWaitingForAi: state.isWaitingForAi
-                                )
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .simultaneousGesture(LongPressGesture(minimumDuration: 0.4).onEnded { _ in onRowHeld(note.id) })
-                        .accessibilityAddTraits(isNoteSelected(note.id) ? .isSelected : [])
-                        .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
-                        .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                            if !state.isSelectingNotes {
-                            Button {
-                                Haptics.confirm()
-                                viewModel.onMoveToFolderRequested(noteId: note.id)
-                            } label: {
-                                Label(String(localized: "Move to folder"), systemImage: "folder")
-                            }
-                            .tint(Brand.primary)
-                            }
-                        }
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            if !state.isSelectingNotes {
-                            Button(role: .destructive) {
-                                Haptics.confirm()
-                                viewModel.onDeleteRequested(id: note.id)
-                            } label: {
-                                Label(String(localized: "Delete"), systemImage: "trash")
-                            }
-                            // The tab bar's brand tint would otherwise repaint a
-                            // destructive action in blue.
-                            .tint(.red)
-                            }
-                        }
-                    }
-                }
-            }
+            notesContent
         }
-        .listStyle(.insetGrouped)
-        .searchable(text: $searchQuery, prompt: Text(String(localized: "Search notes")))
+        .background(OffhandColor.ground.ignoresSafeArea())
+        .toolbar(.hidden, for: .navigationBar)
+        .safeAreaInset(edge: .bottom, spacing: 0) { footer }
         .onChange(of: searchQuery) { viewModel.onSearchQueryChanged(query: searchQuery) }
-        .safeAreaInset(edge: .top) {
-            if let preparation = state.modelPreparation {
-                ModelPreparationBanner(
-                    preparation: preparation,
-                    onDownloadOnMobileData: { viewModel.onDownloadOnMobileDataClicked() }
-                )
-            }
-        }
         .navigationDestination(isPresented: folderStyleEditorBinding) {
             NoteStyleEditorView(styleId: 0)
+                .toolbar(.visible, for: .navigationBar)
         }
         .onChange(of: folderStyleEditorFolderId) { previous, current in
             if let previous, current == nil { viewModel.onFolderStyleRequested(folderId: previous) }
         }
-        .navigationTitle(
-            state.isSelectingNotes
-                ? String.localizedStringWithFormat(String(localized: "%lld selected"), state.selectedNoteIds.count)
-                : String(localized: "Notes")
-        )
-        .toolbar { selectionToolbar }
-        .overlay(alignment: .center) {
-            if !state.isNotesLoaded {
-                NotesLoadingState()
-            } else if state.sections.isEmpty {
-                if !searchQuery.isEmpty {
-                    ContentUnavailableView.search(text: searchQuery)
-                } else if state.selectedFolderId != nil {
-                    ContentUnavailableView(
-                        String(localized: "No notes in this folder yet"),
-                        systemImage: "folder"
-                    )
-                } else if state.isUnsortedShown {
-                    ContentUnavailableView(
-                        String(localized: "No unsorted notes"),
-                        systemImage: "folder",
-                        description: Text(String(localized: "Notes outside your folders appear here."))
-                    )
-                } else {
-                    ContentUnavailableView(
-                        String(localized: "No notes yet"),
-                        systemImage: "mic",
-                        description: Text(String(localized: "Tap Record to capture your first note."))
-                    )
+    }
+
+    @ViewBuilder
+    private var header: some View {
+        if state.isSelectingNotes {
+            HStack(spacing: OffhandSpacing.controls) {
+                Text(String.localizedStringWithFormat(String(localized: "%lld selected"), state.selectedNoteIds.count))
+                    .offhandText(.title)
+                    .foregroundStyle(OffhandColor.ink)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityAddTraits(.isHeader)
+                PlainTextButton(String(localized: "Cancel"), tone: .ink) { viewModel.onNoteSelectionCleared() }
+                    .accessibilityLabel(String(localized: "Cancel selection"))
+            }
+            .padding(.leading, OffhandSpacing.screen)
+            .padding(.trailing, OffhandSpacing.controls)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
+            .overlay(alignment: .bottom) { Hairline() }
+        } else if isSearching {
+            HStack(spacing: OffhandSpacing.inRow) {
+                SearchField(
+                    query: $searchQuery,
+                    placeholder: String(localized: "Search notes"),
+                    clearLabel: String(localized: "Clear search"),
+                    focusesOnAppear: true
+                )
+                PlainTextButton(String(localized: "Cancel"), tone: .ink, action: closeSearch)
+            }
+            .padding(.leading, OffhandSpacing.screen)
+            .padding(.trailing, OffhandSpacing.controls)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
+            .overlay(alignment: .bottom) { Hairline() }
+        } else {
+            HStack {
+                Text(String(localized: "Notes"))
+                    .offhandText(.display)
+                    .foregroundStyle(OffhandColor.ink)
+                    .accessibilityAddTraits(.isHeader)
+                Spacer()
+                BarIconButton(systemImage: "magnifyingglass", label: String(localized: "Search notes")) {
+                    isSearching = true
                 }
             }
-        }
-        .overlay(alignment: .bottomTrailing) {
-            if !state.isSelectingNotes { recordButton }
+            .padding(.leading, OffhandSpacing.screen)
+            .padding(.trailing, 14)
+            .padding(.top, 8)
         }
     }
 
-    // False means nothing was asked (the app is not in front), so the attempt
-    // stays unused for the next recording. StoreKit gives no sign of whether
-    // the prompt appeared: no window is added and the app stays active.
+    private var folderTabs: some View {
+        FolderTabs(
+            folders: state.folders,
+            selectedFolderId: state.selectedFolderId?.int64Value,
+            isUnsortedShown: state.isUnsortedShown,
+            isFolderStylesUnlocked: state.isFolderStylesUnlocked,
+            isFolderLimitReached: state.isFolderLimitReached,
+            onSelect: { viewModel.onFolderSelected(folderId: $0.map { KotlinLong(value: $0) }) },
+            onNew: { viewModel.onNewFolderRequested() },
+            onRename: { viewModel.onRenameFolderRequested(folderId: $0) },
+            onDelete: { viewModel.onDeleteFolderRequested(folderId: $0) },
+            onStyle: { viewModel.onFolderStyleRequested(folderId: $0) },
+            onMove: { viewModel.onFolderMoved(fromIndex: Int32($0), toIndex: Int32($1)) }
+        )
+    }
+
+    @ViewBuilder
+    private var footer: some View {
+        if state.isSelectingNotes {
+            SelectionFooter(
+                onMove: { viewModel.onBulkActionRequested(action: .move) },
+                onDelete: { viewModel.onBulkActionRequested(action: .delete) }
+            )
+        } else if !isSearching {
+            bottomBar
+        }
+    }
+
+    private var notesContent: some View {
+        List {
+            if let preparation = state.modelPreparation {
+                ModelPreparationCard(
+                    preparation: preparation,
+                    onDownloadOnMobileData: { viewModel.onDownloadOnMobileDataClicked() }
+                )
+                .notesListRow(top: 20)
+            }
+            if !state.noteProgress.isEmpty {
+                StatusCard(
+                    title: String(localized: "Preparing your note"),
+                    message: String(localized: "Keep Offhand open until your note is ready.")
+                )
+                .accessibilityElement(children: .combine)
+                .notesListRow(top: 12)
+            }
+            if isShowingSearchResults {
+                SectionLabel(String.localizedStringWithFormat(String(localized: "%lld notes"), noteCount))
+                    .notesListRow(top: 20, bottom: 4)
+            }
+            ForEach(state.sections, id: \.self) { section in
+                if !isSearching {
+                    SectionLabel(dayTitle(section.dayLabel))
+                        .notesListRow(top: 22, bottom: 4)
+                }
+                ForEach(section.notes, id: \.id) { note in
+                    noteRow(note, day: isSearching ? dayTitle(section.dayLabel) : nil)
+                }
+            }
+            if isShowingSearchResults {
+                Text(String(localized: "Search looks through titles, summaries and transcripts."))
+                    .offhandText(.caption)
+                    .foregroundStyle(OffhandColor.ink3)
+                    .notesListRow(top: 20)
+            }
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .environment(\.defaultMinListRowHeight, 0)
+        .overlay { emptyOrLoading }
+    }
+
+    @ViewBuilder
+    private var emptyOrLoading: some View {
+        if !state.isNotesLoaded {
+            NotesLoadingState()
+        } else if state.sections.isEmpty {
+            emptyState
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .allowsHitTesting(false)
+        }
+    }
+
+    @ViewBuilder
+    private var emptyState: some View {
+        if !searchQuery.isEmpty {
+            EmptyState(
+                title: String(format: String(localized: "No notes match “%@”"), searchQuery),
+                message: String(localized: "Search looks through titles, summaries and transcripts.")
+            )
+        } else if state.selectedFolderId != nil {
+            EmptyState(title: String(localized: "No notes in this folder yet"))
+        } else if state.isUnsortedShown {
+            EmptyState(
+                title: String(localized: "No unsorted notes"),
+                message: String(localized: "Notes outside your folders appear here.")
+            )
+        } else {
+            EmptyState(
+                title: String(localized: "No notes yet"),
+                message: String(localized: "Tap Record and speak. Offhand writes the transcript and a summary on your iPhone.")
+            )
+        }
+    }
+
+    private var isShowingSearchResults: Bool {
+        isSearching && !searchQuery.isEmpty && !state.sections.isEmpty
+    }
+
+    private var noteCount: Int {
+        state.sections.reduce(0) { $0 + $1.notes.count }
+    }
+
+    private func noteRow(_ note: NoteCardUi, day: String?) -> some View {
+        let isSelected = isNoteSelected(note.id)
+        let isOpen = isRegularWidth && state.selected?.id == note.id
+        return Button {
+            onRowTapped(note.id)
+        } label: {
+            NoteRow(
+                title: highlighted(note.title, note.titleHighlights),
+                state: rowState(note),
+                meta: metaLine(note, day: day),
+                waveSeed: note.id
+            ) {
+                if state.isSelectingNotes {
+                    ChoiceMark(isSelected: isSelected, size: 24)
+                }
+            }
+            .padding(.horizontal, isOpen ? OffhandSpacing.controls : OffhandSpacing.screen)
+            .background {
+                if isOpen {
+                    RoundedRectangle(cornerRadius: OffhandRadius.field, style: .continuous)
+                        .fill(OffhandColor.surface)
+                        .shadow(color: OffhandColor.ink.opacity(0.06), radius: 1, x: 0, y: 1)
+                } else if isSelected {
+                    OffhandColor.accentSoft
+                }
+            }
+            .padding(.horizontal, isOpen ? OffhandSpacing.controls : 0)
+            .overlay(alignment: .bottom) {
+                if !isOpen {
+                    Hairline().padding(.horizontal, state.isSelectingNotes ? 0 : OffhandSpacing.screen)
+                }
+            }
+        }
+        .buttonStyle(.offhandRow)
+        .simultaneousGesture(LongPressGesture(minimumDuration: 0.4).onEnded { _ in onRowHeld(note.id) })
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .listRowInsets(EdgeInsets())
+        .listRowSeparator(.hidden)
+        .listRowBackground(Color.clear)
+        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+            if !state.isSelectingNotes {
+                Button {
+                    Haptics.confirm()
+                    viewModel.onMoveToFolderRequested(noteId: note.id)
+                } label: {
+                    Label(String(localized: "Move to folder"), systemImage: "folder")
+                }
+                .tint(OffhandColor.accent)
+            }
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            if !state.isSelectingNotes {
+                Button(role: .destructive) {
+                    Haptics.confirm()
+                    viewModel.onDeleteRequested(id: note.id)
+                } label: {
+                    Label(String(localized: "Delete"), systemImage: "trash")
+                }
+                .tint(OffhandColor.danger)
+            }
+        }
+    }
+
+    private func rowState(_ note: NoteCardUi) -> NoteRowState {
+        switch note.status {
+        case .processing:
+            let progress = state.noteProgress[KotlinLong(value: note.id)]?.intValue
+            if state.isWaitingForAi {
+                return .processing(text: String(localized: "Waiting for your on-device AI to finish downloading"), progress: nil)
+            }
+            return .processing(text: String(localized: "Preparing your note"), progress: progress.map { Double($0) / 100 })
+        case .interrupted:
+            return .attention(text: String(localized: "Paused. Open the note to continue."))
+        case .failed:
+            return .attention(text: String(localized: "We were unable to create a summary and transcript for this note."))
+        default:
+            return .ready(preview: note.preview.isEmpty ? nil : highlighted(note.preview, note.previewHighlights))
+        }
+    }
+
+    private func metaLine(_ note: NoteCardUi, day: String?) -> String {
+        let time = [day, note.time].compactMap { $0 }.joined(separator: " ")
+        return [time, note.durationText, note.folderName].compactMap { $0 }.joined(separator: " · ")
+    }
+
+    private func highlighted(_ text: String, _ ranges: [TextRangeUi]) -> AttributedString {
+        var attributed = AttributedString(text)
+        let utf16 = text.utf16
+        for range in ranges {
+            guard let lower = utf16.index(utf16.startIndex, offsetBy: Int(range.start), limitedBy: utf16.endIndex),
+                  let upper = utf16.index(utf16.startIndex, offsetBy: Int(range.end), limitedBy: utf16.endIndex),
+                  lower < upper,
+                  let start = AttributedString.Index(lower, within: attributed),
+                  let end = AttributedString.Index(upper, within: attributed) else { continue }
+            attributed[start..<end].backgroundColor = OffhandColor.accentSoft
+            attributed[start..<end].foregroundColor = OffhandColor.ink
+        }
+        return attributed
+    }
+
+    private func styleLabel(_ style: NoteStyleRef) -> String {
+        if let preset = style.builtInPreset { return NoteStyleLabels.label(for: preset) }
+        return state.customStyles.first { $0.id == style.customId }?.name ?? NoteStyleLabels.label(for: .summary)
+    }
+
+    private func closeSearch() {
+        searchQuery = ""
+        isSearching = false
+    }
+
     private func requestAppStoreReview() -> Bool {
         guard let scene = UIApplication.shared.connectedScenes
             .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else { return false }
@@ -342,7 +528,6 @@ struct NotesListView: View {
         state.selectedNoteIds.contains(KotlinLong(value: id))
     }
 
-    // Holding a row starts a selection; from then on a tap adds or removes it.
     private func onRowTapped(_ id: Int64) {
         if longPressedNoteId == id {
             longPressedNoteId = nil
@@ -359,29 +544,6 @@ struct NotesListView: View {
         viewModel.onNoteSelectionToggled(id: id)
     }
 
-    @ToolbarContentBuilder
-    private var selectionToolbar: some ToolbarContent {
-        if state.isSelectingNotes {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(String(localized: "Cancel")) { viewModel.onNoteSelectionCleared() }
-                    .accessibilityLabel(String(localized: "Cancel selection"))
-            }
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                Button {
-                    viewModel.onBulkActionRequested(action: .move)
-                } label: {
-                    Label(String(localized: "Move to folder"), systemImage: "folder")
-                }
-                Button(role: .destructive) {
-                    viewModel.onBulkActionRequested(action: .delete)
-                } label: {
-                    Label(String(localized: "Delete"), systemImage: "trash")
-                }
-                .tint(.red)
-            }
-        }
-    }
-
     private var deleteBinding: Binding<Bool> {
         Binding(
             get: { state.pendingDeleteNoteId != nil },
@@ -394,6 +556,12 @@ struct NotesListView: View {
             get: { state.moveToFolder != nil },
             set: { isShown in if !isShown { viewModel.onMoveToFolderDismissed() } }
         )
+    }
+
+    private func requestNewFolderAfterMove() {
+        guard isNewFolderRequestedAfterMove else { return }
+        isNewFolderRequestedAfterMove = false
+        viewModel.onNewFolderRequested()
     }
 
     private func openRequestedFolderStyleEditor() {
@@ -453,28 +621,6 @@ struct NotesListView: View {
         viewModel.onNoteSelected(id: noteId)
     }
 
-    private var recordButton: some View {
-        Button {
-            Haptics.confirm()
-            recordSheetRequest = RecordSheetRequest(folderId: state.selectedFolderId?.int64Value)
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "mic.fill")
-                    .font(.title3)
-                Text(String(localized: "Record"))
-                    .font(.headline)
-            }
-            .foregroundStyle(Brand.onPrimary)
-            .padding(.horizontal, 22)
-            .frame(height: 60)
-            .background(Brand.primary, in: Capsule())
-            .shadow(color: .black.opacity(0.25), radius: 10, y: 4)
-        }
-        .accessibilityLabel(String(localized: "Record a note"))
-        .padding(.trailing, 20)
-        .padding(.bottom, 16)
-    }
-
     private func dayTitle(_ label: NoteDayLabelUi) -> String {
         switch onEnum(of: label) {
         case .today: return String(localized: "Today")
@@ -484,9 +630,15 @@ struct NotesListView: View {
     }
 }
 
-// Chips can be picked up and dropped onto another chip to change the order;
-// a long press without moving opens the same menu as a tap on the selected chip.
-private struct FolderChips: View {
+private extension View {
+    func notesListRow(top: CGFloat, bottom: CGFloat = 0) -> some View {
+        listRowInsets(EdgeInsets(top: top, leading: OffhandSpacing.screen, bottom: bottom, trailing: OffhandSpacing.screen))
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+    }
+}
+
+private struct FolderTabs: View {
     let folders: [FolderUi]
     let selectedFolderId: Int64?
     let isUnsortedShown: Bool
@@ -499,17 +651,18 @@ private struct FolderChips: View {
     let onStyle: (Int64) -> Void
     let onMove: (Int, Int) -> Void
 
+    private static let spacing: CGFloat = 22
+
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                FolderChip(
-                    title: isUnsortedShown ? String(localized: "Unsorted") : String(localized: "All notes"),
-                    isSelected: selectedFolderId == nil
-                ) {
-                    onSelect(nil)
-                }
-                ForEach(Array(folders.enumerated()), id: \.element.id) { index, folder in
-                    folderChip(folder)
+        UnderlineTabs(
+            tabs: [TabItem(label: isUnsortedShown ? String(localized: "Unsorted") : String(localized: "All notes"))],
+            selectedIndex: selectedFolderId == nil ? 0 : -1,
+            spacing: Self.spacing,
+            contentPadding: OffhandSpacing.screen,
+            onSelect: { _ in onSelect(nil) }
+        ) {
+            ForEach(Array(folders.enumerated()), id: \.element.id) { index, folder in
+                folderTab(folder)
                     .contextMenu { folderMenuItems(folder) }
                     .draggable(String(folder.id))
                     .dropDestination(for: String.self) { dropped, _ in
@@ -519,38 +672,41 @@ private struct FolderChips: View {
                         onMove(from, index)
                         return true
                     }
-                }
-                Button(action: onNew) {
-                    HStack(spacing: 6) {
-                        Label(String(localized: "New folder"), systemImage: "plus")
-                        if isFolderLimitReached { ProBadge() }
-                    }
-                        .font(.subheadline.weight(.medium))
-                        .padding(.horizontal, 14)
-                        .frame(height: 32)
-                        .background(Color(.secondarySystemGroupedBackground), in: Capsule())
-                        .foregroundStyle(Brand.primary)
-                }
-                .buttonStyle(.plain)
             }
-            .padding(.vertical, 4)
+            newFolderButton
         }
     }
 
-    // Like Android, the selected chip carries the three dots and a tap on it
-    // opens the folder menu; a tap on any other chip selects it.
     @ViewBuilder
-    private func folderChip(_ folder: FolderUi) -> some View {
+    private func folderTab(_ folder: FolderUi) -> some View {
         if folder.id == selectedFolderId {
             Menu {
                 folderMenuItems(folder)
             } label: {
-                FolderChipLabel(title: folder.name, isSelected: true, showsOptions: true)
+                UnderlineTab(tab: TabItem(label: folder.name), isSelected: true) {}
+                    .allowsHitTesting(false)
+                    .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .accessibilityHint(String(localized: "Folder options"))
         } else {
-            FolderChip(title: folder.name, isSelected: false) { onSelect(folder.id) }
+            UnderlineTab(tab: TabItem(label: folder.name), isSelected: false) { onSelect(folder.id) }
         }
+    }
+
+    private var newFolderButton: some View {
+        Button(action: onNew) {
+            HStack(spacing: 6) {
+                Image(systemName: "plus")
+                    .font(.system(size: 18, weight: .regular))
+                    .foregroundStyle(OffhandColor.ink2)
+                if isFolderLimitReached { ProBadge() }
+            }
+            .frame(minWidth: 28, minHeight: OffhandSpacing.touchTarget)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.offhandPress)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(String(localized: "New folder"))
     }
 
     @ViewBuilder
@@ -558,7 +714,7 @@ private struct FolderChips: View {
         Button {
             onStyle(folder.id)
         } label: {
-            Label(styleMenuTitle, systemImage: "gearshape")
+            Label(styleMenuTitle, systemImage: "text.alignleft")
         }
         Button {
             onRename(folder.id)
@@ -571,7 +727,6 @@ private struct FolderChips: View {
         } label: {
             Label(String(localized: "Delete folder"), systemImage: "trash")
         }
-        .tint(.red)
     }
 
     private var styleMenuTitle: String {
@@ -581,8 +736,6 @@ private struct FolderChips: View {
     }
 }
 
-// Picks the style new recordings in a folder get and notes moved into it
-// are rewritten in; "Default" follows Settings.
 private struct FolderStyleSheet: View {
     let viewModel: NotesViewModel
     let picker: FolderStylePickerUi
@@ -608,95 +761,156 @@ private struct FolderStyleSheet: View {
                 }
             }
         }
+        .tint(OffhandColor.ink)
     }
 }
 
-private struct FolderChip: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
+private enum FolderChoice: Equatable {
+    case unsorted
+    case folder(Int64)
 
-    var body: some View {
-        Button(action: action) {
-            FolderChipLabel(title: title, isSelected: isSelected, showsOptions: false)
-        }
-        .buttonStyle(.plain)
+    init(folderId: Int64?) {
+        self = folderId.map { .folder($0) } ?? .unsorted
+    }
+
+    var folderId: Int64? {
+        if case .folder(let id) = self { return id }
+        return nil
     }
 }
 
-private struct FolderChipLabel: View {
+private struct MoveToFolderSheet: View {
     let title: String
-    let isSelected: Bool
-    let showsOptions: Bool
+    let folders: [FolderUi]
+    let initialChoice: FolderChoice?
+    let isNewFolderGated: Bool
+    let styleLabel: (NoteStyleRef) -> String
+    let onMove: (Int64?) -> Void
+    let onNewFolder: () -> Void
+    let onCancel: () -> Void
+    @State private var choice: FolderChoice?
+
+    private static let rowHeight: CGFloat = 60
+    private static let maxVisibleRows = 6
 
     var body: some View {
-        HStack(spacing: 6) {
-            Text(title)
-                .font(.subheadline.weight(.medium))
-                .lineLimit(1)
-            if showsOptions {
-                Image(systemName: "ellipsis")
-                    .font(.subheadline.weight(.semibold))
-                    .rotationEffect(.degrees(90))
-                    .accessibilityLabel(String(localized: "Folder options"))
+        OffhandSheet(title: title) {
+            if folders.count + 2 > Self.maxVisibleRows {
+                ScrollView { rows }
+                    .frame(height: Self.rowHeight * CGFloat(Self.maxVisibleRows))
+            } else {
+                rows
             }
+            HStack(spacing: OffhandSpacing.controls) {
+                SecondaryButton(String(localized: "Cancel"), fillsWidth: true, action: onCancel)
+                PrimaryButton(String(localized: "Move"), fillsWidth: true) {
+                    guard let choice else { return }
+                    onMove(choice.folderId)
+                }
+                .disabled(choice == nil)
+            }
+            .padding(.top, 18)
         }
-        .padding(.horizontal, 14)
-        .frame(height: 32)
-        .background(isSelected ? Brand.primaryContainer : Color(.secondarySystemGroupedBackground), in: Capsule())
-        .foregroundStyle(isSelected ? Brand.onPrimaryContainer : Color.primary)
+        .onAppear { choice = initialChoice }
+    }
+
+    private var rows: some View {
+        VStack(spacing: 0) {
+            ChoiceRow(title: String(localized: "No folder"), isSelected: choice == .unsorted) {
+                choice = .unsorted
+            }
+            ForEach(folders, id: \.id) { folder in
+                ChoiceRow(
+                    title: folder.name,
+                    hint: hint(for: folder),
+                    isSelected: choice == .folder(folder.id)
+                ) {
+                    choice = .folder(folder.id)
+                }
+            }
+            Button(action: onNewFolder) {
+                HStack(spacing: 14) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 18, weight: .regular))
+                        .frame(width: 22, height: 22)
+                    Text(String(localized: "New folder"))
+                        .offhandText(.body, face: .interMedium)
+                    if isNewFolderGated { ProBadge() }
+                }
+                .foregroundStyle(OffhandColor.ink)
+                .frame(maxWidth: .infinity, minHeight: Self.rowHeight, alignment: .leading)
+            }
+            .buttonStyle(.offhandRow)
+        }
+    }
+
+    private func hint(for folder: FolderUi) -> String {
+        let count = String(folder.noteCount)
+        guard let style = folder.style else { return count }
+        return "\(styleLabel(style).localizedUppercase) · \(count)"
     }
 }
 
-private struct ModelPreparationBanner: View {
+private struct SelectionFooter: View {
+    let onMove: () -> Void
+    let onDelete: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Hairline()
+            HStack(spacing: OffhandSpacing.controls) {
+                PrimaryButton(String(localized: "Move to folder"), systemImage: "folder", fillsWidth: true, action: onMove)
+                PlainTextButton(String(localized: "Delete"), tone: .danger, action: onDelete)
+            }
+            .padding(.horizontal, OffhandSpacing.screen)
+            .padding(.top, OffhandSpacing.card)
+            .padding(.bottom, OffhandSpacing.controls)
+        }
+        .background(OffhandColor.ground.ignoresSafeArea(edges: .bottom))
+    }
+}
+
+private struct ModelPreparationCard: View {
     let preparation: ModelPreparationUi
     let onDownloadOnMobileData: () -> Void
     @State private var isInfoVisible = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            switch onEnum(of: preparation) {
-            case .downloading(let downloading):
-                HStack(spacing: 12) {
-                    ProgressView()
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(String(localized: "Setting up your on-device AI"))
-                            .font(.subheadline.weight(.semibold))
-                        Text(String(localized: "New notes start processing once this finishes."))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Text("\(Int(downloading.progressPercent))%")
-                        .font(.subheadline.weight(.medium))
-                        .monospacedDigit()
-                        .foregroundStyle(.secondary)
-                    infoButton
-                }
-            case .waitingForMobileData(let waiting):
-                HStack(spacing: 12) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(String(localized: "Your on-device AI is ready to download"))
-                            .font(.subheadline.weight(.semibold))
-                        Text(String(format: String(localized: "About %@ GB · waits for Wi‑Fi"), waiting.sizeGb))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    infoButton
-                }
-                Button(String(localized: "Download on mobile data"), action: onDownloadOnMobileData)
-                    .buttonStyle(.bordered)
-                    .frame(maxWidth: .infinity)
+        card
+            .offhandDialog(isPresented: $isInfoVisible) {
+                OffhandDialog(
+                    title: String(localized: "Your on-device AI"),
+                    message: String(localized: "Offhand turns recordings into notes with on-device AI that runs entirely on your iPhone. It is a one-time download; after that, nothing is uploaded, ever."),
+                    confirmLabel: String(localized: "Got it"),
+                    onConfirm: { isInfoVisible = false },
+                    onDismiss: { isInfoVisible = false }
+                )
             }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(.bar)
-        .alert(String(localized: "Your on-device AI"), isPresented: $isInfoVisible) {
-            Button(String(localized: "Got it")) {}
-        } message: {
-            Text(String(localized: "Offhand turns recordings into notes with on-device AI that runs entirely on your iPhone. It is a one-time download; after that, nothing is uploaded, ever."))
+    }
+
+    @ViewBuilder
+    private var card: some View {
+        switch onEnum(of: preparation) {
+        case .downloading(let downloading):
+            StatusCard(
+                title: String(localized: "Setting up your on-device AI"),
+                number: "\(Int(downloading.progressPercent))%",
+                progress: Double(downloading.progressPercent) / 100,
+                showsProgress: true,
+                message: String(localized: "New notes start processing once this finishes."),
+                titleTrailing: { infoButton },
+                actions: { EmptyView() }
+            )
+        case .waitingForMobileData(let waiting):
+            StatusCard(
+                title: String(localized: "Your on-device AI is ready to download"),
+                message: String(format: String(localized: "About %@ GB · waits for Wi‑Fi"), waiting.sizeGb),
+                titleTrailing: { infoButton },
+                actions: {
+                    PlainTextButton(String(localized: "Download on mobile data"), action: onDownloadOnMobileData)
+                        .padding(.horizontal, -OffhandSpacing.controls)
+                }
+            )
         }
     }
 
@@ -705,84 +919,13 @@ private struct ModelPreparationBanner: View {
             isInfoVisible = true
         } label: {
             Image(systemName: "info.circle")
+                .font(.system(size: 16, weight: .regular))
+                .foregroundStyle(OffhandColor.ink3)
+                .frame(width: 24, height: 24)
+                .contentShape(Rectangle())
         }
+        .buttonStyle(.offhandPress)
         .accessibilityLabel(String(localized: "About your on-device AI"))
-    }
-}
-
-private struct NoteCardRow: View {
-    let note: NoteCardUi
-    let progress: Int?
-    let isWaitingForAi: Bool
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(highlighted(note.title, note.titleHighlights))
-                .font(.headline)
-                .lineLimit(1)
-            if note.status == .processing {
-                HStack(spacing: 8) {
-                    ProgressView()
-                    Text(progressText)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-            } else if note.status == .interrupted {
-                Label(
-                    String(localized: "Paused. Open the note to continue."),
-                    systemImage: "pause.circle"
-                )
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            } else if note.status == .failed {
-                Label(
-                    String(localized: "We were unable to create a summary and transcript for this note."),
-                    systemImage: "exclamationmark.triangle"
-                )
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            } else if !note.preview.isEmpty {
-                Text(highlighted(note.preview, note.previewHighlights))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-            }
-            HStack(spacing: 12) {
-                Text(note.time)
-                if let duration = note.durationText {
-                    Label(duration, systemImage: "waveform")
-                }
-                if let folder = note.folderName {
-                    Label(folder, systemImage: "folder")
-                        .lineLimit(1)
-                }
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        }
-        .padding(.vertical, 2)
-    }
-
-    private var progressText: String {
-        if isWaitingForAi {
-            return String(localized: "Waiting for your on-device AI to finish downloading")
-        }
-        if let progress { return "\(progress)%" }
-        return String(localized: "Preparing your note")
-    }
-
-    private func highlighted(_ text: String, _ ranges: [TextRangeUi]) -> AttributedString {
-        var attributed = AttributedString(text)
-        let utf16 = text.utf16
-        for range in ranges {
-            guard let lower = utf16.index(utf16.startIndex, offsetBy: Int(range.start), limitedBy: utf16.endIndex),
-                  let upper = utf16.index(utf16.startIndex, offsetBy: Int(range.end), limitedBy: utf16.endIndex),
-                  lower < upper,
-                  let start = AttributedString.Index(lower, within: attributed),
-                  let end = AttributedString.Index(upper, within: attributed) else { continue }
-            attributed[start..<end].backgroundColor = Brand.searchHighlight
-        }
-        return attributed
     }
 }
 
@@ -791,56 +934,21 @@ private struct RecordSheetRequest: Identifiable {
     let folderId: Int64?
 }
 
-// iOS stops the on-device AI as soon as the app leaves the foreground, so a
-// note in progress is only finished while Offhand stays in front.
-struct KeepOpenBanner: View {
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            ProgressView()
-            VStack(alignment: .leading, spacing: 2) {
-                Text(String(localized: "Preparing your note"))
-                    .font(.subheadline.weight(.semibold))
-                Text(String(localized: "Keep Offhand open until your note is ready."))
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .background(Brand.primaryContainer, in: RoundedRectangle(cornerRadius: Brand.cardRadius))
-        .foregroundStyle(Brand.onPrimaryContainer)
-        .accessibilityElement(children: .combine)
-    }
-}
-
-struct KeepOpenHint: View {
-    var body: some View {
-        Label(
-            String(localized: "Keep Offhand open until your note is ready."),
-            systemImage: "iphone"
-        )
-        .font(.footnote)
-        .foregroundStyle(.secondary)
-    }
-}
-
-// Shown until the database has answered, so a cold start never flashes the
-// empty library at someone who has notes.
 private struct NotesLoadingState: View {
-    private static let cardLines: [CGFloat] = [0.55, 0.3, 1, 0.8]
+    private static let lineWidths: [CGFloat] = [0.55, 0.9, 0.3]
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             ForEach(0..<4, id: \.self) { _ in
-                SkeletonLines(widths: Self.cardLines)
-                    .padding(20)
-                    .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Brand.cardRadius))
+                Skeleton(lineWidths: Self.lineWidths)
+                    .padding(.vertical, 18)
+                    .overlay(alignment: .bottom) { Hairline() }
             }
             Spacer()
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, OffhandSpacing.screen)
         .padding(.top, 12)
-        .background(Color(.systemGroupedBackground))
+        .background(OffhandColor.ground)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(String(localized: "Loading your notes"))
     }

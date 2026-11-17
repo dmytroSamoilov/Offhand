@@ -5,7 +5,6 @@ data class AboutSupportUiState(
     val model: ModelUi = ModelUi(),
     val modelOptions: List<ModelOptionUi> = emptyList(),
     val selectedModelId: String? = null,
-    val isTelemetryEnabled: Boolean = false,
     val isDeveloperSectionVisible: Boolean = false,
     val isDeveloperOptionsEnabled: Boolean = false,
     val isDeleteModelConfirmationVisible: Boolean = false,

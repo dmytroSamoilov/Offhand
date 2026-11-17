@@ -25,7 +25,6 @@ kotlin {
             implementation(libs.androidx.core.ktx)
             implementation(libs.play.review.ktx)
             implementation(libs.timber)
-            implementation(libs.androidx.material.icons.extended)
             implementation(libs.androidx.material3.adaptive)
             implementation(libs.androidx.material3.adaptive.layout)
             implementation(libs.androidx.material3.adaptive.navigation)

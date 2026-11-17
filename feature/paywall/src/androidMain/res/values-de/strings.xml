@@ -74,8 +74,12 @@
         <item quantity="other">Weniger als %d Jahre im Jahresabo</item>
     </plurals>
     <string name="paywall_benefits_body">Alles in der Pro-Spalte gehört dir.</string>
-    <string name="paywall_trial_intro_title">Teste Offhand Pro 14 Tage kostenlos</string>
-    <string name="paywall_trial_intro_tagline">Alles aus Pro ist ab heute freigeschaltet. Ohne Zahlung, ohne Konto. Nach 14 Tagen behältst du die kostenlose Version, außer du upgradest.</string>
+    <plurals name="paywall_trial_offer_title">
+        <item quantity="one">Offhand Pro gehört dir noch %d Tag kostenlos</item>
+        <item quantity="other">Offhand Pro gehört dir noch %d Tage kostenlos</item>
+    </plurals>
+    <string name="paywall_trial_intro_tagline">Alles aus Pro ist schon freigeschaltet. Ohne Zahlung, ohne Konto. Wenn die Testphase endet, behältst du die kostenlose Version, außer du upgradest.</string>
+    <string name="paywall_trial_offer_continue">Pro weiter kostenlos nutzen</string>
     <string name="paywall_plan_monthly">Monatlich</string>
     <string name="paywall_plan_monthly_price">%1$s / Monat</string>
     <string name="paywall_plan_monthly_renews">Verlängert sich jeden Monat</string>

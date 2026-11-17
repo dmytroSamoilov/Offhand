@@ -6,8 +6,12 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.util.SizeF
+import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatusRepository
 import com.dmytrosamoilov.offhand.feature.recording.R
@@ -67,23 +71,39 @@ class RecordWidgetUpdater(
 
     private fun views(widgetId: Int, isRecording: Boolean): RemoteViews {
         val folder = store.folderOf(widgetId)
-        return RemoteViews(context.packageName, R.layout.record_widget).apply {
-            setInt(
-                R.id.record_widget_root,
-                "setBackgroundResource",
-                if (isRecording) R.drawable.record_widget_background_recording else R.drawable.record_widget_background,
-            )
-            setImageViewResource(
-                R.id.record_widget_icon,
-                if (isRecording) R.drawable.ic_record_widget_stop else R.drawable.ic_record_widget_mic,
-            )
-            setTextViewText(
-                R.id.record_widget_title,
-                context.getString(if (isRecording) R.string.record_widget_stop else R.string.record_widget_record),
-            )
-            setTextViewText(R.id.record_widget_subtitle, folder?.name ?: context.getString(R.string.record_widget_no_folder))
-            setOnClickPendingIntent(R.id.record_widget_root, tapIntent(widgetId, folder?.id, isRecording))
+        val tap = tapIntent(widgetId, folder?.id, isRecording)
+        return RemoteViews(
+            mapOf(
+                PILL_SIZE to pillViews(isRecording, tap),
+                STRIP_SIZE to stripViews(isRecording, folder?.name, tap),
+            ),
+        )
+    }
+
+    private fun pillViews(isRecording: Boolean, tap: PendingIntent?) = RemoteViews(context.packageName, R.layout.record_widget).apply {
+        setInt(R.id.record_widget_root, SET_BACKGROUND, if (isRecording) R.drawable.record_widget_pill_light else R.drawable.record_widget_pill_ink)
+        setImageViewResource(R.id.record_widget_mark, if (isRecording) R.drawable.record_widget_square else R.drawable.record_widget_dot)
+        setTextViewText(R.id.record_widget_title, context.getString(if (isRecording) R.string.record_widget_stop else R.string.record_widget_record))
+        setTextColor(R.id.record_widget_title, if (isRecording) INK else ON_INK)
+        setOnClickPendingIntent(R.id.record_widget_root, tap)
+    }
+
+    private fun stripViews(isRecording: Boolean, folderName: String?, tap: PendingIntent?) =
+        RemoteViews(context.packageName, R.layout.record_widget_wide).apply {
+            setInt(R.id.record_widget_root, SET_BACKGROUND, if (isRecording) R.drawable.record_widget_strip_dark else R.drawable.record_widget_strip_light)
+            setImageViewResource(R.id.record_widget_mark, if (isRecording) R.drawable.record_widget_mark_stop else R.drawable.record_widget_mark_record)
+            setTextViewText(R.id.record_widget_title, context.getString(if (isRecording) R.string.record_widget_stop_save else R.string.record_widget_record))
+            setTextColor(R.id.record_widget_title, if (isRecording) ON_DARK else INK)
+            setFolderLine(isRecording, folderName)
+            setOnClickPendingIntent(R.id.record_widget_root, tap)
         }
+
+    private fun RemoteViews.setFolderLine(isRecording: Boolean, folderName: String?) {
+        setViewVisibility(R.id.record_widget_folder, if (folderName == null) View.GONE else View.VISIBLE)
+        folderName ?: return
+        val line = if (isRecording) R.string.record_widget_recording_to_folder else R.string.record_widget_to_folder
+        setTextViewText(R.id.record_widget_folder, context.getString(line, folderName))
+        setTextColor(R.id.record_widget_folder, if (isRecording) RECORDING_LINE else FOLDER_LINE)
     }
 
     private fun tapIntent(widgetId: Int, folderId: Long?, isRecording: Boolean): PendingIntent? = when {
@@ -106,5 +126,13 @@ class RecordWidgetUpdater(
     private companion object {
         const val STOP_REQUEST = -1
         const val FLAGS = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        const val SET_BACKGROUND = "setBackgroundResource"
+        val PILL_SIZE = SizeF(110f, 40f)
+        val STRIP_SIZE = SizeF(220f, 40f)
+        val INK = "#0E1116".toColorInt()
+        val ON_INK = Color.WHITE
+        val ON_DARK = "#F2F4F7".toColorInt()
+        val FOLDER_LINE = "#5F6672".toColorInt()
+        val RECORDING_LINE = "#FF8A80".toColorInt()
     }
 }

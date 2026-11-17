@@ -47,7 +47,7 @@ appId: com.dmytrosamoilov.offhand.uitest
     commands:
       - tapOn: "Settings"
       - tapOn: "Backup & restore"
-      - tapOn: "Back up"
+      - tapOn: "Create backup file"
       - assertVisible: ".*neither you nor we can recover.*"
       - tapOn: "Passphrase"
       - inputText: "smoke-test-passphrase"

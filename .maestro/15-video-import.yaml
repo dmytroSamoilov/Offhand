@@ -62,8 +62,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       - assertVisible: "1 file is being imported.*"
       - tapOn: "OK"
       - tapOn:
-          id: "list.bullet"
-          text: "Notes"
+          id: "tab_notes"
 # The placeholder named after the file turns into the fourth note written by
 # the fake engines (smoke, audio import, folder recording came before)
 - extendedWaitUntil:

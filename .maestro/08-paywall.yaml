@@ -21,9 +21,9 @@ appId: com.dmytrosamoilov.offhand.uitest
       - tapOn: "Free"
       - scrollUntilVisible:
           element:
-            text: "Upgrade"
+            text: "Offhand Pro"
           direction: UP
-      - assertVisible: "Offhand Pro"
+      - assertVisible: "Upgrade"
       - tapOn: "Upgrade"
       # The comparison opens collapsed; the rest of it is behind this control
       - tapOn: "See everything in Pro"
@@ -54,9 +54,8 @@ appId: com.dmytrosamoilov.offhand.uitest
           timeout: 10000
       - scrollUntilVisible:
           element:
-            text: "Subscription"
+            text: "Lifetime, yours forever"
           direction: UP
-      - assertVisible: "Lifetime, yours forever"
       - tapOn: "Lifetime, yours forever"
       - assertVisible: "Everything in the Pro column is yours."
       - assertNotVisible: "Start 14-day free trial"
@@ -74,6 +73,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       - tapOn: "Settings"
       - scrollUntilVisible:
           element: "Pro status override"
+          centerElement: true
       - tapOn: "Free"
       - scrollUntilVisible:
           element: "Upgrade"
@@ -88,15 +88,15 @@ appId: com.dmytrosamoilov.offhand.uitest
       - tapOn: "Close"
       - assertNotVisible: "Start 14-day free trial"
       - scrollUntilVisible:
-          element: "Show smart suggestions"
+          element: "Smart suggestions"
       # 07 leaves the switch on; the free user turns it off without a gate and
       # the paywall opens on the way back on
-      - tapOn: "Show smart suggestions"
+      - tapOn: "Smart suggestions"
       - runFlow:
           when:
             notVisible: "Find dates and to-dos in your notes"
           commands:
-            - tapOn: "Show smart suggestions"
+            - tapOn: "Smart suggestions"
       - assertVisible: "Find dates and to-dos in your notes"
       - tapOn: "Start 14-day free trial"
       - extendedWaitUntil:
@@ -112,6 +112,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       - assertVisible: "Lifetime, yours forever"
       - scrollUntilVisible:
           element: "Pro status override"
+          centerElement: true
       - tapOn: "Store"
 
 # A fresh launch as a subscriber: the first paywall of the process must show

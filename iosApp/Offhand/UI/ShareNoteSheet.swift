@@ -1,9 +1,6 @@
 import OffhandShared
 import SwiftUI
 
-// Two tabs, because a note is shared either as a document or as its recording:
-// the text tab lists the file formats, the audio tab explains what the
-// recording file is.
 struct ShareNoteSheet: View {
     let viewModel: NotesViewModel
     let hasAudio: Bool
@@ -12,7 +9,7 @@ struct ShareNoteSheet: View {
     @State private var tab: ShareTab = .text
     @State private var format: NoteExportFormat = .text
 
-    private enum ShareTab: Hashable {
+    private enum ShareTab: Int {
         case text
         case audio
     }
@@ -20,113 +17,74 @@ struct ShareNoteSheet: View {
     private static let formats: [NoteExportFormat] = [.text, .pdf, .docx]
 
     var body: some View {
-        NavigationStack {
-            List {
-                if hasAudio {
-                    tabPicker
-                }
-                if tab == .text {
-                    formatSection
-                } else {
-                    audioSection
-                }
-            }
-            .listSectionSpacing(12)
-            .navigationTitle(String(localized: "Share note"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(String(localized: "Cancel")) { viewModel.onShareDismissed() }
-                }
-            }
-            .safeAreaInset(edge: .bottom) { shareButton }
-        }
-    }
-
-    private var tabPicker: some View {
-        Picker(String(localized: "Share note"), selection: $tab) {
-            Text(String(localized: "Text file")).tag(ShareTab.text)
-            Text(String(localized: "Audio file")).tag(ShareTab.audio)
-        }
-        .pickerStyle(.segmented)
-        .labelsHidden()
-        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
-        .listRowBackground(Color.clear)
-    }
-
-    private var formatSection: some View {
-        Section {
-            ForEach(Self.formats, id: \.self) { option in
-                formatRow(option)
-            }
-        } footer: {
-            Text(footerText)
-        }
-    }
-
-    private var audioSection: some View {
-        Section {
-            optionLabel(
-                title: String(localized: "WAV file"),
-                fileExtension: ".wav",
-                isDimmed: false,
-                isPro: false
-            )
-        } footer: {
-            Text(String(localized: "The recording is shared as an uncompressed WAV file, 16 kHz mono. Every player and transcription tool opens it."))
-        }
-    }
-
-    private var footerText: String {
-        String(localized: "Please keep in mind that shared copies are no longer encrypted once they leave your iPhone.")
-    }
-
-    private func formatRow(_ option: NoteExportFormat) -> some View {
-        let isLocked = self.isLocked(option)
-        return Button {
-            format = option
-        } label: {
-            HStack {
-                optionLabel(
-                    title: title(for: option),
-                    fileExtension: fileExtension(for: option),
-                    isDimmed: false,
-                    isPro: isLocked
+        OffhandSheet(title: String(localized: "Share note")) {
+            if hasAudio {
+                SegmentedControl(
+                    options: [String(localized: "Text file"), String(localized: "Audio file")],
+                    selectedIndex: tab.rawValue,
+                    onSelect: { tab = ShareTab(rawValue: $0) ?? .text }
                 )
-                Spacer()
-                if format == option {
-                    Image(systemName: "checkmark").foregroundStyle(Brand.primary)
+                .padding(.bottom, OffhandSpacing.controls)
+            }
+            if tab == .text {
+                formatRows
+            } else {
+                audioExplanation
+            }
+            Text(String(localized: "The file is made on your iPhone and goes only where you send it."))
+                .offhandText(.caption)
+                .foregroundStyle(OffhandColor.ink3)
+                .padding(.top, 14)
+            HStack(spacing: OffhandSpacing.controls) {
+                PrimaryButton(String(localized: "Share"), systemImage: "square.and.arrow.up", fillsWidth: true) {
+                    confirm(viewModel.onShareConfirmed(noteFormat:includeAudio:))
+                }
+                SecondaryButton(String(localized: "Download"), systemImage: "arrow.down.to.line", fillsWidth: true) {
+                    confirm(viewModel.onSaveToDeviceConfirmed(noteFormat:includeAudio:))
                 }
             }
-            // A plain button in a List only reacts where its label draws
-            // something; the shape makes the whole row, Spacer included, tappable
-            .contentShape(Rectangle())
+            .padding(.top, 18)
         }
-        .buttonStyle(.plain)
     }
 
-    private func optionLabel(title: String, fileExtension: String, isDimmed: Bool, isPro: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack(spacing: 6) {
-                Text(title).foregroundStyle(isDimmed ? AnyShapeStyle(.secondary) : AnyShapeStyle(.primary))
-                if isPro { ProBadge() }
+    private var formatRows: some View {
+        VStack(spacing: 0) {
+            ForEach(Self.formats, id: \.self) { option in
+                ChoiceRow(
+                    title: title(for: option),
+                    hint: fileExtension(for: option),
+                    isSelected: format == option,
+                    showsProBadge: isLocked(option),
+                    showsDivider: option != Self.formats.last
+                ) {
+                    format = option
+                }
             }
-            Text(fileExtension).font(.footnote).foregroundStyle(.secondary)
         }
     }
 
-    private var shareButton: some View {
-        Button {
-            Haptics.confirm()
-            let isText = tab == .text
-            viewModel.onShareConfirmed(noteFormat: isText ? format : nil, includeAudio: !isText)
-        } label: {
-            Text(String(localized: "Share")).frame(maxWidth: .infinity)
+    private var audioExplanation: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: OffhandSpacing.controls) {
+                Text(String(localized: "WAV file"))
+                    .offhandText(.body, face: .interSemibold)
+                    .foregroundStyle(OffhandColor.ink)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text(verbatim: ".wav")
+                    .font(.offhandMonoSmall)
+                    .foregroundStyle(OffhandColor.ink3)
+            }
+            Text(String(localized: "The recording is shared as an uncompressed WAV file, 16 kHz mono. Every player and transcription tool opens it."))
+                .offhandText(.bodySmall)
+                .foregroundStyle(OffhandColor.ink2)
         }
-        .buttonStyle(.borderedProminent)
-        .controlSize(.large)
-        .padding()
-        .background(Color(.systemGroupedBackground))
+        .padding(.vertical, OffhandSpacing.controls)
+    }
+
+    private func confirm(_ action: (NoteExportFormat?, Bool) -> Void) {
+        Haptics.confirm()
+        let isText = tab == .text
+        action(isText ? format : nil, !isText)
     }
 
     private func isLocked(_ option: NoteExportFormat) -> Bool {
@@ -135,9 +93,9 @@ struct ShareNoteSheet: View {
 
     private func title(for option: NoteExportFormat) -> String {
         switch option {
-        case .pdf: return String(localized: "PDF file")
-        case .docx: return String(localized: "Word file")
-        default: return String(localized: "Text file")
+        case .pdf: return String(localized: "PDF")
+        case .docx: return String(localized: "Word")
+        default: return String(localized: "Plain text")
         }
     }
 

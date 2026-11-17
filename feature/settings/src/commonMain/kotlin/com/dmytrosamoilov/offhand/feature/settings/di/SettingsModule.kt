@@ -59,7 +59,33 @@ val featureSettingsModule = module {
     factoryOf(::SetProOverrideUseCase)
     factoryOf(::SetSmartSuggestionsEnabledUseCase)
     factoryOf(::SetTelemetryConsentUseCase)
-    viewModelOf(::SettingsViewModel)
+    viewModel {
+        SettingsViewModel(
+            observeDynamicColor = get(),
+            setDynamicColor = get(),
+            observeNoteStyle = get(),
+            observeCustomNoteStyles = get(),
+            observeAppLockEnabled = get(),
+            setAppLockEnabled = get(),
+            appLockManager = get(),
+            observeTelemetryConsent = get(),
+            setTelemetryConsent = get(),
+            importAudio = get(),
+            isAudioImportAvailable = get(),
+            observeImportAllowance = get(),
+            observeSmartSuggestionsEnabled = get(),
+            setSmartSuggestionsEnabled = get(),
+            observeNoteFeatures = get(),
+            setNoteFeatureEnabled = get(),
+            observeProStatus = get(),
+            observeProOverride = get(),
+            setProOverride = get(),
+            proUpgradeGate = get(),
+            redeemProCode = get(),
+            buildInfo = get(),
+            analyticsTracker = get(),
+        )
+    }
     viewModelOf(::SharedAudioImportViewModel)
     viewModelOf(::AboutSupportViewModel)
     viewModelOf(::NoteStylesViewModel)

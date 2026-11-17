@@ -115,8 +115,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.navigation.compose)
     implementation(libs.koin.androidx.compose)
-    implementation(libs.androidx.material3.adaptive.navigation.suite)
-    implementation(libs.androidx.material.icons.extended)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kermit)
     implementation(libs.timber)

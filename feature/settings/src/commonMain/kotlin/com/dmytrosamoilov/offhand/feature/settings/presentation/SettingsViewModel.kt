@@ -26,7 +26,9 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteFea
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteFeatureEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.RedeemProCodeUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
@@ -52,6 +54,8 @@ class SettingsViewModel(
     observeAppLockEnabled: ObserveAppLockEnabledUseCase,
     private val setAppLockEnabled: SetAppLockEnabledUseCase,
     private val appLockManager: AppLockManager,
+    observeTelemetryConsent: ObserveTelemetryConsentUseCase,
+    private val setTelemetryConsent: SetTelemetryConsentUseCase,
     private val importAudio: ImportAudioUseCase,
     isAudioImportAvailable: IsAudioImportAvailableUseCase,
     private val observeImportAllowance: ObserveImportAllowanceUseCase,
@@ -77,6 +81,7 @@ class SettingsViewModel(
         collect(observeDynamicColor()) { enabled -> copy(isDynamicColorEnabled = enabled) }
         collect(observeNoteStyle()) { style -> copy(noteStyle = style) }
         collect(observeAppLockEnabled()) { enabled -> copy(isAppLockEnabled = enabled) }
+        collect(observeTelemetryConsent()) { granted -> copy(isTelemetryEnabled = granted) }
         collect(observeCustomNoteStyles()) { styles -> copy(customStyles = styles.map { it.toOptionUi() }) }
         collect(isAudioImportAvailable()) { unlocked -> copy(isAudioImportUnlocked = unlocked) }
         collect(observeImportAllowance()) { allowance -> withImportAllowance(allowance) }
@@ -109,6 +114,12 @@ class SettingsViewModel(
             val effective = enabled && appLockManager.isDeviceSecure
             setAppLockEnabled(effective)
             analyticsTracker.track(AnalyticsEvents.appLockToggled(effective))
+        }
+    }
+
+    fun onTelemetryChanged(granted: Boolean) {
+        launchSafely(showLoading = false) {
+            setTelemetryConsent(granted)
         }
     }
 

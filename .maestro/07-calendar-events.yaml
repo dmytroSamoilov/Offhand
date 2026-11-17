@@ -25,10 +25,9 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - tapOn: "Settings"
-      - tapOn: "Show smart suggestions"
+      - tapOn: "Smart suggestions"
       - tapOn:
-          text: "Notes"
-          index: 1
+          id: "tab_notes"
 - tapOn: "Smoke test note"
 - runFlow:
     when:

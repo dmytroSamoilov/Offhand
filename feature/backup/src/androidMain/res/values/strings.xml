@@ -40,4 +40,5 @@
     <string name="backup_file_name_label">File name</string>
     <string name="backup_save_button">Save backup</string>
     <string name="backup_done">Done</string>
+    <string name="backup_subtitle">Offhand makes one encrypted file. You decide where it is kept.</string>
 </resources>

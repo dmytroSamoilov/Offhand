@@ -6,6 +6,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialUsage
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialUsageCount
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.GetProTrialDaysLeftUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.GetProTrialRecapUseCase
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
@@ -43,6 +44,9 @@ class PaywallViewModelTest {
     private val restoreProPurchases: RestoreProPurchasesUseCase = mockk()
     private val observeProStatus: ObserveProStatusUseCase = mockk()
     private val getProTrialRecap: GetProTrialRecapUseCase = mockk()
+    private val getProTrialDaysLeft: GetProTrialDaysLeftUseCase = mockk {
+        coEvery { this@mockk.invoke() } returns 9
+    }
     private val gate: ProUpgradeGate = mockk(relaxed = true)
 
     @Before
@@ -93,6 +97,7 @@ class PaywallViewModelTest {
 
         assertEquals(PaywallMode.OFFER, viewModel.uiState.value.mode)
         assertEquals(emptyList<ProTrialUsageCount>(), viewModel.uiState.value.trialRecap)
+        assertEquals(9, viewModel.uiState.value.trialDaysLeft)
     }
 
     @Test
@@ -193,6 +198,7 @@ class PaywallViewModelTest {
         restoreProPurchases = restoreProPurchases,
         observeProStatus = observeProStatus,
         getProTrialRecap = getProTrialRecap,
+        getProTrialDaysLeft = getProTrialDaysLeft,
         proUpgradeGate = gate,
         analyticsTracker = tracker,
     )

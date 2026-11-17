@@ -2,8 +2,7 @@
 <resources>
     <string name="notes_title">Notas</string>
     <string name="notes_empty_title">Aún no hay notas</string>
-    <string name="notes_empty_hint">Toca Grabar para crear tu primera nota.</string>
-    <string name="notes_record_fab_label">Grabar</string>
+    <string name="notes_empty_hint">Toca Grabar y habla. Offhand escribe la transcripción y un resumen en tu teléfono.</string>
     <string name="notes_model_banner_title">Configurando tu IA en el dispositivo</string>
     <string name="notes_model_banner_subtitle">Descargando en segundo plano</string>
     <string name="notes_model_banner_waiting_title">Tu IA en el dispositivo está lista para descargarse</string>
@@ -15,12 +14,6 @@
     <string name="notes_model_banner_info_dismiss">Entendido</string>
     <string name="notes_day_today">Hoy</string>
     <string name="notes_day_yesterday">Ayer</string>
-    <plurals name="notes_word_count">
-        <item quantity="one">%1$s palabra</item>
-        <item quantity="many">%1$s palabras</item>
-        <item quantity="other">%1$s palabras</item>
-    </plurals>
-    <string name="notes_record_fab_description">Iniciar una grabación nueva</string>
     <string name="notes_select_prompt">Selecciona una nota para leerla</string>
     <string name="notes_back_description">Volver a las notas</string>
     <string name="notes_play_description">Reproducir grabación</string>
@@ -57,10 +50,7 @@
     <string name="notes_retranscribe_description">Volver a transcribir</string>
     <string name="notes_retranscribe_dialog_title">¿Volver a transcribir esta nota?</string>
     <string name="notes_retranscribe_dialog_body">La grabación se transcribirá y resumirá de nuevo, sustituyendo el título, el resumen y la transcripción actuales. La grabación de audio se conserva.</string>
-    <string name="notes_badge_encrypted">Cifrada</string>
     <string name="notes_more_actions_description">Más acciones</string>
-    <string name="notes_share_dialog_title">¿Qué quieres compartir?</string>
-    <string name="notes_share_dialog_body">Ten en cuenta que las copias compartidas dejan de estar cifradas en cuanto salen de tu teléfono.</string>
     <string name="notes_share_dialog_confirm">Compartir</string>
     <string name="notes_share_tab_text">Archivo de texto</string>
     <string name="notes_share_tab_audio">Archivo de audio</string>
@@ -68,9 +58,7 @@
     <string name="notes_share_audio_details">La grabación se comparte como un archivo WAV sin comprimir, 16 kHz mono. Cualquier reproductor o herramienta de transcripción lo abre.</string>
     <string name="notes_share_download">Descargar</string>
     <string name="notes_share_date_label">Fecha</string>
-    <string name="notes_share_format_text">Archivo de texto</string>
-    <string name="notes_share_format_pdf">Archivo PDF</string>
-    <string name="notes_share_format_docx">Archivo de Word</string>
+    <string name="notes_share_format_text">Texto sin formato</string>
     <string name="notes_share_recorded_label">Grabado</string>
     <string name="notes_share_duration_label">Duración</string>
     <string name="notes_share_created_with">Creado con Offhand</string>
@@ -131,4 +119,22 @@
     <string name="notes_bulk_delete_title">¿Eliminar las notas seleccionadas?</string>
     <string name="notes_bulk_delete_body">Se eliminarán de forma permanente de tu teléfono. Esta acción no se puede deshacer.</string>
     <string name="notes_audio_only">Esta nota es solo la grabación.</string>
+    <string name="notes_search_hint">La búsqueda revisa títulos, resúmenes y transcripciones.</string>
+    <string name="notes_seek_description">Posición de reproducción</string>
+    <string name="notes_processing_summary_hint">La transcripción ya está en la otra pestaña. Mantén Offhand abierto hasta que tu nota esté lista.</string>
+    <string name="notes_interrupted_title">Tu nota está en pausa</string>
+    <string name="notes_failed_summary_title">No se pudo escribir el resumen</string>
+    <string name="notes_failed_title">No se pudo terminar la nota</string>
+    <string name="notes_move_confirm">Mover</string>
+    <string name="notes_share_privacy">El archivo se crea en tu teléfono y solo va adonde tú lo envíes.</string>
+    <plurals name="notes_search_count">
+        <item quantity="one">%1$d nota</item>
+        <item quantity="many">%1$d notas</item>
+        <item quantity="other">%1$d notas</item>
+    </plurals>
+    <plurals name="notes_move_notes_title">
+        <item quantity="one">Mover %1$d nota</item>
+        <item quantity="many">Mover %1$d notas</item>
+        <item quantity="other">Mover %1$d notas</item>
+    </plurals>
 </resources>

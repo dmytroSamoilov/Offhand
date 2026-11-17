@@ -3,45 +3,29 @@
     android:id="@+id/record_widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/record_widget_background"
+    android:background="@drawable/record_widget_pill_ink"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp">
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp">
 
     <ImageView
-        android:id="@+id/record_widget_icon"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
+        android:id="@+id/record_widget_mark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:importantForAccessibility="no"
-        android:src="@drawable/ic_record_widget_mic" />
+        android:src="@drawable/record_widget_dot" />
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/record_widget_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:layout_weight="1"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/record_widget_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="@string/record_widget_record"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/record_widget_subtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="@string/record_widget_no_folder"
-            android:textColor="#CCFFFFFF"
-            android:textSize="12sp" />
-    </LinearLayout>
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-medium"
+        android:maxLines="1"
+        android:text="@string/record_widget_record"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp" />
 </LinearLayout>

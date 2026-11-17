@@ -29,6 +29,7 @@ appId: com.dmytrosamoilov.offhand.uitest
     commands:
       - scrollUntilVisible:
           element: "Pro status override"
+          centerElement: true
       - tapOn: "Free"
       # Pro imports did not use up the free taste (the row sits next to the
       # override at the bottom of the form)
@@ -49,11 +50,11 @@ appId: com.dmytrosamoilov.offhand.uitest
             text: "Writing styles"
           direction: UP
 - extendedWaitUntil:
-    visible: "Default: Summary"
+    visible: "Default: Summary|Summary"
     timeout: 5000
 - waitForAnimationToEnd:
     timeout: 3000
-- tapOn: "Writing styles"
+- tapOn: "Writing styles?"
 - extendedWaitUntil:
     visible: "Built in"
     timeout: 5000
@@ -83,7 +84,7 @@ appId: com.dmytrosamoilov.offhand.uitest
             text: "Backup & restore"
           direction: DOWN
 - tapOn: "Backup & restore"
-- tapOn: "Back up"
+- tapOn: "Back up|Create backup file"
 - tapOn: "Passphrase"
 - inputText: "smoke-test-passphrase"
 - tapOn: "Repeat passphrase"
@@ -126,8 +127,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - tapOn:
-          id: "list.bullet"
-          text: "Notes"
+          id: "tab_notes"
 - tapOn: "New folder"
 - inputText: "Second"
 - tapOn: "Save"
@@ -157,7 +157,7 @@ appId: com.dmytrosamoilov.offhand.uitest
     visible: "Summary"
     timeout: 10000
 - tapOn: "Share note"
-- tapOn: "PDF file"
+- tapOn: "PDF( file)?"
 - tapOn: "Share"
 - assertVisible: "Share this note as PDF or Word"
 - tapOn: "Close"
@@ -187,4 +187,5 @@ appId: com.dmytrosamoilov.offhand.uitest
       - tapOn: "Settings"
       - scrollUntilVisible:
           element: "Pro status override"
+          centerElement: true
       - tapOn: "Store"

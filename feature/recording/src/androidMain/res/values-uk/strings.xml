@@ -8,13 +8,12 @@
     <string name="recording_pause_label">Пауза</string>
     <string name="recording_resume_label">Продовжити</string>
     <string name="recording_paused_label">Пауза</string>
-    <string name="recording_active_label">Триває запис…</string>
+    <string name="recording_active_label">Триває запис</string>
     <string name="recording_save_note_button">Зберегти нотатку</string>
     <string name="recording_discard_button">Видалити запис</string>
     <string name="recording_discard_dialog_title">Видалити цей запис?</string>
-    <string name="recording_discard_dialog_body">Запис і все розшифроване до цього моменту буде видалено. Це неможливо скасувати.</string>
+    <string name="recording_discard_dialog_body">%1$s аудіо та розшифровку буде видалено. Це неможливо скасувати.</string>
     <string name="recording_discard_dialog_confirm">Видалити</string>
-    <string name="recording_discard_dialog_cancel">Скасувати</string>
     <string name="recording_stage_finishing">Зберігаємо ваш запис…</string>
     <string name="recording_processing_hint">Це вікно можна закрити — нотатка зʼявиться у списку, коли буде готова.</string>
     <string name="recording_external_mic_generic">Зовнішній мікрофон</string>
@@ -47,4 +46,27 @@
     <string name="record_widget_no_folder">Без папки</string>
     <string name="record_widget_config_title">Зберігати записи в</string>
     <string name="record_widget_config_save">Зберегти</string>
+    <string name="recording_discard_keep">Продовжити запис</string>
+    <string name="recording_live_label">Розшифровка в реальному часі</string>
+    <plurals name="recording_duration_hours">
+        <item quantity="one">%d година</item>
+        <item quantity="few">%d години</item>
+        <item quantity="many">%d годин</item>
+        <item quantity="other">%d години</item>
+    </plurals>
+    <plurals name="recording_duration_minutes">
+        <item quantity="one">%d хвилина</item>
+        <item quantity="few">%d хвилини</item>
+        <item quantity="many">%d хвилин</item>
+        <item quantity="other">%d хвилини</item>
+    </plurals>
+    <plurals name="recording_duration_seconds">
+        <item quantity="one">%d секунда</item>
+        <item quantity="few">%d секунди</item>
+        <item quantity="many">%d секунд</item>
+        <item quantity="other">%d секунди</item>
+    </plurals>
+    <string name="record_widget_stop_save">Зупинити й зберегти</string>
+    <string name="record_widget_to_folder">У папку %1$s</string>
+    <string name="record_widget_recording_to_folder">Запис у папку %1$s</string>
 </resources>

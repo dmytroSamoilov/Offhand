@@ -2,7 +2,9 @@
 <resources>
     <string name="destination_notes">Заметки</string>
     <string name="destination_settings">Настройки</string>
-    <string name="lock_title">Заметки заблокированы</string>
+    <string name="destination_record">Записать</string>
+    <string name="destination_record_description">Начать новую запись</string>
+    <string name="lock_title">Offhand заблокирован</string>
     <string name="lock_body">Ваши заметки зашифрованы на вашем телефоне. Разблокируйте, чтобы продолжить.</string>
     <string name="lock_unlock_button">Разблокировать</string>
     <string name="lock_prompt_title">Разблокировать Offhand</string>

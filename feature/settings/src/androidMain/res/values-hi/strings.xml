@@ -64,23 +64,19 @@
     <string name="settings_note_style_error_duplicate">यह नाम पहले से इस्तेमाल में है</string>
     <string name="settings_note_style_error_sections_too_many">अधिकतम %1$d अनुभाग इस्तेमाल करें</string>
     <string name="settings_note_style_describe_button">बताएँ और AI को फ़ॉर्म भरने दें</string>
-    <string name="settings_note_style_describe_title">अपने नोट का वर्णन करें</string>
-    <string name="settings_note_style_describe_body">बताएँ कि रिकॉर्डिंग किस बारे में है और तैयार नोट में क्या होना चाहिए। AI अनुभाग सुझाएगा; बाद में आप सब कुछ बदल सकते हैं।</string>
     <string name="settings_note_style_describe_hint">उदाहरण: मैं फ़ुटबॉल टीमों को कोच करता हूँ। हर अभ्यास के बाद मैं रिकॉर्ड करता हूँ कि हमने क्या अभ्यास किया, क्या अच्छा रहा, हर खिलाड़ी को किस पर काम करना है और अगली बार क्या योजना है।</string>
     <string name="settings_note_style_describe_build">शैली बनाएँ</string>
     <string name="settings_note_style_describe_running">अनुभागों पर विचार हो रहा है…</string>
     <string name="settings_note_style_describe_failed">AI इसे शैली में नहीं बदल सका। इसे अलग तरह से बताने की कोशिश करें।</string>
 
-    <string name="settings_security_title">सुरक्षा</string>
-    <string name="settings_app_lock_label">Offhand खोलने के लिए अनलॉक ज़रूरी करें</string>
+    <string name="settings_app_lock_label">ऐप लॉक</string>
     <string name="settings_app_lock_description">हर बार Offhand खुलने पर फ़िंगरप्रिंट, चेहरा या स्क्रीन लॉक मांगता है।</string>
     <string name="settings_app_lock_unavailable">इसका इस्तेमाल करने के लिए इस फ़ोन पर स्क्रीन लॉक सेट करें।</string>
-    <string name="settings_appearance_title">दिखावट</string>
     <string name="settings_dynamic_color_label">वॉलपेपर के रंग</string>
     <string name="settings_dynamic_color_description">ऐप को बिल्ट-इन पैलेट के बजाय आपके वॉलपेपर (Material You) के रंगों में रंगता है।</string>
 
     <string name="settings_privacy_title">निजता</string>
-    <string name="settings_telemetry_label">गुमनाम उपयोग और स्थिरता रिपोर्ट</string>
+    <string name="settings_telemetry_label">गुमनाम उपयोग साझा करें</string>
     <string name="settings_telemetry_description">उपयोग के आंकड़े और क्रैश रिपोर्ट — जैसे ऐप खुलने की संख्या, डिवाइस मॉडल और ऐप वर्शन। आपके नोट्स, रिकॉर्डिंग या कोई निजी डेटा कभी नहीं।</string>
     <string name="settings_feedback_title">फ़ीडबैक</string>
     <string name="settings_feature_request_label">फ़ीचर का अनुरोध करें</string>
@@ -120,7 +116,6 @@
     </plurals>
     <string name="settings_pro_upgrade_subtitle">शैलियाँ, PDF और Word निर्यात, स्मार्ट सुझाव, ऑडियो और वीडियो आयात और असीमित फ़ोल्डर</string>
     <string name="settings_pro_upgrade">अपग्रेड करें</string>
-    <string name="settings_subscription_title">सदस्यता</string>
     <string name="settings_subscription_lifetime">आजीवन, हमेशा के लिए आपकी</string>
     <string name="settings_subscription_included">इस डिवाइस पर शामिल है। यह बैकअप का हिस्सा नहीं है और दोबारा इंस्टॉल करने पर नहीं रहता।</string>
     <string name="settings_subscription_trial">मुफ़्त ट्रायल</string>
@@ -131,22 +126,23 @@
     <string name="settings_smart_suggestions_title">स्मार्ट सुझाव</string>
     <string name="settings_smart_suggestions_label">स्मार्ट सुझाव दिखाएँ</string>
     <string name="settings_smart_suggestions_description">हर नए नोट में कैलेंडर इवेंट और काम ढूँढता है। प्रोसेसिंग में कुछ सेकंड और लगते हैं।</string>
-    <string name="settings_notes_title">नोट्स</string>
-    <string name="settings_backup_section_title">बैकअप</string>
-    <string name="settings_about_section_title">जानकारी</string>
     <string name="settings_about_footer">सब कुछ आपके फ़ोन पर ही रहता है। कुछ भी कभी अपलोड नहीं होता।</string>
     <string name="settings_note_style_editor_no_sections">बिना सेक्शन के नोट एक मुक्त सारांश होगा।</string>
     <string name="settings_redeem_code">कोड रिडीम करें</string>
     <string name="settings_redeem_code_body">Google Play सालाना प्लान खोलेगा। भुगतान विधि के बगल वाले तीर पर टैप करें, “कोड रिडीम करें” चुनें और अपना कोड डालें। इसका मुफ़्त ट्रायल सामान्य ट्रायल की जगह लेगा।</string>
     <string name="settings_redeem_code_confirm">जारी रखें</string>
-    <plurals name="settings_subscription_app_trial_days_left">
-        <item quantity="one">मुफ़्त ट्रायल: %d दिन बाकी</item>
-        <item quantity="other">मुफ़्त ट्रायल: %d दिन बाकी</item>
-    </plurals>
     <string name="settings_subscription_monthly">मासिक</string>
     <string name="settings_subscription_monthly_renews">मासिक, %1$s को नवीनीकृत होगी</string>
     <string name="settings_transcription_label">रिकॉर्डिंग ट्रांसक्राइब करें</string>
     <string name="settings_transcription_description">आपकी कही बात को टेक्स्ट में बदलता है। बंद होने पर नोट सिर्फ़ रिकॉर्डिंग होता है।</string>
     <string name="settings_summary_label">सारांश लिखें</string>
     <string name="settings_summary_description">ट्रांसक्रिप्ट से आपकी लेखन शैली में नोट लिखता है। इसके लिए ट्रांसक्रिप्शन चालू होना चाहिए।</string>
+    <string name="settings_group_writes">Offhand क्या लिखता है</string>
+    <string name="settings_group_in_out">नोट्स लाना और ले जाना</string>
+    <string name="settings_group_app">ऐप</string>
+    <plurals name="settings_plan_days_left">
+        <item quantity="one">%d दिन बाकी</item>
+        <item quantity="other">%d दिन बाकी</item>
+    </plurals>
+    <string name="settings_plan_trial_body">मुफ़्त ट्रायल के दौरान Pro की हर सुविधा खुली है। उसके बाद Offhand मुफ़्त रहता है, सारांश स्टाइल और दो फ़ोल्डर के साथ।</string>
 </resources>

@@ -1,5 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import io.mockk.verify
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
@@ -108,6 +110,11 @@ class SettingsViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private val observeTelemetryConsent: ObserveTelemetryConsentUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
+    private val setTelemetryConsent: SetTelemetryConsentUseCase = mockk(relaxed = true)
+
     private fun viewModel() = SettingsViewModel(
         observeDynamicColor = observeDynamicColor,
         setDynamicColor = setDynamicColor,
@@ -116,6 +123,8 @@ class SettingsViewModelTest {
         observeAppLockEnabled = observeAppLockEnabled,
         setAppLockEnabled = setAppLockEnabled,
         appLockManager = appLockManager,
+        observeTelemetryConsent = observeTelemetryConsent,
+        setTelemetryConsent = setTelemetryConsent,
         importAudio = importAudio,
         isAudioImportAvailable = isAudioImportAvailable,
         observeImportAllowance = observeImportAllowance,
@@ -324,5 +333,17 @@ class SettingsViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         coVerify(exactly = 0) { setNoteFeatureEnabled(NoteFeature.SUMMARY, any()) }
+    }
+
+    @Test
+    fun `the usage-sharing switch reads and writes the telemetry consent`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isTelemetryEnabled)
+
+        viewModel.onTelemetryChanged(false)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { setTelemetryConsent(false) }
     }
 }

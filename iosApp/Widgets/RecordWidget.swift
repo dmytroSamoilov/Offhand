@@ -2,8 +2,6 @@ import AppIntents
 import SwiftUI
 import WidgetKit
 
-// The widget's settings: the folder new recordings go to. Declared only in
-// the extension, which is where iOS runs the folder list for the edit sheet.
 struct WidgetFolderEntity: AppEntity {
     static let typeDisplayRepresentation: TypeDisplayRepresentation = "Folder"
     static let defaultQuery = WidgetFolderQuery()
@@ -44,8 +42,6 @@ struct RecordWidgetEntry: TimelineEntry {
     let folder: RecordWidgetFolderInfo?
 }
 
-// One entry is enough: the app reloads the widget whenever what it shows
-// changes, a recording starting or stopping included.
 struct RecordWidgetProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> RecordWidgetEntry {
         RecordWidgetEntry(date: .now, snapshot: RecordWidgetSnapshot(), folder: nil)
@@ -59,8 +55,6 @@ struct RecordWidgetProvider: AppIntentTimelineProvider {
         Timeline(entries: [entry(for: configuration)], policy: .never)
     }
 
-    // The folder is looked up by id every time, so a rename shows up and a
-    // deleted folder falls back to no folder.
     private func entry(for configuration: RecordWidgetConfigurationIntent) -> RecordWidgetEntry {
         let snapshot = RecordWidgetShared.load()
         let folderId = configuration.folder.flatMap { Int64($0.id) }
@@ -83,43 +77,123 @@ struct RecordWidget: Widget {
     }
 }
 
-// Record opens the app with the widget's folder and the app starts the
-// recording there; Stop stops it without opening the app.
 private struct RecordWidgetView: View {
     let entry: RecordWidgetEntry
+    @Environment(\.colorScheme) private var systemScheme
+    @Environment(\.widgetFamily) private var family
 
-    private static let idle = Color(red: 11 / 255, green: 87 / 255, blue: 208 / 255)
-    private static let recording = Color(red: 179 / 255, green: 38 / 255, blue: 30 / 255)
+    private var isRecording: Bool { entry.snapshot.isRecording }
+
+    private var scheme: ColorScheme {
+        guard isRecording else { return systemScheme }
+        return systemScheme == .dark ? .light : .dark
+    }
 
     var body: some View {
         content
-            .containerBackground(entry.snapshot.isRecording ? Self.recording : Self.idle, for: .widget)
+            .foregroundStyle(OffhandColor.ink)
+            .environment(\.colorScheme, scheme)
+            .containerBackground(for: .widget) {
+                (isRecording ? OffhandColor.ground : OffhandColor.surface).environment(\.colorScheme, scheme)
+            }
     }
 
     @ViewBuilder
     private var content: some View {
-        if entry.snapshot.isRecording {
-            Button(intent: StopWidgetRecordingIntent()) { label }
+        if isRecording {
+            Button(intent: StopWidgetRecordingIntent()) { layout }
                 .buttonStyle(.plain)
+                .accessibilityLabel(String(localized: "Stop recording"))
         } else {
-            label.widgetURL(RecordWidgetShared.recordURL(folderId: entry.folder?.id))
+            layout
+                .widgetURL(RecordWidgetShared.recordURL(folderId: entry.folder?.id))
+                .accessibilityLabel(String(localized: "Record a note"))
         }
     }
 
-    private var label: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Image(systemName: entry.snapshot.isRecording ? "stop.fill" : "mic.fill")
-                .font(.title)
-            Spacer(minLength: 0)
-            Text(entry.snapshot.isRecording ? String(localized: "Stop") : String(localized: "Record"))
-                .font(.headline)
-            Text(entry.folder?.name ?? String(localized: "No folder"))
-                .font(.caption)
-                .opacity(0.8)
+    @ViewBuilder
+    private var layout: some View {
+        if family == .systemMedium {
+            HStack(spacing: 14) {
+                glyph
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(isRecording ? String(localized: "Stop and save") : String(localized: "Record"))
+                        .offhandText(.rowTitle)
+                    caption
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                if !isRecording {
+                    WidgetWave().frame(width: 64, height: 28)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        } else {
+            VStack(alignment: .leading, spacing: 0) {
+                glyph
+                Spacer(minLength: 0)
+                Text(isRecording ? String(localized: "Stop") : String(localized: "Record"))
+                    .font(.offhand(.tightSemibold, size: 24, relativeTo: .title2))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                caption.padding(.top, 2)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        }
+    }
+
+    private var glyph: some View {
+        Circle()
+            .fill(OffhandColor.ink)
+            .frame(width: 44, height: 44)
+            .overlay {
+                if isRecording {
+                    RoundedRectangle(cornerRadius: 3, style: .continuous)
+                        .fill(OffhandColor.ground)
+                        .frame(width: 14, height: 14)
+                } else {
+                    Circle()
+                        .fill(OffhandColor.record)
+                        .frame(width: 12, height: 12)
+                }
+            }
+            .accessibilityHidden(true)
+    }
+
+    @ViewBuilder
+    private var caption: some View {
+        if let text = captionText {
+            Text(text)
+                .offhandText(.meta)
+                .foregroundStyle(isRecording ? OffhandColor.danger : OffhandColor.ink3)
                 .lineLimit(1)
         }
-        .foregroundStyle(.white)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .contentShape(Rectangle())
+    }
+
+    private var captionText: String? {
+        switch (isRecording, entry.folder?.name) {
+        case (true, let name?): return String(format: String(localized: "Recording to %@"), name)
+        case (true, nil): return String(localized: "Recording")
+        case (false, let name?): return String(format: String(localized: "To %@"), name)
+        case (false, nil): return nil
+        }
+    }
+}
+
+private struct WidgetWave: View {
+    private static let bars: [CGFloat] = [0.3, 0.6, 0.45, 0.85, 0.5, 1, 0.65, 0.4, 0.7, 0.35, 0.55]
+
+    var body: some View {
+        Canvas { context, size in
+            let step = size.width / CGFloat(Self.bars.count)
+            for (index, level) in Self.bars.enumerated() {
+                let x = step * (CGFloat(index) + 0.5)
+                let height = level * size.height
+                var path = Path()
+                path.move(to: CGPoint(x: x, y: (size.height - height) / 2))
+                path.addLine(to: CGPoint(x: x, y: (size.height + height) / 2))
+                context.stroke(path, with: .color(OffhandColor.wave), style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+            }
+        }
+        .accessibilityHidden(true)
     }
 }

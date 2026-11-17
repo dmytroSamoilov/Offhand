@@ -2,8 +2,7 @@
 <resources>
     <string name="notes_title">Notizen</string>
     <string name="notes_empty_title">Noch keine Notizen</string>
-    <string name="notes_empty_hint">Tippe auf „Aufnehmen“, um deine erste Notiz aufzunehmen.</string>
-    <string name="notes_record_fab_label">Aufnehmen</string>
+    <string name="notes_empty_hint">Tippe auf „Aufnehmen“ und sprich. Offhand schreibt das Transkript und eine Zusammenfassung auf deinem Handy.</string>
     <string name="notes_model_banner_title">Deine KI auf dem Gerät wird eingerichtet</string>
     <string name="notes_model_banner_subtitle">Wird im Hintergrund heruntergeladen</string>
     <string name="notes_model_banner_waiting_title">Deine KI auf dem Gerät ist bereit zum Download</string>
@@ -15,11 +14,6 @@
     <string name="notes_model_banner_info_dismiss">Verstanden</string>
     <string name="notes_day_today">Heute</string>
     <string name="notes_day_yesterday">Gestern</string>
-    <plurals name="notes_word_count">
-        <item quantity="one">%1$s Wort</item>
-        <item quantity="other">%1$s Wörter</item>
-    </plurals>
-    <string name="notes_record_fab_description">Neue Aufnahme starten</string>
     <string name="notes_select_prompt">Wähle eine Notiz aus, um sie zu lesen</string>
     <string name="notes_back_description">Zurück zu den Notizen</string>
     <string name="notes_play_description">Aufnahme abspielen</string>
@@ -56,10 +50,7 @@
     <string name="notes_retranscribe_description">Neu transkribieren</string>
     <string name="notes_retranscribe_dialog_title">Diese Notiz neu transkribieren?</string>
     <string name="notes_retranscribe_dialog_body">Die Aufnahme wird erneut transkribiert und zusammengefasst; der aktuelle Titel, die Zusammenfassung und das Transkript werden ersetzt. Die Audioaufnahme selbst bleibt erhalten.</string>
-    <string name="notes_badge_encrypted">Verschlüsselt</string>
     <string name="notes_more_actions_description">Weitere Aktionen</string>
-    <string name="notes_share_dialog_title">Was möchtest du teilen?</string>
-    <string name="notes_share_dialog_body">Bedenke, dass geteilte Kopien nicht mehr verschlüsselt sind, sobald sie dein Handy verlassen.</string>
     <string name="notes_share_dialog_confirm">Teilen</string>
     <string name="notes_share_tab_text">Textdatei</string>
     <string name="notes_share_tab_audio">Audiodatei</string>
@@ -67,9 +58,7 @@
     <string name="notes_share_audio_details">Die Aufnahme wird als unkomprimierte WAV-Datei geteilt, 16 kHz mono. Jeder Player und jedes Transkriptionstool öffnet sie.</string>
     <string name="notes_share_download">Herunterladen</string>
     <string name="notes_share_date_label">Datum</string>
-    <string name="notes_share_format_text">Textdatei</string>
-    <string name="notes_share_format_pdf">PDF-Datei</string>
-    <string name="notes_share_format_docx">Word-Datei</string>
+    <string name="notes_share_format_text">Nur Text</string>
     <string name="notes_share_recorded_label">Aufgenommen</string>
     <string name="notes_share_duration_label">Dauer</string>
     <string name="notes_share_created_with">Erstellt mit Offhand</string>
@@ -130,4 +119,20 @@
     <string name="notes_bulk_delete_title">Ausgewählte Notizen löschen?</string>
     <string name="notes_bulk_delete_body">Sie werden dauerhaft von deinem Smartphone entfernt. Das lässt sich nicht rückgängig machen.</string>
     <string name="notes_audio_only">Diese Notiz besteht nur aus der Aufnahme.</string>
+    <string name="notes_search_hint">Die Suche durchsucht Titel, Zusammenfassungen und Transkripte.</string>
+    <string name="notes_seek_description">Wiedergabeposition</string>
+    <string name="notes_processing_summary_hint">Das Transkript ist schon im anderen Tab. Lass Offhand geöffnet, bis deine Notiz fertig ist.</string>
+    <string name="notes_interrupted_title">Deine Notiz ist angehalten</string>
+    <string name="notes_failed_summary_title">Die Zusammenfassung konnte nicht geschrieben werden</string>
+    <string name="notes_failed_title">Die Notiz konnte nicht fertiggestellt werden</string>
+    <string name="notes_move_confirm">Verschieben</string>
+    <string name="notes_share_privacy">Die Datei entsteht auf deinem Handy und geht nur dorthin, wohin du sie schickst.</string>
+    <plurals name="notes_search_count">
+        <item quantity="one">%1$d Notiz</item>
+        <item quantity="other">%1$d Notizen</item>
+    </plurals>
+    <plurals name="notes_move_notes_title">
+        <item quantity="one">%1$d Notiz verschieben</item>
+        <item quantity="other">%1$d Notizen verschieben</item>
+    </plurals>
 </resources>

@@ -5,77 +5,44 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.common.LegalLinks
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
-import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
-import com.dmytrosamoilov.offhand.core.data.domain.ProTrialPolicy
-import com.dmytrosamoilov.offhand.core.data.domain.ProTrialUsage
-import com.dmytrosamoilov.offhand.core.data.domain.ProTrialUsageCount
-import com.dmytrosamoilov.offhand.core.ui.R as CoreUiR
+import com.dmytrosamoilov.offhand.core.designsystem.component.BarIconButton
+import com.dmytrosamoilov.offhand.core.designsystem.component.GoldButton
+import com.dmytrosamoilov.offhand.core.designsystem.component.OffhandDialog
+import com.dmytrosamoilov.offhand.core.designsystem.component.OffhandIcons
+import com.dmytrosamoilov.offhand.core.designsystem.component.PlainTextButton
 import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
-import com.dmytrosamoilov.offhand.core.designsystem.component.ProGold
+import com.dmytrosamoilov.offhand.core.designsystem.component.SecondaryButton
+import com.dmytrosamoilov.offhand.core.designsystem.component.TextButtonTone
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandDarkContent
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandSpacing
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.feature.paywall.R
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
@@ -93,447 +60,177 @@ fun PaywallScreen(viewModel: PaywallViewModel = koinViewModel()) {
     }
     BackHandler(onBack = viewModel::onClosed)
 
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
-        when {
-            state.mode == PaywallMode.OPENING -> Unit
-            state.mode == PaywallMode.BENEFITS -> BenefitsContent(onClose = viewModel::onClosed)
-            state.isPro -> SuccessContent(feature = state.feature)
-            else -> PaywallContent(state = state, viewModel = viewModel)
+    OffhandDarkContent {
+        Box(modifier = Modifier.fillMaxSize().background(OffhandTheme.colors.ground)) {
+            when {
+                state.mode == PaywallMode.OPENING -> Unit
+                state.mode == PaywallMode.BENEFITS -> BenefitsContent(onClose = viewModel::onClosed)
+                state.isPro -> SuccessContent(feature = state.feature)
+                else -> OfferContent(state = state, viewModel = viewModel)
+            }
         }
-    }
-    state.message?.let { message ->
-        PaywallMessageDialog(message = message, onDismiss = viewModel::onMessageDismissed)
+        state.message?.let { message ->
+            PaywallMessageDialog(message = message, onDismiss = viewModel::onMessageDismissed)
+        }
     }
 }
 
 @Composable
-private fun PaywallContent(state: PaywallUiState, viewModel: PaywallViewModel) {
+private fun OfferContent(state: PaywallUiState, viewModel: PaywallViewModel) {
     Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
-        CloseRow(onClose = viewModel::onClosed)
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Header(state = state)
+        PaywallTopBar(onClose = viewModel::onClosed) {
+            PlainTextButton(
+                text = stringResource(R.string.paywall_restore),
+                onClick = viewModel::onRestoreClicked,
+                tone = TextButtonTone.Muted,
+                enabled = !state.isPurchasing,
+            )
+        }
+        ScrollingBody {
+            OfferHeader(state = state)
             if (state.trialRecap.isNotEmpty()) TrialRecap(lines = state.trialRecap)
-            ComparisonTable(highlighted = state.feature, isCollapsible = true)
+            BenefitLines(highlighted = state.feature)
             PlanSection(state = state, onPlanSelected = viewModel::onPlanSelected, onRetry = viewModel::onRetryOffers)
-            LegalRow(isEnabled = !state.isPurchasing, onRestore = viewModel::onRestoreClicked)
+            ComparisonTable(highlighted = state.feature, isCollapsible = true)
+            LegalLinksRow()
         }
         if (state.feature == ProFeature.FREE_TRIAL) {
             TrialIntroActions(state = state, onStartTrial = viewModel::onClosed, onPurchase = viewModel::onPurchaseClicked)
         } else {
-            BottomActions(state = state, onPurchase = viewModel::onPurchaseClicked, onContinueFree = viewModel::onClosed)
+            OfferActions(state = state, onPurchase = viewModel::onPurchaseClicked, onContinueFree = viewModel::onClosed)
         }
     }
+}
+
+@Composable
+private fun PaywallTopBar(onClose: () -> Unit, trailing: @Composable () -> Unit = {}) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        BarIconButton(icon = OffhandIcons.Close, contentDescription = stringResource(R.string.paywall_close), onClick = onClose)
+        trailing()
+    }
+}
+
+@Composable
+private fun ColumnScope.ScrollingBody(content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier = Modifier
+            .weight(1f)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = OffhandSpacing.screen)
+            .padding(bottom = OffhandSpacing.section),
+        verticalArrangement = Arrangement.spacedBy(OffhandSpacing.section),
+        content = content,
+    )
+}
+
+@Composable
+private fun OfferHeader(state: PaywallUiState) {
+    Column(modifier = Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        ProLabel()
+        Text(text = state.headline(), style = OffhandTheme.type.title, color = OffhandTheme.colors.ink)
+        Text(text = stringResource(state.taglineRes()), style = OffhandTheme.type.body, color = OffhandTheme.colors.ink2)
+    }
+}
+
+@Composable
+private fun LegalLinksRow() {
+    val context = LocalContext.current
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+        PlainTextButton(
+            text = stringResource(R.string.paywall_terms),
+            onClick = { openLink(context, LegalLinks.TERMS) },
+            tone = TextButtonTone.Muted,
+        )
+        PlainTextButton(
+            text = stringResource(R.string.paywall_privacy),
+            onClick = { openLink(context, LegalLinks.PRIVACY_POLICY) },
+            tone = TextButtonTone.Muted,
+        )
+    }
+}
+
+@Composable
+private fun OfferActions(state: PaywallUiState, onPurchase: () -> Unit, onContinueFree: () -> Unit) {
+    val offer = state.selectedOffer
+    PinnedActions {
+        GoldButton(
+            text = offer.ctaLabel(),
+            onClick = onPurchase,
+            enabled = offer != null && !state.isPurchasing,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        PlainTextButton(
+            text = stringResource(R.string.paywall_continue_free),
+            onClick = onContinueFree,
+            tone = TextButtonTone.Muted,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        offer?.disclosure()?.let { Disclosure(text = it) }
+    }
+}
+
+@Composable
+private fun TrialIntroActions(state: PaywallUiState, onStartTrial: () -> Unit, onPurchase: () -> Unit) {
+    val offer = state.selectedOffer
+    PinnedActions {
+        GoldButton(
+            text = stringResource(R.string.paywall_trial_offer_continue),
+            onClick = onStartTrial,
+            enabled = !state.isPurchasing,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        SecondaryButton(
+            text = stringResource(offer.buyNowLabelRes()),
+            onClick = onPurchase,
+            enabled = offer != null && !state.isPurchasing,
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+        )
+    }
+}
+
+@Composable
+private fun PinnedActions(content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        content = content,
+    )
+}
+
+@Composable
+private fun Disclosure(text: String) {
+    Text(
+        text = text,
+        style = OffhandTheme.type.caption.copy(fontSize = OffhandTheme.type.meta.fontSize * 12 / 11),
+        color = OffhandTheme.colors.ink3,
+        textAlign = TextAlign.Center,
+    )
 }
 
 @Composable
 private fun BenefitsContent(onClose: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
-        CloseRow(onClose = onClose)
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                ProCrown(size = 48.dp)
-                Spacer(modifier = Modifier.height(10.dp))
+        PaywallTopBar(onClose = onClose)
+        ScrollingBody {
+            Column(modifier = Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                ProLabel()
                 Text(
                     text = stringResource(R.string.paywall_success_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
+                    style = OffhandTheme.type.title,
+                    color = OffhandTheme.colors.ink,
                 )
-                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = stringResource(R.string.paywall_benefits_body),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
+                    style = OffhandTheme.type.body,
+                    color = OffhandTheme.colors.ink2,
                 )
             }
             ComparisonTable(highlighted = ProFeature.GENERAL, isCollapsible = false)
-        }
-    }
-}
-
-@Composable
-private fun CloseRow(onClose: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.End) {
-        IconButton(onClick = onClose) {
-            Icon(imageVector = Icons.Filled.Close, contentDescription = stringResource(R.string.paywall_close))
-        }
-    }
-}
-
-@Composable
-private fun Header(state: PaywallUiState) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        ProCrown(size = 48.dp)
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = stringResource(state.headlineRes()),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = stringResource(state.taglineRes()),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-    }
-}
-
-// What the free trial was used for, shown back on the paywall that follows it.
-@Composable
-private fun TrialRecap(lines: List<ProTrialUsageCount>) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = ProGold.copy(alpha = 0.12f)),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            lines.forEach { line ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = stringResource(line.usage.labelRes()),
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Text(text = line.count.toString(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-    }
-}
-
-private data class ComparisonRow(val titleRes: Int, val hintRes: Int?, val features: Set<ProFeature>) {
-    val isPro: Boolean get() = features.isNotEmpty()
-}
-
-private val comparisonRows = listOf(
-    ComparisonRow(R.string.paywall_free_summary, null, emptySet()),
-    ComparisonRow(R.string.paywall_free_private, null, emptySet()),
-    ComparisonRow(R.string.paywall_free_offline, null, emptySet()),
-    ComparisonRow(R.string.paywall_free_no_ads, null, emptySet()),
-    ComparisonRow(R.string.paywall_free_unlimited, null, emptySet()),
-    ComparisonRow(R.string.paywall_free_backup, null, emptySet()),
-    ComparisonRow(R.string.paywall_pro_styles, R.string.paywall_pro_styles_hint, setOf(ProFeature.CUSTOM_STYLES, ProFeature.NOTE_STYLES)),
-    ComparisonRow(R.string.paywall_pro_export, R.string.paywall_pro_export_hint, setOf(ProFeature.DOCUMENT_EXPORT)),
-    ComparisonRow(R.string.paywall_pro_suggestions, R.string.paywall_pro_suggestions_hint, setOf(ProFeature.SMART_SUGGESTIONS)),
-    ComparisonRow(R.string.paywall_pro_import, R.string.paywall_pro_import_hint, setOf(ProFeature.AUDIO_IMPORT)),
-    ComparisonRow(R.string.paywall_pro_folders, R.string.paywall_pro_folders_hint, setOf(ProFeature.FOLDER_STYLES, ProFeature.FOLDERS)),
-    ComparisonRow(R.string.paywall_pro_backup, R.string.paywall_pro_backup_hint, setOf(ProFeature.BACKUP_AUDIO)),
-)
-
-// Collapsed, the table shows its first rows fading out under a "see
-// everything" control, so the plans sit higher on the screen; the row the
-// paywall was opened for and the Pro rows come first, which keeps the part
-// that shows worth reading.
-@Composable
-private fun ComparisonTable(highlighted: ProFeature, isCollapsible: Boolean) {
-    var isExpanded by rememberSaveable { mutableStateOf(!isCollapsible) }
-    val rows = remember(highlighted) {
-        comparisonRows.sortedWith(compareBy({ highlighted !in it.features }, { !it.isPro }))
-    }
-    val container = MaterialTheme.colorScheme.surfaceContainerLow
-    Card(colors = CardDefaults.cardColors(containerColor = container), modifier = Modifier.fillMaxWidth()) {
-        Box(modifier = Modifier.animateContentSize()) {
-            ComparisonRows(
-                rows = rows,
-                highlighted = highlighted,
-                modifier = if (isExpanded) Modifier else Modifier.height(COLLAPSED_TABLE_HEIGHT).clipToBounds(),
-            )
-            if (!isExpanded) {
-                ExpandTableOverlay(container = container, onExpand = { isExpanded = true }, modifier = Modifier.matchParentSize())
-            }
-        }
-        if (isExpanded && isCollapsible) {
-            TextButton(onClick = { isExpanded = false }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                Text(text = stringResource(R.string.paywall_benefits_collapse))
-                Icon(imageVector = Icons.Filled.KeyboardArrowUp, contentDescription = null)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ComparisonRows(rows: List<ComparisonRow>, highlighted: ProFeature, modifier: Modifier) {
-    Column(modifier = modifier.wrapContentHeight(align = Alignment.Top, unbounded = true).padding(vertical = 8.dp)) {
-        TableHeader()
-        rows.forEachIndexed { index, row ->
-            if (index > 0 && row.isPro != rows[index - 1].isPro) {
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
-            }
-            TableRow(row = row, isHighlighted = highlighted in row.features)
-        }
-        Text(
-            text = stringResource(R.string.paywall_pro_more),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        )
-        Text(
-            text = stringResource(R.string.paywall_privacy_note),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 8.dp),
-        )
-    }
-}
-
-@Composable
-private fun ExpandTableOverlay(container: Color, onExpand: () -> Unit, modifier: Modifier) {
-    Box(
-        modifier = modifier
-            .background(Brush.verticalGradient(0.3f to Color.Transparent, 0.8f to container))
-            .clickable(onClick = onExpand),
-        contentAlignment = Alignment.BottomCenter,
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 10.dp)) {
-            Text(
-                text = stringResource(R.string.paywall_benefits_expand),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Icon(
-                imageVector = Icons.Filled.KeyboardArrowDown,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-            )
-        }
-    }
-}
-
-@Composable
-private fun TableHeader() {
-    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-        Spacer(modifier = Modifier.weight(1f))
-        Text(
-            text = stringResource(R.string.paywall_column_free),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.width(COLUMN_WIDTH),
-        )
-        Row(modifier = Modifier.width(COLUMN_WIDTH), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-            ProCrown(size = 14.dp)
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(text = stringResource(R.string.paywall_column_pro), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-        }
-    }
-}
-
-@Composable
-private fun TableRow(row: ComparisonRow, isHighlighted: Boolean) {
-    val background = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp)
-            .background(background, RoundedCornerShape(10.dp))
-            .padding(horizontal = 8.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(row.titleRes),
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (isHighlighted) FontWeight.SemiBold else FontWeight.Normal,
-            )
-            row.hintRes?.let { hint ->
-                Text(text = stringResource(hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
-        CheckCell(isIncluded = !row.isPro, tint = MaterialTheme.colorScheme.primary)
-        CheckCell(isIncluded = true, tint = ProGold)
-    }
-}
-
-@Composable
-private fun CheckCell(isIncluded: Boolean, tint: Color) {
-    Box(modifier = Modifier.width(COLUMN_WIDTH), contentAlignment = Alignment.Center) {
-        if (isIncluded) {
-            Icon(imageVector = Icons.Filled.Check, contentDescription = null, tint = tint, modifier = Modifier.size(18.dp))
-        } else {
-            Text(text = stringResource(R.string.paywall_not_included), color = MaterialTheme.colorScheme.outline)
-        }
-    }
-}
-
-@Composable
-private fun PlanSection(state: PaywallUiState, onPlanSelected: (ProPlan) -> Unit, onRetry: () -> Unit) {
-    when {
-        state.isLoadingOffers -> Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        state.offers.isEmpty() -> OffersUnavailable(onRetry = onRetry)
-        else -> Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            state.offers.forEach { offer ->
-                PlanCard(
-                    offer = offer,
-                    isSelected = offer.plan == state.selectedPlan,
-                    onClick = { onPlanSelected(offer.plan) },
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun OffersUnavailable(onRetry: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = stringResource(R.string.paywall_offers_unavailable),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-        TextButton(onClick = onRetry) { Text(text = stringResource(R.string.paywall_retry)) }
-    }
-}
-
-// One row per plan, stacked, so a third plan and long prices in any
-// language still fit: the selection mark, the plan with what it means, and
-// the price at the end.
-@Composable
-private fun PlanCard(offer: ProOfferUi, isSelected: Boolean, onClick: () -> Unit) {
-    val outline = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-    Card(
-        border = BorderStroke(if (isSelected) 2.dp else 1.dp, outline),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        modifier = Modifier.fillMaxWidth().selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick),
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            SelectionMark(isSelected = isSelected)
-            Column(modifier = Modifier.weight(1f)) {
-                PlanCardTitle(offer = offer)
-                Text(text = offer.hintLabel(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                offer.secondHintLabel()?.let { hint ->
-                    Text(text = hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-            Text(text = offer.priceLabel(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        }
-    }
-}
-
-@Composable
-private fun SelectionMark(isSelected: Boolean) {
-    val color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-    Box(
-        modifier = Modifier
-            .size(22.dp)
-            .background(if (isSelected) color else Color.Transparent, CircleShape)
-            .border(2.dp, color, CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (isSelected) {
-            Icon(
-                imageVector = Icons.Filled.Check,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(14.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun PlanCardTitle(offer: ProOfferUi) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(text = stringResource(offer.plan.titleRes()), style = MaterialTheme.typography.titleSmall, maxLines = 1)
-        if (offer.plan == ProPlan.LIFETIME) BestValueBadge()
-    }
-}
-
-@Composable
-private fun BestValueBadge() {
-    Text(
-        text = stringResource(R.string.paywall_plan_best_value),
-        style = MaterialTheme.typography.labelSmall,
-        color = ProGold,
-        maxLines = 1,
-        modifier = Modifier
-            .background(ProGold.copy(alpha = 0.18f), RoundedCornerShape(50))
-            .padding(horizontal = 8.dp, vertical = 3.dp),
-    )
-}
-
-@Composable
-private fun LegalRow(isEnabled: Boolean, onRestore: () -> Unit) {
-    val context = LocalContext.current
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        TextButton(onClick = onRestore, enabled = isEnabled) { Text(text = stringResource(R.string.paywall_restore)) }
-        TextButton(onClick = { openLink(context, LegalLinks.TERMS) }) { Text(text = stringResource(R.string.paywall_terms)) }
-        TextButton(onClick = { openLink(context, LegalLinks.PRIVACY_POLICY) }) { Text(text = stringResource(R.string.paywall_privacy)) }
-    }
-}
-
-@Composable
-private fun BottomActions(state: PaywallUiState, onPurchase: () -> Unit, onContinueFree: () -> Unit) {
-    val offer = state.selectedOffer
-    HorizontalDivider()
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Button(onClick = onPurchase, enabled = offer != null && !state.isPurchasing, modifier = Modifier.fillMaxWidth()) {
-            Text(text = offer.ctaLabel())
-        }
-        offer?.disclosure()?.let { disclosure ->
-            Text(
-                text = disclosure,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
-        }
-        TextButton(onClick = onContinueFree) { Text(text = stringResource(R.string.paywall_continue_free)) }
-    }
-}
-
-// The welcome to the fourteen free days: starting them is the main action
-// and costs nothing, buying a plan right away sits under it.
-@Composable
-private fun TrialIntroActions(state: PaywallUiState, onStartTrial: () -> Unit, onPurchase: () -> Unit) {
-    val offer = state.selectedOffer
-    HorizontalDivider()
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Button(onClick = onStartTrial, enabled = !state.isPurchasing, modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = pluralStringResource(
-                    R.plurals.paywall_cta_trial_days,
-                    ProTrialPolicy.DURATION_DAYS,
-                    ProTrialPolicy.DURATION_DAYS,
-                ),
-            )
-        }
-        OutlinedButton(onClick = onPurchase, enabled = offer != null && !state.isPurchasing, modifier = Modifier.fillMaxWidth()) {
-            Text(text = stringResource(offer.buyNowLabelRes()))
         }
     }
 }
@@ -543,21 +240,19 @@ private fun SuccessContent(feature: ProFeature) {
     Column(
         modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
     ) {
-        ProCrown(size = 72.dp)
-        Spacer(modifier = Modifier.height(16.dp))
+        ProCrown(size = 56.dp)
         Text(
             text = stringResource(R.string.paywall_success_title),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
+            style = OffhandTheme.type.title,
+            color = OffhandTheme.colors.ink,
             textAlign = TextAlign.Center,
         )
-        Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = stringResource(if (feature == ProFeature.GENERAL) R.string.paywall_success_body else R.string.paywall_success_continue),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = OffhandTheme.type.body,
+            color = OffhandTheme.colors.ink2,
             textAlign = TextAlign.Center,
         )
     }
@@ -570,103 +265,13 @@ private fun PaywallMessageDialog(message: PaywallMessageUi, onDismiss: () -> Uni
         PaywallMessageUi.Pending -> R.string.paywall_message_pending
         PaywallMessageUi.NothingToRestore -> R.string.paywall_message_restore_nothing
     }
-    AlertDialog(
+    OffhandDialog(
+        title = stringResource(R.string.paywall_title),
+        body = stringResource(text),
         onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(R.string.paywall_title)) },
-        text = { Text(text = stringResource(text)) },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.paywall_message_dismiss)) } },
+        confirmLabel = stringResource(R.string.paywall_message_dismiss),
+        onConfirm = onDismiss,
     )
-}
-
-@Composable
-private fun ProOfferUi.priceLabel(): String = when (plan) {
-    ProPlan.YEARLY -> stringResource(R.string.paywall_plan_yearly_price, price)
-    ProPlan.MONTHLY -> stringResource(R.string.paywall_plan_monthly_price, price)
-    else -> price
-}
-
-@Composable
-private fun ProOfferUi.hintLabel(): String = when {
-    plan == ProPlan.LIFETIME -> stringResource(R.string.paywall_plan_lifetime_hint)
-    trialDays > 0 -> pluralStringResource(R.plurals.paywall_plan_trial, trialDays, trialDays)
-    plan == ProPlan.MONTHLY -> stringResource(R.string.paywall_plan_monthly_renews)
-    else -> stringResource(R.string.paywall_plan_yearly_renews)
-}
-
-@Composable
-private fun ProOfferUi.secondHintLabel(): String? = when (plan) {
-    ProPlan.YEARLY -> monthlyPrice?.let { stringResource(R.string.paywall_plan_yearly_monthly, it) }
-    ProPlan.LIFETIME -> yearsOfYearly?.let { pluralStringResource(R.plurals.paywall_plan_lifetime_vs_yearly, it, it) }
-    ProPlan.NONE, ProPlan.MONTHLY, ProPlan.INCLUDED, ProPlan.TRIAL -> null
-}
-
-@Composable
-private fun ProOfferUi.disclosure(): String? = when {
-    plan == ProPlan.MONTHLY -> stringResource(R.string.paywall_monthly_disclosure, price)
-    plan != ProPlan.YEARLY -> null
-    trialDays > 0 -> stringResource(R.string.paywall_no_charge) + "\n" +
-        pluralStringResource(R.plurals.paywall_trial_disclosure, trialDays, trialDays, price)
-    else -> stringResource(R.string.paywall_yearly_disclosure, price)
-}
-
-@Composable
-private fun ProOfferUi?.ctaLabel(): String = when {
-    this == null -> stringResource(R.string.paywall_cta_trial)
-    plan == ProPlan.YEARLY && trialDays > 0 -> pluralStringResource(R.plurals.paywall_cta_trial_days, trialDays, trialDays)
-    plan == ProPlan.YEARLY || plan == ProPlan.MONTHLY -> stringResource(R.string.paywall_cta_subscribe)
-    else -> stringResource(R.string.paywall_cta_lifetime)
-}
-
-private fun ProOfferUi?.buyNowLabelRes(): Int =
-    if (this?.plan == ProPlan.LIFETIME) R.string.paywall_cta_lifetime else R.string.paywall_cta_subscribe
-
-private fun PaywallUiState.headlineRes(): Int = when {
-    feature != ProFeature.TRIAL_ENDED -> feature.headlineRes()
-    trialRecap.isEmpty() -> R.string.paywall_trial_ended_title
-    else -> R.string.paywall_trial_recap_title
-}
-
-private fun PaywallUiState.taglineRes(): Int = when {
-    feature == ProFeature.GENERAL -> R.string.paywall_tagline
-    feature == ProFeature.FREE_TRIAL -> R.string.paywall_trial_intro_tagline
-    feature != ProFeature.TRIAL_ENDED -> R.string.paywall_context_tagline
-    trialRecap.isEmpty() -> R.string.paywall_trial_ended_body
-    else -> R.string.paywall_trial_recap_tagline
-}
-
-private fun ProTrialUsage.labelRes(): Int = when (this) {
-    ProTrialUsage.MEETING_NOTES -> CoreUiR.string.core_ui_note_preset_meeting
-    ProTrialUsage.VISIT_NOTES -> CoreUiR.string.core_ui_note_preset_visit
-    ProTrialUsage.LEGAL_NOTES -> CoreUiR.string.core_ui_note_preset_legal
-    ProTrialUsage.EMAIL_NOTES -> CoreUiR.string.core_ui_note_preset_email
-    ProTrialUsage.CUSTOM_STYLE_NOTES -> R.string.paywall_usage_custom_styles
-    ProTrialUsage.PDF_EXPORTS -> R.string.paywall_usage_pdf
-    ProTrialUsage.WORD_EXPORTS -> R.string.paywall_usage_word
-    ProTrialUsage.IMPORTS -> R.string.paywall_usage_imports
-    ProTrialUsage.CALENDAR_EVENTS -> R.string.paywall_usage_calendar
-    ProTrialUsage.FOLDER_STYLES -> R.string.paywall_usage_folder_styles
-    ProTrialUsage.AUDIO_BACKUPS -> R.string.paywall_usage_backups
-}
-
-private fun ProPlan.titleRes(): Int = when (this) {
-    ProPlan.LIFETIME -> R.string.paywall_plan_lifetime
-    ProPlan.MONTHLY -> R.string.paywall_plan_monthly
-    else -> R.string.paywall_plan_yearly
-}
-
-private fun ProFeature.headlineRes(): Int = when (this) {
-    ProFeature.GENERAL -> R.string.paywall_title
-    ProFeature.CUSTOM_STYLES -> R.string.paywall_context_styles
-    ProFeature.DOCUMENT_EXPORT -> R.string.paywall_context_export
-    ProFeature.SMART_SUGGESTIONS -> R.string.paywall_context_suggestions
-    ProFeature.AUDIO_IMPORT -> R.string.paywall_context_import
-    ProFeature.FOLDER_STYLES -> R.string.paywall_context_folder_styles
-    ProFeature.NOTE_STYLES -> R.string.paywall_context_note_styles
-    ProFeature.FOLDERS -> R.string.paywall_context_folders
-    ProFeature.BACKUP_AUDIO -> R.string.paywall_context_backup_audio
-    ProFeature.WIDGET -> R.string.paywall_context_widget
-    ProFeature.FREE_TRIAL -> R.string.paywall_trial_intro_title
-    ProFeature.TRIAL_ENDED -> R.string.paywall_trial_ended_title
 }
 
 private fun openLink(context: Context, url: String) {
@@ -677,6 +282,14 @@ private fun openLink(context: Context, url: String) {
     }
 }
 
-private val COLUMN_WIDTH = 56.dp
-private val COLLAPSED_TABLE_HEIGHT = 200.dp
 private const val SUCCESS_DISMISS_MS = 1600L
+
+@Composable
+private fun PaywallUiState.headline(): String {
+    val daysLeft = trialDaysLeft
+    return if (feature == ProFeature.FREE_TRIAL && daysLeft != null) {
+        pluralStringResource(R.plurals.paywall_trial_offer_title, daysLeft, daysLeft)
+    } else {
+        stringResource(headlineRes())
+    }
+}

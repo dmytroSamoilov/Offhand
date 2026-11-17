@@ -7,9 +7,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.ModelState
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDeveloperOptionsUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDeveloperOptionsUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetTelemetryConsentUseCase
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.every
@@ -54,8 +52,6 @@ class AboutSupportViewModelTest {
     private val activeBackendFlow = MutableStateFlow(HardwareBackend.CPU)
     private val modelOverrideIdFlow = MutableStateFlow<String?>(null)
     private val modelManager: ModelManager = mockk()
-    private val setTelemetryConsent: SetTelemetryConsentUseCase = mockk(relaxed = true)
-    private val observeTelemetryConsent: ObserveTelemetryConsentUseCase = mockk()
     private val setDeveloperOptions: SetDeveloperOptionsUseCase = mockk(relaxed = true)
     private val observeDeveloperOptions: ObserveDeveloperOptionsUseCase = mockk()
 
@@ -70,7 +66,6 @@ class AboutSupportViewModelTest {
         coJustRun { modelManager.setHardwareBackend(any()) }
         coJustRun { modelManager.setModelOverride(any()) }
         coJustRun { modelManager.deleteModel() }
-        every { observeTelemetryConsent() } returns flowOf(true)
         every { observeDeveloperOptions() } returns flowOf(false)
     }
 
@@ -81,15 +76,13 @@ class AboutSupportViewModelTest {
 
     private fun viewModel(isDeveloperBuild: Boolean = true) = AboutSupportViewModel(
         modelManager = modelManager,
-        observeTelemetryConsent = observeTelemetryConsent,
-        setTelemetryConsent = setTelemetryConsent,
         observeDeveloperOptions = observeDeveloperOptions,
         setDeveloperOptions = setDeveloperOptions,
         buildInfo = BuildInfo(isDeveloperBuild = isDeveloperBuild),
     )
 
     @Test
-    fun `state reflects model info, backend and telemetry`() = runTest(dispatcher) {
+    fun `state reflects model info and backend`() = runTest(dispatcher) {
         val viewModel = viewModel()
         dispatcher.scheduler.advanceUntilIdle()
 
@@ -98,7 +91,6 @@ class AboutSupportViewModelTest {
         assertEquals("2.4", state.model.sizeGb)
         assertEquals(ModelStatusUi.READY, state.model.status)
         assertEquals(BackendOptionUi.CPU, state.selectedBackend)
-        assertTrue(state.isTelemetryEnabled)
     }
 
     @Test
@@ -156,17 +148,6 @@ class AboutSupportViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         coVerify { modelManager.deleteModel() }
-    }
-
-    @Test
-    fun `telemetry toggle persists consent`() = runTest(dispatcher) {
-        val viewModel = viewModel()
-        dispatcher.scheduler.advanceUntilIdle()
-
-        viewModel.onTelemetryChanged(false)
-        dispatcher.scheduler.advanceUntilIdle()
-
-        coVerify { setTelemetryConsent(false) }
     }
 
     @Test
