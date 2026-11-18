@@ -18,6 +18,7 @@ class AudioChunkerTest {
 
     private val loudFrame = ShortArray(FRAME_SAMPLES) { 8_000 }
     private val silentFrame = ShortArray(FRAME_SAMPLES)
+    private val roomNoiseFrame = ShortArray(FRAME_SAMPLES) { ROOM_NOISE_AMPLITUDE }
 
     private fun AudioChunker.feed(frame: ShortArray, times: Int): AudioChunker.PcmChunk? {
         var lastChunk: AudioChunker.PcmChunk? = null
@@ -102,7 +103,45 @@ class AudioChunkerTest {
         assertEquals(3_050L, outcome.vad.totalElapsedMs)
     }
 
+    @Test
+    fun pauseInANoisyRoomProducesBoundary() {
+        val chunker = chunker()
+        chunker.feed(loudFrame, times = 20)
+        val chunk = chunker.feed(roomNoiseFrame, times = 8)
+        checkNotNull(chunk)
+        assertEquals(ChunkBoundaryReason.SILENCE_GAP, chunk.reason)
+        assertEquals(1_000L, chunk.speechMs)
+    }
+
+    @Test
+    fun roomNoiseAloneIsNotSpeech() {
+        val chunker = chunker()
+        val chunk = chunker.feed(roomNoiseFrame, times = 60)
+        checkNotNull(chunk)
+        assertEquals(0L, chunk.speechMs)
+    }
+
+    @Test
+    fun roomNoiseAfterSpeechLeavesASilentTail() {
+        val chunker = chunker()
+        chunker.feed(loudFrame, times = 20)
+        chunker.feed(roomNoiseFrame, times = 8)
+        chunker.feed(roomNoiseFrame, times = 15)
+        val tail = checkNotNull(chunker.drainTail())
+        assertEquals(0L, tail.speechMs)
+    }
+
+    @Test
+    fun speechOverRoomNoiseStillCounts() {
+        val chunker = chunker()
+        chunker.feed(roomNoiseFrame, times = 10)
+        chunker.feed(loudFrame, times = 10)
+        val tail = checkNotNull(chunker.drainTail())
+        assertEquals(500L, tail.speechMs)
+    }
+
     private companion object {
+        const val ROOM_NOISE_AMPLITUDE: Short = 292
         const val SAMPLE_RATE = 16_000
         const val FRAME_SAMPLES = 800
     }
