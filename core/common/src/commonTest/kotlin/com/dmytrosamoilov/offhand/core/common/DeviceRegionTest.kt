@@ -12,13 +12,11 @@ class DeviceRegionTest {
     }
 
     @Test
-    fun `the rest of the EEA with the United Kingdom and Switzerland are asked first`() {
-        assertEquals(listOf(true, true, true), listOf("NO", "GB", "CH").map { code -> DeviceRegion { code }.asksBeforeCollecting })
-    }
-
-    @Test
     fun `countries outside are not asked`() {
-        assertEquals(listOf(false, false, false), listOf("US", "IN", "UA").map { code -> DeviceRegion { code }.asksBeforeCollecting })
+        assertEquals(
+            listOf(false, false, false, false, false, false),
+            listOf("US", "IN", "UA", "GB", "CH", "NO").map { code -> DeviceRegion { code }.asksBeforeCollecting },
+        )
     }
 
     @Test
