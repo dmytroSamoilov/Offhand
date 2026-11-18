@@ -6,7 +6,7 @@ data class DeviceCapability(
     val cpuCores: Int,
 )
 
-const val MIN_SUPPORTED_RAM_MB: Long = 2560L
+const val MIN_SUPPORTED_RAM_MB: Long = 1560L
 const val MIN_TOTAL_RAM_MB: Long = 5L * 1024L
 const val MIN_CPU_CORES: Int = 4
 const val NOMINAL_MIN_SUPPORTED_GB: Int = 3
