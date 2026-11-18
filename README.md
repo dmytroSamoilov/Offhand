@@ -321,4 +321,4 @@ The **Offhand** name and logo are not covered by the code license and may not be
 derivative apps or forks without permission.
 
 Legal documents for the published app:
-[Privacy Policy](legal/privacy-policy.html) · [Terms & Conditions](legal/terms-and-conditions.html)
+[Privacy Policy](https://dmytrosamoilov.com/offhand/privacy-policy/) · [Terms & Conditions](https://dmytrosamoilov.com/offhand/terms-and-conditions/)
