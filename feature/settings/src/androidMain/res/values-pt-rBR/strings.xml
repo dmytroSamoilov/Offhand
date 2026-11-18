@@ -140,8 +140,8 @@
     <string name="settings_transcription_description">Transforma o que você diz em texto. Desativado, a nota é só a gravação.</string>
     <string name="settings_summary_label">Escrever um resumo</string>
     <string name="settings_summary_description">Escreve uma nota a partir da transcrição no seu estilo de escrita. Precisa da transcrição.</string>
-    <string name="settings_group_writes">O que o Offhand escreve</string>
-    <string name="settings_group_in_out">Importar e exportar notas</string>
+    <string name="settings_group_notes">Notas</string>
+    <string name="settings_group_import_backup">Importação e backup</string>
     <string name="settings_group_app">App</string>
     <plurals name="settings_plan_days_left">
         <item quantity="one">resta %d dia</item>

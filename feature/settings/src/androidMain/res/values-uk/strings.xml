@@ -141,8 +141,8 @@
     <string name="settings_transcription_description">Перетворює сказане на текст. Якщо вимкнено, нотатка — це лише запис.</string>
     <string name="settings_summary_label">Писати резюме</string>
     <string name="settings_summary_description">Пише нотатку за розшифровкою у вашому стилі письма. Потрібна розшифровка.</string>
-    <string name="settings_group_writes">Що пише Offhand</string>
-    <string name="settings_group_in_out">Імпорт і перенесення нотаток</string>
+    <string name="settings_group_notes">Нотатки</string>
+    <string name="settings_group_import_backup">Імпорт і копії</string>
     <string name="settings_group_app">Застосунок</string>
     <plurals name="settings_plan_days_left">
         <item quantity="one">залишився %d день</item>

@@ -139,8 +139,8 @@
     <string name="settings_transcription_description">आपकी कही बात को टेक्स्ट में बदलता है। बंद होने पर नोट सिर्फ़ रिकॉर्डिंग होता है।</string>
     <string name="settings_summary_label">सारांश लिखें</string>
     <string name="settings_summary_description">ट्रांसक्रिप्ट से आपकी लेखन शैली में नोट लिखता है। इसके लिए ट्रांसक्रिप्शन चालू होना चाहिए।</string>
-    <string name="settings_group_writes">Offhand क्या लिखता है</string>
-    <string name="settings_group_in_out">नोट्स लाना और ले जाना</string>
+    <string name="settings_group_notes">नोट्स</string>
+    <string name="settings_group_import_backup">आयात और बैकअप</string>
     <string name="settings_group_app">ऐप</string>
     <plurals name="settings_plan_days_left">
         <item quantity="one">%d दिन बाकी</item>

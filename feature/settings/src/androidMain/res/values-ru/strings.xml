@@ -141,8 +141,8 @@
     <string name="settings_transcription_description">Превращает сказанное в текст. Если выключено, заметка — это только запись.</string>
     <string name="settings_summary_label">Писать резюме</string>
     <string name="settings_summary_description">Пишет заметку по расшифровке в вашем стиле письма. Нужна расшифровка.</string>
-    <string name="settings_group_writes">Что пишет Offhand</string>
-    <string name="settings_group_in_out">Импорт и перенос заметок</string>
+    <string name="settings_group_notes">Заметки</string>
+    <string name="settings_group_import_backup">Импорт и копии</string>
     <string name="settings_group_app">Приложение</string>
     <plurals name="settings_plan_days_left">
         <item quantity="one">остался %d день</item>

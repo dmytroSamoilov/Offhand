@@ -139,8 +139,8 @@
     <string name="settings_transcription_description">Macht aus dem Gesagten Text. Ausgeschaltet besteht eine Notiz nur aus der Aufnahme.</string>
     <string name="settings_summary_label">Zusammenfassung schreiben</string>
     <string name="settings_summary_description">Schreibt aus dem Transkript eine Notiz in deinem Schreibstil. Benötigt die Transkription.</string>
-    <string name="settings_group_writes">Was Offhand schreibt</string>
-    <string name="settings_group_in_out">Notizen rein und raus</string>
+    <string name="settings_group_notes">Notizen</string>
+    <string name="settings_group_import_backup">Import &amp; Sicherung</string>
     <string name="settings_group_app">App</string>
     <plurals name="settings_plan_days_left">
         <item quantity="one">noch %d Tag</item>

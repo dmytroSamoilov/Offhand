@@ -145,8 +145,8 @@
     <string name="settings_transcription_description">Turns what you say into text. When off, a note is only its recording.</string>
     <string name="settings_summary_label">Write a summary</string>
     <string name="settings_summary_description">Writes a note from the transcript in your writing style. Needs transcription.</string>
-    <string name="settings_group_writes">What Offhand writes</string>
-    <string name="settings_group_in_out">Getting notes in and out</string>
+    <string name="settings_group_notes">Notes</string>
+    <string name="settings_group_import_backup">Import &amp; backup</string>
     <string name="settings_group_app">App</string>
     <plurals name="settings_plan_days_left">
         <item quantity="one">%d day left</item>

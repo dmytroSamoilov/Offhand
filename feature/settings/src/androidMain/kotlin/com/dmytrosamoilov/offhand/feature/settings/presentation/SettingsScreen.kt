@@ -62,8 +62,8 @@ fun SettingsScreen(
                     onRedeemCodeClick = viewModel::onRedeemCodeClicked,
                     onRedeemCodeConfirm = viewModel::onRedeemCodeConfirmed,
                 )
-                WritingSection(state = state, viewModel = viewModel, onStylesClick = onNoteStylesClick)
-                InAndOutSection(state = state, onBackupClick = onBackupClick, onImportClick = viewModel::onImportAudioClicked)
+                NotesSection(state = state, viewModel = viewModel, onStylesClick = onNoteStylesClick)
+                ImportAndBackupSection(state = state, onBackupClick = onBackupClick, onImportClick = viewModel::onImportAudioClicked)
                 PrivacySection(
                     state = state,
                     onAppLockChanged = viewModel::onAppLockChanged,
@@ -100,11 +100,11 @@ private fun SettingsEffects(state: SettingsUiState, viewModel: SettingsViewModel
 }
 
 @Composable
-private fun WritingSection(state: SettingsUiState, viewModel: SettingsViewModel, onStylesClick: () -> Unit) {
+private fun NotesSection(state: SettingsUiState, viewModel: SettingsViewModel, onStylesClick: () -> Unit) {
     val choices = state.customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) }
     val isAvailable = state.isSummaryAvailable
     val unavailable = stringResource(R.string.settings_not_on_this_phone)
-    SettingsSection(label = stringResource(R.string.settings_group_writes)) {
+    SettingsSection(label = stringResource(R.string.settings_group_notes)) {
         SwitchRow(
             title = stringResource(R.string.settings_transcription_label),
             subtitle = stringResource(R.string.settings_transcription_description),
@@ -131,6 +131,13 @@ private fun WritingSection(state: SettingsUiState, viewModel: SettingsViewModel,
             onCheckedChange = viewModel::onSmartSuggestionsChanged,
             enabled = isAvailable,
             showProBadge = !state.isSmartSuggestionsUnlocked && isAvailable,
+        )
+        SwitchRow(
+            title = stringResource(R.string.settings_skip_silence_label),
+            subtitle = stringResource(R.string.settings_skip_silence_description),
+            checked = state.isSkipSilenceEnabled,
+            onCheckedChange = viewModel::onSkipSilenceChanged,
+            showProBadge = !state.isSkipSilenceUnlocked,
             showDivider = false,
         )
     }
@@ -138,9 +145,9 @@ private fun WritingSection(state: SettingsUiState, viewModel: SettingsViewModel,
 }
 
 @Composable
-private fun InAndOutSection(state: SettingsUiState, onBackupClick: () -> Unit, onImportClick: () -> Unit) {
+private fun ImportAndBackupSection(state: SettingsUiState, onBackupClick: () -> Unit, onImportClick: () -> Unit) {
     var isWidgetHelpVisible by remember { mutableStateOf(false) }
-    SettingsSection(label = stringResource(R.string.settings_group_in_out)) {
+    SettingsSection(label = stringResource(R.string.settings_group_import_backup)) {
         LinkRow(
             title = stringResource(R.string.settings_import_audio_title),
             subtitle = state.freeImportsLeft?.let { stringResource(R.string.settings_import_free_left, it, FreeImportLimits.FREE_IMPORTS) }
@@ -206,13 +213,6 @@ private fun PrivacySection(
 private fun AppSection(state: SettingsUiState, viewModel: SettingsViewModel, onAboutClick: () -> Unit) {
     val context = LocalContext.current
     SettingsSection(label = stringResource(R.string.settings_group_app)) {
-        SwitchRow(
-            title = stringResource(R.string.settings_skip_silence_label),
-            subtitle = stringResource(R.string.settings_skip_silence_description),
-            checked = state.isSkipSilenceEnabled,
-            onCheckedChange = viewModel::onSkipSilenceChanged,
-            showProBadge = !state.isSkipSilenceUnlocked,
-        )
         SwitchRow(
             title = stringResource(R.string.settings_dynamic_color_label),
             subtitle = stringResource(R.string.settings_dynamic_color_description),

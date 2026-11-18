@@ -49,8 +49,8 @@ struct SettingsView<BottomBarContent: View>: View {
                         .accessibilityAddTraits(.isHeader)
                     PlanCard(pro: state.pro, isSummaryAvailable: state.isSummaryAvailable, onOpen: viewModel.onProCardClicked)
                         .padding(.top, OffhandSpacing.card)
-                    writingGroup
-                    notesInAndOutGroup
+                    notesGroup
+                    importAndBackupGroup
                     privacyGroup
                     appGroup
                     if let override = state.proOverride {
@@ -121,11 +121,11 @@ struct SettingsView<BottomBarContent: View>: View {
     }
 
     @ViewBuilder
-    private var writingGroup: some View {
+    private var notesGroup: some View {
         if state.isSummaryAvailable {
-            fullWritingGroup
+            fullNotesGroup
         } else {
-            transcriptsOnlyWritingGroup
+            transcriptsOnlyNotesGroup
         }
     }
 
@@ -137,8 +137,18 @@ struct SettingsView<BottomBarContent: View>: View {
         ) { viewModel.onTranscriptionChanged(enabled: $0) }
     }
 
-    private var fullWritingGroup: some View {
-        SettingsGroup(label: String(localized: "What Offhand writes")) {
+    private var skipSilenceRow: some View {
+        SwitchRow(
+            title: String(localized: "Skip silence"),
+            subtitle: String(localized: "Jump over long pauses when you play a recording."),
+            isOn: state.isSkipSilenceEnabled,
+            showsProBadge: !state.isSkipSilenceUnlocked,
+            showsDivider: false
+        ) { viewModel.onSkipSilenceChanged(enabled: $0) }
+    }
+
+    private var fullNotesGroup: some View {
+        SettingsGroup(label: String(localized: "Notes")) {
             transcribeRow
             SwitchRow(
                 title: String(localized: "Write a summary"),
@@ -155,23 +165,24 @@ struct SettingsView<BottomBarContent: View>: View {
                 title: String(localized: "Smart suggestions"),
                 subtitle: String(localized: "Finds dates to add to your calendar"),
                 isOn: state.isSmartSuggestionsEnabled,
-                showsProBadge: !state.isSmartSuggestionsUnlocked,
-                showsDivider: false
+                showsProBadge: !state.isSmartSuggestionsUnlocked
             ) { viewModel.onSmartSuggestionsChanged(enabled: $0) }
+            skipSilenceRow
         }
     }
 
-    private var transcriptsOnlyWritingGroup: some View {
+    private var transcriptsOnlyNotesGroup: some View {
         let unavailable = String(localized: "Not available on this iPhone")
         return VStack(alignment: .leading, spacing: 0) {
-            SettingsGroup(label: String(localized: "What Offhand writes")) {
+            SettingsGroup(label: String(localized: "Notes")) {
                 transcribeRow
                 Group {
                     SwitchRow(title: String(localized: "Write a summary"), subtitle: unavailable, isOn: false) { _ in }
                     LinkRow(title: String(localized: "Writing style"), subtitle: unavailable, action: {}) { EmptyView() }
-                    SwitchRow(title: String(localized: "Smart suggestions"), subtitle: unavailable, isOn: false, showsDivider: false) { _ in }
+                    SwitchRow(title: String(localized: "Smart suggestions"), subtitle: unavailable, isOn: false) { _ in }
                 }
                 .disabled(true)
+                skipSilenceRow
             }
             Text(String(localized: "Summaries, writing styles and smart suggestions need more memory than this iPhone has. Recording, transcripts, folders, search and sharing all work."))
                 .offhandText(.caption)
@@ -181,8 +192,8 @@ struct SettingsView<BottomBarContent: View>: View {
         }
     }
 
-    private var notesInAndOutGroup: some View {
-        SettingsGroup(label: String(localized: "Getting notes in and out")) {
+    private var importAndBackupGroup: some View {
+        SettingsGroup(label: String(localized: "Import & backup")) {
             LinkRow(
                 title: String(localized: "Import audio or video"),
                 subtitle: importSubtitle,
@@ -230,12 +241,6 @@ struct SettingsView<BottomBarContent: View>: View {
 
     private var appGroup: some View {
         SettingsGroup(label: String(localized: "App")) {
-            SwitchRow(
-                title: String(localized: "Skip silence"),
-                subtitle: String(localized: "Jump over long pauses when you play a recording."),
-                isOn: state.isSkipSilenceEnabled,
-                showsProBadge: !state.isSkipSilenceUnlocked
-            ) { viewModel.onSkipSilenceChanged(enabled: $0) }
             if isSubscription(state.pro) {
                 LinkRow(title: String(localized: "Manage subscription")) { SubscriptionManagement.present() }
             }
