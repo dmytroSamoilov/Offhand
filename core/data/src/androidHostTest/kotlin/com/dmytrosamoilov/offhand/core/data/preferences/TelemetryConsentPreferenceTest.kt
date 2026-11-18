@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.common.DeviceRegion
 import com.dmytrosamoilov.offhand.core.data.domain.TelemetryConsent
 import java.io.File
 import java.nio.file.Files
@@ -26,9 +27,11 @@ class TelemetryConsentPreferenceTest {
     private val dataStore: DataStore<Preferences> = PreferenceDataStoreFactory.createWithPath(scope = dataStoreScope) {
         File(directory, "prefs.preferences_pb").absolutePath.toPath()
     }
+    private var country = "DE"
     private val repository = DataStoreUserPreferencesRepository(
         dataStore,
         BuildInfo(isDeveloperBuild = false, platform = "android"),
+        DeviceRegion { country },
     )
 
     @AfterTest
@@ -38,7 +41,7 @@ class TelemetryConsentPreferenceTest {
     }
 
     @Test
-    fun `a fresh install has not answered`() = runTest {
+    fun `a fresh install in the EU has not answered`() = runTest {
         assertEquals(TelemetryConsent.UNANSWERED, consent())
     }
 
@@ -74,6 +77,28 @@ class TelemetryConsentPreferenceTest {
     @Test
     fun `an install that left onboarding unfinished under the old default is asked`() = runTest {
         dataStore.edit { it[booleanPreferencesKey("onboarding_completed")] = false }
+
+        assertEquals(TelemetryConsent.UNANSWERED, consent())
+    }
+
+    @Test
+    fun `a fresh install outside the EU shares by default`() = runTest {
+        country = "US"
+
+        assertEquals(TelemetryConsent.SHARED, consent())
+    }
+
+    @Test
+    fun `a fresh install outside the EU keeps a switched-off setting`() = runTest {
+        country = "US"
+        repository.setTelemetryConsent(false)
+
+        assertEquals(TelemetryConsent.DECLINED, consent())
+    }
+
+    @Test
+    fun `a phone that reports no region is asked`() = runTest {
+        country = ""
 
         assertEquals(TelemetryConsent.UNANSWERED, consent())
     }

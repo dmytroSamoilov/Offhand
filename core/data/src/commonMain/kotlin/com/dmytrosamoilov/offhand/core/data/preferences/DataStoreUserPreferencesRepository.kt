@@ -8,6 +8,8 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.common.DeviceRegion
+import com.dmytrosamoilov.offhand.core.common.asksBeforeCollecting
 import com.dmytrosamoilov.offhand.core.data.domain.EarlyAdopterPro
 import com.dmytrosamoilov.offhand.core.data.domain.NoteFeature
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.map
 internal class DataStoreUserPreferencesRepository(
     private val dataStore: DataStore<Preferences>,
     private val buildInfo: BuildInfo,
+    private val deviceRegion: DeviceRegion,
 ) : UserPreferencesRepository {
 
     override val preferences: Flow<UserPreferences> =
@@ -140,13 +143,13 @@ internal class DataStoreUserPreferencesRepository(
         return EarlyAdopterPro.entries.firstOrNull { it.name == name } ?: EarlyAdopterPro.UNDECIDED
     }
 
-    // No stored answer on an install that finished onboarding means it was
-    // onboarded before the question was asked, when sharing was the default.
+    // Without a stored answer sharing is the default, except on a new install
+    // in a region that wants a yes first: there the onboarding question decides.
     private fun telemetryConsent(preferences: Preferences): TelemetryConsent =
         when (preferences[KEY_TELEMETRY_CONSENT]) {
             true -> TelemetryConsent.SHARED
             false -> TelemetryConsent.DECLINED
-            null -> if (preferences[KEY_ONBOARDING_COMPLETED] == true) {
+            null -> if (preferences[KEY_ONBOARDING_COMPLETED] == true || !deviceRegion.asksBeforeCollecting) {
                 TelemetryConsent.SHARED
             } else {
                 TelemetryConsent.UNANSWERED

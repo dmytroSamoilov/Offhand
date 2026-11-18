@@ -144,5 +144,5 @@ val coreDataModule = module {
         TrialUsageCountingTracker(ConsentGatedAnalyticsTracker(get(), get(), get(), scope), get(), get(), scope)
     }
     single<DataStore<Preferences>> { createUserPreferencesDataStore() }
-    single<UserPreferencesRepository> { DataStoreUserPreferencesRepository(get(), get()) }
+    single<UserPreferencesRepository> { DataStoreUserPreferencesRepository(get(), get(), get()) }
 }

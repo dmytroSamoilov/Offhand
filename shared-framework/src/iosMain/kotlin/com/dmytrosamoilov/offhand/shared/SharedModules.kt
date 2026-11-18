@@ -1,5 +1,9 @@
 package com.dmytrosamoilov.offhand.shared
 
+import com.dmytrosamoilov.offhand.core.common.DeviceRegion
+import platform.Foundation.NSLocale
+import platform.Foundation.countryCode
+import platform.Foundation.currentLocale
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackend
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
@@ -97,6 +101,7 @@ fun sharedIosModules(deps: IosPlatformDeps): List<Module> = listOf(
 
 private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
     single { BuildInfo(isDeveloperBuild = deps.isDeveloperBuild, appVersion = deps.appVersion, platform = "ios") }
+    single { DeviceRegion { NSLocale.currentLocale.countryCode.orEmpty() } }
     single<BackupCrypto> { IosBackupCrypto(deps.backupCrypto) }
     single<AudioDecoder> { IosAudioDecoder(deps.audioDecoder) }
     single<AudioImportStaging> { IosAudioImportStaging() }

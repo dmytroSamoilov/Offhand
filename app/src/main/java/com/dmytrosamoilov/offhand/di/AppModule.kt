@@ -1,5 +1,7 @@
 package com.dmytrosamoilov.offhand.di
 
+import com.dmytrosamoilov.offhand.core.common.DeviceRegion
+import java.util.Locale
 import com.dmytrosamoilov.offhand.BuildConfig
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackend
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
@@ -26,6 +28,7 @@ import org.koin.dsl.module
 
 val appModule = module {
     single { BuildInfo(isDeveloperBuild = BuildConfig.DEBUG || BuildConfig.FLAVOR == DEV_FLAVOR, appVersion = BuildConfig.VERSION_NAME, platform = "android") }
+    single { DeviceRegion { Locale.getDefault().country } }
     singleOf(::LiteRtLmManager) bind ModelManager::class
     singleOf(::LocalAiBackend) bind AiBackend::class
     singleOf(::WhisperSpeechToText) bind SpeechToText::class
