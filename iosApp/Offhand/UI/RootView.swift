@@ -12,6 +12,7 @@ struct RootView: View {
     @State private var downloadActivityController = AiCoreDownloadActivityController()
     @State private var finishCoordinator = NoteFinishCoordinator()
     @State private var activeNoteId: Int64?
+    @State private var settledNotes: [Int64: Bool] = [:]
     @State private var phase: IosRootPhase = .loading
     @State private var selectedTab = BottomBarDestination.notes
     @State private var isPaywallPresented = false
@@ -129,6 +130,7 @@ struct RootView: View {
                 activityController.suspendedWithPendingWork()
             }
             notifications.register()
+            activityController.endLeftovers()
         }
         .onChange(of: shortcuts.pending) { runPendingShortcut() }
         .onChange(of: phase) { runPendingShortcut() }
@@ -231,35 +233,77 @@ struct RootView: View {
         )
     }
 
+    // The session only carries its note once the recorder has drained, so a
+    // stopped recording first shows as being prepared and is settled when the
+    // session is idle again: a discarded or too short one has no note and
+    // ends the Live Activity there, a saved one waits for its outcome.
     private func observeSession() async {
         var previousPhase = SessionPhase.idle
         var previousPaused = false
+        var isAwaitingSavedNote = false
         for await session in sessionManager.session {
             let phase = session.phase
             if phase == .recording {
                 if previousPhase != .recording {
+                    activeNoteId = nil
+                    isAwaitingSavedNote = false
                     activityController.recordingStarted()
                 } else if session.isPaused != previousPaused {
                     activityController.recordingPaused(session.isPaused)
                 }
-                if let noteId = session.noteId {
-                    activeNoteId = noteId.int64Value
-                }
             } else if previousPhase == .recording {
-                if phase == .failed {
-                    activityController.cancelled()
-                    activeNoteId = nil
-                } else if let noteId = activeNoteId {
-                    finishCoordinator.processingStarted(noteId: noteId)
-                    if finishCoordinator.isManaging(noteId: noteId) {
-                        activityController.cancelled()
-                    } else {
-                        activityController.processingProgressed(percent: nil)
-                    }
-                }
+                isAwaitingSavedNote = true
+                activityController.processingProgressed(percent: nil)
+            }
+            if isAwaitingSavedNote && phase == .failed {
+                isAwaitingSavedNote = false
+                activityController.cancelled()
+            } else if isAwaitingSavedNote && phase == .idle {
+                isAwaitingSavedNote = false
+                recordingSettled(noteId: session.noteId?.int64Value)
             }
             previousPhase = phase
             previousPaused = session.isPaused
+        }
+    }
+
+    // A note that needs no writing (transcription switched off) is finished
+    // before this runs, so its outcome may already be known.
+    private func recordingSettled(noteId: Int64?) {
+        guard let noteId else {
+            activityController.cancelled()
+            return
+        }
+        if let isCompleted = settledNotes.removeValue(forKey: noteId) {
+            endActivity(isCompleted: isCompleted)
+        } else if finishCoordinator.isManaging(noteId: noteId) {
+            activityController.cancelled()
+        } else {
+            activeNoteId = noteId
+        }
+    }
+
+    private func endActivity(isCompleted: Bool) {
+        if isCompleted {
+            activityController.finished()
+        } else {
+            activityController.cancelled()
+        }
+    }
+
+    // A note that leaves processing without an outcome is waiting for the
+    // on-device AI to download; nothing is being worked on, so the Live
+    // Activity has nothing to show. A failure is reported just after the
+    // note leaves, which is what the short wait is for, and a note that was
+    // picked up again in the meantime is left alone.
+    private func endActivityIfLeftWaiting(noteId: Int64) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1))
+            let processing = (sessionManager.processingNoteIds.value as NSSet)
+                .compactMap { ($0 as? NSNumber)?.int64Value }
+            guard activeNoteId == noteId, !processing.contains(noteId) else { return }
+            activeNoteId = nil
+            activityController.cancelled()
         }
     }
 
@@ -281,6 +325,7 @@ struct RootView: View {
             }
             for removed in previousIds.subtracting(current) {
                 finishCoordinator.processingEnded(noteId: removed)
+                endActivityIfLeftWaiting(noteId: removed)
             }
             if current.isEmpty && !previousIds.isEmpty {
                 finishCoordinator.allProcessingFinished()
@@ -305,13 +350,18 @@ struct RootView: View {
             case .importRejected:
                 continue
             }
-            guard eventNoteId == activeNoteId else { continue }
+            let isCompleted: Bool
             switch onEnum(of: event) {
             case .completed:
-                activityController.finished()
+                isCompleted = true
             case .failed, .interrupted, .importRejected:
-                activityController.cancelled()
+                isCompleted = false
             }
+            guard eventNoteId == activeNoteId else {
+                settledNotes = [eventNoteId: isCompleted]
+                continue
+            }
+            endActivity(isCompleted: isCompleted)
             activeNoteId = nil
         }
     }
