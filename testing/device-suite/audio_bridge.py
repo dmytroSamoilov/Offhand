@@ -15,6 +15,13 @@ a path or a shell command any other way.
                                     -> {"pass": bool, "wer": float, ...}
 
 Run by run-android.sh; standalone: python3 -I audio_bridge.py --serial <adb serial>
+
+run-ios.sh has no bridge to call from the device, so it scores a note the test
+handed back as JSON ({"summary", "transcript", "processingMs"}) in one shot:
+
+    python3 -I audio_bridge.py --score-export <file> --clip <id> --device-name <name>
+
+and asks for a clip's timing with --describe-clip <id>.
 """
 import argparse
 import json
@@ -129,6 +136,54 @@ class Device:
         return self.adb("shell", "getprop", "ro.product.model").strip()
 
 
+class ScoredNote:
+    def __init__(self, summary: str, transcript: str, processing_ms: object, device: str, mode: str) -> None:
+        self.summary = summary
+        self.transcript = transcript
+        self.processing_ms = processing_ms
+        self.device = device
+        self.mode = mode
+
+
+def score_note(fixture: dict, note: ScoredNote, results: Path) -> dict:
+    wer = word_error_rate(fixture["text"], note.transcript)
+    missing = [term for term in fixture["summaryMustMention"] if not mentions(note.summary, term)]
+    threshold = fixture["maxWerImport" if note.mode == "import" else "maxWerAcoustic"]
+    result = {
+        "clip": fixture["id"],
+        "mode": note.mode,
+        "device": note.device,
+        "wer": round(wer, 4),
+        "maxWer": threshold,
+        "summaryMissing": missing,
+        "processingMs": note.processing_ms,
+        "transcript": note.transcript,
+        "summary": note.summary,
+        "at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+    }
+    result["pass"] = wer <= threshold and not missing
+    with results.open("a", encoding="utf-8") as out:
+        out.write(json.dumps(result, ensure_ascii=False) + "\n")
+    print(f"[bridge] {fixture['id']} wer={wer:.3f} (max {threshold}) missing={missing} pass={result['pass']}")
+    return result
+
+
+def score_export(export: Path, clip_id: str, device_name: str, results: Path) -> bool:
+    note = json.loads(export.read_text(encoding="utf-8"))
+    scored = ScoredNote(
+        str(note.get("summary", "")), str(note.get("transcript", "")), note.get("processingMs"), device_name, "acoustic"
+    )
+    return score_note(load_fixture(clip_id), scored, results)["pass"]
+
+
+def describe_clip(clip_id: str) -> dict:
+    fixture = load_fixture(clip_id)
+    clip = CLIPS / f"{fixture['id']}.m4a"
+    if not clip.is_file():
+        raise BridgeError(404, f"clip not rendered: {clip.name}")
+    return {"clip": str(clip), "durationMs": clip_duration_ms(clip), "livePhrase": fixture["livePhrase"]}
+
+
 class Bridge:
     def __init__(self, device: Device, results: Path, labels: tuple[str, str]) -> None:
         self.device = device
@@ -153,26 +208,8 @@ class Bridge:
         fixture = load_fixture(body.get("clip"))
         mode = "import" if body.get("mode") == "import" else "acoustic"
         summary, transcript = split_export(self.device.take_newest_export(self.played_at), *self.labels)
-        wer = word_error_rate(fixture["text"], transcript)
-        missing = [term for term in fixture["summaryMustMention"] if not mentions(summary, term)]
-        threshold = fixture["maxWerImport" if mode == "import" else "maxWerAcoustic"]
-        result = {
-            "clip": fixture["id"],
-            "mode": mode,
-            "device": self.device.model(),
-            "wer": round(wer, 4),
-            "maxWer": threshold,
-            "summaryMissing": missing,
-            "processingMs": body.get("processingMs"),
-            "transcript": transcript,
-            "summary": summary,
-            "at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-        }
-        result["pass"] = wer <= threshold and not missing
-        with self.results.open("a", encoding="utf-8") as out:
-            out.write(json.dumps(result, ensure_ascii=False) + "\n")
-        print(f"[bridge] {fixture['id']} wer={wer:.3f} (max {threshold}) missing={missing} pass={result['pass']}")
-        return result
+        note = ScoredNote(summary, transcript, body.get("processingMs"), self.device.model(), mode)
+        return score_note(fixture, note, self.results)
 
     def routes(self) -> dict:
         return {"/play": self.play, "/status": self.status, "/score": self.score}
@@ -211,13 +248,24 @@ def handler_for(bridge: Bridge) -> type[BaseHTTPRequestHandler]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--serial", required=True)
+    parser.add_argument("--serial")
+    parser.add_argument("--score-export", type=Path)
+    parser.add_argument("--describe-clip")
+    parser.add_argument("--clip")
+    parser.add_argument("--device-name", default="iOS device")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--results", type=Path, default=SUITE / "results" / "device-results.jsonl")
     parser.add_argument("--summary-label", default="Summary")
     parser.add_argument("--transcript-label", default="Transcript")
     args = parser.parse_args()
     args.results.parent.mkdir(parents=True, exist_ok=True)
+    if args.describe_clip:
+        print(json.dumps(describe_clip(args.describe_clip)))
+        return
+    if args.score_export:
+        raise SystemExit(0 if score_export(args.score_export, args.clip, args.device_name, args.results) else 1)
+    if not args.serial:
+        parser.error("--serial is required to run the bridge")
     bridge = Bridge(Device(args.serial), args.results, (args.summary_label, args.transcript_label))
     server = ThreadingHTTPServer(("127.0.0.1", args.port), handler_for(bridge))
     print(f"[bridge] listening on 127.0.0.1:{args.port}, results -> {args.results}")

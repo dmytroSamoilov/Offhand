@@ -585,6 +585,7 @@ private struct TimedTranscript: View {
         .padding(.horizontal, -Self.inset)
         .accessibilityAddTraits(isPlaying ? .isSelected : [])
         .accessibilityHint(String(format: String(localized: "Play from %@"), part.time))
+        .accessibilityIdentifier("note_transcript_part")
     }
 }
 
@@ -639,6 +640,7 @@ private struct MarkdownBlocks: View {
             .foregroundStyle(OffhandColor.ink)
             .frame(maxWidth: .infinity, alignment: .leading)
             .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier("note_text_line")
     }
 
     private func heading(_ line: String) -> String? {
