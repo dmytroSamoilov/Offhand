@@ -37,6 +37,14 @@ struct SettingsView<BottomBarContent: View>: View {
         self.bottomBar = bottomBar()
     }
 
+    // The title scrolls with the form and the navigation bar is hidden, so
+    // without this the rows would show through the status bar.
+    private var statusBarCover: some View {
+        Color.clear
+            .frame(height: 0)
+            .background(OffhandColor.ground.ignoresSafeArea(edges: .top))
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -62,6 +70,7 @@ struct SettingsView<BottomBarContent: View>: View {
             }
             .background(OffhandColor.ground.ignoresSafeArea())
             .safeAreaInset(edge: .bottom, spacing: 0) { bottomBar }
+            .safeAreaInset(edge: .top, spacing: 0) { statusBarCover }
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(item: $destination) { destination in
                 switch destination {
