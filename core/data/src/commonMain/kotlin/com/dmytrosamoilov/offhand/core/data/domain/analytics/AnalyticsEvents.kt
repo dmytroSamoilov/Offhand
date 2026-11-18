@@ -88,6 +88,9 @@ object AnalyticsEvents {
     fun smartSuggestionsToggled(enabled: Boolean): AnalyticsEvent =
         event("smart_suggestions_toggled", "enabled" to enabled.label())
 
+    fun skipSilenceToggled(enabled: Boolean): AnalyticsEvent =
+        event("skip_silence_toggled", "enabled" to enabled.label())
+
     fun appLockToggled(enabled: Boolean): AnalyticsEvent = event("app_lock_toggled", "enabled" to enabled.label())
 
     fun noteStyleCreated(sections: Int, described: Boolean): AnalyticsEvent = event(

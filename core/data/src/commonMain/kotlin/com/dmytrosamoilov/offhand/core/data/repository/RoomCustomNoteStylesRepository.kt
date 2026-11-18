@@ -8,6 +8,7 @@ import com.dmytrosamoilov.offhand.core.data.database.toEntity
 import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStylesRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProtectedDataState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -15,10 +16,11 @@ internal class RoomCustomNoteStylesRepository(
     private val noteStyleDao: NoteStyleDao,
     private val noteDao: NoteDao,
     private val folderDao: FolderDao,
+    private val protectedData: ProtectedDataState,
 ) : CustomNoteStylesRepository {
 
     override fun observeStyles(): Flow<List<CustomNoteStyle>> =
-        noteStyleDao.observeAll().map { entities -> entities.map { it.toDomain() } }
+        noteStyleDao.observeAll().map { entities -> entities.map { it.toDomain() } }.retryWhileUnreadable(protectedData)
 
     override suspend fun getStyle(id: Long): CustomNoteStyle? = noteStyleDao.getById(id)?.toDomain()
 

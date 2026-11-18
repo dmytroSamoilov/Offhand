@@ -10,6 +10,7 @@ import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.ObserveProStatu
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.PurchaseProUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.RestoreProPurchasesUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SettleProTrialUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SwitchOffLapsedProSettingsUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.presentation.PaywallViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
@@ -21,6 +22,7 @@ val featurePaywallModule = module {
     factoryOf(::PurchaseProUseCase)
     factoryOf(::RestoreProPurchasesUseCase)
     factory { SettleProTrialUseCase(get(), get(), get()) }
+    factoryOf(::SwitchOffLapsedProSettingsUseCase)
     factoryOf(::AcknowledgeProTrialNoticeUseCase)
     factoryOf(::KeepProTrialInSyncUseCase)
     factoryOf(::GetProTrialRecapUseCase)

@@ -72,6 +72,8 @@
     <string name="settings_app_lock_label">Блокировка приложения</string>
     <string name="settings_app_lock_description">Запрашивает отпечаток пальца, лицо или блокировку экрана при каждом открытии Offhand.</string>
     <string name="settings_app_lock_unavailable">Настройте блокировку экрана на этом телефоне, чтобы использовать эту функцию.</string>
+    <string name="settings_skip_silence_label">Пропускать тишину</string>
+    <string name="settings_skip_silence_description">Перескакивать длинные паузы при прослушивании записи.</string>
     <string name="settings_dynamic_color_label">Цвета обоев</string>
     <string name="settings_dynamic_color_description">Окрашивает приложение в цвета ваших обоев (Material You) вместо встроенной палитры.</string>
 

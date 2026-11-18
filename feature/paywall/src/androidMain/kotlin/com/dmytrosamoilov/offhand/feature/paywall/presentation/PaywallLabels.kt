@@ -160,6 +160,7 @@ internal fun ProFeature.headlineRes(): Int = when (this) {
     ProFeature.FOLDERS -> R.string.paywall_context_folders
     ProFeature.BACKUP_AUDIO -> R.string.paywall_context_backup_audio
     ProFeature.WIDGET -> R.string.paywall_context_widget
+    ProFeature.SKIP_SILENCE -> R.string.paywall_context_skip_silence
     ProFeature.FREE_TRIAL -> R.string.paywall_title
     ProFeature.TRIAL_ENDED -> R.string.paywall_trial_ended_title
 }

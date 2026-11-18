@@ -8,6 +8,7 @@ import com.dmytrosamoilov.offhand.core.data.database.toDomain
 import com.dmytrosamoilov.offhand.core.data.database.toEntity
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProtectedDataState
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -18,10 +19,11 @@ internal class RoomNotesRepository(
     private val transcriptionCheckpointDao: TranscriptionCheckpointDao,
     private val noteWaveformDao: NoteWaveformDao,
     private val audioStore: EncryptedAudioStore,
+    private val protectedData: ProtectedDataState,
 ) : NotesRepository {
 
     override fun observeNotes(): Flow<List<Note>> =
-        noteDao.observeAll().map { entities -> entities.map { it.toDomain() } }
+        noteDao.observeAll().map { entities -> entities.map { it.toDomain() } }.retryWhileUnreadable(protectedData)
 
     override suspend fun getNote(id: Long): Note? = noteDao.getById(id)?.toDomain()
 

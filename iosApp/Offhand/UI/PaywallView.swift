@@ -564,6 +564,7 @@ private enum PaywallCopy {
         case .folders: return String(localized: "Keep more than two folders")
         case .backupAudio: return String(localized: "Back up your recordings too")
         case .widget: return String(localized: "Record from your Home Screen")
+        case .skipSilence: return String(localized: "Skip the silence when you listen")
         case .freeTrial: return String(localized: "Offhand Pro")
         case .trialEnded: return String(localized: "Your Pro trial has ended")
         }

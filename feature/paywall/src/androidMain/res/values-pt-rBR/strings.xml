@@ -98,4 +98,5 @@
     <string name="paywall_usage_folder_styles">Pastas com estilo próprio</string>
     <string name="paywall_usage_backups">Backups com suas gravações</string>
     <string name="paywall_context_widget">Grave pela tela inicial</string>
+    <string name="paywall_context_skip_silence">Pule os silêncios ao ouvir</string>
 </resources>

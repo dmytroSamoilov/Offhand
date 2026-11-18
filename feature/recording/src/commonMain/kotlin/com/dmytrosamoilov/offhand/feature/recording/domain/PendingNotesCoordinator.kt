@@ -2,6 +2,7 @@
 
 package com.dmytrosamoilov.offhand.feature.recording.domain
 
+import co.touchlab.kermit.Logger
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
@@ -13,6 +14,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterru
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SettleRememberedModelDownloadUseCase
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 import kotlinx.coroutines.CoroutineScope
@@ -62,13 +64,13 @@ class PendingNotesCoordinator(
         }
         scope.launch {
             aiCoreDownloadStatus.isSpeechMissing.drop(1).filter { isMissing -> !isMissing }.collect {
-                resumeInterruptedNotes()
+                resumeNotes()
             }
         }
         scope.launch {
             sessionManager.events.collect { event ->
                 if (event is NoteProcessingEvent.Interrupted && appForegroundState.isInForeground.value) {
-                    resumeInterruptedNotes()
+                    resumeNotes()
                 }
             }
         }
@@ -90,7 +92,20 @@ class PendingNotesCoordinator(
             analyticsTracker.track(AnalyticsEvents.modelDownloaded(startedAt.elapsedNow().inWholeMilliseconds))
             rememberDownloadProgress.remember(null)
         }
-        resumeInterruptedNotes()
+        resumeNotes()
+    }
+
+    // A resume that still fails (the device locked again in between) is not
+    // lost: the notes stay interrupted and the next return to the app resumes
+    // them. Letting the error escape would end the app on iOS.
+    private suspend fun resumeNotes() {
+        try {
+            resumeInterruptedNotes()
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (t: Throwable) {
+            Logger.withTag(LOG_TAG).w(t) { "Resuming interrupted notes failed, retried on the next return" }
+        }
     }
 
     // Written in steps, not on every tick: the value only has to survive a kill.
@@ -103,5 +118,6 @@ class PendingNotesCoordinator(
 
     private companion object {
         const val PROGRESS_STEP_PERCENT = 10
+        const val LOG_TAG = "PendingNotesCoordinator"
     }
 }

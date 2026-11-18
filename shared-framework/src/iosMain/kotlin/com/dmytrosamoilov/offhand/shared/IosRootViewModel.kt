@@ -16,6 +16,7 @@ import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserP
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.AcknowledgeProTrialNoticeUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.KeepProTrialInSyncUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SettleProTrialUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SwitchOffLapsedProSettingsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinator
 import com.dmytrosamoilov.offhand.feature.recording.domain.NoteWaveformFiller
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
@@ -48,6 +49,7 @@ class IosRootViewModel(
     private val decideEarlyAdopterPro: DecideEarlyAdopterProUseCase,
     private val markEarlyAdopterThanked: MarkEarlyAdopterThankedUseCase,
     private val settleProTrial: SettleProTrialUseCase,
+    private val switchOffLapsedProSettings: SwitchOffLapsedProSettingsUseCase,
     private val acknowledgeProTrialNotice: AcknowledgeProTrialNoticeUseCase,
     private val keepProTrialInSync: KeepProTrialInSyncUseCase,
     private val proUpgradeGate: ProUpgradeGate,
@@ -137,6 +139,7 @@ class IosRootViewModel(
             phase.first { it == IosRootPhase.READY }
             decideEarlyAdopterPro()
             settleProTrialOnColdStart()
+            switchOffLapsedProSettings()
             resumeInterruptedNotes()
             sweepOrphanedRecordings()
             noteWaveformFiller.start()

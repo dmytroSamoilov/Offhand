@@ -73,6 +73,8 @@
     <string name="settings_app_lock_label">App lock</string>
     <string name="settings_app_lock_description">Ask for your fingerprint, face, or screen lock every time Offhand opens.</string>
     <string name="settings_app_lock_unavailable">Set up a screen lock on this phone to use this.</string>
+    <string name="settings_skip_silence_label">Skip silence</string>
+    <string name="settings_skip_silence_description">Jump over long pauses when you play a recording.</string>
     <string name="settings_dynamic_color_label">Wallpaper colors</string>
     <string name="settings_dynamic_color_description">Color the app from your wallpaper (Material You) instead of the built-in palette.</string>
 

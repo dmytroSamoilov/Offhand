@@ -98,4 +98,5 @@
     <string name="paywall_usage_folder_styles">Carpetas con su propio estilo</string>
     <string name="paywall_usage_backups">Copias de seguridad con tus grabaciones</string>
     <string name="paywall_context_widget">Graba desde la pantalla de inicio</string>
+    <string name="paywall_context_skip_silence">Salta los silencios al escuchar</string>
 </resources>

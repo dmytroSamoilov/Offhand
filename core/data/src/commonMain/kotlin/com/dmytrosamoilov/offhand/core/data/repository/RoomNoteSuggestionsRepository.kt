@@ -8,15 +8,17 @@ import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
 import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestionsRepository
 import com.dmytrosamoilov.offhand.core.data.domain.SuggestedEvent
 import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
+import com.dmytrosamoilov.offhand.core.data.domain.ProtectedDataState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 internal class RoomNoteSuggestionsRepository(
     private val noteSuggestionsDao: NoteSuggestionsDao,
+    private val protectedData: ProtectedDataState,
 ) : NoteSuggestionsRepository {
 
     override fun observeSuggestions(noteId: Long): Flow<NoteSuggestions?> =
-        noteSuggestionsDao.observeByNoteId(noteId).map { entity -> entity?.toDomain() }
+        noteSuggestionsDao.observeByNoteId(noteId).map { entity -> entity?.toDomain() }.retryWhileUnreadable(protectedData)
 
     override suspend fun saveSuggestions(noteId: Long, events: List<CalendarEventSuggestion>) =
         noteSuggestionsDao.upsert(NoteSuggestions(noteId, events.map(::SuggestedEvent)).toEntity())

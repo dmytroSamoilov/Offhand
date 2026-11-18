@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
+import com.dmytrosamoilov.offhand.core.audio.SilenceSkip
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
@@ -43,7 +44,9 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNote
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.FindSilenceUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteWaveformsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveSkipSilenceUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
@@ -66,6 +69,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -79,6 +83,8 @@ class NotesViewModel(
     private val dateLabelFormatter: DateLabelFormatter,
     observeNotes: ObserveNotesUseCase,
     observeNoteWaveforms: ObserveNoteWaveformsUseCase,
+    observeSkipSilence: ObserveSkipSilenceUseCase,
+    private val findSilence: FindSilenceUseCase,
     observeFolders: ObserveFoldersUseCase,
     private val searchNotes: SearchNotesUseCase,
     private val createFolder: CreateFolderUseCase,
@@ -137,6 +143,8 @@ class NotesViewModel(
     private val selectedFolderId = MutableStateFlow<Long?>(null)
     private val searchQuery = MutableStateFlow("")
     private val waveforms = MutableStateFlow<Map<Long, List<Int>>>(emptyMap())
+    private val playbackLoad = MutableStateFlow(PlaybackLoad(audioFileName = null, generation = 0))
+    private val silenceByFile = HashMap<String, List<SilenceSkip>>()
 
     init {
         viewModelScope.launch {
@@ -160,6 +168,7 @@ class NotesViewModel(
         viewModelScope.launch {
             observeNoteWaveforms().collect { latest -> waveforms.value = latest }
         }
+        skipSilenceWhileEnabled(observeSkipSilence)
         viewModelScope.launch {
             combine(allNotes, folders, selectedFolderId, searchQuery, waveforms, ::listContent)
                 .collect { content -> mutableUiState.update { content(it) } }
@@ -697,7 +706,25 @@ class NotesViewModel(
         } else {
             audioPlayer.reset()
         }
+        playbackLoad.update { PlaybackLoad(audioFileName = fileName, generation = it.generation + 1) }
     }
+
+    // Every load clears the player's skips, so they are handed over again for
+    // each one; a recording is scanned once per screen and remembered.
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun skipSilenceWhileEnabled(observeSkipSilence: ObserveSkipSilenceUseCase) {
+        viewModelScope.launch {
+            combine(observeSkipSilence(), playbackLoad) { enabled, load -> load.audioFileName.takeIf { enabled } }
+                .collectLatest { fileName -> audioPlayer.setSilenceSkips(fileName?.let { silenceOf(it) }.orEmpty()) }
+        }
+    }
+
+    private suspend fun silenceOf(audioFileName: String): List<SilenceSkip> =
+        silenceByFile[audioFileName] ?: runCatching { findSilence(audioFileName) }
+            .getOrDefault(emptyList())
+            .also { silenceByFile[audioFileName] = it }
+
+    private data class PlaybackLoad(val audioFileName: String?, val generation: Int)
 
     fun onEditStarted() {
         val selected = mutableUiState.value.selected ?: return

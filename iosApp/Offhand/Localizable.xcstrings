@@ -1321,6 +1321,46 @@
         }
       }
     },
+    "Jump over long pauses when you play a recording." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lange Pausen beim Abspielen einer Aufnahme überspringen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salta las pausas largas al reproducir una grabación."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "रिकॉर्डिंग चलाते समय लंबे ठहराव छोड़ दें।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pula as pausas longas ao ouvir uma gravação."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перескакивать длинные паузы при прослушивании записи."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перестрибувати довгі паузи під час прослуховування запису."
+          }
+        }
+      }
+    },
     "Never leaves your iPhone" : {
       "localizations" : {
         "en" : {
@@ -1413,6 +1453,52 @@
         }
       }
     },
+    "Offhand turns recordings into notes with on-device AI that runs entirely on your iPhone. It is a one-time download; after that, your notes never leave your iPhone." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand macht aus Aufnahmen Notizen – mit KI, die vollständig auf deinem iPhone läuft. Der Download ist einmalig; danach verlassen deine Notizen nie dein iPhone."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand turns recordings into notes with on-device AI that runs entirely on your iPhone. It is a one-time download; after that, your notes never leave your iPhone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand convierte las grabaciones en notas con IA que se ejecuta por completo en tu iPhone. Es una descarga única; después, tus notas nunca salen de tu iPhone."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand रिकॉर्डिंग को ऐसे AI से नोट्स में बदलता है जो पूरी तरह आपके iPhone पर चलता है। यह एक बार का डाउनलोड है; इसके बाद आपके नोट्स कभी आपके iPhone से बाहर नहीं जाते।"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Offhand transforma gravações em notas com IA que roda inteiramente no seu iPhone. É um download único; depois disso, suas notas nunca saem do seu iPhone."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand превращает записи в заметки с помощью ИИ, который работает целиком на вашем iPhone. Загрузка нужна один раз; после этого ваши заметки никогда не покидают ваш iPhone."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offhand перетворює записи на нотатки за допомогою ШІ, який працює повністю на вашому iPhone. Завантаження потрібне один раз; після цього ваші нотатки ніколи не залишають ваш iPhone."
+          }
+        }
+      }
+    },
     "Share with the developer" : {
       "localizations" : {
         "en" : {
@@ -1501,6 +1587,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Передається без вашого імені"
+          }
+        }
+      }
+    },
+    "Skip silence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stille überspringen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saltar silencios"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "खामोशी छोड़ें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pular silêncio"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропускать тишину"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропускати тишу"
+          }
+        }
+      }
+    },
+    "Skip the silence when you listen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stille beim Anhören überspringen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salta los silencios al escuchar"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "सुनते समय खामोशी छोड़ें"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pule os silêncios ao ouvir"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропускайте тишину при прослушивании"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропускайте тишу під час прослуховування"
           }
         }
       }
@@ -10564,52 +10730,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Offhand записує й розшифровує на цьому iPhone. Для короткого змісту потрібно більше памʼяті, ніж має цей iPhone, тому цю частину вимкнено."
-          }
-        }
-      }
-    },
-    "Offhand turns recordings into notes with on-device AI that runs entirely on your iPhone. It is a one-time download; after that, your notes never leave your iPhone." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Offhand macht aus Aufnahmen Notizen – mit KI, die vollständig auf deinem iPhone läuft. Der Download ist einmalig; danach verlassen deine Notizen nie dein iPhone."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Offhand turns recordings into notes with on-device AI that runs entirely on your iPhone. It is a one-time download; after that, your notes never leave your iPhone."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Offhand convierte las grabaciones en notas con IA que se ejecuta por completo en tu iPhone. Es una descarga única; después, tus notas nunca salen de tu iPhone."
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Offhand रिकॉर्डिंग को ऐसे AI से नोट्स में बदलता है जो पूरी तरह आपके iPhone पर चलता है। यह एक बार का डाउनलोड है; इसके बाद आपके नोट्स कभी आपके iPhone से बाहर नहीं जाते।"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O Offhand transforma gravações em notas com IA que roda inteiramente no seu iPhone. É um download único; depois disso, suas notas nunca saem do seu iPhone."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Offhand превращает записи в заметки с помощью ИИ, который работает целиком на вашем iPhone. Загрузка нужна один раз; после этого ваши заметки никогда не покидают ваш iPhone."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Offhand перетворює записи на нотатки за допомогою ШІ, який працює повністю на вашому iPhone. Завантаження потрібне один раз; після цього ваші нотатки ніколи не залишають ваш iPhone."
           }
         }
       }

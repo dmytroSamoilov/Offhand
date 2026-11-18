@@ -24,6 +24,7 @@ data class UserPreferences(
     val modelDownloadProgress: Int? = null,
     val transcriptionEnabled: Boolean = true,
     val summaryEnabled: Boolean = true,
+    val skipSilenceEnabled: Boolean = false,
 )
 
 // Asked as the first onboarding step. Installs that finished onboarding before
@@ -85,6 +86,8 @@ interface UserPreferencesRepository {
     suspend fun setProOverride(override: ProOverride)
 
     suspend fun setSmartSuggestionsEnabled(enabled: Boolean)
+
+    suspend fun setSkipSilenceEnabled(enabled: Boolean)
 
     suspend fun setNoteFeatureEnabled(feature: NoteFeature, enabled: Boolean)
 

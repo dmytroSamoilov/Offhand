@@ -69,11 +69,7 @@ fun SettingsScreen(
                     onAppLockChanged = viewModel::onAppLockChanged,
                     onTelemetryChanged = viewModel::onTelemetryChanged,
                 )
-                AppSection(
-                    isDynamicColorEnabled = state.isDynamicColorEnabled,
-                    onDynamicColorChanged = viewModel::onDynamicColorChanged,
-                    onAboutClick = onAboutSupportClick,
-                )
+                AppSection(state = state, viewModel = viewModel, onAboutClick = onAboutSupportClick)
                 state.proOverride?.let { ProOverrideSection(selected = it, onSelected = viewModel::onProOverrideSelected) }
                 Spacer(modifier = Modifier.height(OffhandSpacing.section))
             }
@@ -207,14 +203,21 @@ private fun PrivacySection(
 }
 
 @Composable
-private fun AppSection(isDynamicColorEnabled: Boolean, onDynamicColorChanged: (Boolean) -> Unit, onAboutClick: () -> Unit) {
+private fun AppSection(state: SettingsUiState, viewModel: SettingsViewModel, onAboutClick: () -> Unit) {
     val context = LocalContext.current
     SettingsSection(label = stringResource(R.string.settings_group_app)) {
         SwitchRow(
+            title = stringResource(R.string.settings_skip_silence_label),
+            subtitle = stringResource(R.string.settings_skip_silence_description),
+            checked = state.isSkipSilenceEnabled,
+            onCheckedChange = viewModel::onSkipSilenceChanged,
+            showProBadge = !state.isSkipSilenceUnlocked,
+        )
+        SwitchRow(
             title = stringResource(R.string.settings_dynamic_color_label),
             subtitle = stringResource(R.string.settings_dynamic_color_description),
-            checked = isDynamicColorEnabled,
-            onCheckedChange = onDynamicColorChanged,
+            checked = state.isDynamicColorEnabled,
+            onCheckedChange = viewModel::onDynamicColorChanged,
         )
         LinkRow(
             title = stringResource(R.string.settings_about_support_title),

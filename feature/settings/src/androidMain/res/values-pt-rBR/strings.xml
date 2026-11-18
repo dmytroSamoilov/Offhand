@@ -72,6 +72,8 @@
     <string name="settings_app_lock_label">Bloqueio do app</string>
     <string name="settings_app_lock_description">Pede sua impressão digital, seu rosto ou o bloqueio de tela sempre que o Offhand abre.</string>
     <string name="settings_app_lock_unavailable">Configure um bloqueio de tela neste telefone para usar isso.</string>
+    <string name="settings_skip_silence_label">Pular silêncio</string>
+    <string name="settings_skip_silence_description">Pula as pausas longas ao ouvir uma gravação.</string>
     <string name="settings_dynamic_color_label">Cores do papel de parede</string>
     <string name="settings_dynamic_color_description">Colore o app com base no seu papel de parede (Material You) em vez da paleta integrada.</string>
 

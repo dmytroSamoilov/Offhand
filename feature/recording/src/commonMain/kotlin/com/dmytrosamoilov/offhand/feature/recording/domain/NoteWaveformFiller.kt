@@ -3,6 +3,8 @@
 package com.dmytrosamoilov.offhand.feature.recording.domain
 
 import co.touchlab.kermit.Logger
+import com.dmytrosamoilov.offhand.core.data.domain.ProtectedDataState
+import com.dmytrosamoilov.offhand.core.data.domain.awaitAvailable
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MeasureNoteWaveformUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveNotesWithoutWaveformUseCase
 import kotlin.concurrent.atomics.AtomicBoolean
@@ -18,10 +20,12 @@ import kotlinx.coroutines.launch
 // the background: new recordings and imports once their audio is complete,
 // and the whole library after the upgrade or a restore. A note that fails is
 // left for the next process, so an unreadable file is not retried in a loop.
-// Started once the app is READY, because reading the notes opens the database.
+// Started once the app is READY, because reading the notes opens the database;
+// each measurement waits while the device is locked, when the recordings cannot be opened.
 class NoteWaveformFiller(
     private val observeNotesWithoutWaveform: ObserveNotesWithoutWaveformUseCase,
     private val measureNoteWaveform: MeasureNoteWaveformUseCase,
+    private val protectedData: ProtectedDataState,
 ) {
 
     // Application-lifetime scope: lives as long as the process, never cancelled.
@@ -41,6 +45,7 @@ class NoteWaveformFiller(
     }
 
     private suspend fun measure(noteId: Long, audioFileName: String) {
+        protectedData.awaitAvailable()
         try {
             measureNoteWaveform(noteId, audioFileName)
         } catch (cancellation: CancellationException) {

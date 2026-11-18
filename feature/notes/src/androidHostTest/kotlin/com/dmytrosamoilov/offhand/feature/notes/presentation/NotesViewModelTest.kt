@@ -209,6 +209,8 @@ class NotesViewModelTest {
         dateLabelFormatter = dateLabelFormatter,
         observeNotes = observeNotes,
         observeNoteWaveforms = mockk { every { this@mockk() } returns flowOf(emptyMap()) },
+        observeSkipSilence = mockk { every { this@mockk() } returns flowOf(false) },
+        findSilence = mockk(),
         observeFolders = observeFolders,
         searchNotes = SearchNotesUseCase(),
         createFolder = createFolder,

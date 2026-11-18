@@ -49,6 +49,7 @@ val appModule = module {
             decideEarlyAdopterPro = lazy { get<DecideEarlyAdopterProUseCase>() },
             markEarlyAdopterThanked = get(),
             settleProTrial = get(),
+            switchOffLapsedProSettings = get(),
             acknowledgeProTrialNotice = get(),
             keepProTrialInSync = get(),
             proUpgradeGate = get(),

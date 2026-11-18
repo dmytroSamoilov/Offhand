@@ -108,4 +108,5 @@
     <string name="paywall_usage_folder_styles">Папок со своим стилем</string>
     <string name="paywall_usage_backups">Резервных копий с записями</string>
     <string name="paywall_context_widget">Записывайте с главного экрана</string>
+    <string name="paywall_context_skip_silence">Пропускайте тишину при прослушивании</string>
 </resources>
