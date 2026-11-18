@@ -488,8 +488,7 @@ private struct NoteDetailFooter: View {
                 RoundIconButton(systemImage: "square.and.arrow.up", label: String(localized: "Share note"), action: onShare)
             }
             .padding(.horizontal, OffhandSpacing.screen)
-            .padding(.top, OffhandSpacing.card)
-            .padding(.bottom, OffhandSpacing.related)
+            .frame(height: BottomBar.barHeight)
         }
         .background(OffhandColor.ground.ignoresSafeArea(edges: .bottom))
         .sensoryFeedback(.success, trigger: copiedAt) { _, new in new != nil }

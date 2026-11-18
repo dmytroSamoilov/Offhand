@@ -18,7 +18,9 @@ struct BottomBar: View {
     let onRecord: () -> Void
     let onSettings: () -> Void
 
-    private static let barHeight: CGFloat = 84
+    // A footer that sits beside the bar in a split view uses the same height,
+    // so the two hairlines line up.
+    static let barHeight: CGFloat = 84
 
     var body: some View {
         VStack(spacing: 0) {
