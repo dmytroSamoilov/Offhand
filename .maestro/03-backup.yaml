@@ -46,6 +46,10 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - tapOn: "Settings"
+      # The row starts under the bottom bar, where a tap lands on the bar
+      - scrollUntilVisible:
+          element: "Backup & restore"
+          centerElement: true
       - tapOn: "Backup & restore"
       - tapOn: "Create backup file"
       - assertVisible: ".*neither you nor we can recover.*"

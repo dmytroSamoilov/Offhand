@@ -31,14 +31,22 @@ appId: com.dmytrosamoilov.offhand.uitest
           element: "Pro status override"
           centerElement: true
       - tapOn: "Free"
-      # Pro imports did not use up the free taste (the row sits next to the
-      # override at the bottom of the form)
-      - assertVisible: "3 of 3 free imports left"
+      # Pro imports did not use up the free taste
+      - scrollUntilVisible:
+          element: "3 of 3 free imports left"
+          direction: UP
+          centerElement: true
       # Scroll back to the very top (the hierarchy reports rows clipped under
       # the title as visible, so aim at the first row like 08 does)
       - scrollUntilVisible:
           element: "Upgrade"
           direction: UP
+      - swipe:
+          start: "50%,35%"
+          end: "50%,85%"
+      - swipe:
+          start: "50%,35%"
+          end: "50%,85%"
 
 # A built-in style other than Summary as the default
 - runFlow:
@@ -83,6 +91,13 @@ appId: com.dmytrosamoilov.offhand.uitest
           element:
             text: "Backup & restore"
           direction: DOWN
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element: "Backup & restore"
+          centerElement: true
 - tapOn: "Backup & restore"
 - tapOn: "Back up|Create backup file"
 - tapOn: "Passphrase"

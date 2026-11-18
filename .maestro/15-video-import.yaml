@@ -47,13 +47,16 @@ appId: com.dmytrosamoilov.offhand.uitest
       - extendedWaitUntil:
           visible: "Cancel"
           timeout: 10000
+      - waitForAnimationToEnd:
+          timeout: 3000
       - tapOn:
           point: "50%,19%"
       - inputText: "import-sample.mp4"
+      - pressKey: Enter
+      - waitForAnimationToEnd:
+          timeout: 3000
       - tapOn:
-          point: "73%,25%"
-      - tapOn:
-          point: "18%,41%"
+          point: "18%,37%"
       - tapOn:
           point: "87%,13%"
       - extendedWaitUntil:

@@ -78,6 +78,14 @@ appId: com.dmytrosamoilov.offhand.uitest
       - scrollUntilVisible:
           element: "Upgrade"
           direction: UP
+      # The scroll stops with the card still under the status bar, where a
+      # tap does not reach it; pull the form down to its very top
+      - swipe:
+          start: "50%,35%"
+          end: "50%,85%"
+      - swipe:
+          start: "50%,35%"
+          end: "50%,85%"
       - tapOn: "Upgrade"
       # The comparison opens collapsed; the rest of it is behind this control
       - tapOn: "See everything in Pro"

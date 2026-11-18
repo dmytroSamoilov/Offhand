@@ -24,6 +24,16 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "App lock"
 - waitForAnimationToEnd:
     timeout: 5000
+# The Face ID prompt is not in the hierarchy and the matcher answers it up to
+# four seconds later, so wait that long for a text that never shows here
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Offhand is locked"
+          timeout: 8000
+          optional: true
 
 # The next launch is locked
 - stopApp

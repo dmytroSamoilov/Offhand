@@ -53,18 +53,21 @@ appId: com.dmytrosamoilov.offhand.uitest
       - tapOn: "Import audio or video"
       # The document picker runs out of process and is invisible to Maestro,
       # and it reopens in whatever folder it showed last, so it is driven by
-      # position through its search: search field, name, the "On My iPhone"
-      # scope chip, the first (only) result tile, then Open
+      # position through its search: search field, name, the keyboard's
+      # search key (which closes the keyboard), the first result tile, then Open
       - extendedWaitUntil:
           visible: "Cancel"
           timeout: 10000
+      - waitForAnimationToEnd:
+          timeout: 3000
       - tapOn:
           point: "50%,19%"
       - inputText: "import-sample"
+      - pressKey: Enter
+      - waitForAnimationToEnd:
+          timeout: 3000
       - tapOn:
-          point: "73%,25%"
-      - tapOn:
-          point: "18%,41%"
+          point: "18%,37%"
       - tapOn:
           point: "87%,13%"
       - extendedWaitUntil:

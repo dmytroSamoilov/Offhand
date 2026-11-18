@@ -49,6 +49,7 @@ appId: com.dmytrosamoilov.offhand.uitest
     commands:
       - scrollUntilVisible:
           element: "About & support"
+          centerElement: true
       - tapOn: "About & support"
       - scrollUntilVisible:
           element: "Developer options"
