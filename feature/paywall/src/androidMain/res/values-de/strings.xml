@@ -98,4 +98,5 @@
     <string name="paywall_usage_folder_styles">Ordner mit eigenem Stil</string>
     <string name="paywall_usage_backups">Backups mit deinen Aufnahmen</string>
     <string name="paywall_context_widget">Vom Startbildschirm aus aufnehmen</string>
+    <string name="paywall_context_skip_silence">Stille beim Anhören überspringen</string>
 </resources>

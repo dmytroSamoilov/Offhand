@@ -21,6 +21,8 @@ struct SettingsView<BottomBarContent: View>: View {
         isTranscriptionEnabled: true,
         isSummaryEnabled: true,
         isSmartSuggestionsUnlocked: false,
+        isSkipSilenceEnabled: false,
+        isSkipSilenceUnlocked: false,
         pro: ProStatusUiFree.shared,
         proOverride: nil,
         isImportPickerRequested: false,
@@ -228,6 +230,12 @@ struct SettingsView<BottomBarContent: View>: View {
 
     private var appGroup: some View {
         SettingsGroup(label: String(localized: "App")) {
+            SwitchRow(
+                title: String(localized: "Skip silence"),
+                subtitle: String(localized: "Jump over long pauses when you play a recording."),
+                isOn: state.isSkipSilenceEnabled,
+                showsProBadge: !state.isSkipSilenceUnlocked
+            ) { viewModel.onSkipSilenceChanged(enabled: $0) }
             if isSubscription(state.pro) {
                 LinkRow(title: String(localized: "Manage subscription")) { SubscriptionManagement.present() }
             }

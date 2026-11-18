@@ -24,6 +24,7 @@ data class UserPreferences(
     val modelDownloadProgress: Int? = null,
     val transcriptionEnabled: Boolean = true,
     val summaryEnabled: Boolean = true,
+    val skipSilenceEnabled: Boolean = false,
 )
 
 // Decided once per install when 1.5 first runs: an install that had finished
@@ -71,6 +72,8 @@ interface UserPreferencesRepository {
     suspend fun setProOverride(override: ProOverride)
 
     suspend fun setSmartSuggestionsEnabled(enabled: Boolean)
+
+    suspend fun setSkipSilenceEnabled(enabled: Boolean)
 
     suspend fun setNoteFeatureEnabled(feature: NoteFeature, enabled: Boolean)
 

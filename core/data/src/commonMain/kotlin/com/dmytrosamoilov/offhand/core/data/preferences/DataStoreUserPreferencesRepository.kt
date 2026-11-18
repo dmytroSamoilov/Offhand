@@ -57,6 +57,7 @@ internal class DataStoreUserPreferencesRepository(
                 modelDownloadProgress = preferences[KEY_MODEL_DOWNLOAD_PROGRESS],
                 transcriptionEnabled = preferences[KEY_TRANSCRIPTION_ENABLED] ?: true,
                 summaryEnabled = preferences[KEY_SUMMARY_ENABLED] ?: true,
+                skipSilenceEnabled = preferences[KEY_SKIP_SILENCE] ?: false,
             )
         }
 
@@ -105,6 +106,10 @@ internal class DataStoreUserPreferencesRepository(
 
     override suspend fun setSmartSuggestionsEnabled(enabled: Boolean) {
         dataStore.edit { it[KEY_SMART_SUGGESTIONS] = enabled }
+    }
+
+    override suspend fun setSkipSilenceEnabled(enabled: Boolean) {
+        dataStore.edit { it[KEY_SKIP_SILENCE] = enabled }
     }
 
     override suspend fun setProOverride(override: ProOverride) {
@@ -171,6 +176,7 @@ internal class DataStoreUserPreferencesRepository(
         val KEY_PRO_OVERRIDE = stringPreferencesKey("debug_pro_override")
         val KEY_NOTIFICATIONS_PROMPTED = booleanPreferencesKey("notifications_prompted")
         val KEY_SMART_SUGGESTIONS = booleanPreferencesKey("smart_suggestions_enabled")
+        val KEY_SKIP_SILENCE = booleanPreferencesKey("skip_silence_enabled")
         val KEY_TRANSCRIPTION_ENABLED = booleanPreferencesKey("transcription_enabled")
         val KEY_SUMMARY_ENABLED = booleanPreferencesKey("summary_enabled")
         val KEY_EARLY_ADOPTER_PRO = stringPreferencesKey("early_adopter_pro")

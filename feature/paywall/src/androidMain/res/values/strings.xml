@@ -102,4 +102,5 @@
     <string name="paywall_usage_folder_styles">Folders with their own style</string>
     <string name="paywall_usage_backups">Backups with your recordings</string>
     <string name="paywall_context_widget">Record from your home screen</string>
+    <string name="paywall_context_skip_silence">Skip the silence when you listen</string>
 </resources>

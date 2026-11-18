@@ -18,6 +18,8 @@ data class SettingsUiState(
     val isTranscriptionEnabled: Boolean = true,
     val isSummaryEnabled: Boolean = true,
     val isSmartSuggestionsUnlocked: Boolean = false,
+    val isSkipSilenceEnabled: Boolean = false,
+    val isSkipSilenceUnlocked: Boolean = false,
     val pro: ProStatusUi = ProStatusUi.Free,
     val proOverride: ProOverride? = null,
     val isImportPickerRequested: Boolean = false,

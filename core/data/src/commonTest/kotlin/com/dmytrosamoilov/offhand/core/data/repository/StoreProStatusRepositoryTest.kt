@@ -151,6 +151,7 @@ private class GrantPreferences : UserPreferencesRepository {
     override suspend fun incrementSavedRecordingsCount() = Unit
     override suspend fun setReviewPromptState(state: ReviewPromptState) = Unit
     override suspend fun setSmartSuggestionsEnabled(enabled: Boolean) = Unit
+    override suspend fun setSkipSilenceEnabled(enabled: Boolean) = Unit
     override suspend fun setNoteFeatureEnabled(feature: NoteFeature, enabled: Boolean) = Unit
     override suspend fun setNotificationsPrompted() = Unit
     override suspend fun setProOverride(override: ProOverride) = Unit

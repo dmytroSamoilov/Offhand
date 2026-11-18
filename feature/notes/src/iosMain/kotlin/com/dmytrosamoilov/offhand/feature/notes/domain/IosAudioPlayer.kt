@@ -3,6 +3,7 @@
 package com.dmytrosamoilov.offhand.feature.notes.domain
 
 import co.touchlab.kermit.Logger
+import com.dmytrosamoilov.offhand.core.audio.SilenceSkip
 import com.dmytrosamoilov.offhand.core.audio.WavCodec
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import kotlinx.cinterop.BetaInteropApi
@@ -52,6 +53,7 @@ class IosAudioPlayer(
     private var player: AVAudioPlayer? = null
     private var progressJob: Job? = null
     private var loadJob: Job? = null
+    private var silenceSkips: List<SilenceSkip> = emptyList()
 
     override fun load(audioFileName: String) {
         reset()
@@ -83,8 +85,9 @@ class IosAudioPlayer(
         progressJob?.cancel()
         progressJob = scope.launch {
             while (active.isPlaying()) {
+                jumpOverSilence(active)
                 publishPosition(active)
-                delay(PROGRESS_INTERVAL_MS)
+                delay(if (silenceSkips.isEmpty()) PROGRESS_INTERVAL_MS else SKIP_CHECK_INTERVAL_MS)
             }
             publishPosition(active)
             mutableState.update { it.copy(isPlaying = false) }
@@ -103,7 +106,12 @@ class IosAudioPlayer(
         publishPosition(active)
     }
 
+    override fun setSilenceSkips(skips: List<SilenceSkip>) {
+        silenceSkips = skips
+    }
+
     override fun reset() {
+        silenceSkips = emptyList()
         loadJob?.cancel()
         progressJob?.cancel()
         player?.stop()
@@ -115,6 +123,14 @@ class IosAudioPlayer(
     override fun release() {
         reset()
         scope.cancel()
+    }
+
+    // AVAudioPlayer has no hook mid-buffer, so the progress loop checks often
+    // while there is anything to skip and jumps once it is inside a pause.
+    private fun jumpOverSilence(active: AVAudioPlayer) {
+        val positionMs = (active.currentTime * MS_PER_SECOND).toLong()
+        val skip = silenceSkips.firstOrNull { positionMs >= it.startMs && positionMs < it.endMs } ?: return
+        active.currentTime = skip.endMs / MS_PER_SECOND
     }
 
     private fun publishPosition(active: AVAudioPlayer) {
@@ -174,6 +190,7 @@ class IosAudioPlayer(
         const val PLAYBACK_FILE = "playback.wav"
         const val MS_PER_SECOND = 1000.0
         const val PROGRESS_INTERVAL_MS = 200L
+        const val SKIP_CHECK_INTERVAL_MS = 40L
         const val SAMPLE_RATE = 16_000
         const val CHANNELS = 1
         const val BITS_PER_SAMPLE = 16

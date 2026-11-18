@@ -72,6 +72,8 @@
     <string name="settings_app_lock_label">Блокування застосунку</string>
     <string name="settings_app_lock_description">Запитує відбиток пальця, обличчя або блокування екрана щоразу, коли відкривається Offhand.</string>
     <string name="settings_app_lock_unavailable">Налаштуйте блокування екрана на цьому телефоні, щоб користуватися цим.</string>
+    <string name="settings_skip_silence_label">Пропускати тишу</string>
+    <string name="settings_skip_silence_description">Перестрибувати довгі паузи під час прослуховування запису.</string>
     <string name="settings_dynamic_color_label">Кольори шпалер</string>
     <string name="settings_dynamic_color_description">Фарбує застосунок у кольори ваших шпалер (Material You) замість вбудованої палітри.</string>
 

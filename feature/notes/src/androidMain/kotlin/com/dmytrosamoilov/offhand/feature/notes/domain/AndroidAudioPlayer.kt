@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.notes.domain
 
 import com.dmytrosamoilov.offhand.core.audio.PcmAudioPlayer
 import com.dmytrosamoilov.offhand.core.audio.PcmPlaybackState
+import com.dmytrosamoilov.offhand.core.audio.SilenceSkip
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +23,8 @@ class AndroidAudioPlayer(
     override fun pause() = player.pause()
 
     override fun seekTo(positionMs: Long) = player.seekTo(positionMs)
+
+    override fun setSilenceSkips(skips: List<SilenceSkip>) = player.setSilenceSkips(skips)
 
     override fun reset() = player.reset()
 

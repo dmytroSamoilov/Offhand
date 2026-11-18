@@ -16,6 +16,7 @@ enum class ProFeature {
     FOLDERS,
     BACKUP_AUDIO,
     WIDGET,
+    SKIP_SILENCE,
     FREE_TRIAL,
     TRIAL_ENDED,
 }

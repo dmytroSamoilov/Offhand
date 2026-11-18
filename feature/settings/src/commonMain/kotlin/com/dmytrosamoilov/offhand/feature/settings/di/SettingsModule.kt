@@ -12,6 +12,7 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteSty
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOverrideUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStatusUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteFeaturesUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSkipSilenceEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteFeatureEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
@@ -22,6 +23,7 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDeveloperOp
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSkipSilenceEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsSummaryAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetTelemetryConsentUseCase
@@ -49,6 +51,7 @@ val featureSettingsModule = module {
     factoryOf(::ObserveProOverrideUseCase)
     factoryOf(::ObserveProStatusUseCase)
     factoryOf(::ObserveSmartSuggestionsEnabledUseCase)
+    factoryOf(::ObserveSkipSilenceEnabledUseCase)
     factoryOf(::ObserveTelemetryConsentUseCase)
     factoryOf(::RedeemProCodeUseCase)
     factoryOf(::SaveCustomNoteStyleUseCase)
@@ -59,6 +62,7 @@ val featureSettingsModule = module {
     factoryOf(::SetNoteStyleUseCase)
     factoryOf(::SetProOverrideUseCase)
     factoryOf(::SetSmartSuggestionsEnabledUseCase)
+    factoryOf(::SetSkipSilenceEnabledUseCase)
     factoryOf(::SetTelemetryConsentUseCase)
     factoryOf(::IsSummaryAvailableUseCase)
     viewModel {
@@ -77,6 +81,8 @@ val featureSettingsModule = module {
             observeImportAllowance = get(),
             observeSmartSuggestionsEnabled = get(),
             setSmartSuggestionsEnabled = get(),
+            observeSkipSilenceEnabled = get(),
+            setSkipSilenceEnabled = get(),
             observeNoteFeatures = get(),
             setNoteFeatureEnabled = get(),
             observeProStatus = get(),

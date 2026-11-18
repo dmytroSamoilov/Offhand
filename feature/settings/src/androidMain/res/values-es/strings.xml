@@ -72,6 +72,8 @@
     <string name="settings_app_lock_label">Bloqueo de la app</string>
     <string name="settings_app_lock_description">Pide tu huella, tu cara o tu bloqueo de pantalla cada vez que se abre Offhand.</string>
     <string name="settings_app_lock_unavailable">Configura un bloqueo de pantalla en este teléfono para usar esta opción.</string>
+    <string name="settings_skip_silence_label">Saltar silencios</string>
+    <string name="settings_skip_silence_description">Salta las pausas largas al reproducir una grabación.</string>
     <string name="settings_dynamic_color_label">Colores del fondo de pantalla</string>
     <string name="settings_dynamic_color_description">Colorea la app a partir de tu fondo de pantalla (Material You) en lugar de la paleta integrada.</string>
 

@@ -72,6 +72,8 @@
     <string name="settings_app_lock_label">App-Sperre</string>
     <string name="settings_app_lock_description">Fragt bei jedem Öffnen von Offhand nach Fingerabdruck, Gesicht oder Displaysperre.</string>
     <string name="settings_app_lock_unavailable">Richte eine Displaysperre auf diesem Smartphone ein, um das zu nutzen.</string>
+    <string name="settings_skip_silence_label">Stille überspringen</string>
+    <string name="settings_skip_silence_description">Lange Pausen beim Abspielen einer Aufnahme überspringen.</string>
     <string name="settings_dynamic_color_label">Farben vom Hintergrundbild</string>
     <string name="settings_dynamic_color_description">Färbt die App passend zu deinem Hintergrundbild (Material You) statt mit der eingebauten Palette.</string>
 

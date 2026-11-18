@@ -72,6 +72,8 @@
     <string name="settings_app_lock_label">ऐप लॉक</string>
     <string name="settings_app_lock_description">हर बार Offhand खुलने पर फ़िंगरप्रिंट, चेहरा या स्क्रीन लॉक मांगता है।</string>
     <string name="settings_app_lock_unavailable">इसका इस्तेमाल करने के लिए इस फ़ोन पर स्क्रीन लॉक सेट करें।</string>
+    <string name="settings_skip_silence_label">खामोशी छोड़ें</string>
+    <string name="settings_skip_silence_description">रिकॉर्डिंग चलाते समय लंबे ठहराव छोड़ दें।</string>
     <string name="settings_dynamic_color_label">वॉलपेपर के रंग</string>
     <string name="settings_dynamic_color_description">ऐप को बिल्ट-इन पैलेट के बजाय आपके वॉलपेपर (Material You) के रंगों में रंगता है।</string>
 

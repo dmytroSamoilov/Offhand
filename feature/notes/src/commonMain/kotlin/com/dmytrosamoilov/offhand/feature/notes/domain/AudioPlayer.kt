@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.notes.domain
 
+import com.dmytrosamoilov.offhand.core.audio.SilenceSkip
 import kotlinx.coroutines.flow.StateFlow
 
 interface AudioPlayer {
@@ -13,6 +14,9 @@ interface AudioPlayer {
     fun pause()
 
     fun seekTo(positionMs: Long)
+
+    // Stretches playback jumps over; loading a recording clears them.
+    fun setSilenceSkips(skips: List<SilenceSkip>)
 
     fun reset()
 
