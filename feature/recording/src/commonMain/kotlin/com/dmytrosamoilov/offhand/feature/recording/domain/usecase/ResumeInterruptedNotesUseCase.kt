@@ -5,7 +5,9 @@ import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProtectedDataState
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
+import com.dmytrosamoilov.offhand.core.data.domain.awaitAvailable
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioRecorder
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
@@ -20,9 +22,13 @@ class ResumeInterruptedNotesUseCase(
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
     private val isSpeechModelDownloaded: IsSpeechModelDownloadedUseCase,
     private val audioStore: EncryptedAudioStore,
+    private val protectedData: ProtectedDataState,
 ) {
 
+    // The notes and their recordings cannot be opened while the device is
+    // locked, so resuming waits for it to be unlocked.
     suspend operator fun invoke() {
+        protectedData.awaitAvailable()
         if (!isSpeechModelDownloaded()) return
         val canWrite = isAiCoreDownloaded()
         val activeNoteIds = sessionManager.processingNoteIds.value

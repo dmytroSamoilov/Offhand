@@ -30,7 +30,9 @@ import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStylesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestionsRepository
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import com.dmytrosamoilov.offhand.core.data.domain.AlwaysAvailableProtectedData
 import com.dmytrosamoilov.offhand.core.data.domain.NoteWaveformRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProtectedDataState
 import com.dmytrosamoilov.offhand.core.data.domain.TranscriptionCheckpointRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatusCache
@@ -121,6 +123,7 @@ val coreDataModule = module {
     factory<NoteSuggestionsDao> { get<NotesDatabase>().noteSuggestionsDao() }
     factory<TranscriptionCheckpointDao> { get<NotesDatabase>().transcriptionCheckpointDao() }
     factory<NoteWaveformDao> { get<NotesDatabase>().noteWaveformDao() }
+    single<ProtectedDataState> { AlwaysAvailableProtectedData() }
     singleOf(::RoomNotesRepository) bind NotesRepository::class
     singleOf(::RoomFoldersRepository) bind FoldersRepository::class
     singleOf(::RoomCustomNoteStylesRepository) bind CustomNoteStylesRepository::class
