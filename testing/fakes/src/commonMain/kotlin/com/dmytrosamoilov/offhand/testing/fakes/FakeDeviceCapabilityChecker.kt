@@ -25,7 +25,7 @@ class FakeDeviceCapabilityChecker : DeviceCapabilityChecker {
     private companion object {
         const val TOTAL_RAM_MB = 8L * 1024L
         const val MID_RAM_MB = 3_660L
-        const val LOW_RAM_MB = 1_850L
+        const val LOW_RAM_MB = 1_400L
         const val AVAILABLE_RAM_MB = 1L * 1024L
         const val CPU_CORES = 8
     }

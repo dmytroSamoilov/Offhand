@@ -38,7 +38,7 @@ class OnboardingViewModelTest {
     private val midDevice =
         DeviceCapability(totalRamMb = 3_660, availableRamMb = 1_800, cpuCores = 8)
     private val weakDevice =
-        DeviceCapability(totalRamMb = 1_850, availableRamMb = 900, cpuCores = 4)
+        DeviceCapability(totalRamMb = 1_400, availableRamMb = 700, cpuCores = 4)
 
     private val deviceCapabilityChecker: DeviceCapabilityChecker = mockk()
     private val setAppLockEnabled: SetAppLockEnabledUseCase = mockk(relaxed = true)
@@ -88,8 +88,8 @@ class OnboardingViewModelTest {
 
         val state = viewModel.uiState.value
         assertEquals(OnboardingStep.DEVICE_INCOMPATIBLE, state.step)
-        assertEquals("1.8", state.deviceSpecs?.totalRamGb)
-        assertEquals("3", state.deviceSpecs?.requiredRamGb)
+        assertEquals("1.4", state.deviceSpecs?.totalRamGb)
+        assertEquals("2", state.deviceSpecs?.requiredRamGb)
         assertEquals(false, state.deviceSpecs?.isRamSatisfied)
         assertEquals(listOf("device_unsupported"), tracked.map { it.name })
         verify(exactly = 0) { modelDownloadLauncher.startIfAllowed() }

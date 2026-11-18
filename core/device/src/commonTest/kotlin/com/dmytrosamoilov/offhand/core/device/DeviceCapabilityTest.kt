@@ -19,7 +19,8 @@ class DeviceCapabilityTest {
     }
 
     @Test
-    fun phonesSoldWithThreeToFiveGigabytesGetTranscriptsOnly() {
+    fun phonesSoldWithTwoToFiveGigabytesGetTranscriptsOnly() {
+        assertEquals(DeviceTier.TRANSCRIPTS_ONLY, tierOf(totalRamMb = 1_850))
         assertEquals(DeviceTier.TRANSCRIPTS_ONLY, tierOf(totalRamMb = 2_760))
         assertEquals(DeviceTier.TRANSCRIPTS_ONLY, tierOf(totalRamMb = 3_660))
         assertEquals(DeviceTier.TRANSCRIPTS_ONLY, tierOf(totalRamMb = 4_610))
@@ -29,7 +30,7 @@ class DeviceCapabilityTest {
 
     @Test
     fun phonesWithLessMemoryOrFewCoresAreNotSupported() {
-        assertEquals(DeviceTier.UNSUPPORTED, tierOf(totalRamMb = 1_850))
+        assertEquals(DeviceTier.UNSUPPORTED, tierOf(totalRamMb = 1_400))
         assertEquals(DeviceTier.UNSUPPORTED, tierOf(totalRamMb = MIN_SUPPORTED_RAM_MB - 1))
         assertEquals(DeviceTier.UNSUPPORTED, tierOf(totalRamMb = 8_192, cpuCores = MIN_CPU_CORES - 1))
     }
