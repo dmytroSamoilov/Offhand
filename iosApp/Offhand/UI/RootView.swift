@@ -179,6 +179,7 @@ struct RootView: View {
             .flatMap { Int64($0) }
         viewModel.onWidgetRecordingRequested {
             shortcuts.requestedFolder = folderId.map { .folder($0) } ?? .unsorted
+            shortcuts.requestedOrigin = .widget
             shortcuts.pending = .startRecording
         }
         return true
@@ -191,6 +192,7 @@ struct RootView: View {
         shortcuts.pending = nil
         switch request {
         case .startRecording:
+            AppViewModels.recording.onRecordingExpectedFrom(origin: shortcuts.takeRequestedOrigin().analyticsOrigin)
             selectedTab = .notes
             shortcuts.recordSheetRequestId += 1
         case .stopRecording:
@@ -418,6 +420,16 @@ struct MainTabView: View {
         Haptics.confirm()
         selectedTab = .notes
         ShortcutRequests.shared.recordSheetRequestId += 1
+    }
+}
+
+private extension ShortcutRequests.Origin {
+    var analyticsOrigin: RecordingOrigin {
+        switch self {
+        case .shortcut: return .shortcut
+        case .widget: return .widget
+        case .onboarding: return .onboarding
+        }
     }
 }
 

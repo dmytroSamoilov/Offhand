@@ -126,9 +126,13 @@ class SettingsViewModel(
         }
     }
 
+    // Switching off is reported first, while events still go out; switching
+    // on is reported after, and waits for the reporting to be back.
     fun onTelemetryChanged(granted: Boolean) {
         launchSafely(showLoading = false) {
+            if (!granted) analyticsTracker.track(AnalyticsEvents.telemetryToggled(enabled = false))
             setTelemetryConsent(granted)
+            if (granted) analyticsTracker.track(AnalyticsEvents.telemetryToggled(enabled = true))
         }
     }
 

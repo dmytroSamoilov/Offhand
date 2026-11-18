@@ -54,6 +54,7 @@ val appModule = module {
             keepProTrialInSync = get(),
             proUpgradeGate = get(),
             appForegroundState = get(),
+            recordingOrigin = get(),
         )
     }
 }

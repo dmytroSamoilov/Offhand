@@ -318,7 +318,10 @@ struct RecordSheetView: View {
         AVAudioApplication.requestRecordPermission { granted in
             Task { @MainActor in
                 isPermissionDenied = !granted
-                guard granted else { return }
+                guard granted else {
+                    viewModel.onMicrophoneDenied()
+                    return
+                }
                 viewModel.onStartRecording(folderId: folderId.map { KotlinLong(value: $0) })
             }
         }

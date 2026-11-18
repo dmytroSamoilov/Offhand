@@ -6,6 +6,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.NoteStyleResolver
 import com.dmytrosamoilov.offhand.feature.recording.domain.NoteWaveformFiller
 import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinator
 import com.dmytrosamoilov.offhand.feature.recording.domain.SpeechWarmUp
+import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingOriginHolder
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.SessionNoteStyleDrafter
 import com.dmytrosamoilov.offhand.feature.recording.domain.TranscriptStructurer
@@ -141,5 +142,6 @@ val featureRecordingModule = module {
     factoryOf(::SaveNoteTranscriptUseCase)
     factoryOf(::SaveTranscriptionCheckpointUseCase)
     factoryOf(::SweepOrphanedRecordingsUseCase)
+    single { RecordingOriginHolder() }
     viewModelOf(::RecordingViewModel)
 }

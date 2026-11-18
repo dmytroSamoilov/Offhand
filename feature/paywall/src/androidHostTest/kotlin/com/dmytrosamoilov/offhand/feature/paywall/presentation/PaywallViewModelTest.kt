@@ -159,6 +159,35 @@ class PaywallViewModelTest {
     }
 
     @Test
+    fun `a purchase that does not go through is reported by how it ended`() = runTest {
+        val tracker: AnalyticsTracker = mockk(relaxed = true)
+        val viewModel = createViewModel(tracker)
+
+        coEvery { purchasePro(ProPlan.YEARLY) } returns PurchaseOutcome.CANCELLED
+        viewModel.onPurchaseClicked()
+        coEvery { purchasePro(ProPlan.YEARLY) } returns PurchaseOutcome.FAILED
+        viewModel.onPurchaseClicked()
+
+        verify(exactly = 1) { tracker.track(match { it.name == "purchase_cancelled" }) }
+        verify(exactly = 1) { tracker.track(match { it.name == "purchase_failed" }) }
+        verify(exactly = 0) { tracker.track(match { it.name == "purchase_completed" }) }
+    }
+
+    @Test
+    fun `keeping the free trial is reported once and not as a dismissal`() = runTest {
+        every { gate.requestedFeature } returns MutableStateFlow(ProFeature.FREE_TRIAL)
+        val tracker: AnalyticsTracker = mockk(relaxed = true)
+        val viewModel = createViewModel(tracker)
+        viewModel.onOpened()
+
+        viewModel.onKeepTrialClicked()
+
+        verify(exactly = 1) { tracker.track(match { it.name == "trial_offer_kept" }) }
+        verify(exactly = 0) { tracker.track(match { it.name == "paywall_dismissed" }) }
+        verify { gate.onPaywallClosed() }
+    }
+
+    @Test
     fun `restore without a purchase reports nothing to restore`() = runTest {
         coEvery { restoreProPurchases() } returns ProStatus.FREE
         val viewModel = createViewModel()

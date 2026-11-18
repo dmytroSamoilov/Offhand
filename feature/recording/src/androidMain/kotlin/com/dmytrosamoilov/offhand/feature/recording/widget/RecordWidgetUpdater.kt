@@ -132,7 +132,7 @@ class RecordWidgetUpdater(
     private fun tapIntent(widgetId: Int, folderId: Long?, isRecording: Boolean): PendingIntent? = when {
         isRecording -> PendingIntent.getService(context, STOP_REQUEST, RecordingService.stopIntent(context), FLAGS)
         canRecordWithoutTheApp() ->
-            PendingIntent.getForegroundService(context, widgetId, RecordingService.startIntent(context, folderId), FLAGS)
+            PendingIntent.getForegroundService(context, widgetId, RecordingService.startIntent(context, folderId, isFromWidget = true), FLAGS)
         else -> openAppIntent(widgetId, folderId)
     }
 

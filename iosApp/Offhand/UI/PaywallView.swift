@@ -202,7 +202,7 @@ struct PaywallView: View {
         VStack(spacing: 8) {
             GoldButton(String(localized: "Keep using Pro for free"), fillsWidth: true) {
                 Haptics.confirm()
-                viewModel.onClosed()
+                viewModel.onKeepTrialClicked()
             }
             .disabled(state.isPurchasing)
             SecondaryButton(PaywallCopy.buyNow(for: state.selectedOffer), fillsWidth: true) {

@@ -28,6 +28,20 @@ final class ShortcutRequests: ObservableObject {
 
     var requestedFolder: RequestedFolder?
 
+    // What asked for the next recording. Siri and Shortcuts leave it empty.
+    enum Origin {
+        case shortcut
+        case widget
+        case onboarding
+    }
+
+    var requestedOrigin: Origin?
+
+    func takeRequestedOrigin() -> Origin {
+        defer { requestedOrigin = nil }
+        return requestedOrigin ?? .shortcut
+    }
+
     func takeRequestedFolder(fallback: Int64?) -> Int64? {
         defer { requestedFolder = nil }
         switch requestedFolder {

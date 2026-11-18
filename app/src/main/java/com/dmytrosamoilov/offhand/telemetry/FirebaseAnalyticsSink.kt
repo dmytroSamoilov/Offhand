@@ -11,6 +11,8 @@ class FirebaseAnalyticsSink(
     private val context: Context,
 ) : AnalyticsSink {
 
+    override fun isReady(): Boolean = AnalyticsReadiness.isReady
+
     override fun log(name: String, params: Map<String, Any>) {
         FirebaseReporting.instanceOrNull(context) ?: return
         FirebaseAnalytics.getInstance(context).logEvent(name, bundleOf(*params.toList().toTypedArray()))

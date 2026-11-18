@@ -69,6 +69,7 @@ struct OnboardingView: View {
             Spacer(minLength: 40)
             RecordPill(String(localized: "Record your first note"), fillsWidth: true) {
                 ShortcutRequests.shared.requestedFolder = .unsorted
+                ShortcutRequests.shared.requestedOrigin = .onboarding
                 ShortcutRequests.shared.pending = .startRecording
                 viewModel.onRecordFirstNoteClicked()
                 onFinished()

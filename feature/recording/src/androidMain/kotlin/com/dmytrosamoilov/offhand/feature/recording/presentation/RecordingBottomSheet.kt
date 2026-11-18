@@ -159,7 +159,11 @@ private fun ColumnScope.SheetPhaseContent(
 ) {
     val haptics = haptics()
     when (state.phase) {
-        RecordingPhaseUi.IDLE -> IdleContent(state = state, onRecordClick = { viewModel.onStartRecording(folderId) })
+        RecordingPhaseUi.IDLE -> IdleContent(
+            state = state,
+            onRecordClick = { viewModel.onStartRecording(folderId) },
+            onMicrophoneDenied = viewModel::onMicrophoneDenied,
+        )
         RecordingPhaseUi.RECORDING -> RecordingContent(
             state = state,
             actions = RecordingActions(

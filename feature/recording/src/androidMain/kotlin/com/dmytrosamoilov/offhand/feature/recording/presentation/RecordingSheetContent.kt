@@ -46,13 +46,18 @@ internal data class RecordingActions(
 )
 
 @Composable
-internal fun ColumnScope.IdleContent(state: RecordingUiState, onRecordClick: () -> Unit) {
+internal fun ColumnScope.IdleContent(state: RecordingUiState, onRecordClick: () -> Unit, onMicrophoneDenied: () -> Unit) {
     val context = LocalContext.current
     var isPermissionDenied by remember { mutableStateOf(false) }
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
     ) { results ->
-        if (results[Manifest.permission.RECORD_AUDIO] == true) onRecordClick() else isPermissionDenied = true
+        if (results[Manifest.permission.RECORD_AUDIO] == true) {
+            onRecordClick()
+        } else {
+            isPermissionDenied = true
+            onMicrophoneDenied()
+        }
     }
     LaunchedEffect(Unit) {
         if (hasMicPermission(context)) onRecordClick() else permissionLauncher.launch(arrayOf(Manifest.permission.RECORD_AUDIO))

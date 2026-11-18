@@ -95,7 +95,7 @@ private fun OfferContent(state: PaywallUiState, viewModel: PaywallViewModel) {
             LegalLinksRow()
         }
         if (state.feature == ProFeature.FREE_TRIAL) {
-            TrialIntroActions(state = state, onStartTrial = viewModel::onClosed, onPurchase = viewModel::onPurchaseClicked)
+            TrialIntroActions(state = state, onStartTrial = viewModel::onKeepTrialClicked, onPurchase = viewModel::onPurchaseClicked)
         } else {
             OfferActions(state = state, onPurchase = viewModel::onPurchaseClicked, onContinueFree = viewModel::onClosed)
         }

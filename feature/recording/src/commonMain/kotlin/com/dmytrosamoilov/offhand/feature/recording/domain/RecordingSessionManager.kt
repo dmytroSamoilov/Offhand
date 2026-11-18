@@ -18,6 +18,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.TranscriptionCheckpoint
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.NoteSource
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.RecordingDiscardReason
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.core.security.closeQuietly
 import com.dmytrosamoilov.offhand.core.security.writeChunk
@@ -191,6 +192,7 @@ class RecordingSessionManager(
     fun discard() {
         if (mutableSession.value.phase != SessionPhase.RECORDING) return
         isDiscardRequested = true
+        trackDiscard(RecordingDiscardReason.USER)
         mutableSession.update { it.copy(phase = SessionPhase.DRAINING, isPaused = false) }
         recorder.stop()
     }
@@ -667,6 +669,7 @@ class RecordingSessionManager(
         } catch (t: Throwable) {
             Logger.withTag(LOG_TAG).e(t) { "Recording failed" }
             closeAudioBackup()
+            analyticsTracker.track(AnalyticsEvents.recordingFailed(t.failureReason()))
             fail(t.message ?: "Recording failed")
         } finally {
             queue.close()
@@ -751,6 +754,7 @@ class RecordingSessionManager(
             markNoteRecorded(it, recorder.vad.value.totalElapsedMs, audioFileName)
         }
         if (noteId == null || recorded == null) {
+            analyticsTracker.track(AnalyticsEvents.recordingFailed(SAVE_FAILURE_REASON))
             fail("Could not save the recording")
             return
         }
@@ -790,6 +794,7 @@ class RecordingSessionManager(
 
     private suspend fun discardShortSession(noteId: Long?) {
         Logger.withTag(LOG_TAG).i { "Recording under ${RecordingLimits.MIN_DURATION_MS} ms discarded" }
+        trackDiscard(RecordingDiscardReason.TOO_SHORT)
         noteId?.let { discardEmptyNote(it) } ?: deleteAudioBackup()
         mutableActiveRecordingNoteId.value = null
         transcripts.clear()
@@ -969,6 +974,10 @@ class RecordingSessionManager(
         }
     }
 
+    private fun trackDiscard(reason: RecordingDiscardReason) {
+        analyticsTracker.track(AnalyticsEvents.recordingDiscarded(reason, recorder.vad.value.totalElapsedMs))
+    }
+
     private fun fail(message: String) {
         mutableSession.update { it.copy(phase = SessionPhase.FAILED, errorMessage = message) }
     }
@@ -979,6 +988,7 @@ class RecordingSessionManager(
     private companion object {
         const val FAILURE_REASON_EMPTY_TRANSCRIPT = "empty_transcript"
         const val FAILURE_REASON_UNKNOWN = "unknown"
+        const val SAVE_FAILURE_REASON = "save_failed"
         const val LOG_TAG = "RecordingSession"
         // Strictly under the Whisper decoder's 30-second per-decode cap.
         const val RETRY_CHUNK_MS = 29_000L

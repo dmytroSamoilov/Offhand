@@ -5,6 +5,8 @@ import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.RecordingOrigin
+import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingOriginHolder
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.SessionPhase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNotificationsPromptedUseCase
@@ -30,6 +32,7 @@ class RecordingViewModel(
     observeNotificationsPrompted: ObserveNotificationsPromptedUseCase,
     observeFolderName: ObserveFolderNameUseCase,
     private val markNotificationsPrompted: MarkNotificationsPromptedUseCase,
+    private val recordingOrigin: RecordingOriginHolder,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
@@ -66,7 +69,18 @@ class RecordingViewModel(
 
     fun onStartRecording(folderId: Long?) {
         waveform.value = emptyList()
+        analyticsTracker.track(AnalyticsEvents.recordingStarted(recordingOrigin.take()))
         recordingProcessController.startRecording(folderId)
+    }
+
+    // Called by whatever opens the record sheet from outside it (the widget,
+    // a shortcut, the onboarding button) before the sheet starts recording.
+    fun onRecordingExpectedFrom(origin: RecordingOrigin) {
+        recordingOrigin.expect(origin)
+    }
+
+    fun onMicrophoneDenied() {
+        analyticsTracker.track(AnalyticsEvents.microphoneDenied())
     }
 
     fun onPauseRecording() {
@@ -110,6 +124,7 @@ class RecordingViewModel(
     }
 
     fun onSheetClosed() {
+        recordingOrigin.clear()
         sessionManager.resetToIdle()
     }
 

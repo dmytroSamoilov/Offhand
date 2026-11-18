@@ -30,6 +30,24 @@ class AnalyticsEventsTest {
     }
 
     @Test
+    fun `copying the summary and copying the transcript are two events`() {
+        assertEquals(AnalyticsEvent("note_summary_copied"), AnalyticsEvents.noteCopied(NoteSection.OVERVIEW))
+        assertEquals(AnalyticsEvent("note_transcript_copied"), AnalyticsEvents.noteCopied(NoteSection.TRANSCRIPT))
+    }
+
+    @Test
+    fun `a recording says where it was started and why it was thrown away`() {
+        assertEquals(
+            AnalyticsEvent("recording_started", mapOf("origin" to "widget")),
+            AnalyticsEvents.recordingStarted(RecordingOrigin.WIDGET),
+        )
+        assertEquals(
+            AnalyticsEvent("recording_discarded", mapOf("reason" to "too_short", "duration_s" to 0L)),
+            AnalyticsEvents.recordingDiscarded(RecordingDiscardReason.TOO_SHORT, durationMs = 640),
+        )
+    }
+
+    @Test
     fun `parameters use only strings and longs`() {
         val events = listOf(
             AnalyticsEvents.shareCompleted("pdf", savedToDevice = true),
@@ -37,7 +55,10 @@ class AnalyticsEventsTest {
             AnalyticsEvents.backupCreated(notes = 7, withAudio = false),
             AnalyticsEvents.purchaseCompleted(ProPlan.YEARLY, trial = true, feature = ProFeature.GENERAL),
             AnalyticsEvents.paywallShown(ProFeature.DOCUMENT_EXPORT),
-            AnalyticsEvents.noteCopied(NoteSection.TRANSCRIPT),
+            AnalyticsEvents.notePlayed(skipsSilence = true),
+            AnalyticsEvents.telemetryToggled(enabled = false),
+            AnalyticsEvents.purchaseFailed(ProPlan.MONTHLY, ProFeature.GENERAL),
+            AnalyticsEvents.searchResultOpened(SearchMatch.TRANSCRIPT),
         )
 
         events.flatMap { it.params.values }.forEach { value ->

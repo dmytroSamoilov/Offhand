@@ -35,6 +35,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.RecordingOrigin
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -42,6 +45,7 @@ class RecordingService : Service(), KoinComponent {
 
     private val sessionManager: RecordingSessionManager by inject()
     private val appForegroundState: AppForegroundState by inject()
+    private val analyticsTracker: AnalyticsTracker by inject()
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var observeJob: Job? = null
@@ -58,6 +62,9 @@ class RecordingService : Service(), KoinComponent {
                     recordingNotification(),
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE,
                 )
+                if (intent.getBooleanExtra(EXTRA_FROM_WIDGET, false)) {
+                    analyticsTracker.track(AnalyticsEvents.recordingStarted(RecordingOrigin.WIDGET))
+                }
                 sessionManager.start(intent.folderIdExtra())
                 observeSession()
             }
@@ -385,6 +392,8 @@ class RecordingService : Service(), KoinComponent {
             "com.dmytrosamoilov.offhand.extra.RETRY_AUDIO_FILE"
         private const val EXTRA_STYLE =
             "com.dmytrosamoilov.offhand.extra.NOTE_STYLE"
+        private const val EXTRA_FROM_WIDGET =
+            "com.dmytrosamoilov.offhand.extra.FROM_WIDGET"
         private const val EXTRA_FOLDER_ID =
             "com.dmytrosamoilov.offhand.extra.FOLDER_ID"
 
@@ -392,9 +401,10 @@ class RecordingService : Service(), KoinComponent {
             context.startForegroundService(startIntent(context, folderId))
         }
 
-        fun startIntent(context: Context, folderId: Long?): Intent {
+        fun startIntent(context: Context, folderId: Long?, isFromWidget: Boolean = false): Intent {
             val intent = serviceIntent(context, ACTION_START)
             folderId?.let { intent.putExtra(EXTRA_FOLDER_ID, it) }
+            if (isFromWidget) intent.putExtra(EXTRA_FROM_WIDGET, true)
             return intent
         }
 

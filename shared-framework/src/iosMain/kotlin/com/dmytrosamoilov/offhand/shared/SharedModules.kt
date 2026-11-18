@@ -11,7 +11,9 @@ import com.dmytrosamoilov.offhand.core.ai.api.di.coreAiApiModule
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.data.domain.ProtectedDataState
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsSink
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
 import com.dmytrosamoilov.offhand.core.common.NetworkMonitor
 import com.dmytrosamoilov.offhand.core.device.DeviceTierProvider
@@ -39,6 +41,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.DefaultNoteTitleProvi
 import com.dmytrosamoilov.offhand.feature.settings.di.featureSettingsModule
 import com.dmytrosamoilov.offhand.testing.fakes.SmokeDeviceTier
 import com.dmytrosamoilov.offhand.testing.fakes.smokeFakesModule
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -132,6 +135,7 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
             get(),
             get(),
             get(),
+            get(),
             CoroutineScope(SupervisorJob() + Dispatchers.Default),
         )
     }
@@ -162,6 +166,7 @@ class IosModelDownloadController(
     private val modelManager: ModelManager,
     private val speechToText: SpeechToText,
     private val deviceTier: DeviceTierProvider,
+    private val analyticsTracker: AnalyticsTracker,
     private val scope: CoroutineScope,
 ) : ModelDownloadController {
 
@@ -173,8 +178,24 @@ class IosModelDownloadController(
     override fun start() {
         if (run?.isActive == true) return
         run = scope.launch {
-            runCatching { speechToText.download() }
-            if (deviceTier.writesSummaries()) runCatching { modelManager.ensureModelAvailable() }
+            reportingFailure { speechToText.download() }
+            if (deviceTier.writesSummaries()) reportingFailure { modelManager.ensureModelAvailable() }
         }
+    }
+
+    // A failed part must not stop the other one, and a failure is reported
+    // the way Android's download service reports it.
+    private suspend fun reportingFailure(download: suspend () -> Unit) {
+        try {
+            download()
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (t: Throwable) {
+            analyticsTracker.track(AnalyticsEvents.modelDownloadFailed(t::class.simpleName ?: UNKNOWN_REASON))
+        }
+    }
+
+    private companion object {
+        const val UNKNOWN_REASON = "unknown"
     }
 }

@@ -45,6 +45,7 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSkipSilence
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -182,6 +183,34 @@ class SettingsViewModelTest {
         viewModel.onSkipSilenceChanged(true)
         dispatcher.scheduler.advanceUntilIdle()
         coVerify { setSkipSilenceEnabled(true) }
+    }
+
+    @Test
+    fun `switching usage sharing off is reported before the consent is withdrawn`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onTelemetryChanged(false)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerifyOrder {
+            analyticsTracker.track(AnalyticsEvents.telemetryToggled(enabled = false))
+            setTelemetryConsent(false)
+        }
+    }
+
+    @Test
+    fun `switching usage sharing on is reported after the consent is stored`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onTelemetryChanged(true)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerifyOrder {
+            setTelemetryConsent(true)
+            analyticsTracker.track(AnalyticsEvents.telemetryToggled(enabled = true))
+        }
     }
 
     @Test

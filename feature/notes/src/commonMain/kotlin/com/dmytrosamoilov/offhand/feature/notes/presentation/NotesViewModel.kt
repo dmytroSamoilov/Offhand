@@ -19,6 +19,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.NoteSection
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.SearchMatch
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.FolderLimits
@@ -145,6 +146,7 @@ class NotesViewModel(
     private val waveforms = MutableStateFlow<Map<Long, List<Int>>>(emptyMap())
     private val playbackLoad = MutableStateFlow(PlaybackLoad(audioFileName = null, generation = 0))
     private val silenceByFile = HashMap<String, List<SilenceSkip>>()
+    private var isSkippingSilence = false
 
     init {
         viewModelScope.launch {
@@ -259,6 +261,7 @@ class NotesViewModel(
     }
 
     fun onDownloadOnMobileDataClicked() {
+        analyticsTracker.track(AnalyticsEvents.mobileDataDownloadClicked())
         modelDownloadLauncher.startOnMobileData()
     }
 
@@ -506,6 +509,7 @@ class NotesViewModel(
     fun onSearchResultSelected(id: Long) {
         val card = mutableUiState.value.sections.flatMap { it.notes }.firstOrNull { it.id == id }
         val isTranscriptMatch = card?.matchLocation == MatchLocationUi.TRANSCRIPT
+        card?.matchLocation?.let { analyticsTracker.track(AnalyticsEvents.searchResultOpened(it.toSearchMatch())) }
         openNote(id, opensTranscript = isTranscriptMatch, transcriptFocus = card?.matchParagraph.takeIf { isTranscriptMatch })
     }
 
@@ -579,6 +583,7 @@ class NotesViewModel(
     // The tab only ever changes on a tap: a summary that arrives while the
     // transcript is being read marks its tab instead of taking the screen.
     fun onDetailTabSelected(tab: NoteDetailTabUi) {
+        if (mutableUiState.value.detailTabs().tab != tab) analyticsTracker.track(AnalyticsEvents.noteTabOpened(tab.toSection()))
         mutableUiState.update { it.withDetailTabs(it.detailTabs().onTabSelected(tab)) }
     }
 
@@ -677,7 +682,7 @@ class NotesViewModel(
             analyticsTracker.track(AnalyticsEvents.notePaused())
         } else {
             audioPlayer.play()
-            analyticsTracker.track(AnalyticsEvents.notePlayed())
+            analyticsTracker.track(AnalyticsEvents.notePlayed(isSkippingSilence))
         }
     }
 
@@ -695,7 +700,7 @@ class NotesViewModel(
         audioPlayer.seekTo(startMs)
         if (!audioPlayer.state.value.isPlaying) {
             audioPlayer.play()
-            analyticsTracker.track(AnalyticsEvents.notePlayed())
+            analyticsTracker.track(AnalyticsEvents.notePlayed(isSkippingSilence))
         }
     }
 
@@ -715,8 +720,13 @@ class NotesViewModel(
     private fun skipSilenceWhileEnabled(observeSkipSilence: ObserveSkipSilenceUseCase) {
         viewModelScope.launch {
             combine(observeSkipSilence(), playbackLoad) { enabled, load -> load.audioFileName.takeIf { enabled } }
-                .collectLatest { fileName -> audioPlayer.setSilenceSkips(fileName?.let { silenceOf(it) }.orEmpty()) }
+                .collectLatest { fileName -> applySilenceSkips(fileName?.let { silenceOf(it) }.orEmpty()) }
         }
+    }
+
+    private fun applySilenceSkips(skips: List<SilenceSkip>) {
+        audioPlayer.setSilenceSkips(skips)
+        isSkippingSilence = skips.isNotEmpty()
     }
 
     private suspend fun silenceOf(audioFileName: String): List<SilenceSkip> =
@@ -816,12 +826,14 @@ class NotesViewModel(
     fun onRetryTranscriptionRequested() {
         val note = selectedNote ?: return
         val audioFileName = note.audioFileName ?: return
+        analyticsTracker.track(AnalyticsEvents.noteRetryClicked())
         recordingProcessController.retryNote(note.id, audioFileName)
     }
 
     // Continues an interrupted note from its checkpoint, the same way a return
     // to the foreground does.
     fun onResumeProcessingRequested() {
+        analyticsTracker.track(AnalyticsEvents.noteContinueClicked())
         launchSafely(showLoading = false) {
             resumeInterruptedNotes()
         }
@@ -883,3 +895,14 @@ private fun NoteExportFormat?.isProFormat(): Boolean = this != null && this != N
 private fun NoteExportFormat?.analyticsFormat(): String = this?.name?.lowercase() ?: AUDIO_FORMAT
 
 private const val AUDIO_FORMAT = "audio"
+
+private fun MatchLocationUi.toSearchMatch(): SearchMatch = when (this) {
+    MatchLocationUi.TITLE -> SearchMatch.TITLE
+    MatchLocationUi.SUMMARY -> SearchMatch.SUMMARY
+    MatchLocationUi.TRANSCRIPT -> SearchMatch.TRANSCRIPT
+}
+
+private fun NoteDetailTabUi.toSection(): NoteSection = when (this) {
+    NoteDetailTabUi.SUMMARY -> NoteSection.OVERVIEW
+    NoteDetailTabUi.TRANSCRIPT -> NoteSection.TRANSCRIPT
+}

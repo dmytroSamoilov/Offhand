@@ -16,6 +16,7 @@ import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 
@@ -23,7 +24,10 @@ class ConsentGatedAnalyticsTrackerTest {
 
     private val logged = mutableListOf<String>()
     private val loggedParams = mutableListOf<Map<String, Any>>()
+    private var isSinkReady = true
     private val sink = object : AnalyticsSink {
+        override fun isReady(): Boolean = isSinkReady
+
         override fun log(name: String, params: Map<String, Any>) {
             logged += name
             loggedParams += params
@@ -108,6 +112,39 @@ class ConsentGatedAnalyticsTrackerTest {
         runCurrent()
 
         assertEquals(listOf("note_played"), logged)
+    }
+
+    @Test
+    fun `an event tracked before the reporting is switched on waits for it and keeps its order`() = runTest {
+        preferences.consent.value = TelemetryConsent.SHARED
+        isSinkReady = false
+        val tracker = ConsentGatedAnalyticsTracker(sink, preferences, buildInfo, backgroundScope)
+        runCurrent()
+
+        tracker.track(AnalyticsEvent("onboarding_step"))
+        tracker.track(AnalyticsEvent("telemetry_toggled"))
+        runCurrent()
+        assertEquals(emptyList(), logged)
+
+        isSinkReady = true
+        advanceTimeBy(1_000)
+        runCurrent()
+
+        assertEquals(listOf("onboarding_step", "telemetry_toggled"), logged)
+    }
+
+    @Test
+    fun `an event is given up when the reporting never switches on`() = runTest {
+        preferences.consent.value = TelemetryConsent.SHARED
+        isSinkReady = false
+        val tracker = ConsentGatedAnalyticsTracker(sink, preferences, buildInfo, backgroundScope)
+        runCurrent()
+
+        tracker.track(AnalyticsEvent("note_played"))
+        advanceTimeBy(60_000)
+        runCurrent()
+
+        assertEquals(emptyList(), logged)
     }
 
     @Test

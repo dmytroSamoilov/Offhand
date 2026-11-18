@@ -99,8 +99,20 @@ class PaywallViewModel(
             mutableUiState.update { it.copy(isPurchasing = true) }
             analyticsTracker.track(AnalyticsEvents.purchaseStarted(state.selectedPlan, state.feature))
             val outcome = purchasePro(state.selectedPlan)
-            if (outcome == PurchaseOutcome.PURCHASED) trackPurchase(state)
+            trackOutcome(outcome, state)
             mutableUiState.update { it.copy(isPurchasing = false, message = outcome.toMessage()) }
+        }
+    }
+
+    private fun trackOutcome(outcome: PurchaseOutcome, state: PaywallUiState) {
+        when (outcome) {
+            PurchaseOutcome.PURCHASED -> trackPurchase(state)
+            PurchaseOutcome.CANCELLED ->
+                analyticsTracker.track(AnalyticsEvents.purchaseCancelled(state.selectedPlan, state.feature))
+            PurchaseOutcome.PENDING ->
+                analyticsTracker.track(AnalyticsEvents.purchasePending(state.selectedPlan, state.feature))
+            PurchaseOutcome.FAILED ->
+                analyticsTracker.track(AnalyticsEvents.purchaseFailed(state.selectedPlan, state.feature))
         }
     }
 
@@ -121,6 +133,16 @@ class PaywallViewModel(
 
     fun onMessageDismissed() {
         mutableUiState.update { it.copy(message = null) }
+    }
+
+    // "Keep using Pro for free" on the trial offer: the answer is reported,
+    // and the close is not counted as a dismissal on top of it.
+    fun onKeepTrialClicked() {
+        if (!isDismissalTracked) {
+            isDismissalTracked = true
+            analyticsTracker.track(AnalyticsEvents.trialOfferKept())
+        }
+        onClosed()
     }
 
     // Several controls can close one presentation (the close button, the

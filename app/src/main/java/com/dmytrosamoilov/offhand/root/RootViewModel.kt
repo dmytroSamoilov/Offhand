@@ -1,5 +1,7 @@
 package com.dmytrosamoilov.offhand.root
 
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.RecordingOrigin
+import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingOriginHolder
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
@@ -52,6 +54,7 @@ class RootViewModel(
     private val keepProTrialInSync: KeepProTrialInSyncUseCase,
     private val proUpgradeGate: ProUpgradeGate,
     private val appForegroundState: AppForegroundState,
+    private val recordingOrigin: RecordingOriginHolder,
 ) : BaseViewModel() {
 
     private val trialNotice = MutableStateFlow<ProTrialNotice?>(null)
@@ -119,11 +122,13 @@ class RootViewModel(
     fun onRecordingRequested(folderId: Long?) {
         launchSafely(showLoading = false) {
             if (!proUpgradeGate.requirePro(ProFeature.WIDGET)) return@launchSafely
+            recordingOrigin.expect(RecordingOrigin.WIDGET)
             recordingRequest.value = RecordingRequestUi(folderId)
         }
     }
 
     fun onFirstRecordingRequested() {
+        recordingOrigin.expect(RecordingOrigin.ONBOARDING)
         recordingRequest.value = RecordingRequestUi(folderId = null)
     }
 
