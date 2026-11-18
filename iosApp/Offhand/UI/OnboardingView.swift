@@ -7,21 +7,29 @@ struct OnboardingView: View {
     @State private var state = OnboardingUiState(step: .deviceCheck, deviceSpecs: nil, isSummaryAvailable: true)
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(verbatim: "Offhand")
-                    .font(.offhand(.tightSemibold, size: 17, relativeTo: .headline))
-                    .foregroundStyle(OffhandColor.ink)
-                    .frame(minHeight: OffhandSpacing.touchTarget)
-                content
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(verbatim: "Offhand")
+                        .font(.offhand(.tightSemibold, size: 17, relativeTo: .headline))
+                        .foregroundStyle(OffhandColor.ink)
+                        .frame(minHeight: OffhandSpacing.touchTarget)
+                    content
+                }
+                .padding(.horizontal, OffhandSpacing.screen)
+                .padding(.bottom, 16)
+                .frame(maxWidth: 560, alignment: .leading)
+                .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, OffhandSpacing.screen)
-            .padding(.bottom, 28)
-            .frame(maxWidth: 560)
-            .frame(maxWidth: .infinity)
-            .containerRelativeFrame(.vertical, alignment: .top) { height, _ in height }
+            .scrollBounceBehavior(.basedOnSize)
+            .id(state.step)
+            actions
+                .padding(.horizontal, OffhandSpacing.screen)
+                .padding(.top, 12)
+                .padding(.bottom, 28)
+                .frame(maxWidth: 560)
+                .frame(maxWidth: .infinity)
         }
-        .scrollBounceBehavior(.basedOnSize)
         .background(OffhandColor.ground.ignoresSafeArea())
         .task {
             for await newState in viewModel.uiState {
@@ -47,6 +55,20 @@ struct OnboardingView: View {
         }
     }
 
+    @ViewBuilder
+    private var actions: some View {
+        switch state.step {
+        case .analyticsConsent:
+            analyticsConsentActions
+        case .welcome:
+            welcomeActions
+        case .transcriptsOnly:
+            transcriptsOnlyActions
+        default:
+            EmptyView()
+        }
+    }
+
     private var welcome: some View {
         VStack(alignment: .leading, spacing: 0) {
             headline(String(localized: "Speak. Offhand writes it down, on your iPhone."))
@@ -66,7 +88,11 @@ struct OnboardingView: View {
                 .offhandText(.bodySmall)
                 .foregroundStyle(OffhandColor.ink2)
                 .padding(.top, 16)
-            Spacer(minLength: 40)
+        }
+    }
+
+    private var welcomeActions: some View {
+        VStack(spacing: 0) {
             RecordPill(String(localized: "Record your first note"), fillsWidth: true) {
                 ShortcutRequests.shared.requestedFolder = .unsorted
                 ShortcutRequests.shared.requestedOrigin = .onboarding
@@ -86,7 +112,6 @@ struct OnboardingView: View {
             }
             .frame(maxWidth: .infinity)
         }
-        .frame(maxHeight: .infinity, alignment: .top)
     }
 
     private var analyticsConsent: some View {
@@ -118,7 +143,11 @@ struct OnboardingView: View {
                 String(localized: "Your transcripts and summaries"),
                 String(localized: "Titles, folder names and searches"),
             ])
-            Spacer(minLength: 32)
+        }
+    }
+
+    private var analyticsConsentActions: some View {
+        VStack(spacing: 0) {
             PrimaryButton(String(localized: "Share with the developer"), fillsWidth: true) {
                 viewModel.onShareAnalyticsClicked()
             }
@@ -133,7 +162,6 @@ struct OnboardingView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.top, 10)
         }
-        .frame(maxHeight: .infinity, alignment: .top)
     }
 
     private func consentRows(_ labels: [String]) -> some View {
@@ -198,12 +226,13 @@ struct OnboardingView: View {
                 .offhandText(.bodySmall)
                 .foregroundStyle(OffhandColor.ink2)
                 .padding(.top, 16)
-            Spacer(minLength: 40)
-            PrimaryButton(String(localized: "Continue with transcripts"), fillsWidth: true) {
-                viewModel.onContinueWithTranscriptsClicked()
-            }
         }
-        .frame(maxHeight: .infinity, alignment: .top)
+    }
+
+    private var transcriptsOnlyActions: some View {
+        PrimaryButton(String(localized: "Continue with transcripts"), fillsWidth: true) {
+            viewModel.onContinueWithTranscriptsClicked()
+        }
     }
 
     private var incompatible: some View {

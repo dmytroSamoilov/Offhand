@@ -1,12 +1,12 @@
 package com.dmytrosamoilov.offhand.feature.onboarding.presentation
 
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,11 +16,11 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -81,24 +81,47 @@ private fun OnboardingContent(
             .fillMaxSize()
             .background(OffhandTheme.colors.ground)
             .systemBarsPadding()
-            .verticalScroll(rememberScrollState())
             .wrapContentWidth()
-            .widthIn(max = MAX_CONTENT_WIDTH)
-            .padding(start = OffhandSpacing.screen, end = OffhandSpacing.screen, top = 12.dp, bottom = 28.dp),
+            .widthIn(max = MAX_CONTENT_WIDTH),
+    ) {
+        StepBody(state = state, modifier = Modifier.weight(1f))
+        when (state.step) {
+            OnboardingStep.DEVICE_CHECK -> Unit
+            OnboardingStep.ANALYTICS_CONSENT -> AnalyticsConsentActions(onShare = onShareAnalytics, onDontShare = onDontShareAnalytics)
+            OnboardingStep.DEVICE_INCOMPATIBLE -> DeviceIncompatibleActions()
+            OnboardingStep.TRANSCRIPTS_ONLY -> TranscriptsOnlyActions(onContinue = onContinueWithTranscripts)
+            OnboardingStep.WELCOME -> WelcomeActions(onRecordFirstNote = onRecordFirstNote, onLookAround = onLookAround)
+        }
+    }
+}
+
+@Composable
+private fun StepBody(state: OnboardingUiState, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(remember(state.step) { ScrollState(initial = 0) })
+            .padding(start = OffhandSpacing.screen, end = OffhandSpacing.screen, top = 12.dp, bottom = 16.dp),
     ) {
         Wordmark()
         when (state.step) {
             OnboardingStep.DEVICE_CHECK -> Skeleton(modifier = Modifier.padding(top = 56.dp))
-            OnboardingStep.ANALYTICS_CONSENT -> AnalyticsConsent(onShare = onShareAnalytics, onDontShare = onDontShareAnalytics)
+            OnboardingStep.ANALYTICS_CONSENT -> AnalyticsConsent()
             OnboardingStep.DEVICE_INCOMPATIBLE -> DeviceIncompatible(state.deviceSpecs)
-            OnboardingStep.TRANSCRIPTS_ONLY -> TranscriptsOnly(onContinue = onContinueWithTranscripts)
-            OnboardingStep.WELCOME -> Welcome(
-                isSummaryAvailable = state.isSummaryAvailable,
-                onRecordFirstNote = onRecordFirstNote,
-                onLookAround = onLookAround,
-            )
+            OnboardingStep.TRANSCRIPTS_ONLY -> TranscriptsOnly()
+            OnboardingStep.WELCOME -> Welcome(isSummaryAvailable = state.isSummaryAvailable)
         }
     }
+}
+
+@Composable
+private fun StepActions(content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = OffhandSpacing.screen, end = OffhandSpacing.screen, top = 12.dp, bottom = 28.dp),
+        content = content,
+    )
 }
 
 @Composable
@@ -112,7 +135,7 @@ private fun Wordmark() {
 }
 
 @Composable
-private fun ColumnScope.Welcome(isSummaryAvailable: Boolean, onRecordFirstNote: () -> Unit, onLookAround: () -> Unit) {
+private fun Welcome(isSummaryAvailable: Boolean) {
     Headline(text = stringResource(R.string.onboarding_welcome_title))
     Column(modifier = Modifier.padding(top = OffhandSpacing.screen)) {
         StageRow(stringResource(R.string.onboarding_step_recorded), stringResource(R.string.onboarding_on_your_phone))
@@ -131,28 +154,33 @@ private fun ColumnScope.Welcome(isSummaryAvailable: Boolean, onRecordFirstNote: 
         color = OffhandTheme.colors.ink2,
         modifier = Modifier.padding(top = 16.dp),
     )
-    Spacer(Modifier.weight(1f).heightIn(min = 40.dp))
-    RecordPill(
-        text = stringResource(R.string.onboarding_record_first_note),
-        onClick = onRecordFirstNote,
-        modifier = Modifier.fillMaxWidth(),
-    )
-    Text(
-        text = stringResource(R.string.onboarding_microphone_hint),
-        style = OffhandTheme.type.caption,
-        color = OffhandTheme.colors.ink2,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-    )
-    PlainTextButton(
-        text = stringResource(R.string.onboarding_look_around),
-        onClick = onLookAround,
-        modifier = Modifier.align(Alignment.CenterHorizontally),
-    )
 }
 
 @Composable
-private fun ColumnScope.AnalyticsConsent(onShare: () -> Unit, onDontShare: () -> Unit) {
+private fun WelcomeActions(onRecordFirstNote: () -> Unit, onLookAround: () -> Unit) {
+    StepActions {
+        RecordPill(
+            text = stringResource(R.string.onboarding_record_first_note),
+            onClick = onRecordFirstNote,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Text(
+            text = stringResource(R.string.onboarding_microphone_hint),
+            style = OffhandTheme.type.caption,
+            color = OffhandTheme.colors.ink2,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+        )
+        PlainTextButton(
+            text = stringResource(R.string.onboarding_look_around),
+            onClick = onLookAround,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+        )
+    }
+}
+
+@Composable
+private fun AnalyticsConsent() {
     Text(
         text = stringResource(R.string.onboarding_analytics_title),
         style = OffhandTheme.type.display,
@@ -184,24 +212,29 @@ private fun ColumnScope.AnalyticsConsent(onShare: () -> Unit, onDontShare: () ->
         stringResource(R.string.onboarding_analytics_private_text),
         stringResource(R.string.onboarding_analytics_private_titles),
     )
-    Spacer(Modifier.weight(1f).heightIn(min = 32.dp))
-    PrimaryButton(
-        text = stringResource(R.string.onboarding_analytics_share),
-        onClick = onShare,
-        modifier = Modifier.fillMaxWidth(),
-    )
-    SecondaryButton(
-        text = stringResource(R.string.onboarding_analytics_dont_share),
-        onClick = onDontShare,
-        modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
-    )
-    Text(
-        text = stringResource(R.string.onboarding_analytics_settings_hint),
-        style = OffhandTheme.type.caption,
-        color = OffhandTheme.colors.ink2,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
-    )
+}
+
+@Composable
+private fun AnalyticsConsentActions(onShare: () -> Unit, onDontShare: () -> Unit) {
+    StepActions {
+        PrimaryButton(
+            text = stringResource(R.string.onboarding_analytics_share),
+            onClick = onShare,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        SecondaryButton(
+            text = stringResource(R.string.onboarding_analytics_dont_share),
+            onClick = onDontShare,
+            modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+        )
+        Text(
+            text = stringResource(R.string.onboarding_analytics_settings_hint),
+            style = OffhandTheme.type.caption,
+            color = OffhandTheme.colors.ink2,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+        )
+    }
 }
 
 @Composable
@@ -231,7 +264,7 @@ private fun StageRow(label: String, meta: String, isMuted: Boolean = false) {
 }
 
 @Composable
-private fun ColumnScope.TranscriptsOnly(onContinue: () -> Unit) {
+private fun TranscriptsOnly() {
     MetaText(text = stringResource(R.string.onboarding_about_phone), modifier = Modifier.padding(top = 56.dp))
     Text(
         text = stringResource(R.string.onboarding_lite_title),
@@ -258,12 +291,17 @@ private fun ColumnScope.TranscriptsOnly(onContinue: () -> Unit) {
         color = OffhandTheme.colors.ink2,
         modifier = Modifier.padding(top = 16.dp),
     )
-    Spacer(Modifier.weight(1f).heightIn(min = 40.dp))
-    PrimaryButton(
-        text = stringResource(R.string.onboarding_lite_continue),
-        onClick = onContinue,
-        modifier = Modifier.fillMaxWidth(),
-    )
+}
+
+@Composable
+private fun TranscriptsOnlyActions(onContinue: () -> Unit) {
+    StepActions {
+        PrimaryButton(
+            text = stringResource(R.string.onboarding_lite_continue),
+            onClick = onContinue,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }
 
 @Composable
@@ -277,8 +315,7 @@ private fun Headline(text: String) {
 }
 
 @Composable
-private fun ColumnScope.DeviceIncompatible(specs: DeviceSpecsUi?) {
-    val activity = LocalActivity.current
+private fun DeviceIncompatible(specs: DeviceSpecsUi?) {
     WaveGlyph(seed = UNSUPPORTED_WAVE_SEED, modifier = Modifier.padding(top = 88.dp))
     Text(
         text = stringResource(R.string.onboarding_incompatible_title),
@@ -299,12 +336,18 @@ private fun ColumnScope.DeviceIncompatible(specs: DeviceSpecsUi?) {
         color = OffhandTheme.colors.ink2,
         modifier = Modifier.padding(top = 16.dp),
     )
-    Spacer(Modifier.weight(1f).heightIn(min = 40.dp))
-    SecondaryButton(
-        text = stringResource(R.string.onboarding_close),
-        onClick = { activity?.finish() },
-        modifier = Modifier.fillMaxWidth(),
-    )
+}
+
+@Composable
+private fun DeviceIncompatibleActions() {
+    val activity = LocalActivity.current
+    StepActions {
+        SecondaryButton(
+            text = stringResource(R.string.onboarding_close),
+            onClick = { activity?.finish() },
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }
 
 @Composable
