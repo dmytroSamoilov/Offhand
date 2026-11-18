@@ -15,7 +15,7 @@
     <string name="onboarding_step_transcribed">Transkribiert</string>
     <string name="onboarding_step_summarised">Zusammengefasst</string>
     <string name="onboarding_on_your_phone">Auf deinem Handy</string>
-    <string name="onboarding_privacy_line">Alles bleibt auf deinem Handy. Nichts wird jemals hochgeladen.</string>
+    <string name="onboarding_privacy_line">Deine Notizen verlassen nie dein Handy.</string>
     <string name="onboarding_record_first_note">Erste Notiz aufnehmen</string>
     <string name="onboarding_microphone_hint">Offhand fragt nach Zugriff auf dein Mikrofon.</string>
     <string name="onboarding_look_around">Jetzt nicht, erst umsehen</string>

@@ -126,7 +126,7 @@
     <string name="settings_smart_suggestions_title">स्मार्ट सुझाव</string>
     <string name="settings_smart_suggestions_label">स्मार्ट सुझाव दिखाएँ</string>
     <string name="settings_smart_suggestions_description">हर नए नोट में कैलेंडर इवेंट और काम ढूँढता है। प्रोसेसिंग में कुछ सेकंड और लगते हैं।</string>
-    <string name="settings_about_footer">सब कुछ आपके फ़ोन पर ही रहता है। कुछ भी कभी अपलोड नहीं होता।</string>
+    <string name="settings_about_footer">आपके नोट्स कभी आपके फ़ोन से बाहर नहीं जाते।</string>
     <string name="settings_note_style_editor_no_sections">बिना सेक्शन के नोट एक मुक्त सारांश होगा।</string>
     <string name="settings_redeem_code">कोड रिडीम करें</string>
     <string name="settings_redeem_code_body">Google Play सालाना प्लान खोलेगा। भुगतान विधि के बगल वाले तीर पर टैप करें, “कोड रिडीम करें” चुनें और अपना कोड डालें। इसका मुफ़्त ट्रायल सामान्य ट्रायल की जगह लेगा।</string>

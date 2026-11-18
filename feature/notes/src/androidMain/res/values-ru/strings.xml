@@ -10,7 +10,7 @@
     <string name="notes_model_banner_mobile_data_button">Скачать через мобильный интернет</string>
     <string name="notes_model_banner_info_description">Об ИИ на устройстве</string>
     <string name="notes_model_banner_info_title">ИИ на устройстве</string>
-    <string name="notes_model_banner_info_body">Offhand превращает записи в заметки с помощью ИИ, который работает целиком на вашем телефоне. Загрузка нужна один раз; после этого ничего никуда не отправляется.</string>
+    <string name="notes_model_banner_info_body">Offhand превращает записи в заметки с помощью ИИ, который работает целиком на вашем телефоне. Загрузка нужна один раз; после этого ваши заметки никогда не покидают ваш телефон.</string>
     <string name="notes_model_banner_info_dismiss">Понятно</string>
     <string name="notes_day_today">Сегодня</string>
     <string name="notes_day_yesterday">Вчера</string>

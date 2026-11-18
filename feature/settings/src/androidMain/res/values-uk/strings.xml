@@ -128,7 +128,7 @@
     <string name="settings_smart_suggestions_title">Розумні підказки</string>
     <string name="settings_smart_suggestions_label">Показувати розумні підказки</string>
     <string name="settings_smart_suggestions_description">Знаходить події календаря й завдання в кожній новій нотатці. Додає кілька секунд обробки.</string>
-    <string name="settings_about_footer">Усе залишається на вашому телефоні. Нічого ніколи не завантажується.</string>
+    <string name="settings_about_footer">Ваші нотатки ніколи не залишають ваш телефон.</string>
     <string name="settings_note_style_editor_no_sections">Без розділів нотатка стає вільним резюме.</string>
     <string name="settings_redeem_code">Ввести промокод</string>
     <string name="settings_redeem_code_body">Google Play відкриє річний план. Натисніть стрілку поруч зі способом оплати, виберіть «Активувати код» і введіть код. Його безкоштовний період замінить стандартний.</string>

@@ -943,7 +943,7 @@ private struct ModelPreparationCard: View {
             .offhandDialog(isPresented: $isInfoVisible) {
                 OffhandDialog(
                     title: String(localized: "Your on-device AI"),
-                    message: String(localized: "Offhand turns recordings into notes with on-device AI that runs entirely on your iPhone. It is a one-time download; after that, nothing is uploaded, ever."),
+                    message: String(localized: "Offhand turns recordings into notes with on-device AI that runs entirely on your iPhone. It is a one-time download; after that, your notes never leave your iPhone."),
                     confirmLabel: String(localized: "Got it"),
                     onConfirm: { isInfoVisible = false },
                     onDismiss: { isInfoVisible = false }

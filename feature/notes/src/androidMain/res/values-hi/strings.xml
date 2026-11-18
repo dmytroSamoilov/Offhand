@@ -10,7 +10,7 @@
     <string name="notes_model_banner_mobile_data_button">मोबाइल डेटा पर डाउनलोड करें</string>
     <string name="notes_model_banner_info_description">आपके ऑन-डिवाइस AI के बारे में</string>
     <string name="notes_model_banner_info_title">आपका ऑन-डिवाइस AI</string>
-    <string name="notes_model_banner_info_body">Offhand रिकॉर्डिंग को ऐसे AI से नोट्स में बदलता है जो पूरी तरह आपके फ़ोन पर चलता है। यह एक बार का डाउनलोड है; इसके बाद कभी कुछ अपलोड नहीं होता।</string>
+    <string name="notes_model_banner_info_body">Offhand रिकॉर्डिंग को ऐसे AI से नोट्स में बदलता है जो पूरी तरह आपके फ़ोन पर चलता है। यह एक बार का डाउनलोड है; इसके बाद आपके नोट्स कभी आपके फ़ोन से बाहर नहीं जाते।</string>
     <string name="notes_model_banner_info_dismiss">समझ गया</string>
     <string name="notes_day_today">आज</string>
     <string name="notes_day_yesterday">कल</string>

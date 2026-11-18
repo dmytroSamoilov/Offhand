@@ -127,7 +127,7 @@
     <string name="settings_smart_suggestions_title">Sugerencias inteligentes</string>
     <string name="settings_smart_suggestions_label">Mostrar sugerencias inteligentes</string>
     <string name="settings_smart_suggestions_description">Encuentra eventos de calendario y tareas en cada nota nueva. Añade unos segundos de procesamiento.</string>
-    <string name="settings_about_footer">Todo se queda en tu teléfono. Nunca se sube nada.</string>
+    <string name="settings_about_footer">Tus notas nunca salen de tu teléfono.</string>
     <string name="settings_note_style_editor_no_sections">Sin secciones, la nota es un resumen libre.</string>
     <string name="settings_redeem_code">Canjear un código</string>
     <string name="settings_redeem_code_body">Google Play abre el plan anual. Toca la flecha junto al método de pago, elige «Canjear código» e introduce tu código. Su prueba gratuita sustituye a la estándar.</string>

@@ -15,7 +15,7 @@
     <string name="onboarding_step_transcribed">Расшифровка</string>
     <string name="onboarding_step_summarised">Краткое содержание</string>
     <string name="onboarding_on_your_phone">На вашем телефоне</string>
-    <string name="onboarding_privacy_line">Всё остаётся на вашем телефоне. Ничего никогда не загружается.</string>
+    <string name="onboarding_privacy_line">Ваши заметки никогда не покидают ваш телефон.</string>
     <string name="onboarding_record_first_note">Записать первую заметку</string>
     <string name="onboarding_microphone_hint">Offhand попросит доступ к микрофону.</string>
     <string name="onboarding_look_around">Не сейчас, сначала осмотрюсь</string>

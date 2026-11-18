@@ -10,7 +10,7 @@
     <string name="notes_model_banner_mobile_data_button">Baixar pelos dados móveis</string>
     <string name="notes_model_banner_info_description">Sobre sua IA no dispositivo</string>
     <string name="notes_model_banner_info_title">Sua IA no dispositivo</string>
-    <string name="notes_model_banner_info_body">O Offhand transforma gravações em notas com IA que roda inteiramente no seu telefone. É um download único; depois disso, nada é enviado, nunca.</string>
+    <string name="notes_model_banner_info_body">O Offhand transforma gravações em notas com IA que roda inteiramente no seu telefone. É um download único; depois disso, suas notas nunca saem do seu telefone.</string>
     <string name="notes_model_banner_info_dismiss">Entendi</string>
     <string name="notes_day_today">Hoje</string>
     <string name="notes_day_yesterday">Ontem</string>

@@ -218,7 +218,7 @@ struct SettingsView<BottomBarContent: View>: View {
                     showsDivider: false
                 ) { viewModel.onTelemetryChanged(granted: $0) }
             }
-            Text(String(localized: "Everything stays on your iPhone. Nothing is uploaded, ever."))
+            Text(String(localized: "Your notes never leave your iPhone."))
                 .offhandText(.caption)
                 .foregroundStyle(OffhandColor.ink2)
                 .padding(.horizontal, OffhandSpacing.card)

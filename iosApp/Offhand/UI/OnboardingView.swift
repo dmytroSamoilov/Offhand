@@ -62,7 +62,7 @@ struct OnboardingView: View {
                 )
             }
             .padding(.top, OffhandSpacing.screen)
-            Text(String(localized: "Everything stays on your iPhone. Nothing is uploaded, ever."))
+            Text(String(localized: "Your notes never leave your iPhone."))
                 .offhandText(.bodySmall)
                 .foregroundStyle(OffhandColor.ink2)
                 .padding(.top, 16)
@@ -193,7 +193,7 @@ struct OnboardingView: View {
                 stageRow(String(localized: "Summaries and writing styles"), meta: String(localized: "Not on this iPhone"), isMuted: true)
             }
             .padding(.top, 28)
-            Text(String(localized: "Everything stays on your iPhone. Nothing is uploaded, ever."))
+            Text(String(localized: "Your notes never leave your iPhone."))
                 .offhandText(.bodySmall)
                 .foregroundStyle(OffhandColor.ink2)
                 .padding(.top, 16)

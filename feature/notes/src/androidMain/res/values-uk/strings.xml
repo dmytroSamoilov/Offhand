@@ -10,7 +10,7 @@
     <string name="notes_model_banner_mobile_data_button">Завантажити через мобільний інтернет</string>
     <string name="notes_model_banner_info_description">Про ШІ на пристрої</string>
     <string name="notes_model_banner_info_title">ШІ на пристрої</string>
-    <string name="notes_model_banner_info_body">Offhand перетворює записи на нотатки за допомогою ШІ, який працює повністю на вашому телефоні. Завантаження потрібне один раз; після цього нічого нікуди не надсилається.</string>
+    <string name="notes_model_banner_info_body">Offhand перетворює записи на нотатки за допомогою ШІ, який працює повністю на вашому телефоні. Завантаження потрібне один раз; після цього ваші нотатки ніколи не залишають ваш телефон.</string>
     <string name="notes_model_banner_info_dismiss">Зрозуміло</string>
     <string name="notes_day_today">Сьогодні</string>
     <string name="notes_day_yesterday">Вчора</string>

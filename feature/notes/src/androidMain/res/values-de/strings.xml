@@ -10,7 +10,7 @@
     <string name="notes_model_banner_mobile_data_button">Über mobile Daten laden</string>
     <string name="notes_model_banner_info_description">Über deine KI auf dem Gerät</string>
     <string name="notes_model_banner_info_title">Deine KI auf dem Gerät</string>
-    <string name="notes_model_banner_info_body">Offhand macht aus Aufnahmen Notizen – mit KI, die vollständig auf deinem Handy läuft. Der Download ist einmalig; danach wird nie etwas hochgeladen.</string>
+    <string name="notes_model_banner_info_body">Offhand macht aus Aufnahmen Notizen – mit KI, die vollständig auf deinem Handy läuft. Der Download ist einmalig; danach verlassen deine Notizen nie dein Handy.</string>
     <string name="notes_model_banner_info_dismiss">Verstanden</string>
     <string name="notes_day_today">Heute</string>
     <string name="notes_day_yesterday">Gestern</string>

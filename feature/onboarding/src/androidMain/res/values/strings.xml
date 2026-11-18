@@ -15,7 +15,7 @@
     <string name="onboarding_step_transcribed">Transcribed</string>
     <string name="onboarding_step_summarised">Summarised</string>
     <string name="onboarding_on_your_phone">On your phone</string>
-    <string name="onboarding_privacy_line">Everything stays on your phone. Nothing is uploaded, ever.</string>
+    <string name="onboarding_privacy_line">Your notes never leave your phone.</string>
     <string name="onboarding_record_first_note">Record your first note</string>
     <string name="onboarding_microphone_hint">Offhand will ask to use your microphone.</string>
     <string name="onboarding_look_around">Not now, look around first</string>
