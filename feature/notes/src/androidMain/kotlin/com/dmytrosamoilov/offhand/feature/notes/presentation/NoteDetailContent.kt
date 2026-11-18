@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,15 +42,11 @@ import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.feature.notes.R
 import kotlinx.coroutines.delay
 
+// The caller owns the scrolling, because a short window scrolls the title and
+// the player together with this text.
 @Composable
-internal fun NoteDetailBody(
-    state: NotesUiState,
-    viewModel: NotesViewModel,
-    note: NoteDetailUi,
-    tabs: NoteDetailTabsUi,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(top = 20.dp, bottom = 24.dp)) {
+internal fun NoteDetailBody(state: NotesUiState, viewModel: NotesViewModel, note: NoteDetailUi, tabs: NoteDetailTabsUi) {
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 24.dp)) {
         if (state.isDeveloperMode) note.metrics?.let { DeveloperMetrics(it) }
         ProcessingHaptics(noteId = note.id, status = note.status)
         when (tabs.selected) {

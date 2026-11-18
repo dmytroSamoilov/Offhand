@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,21 +12,27 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.NoteSection
 import com.dmytrosamoilov.offhand.core.designsystem.component.BarIconButton
 import com.dmytrosamoilov.offhand.core.designsystem.component.Hairline
@@ -86,14 +93,77 @@ private fun NoteDetail(state: NotesUiState, viewModel: NotesViewModel, note: Not
         isSummaryReadyMarked = state.isSummaryReadyMarked,
         onSelected = viewModel::onDetailTabSelected,
     )
-    Column(modifier = Modifier.fillMaxSize().background(OffhandTheme.colors.ground)) {
-        TopBar(
-            leading = { if (showsBack) BackButton(onBack = viewModel::onDetailClosed) },
-            trailing = { NoteOverflowMenu(note = note, state = state, viewModel = viewModel) },
-        )
-        NoteDetailHeader(note = note, playback = state.playback, waveform = state.detailWaveform, tabs = tabs, viewModel = viewModel)
-        NoteDetailBody(state = state, viewModel = viewModel, note = note, tabs = tabs, modifier = Modifier.weight(1f))
-        NoteDetailFooter(note = note, tab = tabs.selected, onShare = viewModel::onShareRequested, onCopied = viewModel::onNoteCopied)
+    BoxWithConstraints(modifier = Modifier.fillMaxSize().background(OffhandTheme.colors.ground)) {
+        val isShort = maxHeight < SHORT_WINDOW_HEIGHT
+        Column(modifier = Modifier.fillMaxSize()) {
+            TopBar(
+                leading = { if (showsBack) BackButton(onBack = viewModel::onDetailClosed) },
+                trailing = { NoteOverflowMenu(note = note, state = state, viewModel = viewModel) },
+            )
+            if (isShort) {
+                ShortNoteDetail(state = state, viewModel = viewModel, note = note, tabs = tabs, modifier = Modifier.weight(1f))
+            } else {
+                PinnedNoteDetail(state = state, viewModel = viewModel, note = note, tabs = tabs, modifier = Modifier.weight(1f))
+            }
+            NoteDetailFooter(note = note, tab = tabs.selected, onShare = viewModel::onShareRequested, onCopied = viewModel::onNoteCopied)
+        }
+    }
+}
+
+@Composable
+private fun PinnedNoteDetail(
+    state: NotesUiState,
+    viewModel: NotesViewModel,
+    note: NoteDetailUi,
+    tabs: NoteDetailTabsUi,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+            NoteDetailIntro(note = note, playback = state.playback, waveform = state.detailWaveform, viewModel = viewModel)
+            if (tabs.visible.size > 1) NoteDetailTabs(tabs = tabs)
+        }
+        Column(modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
+            NoteDetailBody(state = state, viewModel = viewModel, note = note, tabs = tabs)
+        }
+    }
+}
+
+// On a phone held sideways the pinned title, player and tabs would leave no
+// room for the text, so the title and the player scroll away with it and only
+// the tabs stay, held at the top once the scroll has passed what is above them.
+@Composable
+private fun ShortNoteDetail(
+    state: NotesUiState,
+    viewModel: NotesViewModel,
+    note: NoteDetailUi,
+    tabs: NoteDetailTabsUi,
+    modifier: Modifier = Modifier,
+) {
+    val scroll = rememberScrollState()
+    var introHeight by remember { mutableIntStateOf(0) }
+    Column(modifier = modifier.fillMaxWidth().verticalScroll(scroll)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).onSizeChanged { introHeight = it.height }) {
+            NoteDetailIntro(note = note, playback = state.playback, waveform = state.detailWaveform, viewModel = viewModel)
+        }
+        if (tabs.visible.size > 1) {
+            StickyTabs(tabs = tabs, scrolledPast = { (scroll.value - introHeight).coerceAtLeast(0) })
+        }
+        NoteDetailBody(state = state, viewModel = viewModel, note = note, tabs = tabs)
+    }
+}
+
+@Composable
+private fun StickyTabs(tabs: NoteDetailTabsUi, scrolledPast: () -> Int) {
+    Box(
+        modifier = Modifier
+            .zIndex(1f)
+            .graphicsLayer { translationY = scrolledPast().toFloat() }
+            .fillMaxWidth()
+            .background(OffhandTheme.colors.ground)
+            .padding(horizontal = 24.dp),
+    ) {
+        NoteDetailTabs(tabs = tabs)
     }
 }
 
@@ -103,31 +173,22 @@ private fun BackButton(onBack: () -> Unit) {
 }
 
 @Composable
-private fun NoteDetailHeader(
-    note: NoteDetailUi,
-    playback: AudioPlaybackUi,
-    waveform: List<Float>,
-    tabs: NoteDetailTabsUi,
-    viewModel: NotesViewModel,
-) {
+private fun NoteDetailIntro(note: NoteDetailUi, playback: AudioPlaybackUi, waveform: List<Float>, viewModel: NotesViewModel) {
     val hasPlayer = note.hasAudio && playback.isAvailable
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
-        Text(
-            text = note.detailTitle(),
-            style = OffhandTheme.type.title,
-            color = OffhandTheme.colors.ink,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 8.dp),
-        )
-        MetaText(
-            text = listOfNotNull(note.createdAt, playback.durationText.takeIf { hasPlayer }, note.folderName)
-                .joinToString(separator = " ${stringResource(R.string.notes_metadata_separator)} "),
-            modifier = Modifier.padding(top = 8.dp),
-        )
-        if (hasPlayer) NotePlayer(playback = playback, noteId = note.id, waveform = waveform, viewModel = viewModel)
-        if (tabs.visible.size > 1) NoteDetailTabs(tabs = tabs)
-    }
+    Text(
+        text = note.detailTitle(),
+        style = OffhandTheme.type.title,
+        color = OffhandTheme.colors.ink,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(top = 8.dp),
+    )
+    MetaText(
+        text = listOfNotNull(note.createdAt, playback.durationText.takeIf { hasPlayer }, note.folderName)
+            .joinToString(separator = " ${stringResource(R.string.notes_metadata_separator)} "),
+        modifier = Modifier.padding(top = 8.dp),
+    )
+    if (hasPlayer) NotePlayer(playback = playback, noteId = note.id, waveform = waveform, viewModel = viewModel)
 }
 
 @Composable
@@ -278,3 +339,5 @@ private fun NoteDetailUi.detailTitle(): String = when (status) {
     NoteStatusUi.FAILED, NoteStatusUi.INTERRUPTED -> title.ifBlank { stringResource(R.string.notes_recording_fallback_title) }
     NoteStatusUi.READY -> title
 }
+
+private val SHORT_WINDOW_HEIGHT = 480.dp

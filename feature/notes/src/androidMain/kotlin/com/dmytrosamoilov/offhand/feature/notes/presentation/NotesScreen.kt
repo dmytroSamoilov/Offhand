@@ -2,9 +2,12 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.layout.PaneAdaptedValue
+import androidx.compose.material3.adaptive.layout.PaneScaffoldDirective
+import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
@@ -23,6 +26,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.window.core.layout.WindowSizeClass
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,7 +44,7 @@ fun NotesScreen(
     viewModel: NotesViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val navigator = rememberListDetailPaneScaffoldNavigator<Long>()
+    val navigator = rememberListDetailPaneScaffoldNavigator<Long>(scaffoldDirective = notesPaneDirective())
     val paneScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
     val onNewStyle = rememberStyleEditorDetour(viewModel = viewModel, onCreateNoteStyle = onCreateNoteStyle)
@@ -83,6 +87,19 @@ fun NotesScreen(
         )
     }
     NotesOverlays(state = state, viewModel = viewModel, onNewStyle = onNewStyle)
+}
+
+// A phone held sideways is wide enough for the list beside the note but far
+// too short for it: the bottom bar and the note's own bars leave the text a
+// strip. Below a medium height the note takes the whole window, as it does
+// on a phone held upright.
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+private fun notesPaneDirective(): PaneScaffoldDirective {
+    val windowInfo = currentWindowAdaptiveInfo()
+    val directive = calculatePaneScaffoldDirective(windowInfo)
+    val isShort = !windowInfo.windowSizeClass.isHeightAtLeastBreakpoint(WindowSizeClass.HEIGHT_DP_MEDIUM_LOWER_BOUND)
+    return if (isShort) directive.copy(maxHorizontalPartitions = 1) else directive
 }
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
