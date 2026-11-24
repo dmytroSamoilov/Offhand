@@ -5,151 +5,165 @@
 
 <p><a href="https://apps.apple.com/app/offhand-private-voice-notes/id6803641617"><img src="https://toolbox.marketingtools.apple.com/api/badges/download-on-the-app-store/black/en-us?size=250x83" alt="Download on the App Store" height="54" align="middle"></a>&nbsp;&nbsp;<a href="https://play.google.com/store/apps/details?id=com.dmytrosamoilov.offhand&hl=en"><img src="https://play.google/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="72" align="middle"></a></p>
 
-> **Latest release: [Offhand 1.3.0](https://github.com/dmytroSamoilov/Offhand/releases/latest)** —
-> search and folders, encrypted backup & restore with the recordings, transcriptions
-> that continue where they stopped, a better Summary style, and the first paid tier,
-> Offhand Pro: your own note styles, PDF and Word export, smart calendar suggestions and
-> audio file import. See [What's new in 1.3](#whats-new-in-13) and the
+> **Latest release: [Offhand 1.5.1](https://github.com/dmytroSamoilov/Offhand/releases/latest)**:
+> a new look on both platforms, every note in a Summary and a Transcript tab with time
+> marks you can tap to listen, live text while you record, the Email writing style,
+> transcripts on phones with 2 GB of memory and up, and a 14-day Offhand Pro trial for
+> every install. See [What's new in 1.5.1](#whats-new-in-151) and the
 > [releases page](https://github.com/dmytroSamoilov/Offhand/releases) for the full history.
 
-Private voice notes with on-device AI, for Android and iPhone. Offhand records voice
-memos, meetings, and dictations and turns them into structured, readable notes —
-**entirely on device**. No audio, transcript, or note ever leaves your phone.
+Private voice notes with on-device AI, for Android, iPhone and iPad. Offhand records
+voice memos, meetings and dictations and turns them into a transcript and a readable
+note, **entirely on device**. No audio, transcript, or note ever leaves your phone.
 
-Record → on-device speech-to-text → on-device LLM structures the transcript into a
-Markdown note with an AI-generated title → stored encrypted → read, edit, share, delete.
+Record → on-device speech-to-text → on-device LLM writes the note in the writing style
+you picked, with an AI-generated title → stored encrypted → read, listen, search, share.
 
 Built for anyone whose spoken thoughts are nobody else's business: executives capturing
 meeting debriefs, doctors dictating patient notes, consultants and lawyers with
-confidentiality obligations — or just your own ideas on a walk.
+confidentiality obligations, or just your own ideas on a walk.
 
 ## Screenshots
 
 <table>
   <tr>
-    <td align="center"><img src="docs/screenshots/01-record.png" width="180" alt="Recording a voice note with a live waveform"><br><sub>Records &amp; transcribes, 100% offline</sub></td>
-    <td align="center"><img src="docs/screenshots/02-summary-note.png" width="180" alt="A Summary note with main topics, key decisions and action items"><br><sub>Structured notes, not summaries</sub></td>
-    <td align="center"><img src="docs/screenshots/03-search-folders.png" width="180" alt="Full-text search with highlighted matches and a folder filter"><br><sub>Search everything, sort with folders</sub></td>
-    <td align="center"><img src="docs/screenshots/04-backup.png" width="180" alt="Setting a passphrase for an encrypted backup"><br><sub>One encrypted backup, yours to keep</sub></td>
+    <td align="center"><img src="docs/screenshots/01-record.png" width="180" alt="Recording a voice note with the live transcript under the waveform"><br><sub>Your words appear as you speak</sub></td>
+    <td align="center"><img src="docs/screenshots/02-summary.png" width="180" alt="A note's Summary tab with decisions, action items and writing-style chips"><br><sub>A note you can act on</sub></td>
+    <td align="center"><img src="docs/screenshots/03-transcript.png" width="180" alt="A note's Transcript tab with the full text"><br><sub>Every word, next to the summary</sub></td>
+    <td align="center"><img src="docs/screenshots/04-notes-list.png" width="180" alt="The notes list with folders and the Record button"><br><sub>All your notes, sorted into folders</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/05-describe-style.png" width="180" alt="A custom note style drafted from a plain-language description"><br><sub>Describe a style, get a form (Pro)</sub></td>
-    <td align="center"><img src="docs/screenshots/06-import-audio.png" width="180" alt="Importing an audio file from Files"><br><sub>Turn any recording into a note (Pro)</sub></td>
-    <td align="center"><img src="docs/screenshots/07-export-word.png" width="180" alt="Share sheet with the Word file format selected"><br><sub>Share it as Word or PDF (Pro)</sub></td>
-    <td align="center"><img src="docs/screenshots/08-private-by-design.png" width="180" alt="Onboarding step: Private by design"><br><sub>No cloud. No account. Open source.</sub></td>
+    <td align="center"><img src="docs/screenshots/05-search.png" width="180" alt="Search results that say where the match was found"><br><sub>Search says where it found it</sub></td>
+    <td align="center"><img src="docs/screenshots/06-writing-styles.png" width="180" alt="The list of writing styles, own styles first"><br><sub>Meeting notes, an email, or your own style (Pro)</sub></td>
+    <td align="center"><img src="docs/screenshots/07-share.png" width="180" alt="Share sheet with plain text, PDF and Word"><br><sub>Share as text, PDF or Word</sub></td>
+    <td align="center"><img src="docs/screenshots/08-dark.png" width="180" alt="A note in the dark theme"><br><sub>Light and dark</sub></td>
   </tr>
 </table>
 
-## What's new in 1.3
+## What's new in 1.5.1
 
-- **Search and folders** — full-text search across titles, overviews and transcripts with
-  highlighted snippets; notes can be filed into folders, moved from the menu or with a
-  swipe, and filtered by folder.
-- **Backup & restore** — one passphrase-encrypted `.offhand` file with notes, folders,
-  custom styles and the original recordings (AES-256-GCM, PBKDF2-derived key). Restore
-  merges into the existing library and skips duplicates.
-- **Copy any section** — Overview and Transcript each have their own copy button.
-- **Better Summary notes** — the default style now produces main topics, key decisions,
-  action items and an overview instead of a prose recap. Every style is sectioned.
-- **Transcription that survives interruptions** — progress is checkpointed after every
-  window, so a note killed by the system (or a failed run) continues from where it
-  stopped instead of starting over. iOS finishes notes in the background with
-  `BGContinuedProcessingTask` on iOS 26.
-- **App lock** — biometric or device-credential lock, offered during onboarding and in
-  Settings; an active recording carries across app switches without re-locking.
-- **Offhand Pro** — the first paid tier, yearly with a 14-day free trial or a one-time
-  lifetime purchase. Pro unlocks:
-  - **Note styles** — your own styles built from headings, per-section guidance and a
-    format (short, bullets, free), or described in plain words and drafted by the
-    on-device model. Styles are forms, not free prompts, so the output shape stays fixed.
-  - **PDF and Word export** — a note goes out as PDF or DOCX, written on device, next to
-    the existing text and audio sharing.
-  - **Smart suggestions** — the model finds dates and meetings in a note and offers
-    them as calendar events; you review each one in the system calendar editor before
-    anything is saved. Off by default.
-  - **Audio import** — pick audio files (up to two hours each) or share them into the
-    app; each becomes a note through the same on-device pipeline.
-  - Everything stays visible and tappable while free; the paywall opens on the action,
-    never unprompted. Payments go through Google Play and the App Store directly — no
-    payment SDK, no account, no server.
+- **A new look** ("quiet ink") on Android, iPhone and iPad: a paper-grey ground,
+  near-black ink, one blue for state and gold for Pro only, with the same tokens and
+  components on both platforms. A bottom bar with Notes, Record and Settings replaces
+  the old tab bar and floating button.
+- **Summary and Transcript tabs** on every note. Each paragraph of the transcript has a
+  time mark; tap it and the recording plays from that moment. The player stays pinned
+  and shows the real loudness of the recording.
+- **Live text while recording**: the recorder cuts a piece at every natural pause and
+  the transcript appears on the record sheet as you speak. What counts as a pause
+  follows the room's own noise level.
+- **Writing styles**: the built-in Summary is now one to three plain sentences, a new
+  **Email** style turns a memo into a subject and an email, and every note has one-tap
+  style chips under its summary. Built-in headings follow the recording's language.
+- **Transcripts on smaller phones**: phones with 2 to 5 GB of memory now run Offhand for
+  transcripts; summaries need 6 GB. Transcription starts as soon as the speech part of
+  the on-device AI is downloaded, without waiting for the rest.
+- **Switches** for transcription and for the summary, so a note can be just the
+  recording, or a recording with its transcript.
+- **Search says where it matched** (title, summary, or the minute in the transcript),
+  and several notes can be selected at once to move or delete.
+- **Offhand Pro**: every install gets 14 days of Pro, with no payment details. Pro now
+  also has a monthly plan, a home-screen widget that starts a recording, and Skip
+  silence, which jumps over long pauses when you listen back.
+- **Reliability on iOS**: a note that was waiting is finished after a relaunch, the Live
+  Activity ends when the recording does, a database read on a locked device waits for
+  the unlock, and background processing reports progress so the system keeps it alive.
+- **Since 1.3**: video import, PDF and Word export, folder writing styles, drag-to-sort
+  folders, and the free and Pro split of 1.5 (Summary, two folders and three imports
+  are free).
 
 ## How it works
 
 - **Speech-to-text**: [Whisper small (int8)](https://huggingface.co/csukuangfj/sherpa-onnx-whisper-small)
   running locally via [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx). Audio is
-  transcribed in chunks *while the recording continues*.
-- **Note structuring**: [Gemma 4 E2B](https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm)
+  transcribed in pieces *while the recording continues*, and the engine is kept warm
+  while the app is in front, so the first words arrive quickly.
+- **Note writing**: [Gemma 4 E2B](https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm)
   (2B effective parameters, Apache-2.0) running on device via
   [LiteRT-LM](https://github.com/google-ai-edge/LiteRT-LM), with a Tensor
   G5-optimized build selectable on Pixel 10 devices.
-- **Recording**: 16 kHz PCM16 with RMS-based voice-activity detection, chunked at natural
-  silence boundaries inside a `microphone` foreground service.
-- **Structuring**: the merged transcript is rewritten into detail-preserving Markdown
-  sections (headings, lists, action items) according to the chosen note style — not a
-  lossy summary. Long recordings are structured in segments sized to the model's
-  4,096-token context window and merged afterwards, with duplicate statements removed.
-  Small on-device models truncate, miscount and bend JSON, so every step has a parser
-  that recovers what it can and a fallback that never loses the transcript.
-- **Checkpoints**: transcription progress is stored after every 29-second window; an
-  interrupted note resumes from the last checkpoint on the next launch or background run.
+- **Recording**: 16 kHz PCM16 with RMS-based voice-activity detection. A piece is cut at
+  the first half-second pause once it is four seconds long, measured against the room's
+  noise, inside a `microphone` foreground service on Android.
+- **Writing styles**: the transcript is written into the style's form. Summary is a
+  short paragraph; Meeting notes, Visit report, Legal note and Email are sectioned; your
+  own styles are forms built from headings, per-section guidance and a format, not free
+  prompts, so the output shape stays fixed. Long recordings are written in segments
+  sized to the model's 4,096-token context window and merged afterwards. Small
+  on-device models truncate, miscount and bend JSON, so every step has a parser that
+  recovers what it can and a fallback that never loses the transcript.
+- **Device tiers**: decided once from reported memory and CPU cores. Below 6 GB the app
+  downloads only the speech model and finishes notes from the transcript.
+- **Checkpoints**: transcription progress is stored after every piece; an interrupted
+  note resumes from the last checkpoint on the next launch or background run.
 - **Encryption on Android**: notes live in a SQLCipher-encrypted Room database. The
-  passphrase is random, wrapped by an AES-256-GCM key in the Android Keystore, and — on
-  devices with a lockscreen — bound to user authentication (fingerprint or device
+  passphrase is random, wrapped by an AES-256-GCM key in the Android Keystore, and, on
+  devices with a lockscreen, bound to user authentication (fingerprint or device
   credential via `BiometricPrompt`). Recordings are stored through Tink streaming AEAD.
 - **Encryption on iOS**: the database and the recordings use the system's
   complete-unless-open data protection (`NSFileProtectionCompleteUnlessOpen`), so they
   are unreadable while the device is locked and never leave the app sandbox; backups
   use CryptoKit with the same file format as Android.
-- **UI**: Jetpack Compose + Material 3 adaptive components on Android (bottom bar on
-  phones, navigation rail and list-detail two-pane on tablets and foldables); SwiftUI on
-  iOS. The domain, data and ViewModel layers are shared Kotlin Multiplatform code, so
-  both apps run the same pipeline, parsers and business rules.
+- **UI**: Jetpack Compose with Material 3 adaptive layouts on Android (one pane on
+  phones, list-detail two-pane on tablets and unfolded foldables); SwiftUI on iOS. Both
+  follow one design system with the same token and component names. The domain, data
+  and ViewModel layers are shared Kotlin Multiplatform code, so both apps run the same
+  pipeline, parsers and business rules.
 
 ## Verify the privacy claims yourself
 
 That is the point of this repo being public:
 
-- **Network access** — the only outbound traffic in the codebase is the one-time model
-  download over HTTPS:
-  [`ModelDownloader.kt`](core/ai-local/src/main/kotlin/com/dmytrosamoilov/offhand/core/ai/local/ModelDownloader.kt)
-  on Android and
+- **Your notes never leave your phone.** Nothing in the codebase uploads a recording, a
+  transcript or a note. The network is used for three things: the one-time model
+  download over HTTPS
+  ([`ModelDownloader.kt`](core/ai-local/src/main/kotlin/com/dmytrosamoilov/offhand/core/ai/local/ModelDownloader.kt)
+  on Android,
   [`IosFileDownloader.kt`](shared-framework/src/iosMain/kotlin/com/dmytrosamoilov/offhand/shared/IosFileDownloader.kt)
-  on iOS.
-- **Telemetry is off by default and opt-in** — Firebase never initialises on its own:
-  the provider is removed from the [manifest](app/src/main/AndroidManifest.xml) and
-  Crashlytics and Analytics are only configured after you consent, in
+  on iOS), purchases through the stores, and the anonymous usage numbers described
+  next.
+- **Anonymous usage and crash reports, with a switch.** New installs in the EU are asked
+  on the first screen; elsewhere sharing is on from the first launch. Either way it is
+  one switch in Settings, "Share anonymous usage". Firebase never initialises on its
+  own: the provider is removed from the [manifest](app/src/main/AndroidManifest.xml) and
+  Crashlytics and Analytics are only configured while the stored answer says so, in
   [`TelemetryController.kt`](app/src/main/java/com/dmytrosamoilov/offhand/telemetry/TelemetryController.kt)
   and [`TelemetryController.swift`](iosApp/Offhand/Telemetry/TelemetryController.swift).
-  Crash reports and usage statistics never contain note content, titles, folder names or
-  search queries; the full list of events is in
+  Events never contain note content, titles, folder names, search queries or the names
+  of your own styles; the full list is in
   [`AnalyticsEvents.kt`](core/data/src/commonMain/kotlin/com/dmytrosamoilov/offhand/core/data/domain/analytics/AnalyticsEvents.kt).
-- **Encryption at rest** — SQLCipher database and Keystore-wrapped keys in
+- **Encryption at rest**: SQLCipher database and Keystore-wrapped keys in
   [`core/security`](core/security) and [`core/data`](core/data); file protection on iOS
   in the same modules' `iosMain` sources.
-- **Backups are yours** — `allowBackup="false"` keeps notes out of Android cloud
+- **Backups are yours**: `allowBackup="false"` keeps notes out of Android cloud
   backups; the only backup is the passphrase-encrypted file you export yourself
   ([`feature/backup`](feature/backup)). Screenshots and screen recording are allowed.
-- **Payments stay with the stores** — Play Billing and StoreKit 2 are called directly
+- **Payments stay with the stores**: Play Billing and StoreKit 2 are called directly
   ([`PlayProStore.kt`](core/data/src/androidMain/kotlin/com/dmytrosamoilov/offhand/core/data/billing/PlayProStore.kt),
   [`StoreKitProStore.swift`](iosApp/Offhand/Store/StoreKitProStore.swift)); there is no
   third-party billing SDK, no account and no server that learns what you bought.
 
 ## Requirements
 
-- Android 12+ (minSdk 31), **5+ GB RAM and 4+ CPU cores** (checked at first launch)
-- iPhone or iPad on iOS 18 or later
-- ~3 GB free storage for the one-time model downloads (Whisper + Gemma)
+- Android 12+ (minSdk 31) with 4+ CPU cores, checked at first launch. Phones sold with
+  **2 to 5 GB of memory** get transcripts; **6 GB or more** adds summaries and writing
+  styles
+- iPhone or iPad on iOS 18 or later, with the same memory tiers
+- About 3 GB of free storage for the one-time downloads (Whisper + Gemma), or about
+  400 MB on a transcripts-only phone
 
 ## Building
 
-Three product flavors that install side by side: `production` (`com.dmytrosamoilov.offhand`),
-`dev` (`com.dmytrosamoilov.offhand.dev`, "Offhand Dev" label) and `uitest`
-(`com.dmytrosamoilov.offhand.uitest`, "Offhand UI Test" — see [Testing](#testing)).
+Four product flavors that install side by side: `production` (`com.dmytrosamoilov.offhand`),
+`dev` (`com.dmytrosamoilov.offhand.dev`, "Offhand Dev" label), `uitest`
+(`com.dmytrosamoilov.offhand.uitest`, "Offhand UI Test") and `devicetest`
+(`com.dmytrosamoilov.offhand.devicetest`, "Offhand Device Test"); the last two are for
+[Testing](#testing).
 
 1. Clone and open in Android Studio (or use `./gradlew assembleDevDebug`). The models
    (Whisper + Gemma) are ungated on Hugging Face — no account or token needed; the app
    downloads them on first run.
-2. Optional — Firebase telemetry (opt-in crash reporting + usage analytics) needs your own
+2. Optional: Firebase telemetry (crash reporting and anonymous usage) needs your own
    Firebase project's `google-services.json` in `app/`. The app builds and runs fine
    without it.
 
@@ -160,7 +174,8 @@ Three product flavors that install side by side: `production` (`com.dmytrosamoil
 ### iOS
 
 The iOS app lives in `iosApp/` and links the shared Kotlin code as an XCFramework.
-Schemes mirror the Android flavors: `Offhand-dev`, `Offhand-prod` and `Offhand-uitest`.
+Schemes mirror the Android flavors: `Offhand-dev`, `Offhand-prod`, `Offhand-uitest` and
+`Offhand-devicetest`.
 
 1. Install [XcodeGen](https://github.com/yonaskolb/XcodeGen) and Git LFS, then build the
    shared framework and fetch the speech-to-text frameworks:
@@ -217,27 +232,32 @@ whole record → note flow runs on any emulator or simulator, with no 2.4 GB dow
 no real audio, and no device gate. Nothing else is faked — onboarding, the encrypted
 database, the recording pipeline, list, search and detail are all real.
 
-The [Maestro](https://maestro.mobile.dev) flows in `.maestro/` drive both platforms
-and cover:
+The [Maestro](https://maestro.mobile.dev) flows in `.maestro/` drive both platforms.
+`.maestro/config.yaml` fixes their order, because every flow after the first opens the
+note it creates. Twenty flows cover:
 
-1. Fresh install and onboarding (app lock and telemetry consent switched off)
-2. Recording through the fake microphone, saving, closing the sheet
-3. The processed note appearing in the list
-4. Search for "budget" with the highlighted snippet
-5. Opening the note and rendering the Overview and Transcript sections
-6. Folders: create, move the note in (menu and leading swipe), filter by folder, rename, delete
-7. Returning from a note leaves the search field unfocused (Android)
-8. Backup and restore through the system file picker, including the passphrase prompt (Android only; the iOS picker is not scriptable)
-9. Custom note styles: create one with two sections, pick it as the default, rewrite a note with it, delete it
-10. Building a note style from a plain-text description; the fake model answers the drafting prompt with a canned two-section style
-11. Importing an audio file from Settings through the system picker into a new note (needs `.maestro/assets/import-sample.m4a` in the device's Download folder on Android or in the simulator's "On My iPhone" storage on iOS, see below)
-12. Smart suggestions: switching them on in Settings, asking for them on the finished note; the fake model answers with two canned calendar events, one is dismissed, the other is handed to the system calendar's event editor, and both states survive a relaunch
-13. The Pro paywall: the debug override in Settings plays a free user, crowns appear, the paywall opens from the Upgrade card and from Import audio, a simulated purchase unlocks the app and the import picker that was waiting behind the paywall opens on its own
+1. Onboarding with the anonymous-usage question, the first recording, search and the note
+2. Folders: create, folder writing style, move, filter, rename, delete
+3. Backup and restore through the system file picker, with the passphrase
+4. A writing style built by hand, and one drafted from a plain-text description (4, 5)
+5. Audio import and video import through the system picker (6, 15)
+6. Smart suggestions handed to the system calendar editor (7)
+7. The paywall and every Pro gate as a free user, through the debug override (8, 14)
+8. Recording into a folder, pause, resume and discard (9, 11)
+9. Note actions: edit, copy, playback, restyle, re-transcribe, delete (10, 12, 17)
+10. Sharing as text, PDF, Word and audio (13)
+11. Settings and About & support, including removing and re-downloading the on-device AI (16)
+12. Onboarding branches, a recording made without the on-device AI, and a transcripts-only phone (18, 19, 20)
+
+`.maestro/lock/` holds the app-lock flow, which runs separately because it needs a
+screen lock on the device.
 
 The flows assume a phone-sized screen; on tablets and unfolded foldables the app switches
 to its two-pane layout and the steps no longer line up.
 
-Playback, editing, sharing, deleting, settings and model quality are not covered.
+Not covered with the fakes: a failed or interrupted recording, the download banner,
+share-sheet intake, the widget, the Live Activity, the real review prompt, other
+languages, and model quality.
 
 **Install Maestro** (the plain `maestro` formula is an unrelated app — use the tap):
 
@@ -251,6 +271,7 @@ brew trust mobile-dev-inc/tap && brew install mobile-dev-inc/tap/maestro
 ./gradlew assembleUitestDebug
 adb install -r app/build/outputs/apk/uitest/debug/app-uitest-debug.apk
 adb push .maestro/assets/import-sample.m4a /sdcard/Download/import-sample.m4a
+adb push .maestro/assets/import-sample.mp4 /sdcard/Download/import-sample.mp4
 maestro test .maestro/
 ```
 
@@ -266,9 +287,25 @@ maestro test .maestro/
 With several devices connected, add `--device <id>` before `test`. A failed run leaves
 screenshots and a UI hierarchy dump under `~/.maestro/tests/<timestamp>/`.
 
-Two platform quirks the flow already handles: the Android record sheet starts recording
-by itself when opened, and iOS toggles only react to taps on the switch, so the
-onboarding toggle cards accept a tap anywhere on the row.
+The import flows on iOS need both samples from `.maestro/assets/` in the simulator's
+"On My iPhone" storage; `.github/workflows/ci.yml` shows how they are copied there.
+
+### On-device suite (real models)
+
+A second suite runs on a real phone or tablet with the real Whisper and Gemma. The Mac
+plays a fixture clip from `testing/device-suite/clips/` through its speakers, the app
+records it, and the transcript's word error rate and the summary are scored against the
+fixture into `testing/device-suite/results/device-results.jsonl`.
+
+```
+testing/device-suite/run-android.sh
+testing/device-suite/run-ios.sh --device <udid>
+```
+
+Android drives the `devicetest` flavor with the Maestro flows in `.maestro/device/`.
+iOS and iPadOS use an XCUITest (`iosApp/DeviceTests`, scheme `Offhand-devicetest`),
+because Maestro does not drive real iOS devices. Put the device next to the speakers
+in a quiet room, unlocked, with the on-device AI already downloaded.
 
 ### Continuous integration
 
@@ -285,18 +322,18 @@ implementations:
 ```
 :app                    thin shell: activity, navigation, DI bindings
 :core:common            BaseViewModel, shared primitives
-:core:designsystem      Material 3 theme + reusable components
+:core:designsystem      design tokens, fonts and the component kit
 :core:ui                screen scaffolding (loading/error handling)
-:core:device            device capability gate (RAM / CPU cores)
-:core:audio             AudioRecord streaming + VAD chunking
+:core:device            device tiers by memory and CPU cores
+:core:audio             recording, VAD chunking, waveforms, silence detection
 :core:ai-api            AI abstractions — no LiteRT dependency
 :core:ai-local          LiteRT-LM engine, Whisper STT, model download, catalog
 :core:security          Keystore passphrase wrapping, encrypted audio store, app lock
 :core:data              encrypted Room notes, folders, checkpoints, Pro status, billing, analytics events
-:feature:onboarding     device check → model download → consent
-:feature:recording      recording UI, foreground service, AI pipeline, note styles, calendar suggestions
+:feature:onboarding     usage question (EU), device check, first recording
+:feature:recording      record sheet, foreground service, AI pipeline, writing styles, suggestions, widget
 :feature:notes          list / search / folders / detail / edit, export to text, PDF and DOCX
-:feature:settings       note styles, default style, backup, import, subscription, privacy
+:feature:settings       writing styles, switches, backup, import, subscription, privacy
 :feature:backup         passphrase-encrypted backup and restore of notes, folders, styles and audio
 :feature:paywall        Offhand Pro paywall and purchase flow
 :shared-framework       Kotlin Multiplatform framework consumed by the iOS app
