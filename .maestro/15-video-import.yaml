@@ -47,13 +47,16 @@ appId: com.dmytrosamoilov.offhand.uitest
       - extendedWaitUntil:
           visible: "Cancel"
           timeout: 10000
+      - waitForAnimationToEnd:
+          timeout: 3000
       - tapOn:
           point: "50%,19%"
       - inputText: "import-sample.mp4"
+      - pressKey: Enter
+      - waitForAnimationToEnd:
+          timeout: 3000
       - tapOn:
-          point: "73%,25%"
-      - tapOn:
-          point: "18%,41%"
+          point: "18%,37%"
       - tapOn:
           point: "87%,13%"
       - extendedWaitUntil:
@@ -62,15 +65,15 @@ appId: com.dmytrosamoilov.offhand.uitest
       - assertVisible: "1 file is being imported.*"
       - tapOn: "OK"
       - tapOn:
-          id: "list.bullet"
-          text: "Notes"
-# The placeholder named after the file turns into the fourth note written by
-# the fake engines (smoke, audio import, folder recording came before)
+          id: "tab_notes"
+# The placeholder named after the file turns into the third unsorted note
+# written by the fake engines (smoke and audio import came before; the folder
+# recording of 09 is not listed under "Unsorted")
 - extendedWaitUntil:
     notVisible: "import-sample.*"
     timeout: 90000
 - scrollUntilVisible:
     element:
       text: "Smoke test note"
-      index: 3
+      index: 2
     direction: DOWN

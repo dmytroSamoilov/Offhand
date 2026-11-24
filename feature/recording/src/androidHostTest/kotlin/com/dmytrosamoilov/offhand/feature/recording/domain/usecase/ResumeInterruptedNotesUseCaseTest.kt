@@ -4,6 +4,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProtectedDataState
 import com.dmytrosamoilov.offhand.core.data.domain.TranscriptionCheckpoint
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
@@ -17,7 +18,10 @@ import io.mockk.mockk
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -36,8 +40,13 @@ class ResumeInterruptedNotesUseCaseTest {
         coEvery { this@mockk.invoke(any()) } returns null
     }
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase = mockk()
+    private val isSpeechModelDownloaded: IsSpeechModelDownloadedUseCase = mockk()
     private val audioStore: EncryptedAudioStore = mockk {
         every { pcmSizeOf(any()) } returns 0L
+    }
+    private val isProtectedDataAvailable = MutableStateFlow(true)
+    private val protectedData = object : ProtectedDataState {
+        override val isAvailable: StateFlow<Boolean> = isProtectedDataAvailable
     }
 
     private val useCase = ResumeInterruptedNotesUseCase(
@@ -47,7 +56,9 @@ class ResumeInterruptedNotesUseCaseTest {
         failNote = failNote,
         getTranscriptionCheckpoint = getTranscriptionCheckpoint,
         isAiCoreDownloaded = isAiCoreDownloaded,
+        isSpeechModelDownloaded = isSpeechModelDownloaded,
         audioStore = audioStore,
+        protectedData = protectedData,
     )
 
     @Before
@@ -56,6 +67,7 @@ class ResumeInterruptedNotesUseCaseTest {
         every { recordingProcessController.restructureNote(any(), any()) } returns true
         coEvery { failNote(any()) } returns true
         coEvery { isAiCoreDownloaded() } returns true
+        every { isSpeechModelDownloaded() } returns true
         coEvery { notesRepository.deleteNote(any()) } just Runs
     }
 
@@ -81,6 +93,20 @@ class ResumeInterruptedNotesUseCaseTest {
     )
 
     @Test
+    fun `nothing is resumed while the device is locked, and the notes are resumed once it is unlocked`() = runTest {
+        isProtectedDataAvailable.value = false
+        every { notesRepository.observeNotes() } returns flowOf(listOf(note(1, NoteStatus.PROCESSING)))
+
+        val resume = launch { useCase() }
+        runCurrent()
+        verify(exactly = 0) { notesRepository.observeNotes() }
+
+        isProtectedDataAvailable.value = true
+        resume.join()
+        verify { recordingProcessController.retryNote(1, "note-1.pcm.enc") }
+    }
+
+    @Test
     fun `stuck processing note with audio is re-transcribed`() = runTest {
         every { notesRepository.observeNotes() } returns flowOf(
             listOf(note(1, NoteStatus.PROCESSING), note(2, NoteStatus.READY)),
@@ -90,6 +116,33 @@ class ResumeInterruptedNotesUseCaseTest {
 
         verify { recordingProcessController.retryNote(1, "note-1.pcm.enc") }
         verify(exactly = 1) { recordingProcessController.retryNote(any(), any()) }
+    }
+
+    @Test
+    fun `with only the speech part on disk a note is transcribed and a transcribed one waits`() = runTest {
+        coEvery { isAiCoreDownloaded() } returns false
+        every { notesRepository.observeNotes() } returns flowOf(
+            listOf(
+                note(1, NoteStatus.PROCESSING),
+                note(2, NoteStatus.PROCESSING, transcript = "already transcribed"),
+            ),
+        )
+
+        useCase()
+
+        verify { recordingProcessController.retryNote(1, "note-1.pcm.enc") }
+        verify(exactly = 0) { recordingProcessController.restructureNote(any(), any()) }
+        coVerify(exactly = 0) { failNote(any()) }
+    }
+
+    @Test
+    fun `without the speech part nothing is resumed`() = runTest {
+        every { isSpeechModelDownloaded() } returns false
+        every { notesRepository.observeNotes() } returns flowOf(listOf(note(1, NoteStatus.PROCESSING)))
+
+        useCase()
+
+        verify(exactly = 0) { recordingProcessController.retryNote(any(), any()) }
     }
 
     @Test
@@ -146,19 +199,6 @@ class ResumeInterruptedNotesUseCaseTest {
     @Test
     fun `actively processing notes are left alone`() = runTest {
         every { sessionManager.processingNoteIds } returns MutableStateFlow(setOf(1L))
-        every { notesRepository.observeNotes() } returns flowOf(
-            listOf(note(1, NoteStatus.PROCESSING)),
-        )
-
-        useCase()
-
-        verify(exactly = 0) { recordingProcessController.retryNote(any(), any()) }
-        coVerify(exactly = 0) { failNote(any()) }
-    }
-
-    @Test
-    fun `does nothing while the ai core is not downloaded`() = runTest {
-        coEvery { isAiCoreDownloaded() } returns false
         every { notesRepository.observeNotes() } returns flowOf(
             listOf(note(1, NoteStatus.PROCESSING)),
         )

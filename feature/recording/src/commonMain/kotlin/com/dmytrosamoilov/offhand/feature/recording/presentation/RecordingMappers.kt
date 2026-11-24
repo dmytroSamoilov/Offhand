@@ -21,6 +21,7 @@ internal fun toRecordingUiState(
         phase = session.phase.toUi(),
         isPaused = session.isPaused,
         elapsedTime = formatElapsed(vad.totalElapsedMs),
+        elapsedMs = vad.totalElapsedMs,
         waveform = waveform,
         isSilent = vad.isSilent,
         chunks = session.chunks.map { ChunkUi(id = it.id, state = it.state.toUi()) },

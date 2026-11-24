@@ -15,6 +15,7 @@ import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
+import com.dmytrosamoilov.offhand.core.device.DeviceTierProvider
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
@@ -39,6 +40,7 @@ class ModelDownloadService : Service(), KoinComponent {
 
     private val modelManager: ModelManager by inject()
     private val speechToText: SpeechToText by inject()
+    private val deviceTier: DeviceTierProvider by inject()
     private val aiCoreDownloadStatus: AiCoreDownloadStatus by inject()
     private val analyticsTracker: AnalyticsTracker by inject()
     private val appForegroundState: AppForegroundState by inject()
@@ -76,7 +78,7 @@ class ModelDownloadService : Service(), KoinComponent {
         downloadJob = serviceScope.launch {
             try {
                 speechToText.download()
-                modelManager.ensureModelAvailable()
+                if (deviceTier.writesSummaries()) modelManager.ensureModelAvailable()
                 notifyFinished(isSuccess = true)
             } catch (cancellation: CancellationException) {
                 throw cancellation

@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.notes.presentation
 
 import androidx.lifecycle.viewModelScope
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
+import com.dmytrosamoilov.offhand.core.audio.SilenceSkip
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
@@ -18,6 +19,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.NoteSection
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.SearchMatch
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.FolderLimits
@@ -38,10 +40,14 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestion
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteFeaturesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.OfferProTrialUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.FindSilenceUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteWaveformsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveSkipSilenceUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
@@ -64,7 +70,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -75,6 +83,9 @@ class NotesViewModel(
     private val recordingProcessController: RecordingProcessController,
     private val dateLabelFormatter: DateLabelFormatter,
     observeNotes: ObserveNotesUseCase,
+    observeNoteWaveforms: ObserveNoteWaveformsUseCase,
+    observeSkipSilence: ObserveSkipSilenceUseCase,
+    private val findSilence: FindSilenceUseCase,
     observeFolders: ObserveFoldersUseCase,
     private val searchNotes: SearchNotesUseCase,
     private val createFolder: CreateFolderUseCase,
@@ -110,6 +121,7 @@ class NotesViewModel(
     private val modelDownloadLauncher: ModelDownloadLauncher,
     private val clearTranscriptionCheckpoint: ClearTranscriptionCheckpointUseCase,
     private val resumeInterruptedNotes: ResumeInterruptedNotesUseCase,
+    private val offerProTrial: OfferProTrialUseCase,
     buildInfo: BuildInfo,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
@@ -131,6 +143,10 @@ class NotesViewModel(
     private val folders = MutableStateFlow<List<Folder>>(emptyList())
     private val selectedFolderId = MutableStateFlow<Long?>(null)
     private val searchQuery = MutableStateFlow("")
+    private val waveforms = MutableStateFlow<Map<Long, List<Int>>>(emptyMap())
+    private val playbackLoad = MutableStateFlow(PlaybackLoad(audioFileName = null, generation = 0))
+    private val silenceByFile = HashMap<String, List<SilenceSkip>>()
+    private var isSkippingSilence = false
 
     init {
         viewModelScope.launch {
@@ -142,6 +158,7 @@ class NotesViewModel(
         viewModelScope.launch {
             sessionManager.recordingsSavedInApp.collect { requestReviewIfDue() }
         }
+        offerProTrialBackOnTheList()
         viewModelScope.launch {
             observeFolders().collect { latest ->
                 folders.value = latest
@@ -151,8 +168,16 @@ class NotesViewModel(
             }
         }
         viewModelScope.launch {
-            combine(allNotes, folders, selectedFolderId, searchQuery, ::listContent)
+            observeNoteWaveforms().collect { latest -> waveforms.value = latest }
+        }
+        skipSilenceWhileEnabled(observeSkipSilence)
+        viewModelScope.launch {
+            combine(allNotes, folders, selectedFolderId, searchQuery, waveforms, ::listContent)
                 .collect { content -> mutableUiState.update { content(it) } }
+        }
+        viewModelScope.launch {
+            combine(selectedNoteId, waveforms) { noteId, all -> noteId?.let(all::get).orEmpty().toWaveformUi() }
+                .collect { waveform -> mutableUiState.update { it.copy(detailWaveform = waveform) } }
         }
         viewModelScope.launch {
             combine(selectedNoteId, sessionManager.transcribingNoteIds) { noteId, transcribing -> noteId in transcribing }
@@ -161,7 +186,11 @@ class NotesViewModel(
         viewModelScope.launch {
             observeNoteFeatures().collect { features ->
                 mutableUiState.update {
-                    it.copy(isTranscriptionEnabled = features.isTranscriptionEnabled, isSummaryEnabled = features.writesSummary)
+                    it.copy(
+                        isTranscriptionEnabled = features.isTranscriptionEnabled,
+                        isSummaryEnabled = features.writesSummary,
+                        isSummaryAvailable = features.isSummaryAvailable,
+                    )
                 }
             }
         }
@@ -224,9 +253,15 @@ class NotesViewModel(
                 mutableUiState.update { it.copy(isWaitingForAi = isMissing) }
             }
         }
+        viewModelScope.launch {
+            aiCoreDownloadStatus.isSpeechMissing.collect { isMissing ->
+                mutableUiState.update { it.copy(isWaitingForSpeech = isMissing) }
+            }
+        }
     }
 
     fun onDownloadOnMobileDataClicked() {
+        analyticsTracker.track(AnalyticsEvents.mobileDataDownloadClicked())
         modelDownloadLauncher.startOnMobileData()
     }
 
@@ -265,10 +300,11 @@ class NotesViewModel(
         folders: List<Folder>,
         folderId: Long?,
         query: String,
+        waveforms: Map<Long, List<Int>>,
     ): (NotesUiState) -> NotesUiState {
         val notes = loadedNotes.orEmpty()
         val sections = searchNotes(notes.shownFor(folders, folderId, query), query)
-            .toSectionsUi(dateLabelFormatter, folders.namesById())
+            .toSectionsUi(dateLabelFormatter, folders.namesById(), waveforms)
         val foldersUi = folders.toFoldersUi(notes)
         return { state ->
             state.copy(
@@ -468,7 +504,20 @@ class NotesViewModel(
         mutableUiState.update { it.copy(searchQuery = query) }
     }
 
-    fun onNoteSelected(id: Long) {
+    fun onNoteSelected(id: Long) = openNote(id, opensTranscript = false, transcriptFocus = null)
+
+    fun onSearchResultSelected(id: Long) {
+        val card = mutableUiState.value.sections.flatMap { it.notes }.firstOrNull { it.id == id }
+        val isTranscriptMatch = card?.matchLocation == MatchLocationUi.TRANSCRIPT
+        card?.matchLocation?.let { analyticsTracker.track(AnalyticsEvents.searchResultOpened(it.toSearchMatch())) }
+        openNote(id, opensTranscript = isTranscriptMatch, transcriptFocus = card?.matchParagraph.takeIf { isTranscriptMatch })
+    }
+
+    fun onTranscriptFocusHandled() {
+        mutableUiState.update { it.copy(transcriptFocusIndex = null) }
+    }
+
+    private fun openNote(id: Long, opensTranscript: Boolean, transcriptFocus: Int?) {
         launchSafely(showLoading = false) {
             val note = getNote(id) ?: return@launchSafely
             val isAlreadyOpen = selectedNote?.id == note.id
@@ -476,13 +525,27 @@ class NotesViewModel(
             selectedNoteId.value = note.id
             loadAudio(note)
             mutableUiState.update {
-                val tabs = if (isAlreadyOpen) it.detailTabs() else NoteDetailTabState.openedFor(note.status.toUi())
+                val tabs = when {
+                    opensTranscript -> NoteDetailTabState(tab = NoteDetailTabUi.TRANSCRIPT)
+                    isAlreadyOpen -> it.detailTabs()
+                    else -> NoteDetailTabState.openedFor(note.status.toUi())
+                }
                 it.copy(
                     selected = note.toDetailUi(dateLabelFormatter, folders.value.namesById()),
                     editor = null,
                     pendingDeleteNoteId = null,
+                    transcriptFocusIndex = transcriptFocus,
                 ).withDetailTabs(tabs)
             }
+        }
+    }
+
+    private fun offerProTrialBackOnTheList() {
+        launchSafely(showLoading = false) {
+            combine(allNotes, selectedNoteId) { notes, noteId ->
+                noteId == null && notes.orEmpty().any { it.status == NoteStatus.READY }
+            }.first { it }
+            offerProTrial()
         }
     }
 
@@ -520,6 +583,7 @@ class NotesViewModel(
     // The tab only ever changes on a tap: a summary that arrives while the
     // transcript is being read marks its tab instead of taking the screen.
     fun onDetailTabSelected(tab: NoteDetailTabUi) {
+        if (mutableUiState.value.detailTabs().tab != tab) analyticsTracker.track(AnalyticsEvents.noteTabOpened(tab.toSection()))
         mutableUiState.update { it.withDetailTabs(it.detailTabs().onTabSelected(tab)) }
     }
 
@@ -553,6 +617,7 @@ class NotesViewModel(
     // Rewriting a finished note is Pro whatever the target style, Summary included.
     fun onStyleSelected(style: NoteStyleRef) {
         val note = selectedNote ?: return
+        if (!uiState.value.isSummaryAvailable) return
         mutableUiState.update { it.copy(isPresetSheetVisible = false) }
         launchSafely(showLoading = false) {
             val feature = style.requiredProFeature() ?: ProFeature.NOTE_STYLES
@@ -617,7 +682,7 @@ class NotesViewModel(
             analyticsTracker.track(AnalyticsEvents.notePaused())
         } else {
             audioPlayer.play()
-            analyticsTracker.track(AnalyticsEvents.notePlayed())
+            analyticsTracker.track(AnalyticsEvents.notePlayed(isSkippingSilence))
         }
     }
 
@@ -635,7 +700,7 @@ class NotesViewModel(
         audioPlayer.seekTo(startMs)
         if (!audioPlayer.state.value.isPlaying) {
             audioPlayer.play()
-            analyticsTracker.track(AnalyticsEvents.notePlayed())
+            analyticsTracker.track(AnalyticsEvents.notePlayed(isSkippingSilence))
         }
     }
 
@@ -646,7 +711,30 @@ class NotesViewModel(
         } else {
             audioPlayer.reset()
         }
+        playbackLoad.update { PlaybackLoad(audioFileName = fileName, generation = it.generation + 1) }
     }
+
+    // Every load clears the player's skips, so they are handed over again for
+    // each one; a recording is scanned once per screen and remembered.
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun skipSilenceWhileEnabled(observeSkipSilence: ObserveSkipSilenceUseCase) {
+        viewModelScope.launch {
+            combine(observeSkipSilence(), playbackLoad) { enabled, load -> load.audioFileName.takeIf { enabled } }
+                .collectLatest { fileName -> applySilenceSkips(fileName?.let { silenceOf(it) }.orEmpty()) }
+        }
+    }
+
+    private fun applySilenceSkips(skips: List<SilenceSkip>) {
+        audioPlayer.setSilenceSkips(skips)
+        isSkippingSilence = skips.isNotEmpty()
+    }
+
+    private suspend fun silenceOf(audioFileName: String): List<SilenceSkip> =
+        silenceByFile[audioFileName] ?: runCatching { findSilence(audioFileName) }
+            .getOrDefault(emptyList())
+            .also { silenceByFile[audioFileName] = it }
+
+    private data class PlaybackLoad(val audioFileName: String?, val generation: Int)
 
     fun onEditStarted() {
         val selected = mutableUiState.value.selected ?: return
@@ -738,12 +826,14 @@ class NotesViewModel(
     fun onRetryTranscriptionRequested() {
         val note = selectedNote ?: return
         val audioFileName = note.audioFileName ?: return
+        analyticsTracker.track(AnalyticsEvents.noteRetryClicked())
         recordingProcessController.retryNote(note.id, audioFileName)
     }
 
     // Continues an interrupted note from its checkpoint, the same way a return
     // to the foreground does.
     fun onResumeProcessingRequested() {
+        analyticsTracker.track(AnalyticsEvents.noteContinueClicked())
         launchSafely(showLoading = false) {
             resumeInterruptedNotes()
         }
@@ -805,3 +895,14 @@ private fun NoteExportFormat?.isProFormat(): Boolean = this != null && this != N
 private fun NoteExportFormat?.analyticsFormat(): String = this?.name?.lowercase() ?: AUDIO_FORMAT
 
 private const val AUDIO_FORMAT = "audio"
+
+private fun MatchLocationUi.toSearchMatch(): SearchMatch = when (this) {
+    MatchLocationUi.TITLE -> SearchMatch.TITLE
+    MatchLocationUi.SUMMARY -> SearchMatch.SUMMARY
+    MatchLocationUi.TRANSCRIPT -> SearchMatch.TRANSCRIPT
+}
+
+private fun NoteDetailTabUi.toSection(): NoteSection = when (this) {
+    NoteDetailTabUi.SUMMARY -> NoteSection.OVERVIEW
+    NoteDetailTabUi.TRANSCRIPT -> NoteSection.TRANSCRIPT
+}

@@ -8,13 +8,12 @@
     <string name="recording_pause_label">Pause</string>
     <string name="recording_resume_label">Resume</string>
     <string name="recording_paused_label">Paused</string>
-    <string name="recording_active_label">Recording…</string>
+    <string name="recording_active_label">Recording</string>
     <string name="recording_save_note_button">Save note</string>
     <string name="recording_discard_button">Discard recording</string>
     <string name="recording_discard_dialog_title">Discard this recording?</string>
-    <string name="recording_discard_dialog_body">The recording and everything transcribed so far will be deleted. This cannot be undone.</string>
+    <string name="recording_discard_dialog_body">%1$s of audio and its transcript will be deleted. This cannot be undone.</string>
     <string name="recording_discard_dialog_confirm">Discard</string>
-    <string name="recording_discard_dialog_cancel">Cancel</string>
     <string name="recording_chunk_label" translatable="false">#%1$d</string>
     <string name="recording_stage_finishing">Saving your recording…</string>
     <string name="recording_processing_hint">You can close this — the note will appear in your list once it is ready.</string>
@@ -41,7 +40,6 @@
     <string name="recording_notification_note_failed_text">The recording is saved. Tap to open it and try again.</string>
     <string name="recording_notification_note_paused_title">Your note is paused</string>
     <string name="recording_notification_note_paused_text">Open Offhand and it will finish.</string>
-    <string name="recording_live_placeholder">Your words appear here as you speak.</string>
     <string name="record_widget_name">Record a note</string>
     <string name="record_widget_description">Start or stop a recording from your home screen.</string>
     <string name="record_widget_record">Record</string>
@@ -49,4 +47,21 @@
     <string name="record_widget_no_folder">No folder</string>
     <string name="record_widget_config_title">Save recordings to</string>
     <string name="record_widget_config_save">Save</string>
+    <string name="recording_discard_keep">Keep recording</string>
+    <string name="recording_live_label">Live transcript</string>
+    <plurals name="recording_duration_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="recording_duration_minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+    <plurals name="recording_duration_seconds">
+        <item quantity="one">%d second</item>
+        <item quantity="other">%d seconds</item>
+    </plurals>
+    <string name="record_widget_stop_save">Stop and save</string>
+    <string name="record_widget_to_folder">To %1$s</string>
+    <string name="record_widget_recording_to_folder">Recording to %1$s</string>
 </resources>

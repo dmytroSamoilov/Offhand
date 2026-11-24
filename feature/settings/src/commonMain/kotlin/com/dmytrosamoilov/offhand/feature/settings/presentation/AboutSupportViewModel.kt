@@ -7,9 +7,8 @@ import com.dmytrosamoilov.offhand.core.ai.api.ModelState
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDeveloperOptionsUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsSummaryAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDeveloperOptionsUseCase
-import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.core.common.DecimalFormatter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,14 +18,13 @@ import kotlinx.coroutines.launch
 
 class AboutSupportViewModel(
     private val modelManager: ModelManager,
-    observeTelemetryConsent: ObserveTelemetryConsentUseCase,
-    private val setTelemetryConsent: SetTelemetryConsentUseCase,
     observeDeveloperOptions: ObserveDeveloperOptionsUseCase,
     private val setDeveloperOptions: SetDeveloperOptionsUseCase,
+    isSummaryAvailable: IsSummaryAvailableUseCase,
     buildInfo: BuildInfo,
 ) : BaseViewModel() {
 
-    private val mutableUiState = MutableStateFlow(AboutSupportUiState())
+    private val mutableUiState = MutableStateFlow(AboutSupportUiState(isSummaryAvailable = isSummaryAvailable()))
     val uiState: StateFlow<AboutSupportUiState> = mutableUiState.asStateFlow()
 
     init {
@@ -71,11 +69,6 @@ class AboutSupportViewModel(
             }
         }
         viewModelScope.launch {
-            observeTelemetryConsent().collect { granted ->
-                mutableUiState.update { it.copy(isTelemetryEnabled = granted) }
-            }
-        }
-        viewModelScope.launch {
             observeDeveloperOptions().collect { enabled ->
                 mutableUiState.update { it.copy(isDeveloperOptionsEnabled = enabled) }
             }
@@ -91,12 +84,6 @@ class AboutSupportViewModel(
     fun onModelSelected(modelId: String?) {
         launchSafely(showLoading = false) {
             modelManager.setModelOverride(modelId)
-        }
-    }
-
-    fun onTelemetryChanged(granted: Boolean) {
-        launchSafely(showLoading = false) {
-            setTelemetryConsent(granted)
         }
     }
 

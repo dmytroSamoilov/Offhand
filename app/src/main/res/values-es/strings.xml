@@ -2,7 +2,9 @@
 <resources>
     <string name="destination_notes">Notas</string>
     <string name="destination_settings">Ajustes</string>
-    <string name="lock_title">Notas bloqueadas</string>
+    <string name="destination_record">Grabar</string>
+    <string name="destination_record_description">Iniciar una grabación nueva</string>
+    <string name="lock_title">Offhand está bloqueado</string>
     <string name="lock_body">Tus notas están cifradas en tu teléfono. Desbloquea para continuar.</string>
     <string name="lock_unlock_button">Desbloquear</string>
     <string name="lock_prompt_title">Desbloquear Offhand</string>

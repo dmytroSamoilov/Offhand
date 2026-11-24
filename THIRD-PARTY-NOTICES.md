@@ -9,6 +9,16 @@ Offhand bundles or downloads the following third-party components. Each remains 
 | Whisper small (int8, ONNX) | MIT (OpenAI Whisper) | [csukuangfj/sherpa-onnx-whisper-small](https://huggingface.co/csukuangfj/sherpa-onnx-whisper-small) |
 | Gemma 4 E2B (LiteRT) | Apache-2.0 | [litert-community/gemma-4-E2B-it-litert-lm](https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm) |
 
+## Fonts (bundled with both apps)
+
+| Component | License | Source |
+|---|---|---|
+| Inter | SIL Open Font License 1.1 ([text](legal/fonts/Inter-OFL.txt)) | [google/fonts](https://github.com/google/fonts/tree/main/ofl/inter) |
+| Inter Tight | SIL Open Font License 1.1 ([text](legal/fonts/InterTight-OFL.txt)) | [google/fonts](https://github.com/google/fonts/tree/main/ofl/intertight) |
+| JetBrains Mono | SIL Open Font License 1.1 ([text](legal/fonts/JetBrainsMono-OFL.txt)) | [google/fonts](https://github.com/google/fonts/tree/main/ofl/jetbrainsmono) |
+
+The apps carry static weights cut from the variable fonts and subset to Latin and Cyrillic; the font names are unchanged.
+
 ## Runtime libraries
 
 | Component | License |

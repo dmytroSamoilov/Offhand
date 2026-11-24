@@ -17,6 +17,7 @@ data class NotesUiState(
     val noteProgress: Map<Long, Int> = emptyMap(),
     val modelPreparation: ModelPreparationUi? = null,
     val isWaitingForAi: Boolean = false,
+    val isWaitingForSpeech: Boolean = false,
     val searchQuery: String = "",
     val folders: List<FolderUi> = emptyList(),
     val selectedFolderId: Long? = null,
@@ -34,6 +35,7 @@ data class NotesUiState(
     val pendingCalendarEvent: CalendarEventSuggestion? = null,
     val isRetranscribeAvailable: Boolean = false,
     val detailTab: NoteDetailTabUi = NoteDetailTabUi.SUMMARY,
+    val detailWaveform: List<Float> = emptyList(),
     val isSummaryReadyMarked: Boolean = false,
     val isNotesLoaded: Boolean = false,
     val isUnsortedShown: Boolean = false,
@@ -42,16 +44,27 @@ data class NotesUiState(
     val bulkAction: BulkNoteActionUi? = null,
     val isTranscriptionEnabled: Boolean = true,
     val isSummaryEnabled: Boolean = true,
+    val isSummaryAvailable: Boolean = true,
+    val transcriptFocusIndex: Int? = null,
 ) {
     val isSelectingNotes: Boolean get() = selectedNoteIds.isNotEmpty()
+
+    val styleChips: List<StyleChipUi> get() = styleChips()
+
+    val playingPartIndex: Int? get() = playingPartIndex()
+
+    fun rewritesNotesMovedTo(folderId: Long?): Boolean =
+        isSummaryAvailable && isFolderStylesUnlocked && folders.any { it.id == folderId && it.style != null }
 
     // A tab is there while its feature is on or the note already has that
     // text; a failed or paused note keeps Summary, where its buttons are.
     val visibleDetailTabs: List<NoteDetailTabUi>
         get() {
             val note = selected ?: return emptyList()
-            val showsSummary = isSummaryEnabled || note.body.isNotBlank() ||
-                note.status == NoteStatusUi.FAILED || note.status == NoteStatusUi.INTERRUPTED
+            val showsSummary = isSummaryAvailable && (
+                isSummaryEnabled || note.body.isNotBlank() ||
+                    note.status == NoteStatusUi.FAILED || note.status == NoteStatusUi.INTERRUPTED
+                )
             val showsTranscript = isTranscriptionEnabled || note.transcript.isNotBlank()
             return listOfNotNull(
                 NoteDetailTabUi.SUMMARY.takeIf { showsSummary },
@@ -161,7 +174,17 @@ data class NoteCardUi(
     val titleHighlights: List<TextRangeUi> = emptyList(),
     val previewHighlights: List<TextRangeUi> = emptyList(),
     val folderName: String? = null,
+    val matchLocation: MatchLocationUi? = null,
+    val matchTime: String? = null,
+    val matchParagraph: Int? = null,
+    val waveform: List<Float> = emptyList(),
 )
+
+enum class MatchLocationUi {
+    TITLE,
+    SUMMARY,
+    TRANSCRIPT,
+}
 
 data class TextRangeUi(
     val start: Int,
@@ -209,6 +232,7 @@ data class AudioPlaybackUi(
     val progress: Float = 0f,
     val positionText: String = "0:00",
     val durationText: String = "0:00",
+    val positionMs: Long = 0,
 )
 
 data class NoteEditorUi(

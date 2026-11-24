@@ -8,11 +8,14 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.common.DeviceRegion
+import com.dmytrosamoilov.offhand.core.common.asksBeforeCollecting
 import com.dmytrosamoilov.offhand.core.data.domain.EarlyAdopterPro
 import com.dmytrosamoilov.offhand.core.data.domain.NoteFeature
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
+import com.dmytrosamoilov.offhand.core.data.domain.TelemetryConsent
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +24,7 @@ import kotlinx.coroutines.flow.map
 internal class DataStoreUserPreferencesRepository(
     private val dataStore: DataStore<Preferences>,
     private val buildInfo: BuildInfo,
+    private val deviceRegion: DeviceRegion,
 ) : UserPreferencesRepository {
 
     override val preferences: Flow<UserPreferences> =
@@ -33,10 +37,7 @@ internal class DataStoreUserPreferencesRepository(
                 // until the onboarding step writes their answer.
                 appLockEnabled = preferences[KEY_APP_LOCK_ENABLED]
                     ?: preferences[KEY_ONBOARDING_COMPLETED] ?: false,
-                // On until the consent page says otherwise, so Firebase runs from
-                // the first launch and an install that never finishes onboarding
-                // still shows up.
-                telemetryConsent = preferences[KEY_TELEMETRY_CONSENT] ?: true,
+                telemetryConsent = telemetryConsent(preferences),
                 dynamicColor = preferences[KEY_DYNAMIC_COLOR] ?: false,
                 developerOptions = buildInfo.isDeveloperBuild &&
                     (preferences[KEY_DEVELOPER_OPTIONS] ?: false),
@@ -57,6 +58,7 @@ internal class DataStoreUserPreferencesRepository(
                 modelDownloadProgress = preferences[KEY_MODEL_DOWNLOAD_PROGRESS],
                 transcriptionEnabled = preferences[KEY_TRANSCRIPTION_ENABLED] ?: true,
                 summaryEnabled = preferences[KEY_SUMMARY_ENABLED] ?: true,
+                skipSilenceEnabled = preferences[KEY_SKIP_SILENCE] ?: false,
             )
         }
 
@@ -107,6 +109,10 @@ internal class DataStoreUserPreferencesRepository(
         dataStore.edit { it[KEY_SMART_SUGGESTIONS] = enabled }
     }
 
+    override suspend fun setSkipSilenceEnabled(enabled: Boolean) {
+        dataStore.edit { it[KEY_SKIP_SILENCE] = enabled }
+    }
+
     override suspend fun setProOverride(override: ProOverride) {
         dataStore.edit { it[KEY_PRO_OVERRIDE] = override.name }
     }
@@ -142,6 +148,19 @@ internal class DataStoreUserPreferencesRepository(
         return EarlyAdopterPro.entries.firstOrNull { it.name == name } ?: EarlyAdopterPro.UNDECIDED
     }
 
+    // Without a stored answer sharing is the default, except on a new install
+    // in a region that wants a yes first: there the onboarding question decides.
+    private fun telemetryConsent(preferences: Preferences): TelemetryConsent =
+        when (preferences[KEY_TELEMETRY_CONSENT]) {
+            true -> TelemetryConsent.SHARED
+            false -> TelemetryConsent.DECLINED
+            null -> if (preferences[KEY_ONBOARDING_COMPLETED] == true || !deviceRegion.asksBeforeCollecting) {
+                TelemetryConsent.SHARED
+            } else {
+                TelemetryConsent.UNANSWERED
+            }
+        }
+
     private fun proOverride(preferences: Preferences): ProOverride {
         if (!buildInfo.isDeveloperBuild) return ProOverride.STORE
         val name = preferences[KEY_PRO_OVERRIDE] ?: return ProOverride.STORE
@@ -171,6 +190,7 @@ internal class DataStoreUserPreferencesRepository(
         val KEY_PRO_OVERRIDE = stringPreferencesKey("debug_pro_override")
         val KEY_NOTIFICATIONS_PROMPTED = booleanPreferencesKey("notifications_prompted")
         val KEY_SMART_SUGGESTIONS = booleanPreferencesKey("smart_suggestions_enabled")
+        val KEY_SKIP_SILENCE = booleanPreferencesKey("skip_silence_enabled")
         val KEY_TRANSCRIPTION_ENABLED = booleanPreferencesKey("transcription_enabled")
         val KEY_SUMMARY_ENABLED = booleanPreferencesKey("summary_enabled")
         val KEY_EARLY_ADOPTER_PRO = stringPreferencesKey("early_adopter_pro")

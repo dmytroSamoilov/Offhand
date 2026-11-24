@@ -6,8 +6,3 @@ plugins {
 android {
     namespace = "com.dmytrosamoilov.offhand.core.designsystem"
 }
-
-dependencies {
-    api(libs.androidx.graphics.shapes)
-    implementation(libs.androidx.material.icons.core)
-}

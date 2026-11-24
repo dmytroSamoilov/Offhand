@@ -12,10 +12,10 @@ appId: com.dmytrosamoilov.offhand.uitest
       - tapOn: "COUNT ATTEMPT"
 - tapOn: "Share note"
 - assertVisible: "Text file"
-- assertVisible: "PDF file"
-- assertVisible: "Word file"
-- tapOn: "Word file"
-- tapOn: "PDF file"
+- assertVisible: "PDF( file)?"
+- assertVisible: "Word( file)?"
+- tapOn: "Word( file)?"
+- tapOn: "PDF( file)?"
 - tapOn: "Share"
 - runFlow:
     when:
@@ -23,7 +23,7 @@ appId: com.dmytrosamoilov.offhand.uitest
     commands:
       # The system chooser takes over; back closes it and lands on the note
       - extendedWaitUntil:
-          notVisible: "PDF file"
+          notVisible: "PDF( file)?"
           timeout: 10000
       - back
       - extendedWaitUntil:
@@ -34,7 +34,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - extendedWaitUntil:
-          notVisible: "PDF file"
+          notVisible: "PDF( file)?"
           timeout: 10000
       - tapOn:
           text: "Close"

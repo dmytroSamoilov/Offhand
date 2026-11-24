@@ -64,23 +64,21 @@
     <string name="settings_note_style_error_duplicate">Este nombre ya está en uso</string>
     <string name="settings_note_style_error_sections_too_many">Usa como máximo %1$d secciones</string>
     <string name="settings_note_style_describe_button">Descríbelo y deja que la IA rellene el formulario</string>
-    <string name="settings_note_style_describe_title">Describe tu nota</string>
-    <string name="settings_note_style_describe_body">Cuenta de qué trata la grabación y qué debe contener la nota final. La IA propone las secciones; después puedes cambiarlo todo.</string>
     <string name="settings_note_style_describe_hint">Por ejemplo: entreno equipos de fútbol. Después de cada sesión grabo qué practicamos, qué salió bien, en qué debe trabajar cada jugador y qué planear la próxima vez.</string>
     <string name="settings_note_style_describe_build">Crear el estilo</string>
     <string name="settings_note_style_describe_running">Pensando en las secciones…</string>
     <string name="settings_note_style_describe_failed">La IA no pudo convertir eso en un estilo. Prueba a describirlo de otra forma.</string>
 
-    <string name="settings_security_title">Seguridad</string>
-    <string name="settings_app_lock_label">Pedir desbloqueo al abrir Offhand</string>
+    <string name="settings_app_lock_label">Bloqueo de la app</string>
     <string name="settings_app_lock_description">Pide tu huella, tu cara o tu bloqueo de pantalla cada vez que se abre Offhand.</string>
     <string name="settings_app_lock_unavailable">Configura un bloqueo de pantalla en este teléfono para usar esta opción.</string>
-    <string name="settings_appearance_title">Apariencia</string>
+    <string name="settings_skip_silence_label">Saltar silencios</string>
+    <string name="settings_skip_silence_description">Salta las pausas largas al reproducir una grabación.</string>
     <string name="settings_dynamic_color_label">Colores del fondo de pantalla</string>
     <string name="settings_dynamic_color_description">Colorea la app a partir de tu fondo de pantalla (Material You) en lugar de la paleta integrada.</string>
 
     <string name="settings_privacy_title">Privacidad</string>
-    <string name="settings_telemetry_label">Informes anónimos de uso y estabilidad</string>
+    <string name="settings_telemetry_label">Compartir uso anónimo</string>
     <string name="settings_telemetry_description">Estadísticas de uso e informes de errores: cosas como aperturas de la app, modelo del dispositivo y versión de la app. Nunca tus notas, grabaciones ni datos personales.</string>
     <string name="settings_feedback_title">Comentarios</string>
     <string name="settings_feature_request_label">Solicitar una función</string>
@@ -121,7 +119,6 @@
     </plurals>
     <string name="settings_pro_upgrade_subtitle">Estilos, exportación a PDF y Word, sugerencias inteligentes, importación de audio y vídeo y carpetas ilimitadas</string>
     <string name="settings_pro_upgrade">Mejorar</string>
-    <string name="settings_subscription_title">Suscripción</string>
     <string name="settings_subscription_lifetime">De por vida, tuya para siempre</string>
     <string name="settings_subscription_included">Incluido en este dispositivo. No forma parte de las copias de seguridad y no sobrevive a una reinstalación.</string>
     <string name="settings_subscription_trial">Prueba gratis</string>
@@ -132,23 +129,29 @@
     <string name="settings_smart_suggestions_title">Sugerencias inteligentes</string>
     <string name="settings_smart_suggestions_label">Mostrar sugerencias inteligentes</string>
     <string name="settings_smart_suggestions_description">Encuentra eventos de calendario y tareas en cada nota nueva. Añade unos segundos de procesamiento.</string>
-    <string name="settings_notes_title">Notas</string>
-    <string name="settings_backup_section_title">Copia de seguridad</string>
-    <string name="settings_about_section_title">Acerca de</string>
-    <string name="settings_about_footer">Todo se queda en tu teléfono. Nunca se sube nada.</string>
+    <string name="settings_about_footer">Tus notas nunca salen de tu teléfono.</string>
     <string name="settings_note_style_editor_no_sections">Sin secciones, la nota es un resumen libre.</string>
     <string name="settings_redeem_code">Canjear un código</string>
     <string name="settings_redeem_code_body">Google Play abre el plan anual. Toca la flecha junto al método de pago, elige «Canjear código» e introduce tu código. Su prueba gratuita sustituye a la estándar.</string>
     <string name="settings_redeem_code_confirm">Continuar</string>
-    <plurals name="settings_subscription_app_trial_days_left">
-        <item quantity="one">Prueba gratis: queda %d día</item>
-        <item quantity="many">Prueba gratis: quedan %d días</item>
-        <item quantity="other">Prueba gratis: quedan %d días</item>
-    </plurals>
     <string name="settings_subscription_monthly">Mensual</string>
     <string name="settings_subscription_monthly_renews">Mensual, se renueva el %1$s</string>
     <string name="settings_transcription_label">Transcribir grabaciones</string>
     <string name="settings_transcription_description">Convierte lo que dices en texto. Si está desactivado, la nota es solo la grabación.</string>
     <string name="settings_summary_label">Escribir un resumen</string>
     <string name="settings_summary_description">Escribe una nota a partir de la transcripción con tu estilo de escritura. Requiere la transcripción.</string>
+    <string name="settings_group_notes">Notas</string>
+    <string name="settings_group_import_backup">Importación y copias</string>
+    <string name="settings_group_app">App</string>
+    <plurals name="settings_plan_days_left">
+        <item quantity="one">queda %d día</item>
+        <item quantity="many">quedan %d días</item>
+        <item quantity="other">quedan %d días</item>
+    </plurals>
+    <string name="settings_plan_trial_body">Durante la prueba gratis todo lo de Pro está desbloqueado. Después Offhand sigue siendo gratis, con el estilo Resumen y dos carpetas.</string>
+    <string name="settings_not_on_this_phone">No disponible en este teléfono</string>
+    <string name="settings_summary_unavailable_note">Los resúmenes, los estilos de escritura y las sugerencias inteligentes necesitan más memoria de la que tiene este teléfono. Grabar, las transcripciones, las carpetas, la búsqueda y compartir funcionan como siempre.</string>
+    <string name="settings_widget_title">Widget de la pantalla de inicio</string>
+    <string name="settings_widget_subtitle">Graba con un toque</string>
+    <string name="settings_widget_body">Un toque en el widget empieza a grabar, en la carpeta que elijas para él. Tócalo otra vez para detener y guardar.\n\nPara añadirlo, mantén pulsada la pantalla de inicio, toca Widgets y busca Offhand.</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.notes.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.data.domain.Note
+import com.dmytrosamoilov.offhand.feature.notes.domain.MatchLocation
 import com.dmytrosamoilov.offhand.feature.notes.domain.TextMatch
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -98,6 +99,39 @@ class SearchNotesUseCaseTest {
         val result = searchNotes(listOf(note), "note notebook").single()
 
         assertEquals(listOf(TextMatch(start = 0, end = 8), TextMatch(start = 9, end = 13)), result.titleMatches)
+    }
+
+    @Test
+    fun `a match in several places is reported where it comes first title then summary then transcript`() {
+        assertEquals(MatchLocation.TITLE, searchNotes(listOf(budgetNote), "budget").single().location)
+        assertEquals(MatchLocation.SUMMARY, searchNotes(listOf(budgetNote), "agreed").single().location)
+        assertEquals(MatchLocation.TRANSCRIPT, searchNotes(listOf(budgetNote), "quarter").single().location)
+    }
+
+    @Test
+    fun `a title match previews the start of the note and other matches the text around them`() {
+        val title = searchNotes(listOf(hiringNote), "hiring").single()
+        val transcript = searchNotes(listOf(hiringNote), "september").single()
+
+        assertEquals("Two backend engineers in Q3.", title.snippet)
+        assertTrue(transcript.snippet.orEmpty().contains("September"))
+        assertTrue(transcript.snippetMatches.isNotEmpty())
+    }
+
+    @Test
+    fun `a transcript match names the paragraph it is in`() {
+        val note = note(
+            id = 3,
+            title = "Call",
+            body = "Short call.",
+            transcript = "Hello there.\n\nWe talked about the lease.\n\nThe deposit stays the same.",
+        )
+
+        val result = searchNotes(listOf(note), "deposit").single()
+
+        assertEquals(MatchLocation.TRANSCRIPT, result.location)
+        assertEquals(2, result.transcriptParagraph)
+        assertNull(searchNotes(listOf(note), "call").single().transcriptParagraph)
     }
 
     private fun note(id: Long, title: String, body: String, transcript: String) = Note(

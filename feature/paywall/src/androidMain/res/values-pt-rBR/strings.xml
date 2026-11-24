@@ -74,8 +74,12 @@
         <item quantity="other">Menos de %d anos do plano anual</item>
     </plurals>
     <string name="paywall_benefits_body">Tudo na coluna Pro é seu.</string>
-    <string name="paywall_trial_intro_title">Experimente o Offhand Pro grátis por 14 dias</string>
-    <string name="paywall_trial_intro_tagline">Tudo do Pro está liberado a partir de hoje. Sem pagamento e sem conta. Depois de 14 dias você fica com a versão grátis, a menos que faça upgrade.</string>
+    <plurals name="paywall_trial_offer_title">
+        <item quantity="one">O Offhand Pro é seu de graça por mais %d dia</item>
+        <item quantity="other">O Offhand Pro é seu de graça por mais %d dias</item>
+    </plurals>
+    <string name="paywall_trial_intro_tagline">Tudo do Pro já está liberado. Sem pagamento e sem conta. Quando o teste acabar você fica com a versão grátis, a menos que faça upgrade.</string>
+    <string name="paywall_trial_offer_continue">Continuar usando o Pro grátis</string>
     <string name="paywall_plan_monthly">Mensal</string>
     <string name="paywall_plan_monthly_price">%1$s / mês</string>
     <string name="paywall_plan_monthly_renews">Renova todo mês</string>
@@ -94,4 +98,5 @@
     <string name="paywall_usage_folder_styles">Pastas com estilo próprio</string>
     <string name="paywall_usage_backups">Backups com suas gravações</string>
     <string name="paywall_context_widget">Grave pela tela inicial</string>
+    <string name="paywall_context_skip_silence">Pule os silêncios ao ouvir</string>
 </resources>

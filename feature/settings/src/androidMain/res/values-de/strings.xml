@@ -64,23 +64,21 @@
     <string name="settings_note_style_error_duplicate">Dieser Name wird bereits verwendet</string>
     <string name="settings_note_style_error_sections_too_many">Höchstens %1$d Abschnitte verwenden</string>
     <string name="settings_note_style_describe_button">Beschreiben und die KI das Formular ausfüllen lassen</string>
-    <string name="settings_note_style_describe_title">Beschreibe deine Notiz</string>
-    <string name="settings_note_style_describe_body">Sag, worum es in der Aufnahme geht und was die fertige Notiz enthalten soll. Die KI schlägt die Abschnitte vor; danach kannst du alles ändern.</string>
     <string name="settings_note_style_describe_hint">Zum Beispiel: Ich trainiere Fußballmannschaften. Nach jedem Training halte ich fest, was wir geübt haben, was gut lief, woran jeder Spieler arbeiten soll und was beim nächsten Mal geplant ist.</string>
     <string name="settings_note_style_describe_build">Stil erstellen</string>
     <string name="settings_note_style_describe_running">Überlege die Abschnitte…</string>
     <string name="settings_note_style_describe_failed">Die KI konnte daraus keinen Stil machen. Beschreibe es anders.</string>
 
-    <string name="settings_security_title">Sicherheit</string>
-    <string name="settings_app_lock_label">Entsperren beim Öffnen von Offhand verlangen</string>
+    <string name="settings_app_lock_label">App-Sperre</string>
     <string name="settings_app_lock_description">Fragt bei jedem Öffnen von Offhand nach Fingerabdruck, Gesicht oder Displaysperre.</string>
     <string name="settings_app_lock_unavailable">Richte eine Displaysperre auf diesem Smartphone ein, um das zu nutzen.</string>
-    <string name="settings_appearance_title">Darstellung</string>
+    <string name="settings_skip_silence_label">Stille überspringen</string>
+    <string name="settings_skip_silence_description">Lange Pausen beim Abspielen einer Aufnahme überspringen.</string>
     <string name="settings_dynamic_color_label">Farben vom Hintergrundbild</string>
     <string name="settings_dynamic_color_description">Färbt die App passend zu deinem Hintergrundbild (Material You) statt mit der eingebauten Palette.</string>
 
     <string name="settings_privacy_title">Privatsphäre</string>
-    <string name="settings_telemetry_label">Anonyme Nutzungs- &amp; Stabilitätsberichte</string>
+    <string name="settings_telemetry_label">Anonyme Nutzung teilen</string>
     <string name="settings_telemetry_description">Nutzungsstatistiken und Absturzberichte — Dinge wie App-Starts, Gerätemodell und App-Version. Niemals deine Notizen, Aufnahmen oder persönliche Daten.</string>
     <string name="settings_feedback_title">Feedback</string>
     <string name="settings_feature_request_label">Funktion vorschlagen</string>
@@ -120,7 +118,6 @@
     </plurals>
     <string name="settings_pro_upgrade_subtitle">Stile, PDF- und Word-Export, smarte Vorschläge, Audio- und Video-Import und unbegrenzt Ordner</string>
     <string name="settings_pro_upgrade">Upgrade</string>
-    <string name="settings_subscription_title">Abo</string>
     <string name="settings_subscription_lifetime">Lebenslang, gehört dir für immer</string>
     <string name="settings_subscription_included">Auf diesem Gerät enthalten. Nicht Teil von Backups, und eine Neuinstallation setzt es zurück.</string>
     <string name="settings_subscription_trial">Kostenlose Testphase</string>
@@ -131,22 +128,28 @@
     <string name="settings_smart_suggestions_title">Smarte Vorschläge</string>
     <string name="settings_smart_suggestions_label">Smarte Vorschläge anzeigen</string>
     <string name="settings_smart_suggestions_description">Findet Kalendertermine und Aufgaben in jeder neuen Notiz. Dauert ein paar Sekunden länger.</string>
-    <string name="settings_notes_title">Notizen</string>
-    <string name="settings_backup_section_title">Backup</string>
-    <string name="settings_about_section_title">Info</string>
-    <string name="settings_about_footer">Alles bleibt auf deinem Handy. Nichts wird jemals hochgeladen.</string>
+    <string name="settings_about_footer">Deine Notizen verlassen nie dein Handy.</string>
     <string name="settings_note_style_editor_no_sections">Ohne Abschnitte wird die Notiz eine freie Zusammenfassung.</string>
     <string name="settings_redeem_code">Code einlösen</string>
     <string name="settings_redeem_code_body">Google Play öffnet den Jahresplan. Tippe auf den Pfeil neben der Zahlungsmethode, wähle „Code einlösen“ und gib deinen Code ein. Seine kostenlose Testphase ersetzt die normale.</string>
     <string name="settings_redeem_code_confirm">Weiter</string>
-    <plurals name="settings_subscription_app_trial_days_left">
-        <item quantity="one">Kostenlose Testphase: noch %d Tag</item>
-        <item quantity="other">Kostenlose Testphase: noch %d Tage</item>
-    </plurals>
     <string name="settings_subscription_monthly">Monatlich</string>
     <string name="settings_subscription_monthly_renews">Monatlich, verlängert sich am %1$s</string>
     <string name="settings_transcription_label">Aufnahmen transkribieren</string>
     <string name="settings_transcription_description">Macht aus dem Gesagten Text. Ausgeschaltet besteht eine Notiz nur aus der Aufnahme.</string>
     <string name="settings_summary_label">Zusammenfassung schreiben</string>
     <string name="settings_summary_description">Schreibt aus dem Transkript eine Notiz in deinem Schreibstil. Benötigt die Transkription.</string>
+    <string name="settings_group_notes">Notizen</string>
+    <string name="settings_group_import_backup">Import &amp; Sicherung</string>
+    <string name="settings_group_app">App</string>
+    <plurals name="settings_plan_days_left">
+        <item quantity="one">noch %d Tag</item>
+        <item quantity="other">noch %d Tage</item>
+    </plurals>
+    <string name="settings_plan_trial_body">Während deiner kostenlosen Testphase ist alles aus Pro freigeschaltet. Danach bleibt Offhand kostenlos, mit dem Stil Zusammenfassung und zwei Ordnern.</string>
+    <string name="settings_not_on_this_phone">Auf diesem Handy nicht verfügbar</string>
+    <string name="settings_summary_unavailable_note">Zusammenfassungen, Schreibstile und smarte Vorschläge brauchen mehr Arbeitsspeicher, als dieses Handy hat. Aufnehmen, Transkripte, Ordner, Suche und Teilen funktionieren wie gewohnt.</string>
+    <string name="settings_widget_title">Widget für den Startbildschirm</string>
+    <string name="settings_widget_subtitle">Mit einem Tipp aufnehmen</string>
+    <string name="settings_widget_body">Ein Tipp auf das Widget startet eine Aufnahme, in den Ordner, den du dafür auswählst. Tippe noch einmal, um zu stoppen und zu speichern.\n\nSo fügst du es hinzu: Halte den Startbildschirm gedrückt, tippe auf Widgets und suche Offhand.</string>
 </resources>

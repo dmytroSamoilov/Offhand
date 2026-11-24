@@ -7,6 +7,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatusRepository
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
+import com.dmytrosamoilov.offhand.core.data.domain.TelemetryConsent
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
@@ -96,7 +97,7 @@ class DecideEarlyAdopterProUseCaseTest {
             UserPreferences(
                 onboardingCompleted = onboardingCompleted,
                 appLockEnabled = false,
-                telemetryConsent = false,
+                telemetryConsent = TelemetryConsent.DECLINED,
                 dynamicColor = false,
                 developerOptions = false,
                 savedRecordingsCount = 0,

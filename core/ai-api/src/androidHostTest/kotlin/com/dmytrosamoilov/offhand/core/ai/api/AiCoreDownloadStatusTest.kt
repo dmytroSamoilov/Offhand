@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.core.ai.api
 
+import com.dmytrosamoilov.offhand.core.device.DeviceTierProvider
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +34,26 @@ class AiCoreDownloadStatusTest {
     }
     private val policy = ModelDownloadPolicy(networkMonitor)
 
-    private val status = AiCoreDownloadStatus(modelManager, speechToText, policy)
+    private var writesSummaries = true
+    private val deviceTier: DeviceTierProvider = mockk { every { writesSummaries() } answers { writesSummaries } }
+
+    private val status = AiCoreDownloadStatus(modelManager, speechToText, policy, deviceTier)
+
+    @Test
+    fun `a transcripts-only phone waits for the speech model alone`() = runTest {
+        writesSummaries = false
+        modelState.value = ModelState.NotDownloaded
+        speechState.value = SpeechModelState.NotDownloaded
+        isUnmetered.value = false
+
+        assertEquals(AiCoreDownloadState.WaitingForMobileData(bytesTotal = 1_000L), status.state.first())
+        assertEquals(true, status.isMissing.first())
+
+        speechState.value = SpeechModelState.Downloaded
+
+        assertEquals(AiCoreDownloadState.Idle, status.state.first())
+        assertEquals(false, status.isMissing.first())
+    }
 
     @Test
     fun `missing models on mobile data wait until the user allows the download`() = runTest {
@@ -45,6 +65,18 @@ class AiCoreDownloadStatusTest {
 
         policy.allowMobileData()
         assertEquals(AiCoreDownloadState.Idle, status.state.first())
+    }
+
+    @Test
+    fun `speech part stops counting as missing while the rest is still downloading`() = runTest {
+        speechState.value = SpeechModelState.Downloading(bytesDownloaded = 500, bytesTotal = 1_000)
+        modelState.value = ModelState.NotDownloaded
+        assertEquals(true, status.isSpeechMissing.first())
+
+        speechState.value = SpeechModelState.Downloaded
+        modelState.value = ModelState.Downloading(progress = 0.1f, bytesDownloaded = 300, bytesTotal = 3_000)
+        assertEquals(false, status.isSpeechMissing.first())
+        assertEquals(true, status.isMissing.first())
     }
 
     @Test

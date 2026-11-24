@@ -17,11 +17,13 @@ import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_7_8
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_8_9
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_10_11
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_11_12
+import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_12_13
 import com.dmytrosamoilov.offhand.core.data.database.MIGRATION_9_10
 import com.dmytrosamoilov.offhand.core.data.database.FolderDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteStyleDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteSuggestionsDao
+import com.dmytrosamoilov.offhand.core.data.database.NoteWaveformDao
 import com.dmytrosamoilov.offhand.core.data.database.TranscriptionCheckpointDao
 import com.dmytrosamoilov.offhand.core.data.database.NotesDatabase
 import com.dmytrosamoilov.offhand.core.data.database.applyCompleteUnlessOpenProtection
@@ -31,6 +33,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStylesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestionsRepository
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import com.dmytrosamoilov.offhand.core.data.domain.NoteWaveformRepository
 import com.dmytrosamoilov.offhand.core.data.domain.TranscriptionCheckpointRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatusCache
@@ -46,6 +49,7 @@ import com.dmytrosamoilov.offhand.core.data.repository.RoomCustomNoteStylesRepos
 import com.dmytrosamoilov.offhand.core.data.repository.RoomFoldersRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomNoteSuggestionsRepository
 import com.dmytrosamoilov.offhand.core.data.repository.ConsentGatedAnalyticsTracker
+import com.dmytrosamoilov.offhand.core.data.repository.RoomNoteWaveformRepository
 import com.dmytrosamoilov.offhand.core.data.repository.RoomTranscriptionCheckpointRepository
 import com.dmytrosamoilov.offhand.core.data.repository.DebugOverrideProStore
 import com.dmytrosamoilov.offhand.core.data.repository.ProUpgradeCoordinator
@@ -91,6 +95,7 @@ private fun createNotesDatabase(): NotesDatabase {
             MIGRATION_9_10,
             MIGRATION_10_11,
             MIGRATION_11_12,
+            MIGRATION_12_13,
         )
         .build()
     applyCompleteUnlessOpenProtection(databasePath)
@@ -118,11 +123,13 @@ val coreDataModule = module {
     factory<NoteStyleDao> { get<NotesDatabase>().noteStyleDao() }
     factory<NoteSuggestionsDao> { get<NotesDatabase>().noteSuggestionsDao() }
     factory<TranscriptionCheckpointDao> { get<NotesDatabase>().transcriptionCheckpointDao() }
+    factory<NoteWaveformDao> { get<NotesDatabase>().noteWaveformDao() }
     singleOf(::RoomNotesRepository) bind NotesRepository::class
     singleOf(::RoomFoldersRepository) bind FoldersRepository::class
     singleOf(::RoomCustomNoteStylesRepository) bind CustomNoteStylesRepository::class
     singleOf(::RoomNoteSuggestionsRepository) bind NoteSuggestionsRepository::class
     singleOf(::RoomTranscriptionCheckpointRepository) bind TranscriptionCheckpointRepository::class
+    singleOf(::RoomNoteWaveformRepository) bind NoteWaveformRepository::class
     single<ProStore> { DebugOverrideProStore(get(named(PLATFORM_PRO_STORE)), get()) }
     single<ProStatusCache> { DataStoreProStatusCache(get()) }
     single<ProTrialRecordStore> { ICloudProTrialRecordStore() }
@@ -137,5 +144,5 @@ val coreDataModule = module {
         TrialUsageCountingTracker(ConsentGatedAnalyticsTracker(get(), get(), get(), scope), get(), get(), scope)
     }
     single<DataStore<Preferences>> { createUserPreferencesDataStore() }
-    single<UserPreferencesRepository> { DataStoreUserPreferencesRepository(get(), get()) }
+    single<UserPreferencesRepository> { DataStoreUserPreferencesRepository(get(), get(), get()) }
 }

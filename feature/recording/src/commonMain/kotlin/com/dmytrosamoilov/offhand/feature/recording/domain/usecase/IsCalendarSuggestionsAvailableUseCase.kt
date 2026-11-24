@@ -2,6 +2,7 @@ package com.dmytrosamoilov.offhand.feature.recording.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatusRepository
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
+import com.dmytrosamoilov.offhand.core.device.DeviceTierProvider
 import kotlinx.coroutines.flow.first
 
 // The pipeline step runs only for Pro users who switched suggestions on in
@@ -9,7 +10,8 @@ import kotlinx.coroutines.flow.first
 class IsCalendarSuggestionsAvailableUseCase(
     private val proStatus: ProStatusRepository,
     private val preferences: UserPreferencesRepository,
+    private val deviceTier: DeviceTierProvider,
 ) {
-    suspend operator fun invoke(): Boolean =
+    suspend operator fun invoke(): Boolean = deviceTier.writesSummaries() &&
         preferences.preferences.first().smartSuggestionsEnabled && proStatus.observeStatus().first().isPro
 }

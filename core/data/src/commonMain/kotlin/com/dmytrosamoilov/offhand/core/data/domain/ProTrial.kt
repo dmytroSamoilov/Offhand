@@ -19,14 +19,12 @@ sealed interface ProTrialState {
 }
 
 enum class ProTrialNotice {
+    OFFERED,
     ENDED,
     REMOVED,
 }
 
-// What one cold start owes the user: the welcome to a trial that has just
-// started, or the message that it ended or was removed.
 data class ProTrialSettlement(
-    val isTrialOffered: Boolean = false,
     val notice: ProTrialNotice? = null,
 )
 

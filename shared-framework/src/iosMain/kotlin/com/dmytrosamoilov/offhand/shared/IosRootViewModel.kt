@@ -2,7 +2,6 @@ package com.dmytrosamoilov.offhand.shared
 
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import androidx.lifecycle.viewModelScope
-import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialNotice
@@ -17,7 +16,10 @@ import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserP
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.AcknowledgeProTrialNoticeUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.KeepProTrialInSyncUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SettleProTrialUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SwitchOffLapsedProSettingsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.PendingNotesCoordinator
+import com.dmytrosamoilov.offhand.feature.recording.domain.NoteWaveformFiller
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,14 +40,16 @@ enum class IosRootPhase {
 class IosRootViewModel(
     observeUserPreferences: ObserveUserPreferencesUseCase,
     private val appLockManager: AppLockManager,
-    private val modelManager: ModelManager,
+    private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
     private val modelDownloadLauncher: ModelDownloadLauncher,
     private val resumeInterruptedNotes: ResumeInterruptedNotesUseCase,
     private val sweepOrphanedRecordings: SweepOrphanedRecordingsUseCase,
+    private val noteWaveformFiller: NoteWaveformFiller,
     private val clearShareCache: ClearShareCacheUseCase,
     private val decideEarlyAdopterPro: DecideEarlyAdopterProUseCase,
     private val markEarlyAdopterThanked: MarkEarlyAdopterThankedUseCase,
     private val settleProTrial: SettleProTrialUseCase,
+    private val switchOffLapsedProSettings: SwitchOffLapsedProSettingsUseCase,
     private val acknowledgeProTrialNotice: AcknowledgeProTrialNoticeUseCase,
     private val keepProTrialInSync: KeepProTrialInSyncUseCase,
     private val proUpgradeGate: ProUpgradeGate,
@@ -135,19 +139,17 @@ class IosRootViewModel(
             phase.first { it == IosRootPhase.READY }
             decideEarlyAdopterPro()
             settleProTrialOnColdStart()
+            switchOffLapsedProSettings()
             resumeInterruptedNotes()
             sweepOrphanedRecordings()
+            noteWaveformFiller.start()
             clearShareCache()
         }
     }
 
     private suspend fun settleProTrialOnColdStart() {
         val settlement = settleProTrial()
-        when {
-            settlement.isTrialOffered -> proUpgradeGate.showTrialOffer()
-            settlement.notice == ProTrialNotice.ENDED -> showTrialEnded()
-            else -> mutableTrialNotice.value = settlement.notice
-        }
+        if (settlement.notice == ProTrialNotice.ENDED) showTrialEnded() else mutableTrialNotice.value = settlement.notice
     }
 
     // The end of the trial is told by the paywall itself, with what was used.
@@ -174,7 +176,7 @@ class IosRootViewModel(
     }
 
     private suspend fun startModelDownloadIfMissing() {
-        if (!modelManager.isModelDownloaded()) {
+        if (!isAiCoreDownloaded()) {
             modelDownloadLauncher.startWhenAllowed()
         }
     }

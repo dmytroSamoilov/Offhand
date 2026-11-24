@@ -9,6 +9,7 @@ import com.dmytrosamoilov.offhand.core.data.database.toDomain
 import com.dmytrosamoilov.offhand.core.data.domain.Folder
 import com.dmytrosamoilov.offhand.core.data.domain.FoldersRepository
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.ProtectedDataState
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.flow.Flow
@@ -17,10 +18,11 @@ import kotlinx.coroutines.flow.map
 internal class RoomFoldersRepository(
     private val folderDao: FolderDao,
     private val noteDao: NoteDao,
+    private val protectedData: ProtectedDataState,
 ) : FoldersRepository {
 
     override fun observeFolders(): Flow<List<Folder>> =
-        folderDao.observeAll().map { entities -> entities.map { it.toDomain() } }
+        folderDao.observeAll().map { entities -> entities.map { it.toDomain() } }.retryWhileUnreadable(protectedData)
 
     override suspend fun createFolder(name: String): Long = folderDao.insert(
         FolderEntity(

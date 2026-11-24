@@ -28,8 +28,12 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestion
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteFeaturesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteDocumentBuilder
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.OfferProTrialUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.FindSilenceUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteWaveformsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveSkipSilenceUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
@@ -50,6 +54,7 @@ val featureNotesModule = module {
     factoryOf(::CreateFolderUseCase)
     factoryOf(::DecideEarlyAdopterProUseCase)
     factoryOf(::MarkEarlyAdopterThankedUseCase)
+    factoryOf(::OfferProTrialUseCase)
     factoryOf(::DeleteFolderUseCase)
     factoryOf(::MoveNoteToFolderUseCase)
     factoryOf(::ObserveCustomNoteStylesUseCase)
@@ -71,6 +76,9 @@ val featureNotesModule = module {
     factoryOf(::ObserveDeveloperOptionsUseCase)
     factoryOf(::ObserveNoteSuggestionsUseCase)
     factoryOf(::ObserveNotesUseCase)
+    factoryOf(::ObserveNoteWaveformsUseCase)
+    factoryOf(::ObserveSkipSilenceUseCase)
+    factoryOf(::FindSilenceUseCase)
     factoryOf(::SearchNotesUseCase)
     factoryOf(::ShouldRequestReviewUseCase)
     factoryOf(::UpdateNoteUseCase)
@@ -80,6 +88,9 @@ val featureNotesModule = module {
             recordingProcessController = get(),
             dateLabelFormatter = get(),
             observeNotes = get(),
+            observeNoteWaveforms = get(),
+            observeSkipSilence = get(),
+            findSilence = get(),
             observeFolders = get(),
             searchNotes = get(),
             createFolder = get(),
@@ -115,6 +126,7 @@ val featureNotesModule = module {
             aiCoreDownloadStatus = get(),
             clearTranscriptionCheckpoint = get(),
             resumeInterruptedNotes = get(),
+            offerProTrial = get(),
             buildInfo = get(),
             analyticsTracker = get(),
         )

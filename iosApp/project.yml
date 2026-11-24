@@ -14,8 +14,8 @@ settings:
   # Project-wide so the app and the widget extension can never disagree; bump
   # here and regenerate, the App Store rejects an extension on another build.
   base:
-    MARKETING_VERSION: "1.5"
-    CURRENT_PROJECT_VERSION: "29"
+    MARKETING_VERSION: "1.5.1"
+    CURRENT_PROJECT_VERSION: "31"
   configs:
     Debug-dev:
       APP_ID_SUFFIX: .dev
@@ -185,7 +185,44 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
+  # Real-device suite: UI tests that drive Offhand Dev with the real on-device
+  # AI on a connected iPhone or iPad. Run by testing/device-suite/run-ios.sh,
+  # never part of the app or its archives.
+  OffhandDeviceTests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - DeviceTests
+    dependencies:
+      - target: Offhand
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dmytrosamoilov.offhand.devicetests
+        GENERATE_INFOPLIST_FILE: true
+        SWIFT_VERSION: "5.9"
+        IPHONEOS_DEPLOYMENT_TARGET: "18.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: S5UT57PQ2J
+        TEST_TARGET_NAME: Offhand
 schemes:
+  Offhand-devicetest:
+    build:
+      targets:
+        Offhand: all
+        OffhandDeviceTests: [test]
+    run:
+      config: Debug-dev
+    test:
+      config: Debug-dev
+      targets:
+        - OffhandDeviceTests
+    profile:
+      config: Debug-dev
+    analyze:
+      config: Debug-dev
+    archive:
+      config: Debug-dev
   Offhand-dev:
     build:
       targets:

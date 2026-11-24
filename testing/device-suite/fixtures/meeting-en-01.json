@@ -1,0 +1,15 @@
+{
+  "id": "meeting-en-01",
+  "language": "en",
+  "voice": "Samantha",
+  "rate": 175,
+  "text": "Okay, let's start the weekly product meeting. First, the onboarding redesign is finished and it ships on Thursday. Anna will write the release notes and send them to the support team before the launch. Second, the marketing budget for next quarter is still open. We agreed to move half of the conference money into video ads. Mark asked for a short report on the results of the last campaign by Friday. Finally, the Android widget has a bug on small screens, and Leo will look at it tomorrow morning. That's everything for today, thanks everyone.",
+  "livePhrase": "widget|small screens|tomorrow morning|everyone",
+  "maxWerAcoustic": 0.25,
+  "maxWerImport": 0.12,
+  "summaryMustMention": [
+    "onboarding",
+    "budget|conference money|video ads|marketing",
+    "widget"
+  ]
+}

@@ -8,7 +8,7 @@ class AudioChunker(
     private val minChunkMs: Long,
     private val maxChunkMs: Long,
     private val silenceGapMs: Long,
-    private val silenceDb: Float,
+    silenceDb: Float,
 ) {
 
     class FrameOutcome(
@@ -32,6 +32,7 @@ class AudioChunker(
     private var chunkSpeechMs = 0L
     private var totalRecordedMs = 0L
     private var consecutiveSilentMs = 0L
+    private val silenceThreshold = RoomSilenceThreshold(silenceDb)
 
     fun onFrame(frame: ShortArray, count: Int, isPaused: Boolean): FrameOutcome {
         if (isPaused) {
@@ -39,12 +40,13 @@ class AudioChunker(
             return FrameOutcome(pausedSnapshot(), frameBytes = null, completedChunk = null)
         }
         val rmsDb = rmsDb(frame, count)
-        val isSilent = rmsDb < silenceDb
+        val frameMs = (count.toLong() * MS_PER_SECOND) / sampleRate
+        silenceThreshold.onFrame(rmsDb, frameMs)
+        val isSilent = rmsDb < silenceThreshold.currentDb
         val frameBytes = toLittleEndianBytes(frame, count)
         frames += frameBytes
         bufferedBytes += frameBytes.size
 
-        val frameMs = (count.toLong() * MS_PER_SECOND) / sampleRate
         if (isSilent) {
             consecutiveSilentMs += frameMs
         } else {

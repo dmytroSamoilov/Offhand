@@ -23,12 +23,16 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOver
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStatusUseCase
 import com.dmytrosamoilov.offhand.core.data.domain.NoteFeature
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteFeaturesUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSkipSilenceEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteFeatureEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.RedeemProCodeUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSkipSilenceEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
@@ -52,11 +56,15 @@ class SettingsViewModel(
     observeAppLockEnabled: ObserveAppLockEnabledUseCase,
     private val setAppLockEnabled: SetAppLockEnabledUseCase,
     private val appLockManager: AppLockManager,
+    observeTelemetryConsent: ObserveTelemetryConsentUseCase,
+    private val setTelemetryConsent: SetTelemetryConsentUseCase,
     private val importAudio: ImportAudioUseCase,
     isAudioImportAvailable: IsAudioImportAvailableUseCase,
     private val observeImportAllowance: ObserveImportAllowanceUseCase,
     observeSmartSuggestionsEnabled: ObserveSmartSuggestionsEnabledUseCase,
     private val setSmartSuggestionsEnabled: SetSmartSuggestionsEnabledUseCase,
+    observeSkipSilenceEnabled: ObserveSkipSilenceEnabledUseCase,
+    private val setSkipSilenceEnabled: SetSkipSilenceEnabledUseCase,
     observeNoteFeatures: ObserveNoteFeaturesUseCase,
     private val setNoteFeatureEnabled: SetNoteFeatureEnabledUseCase,
     observeProStatus: ObserveProStatusUseCase,
@@ -77,14 +85,20 @@ class SettingsViewModel(
         collect(observeDynamicColor()) { enabled -> copy(isDynamicColorEnabled = enabled) }
         collect(observeNoteStyle()) { style -> copy(noteStyle = style) }
         collect(observeAppLockEnabled()) { enabled -> copy(isAppLockEnabled = enabled) }
+        collect(observeTelemetryConsent()) { granted -> copy(isTelemetryEnabled = granted) }
         collect(observeCustomNoteStyles()) { styles -> copy(customStyles = styles.map { it.toOptionUi() }) }
         collect(isAudioImportAvailable()) { unlocked -> copy(isAudioImportUnlocked = unlocked) }
         collect(observeImportAllowance()) { allowance -> withImportAllowance(allowance) }
         collect(observeSmartSuggestionsEnabled()) { enabled -> copy(isSmartSuggestionsEnabled = enabled) }
+        collect(observeSkipSilenceEnabled()) { enabled -> copy(isSkipSilenceEnabled = enabled) }
         collect(observeNoteFeatures()) { features ->
-            copy(isTranscriptionEnabled = features.isTranscriptionEnabled, isSummaryEnabled = features.writesSummary)
+            copy(
+                isTranscriptionEnabled = features.isTranscriptionEnabled,
+                isSummaryEnabled = features.writesSummary,
+                isSummaryAvailable = features.isSummaryAvailable,
+            )
         }
-        collect(observeProStatus()) { status -> copy(pro = status.toUi(), isSmartSuggestionsUnlocked = status.isPro) }
+        collect(observeProStatus()) { status -> copy(pro = status.toUi(), isSmartSuggestionsUnlocked = status.isPro, isSkipSilenceUnlocked = status.isPro) }
         if (buildInfo.isDeveloperBuild) collect(observeProOverride()) { override -> copy(proOverride = override) }
     }
 
@@ -112,12 +126,23 @@ class SettingsViewModel(
         }
     }
 
+    // Switching off is reported first, while events still go out; switching
+    // on is reported after, and waits for the reporting to be back.
+    fun onTelemetryChanged(granted: Boolean) {
+        launchSafely(showLoading = false) {
+            if (!granted) analyticsTracker.track(AnalyticsEvents.telemetryToggled(enabled = false))
+            setTelemetryConsent(granted)
+            if (granted) analyticsTracker.track(AnalyticsEvents.telemetryToggled(enabled = true))
+        }
+    }
+
     fun onTranscriptionChanged(enabled: Boolean) = setNoteFeature(NoteFeature.TRANSCRIPTION, enabled)
 
     // A summary is written from the transcript, so its switch only counts
     // while transcription is on.
     fun onSummaryChanged(enabled: Boolean) {
-        if (mutableUiState.value.isTranscriptionEnabled) setNoteFeature(NoteFeature.SUMMARY, enabled)
+        val state = mutableUiState.value
+        if (state.isTranscriptionEnabled && state.isSummaryAvailable) setNoteFeature(NoteFeature.SUMMARY, enabled)
     }
 
     private fun setNoteFeature(feature: NoteFeature, enabled: Boolean) {
@@ -129,10 +154,20 @@ class SettingsViewModel(
 
     // Off is free for everyone; switching it on is the Pro action.
     fun onSmartSuggestionsChanged(enabled: Boolean) {
+        if (!mutableUiState.value.isSummaryAvailable) return
         launchSafely(showLoading = false) {
             if (enabled && !proUpgradeGate.requirePro(ProFeature.SMART_SUGGESTIONS)) return@launchSafely
             setSmartSuggestionsEnabled(enabled)
             analyticsTracker.track(AnalyticsEvents.smartSuggestionsToggled(enabled))
+        }
+    }
+
+    // Off is free for everyone; switching it on is the Pro action.
+    fun onSkipSilenceChanged(enabled: Boolean) {
+        launchSafely(showLoading = false) {
+            if (enabled && !proUpgradeGate.requirePro(ProFeature.SKIP_SILENCE)) return@launchSafely
+            setSkipSilenceEnabled(enabled)
+            analyticsTracker.track(AnalyticsEvents.skipSilenceToggled(enabled))
         }
     }
 

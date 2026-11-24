@@ -6,6 +6,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialUsage
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialUsageCount
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.GetProTrialDaysLeftUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.GetProTrialRecapUseCase
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
@@ -43,6 +44,9 @@ class PaywallViewModelTest {
     private val restoreProPurchases: RestoreProPurchasesUseCase = mockk()
     private val observeProStatus: ObserveProStatusUseCase = mockk()
     private val getProTrialRecap: GetProTrialRecapUseCase = mockk()
+    private val getProTrialDaysLeft: GetProTrialDaysLeftUseCase = mockk {
+        coEvery { this@mockk.invoke() } returns 9
+    }
     private val gate: ProUpgradeGate = mockk(relaxed = true)
 
     @Before
@@ -93,6 +97,7 @@ class PaywallViewModelTest {
 
         assertEquals(PaywallMode.OFFER, viewModel.uiState.value.mode)
         assertEquals(emptyList<ProTrialUsageCount>(), viewModel.uiState.value.trialRecap)
+        assertEquals(9, viewModel.uiState.value.trialDaysLeft)
     }
 
     @Test
@@ -154,6 +159,35 @@ class PaywallViewModelTest {
     }
 
     @Test
+    fun `a purchase that does not go through is reported by how it ended`() = runTest {
+        val tracker: AnalyticsTracker = mockk(relaxed = true)
+        val viewModel = createViewModel(tracker)
+
+        coEvery { purchasePro(ProPlan.YEARLY) } returns PurchaseOutcome.CANCELLED
+        viewModel.onPurchaseClicked()
+        coEvery { purchasePro(ProPlan.YEARLY) } returns PurchaseOutcome.FAILED
+        viewModel.onPurchaseClicked()
+
+        verify(exactly = 1) { tracker.track(match { it.name == "purchase_cancelled" }) }
+        verify(exactly = 1) { tracker.track(match { it.name == "purchase_failed" }) }
+        verify(exactly = 0) { tracker.track(match { it.name == "purchase_completed" }) }
+    }
+
+    @Test
+    fun `keeping the free trial is reported once and not as a dismissal`() = runTest {
+        every { gate.requestedFeature } returns MutableStateFlow(ProFeature.FREE_TRIAL)
+        val tracker: AnalyticsTracker = mockk(relaxed = true)
+        val viewModel = createViewModel(tracker)
+        viewModel.onOpened()
+
+        viewModel.onKeepTrialClicked()
+
+        verify(exactly = 1) { tracker.track(match { it.name == "trial_offer_kept" }) }
+        verify(exactly = 0) { tracker.track(match { it.name == "paywall_dismissed" }) }
+        verify { gate.onPaywallClosed() }
+    }
+
+    @Test
     fun `restore without a purchase reports nothing to restore`() = runTest {
         coEvery { restoreProPurchases() } returns ProStatus.FREE
         val viewModel = createViewModel()
@@ -193,6 +227,8 @@ class PaywallViewModelTest {
         restoreProPurchases = restoreProPurchases,
         observeProStatus = observeProStatus,
         getProTrialRecap = getProTrialRecap,
+        getProTrialDaysLeft = getProTrialDaysLeft,
+        isSummaryAvailable = mockk { every { this@mockk.invoke() } returns true },
         proUpgradeGate = gate,
         analyticsTracker = tracker,
     )

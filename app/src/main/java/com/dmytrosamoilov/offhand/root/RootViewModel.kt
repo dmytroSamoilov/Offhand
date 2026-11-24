@@ -1,8 +1,9 @@
 package com.dmytrosamoilov.offhand.root
 
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.RecordingOrigin
+import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingOriginHolder
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import androidx.lifecycle.viewModelScope
-import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
@@ -19,6 +20,9 @@ import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserP
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.AcknowledgeProTrialNoticeUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.KeepProTrialInSyncUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SettleProTrialUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SwitchOffLapsedProSettingsUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.NoteWaveformFiller
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
 import kotlinx.coroutines.Dispatchers
@@ -36,18 +40,21 @@ class RootViewModel(
     observeUserPreferences: ObserveUserPreferencesUseCase,
     private val appLockManager: AppLockManager,
     private val passphraseProvider: DatabasePassphraseProvider,
-    private val modelManager: ModelManager,
+    private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
     private val modelDownloadLauncher: ModelDownloadLauncher,
     private val resumeInterruptedNotes: Lazy<ResumeInterruptedNotesUseCase>,
     private val sweepOrphanedRecordings: Lazy<SweepOrphanedRecordingsUseCase>,
+    private val noteWaveformFiller: Lazy<NoteWaveformFiller>,
     private val clearShareCache: ClearShareCacheUseCase,
     private val decideEarlyAdopterPro: Lazy<DecideEarlyAdopterProUseCase>,
     private val markEarlyAdopterThanked: MarkEarlyAdopterThankedUseCase,
     private val settleProTrial: SettleProTrialUseCase,
+    private val switchOffLapsedProSettings: SwitchOffLapsedProSettingsUseCase,
     private val acknowledgeProTrialNotice: AcknowledgeProTrialNoticeUseCase,
     private val keepProTrialInSync: KeepProTrialInSyncUseCase,
     private val proUpgradeGate: ProUpgradeGate,
     private val appForegroundState: AppForegroundState,
+    private val recordingOrigin: RecordingOriginHolder,
 ) : BaseViewModel() {
 
     private val trialNotice = MutableStateFlow<ProTrialNotice?>(null)
@@ -115,8 +122,14 @@ class RootViewModel(
     fun onRecordingRequested(folderId: Long?) {
         launchSafely(showLoading = false) {
             if (!proUpgradeGate.requirePro(ProFeature.WIDGET)) return@launchSafely
+            recordingOrigin.expect(RecordingOrigin.WIDGET)
             recordingRequest.value = RecordingRequestUi(folderId)
         }
+    }
+
+    fun onFirstRecordingRequested() {
+        recordingOrigin.expect(RecordingOrigin.ONBOARDING)
+        recordingRequest.value = RecordingRequestUi(folderId = null)
     }
 
     fun onRecordingRequestConsumed() {
@@ -141,8 +154,10 @@ class RootViewModel(
             uiState.first { it.phase == RootPhase.READY }
             decideEarlyAdopterPro.value.invoke()
             settleProTrialOnColdStart()
+            switchOffLapsedProSettings()
             resumeInterruptedNotes.value.invoke()
             sweepOrphanedRecordings.value.invoke()
+            noteWaveformFiller.value.start()
             clearShareCache()
         }
     }
@@ -160,11 +175,7 @@ class RootViewModel(
 
     private suspend fun settleProTrialOnColdStart() {
         val settlement = settleProTrial()
-        when {
-            settlement.isTrialOffered -> proUpgradeGate.showTrialOffer()
-            settlement.notice == ProTrialNotice.ENDED -> showTrialEnded()
-            else -> trialNotice.value = settlement.notice
-        }
+        if (settlement.notice == ProTrialNotice.ENDED) showTrialEnded() else trialNotice.value = settlement.notice
     }
 
     // The end of the trial is told by the paywall itself, with what was used.
@@ -184,7 +195,7 @@ class RootViewModel(
     private fun resumeModelDownloadWhenReady() {
         launchSafely(showLoading = false) {
             uiState.first { it.phase == RootPhase.READY }
-            if (!modelManager.isModelDownloaded()) {
+            if (!isAiCoreDownloaded()) {
                 modelDownloadLauncher.startWhenAllowed()
             }
         }

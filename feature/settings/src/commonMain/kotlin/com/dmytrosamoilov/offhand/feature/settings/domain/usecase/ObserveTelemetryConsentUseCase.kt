@@ -7,5 +7,5 @@ import kotlinx.coroutines.flow.map
 class ObserveTelemetryConsentUseCase(
     private val repository: UserPreferencesRepository,
 ) {
-    operator fun invoke(): Flow<Boolean> = repository.preferences.map { it.telemetryConsent }
+    operator fun invoke(): Flow<Boolean> = repository.preferences.map { it.telemetryConsent.isShared }
 }

@@ -5,15 +5,22 @@ import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.RecordingOrigin
+import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingOriginHolder
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
 import com.dmytrosamoilov.offhand.feature.recording.domain.SessionPhase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.MarkNotificationsPromptedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveDeveloperOptionsUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveFolderNameUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveNotificationsPromptedUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -23,12 +30,19 @@ class RecordingViewModel(
     private val sessionManager: RecordingSessionManager,
     observeDeveloperOptions: ObserveDeveloperOptionsUseCase,
     observeNotificationsPrompted: ObserveNotificationsPromptedUseCase,
+    observeFolderName: ObserveFolderNameUseCase,
     private val markNotificationsPrompted: MarkNotificationsPromptedUseCase,
+    private val recordingOrigin: RecordingOriginHolder,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
     private val waveform = MutableStateFlow<List<Float>>(emptyList())
     private val isNotificationPromptRequested = MutableStateFlow(false)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val folderName = sessionManager.session
+        .map { it.folderId }
+        .distinctUntilChanged()
+        .flatMapLatest { folderId -> observeFolderName(folderId) }
     private val wasNotificationPrompted = observeNotificationsPrompted()
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
@@ -41,6 +55,8 @@ class RecordingViewModel(
         ::toRecordingUiState,
     ).combine(isNotificationPromptRequested) { state, isPromptRequested ->
         state.copy(isNotificationPromptRequested = isPromptRequested)
+    }.combine(folderName) { state, name ->
+        state.copy(folderName = name)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
@@ -53,7 +69,18 @@ class RecordingViewModel(
 
     fun onStartRecording(folderId: Long?) {
         waveform.value = emptyList()
+        analyticsTracker.track(AnalyticsEvents.recordingStarted(recordingOrigin.take()))
         recordingProcessController.startRecording(folderId)
+    }
+
+    // Called by whatever opens the record sheet from outside it (the widget,
+    // a shortcut, the onboarding button) before the sheet starts recording.
+    fun onRecordingExpectedFrom(origin: RecordingOrigin) {
+        recordingOrigin.expect(origin)
+    }
+
+    fun onMicrophoneDenied() {
+        analyticsTracker.track(AnalyticsEvents.microphoneDenied())
     }
 
     fun onPauseRecording() {
@@ -97,6 +124,7 @@ class RecordingViewModel(
     }
 
     fun onSheetClosed() {
+        recordingOrigin.clear()
         sessionManager.resetToIdle()
     }
 

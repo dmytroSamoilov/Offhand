@@ -12,8 +12,9 @@ import androidx.room.RoomDatabaseConstructor
         NoteStyleEntity::class,
         NoteSuggestionsEntity::class,
         TranscriptionCheckpointEntity::class,
+        NoteWaveformEntity::class,
     ],
-    version = 12,
+    version = 13,
     exportSchema = false,
 )
 @ConstructedBy(NotesDatabaseConstructor::class)
@@ -27,6 +28,8 @@ internal abstract class NotesDatabase : RoomDatabase() {
     abstract fun noteSuggestionsDao(): NoteSuggestionsDao
 
     abstract fun transcriptionCheckpointDao(): TranscriptionCheckpointDao
+
+    abstract fun noteWaveformDao(): NoteWaveformDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT", "KotlinNoActualForExpect")

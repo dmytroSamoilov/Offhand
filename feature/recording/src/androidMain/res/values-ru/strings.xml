@@ -8,13 +8,12 @@
     <string name="recording_pause_label">Пауза</string>
     <string name="recording_resume_label">Продолжить</string>
     <string name="recording_paused_label">Пауза</string>
-    <string name="recording_active_label">Идёт запись…</string>
+    <string name="recording_active_label">Идёт запись</string>
     <string name="recording_save_note_button">Сохранить заметку</string>
     <string name="recording_discard_button">Удалить запись</string>
     <string name="recording_discard_dialog_title">Удалить эту запись?</string>
-    <string name="recording_discard_dialog_body">Запись и всё расшифрованное к этому моменту будет удалено. Это нельзя отменить.</string>
+    <string name="recording_discard_dialog_body">%1$s аудио и расшифровка будут удалены. Это нельзя отменить.</string>
     <string name="recording_discard_dialog_confirm">Удалить</string>
-    <string name="recording_discard_dialog_cancel">Отмена</string>
     <string name="recording_stage_finishing">Сохраняем вашу запись…</string>
     <string name="recording_processing_hint">Это окно можно закрыть — заметка появится в списке, когда будет готова.</string>
     <string name="recording_external_mic_generic">Внешний микрофон</string>
@@ -39,7 +38,6 @@
     <string name="recording_notification_note_failed_text">Запись сохранена. Нажмите, чтобы открыть её и повторить попытку.</string>
     <string name="recording_notification_note_paused_title">Ваша заметка приостановлена</string>
     <string name="recording_notification_note_paused_text">Откройте Offhand, и она завершится.</string>
-    <string name="recording_live_placeholder">Ваши слова появляются здесь, пока вы говорите.</string>
     <string name="record_widget_name">Записать заметку</string>
     <string name="record_widget_description">Начинайте и останавливайте запись с главного экрана.</string>
     <string name="record_widget_record">Записать</string>
@@ -47,4 +45,27 @@
     <string name="record_widget_no_folder">Без папки</string>
     <string name="record_widget_config_title">Сохранять записи в</string>
     <string name="record_widget_config_save">Сохранить</string>
+    <string name="recording_discard_keep">Продолжить запись</string>
+    <string name="recording_live_label">Расшифровка в реальном времени</string>
+    <plurals name="recording_duration_hours">
+        <item quantity="one">%d час</item>
+        <item quantity="few">%d часа</item>
+        <item quantity="many">%d часов</item>
+        <item quantity="other">%d часа</item>
+    </plurals>
+    <plurals name="recording_duration_minutes">
+        <item quantity="one">%d минута</item>
+        <item quantity="few">%d минуты</item>
+        <item quantity="many">%d минут</item>
+        <item quantity="other">%d минуты</item>
+    </plurals>
+    <plurals name="recording_duration_seconds">
+        <item quantity="one">%d секунда</item>
+        <item quantity="few">%d секунды</item>
+        <item quantity="many">%d секунд</item>
+        <item quantity="other">%d секунды</item>
+    </plurals>
+    <string name="record_widget_stop_save">Остановить и сохранить</string>
+    <string name="record_widget_to_folder">В папку %1$s</string>
+    <string name="record_widget_recording_to_folder">Запись в папку %1$s</string>
 </resources>

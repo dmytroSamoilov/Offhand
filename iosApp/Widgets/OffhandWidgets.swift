@@ -4,6 +4,10 @@ import WidgetKit
 
 @main
 struct OffhandWidgetsBundle: WidgetBundle {
+    init() {
+        OffhandFonts.register()
+    }
+
     var body: some Widget {
         NoteActivityWidget()
         AiCoreDownloadActivityWidget()
@@ -26,7 +30,7 @@ struct NoteActivityWidget: Widget {
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     TrailingStatus(state: context.state)
-                        .font(.title3.monospacedDigit())
+                        .font(.offhand(.monoRegular, size: 20, relativeTo: .title3))
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     ExpandedBottom(state: context.state)
@@ -49,15 +53,15 @@ private struct PhaseGlyph: View {
     var body: some View {
         switch state.phase {
         case .recording:
-            Image(systemName: "mic.fill").foregroundStyle(.red)
+            Image(systemName: "mic.fill").foregroundStyle(OffhandColor.record)
         case .paused:
-            Image(systemName: "pause.fill").foregroundStyle(.blue)
+            Image(systemName: "pause.fill").foregroundStyle(OffhandColor.accent)
         case .processing:
-            Image(systemName: "waveform").foregroundStyle(.blue)
+            Image(systemName: "waveform").foregroundStyle(OffhandColor.accent)
         case .finished:
-            Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+            Image(systemName: "checkmark.circle.fill").foregroundStyle(OffhandColor.accent)
         case .pausedBySystem:
-            Image(systemName: "pause.circle.fill").foregroundStyle(.blue)
+            Image(systemName: "pause.circle.fill").foregroundStyle(OffhandColor.accent)
         }
     }
 }
@@ -93,24 +97,24 @@ private struct ExpandedBottom: View {
         switch state.phase {
         case .recording, .paused:
             Text(String(localized: "Recording a note"))
-                .font(.subheadline)
+                .offhandText(.bodySmall)
                 .foregroundStyle(.secondary)
         case .processing:
             VStack(alignment: .leading, spacing: 6) {
                 Text(String(localized: "Preparing your note"))
-                    .font(.subheadline)
+                    .offhandText(.bodySmall)
                 ProgressView(value: Double(state.progressPercent ?? 0), total: 100)
-                    .tint(.blue)
+                    .tint(OffhandColor.accent)
             }
         case .finished:
             Text(String(localized: "Your note is ready"))
-                .font(.subheadline)
+                .offhandText(.bodySmall)
         case .pausedBySystem:
             VStack(alignment: .leading, spacing: 2) {
                 Text(String(localized: "Your note is paused"))
-                    .font(.subheadline)
+                    .offhandText(.bodySmall)
                 Text(String(localized: "Open Offhand to finish it"))
-                    .font(.caption)
+                    .offhandText(.caption)
                     .foregroundStyle(.secondary)
             }
         }
@@ -128,26 +132,26 @@ private struct LockScreenActivityView: View {
                 switch state.phase {
                 case .recording, .paused:
                     Text(String(localized: "Recording a note"))
-                        .font(.headline)
+                        .offhandText(.rowTitle)
                 case .processing:
                     Text(String(localized: "Preparing your note"))
-                        .font(.headline)
+                        .offhandText(.rowTitle)
                     ProgressView(value: Double(state.progressPercent ?? 0), total: 100)
-                        .tint(.blue)
+                        .tint(OffhandColor.accent)
                 case .finished:
                     Text(String(localized: "Your note is ready"))
-                        .font(.headline)
+                        .offhandText(.rowTitle)
                 case .pausedBySystem:
                     Text(String(localized: "Your note is paused"))
-                        .font(.headline)
+                        .offhandText(.rowTitle)
                     Text(String(localized: "Open Offhand to finish it"))
-                        .font(.subheadline)
+                        .offhandText(.bodySmall)
                         .foregroundStyle(.secondary)
                 }
             }
             Spacer()
             TrailingStatus(state: state)
-                .font(.title3.monospacedDigit())
+                .font(.offhand(.monoRegular, size: 20, relativeTo: .title3))
         }
         .foregroundStyle(.white)
     }
@@ -168,7 +172,7 @@ struct AiCoreDownloadActivityWidget: Widget {
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     DownloadTrailing(state: context.state)
-                        .font(.title3.monospacedDigit())
+                        .font(.offhand(.monoRegular, size: 20, relativeTo: .title3))
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     DownloadExpandedBottom(state: context.state, isStale: context.isStale)
@@ -191,11 +195,11 @@ private struct DownloadGlyph: View {
     var body: some View {
         switch state.phase {
         case .downloading:
-            Image(systemName: "arrow.down.circle.fill").foregroundStyle(.blue)
+            Image(systemName: "arrow.down.circle.fill").foregroundStyle(OffhandColor.accent)
         case .ready:
-            Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+            Image(systemName: "checkmark.circle.fill").foregroundStyle(OffhandColor.accent)
         case .paused:
-            Image(systemName: "pause.circle.fill").foregroundStyle(.blue)
+            Image(systemName: "pause.circle.fill").foregroundStyle(OffhandColor.accent)
         }
     }
 }
@@ -237,10 +241,10 @@ private struct DownloadProgressBar: View {
     var body: some View {
         if state.phase == .downloading {
             ProgressView(value: Double(state.progressPercent), total: 100)
-                .tint(.blue)
+                .tint(OffhandColor.accent)
             if isStale {
                 Text(String(localized: "Continuing in the background"))
-                    .font(.caption)
+                    .offhandText(.caption)
                     .foregroundStyle(.secondary)
             }
         }
@@ -254,7 +258,7 @@ private struct DownloadExpandedBottom: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             DownloadTitle(state: state)
-                .font(.subheadline)
+                .offhandText(.bodySmall)
             DownloadProgressBar(state: state, isStale: isStale)
         }
     }
@@ -270,12 +274,12 @@ private struct DownloadLockScreenView: View {
                 .font(.title2)
             VStack(alignment: .leading, spacing: 4) {
                 DownloadTitle(state: state)
-                    .font(.headline)
+                    .offhandText(.rowTitle)
                 DownloadProgressBar(state: state, isStale: isStale)
             }
             Spacer()
             DownloadTrailing(state: state)
-                .font(.title3.monospacedDigit())
+                .font(.offhand(.monoRegular, size: 20, relativeTo: .title3))
         }
         .foregroundStyle(.white)
     }

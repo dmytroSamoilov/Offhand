@@ -4,6 +4,7 @@ data class RecordingUiState(
     val phase: RecordingPhaseUi = RecordingPhaseUi.IDLE,
     val isPaused: Boolean = false,
     val elapsedTime: String = "00:00",
+    val elapsedMs: Long = 0,
     val waveform: List<Float> = emptyList(),
     val isSilent: Boolean = true,
     val chunks: List<ChunkUi> = emptyList(),
@@ -14,6 +15,7 @@ data class RecordingUiState(
     val isNotificationPromptRequested: Boolean = false,
     val isLiveTranscriptShown: Boolean = false,
     val liveTranscript: String = "",
+    val folderName: String? = null,
 )
 
 enum class RecordingPhaseUi {

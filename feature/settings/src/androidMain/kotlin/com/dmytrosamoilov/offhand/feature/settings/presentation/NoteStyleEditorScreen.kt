@@ -1,58 +1,30 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
-import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLimits
-import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
-import com.dmytrosamoilov.offhand.core.designsystem.theme.extendedColors
-import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
+import com.dmytrosamoilov.offhand.core.designsystem.component.OffhandDialog
+import com.dmytrosamoilov.offhand.core.designsystem.component.PlainTextButton
+import com.dmytrosamoilov.offhand.core.designsystem.component.SegmentedControl
+import com.dmytrosamoilov.offhand.core.designsystem.component.TextButtonTone
+import com.dmytrosamoilov.offhand.core.designsystem.component.TopBar
 import com.dmytrosamoilov.offhand.core.designsystem.haptics.haptics
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
+import com.dmytrosamoilov.offhand.core.ui.component.LabeledTextField
 import com.dmytrosamoilov.offhand.feature.settings.R
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleFieldError
-import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleSectionsError
 import com.dmytrosamoilov.offhand.feature.settings.domain.NoteStyleValidator
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -72,334 +44,113 @@ fun NoteStyleEditorScreen(
     if (state.isDeleteRequested) {
         DeleteStyleDialog(onConfirm = viewModel::onDeleteConfirmed, onDismiss = viewModel::onDeleteDismissed)
     }
-
-    state.describe?.let { describe ->
-        DescribeStyleDialog(
-            state = describe,
-            onDescriptionChanged = viewModel::onDescriptionChanged,
-            onBuild = viewModel::onDraftRequested,
-            onDismiss = viewModel::onDescribeDismissed,
-        )
-    }
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
-        Scaffold(
-            topBar = {
-                EditorTopBar(isNew = state.isNew, onBack = onBack, onSave = viewModel::onSaveRequested)
-            },
-            contentWindowInsets = WindowInsets(0.dp),
-        ) { innerPadding ->
-            EditorContent(
-                state = state,
-                viewModel = viewModel,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .verticalScroll(rememberScrollState())
-                    .imePadding()
-                    .padding(16.dp),
-            )
+        Column(modifier = Modifier.fillMaxSize().imePadding()) {
+            EditorTopBar(isNew = state.isNew, onCancel = onBack, onSave = viewModel::onSaveRequested)
+            SettingsPage(topBar = {}) {
+                EditorContent(state = state, viewModel = viewModel)
+            }
         }
     }
 }
 
 @Composable
-private fun EditorTopBar(isNew: Boolean, onBack: () -> Unit, onSave: () -> Unit) {
-    AppTopBar(
+private fun EditorTopBar(isNew: Boolean, onCancel: () -> Unit, onSave: () -> Unit) {
+    TopBar(
         title = stringResource(
             if (isNew) R.string.settings_note_style_editor_new_title else R.string.settings_note_style_editor_edit_title,
         ),
-        navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.settings_note_style_editor_back),
-                )
-            }
+        leading = {
+            PlainTextButton(
+                text = stringResource(R.string.settings_delete_model_dialog_cancel),
+                onClick = onCancel,
+                tone = TextButtonTone.Ink,
+            )
         },
-        actions = {
-            TextButton(onClick = onSave) { Text(text = stringResource(R.string.settings_note_style_editor_save)) }
+        trailing = {
+            PlainTextButton(text = stringResource(R.string.settings_note_style_editor_save), onClick = onSave)
         },
     )
 }
 
 @Composable
-private fun EditorContent(
-    state: NoteStyleEditorUiState,
-    viewModel: NoteStyleEditorViewModel,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        DescribeButton(onClick = viewModel::onDescribeRequested)
-        NameField(value = state.name, error = state.errors.name, onValueChange = viewModel::onNameChanged)
-        KindField(value = state.noteKind, error = state.errors.noteKind, onValueChange = viewModel::onNoteKindChanged)
+private fun EditorContent(state: NoteStyleEditorUiState, viewModel: NoteStyleEditorViewModel) {
+    Column(modifier = Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        DescribeStyleCard(
+            state = state.describe ?: DescribeStyleUi(),
+            onDescriptionChanged = viewModel::onDescriptionChanged,
+            onBuild = viewModel::onDraftRequested,
+        )
+        LabeledTextField(
+            label = stringResource(R.string.settings_note_style_editor_name),
+            value = state.name,
+            onValueChange = viewModel::onNameChanged,
+            error = fieldErrorText(state.errors.name, NoteStyleValidator.MAX_NAME_LENGTH),
+        )
+        LabeledTextField(
+            label = stringResource(R.string.settings_note_style_editor_kind),
+            value = state.noteKind,
+            onValueChange = viewModel::onNoteKindChanged,
+            placeholder = stringResource(R.string.settings_note_style_editor_kind_hint),
+            error = fieldErrorText(state.errors.noteKind, NoteStyleValidator.MAX_KIND_LENGTH),
+            help = stringResource(R.string.settings_note_style_editor_kind_help),
+        )
         LanguageChoice(selected = state.language, onSelected = viewModel::onLanguageChanged)
-        SectionsEditor(state = state, viewModel = viewModel)
-        if (!state.isNew) DeleteStyleButton(onClick = viewModel::onDeleteRequested)
-        Spacer(modifier = Modifier.height(24.dp))
     }
-}
-
-@Composable
-private fun DeleteStyleButton(onClick: () -> Unit) {
-    TextButton(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-    ) {
-        Text(text = stringResource(R.string.settings_note_styles_delete))
+    SectionsEditor(state = state, viewModel = viewModel)
+    if (!state.isNew) {
+        PlainTextButton(
+            text = stringResource(R.string.settings_note_styles_delete),
+            onClick = viewModel::onDeleteRequested,
+            tone = TextButtonTone.Danger,
+            modifier = Modifier.padding(top = 24.dp),
+        )
     }
 }
 
 @Composable
 private fun DeleteStyleDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
+    OffhandDialog(
+        title = stringResource(R.string.settings_note_styles_delete_dialog_title),
+        body = stringResource(R.string.settings_note_styles_delete_dialog_body),
         onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(R.string.settings_note_styles_delete_dialog_title)) },
-        text = { Text(text = stringResource(R.string.settings_note_styles_delete_dialog_body)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(text = stringResource(R.string.settings_note_styles_delete_dialog_confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.settings_delete_model_dialog_cancel))
-            }
-        },
+        confirmLabel = stringResource(R.string.settings_delete_model_dialog_cancel),
+        onConfirm = onDismiss,
+        destructiveLabel = stringResource(R.string.settings_note_styles_delete_dialog_confirm),
+        onDestructive = onConfirm,
     )
 }
 
 @Composable
-private fun DescribeButton(onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
-    ) {
-        Icon(imageVector = Icons.Filled.AutoAwesome, contentDescription = null)
-        Spacer(modifier = Modifier.padding(6.dp))
-        Text(
-            text = stringResource(R.string.settings_note_style_describe_button),
-            style = MaterialTheme.typography.titleMedium,
-        )
-    }
-}
-
-@Composable
-private fun NameField(value: String, error: NoteStyleFieldError?, onValueChange: (String) -> Unit) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(text = stringResource(R.string.settings_note_style_editor_name)) },
-        isError = error != null,
-        supportingText = fieldErrorText(error, NoteStyleValidator.MAX_NAME_LENGTH),
-        singleLine = true,
-        modifier = Modifier.fillMaxWidth(),
-    )
-}
-
-@Composable
-private fun KindField(value: String, error: NoteStyleFieldError?, onValueChange: (String) -> Unit) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(text = stringResource(R.string.settings_note_style_editor_kind)) },
-        placeholder = { Text(text = stringResource(R.string.settings_note_style_editor_kind_hint)) },
-        isError = error != null,
-        supportingText = fieldErrorText(error, NoteStyleValidator.MAX_KIND_LENGTH)
-            ?: { Text(text = stringResource(R.string.settings_note_style_editor_kind_help)) },
-        singleLine = true,
-        modifier = Modifier.fillMaxWidth(),
-    )
-}
-
-@Composable
-private fun fieldErrorText(error: NoteStyleFieldError?, maxLength: Int): (@Composable () -> Unit)? {
-    val message = when (error) {
-        null -> return null
-        NoteStyleFieldError.BLANK -> stringResource(R.string.settings_note_style_error_blank)
-        NoteStyleFieldError.TOO_LONG -> stringResource(R.string.settings_note_style_error_too_long, maxLength)
-        NoteStyleFieldError.DUPLICATE -> stringResource(R.string.settings_note_style_error_duplicate)
-    }
-    return { Text(text = message) }
+internal fun fieldErrorText(error: NoteStyleFieldError?, maxLength: Int): String? = when (error) {
+    null -> null
+    NoteStyleFieldError.BLANK -> stringResource(R.string.settings_note_style_error_blank)
+    NoteStyleFieldError.TOO_LONG -> stringResource(R.string.settings_note_style_error_too_long, maxLength)
+    NoteStyleFieldError.DUPLICATE -> stringResource(R.string.settings_note_style_error_duplicate)
 }
 
 @Composable
 private fun LanguageChoice(selected: NoteStyleLanguage, onSelected: (NoteStyleLanguage) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    val haptics = haptics()
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             text = stringResource(R.string.settings_note_style_editor_language),
-            style = MaterialTheme.typography.titleSmall,
+            style = OffhandTheme.type.caption.copy(fontWeight = OffhandTheme.type.button.fontWeight),
+            color = OffhandTheme.colors.ink,
         )
-        val haptics = haptics()
-        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-            NoteStyleLanguage.entries.forEachIndexed { index, language ->
-                SegmentedButton(
-                    selected = language == selected,
-                    onClick = {
-                        haptics.tick()
-                        onSelected(language)
-                    },
-                    shape = SegmentedButtonDefaults.itemShape(index = index, count = NoteStyleLanguage.entries.size),
-                ) {
-                    Text(text = stringResource(language.labelRes()))
-                }
-            }
-        }
+        SegmentedControl(
+            options = NoteStyleLanguage.entries.map { stringResource(it.labelRes()) },
+            selectedIndex = NoteStyleLanguage.entries.indexOf(selected),
+            onSelect = { index ->
+                haptics.tick()
+                onSelected(NoteStyleLanguage.entries[index])
+            },
+            compact = true,
+        )
     }
 }
 
 private fun NoteStyleLanguage.labelRes(): Int = when (this) {
     NoteStyleLanguage.RECORDING -> R.string.settings_note_style_editor_language_recording
     NoteStyleLanguage.ENGLISH -> R.string.settings_note_style_editor_language_english
-}
-
-@Composable
-private fun SectionsEditor(state: NoteStyleEditorUiState, viewModel: NoteStyleEditorViewModel) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(
-            text = stringResource(R.string.settings_note_style_editor_sections),
-            style = MaterialTheme.typography.titleSmall,
-        )
-        state.sections.forEachIndexed { index, section ->
-            SectionCard(
-                index = index,
-                count = state.sections.size,
-                section = section,
-                headingError = state.errors.headings[index],
-                viewModel = viewModel,
-            )
-        }
-        if (state.sections.isEmpty()) {
-            Text(
-                text = stringResource(R.string.settings_note_style_editor_no_sections),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        SectionsErrorText(error = state.errors.sections)
-        OutlinedButton(
-            onClick = viewModel::onSectionAdded,
-            enabled = state.sections.size < NoteStyleValidator.MAX_SECTIONS,
-        ) {
-            Icon(imageVector = Icons.Filled.Add, contentDescription = null)
-            Spacer(modifier = Modifier.padding(4.dp))
-            Text(text = stringResource(R.string.settings_note_style_editor_add_section))
-        }
-    }
-}
-
-@Composable
-private fun SectionsErrorText(error: NoteStyleSectionsError?) {
-    val message = when (error) {
-        null -> return
-        NoteStyleSectionsError.TOO_MANY ->
-            stringResource(R.string.settings_note_style_error_sections_too_many, NoteStyleValidator.MAX_SECTIONS)
-    }
-    Text(text = message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
-}
-
-@Composable
-private fun SectionCard(
-    index: Int,
-    count: Int,
-    section: SectionDraftUi,
-    headingError: NoteStyleFieldError?,
-    viewModel: NoteStyleEditorViewModel,
-) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionCardHeader(index = index, count = count, viewModel = viewModel)
-            OutlinedTextField(
-                value = section.heading,
-                onValueChange = { viewModel.onSectionHeadingChanged(index, it) },
-                label = { Text(text = stringResource(R.string.settings_note_style_editor_heading)) },
-                isError = headingError != null,
-                supportingText = fieldErrorText(headingError, NoteStyleValidator.MAX_HEADING_LENGTH),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            OutlinedTextField(
-                value = section.guidance,
-                onValueChange = { viewModel.onSectionGuidanceChanged(index, it) },
-                label = { Text(text = stringResource(R.string.settings_note_style_editor_guidance)) },
-                placeholder = { Text(text = stringResource(R.string.settings_note_style_editor_guidance_hint)) },
-                supportingText = guidanceWarning(section.guidance),
-                minLines = 2,
-                maxLines = NoteStyleLimits.GUIDANCE_VISIBLE_LINES,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            FormatChoice(selected = section.format, onSelected = { viewModel.onSectionFormatChanged(index, it) })
-        }
-    }
-}
-
-@Composable
-private fun SectionCardHeader(index: Int, count: Int, viewModel: NoteStyleEditorViewModel) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = stringResource(R.string.settings_note_style_editor_section_title, index + 1),
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.weight(1f),
-        )
-        IconButton(onClick = { viewModel.onSectionMoved(index, index - 1) }, enabled = index > 0) {
-            Icon(
-                imageVector = Icons.Filled.KeyboardArrowUp,
-                contentDescription = stringResource(R.string.settings_note_style_editor_move_up),
-            )
-        }
-        IconButton(onClick = { viewModel.onSectionMoved(index, index + 1) }, enabled = index < count - 1) {
-            Icon(
-                imageVector = Icons.Filled.KeyboardArrowDown,
-                contentDescription = stringResource(R.string.settings_note_style_editor_move_down),
-            )
-        }
-        IconButton(onClick = { viewModel.onSectionRemoved(index) }) {
-            Icon(
-                imageVector = Icons.Filled.Close,
-                contentDescription = stringResource(R.string.settings_note_style_editor_remove_section),
-            )
-        }
-    }
-}
-
-@Composable
-private fun FormatChoice(selected: SectionFormat, onSelected: (SectionFormat) -> Unit) {
-    val haptics = haptics()
-    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-        SectionFormat.entries.forEachIndexed { index, format ->
-            SegmentedButton(
-                selected = format == selected,
-                onClick = {
-                    haptics.tick()
-                    onSelected(format)
-                },
-                shape = SegmentedButtonDefaults.itemShape(index = index, count = SectionFormat.entries.size),
-            ) {
-                Text(text = stringResource(format.labelRes()))
-            }
-        }
-    }
-}
-
-private fun SectionFormat.labelRes(): Int = when (this) {
-    SectionFormat.SENTENCES -> R.string.settings_note_style_editor_format_sentences
-    SectionFormat.BULLETS -> R.string.settings_note_style_editor_format_bullets
-    SectionFormat.FREE -> R.string.settings_note_style_editor_format_free
-}
-
-// Long guidance is allowed; past the threshold the user is told the model
-// may not cope with it, and the choice stays theirs.
-private fun guidanceWarning(guidance: String): (@Composable () -> Unit)? {
-    if (guidance.length <= NoteStyleLimits.GUIDANCE_WARNING_LENGTH) return null
-    return {
-        Text(
-            text = stringResource(R.string.settings_note_style_editor_guidance_warning),
-            color = MaterialTheme.extendedColors.onWarningContainer,
-            modifier = Modifier
-                .background(MaterialTheme.extendedColors.warningContainer, MaterialTheme.shapes.small)
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-        )
-    }
 }

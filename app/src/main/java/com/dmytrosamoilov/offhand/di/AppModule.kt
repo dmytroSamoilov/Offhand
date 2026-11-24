@@ -1,5 +1,7 @@
 package com.dmytrosamoilov.offhand.di
 
+import com.dmytrosamoilov.offhand.core.common.DeviceRegion
+import java.util.Locale
 import com.dmytrosamoilov.offhand.BuildConfig
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackend
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
@@ -15,6 +17,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DecideEarlyAdopte
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
 import com.dmytrosamoilov.offhand.lifecycle.ProcessForegroundState
+import com.dmytrosamoilov.offhand.feature.recording.domain.NoteWaveformFiller
 import com.dmytrosamoilov.offhand.root.RootViewModel
 import com.dmytrosamoilov.offhand.telemetry.TelemetryController
 import com.dmytrosamoilov.offhand.telemetry.FirebaseAnalyticsSink
@@ -25,6 +28,7 @@ import org.koin.dsl.module
 
 val appModule = module {
     single { BuildInfo(isDeveloperBuild = BuildConfig.DEBUG || BuildConfig.FLAVOR == DEV_FLAVOR, appVersion = BuildConfig.VERSION_NAME, platform = "android") }
+    single { DeviceRegion { Locale.getDefault().country } }
     singleOf(::LiteRtLmManager) bind ModelManager::class
     singleOf(::LocalAiBackend) bind AiBackend::class
     singleOf(::WhisperSpeechToText) bind SpeechToText::class
@@ -36,18 +40,21 @@ val appModule = module {
             observeUserPreferences = get(),
             appLockManager = get(),
             passphraseProvider = get(),
-            modelManager = get(),
+            isAiCoreDownloaded = get(),
             modelDownloadLauncher = get(),
             resumeInterruptedNotes = lazy { get<ResumeInterruptedNotesUseCase>() },
             sweepOrphanedRecordings = lazy { get<SweepOrphanedRecordingsUseCase>() },
+            noteWaveformFiller = lazy { get<NoteWaveformFiller>() },
             clearShareCache = get<ClearShareCacheUseCase>(),
             decideEarlyAdopterPro = lazy { get<DecideEarlyAdopterProUseCase>() },
             markEarlyAdopterThanked = get(),
             settleProTrial = get(),
+            switchOffLapsedProSettings = get(),
             acknowledgeProTrialNotice = get(),
             keepProTrialInSync = get(),
             proUpgradeGate = get(),
             appForegroundState = get(),
+            recordingOrigin = get(),
         )
     }
 }

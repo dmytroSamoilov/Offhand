@@ -2,8 +2,7 @@
 <resources>
     <string name="notes_title">Заметки</string>
     <string name="notes_empty_title">Заметок пока нет</string>
-    <string name="notes_empty_hint">Нажмите «Записать», чтобы создать первую заметку.</string>
-    <string name="notes_record_fab_label">Записать</string>
+    <string name="notes_empty_hint">Нажмите «Записать» и говорите. Offhand напишет расшифровку и резюме на вашем телефоне.</string>
     <string name="notes_model_banner_title">Настраиваем ИИ на устройстве</string>
     <string name="notes_model_banner_subtitle">Загружается в фоне</string>
     <string name="notes_model_banner_waiting_title">ИИ на устройстве готов к загрузке</string>
@@ -11,23 +10,17 @@
     <string name="notes_model_banner_mobile_data_button">Скачать через мобильный интернет</string>
     <string name="notes_model_banner_info_description">Об ИИ на устройстве</string>
     <string name="notes_model_banner_info_title">ИИ на устройстве</string>
-    <string name="notes_model_banner_info_body">Offhand превращает записи в заметки с помощью ИИ, который работает целиком на вашем телефоне. Загрузка нужна один раз; после этого ничего никуда не отправляется.</string>
+    <string name="notes_model_banner_info_body">Offhand превращает записи в заметки с помощью ИИ, который работает целиком на вашем телефоне. Загрузка нужна один раз; после этого ваши заметки никогда не покидают ваш телефон.</string>
     <string name="notes_model_banner_info_dismiss">Понятно</string>
     <string name="notes_day_today">Сегодня</string>
     <string name="notes_day_yesterday">Вчера</string>
-    <plurals name="notes_word_count">
-        <item quantity="one">%1$s слово</item>
-        <item quantity="few">%1$s слова</item>
-        <item quantity="many">%1$s слов</item>
-        <item quantity="other">%1$s слова</item>
-    </plurals>
-    <string name="notes_record_fab_description">Начать новую запись</string>
     <string name="notes_select_prompt">Выберите заметку, чтобы прочитать её</string>
     <string name="notes_back_description">Назад к заметкам</string>
     <string name="notes_play_description">Воспроизвести запись</string>
     <string name="notes_pause_description">Приостановить воспроизведение</string>
     <string name="notes_processing_title">Обработка…</string>
     <string name="notes_processing_preview">Расшифровываем и обобщаем на вашем телефоне. Запись уже можно прослушать.</string>
+    <string name="notes_processing_preview_transcript">Расшифровываем на вашем телефоне. Запись уже можно прослушать.</string>
     <string name="notes_processing_transcribing">Расшифровываем запись… Текст появится здесь автоматически.</string>
     <string name="notes_processing_structuring">Пишем ваше резюме…</string>
     <string name="notes_processing_waiting_preview">Ждём, пока загрузится ИИ на устройстве. Запись уже можно прослушать.</string>
@@ -58,10 +51,7 @@
     <string name="notes_retranscribe_description">Расшифровать заново</string>
     <string name="notes_retranscribe_dialog_title">Расшифровать эту заметку заново?</string>
     <string name="notes_retranscribe_dialog_body">Запись будет расшифрована и обработана заново; текущие название, резюме и расшифровка будут заменены. Сама аудиозапись сохранится.</string>
-    <string name="notes_badge_encrypted">Зашифрована</string>
     <string name="notes_more_actions_description">Другие действия</string>
-    <string name="notes_share_dialog_title">Чем поделиться?</string>
-    <string name="notes_share_dialog_body">Помните: отправленные копии больше не зашифрованы, как только покидают ваш телефон.</string>
     <string name="notes_share_dialog_confirm">Поделиться</string>
     <string name="notes_share_tab_text">Текстовый файл</string>
     <string name="notes_share_tab_audio">Аудиофайл</string>
@@ -69,9 +59,7 @@
     <string name="notes_share_audio_details">Запись передаётся несжатым файлом WAV, 16 кГц, моно. Его открывает любой плеер или сервис расшифровки.</string>
     <string name="notes_share_download">Скачать</string>
     <string name="notes_share_date_label">Дата</string>
-    <string name="notes_share_format_text">Текстовый файл</string>
-    <string name="notes_share_format_pdf">PDF-файл</string>
-    <string name="notes_share_format_docx">Файл Word</string>
+    <string name="notes_share_format_text">Обычный текст</string>
     <string name="notes_share_recorded_label">Записано</string>
     <string name="notes_share_duration_label">Длительность</string>
     <string name="notes_share_created_with">Создано в Offhand</string>
@@ -132,4 +120,34 @@
     <string name="notes_bulk_delete_title">Удалить выбранные заметки?</string>
     <string name="notes_bulk_delete_body">Они будут навсегда удалены с телефона. Это действие нельзя отменить.</string>
     <string name="notes_audio_only">Эта заметка — только запись.</string>
+    <string name="notes_search_hint">Поиск идёт по заголовкам, резюме и расшифровкам.</string>
+    <string name="notes_seek_description">Позиция воспроизведения</string>
+    <string name="notes_processing_summary_hint">Расшифровка уже во второй вкладке. Не закрывайте Offhand, пока заметка не будет готова.</string>
+    <string name="notes_interrupted_title">Заметка приостановлена</string>
+    <string name="notes_failed_summary_title">Не удалось написать резюме</string>
+    <string name="notes_failed_title">Не удалось завершить заметку</string>
+    <string name="notes_move_confirm">Переместить</string>
+    <string name="notes_share_privacy">Файл создаётся на вашем телефоне и попадает только туда, куда вы его отправите.</string>
+    <plurals name="notes_search_count">
+        <item quantity="one">%1$d заметка</item>
+        <item quantity="few">%1$d заметки</item>
+        <item quantity="many">%1$d заметок</item>
+        <item quantity="other">%1$d заметки</item>
+    </plurals>
+    <plurals name="notes_move_notes_title">
+        <item quantity="one">Переместить %1$d заметку</item>
+        <item quantity="few">Переместить %1$d заметки</item>
+        <item quantity="many">Переместить %1$d заметок</item>
+        <item quantity="other">Переместить %1$d заметки</item>
+    </plurals>
+    <plurals name="notes_move_rewrite_caption">
+        <item quantity="one">В папке «%1$s» заметки пишутся в стиле «%2$s», поэтому %3$d заметка будет переписана. Расшифровка не изменится.</item>
+        <item quantity="few">В папке «%1$s» заметки пишутся в стиле «%2$s», поэтому %3$d заметки будут переписаны. Расшифровки не изменятся.</item>
+        <item quantity="many">В папке «%1$s» заметки пишутся в стиле «%2$s», поэтому %3$d заметок будут переписаны. Расшифровки не изменятся.</item>
+        <item quantity="other">В папке «%1$s» заметки пишутся в стиле «%2$s», поэтому %3$d заметки будут переписаны. Расшифровки не изменятся.</item>
+    </plurals>
+    <string name="notes_match_title">В названии</string>
+    <string name="notes_match_summary">В резюме</string>
+    <string name="notes_match_transcript">В расшифровке</string>
+    <string name="notes_match_transcript_at">В расшифровке на %1$s</string>
 </resources>

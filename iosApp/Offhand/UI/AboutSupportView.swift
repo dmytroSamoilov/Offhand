@@ -9,37 +9,45 @@ struct AboutSupportView: View {
         model: ModelUi(displayName: "", sizeGb: "", status: .notDownloaded, downloadPercent: 0, errorMessage: nil),
         modelOptions: [],
         selectedModelId: nil,
-        isTelemetryEnabled: false,
         isDeveloperSectionVisible: false,
         isDeveloperOptionsEnabled: false,
-        isDeleteModelConfirmationVisible: false
+        isDeleteModelConfirmationVisible: false,
+        isSummaryAvailable: true
     )
 
     var body: some View {
-        Form {
-            // The on-device AI's details and its remove button are developer
-            // tools on iOS; everyone else only needs it to be there.
-            if state.isDeveloperOptionsEnabled {
-                modelSection
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(String(localized: "About & support"))
+                    .offhandText(.title)
+                    .foregroundStyle(OffhandColor.ink)
+                    .padding(.horizontal, 8)
+                    .padding(.top, 8)
+                    .accessibilityAddTraits(.isHeader)
+                if state.isDeveloperOptionsEnabled && state.isSummaryAvailable {
+                    modelGroup
+                }
+                feedbackGroup
+                legalGroup
+                if state.isDeveloperSectionVisible {
+                    developerGroup
+                }
             }
-            privacySection
-            feedbackSection
-            legalSection
-            if state.isDeveloperSectionVisible {
-                developerSection
-            }
+            .padding(.horizontal, OffhandSpacing.card)
+            .padding(.bottom, OffhandSpacing.screen)
         }
-        .navigationTitle(String(localized: "About & support"))
+        .background(OffhandColor.ground.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
-        .confirmationDialog(
-            String(localized: "Remove the on-device AI?"),
-            isPresented: deleteBinding,
-            titleVisibility: .visible
-        ) {
-            Button(String(localized: "Remove"), role: .destructive) { viewModel.onDeleteModelConfirmed() }
-            Button(String(localized: "Cancel"), role: .cancel) { viewModel.onDeleteModelDismissed() }
-        } message: {
-            Text(String(localized: "Your notes are kept. Offhand will need to download the on-device AI again before it can process a new recording."))
+        .offhandDialog(isPresented: deleteBinding) {
+            OffhandDialog(
+                title: String(localized: "Remove the on-device AI?"),
+                message: String(localized: "Your notes are kept. Offhand will need to download the on-device AI again before it can process a new recording."),
+                confirmLabel: String(localized: "Cancel"),
+                onConfirm: { viewModel.onDeleteModelDismissed() },
+                destructiveLabel: String(localized: "Remove"),
+                onDestructive: { viewModel.onDeleteModelConfirmed() },
+                onDismiss: { viewModel.onDeleteModelDismissed() }
+            )
         }
         .task {
             for await newState in viewModel.uiState {
@@ -48,28 +56,20 @@ struct AboutSupportView: View {
         }
     }
 
-    private var modelSection: some View {
-        Section {
-            LabeledContent(String(localized: "Model"), value: state.model.displayName)
-            LabeledContent(
-                String(localized: "Size"),
-                value: String(format: String(localized: "%@ GB"), state.model.sizeGb)
-            )
-            modelStatusRow
-            if state.model.status == .error {
-                Text(String(localized: "Something went wrong with the on-device AI"))
-                    .font(.footnote)
-                    .foregroundStyle(.red)
+    private var modelGroup: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            SettingsGroup(label: String(localized: "On-device AI")) {
+                ValueRow(title: String(localized: "Model"), value: state.model.displayName)
+                ValueRow(title: String(localized: "Size"), value: String(format: String(localized: "%@ GB"), state.model.sizeGb))
+                modelStatusRow
+                if state.model.status == .error {
+                    GroupNote(text: String(localized: "Something went wrong with the on-device AI"), color: OffhandColor.danger)
+                }
+                if let message = state.model.errorMessage {
+                    GroupNote(text: message, color: OffhandColor.ink2)
+                }
             }
-            if state.isDeveloperOptionsEnabled, let message = state.model.errorMessage {
-                Text(message)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-        } header: {
-            Text(String(localized: "On-device AI"))
-        } footer: {
-            Text(String(localized: "The on-device AI runs entirely on your iPhone. Removing it frees the space but pauses processing until it is downloaded again."))
+            GroupFooter(text: String(localized: "The on-device AI runs entirely on your iPhone. Removing it frees the space but pauses processing until it is downloaded again."))
         }
     }
 
@@ -77,65 +77,48 @@ struct AboutSupportView: View {
     private var modelStatusRow: some View {
         switch state.model.status {
         case .ready:
-            Button(String(localized: "Remove on-device AI"), role: .destructive) {
-                viewModel.onDeleteModelRequested()
-            }
+            ActionRow(title: String(localized: "Remove on-device AI"), tone: .danger) { viewModel.onDeleteModelRequested() }
         case .downloading:
-            VStack(alignment: .leading, spacing: 6) {
-                Text(String(localized: "Downloading"))
-                ProgressView(value: Double(state.model.downloadPercent), total: 100)
-                    .tint(Brand.primary)
-                Text("\(state.model.downloadPercent)%")
-                    .font(.caption)
-                    .monospacedDigit()
-                    .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text(String(localized: "Downloading"))
+                        .offhandText(.settingTitle)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text(verbatim: "\(state.model.downloadPercent)%")
+                        .offhandText(.number)
+                        .foregroundStyle(OffhandColor.ink2)
+                }
+                ProgressLine(progress: Double(state.model.downloadPercent) / 100, thickness: 3)
             }
+            .padding(OffhandSpacing.card)
         case .loading:
-            LabeledContent(String(localized: "Status"), value: String(localized: "Loading"))
+            ValueRow(title: String(localized: "Status"), value: String(localized: "Loading"), showsDivider: false)
         case .notDownloaded, .error:
-            Button(String(localized: "Download on-device AI")) { viewModel.onDownloadModel() }
-        default:
-            EmptyView()
+            ActionRow(title: String(localized: "Download on-device AI"), tone: .accent) { viewModel.onDownloadModel() }
         }
     }
 
-    private var privacySection: some View {
-        Section {
-            SettingsSwitchRow(
-                title: String(localized: "Share usage & stability reports"),
-                isOn: state.isTelemetryEnabled
-            ) {
-                viewModel.onTelemetryChanged(granted: !state.isTelemetryEnabled)
-            }
-        } header: {
-            Text(String(localized: "Privacy"))
-        } footer: {
-            Text(String(localized: "Anonymous usage statistics and crash reports — things like app opens, device model and app version. Never your notes, audio, or any personal data."))
+    private var feedbackGroup: some View {
+        SettingsGroup(label: String(localized: "Feedback")) {
+            LinkRow(title: String(localized: "Send feedback"), showsDivider: false) { openFeedbackMail() }
         }
     }
 
-    private var feedbackSection: some View {
-        Section(String(localized: "Feedback")) {
-            Button(String(localized: "Send feedback")) { openFeedbackMail() }
+    private var legalGroup: some View {
+        SettingsGroup(label: String(localized: "Legal")) {
+            LinkRow(title: String(localized: "Terms & Conditions")) { open(Links.terms) }
+            LinkRow(title: String(localized: "Privacy Policy")) { open(Links.privacy) }
+            ValueRow(title: String(localized: "Version"), value: Diagnostics.appVersion, showsDivider: false)
         }
     }
 
-    private var legalSection: some View {
-        Section(String(localized: "Legal")) {
-            Button(String(localized: "Terms & Conditions")) { open(Links.terms) }
-            Button(String(localized: "Privacy Policy")) { open(Links.privacy) }
-            LabeledContent(String(localized: "Version"), value: Diagnostics.appVersion)
-        }
-    }
-
-    private var developerSection: some View {
-        Section(String(localized: "Developer")) {
-            SettingsSwitchRow(
+    private var developerGroup: some View {
+        SettingsGroup(label: String(localized: "Developer")) {
+            SwitchRow(
                 title: String(localized: "Developer options"),
-                isOn: state.isDeveloperOptionsEnabled
-            ) {
-                viewModel.onDeveloperOptionsChanged(enabled: !state.isDeveloperOptionsEnabled)
-            }
+                isOn: state.isDeveloperOptionsEnabled,
+                showsDivider: false
+            ) { viewModel.onDeveloperOptionsChanged(enabled: $0) }
         }
     }
 
@@ -151,7 +134,6 @@ struct AboutSupportView: View {
         UIApplication.shared.open(url)
     }
 
-    // Opens the composer pre-filled; the user still sends it themselves.
     private func openFeedbackMail() {
         var components = URLComponents(string: "mailto:\(Links.feedbackEmail)")
         components?.queryItems = [
@@ -182,5 +164,61 @@ struct AboutSupportView: View {
             \(device.systemName) \(device.systemVersion)
             """
         }
+    }
+}
+
+private struct ValueRow: View {
+    let title: String
+    let value: String
+    var showsDivider = true
+
+    var body: some View {
+        SettingsRowLayout(title: title, subtitle: nil, showsProBadge: false, showsDivider: showsDivider) {
+            Text(value)
+                .offhandText(.bodySmall)
+                .foregroundStyle(OffhandColor.ink2)
+        }
+    }
+}
+
+private struct ActionRow: View {
+    let title: String
+    let tone: TextButtonTone
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .offhandText(.settingTitle)
+                .foregroundStyle(tone.color)
+                .padding(.horizontal, OffhandSpacing.card)
+                .frame(maxWidth: .infinity, minHeight: 62, alignment: .leading)
+        }
+        .buttonStyle(.offhandRow)
+    }
+}
+
+private struct GroupNote: View {
+    let text: String
+    let color: Color
+
+    var body: some View {
+        Text(text)
+            .offhandText(.caption)
+            .foregroundStyle(color)
+            .padding(.horizontal, OffhandSpacing.card)
+            .padding(.vertical, 10)
+    }
+}
+
+private struct GroupFooter: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .offhandText(.caption)
+            .foregroundStyle(OffhandColor.ink2)
+            .padding(.horizontal, OffhandSpacing.card)
+            .padding(.top, 12)
     }
 }

@@ -1,0 +1,58 @@
+# Transcripts only: a phone with enough memory to transcribe but not to write
+# summaries (the fake device check reports 3.6 GB). Onboarding says so, a new
+# note is its transcript with no Summary tab, and Settings marks the summary
+# features as not available. Clears the app, so it runs near the end.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+    arguments:
+      smokeDeviceTier: transcripts
+# The analytics question comes before the device check
+- tapOn: "Share with the developer"
+- assertVisible: "Every word, written down.*"
+- tapOn: "Continue with transcripts"
+
+- tapOn: "Record your first note"
+- runFlow:
+    when:
+      visible: "Start recording"
+    commands:
+      - tapOn: "Start recording"
+- extendedWaitUntil:
+    visible: "00:(0[4-9]|[1-5][0-9])"
+    timeout: 15000
+- tapOn: "Save note"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: "^Allow$"
+          optional: true
+
+# The note is its transcript: no Summary tab and nothing is being summarised
+- extendedWaitUntil:
+    visible: "Copy transcript"
+    timeout: 30000
+- assertNotVisible: "Summary"
+- assertNotVisible: "Writing your summary.*"
+
+# Back to the list, then Settings shows the summary features as unavailable
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: "1%,50%"
+          end: "70%,50%"
+- tapOn:
+    id: "tab_settings"
+- assertVisible: "Not available on this .*"

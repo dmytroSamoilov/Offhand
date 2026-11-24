@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.testing.fakes
 
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackend
+import com.dmytrosamoilov.offhand.core.common.DeviceRegion
 import com.dmytrosamoilov.offhand.core.common.NetworkMonitor
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
@@ -15,6 +16,7 @@ import org.koin.dsl.module
 val smokeFakesModule = module {
     single<DeviceCapabilityChecker> { FakeDeviceCapabilityChecker() }
     single<NetworkMonitor> { FakeNetworkMonitor() }
+    single { DeviceRegion { ANALYTICS_QUESTION_COUNTRY } }
     single<ModelManager> { FakeModelManager() }
     single<SpeechToText> { FakeSpeechToText() }
     single<AiBackend> { FakeAiBackend() }
@@ -23,8 +25,16 @@ val smokeFakesModule = module {
     single<InAppReviewRules> { neverPromptForReview }
 }
 
+// The flows walk the analytics question, which only a phone in the EU sees.
+private const val ANALYTICS_QUESTION_COUNTRY = "DE"
+
+val deviceTestModule = module {
+    single<ProStore>(named(PLATFORM_PRO_STORE)) { FakeProStore() }
+    single<InAppReviewRules> { neverPromptForReview }
+}
+
 // The debug rules ask for a review five minutes after install, which is
-// mid-suite for the Maestro flows, and the store's prompt covers the screen.
+// mid-suite for the Maestro flows (emulator and device suites), and the store's prompt covers the screen.
 private val neverPromptForReview = InAppReviewRules(
     minSavedRecordings = Int.MAX_VALUE,
     burstWindowMs = 0L,

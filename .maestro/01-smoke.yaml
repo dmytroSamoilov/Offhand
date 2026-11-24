@@ -8,58 +8,18 @@ appId: com.dmytrosamoilov.offhand.uitest
     permissions:
       all: allow
 
-# Onboarding
-- tapOn: "Continue"
+# Onboarding asks about anonymous usage first, then shows one screen whose
+# Record pill opens the record sheet
+- extendedWaitUntil:
+    visible: "Share with the developer"
+    timeout: 30000
+- tapOn: "Share with the developer"
+- tapOn: "Record your first note"
 - runFlow:
     when:
-      visible: "Continue without a lock"
+      visible: "Start recording"
     commands:
-      - tapOn: "Continue without a lock"
-- runFlow:
-    when:
-      visible: "Lock Offhand?"
-    commands:
-      - runFlow:
-          when:
-            platform: Android
-          commands:
-            - tapOn: "Require unlock to open Offhand"
-      - runFlow:
-          when:
-            platform: iOS
-          commands:
-            - tapOn: "Require unlock to open Offhand"
-      - tapOn: "Continue"
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - tapOn: "Share anonymous reports"
-- runFlow:
-    when:
-      platform: iOS
-    commands:
-      - tapOn: "Share usage & stability reports"
-# Consent is the last page; its Continue ends onboarding
-- tapOn: "Continue"
-- assertVisible: "Notes"
-
-# Record a note through the fake microphone and engines
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - tapOn: "Start a new recording"
-      - runFlow:
-          when:
-            visible: "Start recording"
-          commands:
-            - tapOn: "Start recording"
-- runFlow:
-    when:
-      platform: iOS
-    commands:
-      - tapOn: "Record a note"
+      - tapOn: "Start recording"
 - extendedWaitUntil:
     visible: "00:(0[4-9]|[1-5][0-9])"
     timeout: 15000

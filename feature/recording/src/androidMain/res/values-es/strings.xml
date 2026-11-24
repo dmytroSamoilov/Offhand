@@ -8,13 +8,12 @@
     <string name="recording_pause_label">Pausar</string>
     <string name="recording_resume_label">Reanudar</string>
     <string name="recording_paused_label">En pausa</string>
-    <string name="recording_active_label">Grabando…</string>
+    <string name="recording_active_label">Grabando</string>
     <string name="recording_save_note_button">Guardar nota</string>
     <string name="recording_discard_button">Descartar grabación</string>
     <string name="recording_discard_dialog_title">¿Descartar esta grabación?</string>
-    <string name="recording_discard_dialog_body">Se eliminarán la grabación y todo lo transcrito hasta ahora. Esto no se puede deshacer.</string>
+    <string name="recording_discard_dialog_body">Se eliminarán %1$s de audio y su transcripción. Esto no se puede deshacer.</string>
     <string name="recording_discard_dialog_confirm">Descartar</string>
-    <string name="recording_discard_dialog_cancel">Cancelar</string>
     <string name="recording_stage_finishing">Guardando tu grabación…</string>
     <string name="recording_processing_hint">Puedes cerrar esto: la nota aparecerá en tu lista cuando esté lista.</string>
     <string name="recording_external_mic_generic">Micrófono externo</string>
@@ -39,7 +38,6 @@
     <string name="recording_notification_note_failed_text">La grabación está guardada. Toca para abrirla e intentarlo de nuevo.</string>
     <string name="recording_notification_note_paused_title">Tu nota está en pausa</string>
     <string name="recording_notification_note_paused_text">Abre Offhand y se terminará.</string>
-    <string name="recording_live_placeholder">Tus palabras aparecen aquí mientras hablas.</string>
     <string name="record_widget_name">Grabar una nota</string>
     <string name="record_widget_description">Inicia o detén una grabación desde la pantalla de inicio.</string>
     <string name="record_widget_record">Grabar</string>
@@ -47,4 +45,24 @@
     <string name="record_widget_no_folder">Sin carpeta</string>
     <string name="record_widget_config_title">Guardar las grabaciones en</string>
     <string name="record_widget_config_save">Guardar</string>
+    <string name="recording_discard_keep">Seguir grabando</string>
+    <string name="recording_live_label">Transcripción en directo</string>
+    <plurals name="recording_duration_hours">
+        <item quantity="one">%d hora</item>
+        <item quantity="many">%d horas</item>
+        <item quantity="other">%d horas</item>
+    </plurals>
+    <plurals name="recording_duration_minutes">
+        <item quantity="one">%d minuto</item>
+        <item quantity="many">%d minutos</item>
+        <item quantity="other">%d minutos</item>
+    </plurals>
+    <plurals name="recording_duration_seconds">
+        <item quantity="one">%d segundo</item>
+        <item quantity="many">%d segundos</item>
+        <item quantity="other">%d segundos</item>
+    </plurals>
+    <string name="record_widget_stop_save">Detener y guardar</string>
+    <string name="record_widget_to_folder">En %1$s</string>
+    <string name="record_widget_recording_to_folder">Grabando en %1$s</string>
 </resources>

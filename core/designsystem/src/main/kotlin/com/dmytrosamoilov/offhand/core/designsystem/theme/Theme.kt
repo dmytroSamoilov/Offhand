@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.core.designsystem.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -8,94 +9,17 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-@Immutable
-data class ExtendedColors(
-    val warningContainer: Color,
-    val onWarningContainer: Color,
-    val searchHighlight: Color,
-)
+object OffhandTheme {
+    val colors: OffhandColors
+        @Composable @ReadOnlyComposable get() = LocalOffhandColors.current
 
-private val LightExtendedColors = ExtendedColors(
-    warningContainer = Yellow90,
-    onWarningContainer = Yellow10,
-    searchHighlight = Yellow90,
-)
-
-private val DarkExtendedColors = ExtendedColors(
-    warningContainer = Yellow30,
-    onWarningContainer = Yellow90,
-    searchHighlight = Yellow30,
-)
-
-private val LocalExtendedColors = staticCompositionLocalOf { LightExtendedColors }
-
-val MaterialTheme.extendedColors: ExtendedColors
-    @Composable get() = LocalExtendedColors.current
-
-private val LightColorScheme = lightColorScheme(
-    primary = Blue40,
-    onPrimary = LightSurfaceContainerLowest,
-    primaryContainer = Blue90,
-    onPrimaryContainer = Blue10,
-    secondary = BlueGrey40,
-    onSecondary = LightSurfaceContainerLowest,
-    secondaryContainer = BlueGrey90,
-    onSecondaryContainer = BlueGrey10,
-    tertiary = Teal40,
-    onTertiary = LightSurfaceContainerLowest,
-    tertiaryContainer = Teal90,
-    onTertiaryContainer = Teal10,
-    background = LightSurface,
-    onBackground = LightOnSurface,
-    surface = LightSurface,
-    onSurface = LightOnSurface,
-    surfaceDim = LightSurfaceDim,
-    surfaceBright = LightSurface,
-    surfaceContainerLowest = LightSurfaceContainerLowest,
-    surfaceContainerLow = LightSurfaceContainerLow,
-    surfaceContainer = LightSurfaceContainer,
-    surfaceContainerHigh = LightSurfaceContainerHigh,
-    surfaceContainerHighest = LightSurfaceContainerHighest,
-    surfaceVariant = LightSurfaceVariant,
-    onSurfaceVariant = LightOnSurfaceVariant,
-    outline = LightOutline,
-    outlineVariant = LightOutlineVariant,
-)
-
-private val DarkColorScheme = darkColorScheme(
-    primary = Blue80,
-    onPrimary = BlueOn80,
-    primaryContainer = Blue30,
-    onPrimaryContainer = Blue90,
-    secondary = BlueGrey80,
-    onSecondary = BlueGreyOn80,
-    secondaryContainer = BlueGrey30,
-    onSecondaryContainer = BlueGrey90,
-    tertiary = Teal80,
-    onTertiary = TealOn80,
-    tertiaryContainer = Teal30,
-    onTertiaryContainer = Teal90,
-    background = DarkSurface,
-    onBackground = DarkOnSurface,
-    surface = DarkSurface,
-    onSurface = DarkOnSurface,
-    surfaceDim = DarkSurfaceDim,
-    surfaceBright = DarkSurfaceBright,
-    surfaceContainerLowest = DarkSurfaceContainerLowest,
-    surfaceContainerLow = DarkSurfaceContainerLow,
-    surfaceContainer = DarkSurfaceContainer,
-    surfaceContainerHigh = DarkSurfaceContainerHigh,
-    surfaceContainerHighest = DarkSurfaceContainerHighest,
-    surfaceVariant = DarkSurfaceVariant,
-    onSurfaceVariant = DarkOnSurfaceVariant,
-    outline = DarkOutline,
-    outlineVariant = DarkOutlineVariant,
-)
+    val type: OffhandTextStyles
+        @Composable @ReadOnlyComposable get() = LocalOffhandTextStyles.current
+}
 
 @Composable
 fun OffhandTheme(
@@ -103,21 +27,91 @@ fun OffhandTheme(
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && darkTheme -> dynamicDarkColorScheme(LocalContext.current)
-        dynamicColor -> dynamicLightColorScheme(LocalContext.current)
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val context = LocalContext.current
+    val light = if (dynamicColor) LightQuietInk.withWallpaperColors(dynamicLightColorScheme(context)) else LightQuietInk
+    val dark = if (dynamicColor) DarkQuietInk.withWallpaperColors(dynamicDarkColorScheme(context)) else DarkQuietInk
+    CompositionLocalProvider(LocalDarkPalette provides dark) {
+        QuietInkScope(colors = if (darkTheme) dark else light, content = content)
     }
+}
 
+@Composable
+fun OffhandDarkContent(content: @Composable () -> Unit) {
+    QuietInkScope(colors = LocalDarkPalette.current, content = content)
+}
+
+@Composable
+private fun QuietInkScope(colors: OffhandColors, content: @Composable () -> Unit) {
     CompositionLocalProvider(
-        LocalExtendedColors provides if (darkTheme) DarkExtendedColors else LightExtendedColors,
+        LocalOffhandColors provides colors,
+        LocalOffhandTextStyles provides QuietInkTextStyles,
     ) {
         MaterialTheme(
-            colorScheme = colorScheme,
+            colorScheme = colors.toColorScheme(),
             typography = OffhandTypography,
             shapes = OffhandShapes,
             content = content,
         )
     }
+}
+
+private val LocalDarkPalette = staticCompositionLocalOf { DarkQuietInk }
+
+private fun OffhandColors.withWallpaperColors(scheme: ColorScheme) = copy(
+    ground = if (isDark) scheme.surface else scheme.surfaceContainerLow,
+    surface = if (isDark) scheme.surfaceContainerHigh else scheme.surfaceContainerLowest,
+    ink = scheme.onSurface,
+    ink2 = scheme.onSurfaceVariant,
+    ink3 = scheme.outline,
+    hairline = if (isDark) scheme.surfaceContainerHigh else scheme.surfaceContainerHighest,
+    border = scheme.outlineVariant,
+    wave = scheme.outlineVariant,
+    well = if (isDark) scheme.surfaceContainerLow else scheme.surfaceContainerHigh,
+    wellSelected = if (isDark) scheme.surfaceContainerHighest else scheme.surfaceContainerLowest,
+    accent = scheme.primary,
+    onAccent = scheme.onPrimary,
+    accentSoft = scheme.primaryContainer,
+    onInk = scheme.surface,
+)
+
+private fun OffhandColors.toColorScheme(): ColorScheme {
+    val base = if (isDark) darkColorScheme() else lightColorScheme()
+    return base.copy(
+        primary = ink,
+        onPrimary = onInk,
+        primaryContainer = accentSoft,
+        onPrimaryContainer = ink,
+        inversePrimary = accent,
+        secondary = accent,
+        onSecondary = onAccent,
+        secondaryContainer = well,
+        onSecondaryContainer = ink,
+        tertiary = accent,
+        onTertiary = onAccent,
+        tertiaryContainer = accentSoft,
+        onTertiaryContainer = ink,
+        background = ground,
+        onBackground = ink,
+        surface = ground,
+        onSurface = ink,
+        surfaceVariant = well,
+        onSurfaceVariant = ink2,
+        surfaceTint = ground,
+        inverseSurface = ink,
+        inverseOnSurface = onInk,
+        error = danger,
+        onError = onInk,
+        errorContainer = well,
+        onErrorContainer = ink,
+        outline = border,
+        outlineVariant = hairline,
+        scrim = scrim,
+        surfaceBright = surface,
+        surfaceDim = ground,
+        surfaceContainerLowest = surface,
+        surfaceContainerLow = surface,
+        surfaceContainer = surface,
+        surfaceContainerHigh = surface,
+        surfaceContainerHighest = surface,
+    )
 }

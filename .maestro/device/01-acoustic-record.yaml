@@ -1,0 +1,70 @@
+# Records a fixture clip played from the Mac's speakers through the phone's
+# microphone, checks the live transcript shows its words, waits for the real
+# note, exports it as plain text to Download and lets the bridge score it.
+# The clip comes from the runner: maestro test -e CLIP=<fixture id>. A flow-level
+# env default would win over -e, so there is none. The live transcript shows only
+# its last 140 characters, so each fixture's livePhrase is taken from its end.
+appId: com.dmytrosamoilov.offhand.devicetest
+tags:
+  - acoustic
+---
+- launchApp
+- tapOn: "Start a new recording"
+- runFlow:
+    when:
+      visible: "Start recording"
+    commands:
+      - tapOn: "Start recording"
+- extendedWaitUntil:
+    visible: "00:0[1-9]"
+    timeout: 15000
+
+- runScript:
+    file: scripts/bridge.js
+    env:
+      ACTION: play
+- extendedWaitUntil:
+    visible: "(?is).*(${output.livePhrase}).*"
+    timeout: 60000
+- repeat:
+    while:
+      true: ${output.playing}
+    commands:
+      - extendedWaitUntil:
+          visible: "__never_on_screen__"
+          timeout: 1000
+          optional: true
+      - runScript:
+          file: scripts/bridge.js
+          env:
+            ACTION: status
+- extendedWaitUntil:
+    visible: "__never_on_screen__"
+    timeout: 1500
+    optional: true
+- tapOn: "Save note"
+- runScript: scripts/mark-saved.js
+
+- extendedWaitUntil:
+    visible: "Summary is ready|Copy summary"
+    timeout: 900000
+- runScript: scripts/mark-ready.js
+- tapOn: "Summary"
+- extendedWaitUntil:
+    visible: "Copy summary"
+    timeout: 10000
+
+- tapOn: "Share note"
+- tapOn: "Download"
+- tapOn:
+    text: "(?i)save"
+- extendedWaitUntil:
+    visible: "Copy summary"
+    timeout: 10000
+- runScript:
+    file: scripts/bridge.js
+    env:
+      ACTION: score
+- assertTrue:
+    condition: ${output.pass}
+    label: "Clip ${CLIP} scored within its thresholds"

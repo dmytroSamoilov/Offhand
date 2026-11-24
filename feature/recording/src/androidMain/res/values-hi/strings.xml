@@ -8,13 +8,12 @@
     <string name="recording_pause_label">रोकें</string>
     <string name="recording_resume_label">जारी रखें</string>
     <string name="recording_paused_label">पॉज़ पर</string>
-    <string name="recording_active_label">रिकॉर्डिंग हो रही है…</string>
+    <string name="recording_active_label">रिकॉर्डिंग हो रही है</string>
     <string name="recording_save_note_button">नोट सहेजें</string>
     <string name="recording_discard_button">रिकॉर्डिंग खारिज करें</string>
     <string name="recording_discard_dialog_title">यह रिकॉर्डिंग खारिज करें?</string>
-    <string name="recording_discard_dialog_body">रिकॉर्डिंग और अब तक ट्रांसक्राइब हुआ सब कुछ हट जाएगा। इसे वापस नहीं लाया जा सकता।</string>
+    <string name="recording_discard_dialog_body">%1$s का ऑडियो और उसका ट्रांसक्रिप्ट हट जाएगा। इसे वापस नहीं लाया जा सकता।</string>
     <string name="recording_discard_dialog_confirm">खारिज करें</string>
-    <string name="recording_discard_dialog_cancel">रद्द करें</string>
     <string name="recording_stage_finishing">आपकी रिकॉर्डिंग सहेजी जा रही है…</string>
     <string name="recording_processing_hint">आप इसे बंद कर सकते हैं — नोट तैयार होते ही आपकी सूची में दिखेगा।</string>
     <string name="recording_external_mic_generic">बाहरी माइक्रोफ़ोन</string>
@@ -39,7 +38,6 @@
     <string name="recording_notification_note_failed_text">रिकॉर्डिंग सहेज ली गई है। खोलने और फिर से कोशिश करने के लिए टैप करें।</string>
     <string name="recording_notification_note_paused_title">आपका नोट रुका हुआ है</string>
     <string name="recording_notification_note_paused_text">Offhand खोलें, यह पूरा हो जाएगा।</string>
-    <string name="recording_live_placeholder">आपके बोलते ही आपके शब्द यहां दिखते हैं।</string>
     <string name="record_widget_name">नोट रिकॉर्ड करें</string>
     <string name="record_widget_description">होम स्क्रीन से रिकॉर्डिंग शुरू या बंद करें।</string>
     <string name="record_widget_record">रिकॉर्ड करें</string>
@@ -47,4 +45,21 @@
     <string name="record_widget_no_folder">कोई फ़ोल्डर नहीं</string>
     <string name="record_widget_config_title">रिकॉर्डिंग यहां सहेजें</string>
     <string name="record_widget_config_save">सहेजें</string>
+    <string name="recording_discard_keep">रिकॉर्डिंग जारी रखें</string>
+    <string name="recording_live_label">लाइव ट्रांसक्रिप्ट</string>
+    <plurals name="recording_duration_hours">
+        <item quantity="one">%d घंटा</item>
+        <item quantity="other">%d घंटे</item>
+    </plurals>
+    <plurals name="recording_duration_minutes">
+        <item quantity="one">%d मिनट</item>
+        <item quantity="other">%d मिनट</item>
+    </plurals>
+    <plurals name="recording_duration_seconds">
+        <item quantity="one">%d सेकंड</item>
+        <item quantity="other">%d सेकंड</item>
+    </plurals>
+    <string name="record_widget_stop_save">रोकें और सहेजें</string>
+    <string name="record_widget_to_folder">%1$s में</string>
+    <string name="record_widget_recording_to_folder">%1$s में रिकॉर्डिंग</string>
 </resources>

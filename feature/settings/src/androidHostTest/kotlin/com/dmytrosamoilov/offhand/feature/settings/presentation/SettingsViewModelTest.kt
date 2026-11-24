@@ -1,5 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import io.mockk.verify
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
@@ -18,6 +20,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
+import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
@@ -32,14 +35,17 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomN
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOverrideUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStatusUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSkipSilenceEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.RedeemProCodeUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSkipSilenceEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -80,6 +86,10 @@ class SettingsViewModelTest {
     private val setNoteFeatureEnabled: SetNoteFeatureEnabledUseCase = mockk(relaxed = true)
     private val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
     private val setSmartSuggestionsEnabled: SetSmartSuggestionsEnabledUseCase = mockk(relaxed = true)
+    private val observeSkipSilenceEnabled: ObserveSkipSilenceEnabledUseCase = mockk {
+        every { this@mockk() } returns flowOf(false)
+    }
+    private val setSkipSilenceEnabled: SetSkipSilenceEnabledUseCase = mockk(relaxed = true)
     private val observeProStatus: ObserveProStatusUseCase = mockk()
     private val observeProOverride: ObserveProOverrideUseCase = mockk()
     private val setProOverride: SetProOverrideUseCase = mockk(relaxed = true)
@@ -108,6 +118,11 @@ class SettingsViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private val observeTelemetryConsent: ObserveTelemetryConsentUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
+    private val setTelemetryConsent: SetTelemetryConsentUseCase = mockk(relaxed = true)
+
     private fun viewModel() = SettingsViewModel(
         observeDynamicColor = observeDynamicColor,
         setDynamicColor = setDynamicColor,
@@ -116,6 +131,8 @@ class SettingsViewModelTest {
         observeAppLockEnabled = observeAppLockEnabled,
         setAppLockEnabled = setAppLockEnabled,
         appLockManager = appLockManager,
+        observeTelemetryConsent = observeTelemetryConsent,
+        setTelemetryConsent = setTelemetryConsent,
         importAudio = importAudio,
         isAudioImportAvailable = isAudioImportAvailable,
         observeImportAllowance = observeImportAllowance,
@@ -123,6 +140,8 @@ class SettingsViewModelTest {
         observeNoteFeatures = observeNoteFeatures,
         setNoteFeatureEnabled = setNoteFeatureEnabled,
         setSmartSuggestionsEnabled = setSmartSuggestionsEnabled,
+        observeSkipSilenceEnabled = observeSkipSilenceEnabled,
+        setSkipSilenceEnabled = setSkipSilenceEnabled,
         observeProStatus = observeProStatus,
         observeProOverride = observeProOverride,
         setProOverride = setProOverride,
@@ -148,6 +167,62 @@ class SettingsViewModelTest {
 
         viewModel.onRedeemFallbackOpened()
         assertFalse(viewModel.uiState.value.isRedeemFallbackRequested)
+    }
+
+    @Test
+    fun `skip silence switches on only after the pro gate passes`() = runTest(dispatcher) {
+        coEvery { gate.requirePro(ProFeature.SKIP_SILENCE) } returns false
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onSkipSilenceChanged(true)
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify(exactly = 0) { setSkipSilenceEnabled(any()) }
+
+        coEvery { gate.requirePro(ProFeature.SKIP_SILENCE) } returns true
+        viewModel.onSkipSilenceChanged(true)
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify { setSkipSilenceEnabled(true) }
+    }
+
+    @Test
+    fun `switching usage sharing off is reported before the consent is withdrawn`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onTelemetryChanged(false)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerifyOrder {
+            analyticsTracker.track(AnalyticsEvents.telemetryToggled(enabled = false))
+            setTelemetryConsent(false)
+        }
+    }
+
+    @Test
+    fun `switching usage sharing on is reported after the consent is stored`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onTelemetryChanged(true)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerifyOrder {
+            setTelemetryConsent(true)
+            analyticsTracker.track(AnalyticsEvents.telemetryToggled(enabled = true))
+        }
+    }
+
+    @Test
+    fun `skip silence switches off without the pro gate`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onSkipSilenceChanged(false)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { gate.requirePro(ProFeature.SKIP_SILENCE) }
+        coVerify { setSkipSilenceEnabled(false) }
     }
 
     @Test
@@ -324,5 +399,33 @@ class SettingsViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         coVerify(exactly = 0) { setNoteFeatureEnabled(NoteFeature.SUMMARY, any()) }
+    }
+
+    @Test
+    fun `the usage-sharing switch reads and writes the telemetry consent`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isTelemetryEnabled)
+
+        viewModel.onTelemetryChanged(false)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { setTelemetryConsent(false) }
+    }
+
+    @Test
+    fun `a transcripts-only phone shows the summary as unavailable and ignores its switches`() = runTest(dispatcher) {
+        noteFeatures.value = NoteFeatures(isSummaryAvailable = false)
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isSummaryAvailable)
+        assertFalse(viewModel.uiState.value.isSummaryEnabled)
+        viewModel.onSummaryChanged(true)
+        viewModel.onSmartSuggestionsChanged(true)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { setNoteFeatureEnabled(NoteFeature.SUMMARY, any()) }
+        coVerify(exactly = 0) { setSmartSuggestionsEnabled(any()) }
     }
 }

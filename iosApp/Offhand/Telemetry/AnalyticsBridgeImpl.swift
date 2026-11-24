@@ -8,6 +8,8 @@ import OffhandShared
 // Firebase exists, which it does not until consent was granted.
 final class AnalyticsBridgeImpl: IosAnalyticsBridge {
 
+    func isReady() -> Bool { TelemetryController.shared.isCollectingAnalytics }
+
     func logEvent(name: String, params: [String: Any]) {
         guard FirebaseApp.app() != nil else { return }
         Analytics.logEvent(name, parameters: params)

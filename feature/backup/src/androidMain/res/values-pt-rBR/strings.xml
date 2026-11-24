@@ -39,4 +39,7 @@
     <string name="backup_file_name_label">Nome do arquivo</string>
     <string name="backup_save_button">Salvar backup</string>
     <string name="backup_done">Concluído</string>
+    <string name="backup_subtitle">O Offhand cria um único arquivo criptografado. Você decide onde ele fica.</string>
+    <string name="backup_size_estimate">Cerca de %1$s</string>
+    <string name="backup_include_audio_size">Adiciona cerca de %1$s</string>
 </resources>

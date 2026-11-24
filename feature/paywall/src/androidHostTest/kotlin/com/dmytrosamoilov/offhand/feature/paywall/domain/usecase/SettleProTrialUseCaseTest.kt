@@ -39,18 +39,10 @@ class SettleProTrialUseCaseTest {
     fun `an install with no record starts its trial now`() = runTest {
         every { proStatus.observeStatus() } returns flowOf(ProStatus.trial(endsAtMs = now))
 
-        assertEquals(ProTrialSettlement(isTrialOffered = true), useCase())
+        assertEquals(ProTrialSettlement(), useCase())
 
         assertEquals(ProTrialRecord(startedAtMs = now), trial.record)
         assertEquals(listOf("pro_trial_started"), tracked)
-    }
-
-    @Test
-    fun `a buyer is not welcomed to the trial that starts under their plan`() = runTest {
-        every { proStatus.observeStatus() } returns flowOf(ProStatus.LIFETIME)
-
-        assertEquals(ProTrialSettlement(), useCase())
-        assertEquals(ProTrialRecord(startedAtMs = now), trial.record)
     }
 
     @Test

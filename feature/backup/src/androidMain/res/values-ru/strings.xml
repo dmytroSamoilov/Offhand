@@ -39,4 +39,7 @@
     <string name="backup_file_name_label">Имя файла</string>
     <string name="backup_save_button">Сохранить копию</string>
     <string name="backup_done">Готово</string>
+    <string name="backup_subtitle">Offhand создаёт один зашифрованный файл. Где его хранить, решаете вы.</string>
+    <string name="backup_size_estimate">Около %1$s</string>
+    <string name="backup_include_audio_size">Добавит около %1$s</string>
 </resources>

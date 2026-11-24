@@ -3,22 +3,22 @@ package com.dmytrosamoilov.offhand.feature.onboarding.presentation
 data class OnboardingUiState(
     val step: OnboardingStep = OnboardingStep.DEVICE_CHECK,
     val deviceSpecs: DeviceSpecsUi? = null,
-    val isDeviceSecure: Boolean = false,
-    val isAppLockEnabled: Boolean = true,
-    val isTelemetryEnabled: Boolean = true,
-    val currentPage: Int = 0,
-    val pages: List<OnboardingStep> = emptyList(),
-    val furthestPage: Int = 0,
-) {
-    val pageCount: Int get() = pages.size
-}
+    val isSummaryAvailable: Boolean = true,
+)
 
 enum class OnboardingStep {
     DEVICE_CHECK,
+    ANALYTICS_CONSENT,
     DEVICE_INCOMPATIBLE,
-    PRIVACY,
-    DEVICE_LOCK,
-    TELEMETRY_CONSENT,
+    TRANSCRIPTS_ONLY,
+    WELCOME,
+}
+
+enum class OnboardingChoice(val analyticsName: String) {
+    ANALYTICS_SHARED("analytics_shared"),
+    TRANSCRIPTS_ONLY("transcripts_only"),
+    RECORD_FIRST_NOTE("record_first_note"),
+    LOOK_AROUND("look_around"),
 }
 
 data class DeviceSpecsUi(

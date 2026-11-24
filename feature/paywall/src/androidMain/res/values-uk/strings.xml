@@ -82,8 +82,14 @@
         <item quantity="other">Менше %d років річної підписки</item>
     </plurals>
     <string name="paywall_benefits_body">Усе з колонки Pro вже ваше.</string>
-    <string name="paywall_trial_intro_title">Спробуйте Offhand Pro безкоштовно 14 днів</string>
-    <string name="paywall_trial_intro_tagline">Усі можливості Pro відкрито від сьогодні. Без оплати й без облікового запису. Через 14 днів у вас залишиться безкоштовна версія, якщо ви не перейдете на Pro.</string>
+    <plurals name="paywall_trial_offer_title">
+        <item quantity="one">Offhand Pro безкоштовно ваш ще %d день</item>
+        <item quantity="few">Offhand Pro безкоштовно ваш ще %d дні</item>
+        <item quantity="many">Offhand Pro безкоштовно ваш ще %d днів</item>
+        <item quantity="other">Offhand Pro безкоштовно ваш ще %d дня</item>
+    </plurals>
+    <string name="paywall_trial_intro_tagline">Усі можливості Pro вже відкрито. Без оплати й без облікового запису. Коли пробний період закінчиться, у вас залишиться безкоштовна версія, якщо ви не перейдете на Pro.</string>
+    <string name="paywall_trial_offer_continue">Користуватися Pro безкоштовно</string>
     <string name="paywall_plan_monthly">Місяць</string>
     <string name="paywall_plan_monthly_price">%1$s / місяць</string>
     <string name="paywall_plan_monthly_renews">Поновлюється щомісяця</string>
@@ -102,4 +108,5 @@
     <string name="paywall_usage_folder_styles">Папок із власним стилем</string>
     <string name="paywall_usage_backups">Резервних копій із записами</string>
     <string name="paywall_context_widget">Записуйте з головного екрана</string>
+    <string name="paywall_context_skip_silence">Пропускайте тишу під час прослуховування</string>
 </resources>

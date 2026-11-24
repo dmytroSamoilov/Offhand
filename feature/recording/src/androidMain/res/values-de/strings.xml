@@ -8,13 +8,12 @@
     <string name="recording_pause_label">Pause</string>
     <string name="recording_resume_label">Fortsetzen</string>
     <string name="recording_paused_label">Pausiert</string>
-    <string name="recording_active_label">Aufnahme läuft…</string>
+    <string name="recording_active_label">Aufnahme läuft</string>
     <string name="recording_save_note_button">Notiz speichern</string>
     <string name="recording_discard_button">Aufnahme verwerfen</string>
     <string name="recording_discard_dialog_title">Diese Aufnahme verwerfen?</string>
-    <string name="recording_discard_dialog_body">Die Aufnahme und alles bisher Transkribierte werden gelöscht. Das kann nicht rückgängig gemacht werden.</string>
+    <string name="recording_discard_dialog_body">%1$s Audio und das Transkript werden gelöscht. Das kann nicht rückgängig gemacht werden.</string>
     <string name="recording_discard_dialog_confirm">Verwerfen</string>
-    <string name="recording_discard_dialog_cancel">Abbrechen</string>
     <string name="recording_stage_finishing">Deine Aufnahme wird gespeichert…</string>
     <string name="recording_processing_hint">Du kannst das hier schließen — die Notiz erscheint in deiner Liste, sobald sie fertig ist.</string>
     <string name="recording_external_mic_generic">Externes Mikrofon</string>
@@ -39,7 +38,6 @@
     <string name="recording_notification_note_failed_text">Die Aufnahme ist gespeichert. Tippe, um sie zu öffnen und es erneut zu versuchen.</string>
     <string name="recording_notification_note_paused_title">Deine Notiz ist pausiert</string>
     <string name="recording_notification_note_paused_text">Öffne Offhand, dann wird sie fertig.</string>
-    <string name="recording_live_placeholder">Deine Worte erscheinen hier, während du sprichst.</string>
     <string name="record_widget_name">Notiz aufnehmen</string>
     <string name="record_widget_description">Starte oder stoppe eine Aufnahme vom Startbildschirm aus.</string>
     <string name="record_widget_record">Aufnehmen</string>
@@ -47,4 +45,21 @@
     <string name="record_widget_no_folder">Kein Ordner</string>
     <string name="record_widget_config_title">Aufnahmen speichern in</string>
     <string name="record_widget_config_save">Speichern</string>
+    <string name="recording_discard_keep">Weiter aufnehmen</string>
+    <string name="recording_live_label">Live-Transkript</string>
+    <plurals name="recording_duration_hours">
+        <item quantity="one">%d Stunde</item>
+        <item quantity="other">%d Stunden</item>
+    </plurals>
+    <plurals name="recording_duration_minutes">
+        <item quantity="one">%d Minute</item>
+        <item quantity="other">%d Minuten</item>
+    </plurals>
+    <plurals name="recording_duration_seconds">
+        <item quantity="one">%d Sekunde</item>
+        <item quantity="other">%d Sekunden</item>
+    </plurals>
+    <string name="record_widget_stop_save">Stoppen und sichern</string>
+    <string name="record_widget_to_folder">In %1$s</string>
+    <string name="record_widget_recording_to_folder">Aufnahme in %1$s</string>
 </resources>

@@ -23,7 +23,7 @@ class TelemetryController(
     fun start() {
         scope.launch {
             userPreferences.preferences
-                .map { it.telemetryConsent }
+                .map { it.telemetryConsent.isShared }
                 .distinctUntilChanged()
                 .collect(::applyConsent)
         }
@@ -35,6 +35,7 @@ class TelemetryController(
     // included.
     private fun applyConsent(isGranted: Boolean) {
         if (!isGranted) {
+            AnalyticsReadiness.set(isCollecting = false)
             // Firebase that was never initialised has nothing to send and nothing
             // to switch off.
             FirebaseReporting.instanceOrNull(context)?.let { crashlytics ->
@@ -47,6 +48,7 @@ class TelemetryController(
         FirebaseReporting.initialize(context)?.let { crashlytics ->
             crashlytics.setCrashlyticsCollectionEnabled(true)
             FirebaseAnalytics.getInstance(context).setAnalyticsCollectionEnabled(!buildInfo.isDeveloperBuild)
+            AnalyticsReadiness.set(isCollecting = !buildInfo.isDeveloperBuild)
         }
     }
 }

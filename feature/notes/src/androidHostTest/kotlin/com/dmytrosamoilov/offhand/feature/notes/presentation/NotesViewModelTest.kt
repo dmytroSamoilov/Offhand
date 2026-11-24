@@ -1,5 +1,8 @@
 package com.dmytrosamoilov.offhand.feature.notes.presentation
 
+import io.mockk.verify
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteFeaturesUseCase
 import com.dmytrosamoilov.offhand.core.data.domain.NoteFeatures
 import app.cash.turbine.test
@@ -38,6 +41,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsFolderStylesAva
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsUnlimitedFoldersAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.OfferProTrialUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
@@ -148,6 +152,7 @@ class NotesViewModelTest {
         coEvery { requirePro(any()) } returns true
     }
     private val clearShareCache: ClearShareCacheUseCase = mockk(relaxed = true)
+    private val offerProTrial: OfferProTrialUseCase = mockk(relaxed = true)
     private val recordingsSavedInApp = MutableSharedFlow<Unit>()
     private val shouldRequestReview: ShouldRequestReviewUseCase = mockk {
         coEvery { this@mockk.invoke() } returns false
@@ -203,6 +208,9 @@ class NotesViewModelTest {
         recordingProcessController = recordingProcessController,
         dateLabelFormatter = dateLabelFormatter,
         observeNotes = observeNotes,
+        observeNoteWaveforms = mockk { every { this@mockk() } returns flowOf(emptyMap()) },
+        observeSkipSilence = mockk { every { this@mockk() } returns flowOf(false) },
+        findSilence = mockk(),
         observeFolders = observeFolders,
         searchNotes = SearchNotesUseCase(),
         createFolder = createFolder,
@@ -234,10 +242,16 @@ class NotesViewModelTest {
         observeNoteFeatures = observeNoteFeatures,
         proUpgradeGate = gate,
         sessionManager = sessionManager,
-        aiCoreDownloadStatus = AiCoreDownloadStatus(modelManager, speechToText, ModelDownloadPolicy(unmeteredNetwork)),
+        aiCoreDownloadStatus = AiCoreDownloadStatus(
+            modelManager,
+            speechToText,
+            ModelDownloadPolicy(unmeteredNetwork),
+            mockk { every { writesSummaries() } returns true },
+        ),
         modelDownloadLauncher = mockk(relaxed = true),
         clearTranscriptionCheckpoint = mockk(relaxed = true),
         resumeInterruptedNotes = mockk(relaxed = true),
+        offerProTrial = offerProTrial,
         buildInfo = BuildInfo(isDeveloperBuild = true),
         analyticsTracker = mockk(relaxed = true),
     )
@@ -751,5 +765,96 @@ class NotesViewModelTest {
 
         coVerify(exactly = 0) { deleteNote(any()) }
         assertNull(viewModel.uiState.value.pendingDeleteNoteId)
+    }
+
+    @Test
+    fun `the trial is offered once a finished note exists and no note is open`() = runTest(dispatcher) {
+        val notes = MutableStateFlow(listOf(note.copy(status = NoteStatus.PROCESSING)))
+        every { observeNotes() } returns notes
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        notes.value = listOf(note)
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify(exactly = 0) { offerProTrial() }
+
+        viewModel.onDetailClosed()
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify(exactly = 1) { offerProTrial() }
+    }
+
+    @Test
+    fun `no offer while the library has no finished note`() = runTest(dispatcher) {
+        every { observeNotes() } returns flowOf(listOf(note.copy(status = NoteStatus.PROCESSING)))
+        viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { offerProTrial() }
+    }
+
+    @Test
+    fun `a transcripts-only phone never restyles a note`() = runTest(dispatcher) {
+        noteFeatures.value = NoteFeatures(isSummaryAvailable = false)
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onStyleSelected(NoteStyleRef.BuiltIn(NotePreset.MEETING))
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isSummaryAvailable)
+        assertTrue(viewModel.uiState.value.styleChips.isEmpty())
+        verify(exactly = 0) { recordingProcessController.restructureNote(any(), any()) }
+    }
+
+    @Test
+    fun `a transcript match from search opens the note on its transcript at that paragraph`() = runTest(dispatcher) {
+        val timed = note.copy(
+            transcript = "We opened the meeting.\n\nThe deposit stays the same.",
+            transcriptStartsMs = listOf(0L, 29_000L),
+        )
+        every { observeNotes() } returns flowOf(listOf(timed))
+        coEvery { getNote(5) } returns timed
+        val viewModel = viewModel()
+        viewModel.onSearchQueryChanged("deposit")
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val card = viewModel.uiState.value.sections.single().notes.single()
+        assertEquals(MatchLocationUi.TRANSCRIPT, card.matchLocation)
+        assertEquals("0:29", card.matchTime)
+
+        viewModel.onSearchResultSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(NoteDetailTabUi.TRANSCRIPT, viewModel.uiState.value.detailTab)
+        assertEquals(1, viewModel.uiState.value.transcriptFocusIndex)
+        verify(exactly = 0) { audioPlayer.play() }
+        viewModel.onTranscriptFocusHandled()
+        assertNull(viewModel.uiState.value.transcriptFocusIndex)
+    }
+
+    @Test
+    fun `a summary match opens the note the usual way`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onSearchQueryChanged("approved")
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onSearchResultSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(NoteDetailTabUi.SUMMARY, viewModel.uiState.value.detailTab)
+        assertNull(viewModel.uiState.value.transcriptFocusIndex)
+    }
+
+    @Test
+    fun `a finished import or a transcript-only note counts for the trial offer like a recording`() = runTest(dispatcher) {
+        val imported = note.copy(body = "", title = "interview.m4a", audioFileName = "import-1.pcm")
+        every { observeNotes() } returns flowOf(listOf(imported))
+        noteFeatures.value = NoteFeatures(isSummaryAvailable = false)
+        viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { offerProTrial() }
     }
 }
