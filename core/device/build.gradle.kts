@@ -2,11 +2,11 @@ plugins {
     alias(libs.plugins.offhand.kmp.library)
 }
 
-android {
-    namespace = "com.dmytrosamoilov.offhand.core.device"
-}
-
 kotlin {
+    android {
+        namespace = "com.dmytrosamoilov.offhand.core.device"
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(project(":core:common"))

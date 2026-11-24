@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.core.data.domain.analytics
 
+import com.dmytrosamoilov.offhand.core.data.domain.NoteFeature
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
@@ -7,6 +8,12 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
 enum class NoteSource { RECORDING, IMPORT, RETRY, RESTYLE }
 
 enum class NoteSection { OVERVIEW, TRANSCRIPT }
+
+enum class RecordingOrigin { APP, WIDGET, SHORTCUT, ONBOARDING }
+
+enum class RecordingDiscardReason { USER, TOO_SHORT }
+
+enum class SearchMatch { TITLE, SUMMARY, TRANSCRIPT }
 
 // Every event the apps send. Nothing here carries user content: styles go
 // out as their codename or "custom", never by name.
@@ -36,9 +43,37 @@ object AnalyticsEvents {
 
     fun audioImportRejected(reason: String): AnalyticsEvent = event("audio_import_rejected", "reason" to reason)
 
-    fun noteCopied(section: NoteSection): AnalyticsEvent = event("note_copied", "section" to section.label())
+    fun noteCopied(section: NoteSection): AnalyticsEvent = event(
+        when (section) {
+            NoteSection.OVERVIEW -> "note_summary_copied"
+            NoteSection.TRANSCRIPT -> "note_transcript_copied"
+        },
+    )
 
-    fun notePlayed(): AnalyticsEvent = event("note_played")
+    fun notePlayed(skipsSilence: Boolean): AnalyticsEvent =
+        event("note_played", "skip_silence" to skipsSilence.label())
+
+    fun noteTabOpened(section: NoteSection): AnalyticsEvent = event(
+        "note_tab_opened",
+        "tab" to if (section == NoteSection.OVERVIEW) "summary" else "transcript",
+    )
+
+    fun searchResultOpened(match: SearchMatch): AnalyticsEvent =
+        event("search_result_opened", "match" to match.label())
+
+    fun noteRetryClicked(): AnalyticsEvent = event("note_retry_clicked")
+
+    fun noteContinueClicked(): AnalyticsEvent = event("note_continue_clicked")
+
+    fun recordingStarted(origin: RecordingOrigin): AnalyticsEvent =
+        event("recording_started", "origin" to origin.label())
+
+    fun recordingDiscarded(reason: RecordingDiscardReason, durationMs: Long): AnalyticsEvent =
+        event("recording_discarded", "reason" to reason.label(), "duration_s" to seconds(durationMs))
+
+    fun recordingFailed(reason: String): AnalyticsEvent = event("recording_failed", "reason" to reason)
+
+    fun microphoneDenied(): AnalyticsEvent = event("microphone_denied")
 
     fun notePaused(): AnalyticsEvent = event("note_paused")
 
@@ -76,8 +111,21 @@ object AnalyticsEvents {
     fun defaultStyleChanged(style: NoteStyleRef): AnalyticsEvent =
         event("default_style_changed", "style" to style.analyticsName())
 
+    fun noteFeatureToggled(feature: NoteFeature, enabled: Boolean): AnalyticsEvent = event(
+        when (feature) {
+            NoteFeature.TRANSCRIPTION -> "transcription_toggled"
+            NoteFeature.SUMMARY -> "summary_toggled"
+        },
+        "enabled" to enabled.label(),
+    )
+
     fun smartSuggestionsToggled(enabled: Boolean): AnalyticsEvent =
         event("smart_suggestions_toggled", "enabled" to enabled.label())
+
+    fun skipSilenceToggled(enabled: Boolean): AnalyticsEvent =
+        event("skip_silence_toggled", "enabled" to enabled.label())
+
+    fun telemetryToggled(enabled: Boolean): AnalyticsEvent = event("telemetry_toggled", "enabled" to enabled.label())
 
     fun appLockToggled(enabled: Boolean): AnalyticsEvent = event("app_lock_toggled", "enabled" to enabled.label())
 
@@ -105,12 +153,29 @@ object AnalyticsEvents {
     fun purchaseCompleted(plan: ProPlan, trial: Boolean, feature: ProFeature): AnalyticsEvent =
         event("purchase_completed", "plan" to plan.label(), "trial" to trial.label(), "feature" to feature.label())
 
+    fun purchaseCancelled(plan: ProPlan, feature: ProFeature): AnalyticsEvent =
+        event("purchase_cancelled", "plan" to plan.label(), "feature" to feature.label())
+
+    fun purchaseFailed(plan: ProPlan, feature: ProFeature): AnalyticsEvent =
+        event("purchase_failed", "plan" to plan.label(), "feature" to feature.label())
+
+    fun purchasePending(plan: ProPlan, feature: ProFeature): AnalyticsEvent =
+        event("purchase_pending", "plan" to plan.label(), "feature" to feature.label())
+
+    fun trialOfferKept(): AnalyticsEvent = event("trial_offer_kept")
+
     fun restoreClicked(): AnalyticsEvent = event("restore_clicked")
 
     fun proGrandfathered(hasPurchase: Boolean): AnalyticsEvent =
         event("pro_grandfathered", "has_purchase" to hasPurchase.label())
 
     fun redeemCodeClicked(): AnalyticsEvent = event("redeem_code_clicked")
+
+    fun proTrialStarted(): AnalyticsEvent = event("pro_trial_started")
+
+    fun proTrialEnded(): AnalyticsEvent = event("pro_trial_ended")
+
+    fun proTrialRevoked(): AnalyticsEvent = event("pro_trial_revoked")
 
     fun onboardingCompleted(): AnalyticsEvent = event("onboarding_completed")
 
@@ -119,9 +184,14 @@ object AnalyticsEvents {
     fun deviceUnsupported(ramGb: Long, cpuCores: Int): AnalyticsEvent =
         event("device_unsupported", "ram_gb" to ramGb, "cores" to cpuCores.toLong())
 
+    fun deviceTranscriptsOnly(ramGb: Long, cpuCores: Int): AnalyticsEvent =
+        event("device_transcripts_only", "ram_gb" to ramGb, "cores" to cpuCores.toLong())
+
     fun frameworkUnsupported(): AnalyticsEvent = event("framework_unsupported")
 
     fun modelDownloadStarted(network: String): AnalyticsEvent = event("model_download_started", "network" to network)
+
+    fun mobileDataDownloadClicked(): AnalyticsEvent = event("mobile_data_download_clicked")
 
     fun modelDownloadFailed(reason: String): AnalyticsEvent = event("model_download_failed", "reason" to reason)
 
@@ -132,6 +202,8 @@ object AnalyticsEvents {
         event("notification_permission", "granted" to granted.label())
 
     fun modelDownloaded(durationMs: Long): AnalyticsEvent = event("model_downloaded", "duration_s" to seconds(durationMs))
+
+    fun modelDownloadedWhileAway(): AnalyticsEvent = event("model_downloaded")
 
     fun notesSearched(): AnalyticsEvent = event("notes_searched")
 
@@ -148,7 +220,7 @@ object AnalyticsEvents {
     private fun Boolean.label(): String = toString()
 
     private const val SECONDS_PER_MINUTE = 60L
-private const val MS_PER_SECOND = 1_000L
+    private const val MS_PER_SECOND = 1_000L
 }
 
 fun NoteStyleRef.analyticsName(): String = when (this) {

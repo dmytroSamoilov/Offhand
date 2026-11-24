@@ -2,11 +2,11 @@ plugins {
     alias(libs.plugins.offhand.kmp.library)
 }
 
-android {
-    namespace = "com.dmytrosamoilov.offhand.testing.fakes"
-}
-
 kotlin {
+    android {
+        namespace = "com.dmytrosamoilov.offhand.testing.fakes"
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(project(":core:ai-api"))

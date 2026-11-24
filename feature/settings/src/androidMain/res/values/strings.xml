@@ -29,14 +29,14 @@
 
     <string name="settings_note_style_note">The selected style is used for new recordings. You can change the style of any note from the note itself.</string>
     <string name="settings_note_styles_default_value">Default: %1$s</string>
-    <string name="settings_note_styles_title">Summary styles</string>
+    <string name="settings_note_styles_title">Writing styles</string>
     <string name="settings_note_styles_edit">Edit</string>
     <string name="settings_note_styles_delete">Delete style</string>
     <string name="settings_note_styles_delete_dialog_title">Delete this style?</string>
     <string name="settings_note_styles_delete_dialog_body">Notes written with it are kept. They switch to the Summary style the next time they are rewritten.</string>
     <string name="settings_note_styles_delete_dialog_confirm">Delete</string>
-    <string name="settings_note_style_editor_new_title">New summary style</string>
-    <string name="settings_note_style_editor_edit_title">Edit summary style</string>
+    <string name="settings_note_style_editor_new_title">New writing style</string>
+    <string name="settings_note_style_editor_edit_title">Edit writing style</string>
     <string name="settings_note_style_editor_back">Back</string>
     <string name="settings_note_style_editor_save">Save</string>
     <string name="settings_note_style_editor_name">Name</string>
@@ -65,23 +65,21 @@
     <string name="settings_note_style_error_duplicate">This name is already used</string>
     <string name="settings_note_style_error_sections_too_many">Use at most %1$d sections</string>
     <string name="settings_note_style_describe_button">Describe it and let the AI fill the form</string>
-    <string name="settings_note_style_describe_title">Describe your note</string>
-    <string name="settings_note_style_describe_body">Say what the recording is about and what the finished note should contain. The AI proposes the sections; you can change everything afterwards.</string>
     <string name="settings_note_style_describe_hint">For example: I coach football teams. After each training I record what we practised, what went well, what each player should work on and what to plan next time.</string>
     <string name="settings_note_style_describe_build">Build the style</string>
     <string name="settings_note_style_describe_running">Thinking about your sections…</string>
     <string name="settings_note_style_describe_failed">The AI could not turn that into a style. Try describing it differently.</string>
 
-    <string name="settings_security_title">Security</string>
-    <string name="settings_app_lock_label">Require unlock to open Offhand</string>
+    <string name="settings_app_lock_label">App lock</string>
     <string name="settings_app_lock_description">Ask for your fingerprint, face, or screen lock every time Offhand opens.</string>
     <string name="settings_app_lock_unavailable">Set up a screen lock on this phone to use this.</string>
-    <string name="settings_appearance_title">Appearance</string>
+    <string name="settings_skip_silence_label">Skip silence</string>
+    <string name="settings_skip_silence_description">Jump over long pauses when you play a recording.</string>
     <string name="settings_dynamic_color_label">Wallpaper colors</string>
     <string name="settings_dynamic_color_description">Color the app from your wallpaper (Material You) instead of the built-in palette.</string>
 
     <string name="settings_privacy_title">Privacy</string>
-    <string name="settings_telemetry_label">Anonymous usage &amp; stability reports</string>
+    <string name="settings_telemetry_label">Share anonymous usage</string>
     <string name="settings_telemetry_description">Usage statistics and crash reports — things like app opens, device model and app version. Never your notes, recordings or any personal data.</string>
     <string name="settings_feedback_title">Feedback</string>
     <string name="settings_feature_request_label">Request a feature</string>
@@ -126,7 +124,6 @@
     <string name="settings_pro_override_pro" translatable="false">Pro</string>
     <string name="settings_pro_upgrade_subtitle">Styles, PDF and Word export, smart suggestions, audio and video import and unlimited folders</string>
     <string name="settings_pro_upgrade">Upgrade</string>
-    <string name="settings_subscription_title">Subscription</string>
     <string name="settings_subscription_lifetime">Lifetime, yours forever</string>
     <string name="settings_subscription_included">Included on this device. It is not part of backups and does not survive a reinstall.</string>
     <string name="settings_subscription_trial">Free trial</string>
@@ -137,12 +134,28 @@
     <string name="settings_smart_suggestions_title">Smart suggestions</string>
     <string name="settings_smart_suggestions_label">Show smart suggestions</string>
     <string name="settings_smart_suggestions_description">Find calendar events and to-dos in every new note. Adds a few seconds of processing.</string>
-    <string name="settings_notes_title">Notes</string>
-    <string name="settings_backup_section_title">Backup</string>
-    <string name="settings_about_section_title">About</string>
-    <string name="settings_about_footer">Everything stays on your phone. Nothing is uploaded, ever.</string>
+    <string name="settings_about_footer">Your notes never leave your phone.</string>
     <string name="settings_note_style_editor_no_sections">Without sections the note is one free-form summary.</string>
     <string name="settings_redeem_code">Redeem a code</string>
     <string name="settings_redeem_code_body">Google Play opens the yearly plan. Tap the arrow next to the payment method, choose Redeem code and enter your code. Its free trial replaces the standard one.</string>
     <string name="settings_redeem_code_confirm">Continue</string>
+    <string name="settings_subscription_monthly">Monthly</string>
+    <string name="settings_subscription_monthly_renews">Monthly, renews on %1$s</string>
+    <string name="settings_transcription_label">Transcribe recordings</string>
+    <string name="settings_transcription_description">Turns what you say into text. When off, a note is only its recording.</string>
+    <string name="settings_summary_label">Write a summary</string>
+    <string name="settings_summary_description">Writes a note from the transcript in your writing style. Needs transcription.</string>
+    <string name="settings_group_notes">Notes</string>
+    <string name="settings_group_import_backup">Import &amp; backup</string>
+    <string name="settings_group_app">App</string>
+    <plurals name="settings_plan_days_left">
+        <item quantity="one">%d day left</item>
+        <item quantity="other">%d days left</item>
+    </plurals>
+    <string name="settings_plan_trial_body">Everything in Pro is unlocked during your free trial. After that Offhand stays free, with the Summary style and two folders.</string>
+    <string name="settings_not_on_this_phone">Not available on this phone</string>
+    <string name="settings_summary_unavailable_note">Summaries, writing styles and smart suggestions need more memory than this phone has. Recording, transcripts, folders, search and sharing all work.</string>
+    <string name="settings_widget_title">Home-screen widget</string>
+    <string name="settings_widget_subtitle">Record with one tap</string>
+    <string name="settings_widget_body">One tap on the widget starts a recording, into the folder you pick for it. Tap it again to stop and save.\n\nTo add it, touch and hold your home screen, tap Widgets and find Offhand.</string>
 </resources>

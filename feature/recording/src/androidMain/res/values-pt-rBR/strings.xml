@@ -5,14 +5,15 @@
     <string name="recording_stop_description">Parar gravação</string>
     <string name="recording_pause_description">Pausar gravação</string>
     <string name="recording_resume_description">Retomar gravação</string>
+    <string name="recording_pause_label">Pausar</string>
+    <string name="recording_resume_label">Retomar</string>
     <string name="recording_paused_label">Em pausa</string>
-    <string name="recording_active_label">Gravando…</string>
+    <string name="recording_active_label">Gravando</string>
     <string name="recording_save_note_button">Salvar nota</string>
     <string name="recording_discard_button">Descartar gravação</string>
     <string name="recording_discard_dialog_title">Descartar esta gravação?</string>
-    <string name="recording_discard_dialog_body">A gravação e tudo o que foi transcrito até agora serão excluídos. Isso não pode ser desfeito.</string>
+    <string name="recording_discard_dialog_body">Serão excluídos %1$s de áudio e a transcrição. Isso não pode ser desfeito.</string>
     <string name="recording_discard_dialog_confirm">Descartar</string>
-    <string name="recording_discard_dialog_cancel">Cancelar</string>
     <string name="recording_stage_finishing">Salvando sua gravação…</string>
     <string name="recording_processing_hint">Você pode fechar isto — a nota vai aparecer na sua lista quando estiver pronta.</string>
     <string name="recording_external_mic_generic">Microfone externo</string>
@@ -37,4 +38,31 @@
     <string name="recording_notification_note_failed_text">A gravação está salva. Toque para abri-la e tentar de novo.</string>
     <string name="recording_notification_note_paused_title">Sua nota está pausada</string>
     <string name="recording_notification_note_paused_text">Abra o Offhand e ela será concluída.</string>
+    <string name="record_widget_name">Gravar uma nota</string>
+    <string name="record_widget_description">Inicie ou pare uma gravação na tela inicial.</string>
+    <string name="record_widget_record">Gravar</string>
+    <string name="record_widget_stop">Parar</string>
+    <string name="record_widget_no_folder">Sem pasta</string>
+    <string name="record_widget_config_title">Salvar gravações em</string>
+    <string name="record_widget_config_save">Salvar</string>
+    <string name="recording_discard_keep">Continuar gravando</string>
+    <string name="recording_live_label">Transcrição ao vivo</string>
+    <plurals name="recording_duration_hours">
+        <item quantity="one">%d hora</item>
+        <item quantity="many">%d horas</item>
+        <item quantity="other">%d horas</item>
+    </plurals>
+    <plurals name="recording_duration_minutes">
+        <item quantity="one">%d minuto</item>
+        <item quantity="many">%d minutos</item>
+        <item quantity="other">%d minutos</item>
+    </plurals>
+    <plurals name="recording_duration_seconds">
+        <item quantity="one">%d segundo</item>
+        <item quantity="many">%d segundos</item>
+        <item quantity="other">%d segundos</item>
+    </plurals>
+    <string name="record_widget_stop_save">Parar e salvar</string>
+    <string name="record_widget_to_folder">Em %1$s</string>
+    <string name="record_widget_recording_to_folder">Gravando em %1$s</string>
 </resources>

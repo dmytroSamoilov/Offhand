@@ -3,11 +3,11 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-android {
-    namespace = "com.dmytrosamoilov.offhand.feature.recording"
-}
-
 kotlin {
+    android {
+        namespace = "com.dmytrosamoilov.offhand.feature.recording"
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(project(":core:ai-api"))
@@ -22,7 +22,6 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.androidx.core.ktx)
-            implementation(libs.androidx.material.icons.extended)
             implementation(libs.timber)
         }
     }

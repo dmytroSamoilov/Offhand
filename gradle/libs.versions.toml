@@ -1,48 +1,48 @@
 [versions]
-agp = "8.13.2"
-kotlin = "2.3.21"
-ksp = "2.3.12"
-coreKtx = "1.18.0"
+agp = "9.5.1"
+kotlin = "2.4.21"
+ksp = "2.3.14"
+coreKtx = "1.19.1"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
-uiautomator = "2.4.0"
+uiautomator = "2.4.1"
 androidxTestRunner = "1.7.0"
-lifecycle = "2.10.0"
+lifecycle = "2.11.0"
 activityCompose = "1.13.0"
-composeBom = "2026.06.01"
-material3Adaptive = "1.2.0"
-materialIconsExtended = "1.7.8"
-graphicsShapes = "1.1.0"
+composeBom = "2026.09.00"
+material3Adaptive = "1.3.0"
 koinBom = "4.2.2"
-skie = "0.10.12"
-navigationCompose = "2.9.8"
+skie = "0.10.16"
+navigationCompose = "2.10.2"
 coroutines = "1.11.0"
 kotlinxDatetime = "0.8.0"
-litertlm = "0.17.1"
-sherpaOnnx = "1.13.8"
-okhttp = "4.12.0"
-kotlinxSerialization = "1.11.0"
+litertlm = "0.19.1"
+sherpaOnnx = "2.0.1"
+okhttp = "5.5.1"
+kotlinxSerialization = "1.13.0"
 timber = "5.0.1"
-tink = "1.23.0"
+tink = "1.24.0"
 room = "2.8.5"
 sqlite = "2.7.1"
-datastore = "1.2.1"
+datastore = "1.3.0"
 okio = "3.18.2"
 playReview = "2.0.2"
 playBilling = "9.1.0"
-sqlcipher = "4.19.1"
+playBlockstore = "16.4.0"
+sqlcipher = "4.20.0"
 biometric = "1.1.0"
 fragmentKtx = "1.9.1"
-mockk = "1.14.11"
+mockk = "1.14.12"
 turbine = "1.2.1"
 leakcanary = "2.14"
-googleServices = "4.5.0"
+googleServices = "4.6.0"
 firebaseCrashlyticsPlugin = "3.0.8"
-firebaseBom = "34.19.0"
+firebaseBom = "35.2.0"
 kermit = "2.2.0"
 
 [libraries]
+play-blockstore = { group = "com.google.android.gms", name = "play-services-auth-blockstore", version.ref = "playBlockstore" }
 play-billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "playBilling" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
@@ -63,12 +63,9 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
-androidx-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core", version.ref = "materialIconsExtended" }
-androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "material3Adaptive" }
 androidx-material3-adaptive-layout = { group = "androidx.compose.material3.adaptive", name = "adaptive-layout", version.ref = "material3Adaptive" }
 androidx-material3-adaptive-navigation = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation", version.ref = "material3Adaptive" }
-androidx-graphics-shapes = { group = "androidx.graphics", name = "graphics-shapes", version.ref = "graphicsShapes" }
 
 # Navigation
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
@@ -144,7 +141,7 @@ compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compos
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

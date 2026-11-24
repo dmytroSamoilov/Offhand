@@ -94,3 +94,23 @@ internal val MIGRATION_10_11 = object : Migration(10, 11) {
         )
     }
 }
+
+// Where each paragraph of a transcript starts in the recording, so the
+// transcript can show its time marks; older notes simply have none.
+internal val MIGRATION_11_12 = object : Migration(11, 12) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE notes ADD COLUMN transcriptStartsMs TEXT")
+    }
+}
+
+// The loudness of each recording in sections, drawn by the list and the player;
+// the rows are filled from the stored audio after the upgrade.
+internal val MIGRATION_12_13 = object : Migration(12, 13) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS note_waveforms (" +
+                "noteId INTEGER PRIMARY KEY NOT NULL, " +
+                "levels TEXT NOT NULL)",
+        )
+    }
+}

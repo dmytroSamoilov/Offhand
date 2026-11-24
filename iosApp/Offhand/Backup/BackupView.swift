@@ -14,28 +14,38 @@ struct BackupView: View {
         isRestorePassphraseRequested: false,
         backupStep: nil,
         backupFileName: "",
-        operation: nil
+        operation: nil,
+        textBytes: nil,
+        recordingBytes: nil
     )
     @State private var isImporterPresented = false
 
     var body: some View {
-        Form {
-            Section {
-                Button(String(localized: "Back up")) { viewModel.onBackupFlowStarted() }
-            } header: {
-                Text(String(localized: "Backup"))
-            } footer: {
-                Text(String(localized: "Save an encrypted copy of your notes, folders and recordings to a file. You will need the passphrase to restore it, and it cannot be recovered."))
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(String(localized: "Backup & restore"))
+                    .offhandText(.title)
+                    .foregroundStyle(OffhandColor.ink)
+                    .padding(.top, 8)
+                    .accessibilityAddTraits(.isHeader)
+                Text(String(localized: "Offhand makes one encrypted file. You decide where it is kept."))
+                    .offhandText(.dialogBody)
+                    .foregroundStyle(OffhandColor.ink2)
+                    .padding(.top, 8)
+                BackupSectionLabel(text: String(localized: "Make a backup"))
+                if let size = BackupSize.text(state.estimatedBytes) {
+                    BackupSizeLine(text: String(format: String(localized: "About %@"), size))
+                }
+                PrimaryButton(String(localized: "Create backup file"), fillsWidth: true) { viewModel.onBackupFlowStarted() }
+                BackupHint(text: String(localized: "Save an encrypted copy of your notes, folders and recordings to a file. You will need the passphrase to restore it, and it cannot be recovered."))
+                BackupSectionLabel(text: String(localized: "Restore")).padding(.top, 8)
+                SecondaryButton(String(localized: "Choose a backup file"), fillsWidth: true) { isImporterPresented = true }
+                BackupHint(text: String(localized: "Add notes and folders from a backup file. Notes already on this iPhone are kept and duplicates are skipped."))
             }
-            Section {
-                Button(String(localized: "Choose a backup file")) { isImporterPresented = true }
-            } header: {
-                Text(String(localized: "Restore"))
-            } footer: {
-                Text(String(localized: "Add notes and folders from a backup file. Notes already on this iPhone are kept and duplicates are skipped."))
-            }
+            .padding(.horizontal, OffhandSpacing.screen)
+            .padding(.bottom, OffhandSpacing.screen)
         }
-        .navigationTitle(String(localized: "Backup & restore"))
+        .background(OffhandColor.ground.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: backupSheetBinding) {
             BackupSheet(viewModel: viewModel, state: state)
@@ -49,16 +59,21 @@ struct BackupView: View {
             Button(String(localized: "Restore")) { viewModel.onRestoreConfirmed() }
             Button(String(localized: "Cancel"), role: .cancel) { viewModel.onRestorePassphraseDismissed() }
         }
-        .alert(restoreResultTitle, isPresented: restoreResultBinding) {
-            Button(String(localized: "OK")) { viewModel.onOperationDismissed() }
-        } message: {
-            Text(BackupTexts.message(for: state.operation))
+        .offhandDialog(isPresented: restoreResultBinding) {
+            OffhandDialog(
+                title: restoreResultTitle,
+                message: BackupTexts.message(for: state.operation),
+                confirmLabel: String(localized: "OK"),
+                onConfirm: { viewModel.onOperationDismissed() },
+                onDismiss: { viewModel.onOperationDismissed() }
+            )
         }
         .overlay {
             if case .running(let running) = onEnum(of: state.operation), running.mode == .restore {
-                ProgressOverlay(mode: running.mode, percent: Int(running.percent))
+                ProgressOverlay(percent: Int(running.percent))
             }
         }
+        .onAppear { viewModel.refreshSizeEstimate() }
         .task {
             for await newState in viewModel.uiState {
                 state = newState
@@ -120,6 +135,48 @@ struct BackupView: View {
     }
 }
 
+private struct BackupSectionLabel: View {
+    let text: String
+
+    var body: some View {
+        SectionLabel(text)
+            .padding(.top, 26)
+            .padding(.bottom, 10)
+    }
+}
+
+private enum BackupSize {
+    static func text(_ bytes: KotlinLong?) -> String? {
+        guard let bytes, bytes.int64Value > 0 else { return nil }
+        return ByteCountFormatter.string(fromByteCount: bytes.int64Value, countStyle: .file)
+    }
+}
+
+private struct BackupSizeLine: View {
+    let text: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(text)
+                .font(.offhandMonoSmall)
+                .foregroundStyle(OffhandColor.ink2)
+            Hairline()
+        }
+        .padding(.bottom, 16)
+    }
+}
+
+private struct BackupHint: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .offhandText(.caption)
+            .foregroundStyle(OffhandColor.ink2)
+            .padding(.top, 8)
+    }
+}
+
 private struct BackupSheet: View {
     let viewModel: BackupViewModel
     let state: BackupUiState
@@ -127,25 +184,19 @@ private struct BackupSheet: View {
     @State private var pendingBackupURL: URL?
 
     var body: some View {
-        NavigationStack {
-            Form {
+        OffhandSheet(title: sheetTitle) {
+            if state.operation == nil {
+                PlainTextButton(String(localized: "Cancel"), tone: .muted) { viewModel.onBackupFlowDismissed() }
+            }
+        } content: {
+            VStack(alignment: .leading, spacing: 12) {
                 switch onEnum(of: state.operation) {
                 case .none: stepContent
                 case .running(let running): progressContent(percent: Int(running.percent))
                 default: resultContent
                 }
             }
-            .navigationTitle(sheetTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                if state.operation == nil {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(String(localized: "Cancel")) { viewModel.onBackupFlowDismissed() }
-                    }
-                }
-            }
         }
-        .presentationDetents([.large])
         .sheet(item: $exportURL) { url in
             DocumentExporter(url: url)
         }
@@ -166,83 +217,71 @@ private struct BackupSheet: View {
         }
     }
 
+    @ViewBuilder
     private var passphraseStep: some View {
-        Group {
-            Section {
-                SecureField(String(localized: "Passphrase"), text: passphraseBinding)
-                SecureField(String(localized: "Repeat passphrase"), text: confirmationBinding)
-                if let error = state.passphraseError {
-                    Text(BackupTexts.passphraseError(error))
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                }
-            }
-            Section {
-                WarningBox(text: String(localized: "Keep this passphrase safe. If you lose it, neither you nor we can recover the notes in this backup."))
-                    .listRowInsets(EdgeInsets())
-                    .listRowBackground(Color.clear)
-            }
-            Section {
-                Button(String(localized: "Continue")) { viewModel.onBackupPassphraseContinued() }
-                    .frame(maxWidth: .infinity)
-            }
-        }
+        OffhandTextField(text: passphraseBinding, placeholder: String(localized: "Passphrase"), isSecure: true)
+        OffhandTextField(
+            text: confirmationBinding,
+            placeholder: String(localized: "Repeat passphrase"),
+            error: state.passphraseError.map(BackupTexts.passphraseError),
+            isSecure: true
+        )
+        Text(String(localized: "Keep this passphrase safe. If you lose it, neither you nor we can recover the notes in this backup."))
+            .offhandText(.caption)
+            .foregroundStyle(OffhandColor.ink2)
+        PrimaryButton(String(localized: "Continue"), fillsWidth: true) { viewModel.onBackupPassphraseContinued() }
+            .padding(.top, 8)
     }
 
+    @ViewBuilder
     private var optionsStep: some View {
-        Group {
-            Section {
-                HStack {
-                    TextField(String(localized: "File name"), text: fileNameBinding)
-                    Text(BackupFileNames.shared.EXTENSION)
-                        .foregroundStyle(.secondary)
-                }
-                SettingsSwitchRow(
-                    title: String(localized: "Include audio recordings"),
-                    isOn: state.includeAudio,
-                    showsProBadge: !state.isAudioUnlocked
-                ) {
-                    viewModel.onIncludeAudioChanged(enabled: !state.includeAudio)
-                }
-                SettingsSwitchRow(
-                    title: String(localized: "Include summary styles"),
-                    isOn: state.includeStyles
-                ) {
-                    viewModel.onIncludeStylesChanged(enabled: !state.includeStyles)
-                }
-            } footer: {
-                Text(String(localized: "Recordings make the file much larger."))
-            }
-            Section {
-                Button(String(localized: "Save backup")) { startBackup() }
-                    .frame(maxWidth: .infinity)
-            }
+        OffhandTextField(text: fileNameBinding, placeholder: String(localized: "File name")) {
+            Text(BackupFileNames.shared.EXTENSION)
+                .offhandText(.body)
+                .foregroundStyle(OffhandColor.ink3)
+                .padding(.trailing, 12)
         }
+        SurfaceCard {
+            SwitchRow(
+                title: String(localized: "Include audio recordings"),
+                subtitle: recordingsSubtitle,
+                isOn: state.includeAudio,
+                showsProBadge: !state.isAudioUnlocked
+            ) { viewModel.onIncludeAudioChanged(enabled: $0) }
+            SwitchRow(
+                title: String(localized: "Include writing styles"),
+                isOn: state.includeStyles,
+                showsDivider: false
+            ) { viewModel.onIncludeStylesChanged(enabled: $0) }
+        }
+        PrimaryButton(String(localized: "Save backup"), fillsWidth: true) { startBackup() }
+            .padding(.top, 8)
     }
 
     private func progressContent(percent: Int) -> some View {
-        Section {
-            VStack(spacing: 14) {
-                ProgressView(value: Double(percent), total: 100)
-                    .tint(Brand.primary)
-                Text("\(percent)%")
-                    .font(.subheadline.monospacedDigit())
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.vertical, 8)
+        HStack(spacing: 12) {
+            ProgressLine(progress: Double(percent) / 100, thickness: 3)
+            Text(verbatim: "\(percent)%")
+                .offhandText(.number)
+                .foregroundStyle(OffhandColor.ink2)
         }
+        .padding(.vertical, 12)
     }
 
+    @ViewBuilder
     private var resultContent: some View {
-        Group {
-            Section {
-                Text(BackupTexts.message(for: state.operation))
-            }
-            Section {
-                Button(String(localized: "Done")) { viewModel.onBackupFlowDismissed() }
-                    .frame(maxWidth: .infinity)
-            }
+        Text(BackupTexts.message(for: state.operation))
+            .offhandText(.dialogBody)
+            .foregroundStyle(OffhandColor.ink2)
+        PrimaryButton(String(localized: "Done"), fillsWidth: true) { viewModel.onBackupFlowDismissed() }
+            .padding(.top, 8)
+    }
+
+    private var recordingsSubtitle: String {
+        guard let size = BackupSize.text(state.recordingBytes) else {
+            return String(localized: "Recordings make the file much larger.")
         }
+        return String(format: String(localized: "Adds about %@"), size)
     }
 
     private var sheetTitle: String {
@@ -284,22 +323,6 @@ private struct BackupSheet: View {
     }
 }
 
-private struct WarningBox: View {
-    let text: String
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: "exclamationmark.triangle.fill")
-            Text(text)
-                .font(.subheadline)
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Brand.warningContainer, in: RoundedRectangle(cornerRadius: 12))
-        .foregroundStyle(Brand.onWarningContainer)
-    }
-}
-
 private enum BackupTexts {
     static func message(for operation: BackupOperationUi?) -> String {
         switch onEnum(of: operation) {
@@ -336,24 +359,25 @@ private enum BackupTexts {
 }
 
 private struct ProgressOverlay: View {
-    let mode: BackupModeUi
     let percent: Int
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.35).ignoresSafeArea()
-            VStack(spacing: 14) {
-                ProgressView(value: Double(percent), total: 100)
-                    .tint(Brand.primary)
-                Text(mode == .backup ? String(localized: "Backing up") : String(localized: "Restoring"))
-                    .font(.headline)
-                Text("\(percent)%")
-                    .font(.subheadline.monospacedDigit())
-                    .foregroundStyle(.secondary)
+            OffhandColor.scrim.ignoresSafeArea()
+            VStack(alignment: .leading, spacing: 14) {
+                Text(String(localized: "Restoring"))
+                    .offhandText(.heading)
+                    .foregroundStyle(OffhandColor.ink)
+                HStack(spacing: 12) {
+                    ProgressLine(progress: Double(percent) / 100, thickness: 3)
+                    Text(verbatim: "\(percent)%")
+                        .offhandText(.number)
+                        .foregroundStyle(OffhandColor.ink2)
+                }
             }
-            .padding(24)
-            .frame(maxWidth: 280)
-            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+            .padding(OffhandSpacing.screen)
+            .frame(maxWidth: 300)
+            .background(OffhandColor.surface, in: RoundedRectangle(cornerRadius: OffhandRadius.sheet, style: .continuous))
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.telemetry
 
 import android.content.Context
+import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.CoroutineScope
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 class TelemetryController(
     private val context: Context,
     private val userPreferences: UserPreferencesRepository,
+    private val buildInfo: BuildInfo,
 ) {
 
     // Application-lifetime scope: lives as long as the process, never cancelled.
@@ -21,7 +23,7 @@ class TelemetryController(
     fun start() {
         scope.launch {
             userPreferences.preferences
-                .map { it.telemetryConsent }
+                .map { it.telemetryConsent.isShared }
                 .distinctUntilChanged()
                 .collect(::applyConsent)
         }
@@ -29,8 +31,11 @@ class TelemetryController(
 
     // FirebaseAnalytics.getInstance can self-initialise measurement, so it is only
     // reachable behind a non-null Crashlytics — proof that FirebaseApp exists.
+    // A developer build reports crashes but never analytics, automatic events
+    // included.
     private fun applyConsent(isGranted: Boolean) {
         if (!isGranted) {
+            AnalyticsReadiness.set(isCollecting = false)
             // Firebase that was never initialised has nothing to send and nothing
             // to switch off.
             FirebaseReporting.instanceOrNull(context)?.let { crashlytics ->
@@ -42,7 +47,8 @@ class TelemetryController(
         }
         FirebaseReporting.initialize(context)?.let { crashlytics ->
             crashlytics.setCrashlyticsCollectionEnabled(true)
-            FirebaseAnalytics.getInstance(context).setAnalyticsCollectionEnabled(true)
+            FirebaseAnalytics.getInstance(context).setAnalyticsCollectionEnabled(!buildInfo.isDeveloperBuild)
+            AnalyticsReadiness.set(isCollecting = !buildInfo.isDeveloperBuild)
         }
     }
 }

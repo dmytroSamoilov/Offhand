@@ -37,19 +37,19 @@
     <string name="paywall_close">बंद करें</string>
     <string name="paywall_no_browser">लिंक खोलने के लिए कोई ब्राउज़र नहीं मिला।</string>
     <string name="paywall_context_tagline">Offhand Pro का हिस्सा। हर रिकॉर्डिंग से और ज़्यादा पाएँ।</string>
-    <string name="paywall_context_styles">अपनी सारांश शैली सहेजें</string>
-    <string name="paywall_context_note_styles">कोई दूसरी सारांश शैली चुनें</string>
+    <string name="paywall_context_styles">अपनी लेखन शैली सहेजें</string>
+    <string name="paywall_context_note_styles">कोई दूसरी लेखन शैली चुनें</string>
     <string name="paywall_context_export">यह नोट PDF या Word में साझा करें</string>
     <string name="paywall_context_suggestions">अपने नोट्स में तारीखें और काम ढूँढें</string>
     <string name="paywall_context_import">रिकॉर्डिंग और वीडियो को नोट्स में बदलें</string>
-    <string name="paywall_context_folder_styles">इस फ़ोल्डर को अपनी सारांश शैली दें</string>
+    <string name="paywall_context_folder_styles">इस फ़ोल्डर को अपनी लेखन शैली दें</string>
     <string name="paywall_context_folders">दो से ज़्यादा फ़ोल्डर रखें</string>
     <string name="paywall_context_backup_audio">अपनी रिकॉर्डिंग का भी बैकअप लें</string>
     <string name="paywall_pro_styles_hint">मीटिंग नोट्स, विज़िट रिपोर्ट, कानूनी नोट, आपकी अपनी शैलियाँ और किसी भी नोट के लिए नई शैली</string>
     <string name="paywall_pro_export_hint">PDF और Word, क्लाइंट, ईमेल और प्रिंट के लिए तैयार</string>
     <string name="paywall_pro_suggestions_hint">तारीखें और काम सीधे आपके कैलेंडर में</string>
     <string name="paywall_pro_import_hint">वॉइस मेमो, कॉल, स्क्रीन रिकॉर्डिंग और वीडियो फ़ाइलें बिना सीमा (तीन मुफ़्त आज़माने के लिए)</string>
-    <string name="paywall_pro_folders_hint">हर एक की अपनी सारांश शैली</string>
+    <string name="paywall_pro_folders_hint">हर एक की अपनी लेखन शैली</string>
     <string name="paywall_pro_backup_hint">ऑडियो सहित, फिर भी एन्क्रिप्टेड</string>
     <string name="paywall_plan_yearly_monthly">लगभग %1$s प्रति माह</string>
     <string name="paywall_plan_best_value">सबसे किफ़ायती</string>
@@ -74,4 +74,29 @@
         <item quantity="other">वार्षिक के %d साल से भी कम</item>
     </plurals>
     <string name="paywall_benefits_body">Pro कॉलम की हर सुविधा आपकी है।</string>
+    <plurals name="paywall_trial_offer_title">
+        <item quantity="one">Offhand Pro अभी %d और दिन आपके लिए मुफ़्त है</item>
+        <item quantity="other">Offhand Pro अभी %d और दिन आपके लिए मुफ़्त है</item>
+    </plurals>
+    <string name="paywall_trial_intro_tagline">Pro की हर सुविधा पहले से खुली है। कोई भुगतान नहीं, कोई खाता नहीं। ट्रायल खत्म होने पर आपके पास मुफ़्त संस्करण रहेगा, जब तक आप अपग्रेड न करें।</string>
+    <string name="paywall_trial_offer_continue">Pro मुफ़्त में इस्तेमाल करते रहें</string>
+    <string name="paywall_plan_monthly">मासिक</string>
+    <string name="paywall_plan_monthly_price">%1$s / माह</string>
+    <string name="paywall_plan_monthly_renews">हर महीने नवीनीकृत होता है</string>
+    <string name="paywall_monthly_disclosure">%1$s प्रति माह, अपने आप नवीनीकृत होता है। स्टोर खाते से कभी भी रद्द करें।</string>
+    <string name="paywall_benefits_expand">Pro की सभी सुविधाएँ देखें</string>
+    <string name="paywall_benefits_collapse">कम दिखाएँ</string>
+    <string name="paywall_trial_ended_title">आपका Pro ट्रायल समाप्त हो गया है</string>
+    <string name="paywall_trial_ended_body">Offhand Pro के आपके 14 दिन पूरे हो गए हैं। आपके नोट्स, फ़ोल्डर और स्टाइल सब यहीं हैं। आप मुफ़्त संस्करण इस्तेमाल करते रह सकते हैं या Pro की सभी सुविधाएँ रखने के लिए अपग्रेड कर सकते हैं।</string>
+    <string name="paywall_trial_recap_title">Offhand Pro के साथ आपके 14 दिन</string>
+    <string name="paywall_trial_recap_tagline">आपका ट्रायल समाप्त हो गया है। Pro के साथ यह सब बनाए रखें।</string>
+    <string name="paywall_usage_custom_styles">आपकी अपनी शैलियों में नोट्स</string>
+    <string name="paywall_usage_pdf">साझा किए गए PDF</string>
+    <string name="paywall_usage_word">साझा किए गए Word दस्तावेज़</string>
+    <string name="paywall_usage_imports">आयात की गई रिकॉर्डिंग और वीडियो</string>
+    <string name="paywall_usage_calendar">कैलेंडर में जोड़े गए इवेंट</string>
+    <string name="paywall_usage_folder_styles">अपनी शैली वाले फ़ोल्डर</string>
+    <string name="paywall_usage_backups">आपकी रिकॉर्डिंग वाले बैकअप</string>
+    <string name="paywall_context_widget">होम स्क्रीन से रिकॉर्ड करें</string>
+    <string name="paywall_context_skip_silence">सुनते समय खामोशी छोड़ें</string>
 </resources>

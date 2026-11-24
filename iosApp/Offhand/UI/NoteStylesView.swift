@@ -1,8 +1,6 @@
 import OffhandShared
 import SwiftUI
 
-// The same list as the restyle sheet: picking a row sets the default for new
-// recordings, custom rows open the editor, where deleting lives.
 struct NoteStylesView: View {
     private let viewModel = AppViewModels.noteStyles
     @State private var state = NoteStylesUiState(
@@ -18,12 +16,12 @@ struct NoteStylesView: View {
             current: state.selected,
             customStyles: state.customStyles.map { NoteStyleChoice(id: $0.id, name: $0.name, details: $0.description_) },
             isProStylesUnlocked: state.isUnlocked,
-            footer: String(localized: "The selected style is used for new recordings. You can change the style of any note from the note itself."),
             onSelect: { viewModel.onStyleSelected(style: $0) },
             onCreateStyle: { openEditor(styleId: 0) },
-            onEdit: { openEditor(styleId: $0) }
+            onEdit: { openEditor(styleId: $0) },
+            title: String(localized: "Writing styles"),
+            subtitle: String(localized: "A style decides what Offhand writes from your recording. Tap one to use it for new notes.")
         )
-        .navigationTitle(String(localized: "Summary styles"))
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $isEditorVisible) {
             NoteStyleEditorView(styleId: editorStyleId)

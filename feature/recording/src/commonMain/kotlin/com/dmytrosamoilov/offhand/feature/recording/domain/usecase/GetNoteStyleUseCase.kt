@@ -6,7 +6,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import kotlinx.coroutines.flow.first
 
 // The style a new note gets: the folder's own style when it has one, else
-// the default from Settings.
+// the default from Settings. Without Pro every new note is a Summary,
+// whatever default a trial or a lapsed plan left behind.
 class GetNoteStyleUseCase(
     private val repository: UserPreferencesRepository,
     private val entitlements: ProStatusRepository,
@@ -14,9 +15,7 @@ class GetNoteStyleUseCase(
 ) {
     suspend operator fun invoke(folderId: Long? = null): NoteStyleRef {
         getFolderStyle(folderId)?.let { return it }
-        val style = repository.preferences.first().noteStyle
-        if (style is NoteStyleRef.BuiltIn) return style
         val unlocked = entitlements.observeStatus().first().isPro
-        return if (unlocked) style else NoteStyleRef.DEFAULT
+        return if (unlocked) repository.preferences.first().noteStyle else NoteStyleRef.DEFAULT
     }
 }

@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand
 
+import com.dmytrosamoilov.offhand.feature.recording.widget.RecordWidgetUpdater
 import android.app.Application
 import android.content.ComponentCallbacks2
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -89,6 +90,7 @@ class OffhandApplication : Application(), KoinComponent {
         Logger.setMinSeverity(if (BuildConfig.DEBUG) Severity.Verbose else Severity.Assert)
         telemetryController.start()
         pendingNotesCoordinator.start()
+        get<RecordWidgetUpdater>().start()
         observeForegroundForLock()
     }
 

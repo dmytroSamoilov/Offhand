@@ -19,6 +19,7 @@ class FakeProStore : ProStore {
     override val status: Flow<ProStatus?> = mutableStatus.asStateFlow()
 
     override suspend fun loadOffers(): List<ProOffer> = listOf(
+        ProOffer(plan = ProPlan.MONTHLY, price = "$3.99", priceMicros = 3_990_000),
         ProOffer(plan = ProPlan.YEARLY, price = "$24.99", trialDays = 14, priceMicros = 24_990_000, monthlyPrice = "$2.08"),
         ProOffer(plan = ProPlan.LIFETIME, price = "$59.99", priceMicros = 59_990_000),
     )

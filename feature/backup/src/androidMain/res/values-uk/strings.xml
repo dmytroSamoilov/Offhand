@@ -10,8 +10,8 @@
     <string name="backup_passphrase_mismatch">Парольні фрази не збігаються.</string>
     <string name="backup_include_audio_label">Додати аудіозаписи</string>
     <string name="backup_include_audio_description">Із записами файл стає значно більшим.</string>
-    <string name="backup_include_styles_label">Включити стилі резюме</string>
-    <string name="backup_include_styles_description">Ваші стилі резюме зберігаються разом із нотатками.</string>
+    <string name="backup_include_styles_label">Включити стилі письма</string>
+    <string name="backup_include_styles_description">Ваші стилі письма зберігаються разом із нотатками.</string>
     <string name="backup_restore_title">Відновити</string>
     <string name="backup_restore_body">Додайте нотатки й папки з файлу резервної копії. Нотатки на цьому телефоні збережуться, дублікати буде пропущено.</string>
     <string name="backup_restore_button">Вибрати файл копії</string>
@@ -39,4 +39,7 @@
     <string name="backup_file_name_label">Назва файлу</string>
     <string name="backup_save_button">Зберегти копію</string>
     <string name="backup_done">Готово</string>
+    <string name="backup_subtitle">Offhand створює один зашифрований файл. Де його зберігати, вирішуєте ви.</string>
+    <string name="backup_size_estimate">Близько %1$s</string>
+    <string name="backup_include_audio_size">Додасть близько %1$s</string>
 </resources>

@@ -12,6 +12,8 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.MediaCodecAudioDecode
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingAudioBackup
 import com.dmytrosamoilov.offhand.feature.recording.presentation.DefaultNoteTitleProviderImpl
 import com.dmytrosamoilov.offhand.feature.recording.service.RecordingProcessControllerImpl
+import com.dmytrosamoilov.offhand.feature.recording.widget.RecordWidgetStore
+import com.dmytrosamoilov.offhand.feature.recording.widget.RecordWidgetUpdater
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -23,4 +25,6 @@ val featureRecordingAndroidModule = module {
     singleOf(::AndroidRecordingAudioBackup) bind RecordingAudioBackup::class
     singleOf(::MediaCodecAudioDecoder) bind AudioDecoder::class
     singleOf(::AudioImportIntake) bind AudioImportStaging::class
+    singleOf(::RecordWidgetStore)
+    singleOf(::RecordWidgetUpdater)
 }

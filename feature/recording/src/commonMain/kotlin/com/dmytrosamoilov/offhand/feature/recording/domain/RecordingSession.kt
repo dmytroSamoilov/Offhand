@@ -7,6 +7,9 @@ data class RecordingSession(
     val transcriptionTimeMs: Long = 0,
     val noteId: Long? = null,
     val errorMessage: String? = null,
+    val isTranscribedLive: Boolean = false,
+    val liveTranscript: String = "",
+    val folderId: Long? = null,
 )
 
 enum class SessionPhase {

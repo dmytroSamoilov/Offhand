@@ -29,15 +29,24 @@ appId: com.dmytrosamoilov.offhand.uitest
     commands:
       - scrollUntilVisible:
           element: "Pro status override"
+          centerElement: true
       - tapOn: "Free"
-      # Pro imports did not use up the free taste (the row sits next to the
-      # override at the bottom of the form)
-      - assertVisible: "3 of 3 free imports left"
+      # Pro imports did not use up the free taste
+      - scrollUntilVisible:
+          element: "3 of 3 free imports left"
+          direction: UP
+          centerElement: true
       # Scroll back to the very top (the hierarchy reports rows clipped under
       # the title as visible, so aim at the first row like 08 does)
       - scrollUntilVisible:
           element: "Upgrade"
           direction: UP
+      - swipe:
+          start: "50%,35%"
+          end: "50%,85%"
+      - swipe:
+          start: "50%,35%"
+          end: "50%,85%"
 
 # A built-in style other than Summary as the default
 - runFlow:
@@ -46,19 +55,19 @@ appId: com.dmytrosamoilov.offhand.uitest
     commands:
       - scrollUntilVisible:
           element:
-            text: "Summary styles"
+            text: "Writing styles"
           direction: UP
 - extendedWaitUntil:
-    visible: "Default: Summary"
+    visible: "Default: Summary|Summary"
     timeout: 5000
 - waitForAnimationToEnd:
     timeout: 3000
-- tapOn: "Summary styles"
+- tapOn: "Writing styles?"
 - extendedWaitUntil:
     visible: "Built in"
     timeout: 5000
 - tapOn: "Meeting notes"
-- assertVisible: "Choose a different summary style"
+- assertVisible: "Choose a different writing style"
 - tapOn: "Close"
 - runFlow:
     when:
@@ -82,8 +91,15 @@ appId: com.dmytrosamoilov.offhand.uitest
           element:
             text: "Backup & restore"
           direction: DOWN
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element: "Backup & restore"
+          centerElement: true
 - tapOn: "Backup & restore"
-- tapOn: "Back up"
+- tapOn: "Back up|Create backup file"
 - tapOn: "Passphrase"
 - inputText: "smoke-test-passphrase"
 - tapOn: "Repeat passphrase"
@@ -126,12 +142,11 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - tapOn:
-          id: "list.bullet"
-          text: "Notes"
+          id: "tab_notes"
 - tapOn: "New folder"
 - inputText: "Second"
 - tapOn: "Save"
-- assertVisible: "No notes in this folder."
+- assertVisible: "No notes in this folder yet"
 - tapOn: "New folder"
 - assertVisible: "Keep more than two folders"
 - tapOn: "Close"
@@ -139,7 +154,7 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "Delete folder"
 - tapOn: "Delete"
 - assertNotVisible: "Second"
-- tapOn: "All notes"
+- tapOn: "All notes|Unsorted"
 
 # Restyling a note and exporting it as PDF
 - tapOn: "Smoke test note"
@@ -149,15 +164,15 @@ appId: com.dmytrosamoilov.offhand.uitest
     commands:
       - tapOn: "COUNT ATTEMPT"
 - tapOn: "More actions"
-- tapOn: "Change summary style"
+- tapOn: "Change writing style"
 - tapOn: "Meeting notes"
-- assertVisible: "Choose a different summary style"
+- assertVisible: "Choose a different writing style"
 - tapOn: "Close"
 - extendedWaitUntil:
     visible: "Summary"
     timeout: 10000
 - tapOn: "Share note"
-- tapOn: "PDF file"
+- tapOn: "PDF( file)?"
 - tapOn: "Share"
 - assertVisible: "Share this note as PDF or Word"
 - tapOn: "Close"
@@ -187,4 +202,5 @@ appId: com.dmytrosamoilov.offhand.uitest
       - tapOn: "Settings"
       - scrollUntilVisible:
           element: "Pro status override"
+          centerElement: true
       - tapOn: "Store"

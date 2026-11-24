@@ -3,11 +3,11 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-android {
-    namespace = "com.dmytrosamoilov.offhand.feature.backup"
-}
-
 kotlin {
+    android {
+        namespace = "com.dmytrosamoilov.offhand.feature.backup"
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(project(":core:data"))
@@ -18,7 +18,6 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
-            implementation(libs.androidx.material.icons.extended)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

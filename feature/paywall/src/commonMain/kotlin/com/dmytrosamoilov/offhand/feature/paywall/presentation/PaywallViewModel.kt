@@ -9,6 +9,9 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.GetProTrialDaysLeftUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.GetProTrialRecapUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.IsSummaryAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.LoadProOffersUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.ObserveProStatusUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.PurchaseProUseCase
@@ -25,11 +28,14 @@ class PaywallViewModel(
     private val purchasePro: PurchaseProUseCase,
     private val restoreProPurchases: RestoreProPurchasesUseCase,
     private val observeProStatus: ObserveProStatusUseCase,
+    private val getProTrialRecap: GetProTrialRecapUseCase,
+    private val getProTrialDaysLeft: GetProTrialDaysLeftUseCase,
+    isSummaryAvailable: IsSummaryAvailableUseCase,
     private val proUpgradeGate: ProUpgradeGate,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
-    private val mutableUiState = MutableStateFlow(PaywallUiState())
+    private val mutableUiState = MutableStateFlow(PaywallUiState(isSummaryAvailable = isSummaryAvailable()))
     private var isDismissalTracked = false
 
     val uiState: StateFlow<PaywallUiState> = mutableUiState.asStateFlow()
@@ -37,7 +43,7 @@ class PaywallViewModel(
     init {
         viewModelScope.launch {
             observeProStatus().collect { status ->
-                mutableUiState.update { it.copy(isPro = status.isPro) }
+                mutableUiState.update { it.copy(isPro = status.isProForGood) }
             }
         }
         loadOffers()
@@ -46,7 +52,8 @@ class PaywallViewModel(
     // The same instance serves every presentation, so a reopened paywall
     // starts from a clean slate and fresh prices. The status is read here
     // rather than taken from the collected state, which a first presentation
-    // may not have received yet.
+    // may not have received yet. Someone on the free trial is still shown
+    // the offer.
     fun onOpened() {
         isDismissalTracked = false
         val feature = proUpgradeGate.requestedFeature.value ?: ProFeature.GENERAL
@@ -57,11 +64,22 @@ class PaywallViewModel(
                 message = null,
                 isPurchasing = false,
                 mode = PaywallMode.OPENING,
+                trialRecap = emptyList(),
+                trialDaysLeft = null,
             )
         }
         launchSafely(showLoading = false) {
-            val isPro = observeProStatus().first().isPro
-            mutableUiState.update { it.copy(isPro = isPro, mode = if (isPro) PaywallMode.BENEFITS else PaywallMode.OFFER) }
+            val isPro = observeProStatus().first().isProForGood
+            val recap = if (feature == ProFeature.TRIAL_ENDED) getProTrialRecap() else emptyList()
+            val daysLeft = if (feature == ProFeature.FREE_TRIAL) getProTrialDaysLeft() else null
+            mutableUiState.update {
+                it.copy(
+                    isPro = isPro,
+                    mode = if (isPro) PaywallMode.BENEFITS else PaywallMode.OFFER,
+                    trialRecap = recap,
+                    trialDaysLeft = daysLeft,
+                )
+            }
             if (isPro) return@launchSafely
             analyticsTracker.track(AnalyticsEvents.paywallShown(feature))
             loadOffers()
@@ -81,8 +99,20 @@ class PaywallViewModel(
             mutableUiState.update { it.copy(isPurchasing = true) }
             analyticsTracker.track(AnalyticsEvents.purchaseStarted(state.selectedPlan, state.feature))
             val outcome = purchasePro(state.selectedPlan)
-            if (outcome == PurchaseOutcome.PURCHASED) trackPurchase(state)
+            trackOutcome(outcome, state)
             mutableUiState.update { it.copy(isPurchasing = false, message = outcome.toMessage()) }
+        }
+    }
+
+    private fun trackOutcome(outcome: PurchaseOutcome, state: PaywallUiState) {
+        when (outcome) {
+            PurchaseOutcome.PURCHASED -> trackPurchase(state)
+            PurchaseOutcome.CANCELLED ->
+                analyticsTracker.track(AnalyticsEvents.purchaseCancelled(state.selectedPlan, state.feature))
+            PurchaseOutcome.PENDING ->
+                analyticsTracker.track(AnalyticsEvents.purchasePending(state.selectedPlan, state.feature))
+            PurchaseOutcome.FAILED ->
+                analyticsTracker.track(AnalyticsEvents.purchaseFailed(state.selectedPlan, state.feature))
         }
     }
 
@@ -96,13 +126,23 @@ class PaywallViewModel(
         launchSafely(showLoading = false) {
             mutableUiState.update { it.copy(isPurchasing = true) }
             val restored = restoreProPurchases()
-            val message = PaywallMessageUi.NothingToRestore.takeUnless { restored?.isPro == true }
+            val message = PaywallMessageUi.NothingToRestore.takeUnless { restored?.isProForGood == true }
             mutableUiState.update { it.copy(isPurchasing = false, message = message) }
         }
     }
 
     fun onMessageDismissed() {
         mutableUiState.update { it.copy(message = null) }
+    }
+
+    // "Keep using Pro for free" on the trial offer: the answer is reported,
+    // and the close is not counted as a dismissal on top of it.
+    fun onKeepTrialClicked() {
+        if (!isDismissalTracked) {
+            isDismissalTracked = true
+            analyticsTracker.track(AnalyticsEvents.trialOfferKept())
+        }
+        onClosed()
     }
 
     // Several controls can close one presentation (the close button, the

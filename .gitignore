@@ -32,3 +32,6 @@ iosApp/DerivedData/
 
 # Firebase client configs (per-flavor, obtained from the Firebase console)
 GoogleService-Info.plist
+
+# On-device Maestro suite output
+/testing/device-suite/results/

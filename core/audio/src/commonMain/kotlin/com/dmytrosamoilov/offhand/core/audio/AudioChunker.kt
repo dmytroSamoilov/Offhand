@@ -8,7 +8,7 @@ class AudioChunker(
     private val minChunkMs: Long,
     private val maxChunkMs: Long,
     private val silenceGapMs: Long,
-    private val silenceDb: Float,
+    silenceDb: Float,
 ) {
 
     class FrameOutcome(
@@ -32,6 +32,7 @@ class AudioChunker(
     private var chunkSpeechMs = 0L
     private var totalRecordedMs = 0L
     private var consecutiveSilentMs = 0L
+    private val silenceThreshold = RoomSilenceThreshold(silenceDb)
 
     fun onFrame(frame: ShortArray, count: Int, isPaused: Boolean): FrameOutcome {
         if (isPaused) {
@@ -39,12 +40,13 @@ class AudioChunker(
             return FrameOutcome(pausedSnapshot(), frameBytes = null, completedChunk = null)
         }
         val rmsDb = rmsDb(frame, count)
-        val isSilent = rmsDb < silenceDb
+        val frameMs = (count.toLong() * MS_PER_SECOND) / sampleRate
+        silenceThreshold.onFrame(rmsDb, frameMs)
+        val isSilent = rmsDb < silenceThreshold.currentDb
         val frameBytes = toLittleEndianBytes(frame, count)
         frames += frameBytes
         bufferedBytes += frameBytes.size
 
-        val frameMs = (count.toLong() * MS_PER_SECOND) / sampleRate
         if (isSilent) {
             consecutiveSilentMs += frameMs
         } else {
@@ -135,11 +137,18 @@ class AudioChunker(
         return bytes
     }
 
-    private companion object {
-        const val MS_PER_SECOND = 1_000L
-        const val BYTES_PER_SAMPLE = 2
-        const val PCM_FULL_SCALE = 32_768.0
-        const val MIN_MEASURABLE_RMS = 1e-9
-        const val DB_FACTOR = 20.0
+    // A piece ends at the first pause once it is a few seconds long, so the
+    // text of what was just said can be shown while the recording goes on; a
+    // stretch without pauses is still cut before Whisper's 30-second window.
+    companion object {
+        const val LIVE_MIN_CHUNK_MS = 4_000L
+        const val LIVE_MAX_CHUNK_MS = 29_000L
+        const val LIVE_SILENCE_GAP_MS = 500L
+        const val LIVE_SILENCE_DB = -45f
+        private const val MS_PER_SECOND = 1_000L
+        private const val BYTES_PER_SAMPLE = 2
+        private const val PCM_FULL_SCALE = 32_768.0
+        private const val MIN_MEASURABLE_RMS = 1e-9
+        private const val DB_FACTOR = 20.0
     }
 }

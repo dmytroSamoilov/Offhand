@@ -2,7 +2,9 @@
 <resources>
     <string name="destination_notes">Нотатки</string>
     <string name="destination_settings">Налаштування</string>
-    <string name="lock_title">Нотатки заблоковано</string>
+    <string name="destination_record">Записати</string>
+    <string name="destination_record_description">Почати новий запис</string>
+    <string name="lock_title">Offhand заблоковано</string>
     <string name="lock_body">Ваші нотатки зашифровані на вашому телефоні. Розблокуйте, щоб продовжити.</string>
     <string name="lock_unlock_button">Розблокувати</string>
     <string name="lock_prompt_title">Розблокувати Offhand</string>
@@ -14,4 +16,8 @@
     <string name="framework_unsupported_title">Offhand не може працювати на цьому телефоні</string>
     <string name="framework_unsupported_body">Системне ПЗ цього телефона змінене й повідомляє новішу версію Android, ніж є насправді. Offhand потрібен незмінений Android 12 або новіший.</string>
     <string name="framework_unsupported_close">Закрити</string>
+    <string name="trial_removed_title">Пробний період Pro скасовано</string>
+    <string name="trial_removed_body">Дату на цьому телефоні було переведено на час до початку пробного періоду, тому його завершено. Ви можете користуватися безкоштовною версією або перейти на Offhand Pro.</string>
+    <string name="trial_notice_upgrade">Переглянути Offhand Pro</string>
+    <string name="trial_notice_keep_free">Продовжити з безкоштовною версією</string>
 </resources>

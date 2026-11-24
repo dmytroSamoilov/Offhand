@@ -4,22 +4,36 @@
 # and a loop answering every prompt with pearl.match every few seconds, slow
 # enough for the lock screen to be seen first) and removes it after.
 # Run with `maestro test .maestro/lock/`. Covers switching the lock on in
-# onboarding, the lock screen on the next launch, unlocking, and switching the
-# lock off in Settings.
+# Settings (onboarding no longer asks), the lock screen on the next launch,
+# unlocking, and switching the lock off in Settings.
 appId: com.dmytrosamoilov.offhand.uitest
 ---
 - launchApp:
     clearState: true
-- tapOn: "Continue"
-# The switch starts on. iOS confirms the identity with Face ID here (answered
-# by the matcher loop); Android asks for the credential only at the lock screen
-- assertVisible: "Lock Offhand?"
-- tapOn: "Continue"
-- extendedWaitUntil:
-    visible: "Share anonymous reports|Share usage & stability reports"
-    timeout: 15000
-- tapOn: "Continue"
-- assertVisible: "Notes"
+- tapOn: "Don.t share"
+- tapOn: "Not now, look around first"
+- tapOn:
+    id: "tab_settings"
+# iOS confirms the identity with Face ID here (answered by the matcher loop);
+# Android asks for the credential only at the lock screen
+- scrollUntilVisible:
+    element:
+      text: "App lock"
+    centerElement: true
+    direction: DOWN
+- tapOn: "App lock"
+- waitForAnimationToEnd:
+    timeout: 5000
+# The Face ID prompt is not in the hierarchy and the matcher answers it up to
+# four seconds later, so wait that long for a text that never shows here
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Offhand is locked"
+          timeout: 8000
+          optional: true
 
 # The next launch is locked
 - stopApp
@@ -43,16 +57,21 @@ appId: com.dmytrosamoilov.offhand.uitest
           visible: "Offhand is locked"
           timeout: 10000
 - extendedWaitUntil:
-    visible: "Notes"
+    visible: "No notes yet"
     timeout: 15000
-- assertVisible: "Smoke test note|No notes yet.*"
 
 # Switching the lock off in Settings makes the next launch open straight away
-- tapOn: "Settings"
-- tapOn: "Require unlock to open Offhand"
+- tapOn:
+    id: "tab_settings"
+- scrollUntilVisible:
+    element:
+      text: "App lock"
+    centerElement: true
+    direction: DOWN
+- tapOn: "App lock"
 - stopApp
 - launchApp
 - extendedWaitUntil:
-    visible: "Notes"
+    visible: "No notes yet"
     timeout: 15000
-- assertNotVisible: "Notes locked|Offhand is locked"
+- assertNotVisible: "Offhand is locked"

@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.ApplicationExtension
+import com.dmytrosamoilov.offhand.buildlogic.TARGET_SDK
 import com.dmytrosamoilov.offhand.buildlogic.configureAndroidCompose
 import com.dmytrosamoilov.offhand.buildlogic.configureKotlinAndroid
 import org.gradle.api.Plugin
@@ -9,12 +10,11 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             pluginManager.apply("com.android.application")
-            pluginManager.apply("org.jetbrains.kotlin.android")
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
                 configureAndroidCompose(this)
-                defaultConfig.targetSdk = 36
+                defaultConfig.targetSdk = TARGET_SDK
                 buildFeatures.buildConfig = true
             }
         }

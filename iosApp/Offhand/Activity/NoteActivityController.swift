@@ -8,6 +8,16 @@ final class NoteActivityController {
     private var activity: Activity<NoteActivityAttributes>?
     private var recordingStartedAt = Date()
 
+    // An activity from an earlier run of the app (ended while a recording or
+    // a note was still shown) has nobody left to update it and would keep its
+    // timer running, so whatever this process did not start is ended.
+    func endLeftovers() {
+        for leftover in Activity<NoteActivityAttributes>.activities where leftover.id != activity?.id {
+            guard leftover.activityState == .active || leftover.activityState == .stale else { continue }
+            Task { await leftover.end(nil, dismissalPolicy: .immediate) }
+        }
+    }
+
     func recordingStarted() {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
             logger.error("Live Activities are disabled for this app")

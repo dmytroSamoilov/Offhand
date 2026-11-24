@@ -1,9 +1,11 @@
 package com.dmytrosamoilov.offhand.core.data.repository
 
+import com.dmytrosamoilov.offhand.core.data.domain.NoteFeature
 import com.dmytrosamoilov.offhand.core.data.domain.EarlyAdopterPro
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
+import com.dmytrosamoilov.offhand.core.data.domain.TelemetryConsent
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
@@ -14,6 +16,7 @@ import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 
@@ -21,7 +24,10 @@ class ConsentGatedAnalyticsTrackerTest {
 
     private val logged = mutableListOf<String>()
     private val loggedParams = mutableListOf<Map<String, Any>>()
+    private var isSinkReady = true
     private val sink = object : AnalyticsSink {
+        override fun isReady(): Boolean = isSinkReady
+
         override fun log(name: String, params: Map<String, Any>) {
             logged += name
             loggedParams += params
@@ -31,12 +37,12 @@ class ConsentGatedAnalyticsTrackerTest {
     private val buildInfo = BuildInfo(isDeveloperBuild = false, platform = "android")
 
     @Test
-    fun `events are dropped until consent is granted`() = runTest {
+    fun `a declined consent drops events and a later share only sends what follows`() = runTest {
         val tracker = ConsentGatedAnalyticsTracker(sink, preferences, buildInfo, backgroundScope)
         runCurrent()
 
         tracker.track(AnalyticsEvent("note_played"))
-        preferences.consent.value = true
+        preferences.consent.value = TelemetryConsent.SHARED
         runCurrent()
         tracker.track(AnalyticsEvent("note_paused"))
 
@@ -45,12 +51,12 @@ class ConsentGatedAnalyticsTrackerTest {
 
     @Test
     fun `withdrawn consent stops events again`() = runTest {
-        preferences.consent.value = true
+        preferences.consent.value = TelemetryConsent.SHARED
         val tracker = ConsentGatedAnalyticsTracker(sink, preferences, buildInfo, backgroundScope)
         runCurrent()
 
         tracker.track(AnalyticsEvent("share_clicked"))
-        preferences.consent.value = false
+        preferences.consent.value = TelemetryConsent.DECLINED
         runCurrent()
         tracker.track(AnalyticsEvent("note_deleted"))
 
@@ -58,8 +64,104 @@ class ConsentGatedAnalyticsTrackerTest {
     }
 
     @Test
+    fun `nothing is sent while the question is unanswered`() = runTest {
+        preferences.consent.value = TelemetryConsent.UNANSWERED
+        val tracker = ConsentGatedAnalyticsTracker(sink, preferences, buildInfo, backgroundScope)
+        runCurrent()
+
+        tracker.track(AnalyticsEvent("device_transcripts_only"))
+        runCurrent()
+
+        assertEquals(emptyList(), logged)
+    }
+
+    @Test
+    fun `events from before the answer go out once the answer is share`() = runTest {
+        preferences.consent.value = TelemetryConsent.UNANSWERED
+        val tracker = ConsentGatedAnalyticsTracker(sink, preferences, buildInfo, backgroundScope)
+        runCurrent()
+
+        tracker.track(AnalyticsEvent("onboarding_step"))
+        preferences.consent.value = TelemetryConsent.SHARED
+        runCurrent()
+
+        assertEquals(listOf("onboarding_step"), logged)
+    }
+
+    @Test
+    fun `events from before the answer are dropped when the answer is do not share`() = runTest {
+        preferences.consent.value = TelemetryConsent.UNANSWERED
+        val tracker = ConsentGatedAnalyticsTracker(sink, preferences, buildInfo, backgroundScope)
+        runCurrent()
+
+        tracker.track(AnalyticsEvent("device_unsupported"))
+        preferences.consent.value = TelemetryConsent.DECLINED
+        runCurrent()
+        preferences.consent.value = TelemetryConsent.SHARED
+        runCurrent()
+
+        assertEquals(emptyList(), logged)
+    }
+
+    @Test
+    fun `events tracked before the stored answer has loaded are not lost`() = runTest {
+        preferences.consent.value = TelemetryConsent.SHARED
+        val tracker = ConsentGatedAnalyticsTracker(sink, preferences, buildInfo, backgroundScope)
+
+        tracker.track(AnalyticsEvent("note_played"))
+        runCurrent()
+
+        assertEquals(listOf("note_played"), logged)
+    }
+
+    @Test
+    fun `an event tracked before the reporting is switched on waits for it and keeps its order`() = runTest {
+        preferences.consent.value = TelemetryConsent.SHARED
+        isSinkReady = false
+        val tracker = ConsentGatedAnalyticsTracker(sink, preferences, buildInfo, backgroundScope)
+        runCurrent()
+
+        tracker.track(AnalyticsEvent("onboarding_step"))
+        tracker.track(AnalyticsEvent("telemetry_toggled"))
+        runCurrent()
+        assertEquals(emptyList(), logged)
+
+        isSinkReady = true
+        advanceTimeBy(1_000)
+        runCurrent()
+
+        assertEquals(listOf("onboarding_step", "telemetry_toggled"), logged)
+    }
+
+    @Test
+    fun `an event is given up when the reporting never switches on`() = runTest {
+        preferences.consent.value = TelemetryConsent.SHARED
+        isSinkReady = false
+        val tracker = ConsentGatedAnalyticsTracker(sink, preferences, buildInfo, backgroundScope)
+        runCurrent()
+
+        tracker.track(AnalyticsEvent("note_played"))
+        advanceTimeBy(60_000)
+        runCurrent()
+
+        assertEquals(emptyList(), logged)
+    }
+
+    @Test
+    fun `a developer build sends nothing even with consent`() = runTest {
+        preferences.consent.value = TelemetryConsent.SHARED
+        val developerBuild = BuildInfo(isDeveloperBuild = true, platform = "android")
+        val tracker = ConsentGatedAnalyticsTracker(sink, preferences, developerBuild, backgroundScope)
+        runCurrent()
+
+        tracker.track(AnalyticsEvent("note_played"))
+
+        assertEquals(emptyList(), logged)
+    }
+
+    @Test
     fun `every event carries the platform next to its own parameters`() = runTest {
-        preferences.consent.value = true
+        preferences.consent.value = TelemetryConsent.SHARED
         val tracker = ConsentGatedAnalyticsTracker(sink, preferences, buildInfo, backgroundScope)
         runCurrent()
 
@@ -70,13 +172,13 @@ class ConsentGatedAnalyticsTrackerTest {
 }
 
 private class ConsentPreferences : UserPreferencesRepository {
-    val consent = MutableStateFlow(false)
+    val consent = MutableStateFlow(TelemetryConsent.DECLINED)
 
-    override val preferences: Flow<UserPreferences> = consent.map { granted ->
+    override val preferences: Flow<UserPreferences> = consent.map { answer ->
         UserPreferences(
             onboardingCompleted = true,
             appLockEnabled = false,
-            telemetryConsent = granted,
+            telemetryConsent = answer,
             dynamicColor = false,
             developerOptions = false,
             savedRecordingsCount = 0,
@@ -97,6 +199,8 @@ private class ConsentPreferences : UserPreferencesRepository {
     override suspend fun setReviewPromptState(state: ReviewPromptState) = Unit
     override suspend fun setProOverride(override: ProOverride) = Unit
     override suspend fun setSmartSuggestionsEnabled(enabled: Boolean) = Unit
+    override suspend fun setSkipSilenceEnabled(enabled: Boolean) = Unit
+    override suspend fun setNoteFeatureEnabled(feature: NoteFeature, enabled: Boolean) = Unit
     override suspend fun setNotificationsPrompted() = Unit
 
     override suspend fun setEarlyAdopterPro(decision: EarlyAdopterPro) = Unit

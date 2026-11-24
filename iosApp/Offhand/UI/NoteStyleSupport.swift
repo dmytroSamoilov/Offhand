@@ -14,16 +14,18 @@ enum NoteStyleLabels {
         case .meeting: return String(localized: "Meeting notes")
         case .visit: return String(localized: "Visit report")
         case .legal: return String(localized: "Legal note")
+        case .email: return String(localized: "Email")
         default: return String(localized: "Summary")
         }
     }
 
     static func details(for preset: NotePreset) -> String {
         switch preset {
-        case .summary: return String(localized: "Main topics, key decisions, action items and a short overview.")
+        case .summary: return String(localized: "One to three sentences on what the recording is about.")
         case .meeting: return String(localized: "Discussion, decisions, action items and open questions.")
         case .visit: return String(localized: "Who the visit was about, observations, what was done and follow-ups.")
         case .legal: return String(localized: "Matter, facts stated, instructions, advice given and next steps.")
+        case .email: return String(localized: "A subject line and an email that is ready to send.")
         default: return ""
         }
     }
@@ -34,128 +36,122 @@ enum NoteStyleLabels {
     }
 }
 
-struct StyleOptionRow: View {
-    let title: String
-    let details: String
-    let isSelected: Bool
-    var showProBadge = false
-    let action: () -> Void
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                .font(.title3)
-                .foregroundStyle(isSelected ? Brand.primary : Color.secondary)
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
-                    Text(title)
-                        .font(.body)
-                        .foregroundStyle(Color.primary)
-                    if showProBadge { ProBadge() }
-                }
-                Text(details)
-                    .font(.caption)
-                    .foregroundStyle(Color.secondary)
-            }
-            Spacer()
-        }
-        .contentShape(Rectangle())
-        .onTapGesture(perform: action)
-    }
-}
-
 struct NoteStyleChoice: Identifiable {
     let id: Int64
     let name: String
     let details: String
 }
 
-// One list for every place a style is picked: the user's own styles, then the
-// built-in ones, with "New" as a toolbar item in the host's top-right corner.
-// The Summary styles screen adds an Edit button to the custom rows; the
-// restyle sheet shows the plain list.
-// The selected row looks the same as on Android: tinted, with a filled check.
 struct NoteStyleList: View {
     let current: NoteStyleRef?
     let customStyles: [NoteStyleChoice]
     let isProStylesUnlocked: Bool
-    let footer: String
+    var footer: String?
     let onSelect: (NoteStyleRef) -> Void
     var onCreateStyle: (() -> Void)?
     var onDefaultSelected: (() -> Void)?
     var onEdit: ((Int64) -> Void)?
+    var title: String?
+    var subtitle: String?
+
+    private static let presets: [NotePreset] = [.summary, .meeting, .visit, .legal, .email]
 
     var body: some View {
-        List {
-            if let onDefaultSelected {
-                Section {
-                    StyleOptionRow(
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                heading
+                if let onDefaultSelected {
+                    ChoiceRow(
                         title: String(localized: "Default"),
-                        details: String(localized: "The style chosen in Settings"),
+                        subtitle: String(localized: "The style chosen in Settings"),
                         isSelected: current == nil,
+                        showsDivider: false,
+                        minHeight: 66,
                         action: onDefaultSelected
                     )
-                    .listRowBackground(rowBackground(isSelected: current == nil))
                 }
-            }
-            if !customStyles.isEmpty {
-                Section(String(localized: "Your styles")) {
-                    ForEach(customStyles) { style in
-                        customRow(style)
+                if !customStyles.isEmpty {
+                    groupLabel(String(localized: "Your styles"))
+                    ForEach(Array(customStyles.enumerated()), id: \.element.id) { index, style in
+                        customRow(style, showsDivider: index < customStyles.count - 1)
                     }
                 }
-            }
-            Section {
-                ForEach([NotePreset.summary, .meeting, .visit, .legal], id: \.self) { preset in
-                    StyleOptionRow(
+                groupLabel(String(localized: "Built in"))
+                ForEach(Self.presets, id: \.self) { preset in
+                    ChoiceRow(
                         title: NoteStyleLabels.label(for: preset),
-                        details: NoteStyleLabels.details(for: preset),
+                        subtitle: NoteStyleLabels.details(for: preset),
                         isSelected: current?.builtInPreset == preset,
-                        showProBadge: !isProStylesUnlocked && preset != .summary
+                        showsProBadge: !isProStylesUnlocked && preset != .summary,
+                        showsDivider: preset != Self.presets.last,
+                        minHeight: 66
                     ) {
                         onSelect(NoteStyleRefBuiltIn(preset: preset))
                     }
-                    .listRowBackground(rowBackground(isSelected: current?.builtInPreset == preset))
                 }
-            } header: {
-                Text(String(localized: "Built in"))
-            } footer: {
-                Text(footer)
+                if let footer {
+                    Text(footer)
+                        .offhandText(.caption)
+                        .foregroundStyle(OffhandColor.ink2)
+                        .padding(.top, OffhandSpacing.card)
+                }
             }
+            .padding(.horizontal, OffhandSpacing.screen)
+            .padding(.bottom, OffhandSpacing.screen)
         }
+        .background(OffhandColor.ground.ignoresSafeArea())
         .toolbar {
             if let onCreateStyle {
                 ToolbarItem(placement: .primaryAction) {
                     Button(String(localized: "New"), action: onCreateStyle)
+                        .font(.offhand(.buttonSmall))
+                        .tint(OffhandColor.accent)
                 }
             }
         }
     }
 
     @ViewBuilder
-    private func customRow(_ style: NoteStyleChoice) -> some View {
-        let isSelected = current?.customId == style.id
-        HStack(spacing: 12) {
-            StyleOptionRow(
-                title: style.name,
-                details: style.details,
-                isSelected: isSelected,
-                showProBadge: !isProStylesUnlocked
-            ) {
-                onSelect(NoteStyleRefCustom(id: style.id))
-            }
-            if let onEdit {
-                Button(String(localized: "Edit")) {
-                    onEdit(style.id)
-                }
-                .buttonStyle(.borderless)
-                .foregroundStyle(Brand.primary)
-            }
+    private var heading: some View {
+        if let title {
+            Text(title)
+                .offhandText(.title)
+                .foregroundStyle(OffhandColor.ink)
+                .padding(.top, 8)
+                .accessibilityAddTraits(.isHeader)
         }
-        .listRowBackground(rowBackground(isSelected: isSelected))
+        if let subtitle {
+            Text(subtitle)
+                .offhandText(.dialogBody)
+                .foregroundStyle(OffhandColor.ink2)
+                .padding(.top, 8)
+        }
     }
 
-    private func rowBackground(isSelected: Bool) -> Color {
-        isSelected ? Brand.secondaryContainer : Color(.secondarySystemGroupedBackground)
+    private func groupLabel(_ text: String) -> some View {
+        SectionLabel(text)
+            .padding(.top, 22)
+            .padding(.bottom, 2)
+    }
+
+    private func customRow(_ style: NoteStyleChoice, showsDivider: Bool) -> some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                ChoiceRow(
+                    title: style.name,
+                    subtitle: style.details,
+                    isSelected: current?.customId == style.id,
+                    showsProBadge: !isProStylesUnlocked,
+                    showsDivider: false,
+                    minHeight: 66
+                ) {
+                    onSelect(NoteStyleRefCustom(id: style.id))
+                }
+                if let onEdit {
+                    PlainTextButton(String(localized: "Edit")) { onEdit(style.id) }
+                }
+            }
+            if showsDivider { Hairline() }
+        }
     }
 }

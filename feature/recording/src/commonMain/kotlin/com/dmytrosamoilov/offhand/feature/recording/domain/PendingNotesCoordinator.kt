@@ -2,6 +2,7 @@
 
 package com.dmytrosamoilov.offhand.feature.recording.domain
 
+import co.touchlab.kermit.Logger
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadState
 import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
@@ -10,20 +11,27 @@ import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RememberModelDownloadProgressUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SettleRememberedModelDownloadUseCase
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 // Reacts to the model download finishing: notes waiting for the AI core are
-// picked up, and the download time is reported (measured from when this
+// picked up (those waiting to be transcribed already when the speech part
+// lands, well before the rest), and the download time is reported (measured from when this
 // process saw the download running, so a restart mid-download shortens it).
 // The percent reached is remembered across starts: a download still pending
-// at a cold start with the model missing is reported as abandoned, once.
+// at a cold start is reported once: as abandoned with the model missing, as
+// downloaded when it finished while no process was watching (iOS relaunches
+// the app for a background download without building the root view model).
 // A note the system interrupted while the app is already back in front is
 // resumed at once, without waiting for the next foreground return.
 class PendingNotesCoordinator(
@@ -33,7 +41,9 @@ class PendingNotesCoordinator(
     private val resumeInterruptedNotes: ResumeInterruptedNotesUseCase,
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
     private val rememberDownloadProgress: RememberModelDownloadProgressUseCase,
+    private val settleRememberedDownload: SettleRememberedModelDownloadUseCase,
     private val analyticsTracker: AnalyticsTracker,
+    private val speechWarmUp: SpeechWarmUp,
 ) {
 
     // Application-lifetime scope: lives as long as the process, never cancelled.
@@ -44,17 +54,23 @@ class PendingNotesCoordinator(
 
     fun start() {
         if (!isStarted.compareAndSet(expectedValue = false, newValue = true)) return
+        speechWarmUp.start(scope)
         scope.launch {
-            reportAbandonedDownload()
+            settleRememberedDownload()
             aiCoreDownloadStatus.state.collect { state ->
                 onDownloadState(state is AiCoreDownloadState.Downloading)
                 if (state is AiCoreDownloadState.Downloading) rememberProgress(state.progressPercent)
             }
         }
         scope.launch {
+            aiCoreDownloadStatus.isSpeechMissing.drop(1).filter { isMissing -> !isMissing }.collect {
+                resumeNotes()
+            }
+        }
+        scope.launch {
             sessionManager.events.collect { event ->
                 if (event is NoteProcessingEvent.Interrupted && appForegroundState.isInForeground.value) {
-                    resumeInterruptedNotes()
+                    resumeNotes()
                 }
             }
         }
@@ -76,17 +92,20 @@ class PendingNotesCoordinator(
             analyticsTracker.track(AnalyticsEvents.modelDownloaded(startedAt.elapsedNow().inWholeMilliseconds))
             rememberDownloadProgress.remember(null)
         }
-        resumeInterruptedNotes()
+        resumeNotes()
     }
 
-    private suspend fun reportAbandonedDownload() {
-        val pending = rememberDownloadProgress.pending() ?: return
-        if (isAiCoreDownloaded()) {
-            rememberDownloadProgress.remember(null)
-            return
+    // A resume that still fails (the device locked again in between) is not
+    // lost: the notes stay interrupted and the next return to the app resumes
+    // them. Letting the error escape would end the app on iOS.
+    private suspend fun resumeNotes() {
+        try {
+            resumeInterruptedNotes()
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (t: Throwable) {
+            Logger.withTag(LOG_TAG).w(t) { "Resuming interrupted notes failed, retried on the next return" }
         }
-        analyticsTracker.track(AnalyticsEvents.modelDownloadAbandoned(pending))
-        rememberDownloadProgress.remember(null)
     }
 
     // Written in steps, not on every tick: the value only has to survive a kill.
@@ -99,5 +118,6 @@ class PendingNotesCoordinator(
 
     private companion object {
         const val PROGRESS_STEP_PERCENT = 10
+        const val LOG_TAG = "PendingNotesCoordinator"
     }
 }

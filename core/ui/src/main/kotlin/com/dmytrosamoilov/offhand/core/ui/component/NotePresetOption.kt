@@ -1,31 +1,14 @@
 package com.dmytrosamoilov.offhand.core.ui.component
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
-import com.dmytrosamoilov.offhand.core.designsystem.component.ProBadge
-import com.dmytrosamoilov.offhand.core.designsystem.component.RoundedCheckbox
+import com.dmytrosamoilov.offhand.core.designsystem.component.ChoiceRow
 import com.dmytrosamoilov.offhand.core.ui.R
 
 enum class NotePresetOption(
@@ -48,6 +31,10 @@ enum class NotePresetOption(
         labelRes = R.string.core_ui_note_preset_legal,
         descriptionRes = R.string.core_ui_note_preset_legal_description,
     ),
+    EMAIL(
+        labelRes = R.string.core_ui_note_preset_email,
+        descriptionRes = R.string.core_ui_note_preset_email_description,
+    ),
 }
 
 fun NotePreset.toUi(): NotePresetOption = when (this) {
@@ -55,6 +42,7 @@ fun NotePreset.toUi(): NotePresetOption = when (this) {
     NotePreset.MEETING -> NotePresetOption.MEETING
     NotePreset.VISIT -> NotePresetOption.VISIT
     NotePreset.LEGAL -> NotePresetOption.LEGAL
+    NotePreset.EMAIL -> NotePresetOption.EMAIL
 }
 
 fun NotePresetOption.toDomain(): NotePreset = when (this) {
@@ -62,6 +50,7 @@ fun NotePresetOption.toDomain(): NotePreset = when (this) {
     NotePresetOption.MEETING -> NotePreset.MEETING
     NotePresetOption.VISIT -> NotePreset.VISIT
     NotePresetOption.LEGAL -> NotePreset.LEGAL
+    NotePresetOption.EMAIL -> NotePreset.EMAIL
 }
 
 @Composable
@@ -71,6 +60,7 @@ fun NotePresetOptionCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     showProBadge: Boolean = false,
+    showDivider: Boolean = true,
 ) {
     NoteStyleCard(
         title = stringResource(option.labelRes),
@@ -79,6 +69,7 @@ fun NotePresetOptionCard(
         onClick = onClick,
         modifier = modifier,
         showProBadge = showProBadge,
+        showDivider = showDivider,
     )
 }
 
@@ -90,53 +81,18 @@ fun NoteStyleCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     showProBadge: Boolean = false,
+    showDivider: Boolean = true,
     trailingActions: @Composable RowScope.() -> Unit = {},
 ) {
-    val containerColor by animateColorAsState(
-        targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.secondaryContainer
-        } else {
-            MaterialTheme.colorScheme.surface
-        },
+    ChoiceRow(
+        title = title,
+        subtitle = description.ifBlank { null },
+        isSelected = isSelected,
+        onClick = onClick,
+        modifier = modifier,
+        showProBadge = showProBadge,
+        showDivider = showDivider,
+        minHeight = 66.dp,
+        trailing = { Row(content = trailingActions) },
     )
-    val borderColor by animateColorAsState(
-        targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.outlineVariant
-        },
-    )
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        border = BorderStroke(width = 1.dp, color = borderColor),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            RoundedCheckbox(checked = isSelected)
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    if (showProBadge) ProBadge()
-                }
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            trailingActions()
-        }
-    }
 }

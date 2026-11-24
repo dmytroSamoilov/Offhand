@@ -37,19 +37,19 @@
     <string name="paywall_close">Cerrar</string>
     <string name="paywall_no_browser">No hay ningún navegador para abrir el enlace.</string>
     <string name="paywall_context_tagline">Parte de Offhand Pro. Saca más de cada grabación.</string>
-    <string name="paywall_context_styles">Guarda tu propio estilo de resumen</string>
-    <string name="paywall_context_note_styles">Elige otro estilo de resumen</string>
+    <string name="paywall_context_styles">Guarda tu propio estilo de escritura</string>
+    <string name="paywall_context_note_styles">Elige otro estilo de escritura</string>
     <string name="paywall_context_export">Comparte esta nota en PDF o Word</string>
     <string name="paywall_context_suggestions">Encuentra fechas y tareas en tus notas</string>
     <string name="paywall_context_import">Convierte grabaciones y vídeos en notas</string>
-    <string name="paywall_context_folder_styles">Dale a esta carpeta su propio estilo de resumen</string>
+    <string name="paywall_context_folder_styles">Dale a esta carpeta su propio estilo de escritura</string>
     <string name="paywall_context_folders">Ten más de dos carpetas</string>
     <string name="paywall_context_backup_audio">Haz copia también de tus grabaciones</string>
     <string name="paywall_pro_styles_hint">Notas de reunión, Informe de visita, Nota jurídica, tus propios estilos y otro estilo para cualquier nota</string>
     <string name="paywall_pro_export_hint">PDF y Word, listos para clientes, correo e impresión</string>
     <string name="paywall_pro_suggestions_hint">Fechas y tareas directas a tu calendario</string>
     <string name="paywall_pro_import_hint">Notas de voz, llamadas, grabaciones de pantalla y vídeos sin límite (tres gratis para probar)</string>
-    <string name="paywall_pro_folders_hint">Cada una con su propio estilo de resumen</string>
+    <string name="paywall_pro_folders_hint">Cada una con su propio estilo de escritura</string>
     <string name="paywall_pro_backup_hint">Con el audio, siempre cifrado</string>
     <string name="paywall_plan_yearly_monthly">Unos %1$s al mes</string>
     <string name="paywall_plan_best_value">Mejor valor</string>
@@ -74,4 +74,29 @@
         <item quantity="other">Menos de %d años del plan anual</item>
     </plurals>
     <string name="paywall_benefits_body">Todo lo de la columna Pro es tuyo.</string>
+    <plurals name="paywall_trial_offer_title">
+        <item quantity="one">Offhand Pro es tuyo gratis %d día más</item>
+        <item quantity="other">Offhand Pro es tuyo gratis %d días más</item>
+    </plurals>
+    <string name="paywall_trial_intro_tagline">Todo lo de Pro ya está desbloqueado. Sin pago y sin cuenta. Cuando termine la prueba te quedas con la versión gratis, salvo que mejores.</string>
+    <string name="paywall_trial_offer_continue">Seguir usando Pro gratis</string>
+    <string name="paywall_plan_monthly">Mensual</string>
+    <string name="paywall_plan_monthly_price">%1$s / mes</string>
+    <string name="paywall_plan_monthly_renews">Se renueva cada mes</string>
+    <string name="paywall_monthly_disclosure">%1$s al mes, se renueva automáticamente. Cancela cuando quieras en tu cuenta de la tienda.</string>
+    <string name="paywall_benefits_expand">Ver todo lo que incluye Pro</string>
+    <string name="paywall_benefits_collapse">Mostrar menos</string>
+    <string name="paywall_trial_ended_title">Tu prueba de Pro ha terminado</string>
+    <string name="paywall_trial_ended_body">Tus 14 días de Offhand Pro han terminado. Tus notas, carpetas y estilos siguen aquí. Puedes seguir con la versión gratis o mejorar para conservar todo lo de Pro.</string>
+    <string name="paywall_trial_recap_title">Tus 14 días con Offhand Pro</string>
+    <string name="paywall_trial_recap_tagline">Tu prueba ha terminado. Conserva todo esto con Pro.</string>
+    <string name="paywall_usage_custom_styles">Notas con tus propios estilos</string>
+    <string name="paywall_usage_pdf">PDF compartidos</string>
+    <string name="paywall_usage_word">Documentos de Word compartidos</string>
+    <string name="paywall_usage_imports">Grabaciones y vídeos importados</string>
+    <string name="paywall_usage_calendar">Eventos añadidos a tu calendario</string>
+    <string name="paywall_usage_folder_styles">Carpetas con su propio estilo</string>
+    <string name="paywall_usage_backups">Copias de seguridad con tus grabaciones</string>
+    <string name="paywall_context_widget">Graba desde la pantalla de inicio</string>
+    <string name="paywall_context_skip_silence">Salta los silencios al escuchar</string>
 </resources>

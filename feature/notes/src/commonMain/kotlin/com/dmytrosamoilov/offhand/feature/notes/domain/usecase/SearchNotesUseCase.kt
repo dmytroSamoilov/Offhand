@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.notes.domain.usecase
 
 import com.dmytrosamoilov.offhand.core.data.domain.Note
+import com.dmytrosamoilov.offhand.feature.notes.domain.MatchLocation
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteSearchResult
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteTextCleaner
 import com.dmytrosamoilov.offhand.feature.notes.domain.TextMatch
@@ -19,15 +20,24 @@ class SearchNotesUseCase {
         val fields = listOf(note.title, body, transcript)
         val allTermsFound = terms.all { term -> fields.any { it.contains(term, ignoreCase = true) } }
         if (!allTermsFound) return null
-        val source = listOf(body, transcript).firstOrNull { field -> terms.any { field.contains(it, ignoreCase = true) } }
-        val snippet = source?.let { snippetAround(it, terms) } ?: NoteTextCleaner.preview(body)
+        val location = MatchLocation.entries.zip(fields).first { (_, field) -> field.containsAny(terms) }.first
+        val source = listOf(body, transcript).firstOrNull { it.containsAny(terms) }
+        val snippet = source?.let { snippetAround(it, terms) } ?: NoteTextCleaner.preview(body.ifBlank { transcript })
         return NoteSearchResult(
             note = note,
             titleMatches = occurrences(note.title, terms),
             snippet = snippet,
             snippetMatches = occurrences(snippet, terms),
+            location = location,
+            transcriptParagraph = if (location == MatchLocation.TRANSCRIPT) paragraphOf(note.transcript, terms) else null,
         )
     }
+
+    private fun String.containsAny(terms: List<String>): Boolean = terms.any { contains(it, ignoreCase = true) }
+
+    private fun paragraphOf(transcript: String, terms: List<String>): Int? =
+        transcript.split(PARAGRAPH_SEPARATOR).filter(String::isNotBlank).indexOfFirst { it.containsAny(terms) }
+            .takeIf { it >= 0 }
 
     private fun snippetAround(text: String, terms: List<String>): String {
         val firstMatch = terms
@@ -73,5 +83,6 @@ class SearchNotesUseCase {
         val WHITESPACE_RUNS = Regex("\\s+")
         const val LEAD_CHARS = 60
         const val ELLIPSIS = "… "
+        const val PARAGRAPH_SEPARATOR = "\n\n"
     }
 }

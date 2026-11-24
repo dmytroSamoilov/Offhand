@@ -28,14 +28,14 @@
 
     <string name="settings_note_style_note">Выбранный стиль используется для новых записей. Стиль любой заметки можно изменить в самой заметке.</string>
     <string name="settings_note_styles_default_value">По умолчанию: %1$s</string>
-    <string name="settings_note_styles_title">Стили резюме</string>
+    <string name="settings_note_styles_title">Стили письма</string>
     <string name="settings_note_styles_edit">Изменить</string>
     <string name="settings_note_styles_delete">Удалить стиль</string>
     <string name="settings_note_styles_delete_dialog_title">Удалить этот стиль?</string>
     <string name="settings_note_styles_delete_dialog_body">Заметки, написанные в нём, сохранятся. При следующем переписывании они перейдут в стиль «Конспект».</string>
     <string name="settings_note_styles_delete_dialog_confirm">Удалить</string>
-    <string name="settings_note_style_editor_new_title">Новый стиль резюме</string>
-    <string name="settings_note_style_editor_edit_title">Изменить стиль резюме</string>
+    <string name="settings_note_style_editor_new_title">Новый стиль письма</string>
+    <string name="settings_note_style_editor_edit_title">Изменить стиль письма</string>
     <string name="settings_note_style_editor_back">Назад</string>
     <string name="settings_note_style_editor_save">Сохранить</string>
     <string name="settings_note_style_editor_name">Название</string>
@@ -64,23 +64,21 @@
     <string name="settings_note_style_error_duplicate">Такое название уже используется</string>
     <string name="settings_note_style_error_sections_too_many">Не больше %1$d разделов</string>
     <string name="settings_note_style_describe_button">Опишите, и ИИ заполнит форму</string>
-    <string name="settings_note_style_describe_title">Опишите свою заметку</string>
-    <string name="settings_note_style_describe_body">Расскажите, о чём запись и что должно быть в готовой заметке. ИИ предложит разделы, потом всё можно изменить.</string>
     <string name="settings_note_style_describe_hint">Например: я тренирую футбольные команды. После каждой тренировки записываю, что мы отрабатывали, что получилось, над чем работать каждому игроку и что запланировать в следующий раз.</string>
     <string name="settings_note_style_describe_build">Создать стиль</string>
     <string name="settings_note_style_describe_running">Продумываем разделы…</string>
     <string name="settings_note_style_describe_failed">ИИ не смог превратить это в стиль. Попробуйте описать иначе.</string>
 
-    <string name="settings_security_title">Безопасность</string>
-    <string name="settings_app_lock_label">Требовать разблокировку при открытии Offhand</string>
+    <string name="settings_app_lock_label">Блокировка приложения</string>
     <string name="settings_app_lock_description">Запрашивает отпечаток пальца, лицо или блокировку экрана при каждом открытии Offhand.</string>
     <string name="settings_app_lock_unavailable">Настройте блокировку экрана на этом телефоне, чтобы использовать эту функцию.</string>
-    <string name="settings_appearance_title">Оформление</string>
+    <string name="settings_skip_silence_label">Пропускать тишину</string>
+    <string name="settings_skip_silence_description">Перескакивать длинные паузы при прослушивании записи.</string>
     <string name="settings_dynamic_color_label">Цвета обоев</string>
     <string name="settings_dynamic_color_description">Окрашивает приложение в цвета ваших обоев (Material You) вместо встроенной палитры.</string>
 
     <string name="settings_privacy_title">Конфиденциальность</string>
-    <string name="settings_telemetry_label">Анонимные отчёты об использовании и стабильности</string>
+    <string name="settings_telemetry_label">Делиться анонимной статистикой</string>
     <string name="settings_telemetry_description">Статистика использования и отчёты о сбоях — например, запуски приложения, модель устройства и версия приложения. Никогда — ваши заметки, записи или личные данные.</string>
     <string name="settings_feedback_title">Обратная связь</string>
     <string name="settings_feature_request_label">Предложить функцию</string>
@@ -122,7 +120,6 @@
     </plurals>
     <string name="settings_pro_upgrade_subtitle">Стили, экспорт в PDF и Word, умные подсказки, импорт аудио и видео и папки без ограничений</string>
     <string name="settings_pro_upgrade">Перейти на Pro</string>
-    <string name="settings_subscription_title">Подписка</string>
     <string name="settings_subscription_lifetime">Навсегда, ваша без ограничений</string>
     <string name="settings_subscription_included">Включено на этом устройстве. Не входит в резервные копии и не сохраняется после переустановки.</string>
     <string name="settings_subscription_trial">Пробный период</string>
@@ -133,12 +130,30 @@
     <string name="settings_smart_suggestions_title">Умные подсказки</string>
     <string name="settings_smart_suggestions_label">Показывать умные подсказки</string>
     <string name="settings_smart_suggestions_description">Находит события календаря и задачи в каждой новой заметке. Добавляет несколько секунд обработки.</string>
-    <string name="settings_notes_title">Заметки</string>
-    <string name="settings_backup_section_title">Резервная копия</string>
-    <string name="settings_about_section_title">О приложении</string>
-    <string name="settings_about_footer">Всё остаётся на вашем телефоне. Ничего никогда не загружается.</string>
+    <string name="settings_about_footer">Ваши заметки никогда не покидают ваш телефон.</string>
     <string name="settings_note_style_editor_no_sections">Без разделов заметка становится свободным резюме.</string>
     <string name="settings_redeem_code">Ввести промокод</string>
     <string name="settings_redeem_code_body">Google Play откроет годовой план. Нажмите стрелку рядом со способом оплаты, выберите «Активировать код» и введите код. Его бесплатный период заменит стандартный.</string>
     <string name="settings_redeem_code_confirm">Продолжить</string>
+    <string name="settings_subscription_monthly">Месячная</string>
+    <string name="settings_subscription_monthly_renews">Месячная, продлится %1$s</string>
+    <string name="settings_transcription_label">Расшифровывать записи</string>
+    <string name="settings_transcription_description">Превращает сказанное в текст. Если выключено, заметка — это только запись.</string>
+    <string name="settings_summary_label">Писать резюме</string>
+    <string name="settings_summary_description">Пишет заметку по расшифровке в вашем стиле письма. Нужна расшифровка.</string>
+    <string name="settings_group_notes">Заметки</string>
+    <string name="settings_group_import_backup">Импорт и копии</string>
+    <string name="settings_group_app">Приложение</string>
+    <plurals name="settings_plan_days_left">
+        <item quantity="one">остался %d день</item>
+        <item quantity="few">осталось %d дня</item>
+        <item quantity="many">осталось %d дней</item>
+        <item quantity="other">осталось %d дня</item>
+    </plurals>
+    <string name="settings_plan_trial_body">Во время пробного периода открыто всё из Pro. Потом Offhand остаётся бесплатным, со стилем «Резюме» и двумя папками.</string>
+    <string name="settings_not_on_this_phone">Недоступно на этом телефоне</string>
+    <string name="settings_summary_unavailable_note">Для резюме, стилей письма и умных подсказок нужно больше памяти, чем есть в этом телефоне. Запись, расшифровки, папки, поиск и отправка заметок работают как обычно.</string>
+    <string name="settings_widget_title">Виджет на главном экране</string>
+    <string name="settings_widget_subtitle">Запись одним касанием</string>
+    <string name="settings_widget_body">Одно касание виджета начинает запись в папку, которую вы для него выберете. Коснитесь ещё раз, чтобы остановить и сохранить.\n\nЧтобы добавить его, нажмите и удерживайте главный экран, выберите «Виджеты» и найдите Offhand.</string>
 </resources>

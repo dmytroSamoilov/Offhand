@@ -2,11 +2,11 @@ plugins {
     alias(libs.plugins.offhand.kmp.library)
 }
 
-android {
-    namespace = "com.dmytrosamoilov.offhand.core.audio"
-}
-
 kotlin {
+    android {
+        namespace = "com.dmytrosamoilov.offhand.core.audio"
+    }
+
     sourceSets {
         commonMain.dependencies {
             api(libs.coroutines.core)

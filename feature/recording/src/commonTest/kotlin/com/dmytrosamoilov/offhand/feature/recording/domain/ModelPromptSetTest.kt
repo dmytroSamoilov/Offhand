@@ -65,8 +65,8 @@ class ModelPromptSetTest {
     }
 
     @Test
-    fun `every preset forbids empty headings`() {
-        NotePreset.entries.forEach { preset ->
+    fun `every preset with headings forbids empty headings`() {
+        NotePreset.entries.filter { BuiltInNoteStyles.sections(it).isNotEmpty() }.forEach { preset ->
             assertTrue(
                 ModelPromptSet.Gemma4.structureNote(spec(preset))
                     .contains("Never write a heading with nothing under it"),
@@ -75,16 +75,50 @@ class ModelPromptSetTest {
     }
 
     @Test
-    fun `summary preset is the four-section quick summary`() {
+    fun `summary preset is one to three plain sentences and the polish pass holds it to that`() {
         val prompt = ModelPromptSet.Gemma4.structureNote(spec(NotePreset.SUMMARY))
+        val polish = ModelPromptSet.Gemma4.polishNote(spec(NotePreset.SUMMARY), thinkingEnabled = false)
 
-        assertEquals(
-            listOf("## Main Topics", "## Key Decisions", "## Action Items", "## Summary Overview"),
-            BuiltInNoteStyles.sections(NotePreset.SUMMARY),
-        )
-        assertTrue(prompt.contains("a summary of the recording in Markdown"))
-        assertTrue(prompt.contains("Under \"## Action Items\" write one \"- \" line per point: list all tasks"))
-        assertTrue(prompt.contains("Under \"## Summary Overview\" write short plain sentences: provide a brief, one-paragraph overview"))
+        assertTrue(BuiltInNoteStyles.sections(NotePreset.SUMMARY).isEmpty())
+        assertTrue(prompt.contains("in one to three plain sentences"))
+        assertTrue(prompt.contains("with no heading, no list, no line breaks and no Markdown"))
+        assertFalse(prompt.contains("Never write a heading with nothing under it"))
+        assertTrue(polish.contains("one to three sentences long in total"))
+        assertTrue(polish.contains("no headings, no \"- \" lines and no other Markdown"))
+        assertFalse(polish.contains("Keep only these section headings"))
+        assertTrue(spec(NotePreset.SUMMARY).isCondensedByPolish)
+    }
+
+    @Test
+    fun `email preset asks for a subject line and a formatted body and keeps one of each`() {
+        val prompt = ModelPromptSet.Gemma4.structureNote(spec(NotePreset.EMAIL))
+        val polish = ModelPromptSet.Gemma4.polishNote(spec(NotePreset.EMAIL), thinkingEnabled = false)
+
+        assertEquals(listOf("## Subject", "## Email"), BuiltInNoteStyles.sections(NotePreset.EMAIL))
+        assertTrue(prompt.contains("Under \"## Subject\" write one line with the subject"))
+        assertTrue(prompt.contains("a greeting line"))
+        assertTrue(prompt.contains("never write a placeholder"))
+        assertTrue(polish.contains("exactly one line under \"## Subject\""))
+        assertEquals(listOf("## Email"), spec(NotePreset.EMAIL).paragraphSections)
+    }
+
+    @Test
+    fun `built-in styles with headings ask for them in the recording's language and Summary does not`() {
+        listOf(NotePreset.MEETING, NotePreset.VISIT, NotePreset.LEGAL, NotePreset.EMAIL).forEach { preset ->
+            assertTrue(ModelPromptSet.Gemma4.structureNote(spec(preset)).contains("write each heading translated into that language"))
+            assertTrue(ModelPromptSet.Gemma4.polishNote(spec(preset), thinkingEnabled = false).contains("never turn them back into English"))
+            BuiltInNoteStyles.sections(preset).forEach { heading ->
+                assertTrue(spec(preset).headingTranslations.getValue(heading).isNotEmpty(), "$heading has no translations")
+            }
+        }
+        assertFalse(ModelPromptSet.Gemma4.structureNote(spec(NotePreset.SUMMARY)).contains("translated into that language"))
+    }
+
+    @Test
+    fun `built-in list sections are named to the polish pass`() {
+        val polish = ModelPromptSet.Gemma4.polishNote(spec(NotePreset.MEETING), thinkingEnabled = false)
+
+        assertTrue(polish.contains("Keep each point as one \"- \" line under \"## Decisions\", \"## Action items\", \"## Open questions\"."))
     }
 
     // Models copy quoted first-person sentences straight into the note as if
@@ -135,7 +169,7 @@ class ModelPromptSetTest {
 
     @Test
     fun `polish prompts allow adding a missing allowed heading`() {
-        NotePreset.entries.forEach { preset ->
+        NotePreset.entries.filter { BuiltInNoteStyles.sections(it).isNotEmpty() }.forEach { preset ->
             assertTrue(
                 ModelPromptSet.Gemma4.polishNote(spec(preset), thinkingEnabled = false)
                     .contains("add that heading"),

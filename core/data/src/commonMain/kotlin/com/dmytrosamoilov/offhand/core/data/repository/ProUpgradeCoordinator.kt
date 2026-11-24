@@ -30,6 +30,14 @@ internal class ProUpgradeCoordinator(
         requested.value = ProFeature.GENERAL
     }
 
+    override fun showTrialOffer() {
+        requested.value = ProFeature.FREE_TRIAL
+    }
+
+    override fun showTrialEnded() {
+        requested.value = ProFeature.TRIAL_ENDED
+    }
+
     override fun onPaywallClosed() {
         requested.value = null
         closedCount.update { it + 1 }

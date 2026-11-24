@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 data class UserPreferences(
     val onboardingCompleted: Boolean,
     val appLockEnabled: Boolean,
-    val telemetryConsent: Boolean,
+    val telemetryConsent: TelemetryConsent,
     val dynamicColor: Boolean,
     val developerOptions: Boolean,
     val savedRecordingsCount: Int,
@@ -22,7 +22,24 @@ data class UserPreferences(
     // Percent of an on-device AI download that has not finished yet; null when
     // none is pending, so a cold start can tell an abandoned download apart.
     val modelDownloadProgress: Int? = null,
+    val transcriptionEnabled: Boolean = true,
+    val summaryEnabled: Boolean = true,
+    val skipSilenceEnabled: Boolean = false,
 )
+
+// Asked as the first onboarding step. Installs that finished onboarding before
+// the question existed never saw it and read as SHARED unless they switched it
+// off, which was the default they had.
+enum class TelemetryConsent {
+    UNANSWERED,
+    SHARED,
+    DECLINED,
+    ;
+
+    val isShared: Boolean get() = this == SHARED
+
+    val isAnswered: Boolean get() = this != UNANSWERED
+}
 
 // Decided once per install when 1.5 first runs: an install that had finished
 // onboarding and holds at least one note keeps Pro on this device for good.
@@ -69,6 +86,10 @@ interface UserPreferencesRepository {
     suspend fun setProOverride(override: ProOverride)
 
     suspend fun setSmartSuggestionsEnabled(enabled: Boolean)
+
+    suspend fun setSkipSilenceEnabled(enabled: Boolean)
+
+    suspend fun setNoteFeatureEnabled(feature: NoteFeature, enabled: Boolean)
 
     suspend fun setNotificationsPrompted()
 

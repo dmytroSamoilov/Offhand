@@ -8,6 +8,8 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
 import com.dmytrosamoilov.offhand.core.data.domain.ProPlan
 import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialPolicy
+import kotlin.time.Clock
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
@@ -19,11 +21,18 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamic
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOverrideUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStatusUseCase
+import com.dmytrosamoilov.offhand.core.data.domain.NoteFeature
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteFeaturesUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSkipSilenceEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteFeatureEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.RedeemProCodeUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSkipSilenceEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
@@ -47,11 +56,17 @@ class SettingsViewModel(
     observeAppLockEnabled: ObserveAppLockEnabledUseCase,
     private val setAppLockEnabled: SetAppLockEnabledUseCase,
     private val appLockManager: AppLockManager,
+    observeTelemetryConsent: ObserveTelemetryConsentUseCase,
+    private val setTelemetryConsent: SetTelemetryConsentUseCase,
     private val importAudio: ImportAudioUseCase,
     isAudioImportAvailable: IsAudioImportAvailableUseCase,
     private val observeImportAllowance: ObserveImportAllowanceUseCase,
     observeSmartSuggestionsEnabled: ObserveSmartSuggestionsEnabledUseCase,
     private val setSmartSuggestionsEnabled: SetSmartSuggestionsEnabledUseCase,
+    observeSkipSilenceEnabled: ObserveSkipSilenceEnabledUseCase,
+    private val setSkipSilenceEnabled: SetSkipSilenceEnabledUseCase,
+    observeNoteFeatures: ObserveNoteFeaturesUseCase,
+    private val setNoteFeatureEnabled: SetNoteFeatureEnabledUseCase,
     observeProStatus: ObserveProStatusUseCase,
     observeProOverride: ObserveProOverrideUseCase,
     private val setProOverride: SetProOverrideUseCase,
@@ -70,11 +85,20 @@ class SettingsViewModel(
         collect(observeDynamicColor()) { enabled -> copy(isDynamicColorEnabled = enabled) }
         collect(observeNoteStyle()) { style -> copy(noteStyle = style) }
         collect(observeAppLockEnabled()) { enabled -> copy(isAppLockEnabled = enabled) }
+        collect(observeTelemetryConsent()) { granted -> copy(isTelemetryEnabled = granted) }
         collect(observeCustomNoteStyles()) { styles -> copy(customStyles = styles.map { it.toOptionUi() }) }
         collect(isAudioImportAvailable()) { unlocked -> copy(isAudioImportUnlocked = unlocked) }
         collect(observeImportAllowance()) { allowance -> withImportAllowance(allowance) }
         collect(observeSmartSuggestionsEnabled()) { enabled -> copy(isSmartSuggestionsEnabled = enabled) }
-        collect(observeProStatus()) { status -> copy(pro = status.toUi(), isSmartSuggestionsUnlocked = status.isPro) }
+        collect(observeSkipSilenceEnabled()) { enabled -> copy(isSkipSilenceEnabled = enabled) }
+        collect(observeNoteFeatures()) { features ->
+            copy(
+                isTranscriptionEnabled = features.isTranscriptionEnabled,
+                isSummaryEnabled = features.writesSummary,
+                isSummaryAvailable = features.isSummaryAvailable,
+            )
+        }
+        collect(observeProStatus()) { status -> copy(pro = status.toUi(), isSmartSuggestionsUnlocked = status.isPro, isSkipSilenceUnlocked = status.isPro) }
         if (buildInfo.isDeveloperBuild) collect(observeProOverride()) { override -> copy(proOverride = override) }
     }
 
@@ -102,12 +126,48 @@ class SettingsViewModel(
         }
     }
 
+    // Switching off is reported first, while events still go out; switching
+    // on is reported after, and waits for the reporting to be back.
+    fun onTelemetryChanged(granted: Boolean) {
+        launchSafely(showLoading = false) {
+            if (!granted) analyticsTracker.track(AnalyticsEvents.telemetryToggled(enabled = false))
+            setTelemetryConsent(granted)
+            if (granted) analyticsTracker.track(AnalyticsEvents.telemetryToggled(enabled = true))
+        }
+    }
+
+    fun onTranscriptionChanged(enabled: Boolean) = setNoteFeature(NoteFeature.TRANSCRIPTION, enabled)
+
+    // A summary is written from the transcript, so its switch only counts
+    // while transcription is on.
+    fun onSummaryChanged(enabled: Boolean) {
+        val state = mutableUiState.value
+        if (state.isTranscriptionEnabled && state.isSummaryAvailable) setNoteFeature(NoteFeature.SUMMARY, enabled)
+    }
+
+    private fun setNoteFeature(feature: NoteFeature, enabled: Boolean) {
+        launchSafely(showLoading = false) {
+            setNoteFeatureEnabled(feature, enabled)
+            analyticsTracker.track(AnalyticsEvents.noteFeatureToggled(feature, enabled))
+        }
+    }
+
     // Off is free for everyone; switching it on is the Pro action.
     fun onSmartSuggestionsChanged(enabled: Boolean) {
+        if (!mutableUiState.value.isSummaryAvailable) return
         launchSafely(showLoading = false) {
             if (enabled && !proUpgradeGate.requirePro(ProFeature.SMART_SUGGESTIONS)) return@launchSafely
             setSmartSuggestionsEnabled(enabled)
             analyticsTracker.track(AnalyticsEvents.smartSuggestionsToggled(enabled))
+        }
+    }
+
+    // Off is free for everyone; switching it on is the Pro action.
+    fun onSkipSilenceChanged(enabled: Boolean) {
+        launchSafely(showLoading = false) {
+            if (enabled && !proUpgradeGate.requirePro(ProFeature.SKIP_SILENCE)) return@launchSafely
+            setSkipSilenceEnabled(enabled)
+            analyticsTracker.track(AnalyticsEvents.skipSilenceToggled(enabled))
         }
     }
 
@@ -179,9 +239,16 @@ private fun SettingsUiState.withImportAllowance(allowance: ImportAllowance): Set
     is ImportAllowance.Free -> copy(freeImportsLeft = allowance.left, allowsMultipleImports = false)
 }
 
+private fun appTrialUi(endsAtMs: Long, nowMs: Long) = ProStatusUi.AppTrial(
+    daysLeft = ProTrialPolicy.daysLeft(endsAtMs, nowMs),
+    elapsed = ProTrialPolicy.elapsedFraction(endsAtMs, nowMs),
+)
+
 private fun ProStatus.toUi(): ProStatusUi = when {
     plan == ProPlan.LIFETIME -> ProStatusUi.Lifetime
     plan == ProPlan.INCLUDED -> ProStatusUi.Included
+    plan == ProPlan.TRIAL -> appTrialUi(endsAtMs = renewsAtMs ?: 0L, nowMs = Clock.System.now().toEpochMilliseconds())
+    plan == ProPlan.MONTHLY -> ProStatusUi.Monthly(renewsAtMs)
     plan == ProPlan.YEARLY && isTrial -> ProStatusUi.Trial(renewsAtMs)
     plan == ProPlan.YEARLY -> ProStatusUi.Yearly(renewsAtMs)
     else -> ProStatusUi.Free

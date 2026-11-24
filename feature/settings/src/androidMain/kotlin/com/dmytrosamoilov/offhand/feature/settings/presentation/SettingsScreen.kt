@@ -3,35 +3,21 @@ package com.dmytrosamoilov.offhand.feature.settings.presentation
 import android.content.Context
 import android.content.Intent
 import android.text.format.DateUtils
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
@@ -41,12 +27,17 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
-import com.dmytrosamoilov.offhand.feature.recording.domain.FreeImportLimits
-import com.dmytrosamoilov.offhand.core.designsystem.component.AppTopBar
-import com.dmytrosamoilov.offhand.core.designsystem.component.ProCrown
+import com.dmytrosamoilov.offhand.core.designsystem.component.LargeTitleHeader
+import com.dmytrosamoilov.offhand.core.designsystem.component.LinkRow
+import com.dmytrosamoilov.offhand.core.designsystem.component.OffhandDialog
+import com.dmytrosamoilov.offhand.core.designsystem.component.SegmentedControl
+import com.dmytrosamoilov.offhand.core.designsystem.component.SwitchRow
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandSpacing
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleChoice
 import com.dmytrosamoilov.offhand.core.ui.component.label
+import com.dmytrosamoilov.offhand.feature.recording.domain.FreeImportLimits
 import com.dmytrosamoilov.offhand.feature.settings.R
 import org.koin.androidx.compose.koinViewModel
 
@@ -59,8 +50,37 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val importPicker = LocalAudioImportPicker.current
+    SettingsEffects(state = state, viewModel = viewModel)
 
+    BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
+        Column(modifier = Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState())) {
+            LargeTitleHeader(title = stringResource(R.string.settings_title))
+            Column(modifier = Modifier.padding(horizontal = OffhandSpacing.card, vertical = OffhandSpacing.card)) {
+                PlanCard(status = state.pro, onClick = viewModel::onProCardClicked)
+                SubscriptionRows(
+                    status = state.pro,
+                    onRedeemCodeClick = viewModel::onRedeemCodeClicked,
+                    onRedeemCodeConfirm = viewModel::onRedeemCodeConfirmed,
+                )
+                NotesSection(state = state, viewModel = viewModel, onStylesClick = onNoteStylesClick)
+                ImportAndBackupSection(state = state, onBackupClick = onBackupClick, onImportClick = viewModel::onImportAudioClicked)
+                PrivacySection(
+                    state = state,
+                    onAppLockChanged = viewModel::onAppLockChanged,
+                    onTelemetryChanged = viewModel::onTelemetryChanged,
+                )
+                AppSection(state = state, viewModel = viewModel, onAboutClick = onAboutSupportClick)
+                state.proOverride?.let { ProOverrideSection(selected = it, onSelected = viewModel::onProOverrideSelected) }
+                Spacer(modifier = Modifier.height(OffhandSpacing.section))
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsEffects(state: SettingsUiState, viewModel: SettingsViewModel) {
+    val importPicker = LocalAudioImportPicker.current
+    val context = LocalContext.current
     LifecycleResumeEffect(Unit) {
         viewModel.onScreenShown()
         onPauseOrDispose { }
@@ -71,185 +91,187 @@ fun SettingsScreen(
             importPicker.pick(allowMultiple = state.allowsMultipleImports)
         }
     }
-    val context = LocalContext.current
     LaunchedEffect(state.isRedeemFallbackRequested) {
         if (state.isRedeemFallbackRequested) {
             viewModel.onRedeemFallbackOpened()
             openInPlayStore(context, PLAY_REDEEM_URL)
         }
     }
-
-    BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
-        Scaffold(
-            topBar = { AppTopBar(title = stringResource(R.string.settings_title)) },
-            contentWindowInsets = WindowInsets(0.dp),
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                ProSection(
-                    status = state.pro,
-                    onProCardClick = viewModel::onProCardClicked,
-                    onRedeemCodeClick = viewModel::onRedeemCodeClicked,
-                    onRedeemCodeConfirm = viewModel::onRedeemCodeConfirmed,
-                )
-                NotesSection(
-                    state = state,
-                    onStylesClick = onNoteStylesClick,
-                    onSmartSuggestionsChanged = viewModel::onSmartSuggestionsChanged,
-                )
-                SecuritySection(
-                    isAppLockEnabled = state.isAppLockEnabled,
-                    isDeviceSecure = state.isDeviceSecure,
-                    onAppLockChanged = viewModel::onAppLockChanged,
-                )
-                AppearanceSection(
-                    isDynamicColorEnabled = state.isDynamicColorEnabled,
-                    onDynamicColorChanged = viewModel::onDynamicColorChanged,
-                )
-                BackupSection(
-                    isImportUnlocked = state.isAudioImportUnlocked,
-                    freeImportsLeft = state.freeImportsLeft,
-                    onBackupClick = onBackupClick,
-                    onImportClick = viewModel::onImportAudioClicked,
-                )
-                AboutSection(onClick = onAboutSupportClick)
-                state.proOverride?.let { override ->
-                    ProOverrideSection(selected = override, onSelected = viewModel::onProOverrideSelected)
-                }
-            }
-        }
-    }
 }
 
-// Mirrors the iOS form: one Notes group with the Summary styles screen (which
-// also holds the default choice) and the suggestions switch.
 @Composable
-private fun NotesSection(
-    state: SettingsUiState,
-    onStylesClick: () -> Unit,
-    onSmartSuggestionsChanged: (Boolean) -> Unit,
-) {
+private fun NotesSection(state: SettingsUiState, viewModel: SettingsViewModel, onStylesClick: () -> Unit) {
     val choices = state.customStyles.map { NoteStyleChoice(id = it.id, name = it.name, description = it.description) }
-    SettingsCard(title = stringResource(R.string.settings_notes_title)) {
-        SettingsLinkRow(
+    val isAvailable = state.isSummaryAvailable
+    val unavailable = stringResource(R.string.settings_not_on_this_phone)
+    SettingsSection(label = stringResource(R.string.settings_group_notes)) {
+        SwitchRow(
+            title = stringResource(R.string.settings_transcription_label),
+            subtitle = stringResource(R.string.settings_transcription_description),
+            checked = state.isTranscriptionEnabled,
+            onCheckedChange = viewModel::onTranscriptionChanged,
+        )
+        SwitchRow(
+            title = stringResource(R.string.settings_summary_label),
+            subtitle = if (isAvailable) stringResource(R.string.settings_summary_description) else unavailable,
+            checked = state.isSummaryEnabled,
+            onCheckedChange = viewModel::onSummaryChanged,
+            enabled = state.isTranscriptionEnabled && isAvailable,
+        )
+        LinkRow(
             title = stringResource(R.string.settings_note_styles_title),
-            subtitle = stringResource(R.string.settings_note_styles_default_value, state.noteStyle.label(choices)),
+            subtitle = if (isAvailable) stringResource(R.string.settings_note_styles_default_value, state.noteStyle.label(choices)) else unavailable,
             onClick = onStylesClick,
+            enabled = isAvailable,
         )
         SwitchRow(
-            label = stringResource(R.string.settings_smart_suggestions_label),
-            description = stringResource(R.string.settings_smart_suggestions_description),
-            checked = state.isSmartSuggestionsEnabled,
-            onCheckedChange = onSmartSuggestionsChanged,
-            showProBadge = !state.isSmartSuggestionsUnlocked,
+            title = stringResource(R.string.settings_smart_suggestions_label),
+            subtitle = if (isAvailable) stringResource(R.string.settings_smart_suggestions_description) else unavailable,
+            checked = state.isSmartSuggestionsEnabled && isAvailable,
+            onCheckedChange = viewModel::onSmartSuggestionsChanged,
+            enabled = isAvailable,
+            showProBadge = !state.isSmartSuggestionsUnlocked && isAvailable,
+        )
+        SwitchRow(
+            title = stringResource(R.string.settings_skip_silence_label),
+            subtitle = stringResource(R.string.settings_skip_silence_description),
+            checked = state.isSkipSilenceEnabled,
+            onCheckedChange = viewModel::onSkipSilenceChanged,
+            showProBadge = !state.isSkipSilenceUnlocked,
+            showDivider = false,
         )
     }
+    if (!isAvailable) SettingsFootnote(text = stringResource(R.string.settings_summary_unavailable_note))
 }
 
 @Composable
-private fun SecuritySection(
-    isAppLockEnabled: Boolean,
-    isDeviceSecure: Boolean,
+private fun ImportAndBackupSection(state: SettingsUiState, onBackupClick: () -> Unit, onImportClick: () -> Unit) {
+    var isWidgetHelpVisible by remember { mutableStateOf(false) }
+    SettingsSection(label = stringResource(R.string.settings_group_import_backup)) {
+        LinkRow(
+            title = stringResource(R.string.settings_import_audio_title),
+            subtitle = state.freeImportsLeft?.let { stringResource(R.string.settings_import_free_left, it, FreeImportLimits.FREE_IMPORTS) }
+                ?: stringResource(R.string.settings_import_audio_subtitle),
+            onClick = onImportClick,
+            showProBadge = !state.isAudioImportUnlocked,
+        )
+        LinkRow(
+            title = stringResource(R.string.settings_widget_title),
+            subtitle = stringResource(R.string.settings_widget_subtitle),
+            onClick = { isWidgetHelpVisible = true },
+            showProBadge = state.pro == ProStatusUi.Free,
+        )
+        LinkRow(
+            title = stringResource(R.string.settings_backup_title),
+            subtitle = stringResource(R.string.settings_backup_subtitle),
+            onClick = onBackupClick,
+            showDivider = false,
+        )
+    }
+    if (isWidgetHelpVisible) WidgetHelpDialog(onDismiss = { isWidgetHelpVisible = false })
+}
+
+@Composable
+private fun WidgetHelpDialog(onDismiss: () -> Unit) {
+    OffhandDialog(
+        title = stringResource(R.string.settings_widget_title),
+        body = stringResource(R.string.settings_widget_body),
+        onDismissRequest = onDismiss,
+        confirmLabel = stringResource(R.string.settings_import_dismiss),
+        onConfirm = onDismiss,
+    )
+}
+
+@Composable
+private fun PrivacySection(
+    state: SettingsUiState,
     onAppLockChanged: (Boolean) -> Unit,
+    onTelemetryChanged: (Boolean) -> Unit,
 ) {
-    SettingsCard(title = stringResource(R.string.settings_security_title)) {
+    SettingsSection(label = stringResource(R.string.settings_privacy_title)) {
         SwitchRow(
-            label = stringResource(R.string.settings_app_lock_label),
-            description = if (isDeviceSecure) {
-                stringResource(R.string.settings_app_lock_description)
-            } else {
-                stringResource(R.string.settings_app_lock_unavailable)
-            },
-            checked = isAppLockEnabled && isDeviceSecure,
+            title = stringResource(R.string.settings_app_lock_label),
+            subtitle = stringResource(
+                if (state.isDeviceSecure) R.string.settings_app_lock_description else R.string.settings_app_lock_unavailable,
+            ),
+            checked = state.isAppLockEnabled && state.isDeviceSecure,
             onCheckedChange = onAppLockChanged,
-            enabled = isDeviceSecure,
+            enabled = state.isDeviceSecure,
         )
-    }
-}
-
-@Composable
-private fun AppearanceSection(
-    isDynamicColorEnabled: Boolean,
-    onDynamicColorChanged: (Boolean) -> Unit,
-) {
-    SettingsCard(title = stringResource(R.string.settings_appearance_title)) {
         SwitchRow(
-            label = stringResource(R.string.settings_dynamic_color_label),
-            description = stringResource(R.string.settings_dynamic_color_description),
-            checked = isDynamicColorEnabled,
-            onCheckedChange = onDynamicColorChanged,
+            title = stringResource(R.string.settings_telemetry_label),
+            subtitle = stringResource(R.string.settings_telemetry_description),
+            checked = state.isTelemetryEnabled,
+            onCheckedChange = onTelemetryChanged,
+            showDivider = false,
+        )
+    }
+    SettingsFootnote(text = stringResource(R.string.settings_about_footer))
+}
+
+@Composable
+private fun AppSection(state: SettingsUiState, viewModel: SettingsViewModel, onAboutClick: () -> Unit) {
+    val context = LocalContext.current
+    SettingsSection(label = stringResource(R.string.settings_group_app)) {
+        SwitchRow(
+            title = stringResource(R.string.settings_dynamic_color_label),
+            subtitle = stringResource(R.string.settings_dynamic_color_description),
+            checked = state.isDynamicColorEnabled,
+            onCheckedChange = viewModel::onDynamicColorChanged,
+        )
+        LinkRow(
+            title = stringResource(R.string.settings_about_support_title),
+            subtitle = stringResource(R.string.settings_about_support_subtitle, appVersion(context)),
+            onClick = onAboutClick,
+            showDivider = false,
         )
     }
 }
 
 @Composable
-private fun ProSection(
-    status: ProStatusUi,
-    onProCardClick: () -> Unit,
-    onRedeemCodeClick: () -> Unit,
-    onRedeemCodeConfirm: () -> Unit,
-) {
+private fun SubscriptionRows(status: ProStatusUi, onRedeemCodeClick: () -> Unit, onRedeemCodeConfirm: () -> Unit) {
     val context = LocalContext.current
-    SettingsCard(title = stringResource(R.string.settings_subscription_title)) {
-        if (status == ProStatusUi.Free) {
-            UpgradeRow(onClick = onProCardClick)
-        } else {
-            PlanRow(status = status, onClick = onProCardClick)
-        }
-        if (status is ProStatusUi.Yearly || status is ProStatusUi.Trial) {
-            SettingsLinkRow(
+    var isHintVisible by remember { mutableStateOf(false) }
+    Spacer(modifier = Modifier.height(8.dp))
+    SettingsSection(label = null) {
+        if (status.isRenewing()) {
+            LinkRow(
                 title = stringResource(R.string.settings_subscription_manage),
-                subtitle = null,
                 onClick = { openSubscriptionManagement(context) },
             )
         }
-        RedeemCodeRow(onClick = onRedeemCodeClick, onConfirm = onRedeemCodeConfirm)
+        LinkRow(
+            title = stringResource(R.string.settings_redeem_code),
+            onClick = {
+                onRedeemCodeClick()
+                isHintVisible = true
+            },
+            showDivider = false,
+        )
     }
-}
-
-// A code is entered inside Play's purchase sheet, behind the arrow next to the
-// payment method (custom codes work nowhere else), so the row explains that
-// before the yearly flow opens.
-@Composable
-private fun RedeemCodeRow(onClick: () -> Unit, onConfirm: () -> Unit) {
-    var isHintVisible by remember { mutableStateOf(false) }
-    SettingsLinkRow(
-        title = stringResource(R.string.settings_redeem_code),
-        subtitle = null,
-        onClick = {
-            onClick()
-            isHintVisible = true
-        },
-    )
     if (isHintVisible) {
         RedeemCodeDialog(
             onConfirm = {
                 isHintVisible = false
-                onConfirm()
+                onRedeemCodeConfirm()
             },
             onDismiss = { isHintVisible = false },
         )
     }
 }
 
+private fun ProStatusUi.isRenewing(): Boolean =
+    this is ProStatusUi.Yearly || this is ProStatusUi.Monthly || this is ProStatusUi.Trial
+
 @Composable
 private fun RedeemCodeDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
+    OffhandDialog(
+        title = stringResource(R.string.settings_redeem_code),
+        body = stringResource(R.string.settings_redeem_code_body),
         onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(R.string.settings_redeem_code)) },
-        text = { Text(text = stringResource(R.string.settings_redeem_code_body)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) { Text(text = stringResource(R.string.settings_redeem_code_confirm)) }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.settings_import_pro_cancel)) }
-        },
+        confirmLabel = stringResource(R.string.settings_redeem_code_confirm),
+        onConfirm = onConfirm,
+        dismissLabel = stringResource(R.string.settings_import_pro_cancel),
     )
 }
 
@@ -262,66 +284,23 @@ private fun openInPlayStore(context: Context, url: String) {
     runCatching { context.startActivity(intent) }.onFailure { openLink(context, url) }
 }
 
+private fun openSubscriptionManagement(context: Context) {
+    openInPlayStore(context, "https://play.google.com/store/account/subscriptions?sku=offhand_pro&package=${context.packageName}")
+}
+
 private const val PLAY_REDEEM_URL = "https://play.google.com/redeem"
 private const val PLAY_STORE_PACKAGE = "com.android.vending"
 
 @Composable
-private fun UpgradeRow(onClick: () -> Unit) {
-    ProRow(
-        subtitle = stringResource(R.string.settings_pro_upgrade_subtitle),
-        onClick = onClick,
-        trailing = { Button(onClick = onClick) { Text(text = stringResource(R.string.settings_pro_upgrade)) } },
-    )
-}
-
-@Composable
-private fun PlanRow(status: ProStatusUi, onClick: () -> Unit) {
-    ProRow(
-        subtitle = status.statusLabel(),
-        onClick = onClick,
-        trailing = {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        },
-    )
-}
-
-@Composable
-private fun ProRow(subtitle: String, onClick: () -> Unit, trailing: @Composable () -> Unit) {
-    Row(
-        modifier = Modifier
-            .acrossCardPadding()
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .settingsRowPadding(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = stringResource(R.string.settings_pro_title), style = MaterialTheme.typography.bodyLarge)
-                ProCrown(size = 20.dp)
-            }
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        trailing()
-    }
-}
-
-@Composable
-private fun ProStatusUi.statusLabel(): String = when (this) {
-    ProStatusUi.Free -> ""
+internal fun ProStatusUi.statusLabel(): String = when (this) {
+    ProStatusUi.Free -> stringResource(R.string.settings_pro_upgrade_subtitle)
     ProStatusUi.Lifetime -> stringResource(R.string.settings_subscription_lifetime)
     ProStatusUi.Included -> stringResource(R.string.settings_subscription_included)
+    is ProStatusUi.AppTrial -> stringResource(R.string.settings_plan_trial_body)
     is ProStatusUi.Trial -> endsAtMs?.let { stringResource(R.string.settings_subscription_trial_until, formatDate(it)) }
         ?: stringResource(R.string.settings_subscription_trial)
+    is ProStatusUi.Monthly -> renewsAtMs?.let { stringResource(R.string.settings_subscription_monthly_renews, formatDate(it)) }
+        ?: stringResource(R.string.settings_subscription_monthly)
     is ProStatusUi.Yearly -> renewsAtMs?.let { stringResource(R.string.settings_subscription_yearly_renews, formatDate(it)) }
         ?: stringResource(R.string.settings_subscription_yearly)
 }
@@ -330,30 +309,20 @@ private fun ProStatusUi.statusLabel(): String = when (this) {
 private fun formatDate(epochMs: Long): String =
     DateUtils.formatDateTime(LocalContext.current, epochMs, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR)
 
-// Play's subscription center for this product; Play requires an in-app way
-// to reach it and it is where cancellation lives.
-private fun openSubscriptionManagement(context: Context) {
-    openInPlayStore(context, "https://play.google.com/store/account/subscriptions?sku=offhand_pro&package=${context.packageName}")
-}
-
 @Composable
 private fun ProOverrideSection(selected: ProOverride, onSelected: (ProOverride) -> Unit) {
-    SettingsCard(title = stringResource(R.string.settings_developer_title)) {
-        Text(
-            text = stringResource(R.string.settings_pro_override_label),
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(top = 12.dp, bottom = 8.dp),
-        )
-        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
-            ProOverride.entries.forEachIndexed { index, option ->
-                SegmentedButton(
-                    selected = option == selected,
-                    onClick = { onSelected(option) },
-                    shape = SegmentedButtonDefaults.itemShape(index = index, count = ProOverride.entries.size),
-                ) {
-                    Text(text = stringResource(option.labelRes()))
-                }
-            }
+    SettingsSection(label = stringResource(R.string.settings_developer_title)) {
+        Column(modifier = Modifier.padding(OffhandSpacing.card)) {
+            Text(
+                text = stringResource(R.string.settings_pro_override_label),
+                style = OffhandTheme.type.settingTitle,
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+            SegmentedControl(
+                options = ProOverride.entries.map { stringResource(it.labelRes()) },
+                selectedIndex = ProOverride.entries.indexOf(selected),
+                onSelect = { onSelected(ProOverride.entries[it]) },
+            )
         }
     }
 }
@@ -388,49 +357,11 @@ internal fun ImportNotice(notice: ImportNoticeUi?, onDismiss: () -> Unit) {
 
 @Composable
 private fun ImportNoticeDialog(title: String, text: String, onDismiss: () -> Unit) {
-    AlertDialog(
+    OffhandDialog(
+        title = title,
+        body = text,
         onDismissRequest = onDismiss,
-        title = { Text(text = title) },
-        text = { Text(text = text) },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.settings_import_dismiss)) }
-        },
+        confirmLabel = stringResource(R.string.settings_import_dismiss),
+        onConfirm = onDismiss,
     )
-}
-
-
-@Composable
-private fun BackupSection(
-    isImportUnlocked: Boolean,
-    freeImportsLeft: Int?,
-    onBackupClick: () -> Unit,
-    onImportClick: () -> Unit,
-) {
-    SettingsCard(title = stringResource(R.string.settings_backup_section_title)) {
-        SettingsLinkRow(
-            title = stringResource(R.string.settings_backup_title),
-            subtitle = stringResource(R.string.settings_backup_subtitle),
-            onClick = onBackupClick,
-        )
-        SettingsLinkRow(
-            title = stringResource(R.string.settings_import_audio_title),
-            subtitle = freeImportsLeft?.let { stringResource(R.string.settings_import_free_left, it, FreeImportLimits.FREE_IMPORTS) }
-                ?: stringResource(R.string.settings_import_audio_subtitle),
-            onClick = onImportClick,
-            showProBadge = !isImportUnlocked,
-        )
-    }
-}
-
-@Composable
-private fun AboutSection(onClick: () -> Unit) {
-    val context = LocalContext.current
-    SettingsCard(title = stringResource(R.string.settings_about_section_title)) {
-        SettingsLinkRow(
-            title = stringResource(R.string.settings_about_support_title),
-            subtitle = stringResource(R.string.settings_about_support_subtitle, appVersion(context)),
-            onClick = onClick,
-        )
-        SettingsNote(text = stringResource(R.string.settings_about_footer))
-    }
 }

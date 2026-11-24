@@ -5,14 +5,46 @@ internal object NoteSectionMerger {
     // Prose sections are the user's own text: their paragraph breaks are kept
     // and their lines are never de-duplicated, because a repeated line there
     // is what was said, not a merge artefact.
-    fun merge(overviews: List<String>, headings: List<String>, proseHeadings: List<String> = emptyList()): String {
+    //
+    // A built-in heading may come back translated into the recording's
+    // language: a known translation counts as that heading, so its lines land
+    // in the same section, and the section is shown under the words the model
+    // wrote first.
+    fun merge(
+        overviews: List<String>,
+        headings: List<String>,
+        proseHeadings: List<String> = emptyList(),
+        headingTranslations: Map<String, List<String>> = emptyMap(),
+    ): String {
         val sections = linkedMapOf(PREAMBLE to mutableListOf<String>())
         headings.forEach { heading -> sections[heading] = mutableListOf() }
-        overviews.forEach { overview -> collect(overview, headings, proseHeadings, sections) }
+        val names = HeadingNames(headings, headingTranslations)
+        overviews.forEach { overview -> collect(overview, names, proseHeadings, sections) }
         dropLinesRepeatedInLaterSections(sections)
         return sections.entries
             .filter { it.value.any(String::isNotEmpty) }
-            .joinToString(SECTION_SEPARATOR) { (heading, lines) -> render(heading, lines) }
+            .joinToString(SECTION_SEPARATOR) { (heading, lines) -> render(names.shownAs(heading), lines) }
+    }
+
+    private class HeadingNames(
+        private val headings: List<String>,
+        private val translations: Map<String, List<String>>,
+    ) {
+        private val written = mutableMapOf<String, String>()
+
+        // The English heading written with other casing is shown as given in
+        // the style; only a translation is shown in the model's own words.
+        fun resolve(text: String): String {
+            headings.firstOrNull { it.removePrefix(HEADING_PREFIX).equals(text, ignoreCase = true) }?.let { return it }
+            val heading = headings.firstOrNull { isTranslationOf(it, text) } ?: return "$HEADING_PREFIX$text"
+            written.getOrPut(heading) { "$HEADING_PREFIX$text" }
+            return heading
+        }
+
+        fun shownAs(heading: String): String = written[heading] ?: heading
+
+        private fun isTranslationOf(heading: String, text: String): Boolean =
+            translations[heading].orEmpty().any { it.equals(text, ignoreCase = true) }
     }
 
     private fun dropLinesRepeatedInLaterSections(sections: MutableMap<String, MutableList<String>>) {
@@ -48,14 +80,14 @@ internal object NoteSectionMerger {
 
     private fun collect(
         overview: String,
-        headings: List<String>,
+        names: HeadingNames,
         proseHeadings: List<String>,
         sections: MutableMap<String, MutableList<String>>,
     ) {
         var current = PREAMBLE
         var startsParagraph = true
         overview.lines().map(String::trim).forEach { line ->
-            val heading = headingOf(line, headings)
+            val heading = headingOf(line, names)
             when {
                 heading != null -> {
                     current = heading
@@ -72,11 +104,9 @@ internal object NoteSectionMerger {
         }
     }
 
-    private fun headingOf(line: String, headings: List<String>): String? {
+    private fun headingOf(line: String, names: HeadingNames): String? {
         if (!line.startsWith(HEADING_MARKER)) return null
-        val text = line.trimStart('#', ' ').trim()
-        return headings.firstOrNull { it.removePrefix(HEADING_PREFIX).equals(text, ignoreCase = true) }
-            ?: "$HEADING_PREFIX$text"
+        return names.resolve(line.trimStart('#', ' ').trim().trimEnd(':'))
     }
 
     private fun render(heading: String, lines: List<String>): String {

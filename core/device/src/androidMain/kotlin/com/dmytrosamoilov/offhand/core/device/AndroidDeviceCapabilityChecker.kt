@@ -17,9 +17,10 @@ class AndroidDeviceCapabilityChecker(
             cpuCores = Runtime.getRuntime().availableProcessors(),
         )
         Timber.tag(LOG_TAG).d(
-            "snapshot=%s capable=%s (ram threshold=%dMB, cores threshold=%d)",
+            "snapshot=%s tier=%s (supported from %dMB, full from %dMB, cores %d)",
             capability,
-            capability.isLocalLlmCapable(),
+            capability.tier(),
+            MIN_SUPPORTED_RAM_MB,
             MIN_TOTAL_RAM_MB,
             MIN_CPU_CORES,
         )

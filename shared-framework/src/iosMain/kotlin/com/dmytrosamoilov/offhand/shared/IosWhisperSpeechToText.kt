@@ -26,6 +26,10 @@ class IosWhisperSpeechToText(
     private val prepareMutex = Mutex()
     private var prepared = false
 
+    override suspend fun download() {
+        prepareMutex.withLock { downloadMissingFiles() }
+    }
+
     override suspend fun prepare() {
         prepareMutex.withLock {
             if (prepared) return

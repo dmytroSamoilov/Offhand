@@ -1,10 +1,13 @@
 package com.dmytrosamoilov.offhand.root
 
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.RecordingOrigin
+import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingOriginHolder
+import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
 import androidx.lifecycle.viewModelScope
-import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.common.BaseViewModel
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import com.dmytrosamoilov.offhand.core.data.domain.ModelDownloadLauncher
+import com.dmytrosamoilov.offhand.core.data.domain.ProTrialNotice
 import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.core.security.AppLockState
@@ -14,9 +17,16 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DecideEarlyAdopte
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkEarlyAdopterThankedUseCase
 import com.dmytrosamoilov.offhand.core.data.domain.isEarlyAdopterThanksPending
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserPreferencesUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.AcknowledgeProTrialNoticeUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.KeepProTrialInSyncUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SettleProTrialUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SwitchOffLapsedProSettingsUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.NoteWaveformFiller
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAiCoreDownloadedUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.SweepOrphanedRecordingsUseCase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -30,21 +40,32 @@ class RootViewModel(
     observeUserPreferences: ObserveUserPreferencesUseCase,
     private val appLockManager: AppLockManager,
     private val passphraseProvider: DatabasePassphraseProvider,
-    private val modelManager: ModelManager,
+    private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
     private val modelDownloadLauncher: ModelDownloadLauncher,
     private val resumeInterruptedNotes: Lazy<ResumeInterruptedNotesUseCase>,
     private val sweepOrphanedRecordings: Lazy<SweepOrphanedRecordingsUseCase>,
+    private val noteWaveformFiller: Lazy<NoteWaveformFiller>,
     private val clearShareCache: ClearShareCacheUseCase,
     private val decideEarlyAdopterPro: Lazy<DecideEarlyAdopterProUseCase>,
     private val markEarlyAdopterThanked: MarkEarlyAdopterThankedUseCase,
+    private val settleProTrial: SettleProTrialUseCase,
+    private val switchOffLapsedProSettings: SwitchOffLapsedProSettingsUseCase,
+    private val acknowledgeProTrialNotice: AcknowledgeProTrialNoticeUseCase,
+    private val keepProTrialInSync: KeepProTrialInSyncUseCase,
     private val proUpgradeGate: ProUpgradeGate,
     private val appForegroundState: AppForegroundState,
+    private val recordingOrigin: RecordingOriginHolder,
 ) : BaseViewModel() {
+
+    private val trialNotice = MutableStateFlow<ProTrialNotice?>(null)
+    private val recordingRequest = MutableStateFlow<RecordingRequestUi?>(null)
 
     val uiState: StateFlow<RootUiState> = combine(
         observeUserPreferences(),
         appLockManager.lockState,
-    ) { preferences, lockState ->
+        trialNotice,
+        recordingRequest,
+    ) { preferences, lockState, trialNotice, recordingRequest ->
         val phase = when {
             !preferences.onboardingCompleted -> RootPhase.ONBOARDING
             preferences.appLockEnabled && lockState == AppLockState.LOCKED -> RootPhase.LOCKED
@@ -54,6 +75,8 @@ class RootViewModel(
             phase = phase,
             isDynamicColorEnabled = preferences.dynamicColor,
             isEarlyAdopterThanksShown = phase == RootPhase.READY && preferences.isEarlyAdopterThanksPending,
+            trialNotice = trialNotice.takeIf { phase == RootPhase.READY },
+            recordingRequest = recordingRequest,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -66,6 +89,19 @@ class RootViewModel(
         resumeInterruptedNotesWhenReady()
         resumeInterruptedNotesOnReturn()
         resumeModelDownloadWhenReady()
+        keepProTrialInSyncWhenReady()
+    }
+
+    fun onTrialNoticeDismissed() {
+        val notice = trialNotice.value ?: return
+        trialNotice.value = null
+        launchSafely(showLoading = false) { acknowledgeProTrialNotice(notice) }
+    }
+
+    // The trial is over, so the paywall opens with its offer.
+    fun onTrialUpgradeRequested() {
+        onTrialNoticeDismissed()
+        proUpgradeGate.showBenefits()
     }
 
     fun onEarlyAdopterThanksDismissed() {
@@ -79,6 +115,25 @@ class RootViewModel(
             markEarlyAdopterThanked()
             proUpgradeGate.showBenefits()
         }
+    }
+
+    // The widget opens the app when it cannot record by itself: without Pro
+    // the paywall comes first, and the record sheet asks for the microphone.
+    fun onRecordingRequested(folderId: Long?) {
+        launchSafely(showLoading = false) {
+            if (!proUpgradeGate.requirePro(ProFeature.WIDGET)) return@launchSafely
+            recordingOrigin.expect(RecordingOrigin.WIDGET)
+            recordingRequest.value = RecordingRequestUi(folderId)
+        }
+    }
+
+    fun onFirstRecordingRequested() {
+        recordingOrigin.expect(RecordingOrigin.ONBOARDING)
+        recordingRequest.value = RecordingRequestUi(folderId = null)
+    }
+
+    fun onRecordingRequestConsumed() {
+        recordingRequest.value = null
     }
 
     fun onUnlockAuthenticated() {
@@ -98,8 +153,11 @@ class RootViewModel(
         launchSafely(showLoading = false) {
             uiState.first { it.phase == RootPhase.READY }
             decideEarlyAdopterPro.value.invoke()
+            settleProTrialOnColdStart()
+            switchOffLapsedProSettings()
             resumeInterruptedNotes.value.invoke()
             sweepOrphanedRecordings.value.invoke()
+            noteWaveformFiller.value.start()
             clearShareCache()
         }
     }
@@ -115,11 +173,29 @@ class RootViewModel(
         }
     }
 
+    private suspend fun settleProTrialOnColdStart() {
+        val settlement = settleProTrial()
+        if (settlement.notice == ProTrialNotice.ENDED) showTrialEnded() else trialNotice.value = settlement.notice
+    }
+
+    // The end of the trial is told by the paywall itself, with what was used.
+    private suspend fun showTrialEnded() {
+        acknowledgeProTrialNotice(ProTrialNotice.ENDED)
+        proUpgradeGate.showTrialEnded()
+    }
+
+    private fun keepProTrialInSyncWhenReady() {
+        launchSafely(showLoading = false) {
+            uiState.first { it.phase == RootPhase.READY }
+            keepProTrialInSync()
+        }
+    }
+
     // READY implies onboarding is complete, so the user has already agreed to the download.
     private fun resumeModelDownloadWhenReady() {
         launchSafely(showLoading = false) {
             uiState.first { it.phase == RootPhase.READY }
-            if (!modelManager.isModelDownloaded()) {
+            if (!isAiCoreDownloaded()) {
                 modelDownloadLauncher.startWhenAllowed()
             }
         }

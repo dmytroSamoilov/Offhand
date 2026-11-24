@@ -3,7 +3,7 @@
     <string name="core_ui_error_title">Что-то пошло не так</string>
     <string name="core_ui_error_confirm">ОК</string>
     <string name="core_ui_note_preset_summary">Резюме</string>
-    <string name="core_ui_note_preset_summary_description">Основные темы, ключевые решения, задачи и краткий обзор.</string>
+    <string name="core_ui_note_preset_summary_description">От одного до трёх предложений о том, о чём запись.</string>
     <string name="core_ui_note_preset_meeting">Заметки со встречи</string>
     <string name="core_ui_note_preset_meeting_description">Обсуждение, решения, задачи и открытые вопросы.</string>
     <string name="core_ui_note_preset_visit">Отчёт о визите</string>
@@ -15,4 +15,6 @@
     <string name="core_ui_styles_new_button">Новый</string>
     <string name="core_ui_styles_default_option">По умолчанию</string>
     <string name="core_ui_styles_default_option_description">Стиль, выбранный в настройках</string>
+    <string name="core_ui_note_preset_email">Письмо</string>
+    <string name="core_ui_note_preset_email_description">Тема и готовое к отправке письмо.</string>
 </resources>

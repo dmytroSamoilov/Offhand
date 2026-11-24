@@ -21,6 +21,7 @@ internal fun toRecordingUiState(
         phase = session.phase.toUi(),
         isPaused = session.isPaused,
         elapsedTime = formatElapsed(vad.totalElapsedMs),
+        elapsedMs = vad.totalElapsedMs,
         waveform = waveform,
         isSilent = vad.isSilent,
         chunks = session.chunks.map { ChunkUi(id = it.id, state = it.state.toUi()) },
@@ -28,7 +29,19 @@ internal fun toRecordingUiState(
         savedNoteId = session.noteId,
         isDeveloperMode = isDeveloperMode,
         externalMicName = externalMicName,
+        isLiveTranscriptShown = session.isTranscribedLive,
+        liveTranscript = session.liveTranscript.liveTail(),
     )
+
+// The sheet has room for a few lines, so it shows the end of what was said.
+internal fun String.liveTail(): String {
+    if (length <= LIVE_TAIL_CHARS) return this
+    val tail = takeLast(LIVE_TAIL_CHARS)
+    return LIVE_TAIL_PREFIX + tail.substringAfter(' ', tail)
+}
+
+private const val LIVE_TAIL_CHARS = 140
+private const val LIVE_TAIL_PREFIX = "… "
 
 private fun SessionPhase.toUi(): RecordingPhaseUi = when (this) {
     SessionPhase.IDLE -> RecordingPhaseUi.IDLE

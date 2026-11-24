@@ -4,7 +4,8 @@ enum class NotePreset {
     SUMMARY,
     MEETING,
     VISIT,
-    LEGAL;
+    LEGAL,
+    EMAIL;
 
     companion object {
         val DEFAULT = SUMMARY

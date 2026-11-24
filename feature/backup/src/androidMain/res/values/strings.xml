@@ -10,8 +10,8 @@
     <string name="backup_passphrase_mismatch">The passphrases do not match.</string>
     <string name="backup_include_audio_label">Include audio recordings</string>
     <string name="backup_include_audio_description">Recordings make the file much larger.</string>
-    <string name="backup_include_styles_label">Include summary styles</string>
-    <string name="backup_include_styles_description">Your custom summary styles travel with the notes.</string>
+    <string name="backup_include_styles_label">Include writing styles</string>
+    <string name="backup_include_styles_description">Your custom writing styles travel with the notes.</string>
     <string name="backup_restore_title">Restore</string>
     <string name="backup_restore_body">Add notes and folders from a backup file. Notes already on this phone are kept and duplicates are skipped.</string>
     <string name="backup_restore_button">Choose a backup file</string>
@@ -40,4 +40,7 @@
     <string name="backup_file_name_label">File name</string>
     <string name="backup_save_button">Save backup</string>
     <string name="backup_done">Done</string>
+    <string name="backup_subtitle">Offhand makes one encrypted file. You decide where it is kept.</string>
+    <string name="backup_size_estimate">About %1$s</string>
+    <string name="backup_include_audio_size">Adds about %1$s</string>
 </resources>

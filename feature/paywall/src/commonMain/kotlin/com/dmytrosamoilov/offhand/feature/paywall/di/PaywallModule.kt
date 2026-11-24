@@ -1,9 +1,16 @@
 package com.dmytrosamoilov.offhand.feature.paywall.di
 
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.AcknowledgeProTrialNoticeUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.GetProTrialDaysLeftUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.GetProTrialRecapUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.IsSummaryAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.KeepProTrialInSyncUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.LoadProOffersUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.ObserveProStatusUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.PurchaseProUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.RestoreProPurchasesUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SettleProTrialUseCase
+import com.dmytrosamoilov.offhand.feature.paywall.domain.usecase.SwitchOffLapsedProSettingsUseCase
 import com.dmytrosamoilov.offhand.feature.paywall.presentation.PaywallViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
@@ -14,5 +21,12 @@ val featurePaywallModule = module {
     factoryOf(::ObserveProStatusUseCase)
     factoryOf(::PurchaseProUseCase)
     factoryOf(::RestoreProPurchasesUseCase)
+    factory { SettleProTrialUseCase(get(), get(), get()) }
+    factoryOf(::SwitchOffLapsedProSettingsUseCase)
+    factoryOf(::AcknowledgeProTrialNoticeUseCase)
+    factoryOf(::KeepProTrialInSyncUseCase)
+    factoryOf(::GetProTrialRecapUseCase)
+    factory { GetProTrialDaysLeftUseCase(get()) }
+    factoryOf(::IsSummaryAvailableUseCase)
     viewModelOf(::PaywallViewModel)
 }

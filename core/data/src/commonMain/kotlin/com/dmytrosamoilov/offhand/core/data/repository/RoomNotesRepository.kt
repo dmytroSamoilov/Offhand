@@ -2,11 +2,13 @@ package com.dmytrosamoilov.offhand.core.data.repository
 
 import com.dmytrosamoilov.offhand.core.data.database.NoteDao
 import com.dmytrosamoilov.offhand.core.data.database.NoteSuggestionsDao
+import com.dmytrosamoilov.offhand.core.data.database.NoteWaveformDao
 import com.dmytrosamoilov.offhand.core.data.database.TranscriptionCheckpointDao
 import com.dmytrosamoilov.offhand.core.data.database.toDomain
 import com.dmytrosamoilov.offhand.core.data.database.toEntity
 import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProtectedDataState
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -15,11 +17,13 @@ internal class RoomNotesRepository(
     private val noteDao: NoteDao,
     private val noteSuggestionsDao: NoteSuggestionsDao,
     private val transcriptionCheckpointDao: TranscriptionCheckpointDao,
+    private val noteWaveformDao: NoteWaveformDao,
     private val audioStore: EncryptedAudioStore,
+    private val protectedData: ProtectedDataState,
 ) : NotesRepository {
 
     override fun observeNotes(): Flow<List<Note>> =
-        noteDao.observeAll().map { entities -> entities.map { it.toDomain() } }
+        noteDao.observeAll().map { entities -> entities.map { it.toDomain() } }.retryWhileUnreadable(protectedData)
 
     override suspend fun getNote(id: Long): Note? = noteDao.getById(id)?.toDomain()
 
@@ -33,6 +37,7 @@ internal class RoomNotesRepository(
         noteDao.getById(id)?.audioFileName?.let(audioStore::delete)
         noteSuggestionsDao.deleteByNoteId(id)
         transcriptionCheckpointDao.deleteByNoteId(id)
+        noteWaveformDao.deleteByNoteId(id)
         noteDao.deleteById(id)
     }
 

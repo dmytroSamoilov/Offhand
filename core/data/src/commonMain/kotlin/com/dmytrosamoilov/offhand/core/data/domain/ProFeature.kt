@@ -2,7 +2,9 @@ package com.dmytrosamoilov.offhand.core.data.domain
 
 // NOTE_STYLES covers the built-in Meeting, Visit and Legal styles, the
 // default style and restyling a note; FOLDERS the third folder onwards;
-// BACKUP_AUDIO the recordings inside a backup file.
+// BACKUP_AUDIO the recordings inside a backup file. FREE_TRIAL is not a gate:
+// it opens the paywall as the welcome to the fourteen free days, and
+// TRIAL_ENDED opens it once after they are over, with what was used.
 enum class ProFeature {
     GENERAL,
     CUSTOM_STYLES,
@@ -13,6 +15,10 @@ enum class ProFeature {
     FOLDER_STYLES,
     FOLDERS,
     BACKUP_AUDIO,
+    WIDGET,
+    SKIP_SILENCE,
+    FREE_TRIAL,
+    TRIAL_ENDED,
 }
 
 // Summary is the free style; every other choice meets the paywall.

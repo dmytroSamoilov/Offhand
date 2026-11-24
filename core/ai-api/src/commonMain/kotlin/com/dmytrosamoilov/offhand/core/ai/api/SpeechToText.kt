@@ -11,6 +11,8 @@ interface SpeechToText {
 
     val downloadState: StateFlow<SpeechModelState>
 
+    suspend fun download()
+
     suspend fun prepare()
 
     suspend fun transcribe(audioWav: ByteArray): TranscriptionResult

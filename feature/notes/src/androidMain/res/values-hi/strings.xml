@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="notes_title">नोट्स</string>
-    <string name="notes_empty_state">अभी कोई नोट नहीं है। पहला नोट रिकॉर्ड करने के लिए माइक्रोफ़ोन बटन दबाएं।</string>
+    <string name="notes_empty_title">अभी कोई नोट नहीं है</string>
+    <string name="notes_empty_hint">रिकॉर्ड करें पर टैप करें और बोलें। Offhand आपके फ़ोन पर ट्रांसक्रिप्ट और सारांश लिखता है।</string>
     <string name="notes_model_banner_title">आपका ऑन-डिवाइस AI सेट हो रहा है</string>
     <string name="notes_model_banner_subtitle">बैकग्राउंड में डाउनलोड हो रहा है</string>
     <string name="notes_model_banner_waiting_title">आपका ऑन-डिवाइस AI डाउनलोड के लिए तैयार है</string>
@@ -9,32 +10,33 @@
     <string name="notes_model_banner_mobile_data_button">मोबाइल डेटा पर डाउनलोड करें</string>
     <string name="notes_model_banner_info_description">आपके ऑन-डिवाइस AI के बारे में</string>
     <string name="notes_model_banner_info_title">आपका ऑन-डिवाइस AI</string>
-    <string name="notes_model_banner_info_body">Offhand रिकॉर्डिंग को ऐसे AI से नोट्स में बदलता है जो पूरी तरह आपके फ़ोन पर चलता है। यह एक बार का डाउनलोड है; इसके बाद कभी कुछ अपलोड नहीं होता।</string>
+    <string name="notes_model_banner_info_body">Offhand रिकॉर्डिंग को ऐसे AI से नोट्स में बदलता है जो पूरी तरह आपके फ़ोन पर चलता है। यह एक बार का डाउनलोड है; इसके बाद आपके नोट्स कभी आपके फ़ोन से बाहर नहीं जाते।</string>
     <string name="notes_model_banner_info_dismiss">समझ गया</string>
     <string name="notes_day_today">आज</string>
     <string name="notes_day_yesterday">कल</string>
-    <plurals name="notes_word_count">
-        <item quantity="one">%1$s शब्द</item>
-        <item quantity="other">%1$s शब्द</item>
-    </plurals>
-    <string name="notes_record_fab_description">नई रिकॉर्डिंग शुरू करें</string>
     <string name="notes_select_prompt">पढ़ने के लिए कोई नोट चुनें</string>
     <string name="notes_back_description">नोट्स पर वापस जाएं</string>
     <string name="notes_play_description">रिकॉर्डिंग चलाएं</string>
     <string name="notes_pause_description">प्लेबैक रोकें</string>
     <string name="notes_processing_title">प्रोसेस हो रहा है…</string>
     <string name="notes_processing_preview">आपके फ़ोन पर ट्रांसक्राइब और सारांश तैयार हो रहा है। आप रिकॉर्डिंग अभी चला सकते हैं।</string>
-    <string name="notes_processing_transcribing">ट्रांसक्रिप्ट प्रोसेस हो रहा है… यह यहां अपने-आप दिखेगा।</string>
-    <string name="notes_processing_structuring">सारांश लिखा जा रहा है… ट्रांसक्रिप्ट पहले से नीचे मौजूद है।</string>
+    <string name="notes_processing_preview_transcript">आपके फ़ोन पर ट्रांसक्राइब हो रहा है। आप रिकॉर्डिंग अभी चला सकते हैं।</string>
+    <string name="notes_processing_transcribing">आपकी रिकॉर्डिंग ट्रांसक्राइब हो रही है… टेक्स्ट यहां अपने-आप दिखेगा।</string>
+    <string name="notes_processing_structuring">आपका सारांश लिखा जा रहा है…</string>
+    <string name="notes_processing_waiting_preview">आपके ऑन-डिवाइस AI के डाउनलोड होने का इंतज़ार है। आप रिकॉर्डिंग अभी चला सकते हैं।</string>
+    <string name="notes_processing_waiting_transcribing">आपका ऑन-डिवाइस AI डाउनलोड होते ही आपका नोट लिखा जाएगा। यह यहां अपने-आप दिखेगा।</string>
+    <string name="notes_processing_waiting_structuring">आपका ऑन-डिवाइस AI डाउनलोड होते ही सारांश लिखा जाएगा।</string>
     <string name="notes_recording_fallback_title">रिकॉर्डिंग</string>
     <string name="notes_failed_description">हम इस नोट के लिए सारांश और ट्रांसक्रिप्ट नहीं बना सके।</string>
-    <string name="notes_failed_summary_description">हम इस नोट के लिए सारांश नहीं बना सके। ट्रांसक्रिप्ट नीचे सहेजा गया है।</string>
+    <string name="notes_failed_summary_description">हम इस नोट के लिए सारांश नहीं बना सके। ट्रांसक्रिप्ट सहेजा गया है।</string>
     <string name="notes_try_again_button">फिर से कोशिश करें</string>
     <string name="notes_interrupted_description">यह नोट पूरा होने से पहले रुक गया था। Offhand को खुला रखें, यह आगे बढ़ेगा।</string>
     <string name="notes_interrupted_preview">रुका हुआ। जारी रखने के लिए नोट खोलें।</string>
     <string name="notes_continue_button">जारी रखें</string>
     <string name="notes_summary_heading">सारांश</string>
     <string name="notes_transcript_heading">ट्रांसक्रिप्ट</string>
+    <string name="notes_summary_ready_description">सारांश तैयार है</string>
+    <string name="notes_transcript_empty">इस नोट का कोई ट्रांसक्रिप्ट नहीं है।</string>
     <string name="notes_edit_description">नोट में बदलाव करें</string>
     <string name="notes_share_description">नोट शेयर करें</string>
     <string name="notes_delete_description">नोट हटाएं</string>
@@ -49,10 +51,7 @@
     <string name="notes_retranscribe_description">दोबारा ट्रांसक्राइब करें</string>
     <string name="notes_retranscribe_dialog_title">यह नोट दोबारा ट्रांसक्राइब करें?</string>
     <string name="notes_retranscribe_dialog_body">रिकॉर्डिंग दोबारा ट्रांसक्राइब और सारांशित होगी; मौजूदा शीर्षक, सारांश और ट्रांसक्रिप्ट बदल जाएंगे। ऑडियो रिकॉर्डिंग सुरक्षित रहेगी।</string>
-    <string name="notes_badge_encrypted">एन्क्रिप्टेड</string>
     <string name="notes_more_actions_description">और कार्रवाइयां</string>
-    <string name="notes_share_dialog_title">आप क्या शेयर करना चाहते हैं?</string>
-    <string name="notes_share_dialog_body">ध्यान रखें कि साझा की गई कॉपियाँ आपके फ़ोन से बाहर जाते ही एन्क्रिप्टेड नहीं रहतीं।</string>
     <string name="notes_share_dialog_confirm">शेयर करें</string>
     <string name="notes_share_tab_text">टेक्स्ट फ़ाइल</string>
     <string name="notes_share_tab_audio">ऑडियो फ़ाइल</string>
@@ -60,14 +59,12 @@
     <string name="notes_share_audio_details">रिकॉर्डिंग बिना कंप्रेशन वाली WAV फ़ाइल के रूप में शेयर होती है, 16 kHz मोनो। इसे हर प्लेयर और ट्रांसक्रिप्शन टूल खोल सकता है।</string>
     <string name="notes_share_download">डाउनलोड करें</string>
     <string name="notes_share_date_label">तारीख</string>
-    <string name="notes_share_format_text">टेक्स्ट फ़ाइल</string>
-    <string name="notes_share_format_pdf">PDF फ़ाइल</string>
-    <string name="notes_share_format_docx">Word फ़ाइल</string>
+    <string name="notes_share_format_text">सादा टेक्स्ट</string>
     <string name="notes_share_recorded_label">रिकॉर्ड किया गया</string>
     <string name="notes_share_duration_label">अवधि</string>
     <string name="notes_share_created_with">Offhand से बनाया गया</string>
     <string name="notes_share_exported_label">एक्सपोर्ट किया गया</string>
-    <string name="notes_preset_description">सारांश शैली बदलें</string>
+    <string name="notes_preset_description">लेखन शैली बदलें</string>
     <string name="notes_preset_sheet_body">रिकॉर्डिंग सुरक्षित रहती है। आपकी चुनी शैली में ट्रांसक्रिप्ट से शीर्षक और सारांश दोबारा लिखे जाते हैं।</string>
     <string name="notes_copy_summary_description">सारांश कॉपी करें</string>
     <string name="notes_copy_transcript_description">ट्रांसक्रिप्ट कॉपी करें</string>
@@ -81,8 +78,8 @@
     <string name="notes_folder_options_description">फ़ोल्डर विकल्प</string>
     <string name="notes_folder_rename">फ़ोल्डर का नाम बदलें</string>
     <string name="notes_folder_delete">फ़ोल्डर हटाएं</string>
-    <string name="notes_folder_style">सारांश शैली</string>
-    <string name="notes_folder_style_title">%1$s के लिए सारांश शैली</string>
+    <string name="notes_folder_style">लेखन शैली</string>
+    <string name="notes_folder_style_title">%1$s के लिए लेखन शैली</string>
     <string name="notes_folder_style_body">इस फ़ोल्डर की नई रिकॉर्डिंग इसका इस्तेमाल करती हैं, और यहाँ ले जाए गए नोट्स इसी में दोबारा लिखे जाते हैं।</string>
     <string name="notes_folder_style_default">डिफ़ॉल्ट</string>
     <string name="notes_folder_name_label">फ़ोल्डर का नाम</string>
@@ -91,8 +88,8 @@
     <string name="notes_folder_error_too_long">अधिकतम %1$d वर्ण इस्तेमाल करें।</string>
     <string name="notes_folder_error_duplicate">इस नाम का फ़ोल्डर पहले से मौजूद है।</string>
     <string name="notes_folder_delete_dialog_title">यह फ़ोल्डर हटाएं?</string>
-    <string name="notes_folder_delete_dialog_body">इसके नोट्स सुरक्षित रहेंगे और सभी नोट्स में वापस आ जाएंगे।</string>
-    <string name="notes_folder_empty_state">इस फ़ोल्डर में कोई नोट नहीं है।</string>
+    <string name="notes_folder_delete_dialog_body">इसके नोट्स सुरक्षित रहेंगे, बस किसी फ़ोल्डर में नहीं होंगे।</string>
+    <string name="notes_folder_empty_state">इस फ़ोल्डर में अभी कोई नोट नहीं है</string>
     <string name="notes_move_to_folder">फ़ोल्डर में ले जाएं</string>
     <string name="notes_folder_none">कोई फ़ोल्डर नहीं</string>
     <string name="notes_import_error_title">यह फ़ाइल आयात नहीं हो सकी</string>
@@ -111,4 +108,40 @@
     <string name="notes_suggestions_added">जोड़ा गया</string>
     <string name="notes_suggestions_dismiss">सुझाव हटाएँ</string>
     <string name="notes_suggestions_locked">Offhand Pro आपके नोट्स में कैलेंडर इवेंट और काम ढूँढता है।</string>
+    <string name="notes_folder_unsorted">बिना फ़ोल्डर</string>
+    <string name="notes_unsorted_empty_title">बिना फ़ोल्डर का कोई नोट नहीं</string>
+    <string name="notes_unsorted_empty_hint">जो नोट्स किसी फ़ोल्डर में नहीं हैं, वे यहां दिखते हैं।</string>
+    <string name="notes_loading_description">आपके नोट्स लोड हो रहे हैं</string>
+    <string name="notes_transcript_more_coming">बाकी हिस्सा अभी ट्रांसक्राइब हो रहा है…</string>
+    <string name="notes_transcript_time_description">%1$s से चलाएं</string>
+    <string name="notes_selection_count">%1$d चुने गए</string>
+    <string name="notes_selection_cancel">चयन रद्द करें</string>
+    <string name="notes_select_action">चुनें</string>
+    <string name="notes_bulk_delete_title">चुने गए नोट हटाएं?</string>
+    <string name="notes_bulk_delete_body">ये आपके फ़ोन से हमेशा के लिए हट जाएंगे। इसे वापस नहीं किया जा सकता।</string>
+    <string name="notes_audio_only">यह नोट सिर्फ़ रिकॉर्डिंग है।</string>
+    <string name="notes_search_hint">खोज शीर्षकों, सारांशों और ट्रांसक्रिप्ट में देखती है।</string>
+    <string name="notes_seek_description">प्लेबैक की स्थिति</string>
+    <string name="notes_processing_summary_hint">ट्रांसक्रिप्ट दूसरे टैब में पहले से है। नोट तैयार होने तक Offhand को खुला रखें।</string>
+    <string name="notes_interrupted_title">आपका नोट रुका हुआ है</string>
+    <string name="notes_failed_summary_title">सारांश नहीं लिखा जा सका</string>
+    <string name="notes_failed_title">नोट पूरा नहीं हो सका</string>
+    <string name="notes_move_confirm">ले जाएं</string>
+    <string name="notes_share_privacy">फ़ाइल आपके फ़ोन पर बनती है और सिर्फ़ वहीं जाती है जहाँ आप उसे भेजते हैं।</string>
+    <plurals name="notes_search_count">
+        <item quantity="one">%1$d नोट</item>
+        <item quantity="other">%1$d नोट</item>
+    </plurals>
+    <plurals name="notes_move_notes_title">
+        <item quantity="one">%1$d नोट ले जाएं</item>
+        <item quantity="other">%1$d नोट ले जाएं</item>
+    </plurals>
+    <plurals name="notes_move_rewrite_caption">
+        <item quantity="one">%1$s नोट %2$s शैली में लिखता है, इसलिए यह नोट दोबारा लिखा जाएगा। आपका ट्रांसक्रिप्ट नहीं बदलेगा।</item>
+        <item quantity="other">%1$s नोट %2$s शैली में लिखता है, इसलिए ये %3$d नोट दोबारा लिखे जाएंगे। आपके ट्रांसक्रिप्ट नहीं बदलेंगे।</item>
+    </plurals>
+    <string name="notes_match_title">शीर्षक में</string>
+    <string name="notes_match_summary">सारांश में</string>
+    <string name="notes_match_transcript">ट्रांसक्रिप्ट में</string>
+    <string name="notes_match_transcript_at">ट्रांसक्रिप्ट में %1$s पर</string>
 </resources>

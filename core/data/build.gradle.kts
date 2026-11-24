@@ -5,19 +5,20 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-android {
-    namespace = "com.dmytrosamoilov.offhand.core.data"
-}
-
 room {
     schemaDirectory("$projectDir/schemas")
 }
 
 kotlin {
+    android {
+        namespace = "com.dmytrosamoilov.offhand.core.data"
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(project(":core:common"))
             implementation(project(":core:security"))
+            api(project(":core:device"))
             api(libs.coroutines.core)
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
@@ -32,6 +33,7 @@ kotlin {
             implementation(libs.okio)
             implementation(libs.timber)
             implementation(libs.play.billing.ktx)
+            implementation(libs.play.blockstore)
         }
         iosMain.dependencies {
             implementation(libs.sqlite.bundled)

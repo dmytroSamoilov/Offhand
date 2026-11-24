@@ -3,15 +3,16 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-android {
-    namespace = "com.dmytrosamoilov.offhand.core.ai.api"
-}
-
 kotlin {
+    android {
+        namespace = "com.dmytrosamoilov.offhand.core.ai.api"
+    }
+
     sourceSets {
         commonMain.dependencies {
             api(libs.coroutines.core)
             api(project(":core:common"))
+            api(project(":core:device"))
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
             implementation(libs.kotlinx.serialization.json)
@@ -22,7 +23,7 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
-        getByName("androidUnitTest").dependencies {
+        getByName("androidHostTest").dependencies {
             implementation(libs.junit)
             implementation(libs.coroutines.test)
             implementation(libs.mockk)

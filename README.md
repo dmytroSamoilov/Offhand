@@ -154,7 +154,7 @@ Three product flavors that install side by side: `production` (`com.dmytrosamoil
    without it.
 
 ```
-./gradlew assembleDebug testDebugUnitTest lintDebug :app:lintDevDebug
+./gradlew assembleDebug testAndroidHostTest testDebugUnitTest lintAndroidMain lintDebug :app:lintDevDebug
 ```
 
 ### iOS
@@ -191,8 +191,11 @@ Schemes mirror the Android flavors: `Offhand-dev`, `Offhand-prod` and `Offhand-u
 ### Unit tests
 
 ```
-./gradlew testDebugUnitTest
+./gradlew testAndroidHostTest testDebugUnitTest
 ```
+
+`testAndroidHostTest` runs the JVM tests of the Kotlin Multiplatform modules (`commonTest`
+and `src/androidHostTest`), `testDebugUnitTest` those of the plain Android modules.
 
 Tests that need no Android or MockK live in `commonTest` and also run on the
 Kotlin/Native iOS target, which catches K/N-only differences (regex classes, stdlib)
@@ -318,4 +321,4 @@ The **Offhand** name and logo are not covered by the code license and may not be
 derivative apps or forks without permission.
 
 Legal documents for the published app:
-[Privacy Policy](legal/privacy-policy.html) · [Terms & Conditions](legal/terms-and-conditions.html)
+[Privacy Policy](https://dmytrosamoilov.com/offhand/privacy-policy/) · [Terms & Conditions](https://dmytrosamoilov.com/offhand/terms-and-conditions/)

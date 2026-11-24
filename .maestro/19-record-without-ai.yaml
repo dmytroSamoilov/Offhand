@@ -1,0 +1,109 @@
+# Runs after 17-delete-note.yaml and before 18-onboarding-branches.yaml (which
+# clears the state and denies the microphone). Covers recording while the
+# on-device AI is not on the phone: the developer options remove it, a note is
+# recorded and saved, it keeps its transcript and waits instead of failing, and
+# the next launch (the fake has its AI back after a process start) finishes it.
+appId: com.dmytrosamoilov.offhand.uitest
+---
+- launchApp
+- assertVisible: "Smoke test note"
+- tapOn: "Settings"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "About & support"
+          direction: DOWN
+      - tapOn: "About & support"
+      - scrollUntilVisible:
+          element:
+            text: "Developer options"
+          direction: DOWN
+      - tapOn: "Developer options"
+      - scrollUntilVisible:
+          element:
+            text: "Remove on-device AI"
+          direction: UP
+      - tapOn: "Remove on-device AI"
+      - tapOn: "Remove"
+      - assertVisible: "Not downloaded"
+      - scrollUntilVisible:
+          element:
+            text: "Developer options"
+          direction: DOWN
+      - tapOn: "Developer options"
+      - back
+      - tapOn:
+          id: "tab_notes"
+      - tapOn: "Start a new recording"
+      - runFlow:
+          when:
+            visible: "Start recording"
+          commands:
+            - tapOn: "Start recording"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element: "About & support"
+          centerElement: true
+      - tapOn: "About & support"
+      - scrollUntilVisible:
+          element: "Developer options"
+      - tapOn: "Developer options"
+      # A row clipped under the title still counts as visible, so scroll up to
+      # the section's first row
+      - scrollUntilVisible:
+          element: "Model"
+          direction: UP
+      - tapOn: "Remove on-device AI"
+      # The confirmation is an action sheet; its title is not read back
+      - extendedWaitUntil:
+          visible: "Remove"
+          timeout: 5000
+      - tapOn: "Remove"
+      - assertVisible: "Download on-device AI"
+      - scrollUntilVisible:
+          element: "Developer options"
+      - tapOn: "Developer options"
+      - swipe:
+          start: "1%,50%"
+          end: "70%,50%"
+      - tapOn:
+          id: "tab_notes"
+      - tapOn: "Record a note"
+- extendedWaitUntil:
+    visible: "00:(0[4-9]|[1-5][0-9])"
+    timeout: 15000
+- tapOn: "Save note"
+# Saving opens the note on its Transcript tab with the transcript there; the
+# Summary tab says the summary waits for the on-device AI instead of claiming
+# it is being written
+- extendedWaitUntil:
+    visible: "Team meeting about the quarterly budget."
+    timeout: 15000
+- tapOn: "Summary"
+- assertVisible: "(Your summary will be written when|Waiting for) your on-device AI.*"
+- assertNotVisible: "Writing (the|your) summary.*"
+- stopApp
+- launchApp
+# The waiting note carries its placeholder title until it is finished
+- extendedWaitUntil:
+    notVisible: "(Recording|Note) [0-9]+"
+    timeout: 60000
+- tapOn:
+    text: "Smoke test note"
+    index: 0
+- runFlow:
+    when:
+      visible: "In-app review · dev build"
+    commands:
+      - tapOn: "COUNT ATTEMPT"
+- assertVisible: "Copy summary"
+- assertNotVisible: "(Your summary will be written when|Waiting for) your on-device AI.*"
+- assertNotVisible: "Writing (the|your) summary.*"
+- tapOn: "Transcript"
+- assertVisible: "Team meeting about the quarterly budget."

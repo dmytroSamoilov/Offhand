@@ -12,11 +12,14 @@ struct RootView: View {
     @State private var downloadActivityController = AiCoreDownloadActivityController()
     @State private var finishCoordinator = NoteFinishCoordinator()
     @State private var activeNoteId: Int64?
+    @State private var settledNotes: [Int64: Bool] = [:]
     @State private var phase: IosRootPhase = .loading
-    @State private var selectedTab = 0
+    @State private var selectedTab = BottomBarDestination.notes
     @State private var isPaywallPresented = false
     @State private var isEarlyAdopterThanksShown = false
     @State private var showsBenefitsAfterThanks = false
+    @State private var trialNotice: TrialNoticeItem?
+    @State private var showsOfferAfterTrialNotice = false
     @ObservedObject private var notifications = NoteNotifications.shared
     @ObservedObject private var shortcuts = ShortcutRequests.shared
     @Environment(\.scenePhase) private var scenePhase
@@ -26,6 +29,9 @@ struct RootView: View {
             switch phase {
             case .loading:
                 ProgressView()
+                    .tint(OffhandColor.ink2)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(OffhandColor.ground.ignoresSafeArea())
             case .onboarding:
                 OnboardingView { viewModel.onReady() }
             case .locked:
@@ -63,7 +69,20 @@ struct RootView: View {
                 },
                 onDismiss: { viewModel.onEarlyAdopterThanksDismissed() }
             )
-            .presentationDetents([.fraction(0.66), .large])
+        }
+        .task {
+            for await notice in viewModel.trialNotice {
+                trialNotice = notice == .removed ? TrialNoticeItem(notice: .removed) : nil
+            }
+        }
+        .sheet(item: trialNoticeBinding, onDismiss: showOfferIfRequested) { item in
+            TrialRemovedSheet(
+                onUpgrade: {
+                    showsOfferAfterTrialNotice = true
+                    viewModel.onTrialNoticeDismissed()
+                },
+                onDismiss: { viewModel.onTrialNoticeDismissed() }
+            )
         }
         .task { await observeSession() }
         .task { await observeProcessingIds() }
@@ -79,6 +98,7 @@ struct RootView: View {
         // CFBundleDocumentTypes); the share sheet gave no hint that import is
         // Pro, so a free user is asked before the paywall.
         .onOpenURL { url in
+            if openRecordRequest(url) { return }
             guard url.isFileURL else { return }
             let staged = AudioFileStaging.stage(url)
             sharedAudioImport.onSharedAudioReceived(
@@ -86,31 +106,38 @@ struct RootView: View {
                 unreadableCount: staged == nil ? 1 : 0
             )
         }
-        .alert(String(localized: "Import with Offhand Pro"), isPresented: proImportBinding) {
-            Button(String(localized: "Upgrade")) { sharedAudioImport.onUpgradeClicked() }
-            Button(String(localized: "Cancel"), role: .cancel) { sharedAudioImport.onImportDeclined() }
-        } message: {
-            Text(String(localized: "Turning recordings and videos from other apps into notes is part of Offhand Pro. Upgrade to import the shared file."))
+        .offhandDialog(isPresented: proImportBinding) {
+            OffhandDialog(
+                title: String(localized: "Import with Offhand Pro"),
+                message: String(localized: "Turning recordings and videos from other apps into notes is part of Offhand Pro. Upgrade to import the shared file."),
+                confirmLabel: String(localized: "Upgrade"),
+                onConfirm: { sharedAudioImport.onUpgradeClicked() },
+                dismissLabel: String(localized: "Cancel"),
+                onDismiss: { sharedAudioImport.onImportDeclined() }
+            )
         }
-        .alert(sharedImportNoticeTitle, isPresented: sharedImportNoticeBinding) {
-            Button(String(localized: "OK")) { sharedAudioImport.onNoticeDismissed() }
-        } message: {
-            if let notice = sharedImportState.notice {
-                Text(ImportNoticeText.message(notice))
-            }
+        .offhandDialog(isPresented: sharedImportNoticeBinding) {
+            OffhandDialog(
+                title: sharedImportNoticeTitle,
+                message: sharedImportState.notice.map { ImportNoticeText.message($0) },
+                confirmLabel: String(localized: "OK"),
+                onConfirm: { sharedAudioImport.onNoticeDismissed() },
+                onDismiss: { sharedAudioImport.onNoticeDismissed() }
+            )
         }
         .onAppear {
             NoteFinishCoordinator.onExpired = { [activityController] in
                 activityController.suspendedWithPendingWork()
             }
             notifications.register()
+            activityController.endLeftovers()
         }
         .onChange(of: shortcuts.pending) { runPendingShortcut() }
         .onChange(of: phase) { runPendingShortcut() }
         .onChange(of: notifications.noteIdToOpen) {
             guard let noteId = notifications.noteIdToOpen else { return }
             notifications.noteIdToOpen = nil
-            selectedTab = 0
+            selectedTab = .notes
             AppViewModels.notes.onNoteSelected(id: noteId)
         }
         .onReceive(
@@ -139,6 +166,27 @@ struct RootView: View {
         }
     }
 
+    // The home-screen widget's Record opens the app with this link: without
+    // Pro the paywall comes first, and the record sheet asks for the
+    // microphone and starts recording into the widget's folder. Only the widget's own scheme and host are
+    // accepted, and the folder is a number or nothing.
+    private func openRecordRequest(_ url: URL) -> Bool {
+        guard !RecordWidgetShared.urlScheme.isEmpty,
+              url.scheme == RecordWidgetShared.urlScheme,
+              url.host == RecordWidgetShared.recordHost else { return false }
+        let folderId = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+            .queryItems?
+            .first { $0.name == RecordWidgetShared.folderQueryItem }?
+            .value
+            .flatMap { Int64($0) }
+        viewModel.onWidgetRecordingRequested {
+            shortcuts.requestedFolder = folderId.map { .folder($0) } ?? .unsorted
+            shortcuts.requestedOrigin = .widget
+            shortcuts.pending = .startRecording
+        }
+        return true
+    }
+
     // A shortcut fired while the app was locked or still loading waits here
     // until the notes list can act on it.
     private func runPendingShortcut() {
@@ -146,7 +194,8 @@ struct RootView: View {
         shortcuts.pending = nil
         switch request {
         case .startRecording:
-            selectedTab = 0
+            AppViewModels.recording.onRecordingExpectedFrom(origin: shortcuts.takeRequestedOrigin().analyticsOrigin)
+            selectedTab = .notes
             shortcuts.recordSheetRequestId += 1
         case .stopRecording:
             if sessionManager.session.value.phase != .idle {
@@ -163,6 +212,20 @@ struct RootView: View {
         viewModel.onProBenefitsRequested()
     }
 
+    // Same reason as the thank-you: the paywall opens once the sheet is gone.
+    private func showOfferIfRequested() {
+        guard showsOfferAfterTrialNotice else { return }
+        showsOfferAfterTrialNotice = false
+        viewModel.onProBenefitsRequested()
+    }
+
+    private var trialNoticeBinding: Binding<TrialNoticeItem?> {
+        Binding(
+            get: { trialNotice },
+            set: { item in if item == nil { viewModel.onTrialNoticeDismissed() } }
+        )
+    }
+
     private var earlyAdopterThanksBinding: Binding<Bool> {
         Binding(
             get: { isEarlyAdopterThanksShown },
@@ -170,35 +233,77 @@ struct RootView: View {
         )
     }
 
+    // The session only carries its note once the recorder has drained, so a
+    // stopped recording first shows as being prepared and is settled when the
+    // session is idle again: a discarded or too short one has no note and
+    // ends the Live Activity there, a saved one waits for its outcome.
     private func observeSession() async {
         var previousPhase = SessionPhase.idle
         var previousPaused = false
+        var isAwaitingSavedNote = false
         for await session in sessionManager.session {
             let phase = session.phase
             if phase == .recording {
                 if previousPhase != .recording {
+                    activeNoteId = nil
+                    isAwaitingSavedNote = false
                     activityController.recordingStarted()
                 } else if session.isPaused != previousPaused {
                     activityController.recordingPaused(session.isPaused)
                 }
-                if let noteId = session.noteId {
-                    activeNoteId = noteId.int64Value
-                }
             } else if previousPhase == .recording {
-                if phase == .failed {
-                    activityController.cancelled()
-                    activeNoteId = nil
-                } else if let noteId = activeNoteId {
-                    finishCoordinator.processingStarted(noteId: noteId)
-                    if finishCoordinator.isManaging(noteId: noteId) {
-                        activityController.cancelled()
-                    } else {
-                        activityController.processingProgressed(percent: nil)
-                    }
-                }
+                isAwaitingSavedNote = true
+                activityController.processingProgressed(percent: nil)
+            }
+            if isAwaitingSavedNote && phase == .failed {
+                isAwaitingSavedNote = false
+                activityController.cancelled()
+            } else if isAwaitingSavedNote && phase == .idle {
+                isAwaitingSavedNote = false
+                recordingSettled(noteId: session.noteId?.int64Value)
             }
             previousPhase = phase
             previousPaused = session.isPaused
+        }
+    }
+
+    // A note that needs no writing (transcription switched off) is finished
+    // before this runs, so its outcome may already be known.
+    private func recordingSettled(noteId: Int64?) {
+        guard let noteId else {
+            activityController.cancelled()
+            return
+        }
+        if let isCompleted = settledNotes.removeValue(forKey: noteId) {
+            endActivity(isCompleted: isCompleted)
+        } else if finishCoordinator.isManaging(noteId: noteId) {
+            activityController.cancelled()
+        } else {
+            activeNoteId = noteId
+        }
+    }
+
+    private func endActivity(isCompleted: Bool) {
+        if isCompleted {
+            activityController.finished()
+        } else {
+            activityController.cancelled()
+        }
+    }
+
+    // A note that leaves processing without an outcome is waiting for the
+    // on-device AI to download; nothing is being worked on, so the Live
+    // Activity has nothing to show. A failure is reported just after the
+    // note leaves, which is what the short wait is for, and a note that was
+    // picked up again in the meantime is left alone.
+    private func endActivityIfLeftWaiting(noteId: Int64) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1))
+            let processing = (sessionManager.processingNoteIds.value as NSSet)
+                .compactMap { ($0 as? NSNumber)?.int64Value }
+            guard activeNoteId == noteId, !processing.contains(noteId) else { return }
+            activeNoteId = nil
+            activityController.cancelled()
         }
     }
 
@@ -220,6 +325,7 @@ struct RootView: View {
             }
             for removed in previousIds.subtracting(current) {
                 finishCoordinator.processingEnded(noteId: removed)
+                endActivityIfLeftWaiting(noteId: removed)
             }
             if current.isEmpty && !previousIds.isEmpty {
                 finishCoordinator.allProcessingFinished()
@@ -244,13 +350,18 @@ struct RootView: View {
             case .importRejected:
                 continue
             }
-            guard eventNoteId == activeNoteId else { continue }
+            let isCompleted: Bool
             switch onEnum(of: event) {
             case .completed:
-                activityController.finished()
+                isCompleted = true
             case .failed, .interrupted, .importRejected:
-                activityController.cancelled()
+                isCompleted = false
             }
+            guard eventNoteId == activeNoteId else {
+                settledNotes = [eventNoteId: isCompleted]
+                continue
+            }
+            endActivity(isCompleted: isCompleted)
             activeNoteId = nil
         }
     }
@@ -304,7 +415,9 @@ struct RootView: View {
         let session = sessionManager.session.value
         let hasPendingWork = !sessionManager.processingNoteIds.value.isEmpty || session.phase == .draining
         if hasPendingWork {
-            notifications.remindToKeepOpen()
+            // With a system task carrying the work there is nothing to come
+            // back for; if that task is cut short, its own notice says so.
+            if !NoteFinishCoordinator.isContinuingInBackground { notifications.remindToKeepOpen() }
             finishCoordinator.appEnteredBackgroundWhileProcessing()
             finishCoordinator.appEnteredBackgroundWithPendingWork()
         } else {
@@ -326,49 +439,121 @@ struct RootView: View {
 }
 
 struct MainTabView: View {
-    @Binding var selectedTab: Int
+    @Binding var selectedTab: BottomBarDestination
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            NotesListView()
-                .tabItem { Label(String(localized: "Notes"), systemImage: "list.bullet") }
-                .tag(0)
-            SettingsView()
-                .tabItem { Label(String(localized: "Settings"), systemImage: "gearshape") }
-                .tag(1)
+        ZStack {
+            NotesListView { bottomBar }
+                .shownAsTab(selectedTab == .notes)
+            SettingsView { bottomBar }
+                .shownAsTab(selectedTab == .settings)
         }
-        .tint(Brand.primary)
+        .background(OffhandColor.ground.ignoresSafeArea())
+    }
+
+    private var bottomBar: some View {
+        BottomBar(
+            selected: selectedTab,
+            labels: BottomBarLabels(
+                notes: String(localized: "Notes"),
+                settings: String(localized: "Settings"),
+                record: String(localized: "Record"),
+                recordAccessibilityLabel: String(localized: "Record a note")
+            ),
+            onNotes: { selectedTab = .notes },
+            onRecord: startRecording,
+            onSettings: { selectedTab = .settings }
+        )
+    }
+
+    private func startRecording() {
+        Haptics.confirm()
+        selectedTab = .notes
+        ShortcutRequests.shared.recordSheetRequestId += 1
     }
 }
 
-// The early-adopter grant: the crown and a primary button keep it from being
-// tapped past, and the body says plainly that Pro stays on this iPhone only.
+private extension ShortcutRequests.Origin {
+    var analyticsOrigin: RecordingOrigin {
+        switch self {
+        case .shortcut: return .shortcut
+        case .widget: return .widget
+        case .onboarding: return .onboarding
+        }
+    }
+}
+
+private extension View {
+    func shownAsTab(_ isShown: Bool) -> some View {
+        opacity(isShown ? 1 : 0)
+            .allowsHitTesting(isShown)
+            .accessibilityHidden(!isShown)
+    }
+}
+
+private struct TrialNoticeItem: Identifiable {
+    let notice: ProTrialNotice
+
+    var id: String { notice.name }
+}
+
+private struct TrialRemovedSheet: View {
+    let onUpgrade: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        ProNoticeSheet(
+            title: String(localized: "Your Pro trial was removed"),
+            message: String(localized: "The date on this iPhone was set back past the start of your trial, so the trial has ended. You can keep using the free version or upgrade to Offhand Pro."),
+            primaryLabel: String(localized: "See Offhand Pro"),
+            onPrimary: onUpgrade,
+            secondaryLabel: String(localized: "Continue with the free version"),
+            onSecondary: onDismiss
+        )
+    }
+}
+
 private struct EarlyAdopterThanksSheet: View {
     let onShowBenefits: () -> Void
     let onDismiss: () -> Void
 
     var body: some View {
-        VStack(spacing: 20) {
-            ProCrown(size: 56)
-                .padding(.top, 8)
-            Text(String(localized: "Offhand Pro is yours"))
-                .font(.title2.bold())
-                .multilineTextAlignment(.center)
-            Text(String(localized: "You were here before 1.5, while Offhand was still rough. Thank you for testing it with me. As a thank-you, everything in Offhand Pro is unlocked on this iPhone, for good. No purchase, no account.\n\nOne thing to know: Pro lives on this iPhone only. If you delete or reinstall Offhand, or move to a new iPhone, it will not come back."))
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 0)
-            Button(String(localized: "Show Pro benefits"), action: onShowBenefits)
-                .buttonStyle(.borderedProminent)
-                .tint(Brand.primary)
-                .controlSize(.large)
-                .frame(maxWidth: .infinity)
-            Button(String(localized: "Got it"), action: onDismiss)
-                .buttonStyle(.plain)
-                .foregroundStyle(Brand.primary)
+        ProNoticeSheet(
+            title: String(localized: "Offhand Pro is yours"),
+            message: String(localized: "You were here before 1.5, while Offhand was still rough. Thank you for testing it with me. As a thank-you, everything in Offhand Pro is unlocked on this iPhone, for good. No purchase, no account.\n\nOne thing to know: Pro lives on this iPhone only. If you delete or reinstall Offhand, or move to a new iPhone, it will not come back."),
+            primaryLabel: String(localized: "Show Pro benefits"),
+            onPrimary: onShowBenefits,
+            secondaryLabel: String(localized: "Got it"),
+            onSecondary: onDismiss
+        )
+    }
+}
+
+private struct ProNoticeSheet: View {
+    let title: String
+    let message: String
+    let primaryLabel: String
+    let onPrimary: () -> Void
+    let secondaryLabel: String
+    let onSecondary: () -> Void
+
+    var body: some View {
+        OffhandSheet {
+            VStack(alignment: .leading, spacing: 0) {
+                ProCrown(size: 40)
+                    .padding(.top, 8)
+                SheetHeading(title)
+                    .padding(.top, 20)
+                Text(message)
+                    .offhandText(.dialogBody)
+                    .foregroundStyle(OffhandColor.ink2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 10)
+                PrimaryButton(primaryLabel, fillsWidth: true, action: onPrimary)
+                    .padding(.top, 24)
+                PlainTextButton(secondaryLabel, tone: .muted, fillsWidth: true, action: onSecondary)
+                    .padding(.top, 4)
+            }
         }
-        .padding(24)
     }
 }

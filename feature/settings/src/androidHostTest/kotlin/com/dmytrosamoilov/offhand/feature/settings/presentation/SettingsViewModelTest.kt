@@ -1,0 +1,431 @@
+package com.dmytrosamoilov.offhand.feature.settings.presentation
+
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetTelemetryConsentUseCase
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import io.mockk.verify
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import kotlinx.coroutines.flow.MutableStateFlow
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteFeatureEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteFeaturesUseCase
+import com.dmytrosamoilov.offhand.core.data.domain.NoteFeatures
+import com.dmytrosamoilov.offhand.core.data.domain.NoteFeature
+import com.dmytrosamoilov.offhand.core.data.domain.CustomNoteStyle
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleLanguage
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleSection
+import com.dmytrosamoilov.offhand.core.data.domain.SectionFormat
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.AudioImportSource
+import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.data.domain.ProOverride
+import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
+import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
+import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
+import com.dmytrosamoilov.offhand.core.security.AppLockManager
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioResult
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ImportAudioUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.ImportAllowance
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.IsAudioImportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ObserveImportAllowanceUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveAppLockEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOverrideUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStatusUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSkipSilenceEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.RedeemProCodeUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetAppLockEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSkipSilenceEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.coVerifyOrder
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class SettingsViewModelTest {
+
+    private val dispatcher = StandardTestDispatcher()
+
+    private val setDynamicColor: SetDynamicColorUseCase = mockk(relaxed = true)
+    private val observeDynamicColor: ObserveDynamicColorUseCase = mockk()
+    private val observeNoteStyle: ObserveNoteStyleUseCase = mockk()
+    private val observeCustomNoteStyles: ObserveCustomNoteStylesUseCase = mockk()
+    private val setAppLockEnabled: SetAppLockEnabledUseCase = mockk(relaxed = true)
+    private val observeAppLockEnabled: ObserveAppLockEnabledUseCase = mockk()
+    private val appLockManager: AppLockManager = mockk()
+    private val importAudio: ImportAudioUseCase = mockk()
+    private val isAudioImportAvailable: IsAudioImportAvailableUseCase = mockk()
+    private val observeImportAllowance: ObserveImportAllowanceUseCase = mockk()
+    private val observeSmartSuggestionsEnabled: ObserveSmartSuggestionsEnabledUseCase = mockk()
+    private val noteFeatures = MutableStateFlow(NoteFeatures())
+    private val observeNoteFeatures: ObserveNoteFeaturesUseCase = mockk {
+        every { this@mockk.invoke() } returns noteFeatures
+    }
+    private val setNoteFeatureEnabled: SetNoteFeatureEnabledUseCase = mockk(relaxed = true)
+    private val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
+    private val setSmartSuggestionsEnabled: SetSmartSuggestionsEnabledUseCase = mockk(relaxed = true)
+    private val observeSkipSilenceEnabled: ObserveSkipSilenceEnabledUseCase = mockk {
+        every { this@mockk() } returns flowOf(false)
+    }
+    private val setSkipSilenceEnabled: SetSkipSilenceEnabledUseCase = mockk(relaxed = true)
+    private val observeProStatus: ObserveProStatusUseCase = mockk()
+    private val observeProOverride: ObserveProOverrideUseCase = mockk()
+    private val setProOverride: SetProOverrideUseCase = mockk(relaxed = true)
+    private val gate: ProUpgradeGate = mockk()
+    private val redeemProCode: RedeemProCodeUseCase = mockk()
+
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(dispatcher)
+        every { observeDynamicColor() } returns flowOf(true)
+        every { observeNoteStyle() } returns flowOf(NoteStyleRef.BuiltIn(NotePreset.MEETING))
+        every { observeCustomNoteStyles() } returns flowOf(emptyList())
+        every { observeAppLockEnabled() } returns flowOf(true)
+        every { appLockManager.isDeviceSecure } returns true
+        every { isAudioImportAvailable() } returns flowOf(true)
+        every { observeImportAllowance() } returns flowOf(ImportAllowance.Unlimited)
+        coEvery { importAudio(any()) } returns ImportAudioResult.STARTED
+        every { observeSmartSuggestionsEnabled() } returns flowOf(false)
+        every { observeProStatus() } returns flowOf(ProStatus.LIFETIME)
+        every { observeProOverride() } returns flowOf(ProOverride.STORE)
+        coEvery { gate.requirePro(any()) } returns true
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    private val observeTelemetryConsent: ObserveTelemetryConsentUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
+    private val setTelemetryConsent: SetTelemetryConsentUseCase = mockk(relaxed = true)
+
+    private fun viewModel() = SettingsViewModel(
+        observeDynamicColor = observeDynamicColor,
+        setDynamicColor = setDynamicColor,
+        observeNoteStyle = observeNoteStyle,
+        observeCustomNoteStyles = observeCustomNoteStyles,
+        observeAppLockEnabled = observeAppLockEnabled,
+        setAppLockEnabled = setAppLockEnabled,
+        appLockManager = appLockManager,
+        observeTelemetryConsent = observeTelemetryConsent,
+        setTelemetryConsent = setTelemetryConsent,
+        importAudio = importAudio,
+        isAudioImportAvailable = isAudioImportAvailable,
+        observeImportAllowance = observeImportAllowance,
+        observeSmartSuggestionsEnabled = observeSmartSuggestionsEnabled,
+        observeNoteFeatures = observeNoteFeatures,
+        setNoteFeatureEnabled = setNoteFeatureEnabled,
+        setSmartSuggestionsEnabled = setSmartSuggestionsEnabled,
+        observeSkipSilenceEnabled = observeSkipSilenceEnabled,
+        setSkipSilenceEnabled = setSkipSilenceEnabled,
+        observeProStatus = observeProStatus,
+        observeProOverride = observeProOverride,
+        setProOverride = setProOverride,
+        proUpgradeGate = gate,
+        redeemProCode = redeemProCode,
+        buildInfo = BuildInfo(isDeveloperBuild = false, appVersion = "1", platform = "test"),
+        analyticsTracker = analyticsTracker,
+    )
+
+    @Test
+    fun `redeem confirmation asks for the store fallback only when the purchase flow fails`() = runTest(dispatcher) {
+        coEvery { redeemProCode() } returns PurchaseOutcome.CANCELLED
+        val viewModel = viewModel()
+
+        viewModel.onRedeemCodeConfirmed()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.isRedeemFallbackRequested)
+
+        coEvery { redeemProCode() } returns PurchaseOutcome.FAILED
+        viewModel.onRedeemCodeConfirmed()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isRedeemFallbackRequested)
+
+        viewModel.onRedeemFallbackOpened()
+        assertFalse(viewModel.uiState.value.isRedeemFallbackRequested)
+    }
+
+    @Test
+    fun `skip silence switches on only after the pro gate passes`() = runTest(dispatcher) {
+        coEvery { gate.requirePro(ProFeature.SKIP_SILENCE) } returns false
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onSkipSilenceChanged(true)
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify(exactly = 0) { setSkipSilenceEnabled(any()) }
+
+        coEvery { gate.requirePro(ProFeature.SKIP_SILENCE) } returns true
+        viewModel.onSkipSilenceChanged(true)
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify { setSkipSilenceEnabled(true) }
+    }
+
+    @Test
+    fun `switching usage sharing off is reported before the consent is withdrawn`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onTelemetryChanged(false)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerifyOrder {
+            analyticsTracker.track(AnalyticsEvents.telemetryToggled(enabled = false))
+            setTelemetryConsent(false)
+        }
+    }
+
+    @Test
+    fun `switching usage sharing on is reported after the consent is stored`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onTelemetryChanged(true)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerifyOrder {
+            setTelemetryConsent(true)
+            analyticsTracker.track(AnalyticsEvents.telemetryToggled(enabled = true))
+        }
+    }
+
+    @Test
+    fun `skip silence switches off without the pro gate`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onSkipSilenceChanged(false)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { gate.requirePro(ProFeature.SKIP_SILENCE) }
+        coVerify { setSkipSilenceEnabled(false) }
+    }
+
+    @Test
+    fun `state reflects note preset and dynamic color`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(NoteStyleRef.BuiltIn(NotePreset.MEETING), viewModel.uiState.value.noteStyle)
+        assertTrue(viewModel.uiState.value.isDynamicColorEnabled)
+    }
+
+    @Test
+    fun `dynamic color toggle persists preference`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onDynamicColorChanged(false)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { setDynamicColor(false) }
+    }
+
+    @Test
+    fun `app lock toggle persists preference`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isAppLockEnabled)
+        viewModel.onAppLockChanged(false)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { setAppLockEnabled(false) }
+    }
+
+    @Test
+    fun `app lock cannot be enabled without a device passcode`() = runTest(dispatcher) {
+        every { appLockManager.isDeviceSecure } returns false
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onAppLockChanged(true)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(false, viewModel.uiState.value.isDeviceSecure)
+        coVerify { setAppLockEnabled(false) }
+    }
+
+    @Test
+    fun `switching smart suggestions on asks the paywall first`() = runTest(dispatcher) {
+        coEvery { gate.requirePro(any()) } returns false
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.onSmartSuggestionsChanged(true)
+        advanceUntilIdle()
+        coVerify(exactly = 0) { setSmartSuggestionsEnabled(any()) }
+
+        viewModel.onSmartSuggestionsChanged(false)
+        advanceUntilIdle()
+        coVerify { setSmartSuggestionsEnabled(false) }
+    }
+
+    @Test
+    fun `the import picker opens only after the paywall passes`() = runTest(dispatcher) {
+        every { observeImportAllowance() } returns flowOf(ImportAllowance.Free(left = 0))
+        coEvery { gate.requirePro(any()) } returns false
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.onImportAudioClicked()
+        advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.isImportPickerRequested)
+
+        coEvery { gate.requirePro(any()) } returns true
+        viewModel.onImportAudioClicked()
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isImportPickerRequested)
+        viewModel.onImportPickerOpened()
+        assertFalse(viewModel.uiState.value.isImportPickerRequested)
+    }
+
+    @Test
+    fun `a free import left opens the picker without the paywall`() = runTest(dispatcher) {
+        every { observeImportAllowance() } returns flowOf(ImportAllowance.Free(left = 2))
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.onImportAudioClicked()
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isImportPickerRequested)
+        assertFalse(viewModel.uiState.value.allowsMultipleImports)
+        assertEquals(2, viewModel.uiState.value.freeImportsLeft)
+        coVerify(exactly = 0) { gate.requirePro(any()) }
+    }
+
+    @Test
+    fun `custom styles are listed once unlocked`() = runTest(dispatcher) {
+        every { observeCustomNoteStyles() } returns flowOf(listOf(customStyle))
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        assertEquals(listOf("Debrief"), viewModel.uiState.value.customStyles.map { it.name })
+    }
+
+    private val customStyle = CustomNoteStyle(
+        id = 1,
+        name = "Debrief",
+        noteKind = "",
+        language = NoteStyleLanguage.RECORDING,
+        sections = listOf(NoteStyleSection("Customer", "", SectionFormat.SENTENCES)),
+        createdAtEpochMs = 0,
+    )
+
+    @Test
+    fun `importing several files starts each one and reports the count`() = runTest {
+        val viewModel = viewModel()
+        val sources = listOf(AudioImportSource("/a", "a.m4a"), AudioImportSource("/b", "b.mp3"))
+
+        viewModel.onAudioImportSelected(sources, unreadableCount = 0)
+        advanceUntilIdle()
+
+        assertEquals(ImportNoticeUi.Started(2), viewModel.uiState.value.importNotice)
+        coVerify { importAudio(sources) }
+        viewModel.onImportNoticeDismissed()
+        assertEquals(null, viewModel.uiState.value.importNotice)
+    }
+
+    @Test
+    fun `a declined paywall starts nothing and shows no started notice`() = runTest {
+        coEvery { importAudio(any()) } returns ImportAudioResult.LOCKED
+        val viewModel = viewModel()
+
+        viewModel.onAudioImportSelected(listOf(AudioImportSource("/a", "a.m4a")), unreadableCount = 0)
+        advanceUntilIdle()
+
+        assertEquals(null, viewModel.uiState.value.importNotice)
+    }
+
+    @Test
+    fun `unreadable files are reported when nothing was locked`() = runTest {
+        val viewModel = viewModel()
+
+        viewModel.onAudioImportSelected(listOf(AudioImportSource("/a", "a.m4a")), unreadableCount = 1)
+        advanceUntilIdle()
+
+        assertEquals(ImportNoticeUi.Unreadable, viewModel.uiState.value.importNotice)
+        coVerify(exactly = 1) { importAudio(any()) }
+    }
+
+    @Test
+    fun `switching transcription or the summary is stored and reported with its state`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onTranscriptionChanged(false)
+        viewModel.onSummaryChanged(false)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { setNoteFeatureEnabled(NoteFeature.TRANSCRIPTION, false) }
+        coVerify { setNoteFeatureEnabled(NoteFeature.SUMMARY, false) }
+        verify { analyticsTracker.track(AnalyticsEvents.noteFeatureToggled(NoteFeature.TRANSCRIPTION, false)) }
+        verify { analyticsTracker.track(AnalyticsEvents.noteFeatureToggled(NoteFeature.SUMMARY, false)) }
+    }
+
+    @Test
+    fun `without transcription the summary reads as off and its switch does nothing`() = runTest(dispatcher) {
+        noteFeatures.value = NoteFeatures(isTranscriptionEnabled = false, isSummaryEnabled = true)
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isSummaryEnabled)
+        viewModel.onSummaryChanged(true)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { setNoteFeatureEnabled(NoteFeature.SUMMARY, any()) }
+    }
+
+    @Test
+    fun `the usage-sharing switch reads and writes the telemetry consent`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isTelemetryEnabled)
+
+        viewModel.onTelemetryChanged(false)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { setTelemetryConsent(false) }
+    }
+
+    @Test
+    fun `a transcripts-only phone shows the summary as unavailable and ignores its switches`() = runTest(dispatcher) {
+        noteFeatures.value = NoteFeatures(isSummaryAvailable = false)
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isSummaryAvailable)
+        assertFalse(viewModel.uiState.value.isSummaryEnabled)
+        viewModel.onSummaryChanged(true)
+        viewModel.onSmartSuggestionsChanged(true)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { setNoteFeatureEnabled(NoteFeature.SUMMARY, any()) }
+        coVerify(exactly = 0) { setSmartSuggestionsEnabled(any()) }
+    }
+}

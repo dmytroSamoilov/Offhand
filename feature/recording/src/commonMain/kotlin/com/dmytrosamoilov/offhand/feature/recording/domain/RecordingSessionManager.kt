@@ -2,6 +2,8 @@ package com.dmytrosamoilov.offhand.feature.recording.domain
 
 import co.touchlab.kermit.Logger
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackendException
+import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
+import com.dmytrosamoilov.offhand.core.ai.api.SpeechModelState
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
 import com.dmytrosamoilov.offhand.core.ai.api.TranscriptionResult
 import com.dmytrosamoilov.offhand.core.audio.AudioChunk
@@ -16,6 +18,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.TranscriptionCheckpoint
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.NoteSource
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.RecordingDiscardReason
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.core.security.closeQuietly
 import com.dmytrosamoilov.offhand.core.security.writeChunk
@@ -25,6 +28,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateImporte
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.CreateRecordingNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.DiscardNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.FailNoteUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteFeaturesUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetNoteUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.GetTranscriptionCheckpointUseCase
@@ -72,6 +76,7 @@ class RecordingSessionManager(
     private val clearTranscriptionCheckpoint: ClearTranscriptionCheckpointUseCase,
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
     private val getNoteStyle: GetNoteStyleUseCase,
+    private val getNoteFeatures: GetNoteFeaturesUseCase,
     private val getNote: GetNoteUseCase,
     private val calendarEventExtractor: CalendarEventExtractor,
     private val saveNoteSuggestions: SaveNoteSuggestionsUseCase,
@@ -97,6 +102,9 @@ class RecordingSessionManager(
     private val mutableSuggestingNoteIds = MutableStateFlow<Set<Long>>(emptySet())
     val suggestingNoteIds: StateFlow<Set<Long>> = mutableSuggestingNoteIds.asStateFlow()
 
+    private val mutableTranscribingNoteIds = MutableStateFlow<Set<Long>>(emptySet())
+    val transcribingNoteIds: StateFlow<Set<Long>> = mutableTranscribingNoteIds.asStateFlow()
+
     private val mutableNoteProgress = MutableStateFlow<Map<Long, Int>>(emptyMap())
     val noteProgress: StateFlow<Map<Long, Int>> = mutableNoteProgress.asStateFlow()
 
@@ -116,12 +124,29 @@ class RecordingSessionManager(
     val externalMicName: StateFlow<String?> = recorder.externalInputName
 
     private val transcripts = mutableMapOf<Int, String>()
+    private val chunkStartsMs = mutableMapOf<Int, Long>()
     private var transcriptionTimeMs = 0L
     private var recordedBytes = 0L
 
     private var audioFileName: String? = null
 
     private var isDiscardRequested = false
+
+    // Decided once per recording: with transcription switched off the note is
+    // the recording alone.
+    private var isSessionTranscribed = true
+
+    private var isStoppedInApp = false
+
+    // A recording the user stopped in the app's own interface was just saved.
+    // One stopped from the notification or from outside the app is not here.
+    private val mutableRecordingsSavedInApp = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val recordingsSavedInApp: SharedFlow<Unit> = mutableRecordingsSavedInApp.asSharedFlow()
+
+    // Decided once per recording: without the speech model on disk the session
+    // only captures audio, so it never starts or waits on a download, and the
+    // note is transcribed from the stored audio once the on-device AI is there.
+    private var isTranscribingLive = true
 
     private var sessionStyle: NoteStyleRef = NoteStyleRef.DEFAULT
 
@@ -131,11 +156,13 @@ class RecordingSessionManager(
         if (mutableSession.value.phase.isActive()) return
         sessionFolderId = folderId
         transcripts.clear()
+        chunkStartsMs.clear()
         transcriptionTimeMs = 0
         recordedBytes = 0
         isDiscardRequested = false
+        isStoppedInApp = false
         recorder.resetVad()
-        mutableSession.value = RecordingSession(phase = SessionPhase.RECORDING)
+        mutableSession.value = RecordingSession(phase = SessionPhase.RECORDING, folderId = folderId)
         scope.launch { runSession() }
     }
 
@@ -151,6 +178,11 @@ class RecordingSessionManager(
         mutableSession.update { it.copy(isPaused = false) }
     }
 
+    fun stopInApp() {
+        isStoppedInApp = true
+        stop()
+    }
+
     fun stop() {
         if (mutableSession.value.phase != SessionPhase.RECORDING) return
         mutableSession.update { it.copy(phase = SessionPhase.DRAINING, isPaused = false) }
@@ -160,6 +192,7 @@ class RecordingSessionManager(
     fun discard() {
         if (mutableSession.value.phase != SessionPhase.RECORDING) return
         isDiscardRequested = true
+        trackDiscard(RecordingDiscardReason.USER)
         mutableSession.update { it.copy(phase = SessionPhase.DRAINING, isPaused = false) }
         recorder.stop()
     }
@@ -177,6 +210,11 @@ class RecordingSessionManager(
     fun retryNote(noteId: Long, audioFileName: String) {
         if (!claimProcessing(noteId)) return
         scope.launch {
+            if (!isSpeechOnDisk()) {
+                markNoteProcessing(noteId)
+                parkUntilAiCoreArrives(noteId)
+                return@launch
+            }
             processingMutex.withLock {
                 val note = markNoteProcessing(noteId)
                 if (note == null) {
@@ -188,6 +226,7 @@ class RecordingSessionManager(
                     val stored = transcribeStoredAudio(noteId, audioFileName, resumePoint(note)) { fraction ->
                         updateProgress(noteId, fraction * RETRY_WHISPER_SHARE)
                     }
+                    if (isWaitingToBeWritten(noteId, stored)) return@trackingForeground
                     processNote(
                         noteId = noteId,
                         transcripts = stored.texts,
@@ -206,9 +245,11 @@ class RecordingSessionManager(
     private suspend fun resumePoint(note: Note): ResumePoint {
         val checkpoint = getTranscriptionCheckpoint(note.id) ?: return ResumePoint.START
         Logger.withTag(LOG_TAG).i { "Resuming transcription of note ${note.id} from ${checkpoint.transcribedBytes} bytes" }
+        val texts = transcriptStructurer.splitStoredTranscript(note.transcript)
         return ResumePoint(
             skipBytes = checkpoint.transcribedBytes,
-            texts = transcriptStructurer.splitStoredTranscript(note.transcript),
+            texts = texts,
+            startsMs = note.transcriptStartsMs.takeIf { it.size == texts.size },
             transcriptionTimeMs = checkpoint.transcriptionTimeMs,
         )
     }
@@ -217,7 +258,7 @@ class RecordingSessionManager(
         if (!claimProcessing(noteId)) return
         scope.launch {
             processingMutex.withLock {
-                val note = getNote(noteId)?.takeIf { it.transcript.isNotBlank() }
+                val note = getNote(noteId)?.takeIf { it.transcript.isNotBlank() && getNoteFeatures().isSummaryAvailable }
                 if (note == null || markNoteProcessing(noteId) == null) {
                     mutableProcessingNoteIds.update { it - noteId }
                     return@withLock
@@ -266,10 +307,19 @@ class RecordingSessionManager(
             return
         }
         markNoteRecorded(noteId, decoded.durationMs, fileName)
+        if (!getNoteFeatures().isTranscriptionEnabled) {
+            completeAudioOnly(noteId, NoteSource.IMPORT)
+            return
+        }
+        if (!isSpeechOnDisk()) {
+            parkUntilAiCoreArrives(noteId)
+            return
+        }
         trackingForeground(noteId) {
             val stored = transcribeStoredAudio(noteId, fileName, ResumePoint.START) { fraction ->
                 updateProgress(noteId, IMPORT_DECODE_SHARE + fraction * (RETRY_WHISPER_SHARE - IMPORT_DECODE_SHARE))
             }
+            if (isWaitingToBeWritten(noteId, stored)) return@trackingForeground
             processNote(noteId, stored.texts, stored.transcriptionTimeMs, RETRY_WHISPER_SHARE, style, NoteSource.IMPORT)
         }
     }
@@ -279,7 +329,7 @@ class RecordingSessionManager(
         scope.launch {
             processingMutex.withLock {
                 try {
-                    suggestEventsLocked(noteId)
+                    if (getNoteFeatures().isSummaryAvailable) suggestEventsLocked(noteId)
                 } finally {
                     mutableProcessingNoteIds.update { it - noteId }
                 }
@@ -356,6 +406,30 @@ class RecordingSessionManager(
     private fun claimProcessing(noteId: Long): Boolean =
         noteId !in mutableProcessingNoteIds.getAndUpdate { it + noteId }
 
+    // The speech part of the on-device AI arrives long before the part that
+    // writes, so a note is transcribed as soon as the first is on disk.
+    private fun isSpeechOnDisk(): Boolean = speechToText.downloadState.value is SpeechModelState.Downloaded
+
+    // A note without a summary is finished from its transcript alone.
+    private suspend fun isReadyToWrite(): Boolean = !getNoteFeatures().writesSummary || isAiCoreDownloaded()
+
+    // The transcript is saved and shown; the summary is written when the rest
+    // of the on-device AI has arrived. An empty transcript has nothing to wait
+    // for and fails like any other.
+    private suspend fun isWaitingToBeWritten(noteId: Long, stored: StoredTranscription): Boolean {
+        if (stored.texts.isEmpty() || isReadyToWrite()) return false
+        parkUntilAiCoreArrives(noteId)
+        return true
+    }
+
+    // The note stays PROCESSING with its audio or transcript, which is what
+    // ResumeInterruptedNotesUseCase picks up when the download finishes.
+    private fun parkUntilAiCoreArrives(noteId: Long) {
+        Logger.withTag(LOG_TAG).w { "AI core not downloaded yet, note $noteId stays queued" }
+        mutableProcessingNoteIds.update { it - noteId }
+        mutableNoteProgress.update { it - noteId }
+    }
+
     // The checkpoint survives a failure on purpose: "Try again" then continues
     // where the transcription stopped instead of starting over.
     private suspend fun transcribeStoredAudio(
@@ -364,6 +438,7 @@ class RecordingSessionManager(
         resumePoint: ResumePoint,
         onProgress: (Float) -> Unit,
     ): StoredTranscription = try {
+        mutableTranscribingNoteIds.update { it + noteId }
         speechToText.prepare()
         val approxTotalBytes = audioStore.sizeOf(audioFileName).coerceAtLeast(1L)
         if (audioBackup.openRead(audioFileName)) {
@@ -382,6 +457,7 @@ class RecordingSessionManager(
         Logger.withTag(LOG_TAG).e(t) { "Stored audio transcription failed" }
         StoredTranscription(texts = emptyList(), transcriptionTimeMs = 0)
     } finally {
+        mutableTranscribingNoteIds.update { it - noteId }
         speechToText.release()
     }
 
@@ -404,17 +480,22 @@ class RecordingSessionManager(
     ): StoredTranscription {
         val window = ByteArray((RETRY_CHUNK_MS * BYTES_PER_MS).toInt())
         val texts = resumePoint.texts.toMutableList()
+        val startsMs = resumePoint.startsMs?.toMutableList()
         var totalTimeMs = resumePoint.transcriptionTimeMs
         var bytesRead = resumePoint.skipBytes
         while (true) {
             val read = readWindow(window)
             if (read <= 0) break
+            val windowStartMs = bytesRead / BYTES_PER_MS
             bytesRead += read
             transcribeWindow(wrapWindow(window, read))?.let { result ->
                 totalTimeMs += result.processingTimeMs
-                result.text.trim().takeIf { it.isNotBlank() }?.let(texts::add)
+                result.text.trim().takeIf { it.isNotBlank() }?.let { text ->
+                    texts.add(text)
+                    startsMs?.add(windowStartMs)
+                }
             }
-            checkpoint(noteId, bytesRead, texts, totalTimeMs)
+            checkpoint(noteId, bytesRead, texts.toList(), startsMs?.toList().orEmpty(), totalTimeMs)
             onProgress((bytesRead.toFloat() / approxTotalBytes).coerceAtMost(1f))
             if (read < window.size) break
         }
@@ -431,8 +512,14 @@ class RecordingSessionManager(
 
     // Every finished window is written down, so an interrupted transcription
     // continues from the last window instead of starting over.
-    private suspend fun checkpoint(noteId: Long, transcribedBytes: Long, texts: List<String>, transcriptionTimeMs: Long) {
-        persistTranscript(noteId, texts, transcriptionTimeMs)
+    private suspend fun checkpoint(
+        noteId: Long,
+        transcribedBytes: Long,
+        texts: List<String>,
+        startsMs: List<Long>,
+        transcriptionTimeMs: Long,
+    ) {
+        persistTranscript(noteId, texts, transcriptionTimeMs, startsMs)
         saveTranscriptionCheckpoint(TranscriptionCheckpoint(noteId, transcribedBytes, transcriptionTimeMs))
     }
 
@@ -466,10 +553,11 @@ class RecordingSessionManager(
     private data class ResumePoint(
         val skipBytes: Long,
         val texts: List<String>,
+        val startsMs: List<Long>?,
         val transcriptionTimeMs: Long,
     ) {
         companion object {
-            val START = ResumePoint(skipBytes = 0L, texts = emptyList(), transcriptionTimeMs = 0L)
+            val START = ResumePoint(skipBytes = 0L, texts = emptyList(), startsMs = emptyList(), transcriptionTimeMs = 0L)
         }
     }
 
@@ -480,17 +568,20 @@ class RecordingSessionManager(
 
     private suspend fun runSession() {
         sessionStyle = getNoteStyle(sessionFolderId)
+        isSessionTranscribed = getNoteFeatures().isTranscriptionEnabled
+        isTranscribingLive = isSessionTranscribed && speechToText.downloadState.value is SpeechModelState.Downloaded
+        mutableSession.update { it.copy(isTranscribedLive = isTranscribingLive) }
         openAudioBackup()
         mutableActiveRecordingNoteId.value = createSessionNote()
         val queue = Channel<AudioChunk>(Channel.UNLIMITED)
-        scope.launch { prepareTranscriber() }
+        if (isTranscribingLive) scope.launch { prepareTranscriber() }
         scope.launch { produceChunks(queue) }
         for (chunk in queue) {
-            if (!isDiscardRequested) {
+            if (isTranscribingLive && !isDiscardRequested) {
                 transcribeChunk(chunk)
             }
         }
-        speechToText.release()
+        if (isTranscribingLive) speechToText.release()
         when {
             isDiscardRequested -> finishDiscardedSession()
             mutableSession.value.phase == SessionPhase.FAILED -> salvageFailedSession()
@@ -514,6 +605,7 @@ class RecordingSessionManager(
         }
         mutableActiveRecordingNoteId.value = null
         transcripts.clear()
+        chunkStartsMs.clear()
         isDiscardRequested = false
         mutableSession.value = RecordingSession()
     }
@@ -528,12 +620,17 @@ class RecordingSessionManager(
                 markNoteRecorded(noteId, recorder.vad.value.totalElapsedMs, audioFileName) ?: return
                 startProcessing(noteId, chunkTranscripts, transcriptionTimeMs, sessionStyle)
             }
-            audioFileName != null -> {
-                markNoteRecorded(noteId, recorder.vad.value.totalElapsedMs, audioFileName)
-                failNote(noteId)
-            }
+            audioFileName != null -> salvageUntranscribedSession(noteId)
             else -> discardEmptyNote(noteId)
         }
+    }
+
+    // A session that never transcribed live has no transcript to judge the
+    // audio by, so it goes through the stored audio like a saved one.
+    private suspend fun salvageUntranscribedSession(noteId: Long) {
+        val fileName = audioFileName ?: return
+        markNoteRecorded(noteId, recorder.vad.value.totalElapsedMs, fileName)
+        if (isTranscribingLive) failNote(noteId) else retryNote(noteId, fileName)
     }
 
     private fun hasMinimumAudio(): Boolean =
@@ -572,6 +669,7 @@ class RecordingSessionManager(
         } catch (t: Throwable) {
             Logger.withTag(LOG_TAG).e(t) { "Recording failed" }
             closeAudioBackup()
+            analyticsTracker.track(AnalyticsEvents.recordingFailed(t.failureReason()))
             fail(t.message ?: "Recording failed")
         } finally {
             queue.close()
@@ -601,6 +699,7 @@ class RecordingSessionManager(
     }
 
     private suspend fun transcribeChunk(chunk: AudioChunk) {
+        chunkStartsMs[chunk.id] = recordedBytes / BYTES_PER_MS
         recordedBytes += chunk.durationMs * BYTES_PER_MS
         if (chunk.speechMs < MIN_CHUNK_SPEECH_MS) {
             updateChunk(chunk.id) { it.copy(state = ChunkState.DONE) }
@@ -612,7 +711,9 @@ class RecordingSessionManager(
             val result = speechToText.transcribe(chunk.wav)
             transcripts[chunk.id] = result.text.trim()
             transcriptionTimeMs += result.processingTimeMs
-            mutableSession.update { it.copy(transcriptionTimeMs = transcriptionTimeMs) }
+            mutableSession.update {
+                it.copy(transcriptionTimeMs = transcriptionTimeMs, liveTranscript = sortedTranscripts().joinToString(" "))
+            }
             updateChunk(chunk.id) { it.copy(state = ChunkState.DONE) }
             persistSessionTranscript()
             checkpointSession()
@@ -626,7 +727,7 @@ class RecordingSessionManager(
 
     private suspend fun persistSessionTranscript() {
         val noteId = mutableActiveRecordingNoteId.value ?: return
-        persistTranscript(noteId, sortedTranscripts(), transcriptionTimeMs)
+        persistTranscript(noteId, sortedTranscripts(), transcriptionTimeMs, sortedStartsMs())
     }
 
     // A recording killed mid-way resumes from the last finished chunk, so the
@@ -639,6 +740,10 @@ class RecordingSessionManager(
     private fun sortedTranscripts(): List<String> =
         transcripts.entries.sortedBy { it.key }.map { it.value }.filter { it.isNotBlank() }
 
+    // One start per paragraph of the saved transcript, in the same order.
+    private fun sortedStartsMs(): List<Long> =
+        transcripts.entries.sortedBy { it.key }.filter { it.value.isNotBlank() }.map { chunkStartsMs[it.key] ?: 0L }
+
     private suspend fun finishRecordedSession() {
         val noteId = mutableSession.value.noteId
         if (!hasMinimumAudio()) {
@@ -649,30 +754,51 @@ class RecordingSessionManager(
             markNoteRecorded(it, recorder.vad.value.totalElapsedMs, audioFileName)
         }
         if (noteId == null || recorded == null) {
+            analyticsTracker.track(AnalyticsEvents.recordingFailed(SAVE_FAILURE_REASON))
             fail("Could not save the recording")
             return
         }
         mutableActiveRecordingNoteId.value = null
         clearTranscriptionCheckpoint(noteId)
         registerSavedRecording()
+        if (isStoppedInApp) mutableRecordingsSavedInApp.emit(Unit)
         val chunkTranscripts = sortedTranscripts()
         val recordedTranscriptionMs = transcriptionTimeMs
         val style = sessionStyle
-        val storedAudio = audioFileName.takeIf { mutableSession.value.chunks.any { it.state == ChunkState.FAILED } }
+        val storedAudio = audioFileName.takeIf { needsStoredAudioTranscription() }
         analyticsTracker.track(AnalyticsEvents.noteRecorded(recorder.vad.value.totalElapsedMs, style))
         mutableSession.value = RecordingSession(noteId = noteId)
-        if (storedAudio != null) {
+        if (!isSessionTranscribed) {
+            completeAudioOnly(noteId, NoteSource.RECORDING)
+        } else if (storedAudio != null) {
             retryNote(noteId, storedAudio)
         } else {
             startProcessing(noteId, chunkTranscripts, recordedTranscriptionMs, style)
         }
     }
 
+    // With transcription off the note is finished the moment its audio is
+    // saved: it keeps the title it was created with and has no text.
+    private suspend fun completeAudioOnly(noteId: Long, source: NoteSource) {
+        val note = getNote(noteId)
+        if (note != null && completeNote(noteId, note.title, "", "", 0, 0, HardwareBackend.CPU.name, note.style)) {
+            mutableEvents.emit(NoteProcessingEvent.Completed(noteId))
+            trackNoteReady(noteId, source)
+        }
+        mutableProcessingNoteIds.update { it - noteId }
+        mutableNoteProgress.update { it - noteId }
+    }
+
+    private fun needsStoredAudioTranscription(): Boolean =
+        !isTranscribingLive || mutableSession.value.chunks.any { it.state == ChunkState.FAILED }
+
     private suspend fun discardShortSession(noteId: Long?) {
         Logger.withTag(LOG_TAG).i { "Recording under ${RecordingLimits.MIN_DURATION_MS} ms discarded" }
+        trackDiscard(RecordingDiscardReason.TOO_SHORT)
         noteId?.let { discardEmptyNote(it) } ?: deleteAudioBackup()
         mutableActiveRecordingNoteId.value = null
         transcripts.clear()
+        chunkStartsMs.clear()
         mutableSession.value = RecordingSession()
     }
 
@@ -684,9 +810,8 @@ class RecordingSessionManager(
     ) {
         mutableProcessingNoteIds.update { it + noteId }
         scope.launch {
-            if (!isAiCoreDownloaded()) {
-                Logger.withTag(LOG_TAG).w { "AI core not downloaded yet, note $noteId stays queued" }
-                mutableProcessingNoteIds.update { it - noteId }
+            if (!isReadyToWrite()) {
+                parkUntilAiCoreArrives(noteId)
                 return@launch
             }
             processingMutex.withLock {
@@ -701,12 +826,14 @@ class RecordingSessionManager(
         noteId: Long,
         transcripts: List<String>,
         transcriptionMs: Long,
+        startsMs: List<Long>? = null,
     ) {
         if (transcripts.isEmpty()) return
         saveNoteTranscript(
             noteId = noteId,
             transcript = transcriptStructurer.joinChunks(transcripts),
             transcriptionTimeMs = transcriptionMs,
+            startsMs = startsMs,
         )
     }
 
@@ -789,7 +916,12 @@ class RecordingSessionManager(
     ): StructureOutcome {
         if (transcripts.isEmpty()) return StructureOutcome.FAILED
         persistTranscript(noteId, transcripts, transcriptionMs)
-        val structured = structureOrKeepTranscript(noteId, transcripts, progressOffset, style)
+        val writesSummary = source == NoteSource.RESTYLE || getNoteFeatures().writesSummary
+        val structured = if (writesSummary) {
+            structureOrKeepTranscript(noteId, transcripts, progressOffset, style)
+        } else {
+            transcriptStructurer.transcriptOnly(transcripts, style).copy(overview = "")
+        }
         val stillExists = completeNote(
             noteId = noteId,
             title = structured.title,
@@ -805,7 +937,7 @@ class RecordingSessionManager(
         mutableNoteProgress.update { it - noteId }
         mutableEvents.emit(NoteProcessingEvent.Completed(noteId))
         trackNoteReady(noteId, source)
-        suggestEventsLocked(noteId)
+        if (writesSummary) suggestEventsLocked(noteId)
         return StructureOutcome.COMPLETED
     }
 
@@ -842,6 +974,10 @@ class RecordingSessionManager(
         }
     }
 
+    private fun trackDiscard(reason: RecordingDiscardReason) {
+        analyticsTracker.track(AnalyticsEvents.recordingDiscarded(reason, recorder.vad.value.totalElapsedMs))
+    }
+
     private fun fail(message: String) {
         mutableSession.update { it.copy(phase = SessionPhase.FAILED, errorMessage = message) }
     }
@@ -852,13 +988,16 @@ class RecordingSessionManager(
     private companion object {
         const val FAILURE_REASON_EMPTY_TRANSCRIPT = "empty_transcript"
         const val FAILURE_REASON_UNKNOWN = "unknown"
+        const val SAVE_FAILURE_REASON = "save_failed"
         const val LOG_TAG = "RecordingSession"
         // Strictly under the Whisper decoder's 30-second per-decode cap.
         const val RETRY_CHUNK_MS = 29_000L
         const val BYTES_PER_MS = AudioRecorder.SAMPLE_RATE * 2 / 1000L
         const val RETRY_WHISPER_SHARE = 0.6f
         const val IMPORT_DECODE_SHARE = 0.15f
-        const val MIN_CHUNK_SPEECH_MS = 1_000L
+        // Pieces are a few seconds long now, so a short answer must not be
+        // dropped as silence; below this a piece is noise more often than a word.
+        const val MIN_CHUNK_SPEECH_MS = 500L
         const val SKIP_BUFFER_BYTES = 64 * 1024
     }
 }

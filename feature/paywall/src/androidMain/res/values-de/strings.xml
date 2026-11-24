@@ -37,19 +37,19 @@
     <string name="paywall_close">Schließen</string>
     <string name="paywall_no_browser">Kein Browser gefunden, um den Link zu öffnen.</string>
     <string name="paywall_context_tagline">Teil von Offhand Pro. Hol mehr aus jeder Aufnahme heraus.</string>
-    <string name="paywall_context_styles">Deinen eigenen Zusammenfassungsstil speichern</string>
-    <string name="paywall_context_note_styles">Einen anderen Zusammenfassungsstil wählen</string>
+    <string name="paywall_context_styles">Deinen eigenen Schreibstil speichern</string>
+    <string name="paywall_context_note_styles">Einen anderen Schreibstil wählen</string>
     <string name="paywall_context_export">Diese Notiz als PDF oder Word teilen</string>
     <string name="paywall_context_suggestions">Termine und Aufgaben in deinen Notizen finden</string>
     <string name="paywall_context_import">Aufnahmen und Videos in Notizen verwandeln</string>
-    <string name="paywall_context_folder_styles">Diesem Ordner einen eigenen Zusammenfassungsstil geben</string>
+    <string name="paywall_context_folder_styles">Diesem Ordner einen eigenen Schreibstil geben</string>
     <string name="paywall_context_folders">Mehr als zwei Ordner anlegen</string>
     <string name="paywall_context_backup_audio">Auch deine Aufnahmen sichern</string>
     <string name="paywall_pro_styles_hint">Meeting-Notizen, Besuchsbericht, Juristische Notiz, eigene Stile und ein neuer Stil für jede Notiz</string>
     <string name="paywall_pro_export_hint">PDF und Word, bereit für Kunden, E-Mail und Druck</string>
     <string name="paywall_pro_suggestions_hint">Termine und Aufgaben direkt in deinen Kalender</string>
     <string name="paywall_pro_import_hint">Sprachmemos, Anrufe, Bildschirmaufnahmen und Videodateien ohne Limit (drei zum Ausprobieren gratis)</string>
-    <string name="paywall_pro_folders_hint">Jeder mit eigenem Zusammenfassungsstil</string>
+    <string name="paywall_pro_folders_hint">Jeder mit eigenem Schreibstil</string>
     <string name="paywall_pro_backup_hint">Audio inklusive, weiterhin verschlüsselt</string>
     <string name="paywall_plan_yearly_monthly">Etwa %1$s im Monat</string>
     <string name="paywall_plan_best_value">Bester Wert</string>
@@ -74,4 +74,29 @@
         <item quantity="other">Weniger als %d Jahre im Jahresabo</item>
     </plurals>
     <string name="paywall_benefits_body">Alles in der Pro-Spalte gehört dir.</string>
+    <plurals name="paywall_trial_offer_title">
+        <item quantity="one">Offhand Pro gehört dir noch %d Tag kostenlos</item>
+        <item quantity="other">Offhand Pro gehört dir noch %d Tage kostenlos</item>
+    </plurals>
+    <string name="paywall_trial_intro_tagline">Alles aus Pro ist schon freigeschaltet. Ohne Zahlung, ohne Konto. Wenn die Testphase endet, behältst du die kostenlose Version, außer du upgradest.</string>
+    <string name="paywall_trial_offer_continue">Pro weiter kostenlos nutzen</string>
+    <string name="paywall_plan_monthly">Monatlich</string>
+    <string name="paywall_plan_monthly_price">%1$s / Monat</string>
+    <string name="paywall_plan_monthly_renews">Verlängert sich jeden Monat</string>
+    <string name="paywall_monthly_disclosure">%1$s pro Monat, verlängert sich automatisch. Jederzeit im Store-Konto kündbar.</string>
+    <string name="paywall_benefits_expand">Alles in Pro ansehen</string>
+    <string name="paywall_benefits_collapse">Weniger anzeigen</string>
+    <string name="paywall_trial_ended_title">Deine Pro-Testphase ist beendet</string>
+    <string name="paywall_trial_ended_body">Deine 14 Tage Offhand Pro sind vorbei. Deine Notizen, Ordner und Stile sind alle noch da. Du kannst die kostenlose Version weiter nutzen oder upgraden, um alles aus Pro zu behalten.</string>
+    <string name="paywall_trial_recap_title">Deine 14 Tage mit Offhand Pro</string>
+    <string name="paywall_trial_recap_tagline">Deine Testphase ist beendet. Behalte all das mit Pro.</string>
+    <string name="paywall_usage_custom_styles">Notizen in eigenen Stilen</string>
+    <string name="paywall_usage_pdf">Geteilte PDFs</string>
+    <string name="paywall_usage_word">Geteilte Word-Dokumente</string>
+    <string name="paywall_usage_imports">Importierte Aufnahmen und Videos</string>
+    <string name="paywall_usage_calendar">Termine im Kalender eingetragen</string>
+    <string name="paywall_usage_folder_styles">Ordner mit eigenem Stil</string>
+    <string name="paywall_usage_backups">Backups mit deinen Aufnahmen</string>
+    <string name="paywall_context_widget">Vom Startbildschirm aus aufnehmen</string>
+    <string name="paywall_context_skip_silence">Stille beim Anhören überspringen</string>
 </resources>

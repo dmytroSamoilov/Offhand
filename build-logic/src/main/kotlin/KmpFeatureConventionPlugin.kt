@@ -1,9 +1,10 @@
-import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.dmytrosamoilov.offhand.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
@@ -14,17 +15,14 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
             pluginManager.apply("offhand.kmp.library")
             pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
 
-            extensions.configure<LibraryExtension> {
-                buildFeatures {
-                    compose = true
-                }
-            }
-
             extensions.configure<ComposeCompilerGradlePluginExtension> {
                 targetKotlinPlatforms.set(setOf(KotlinPlatformType.androidJvm))
             }
 
             extensions.configure<KotlinMultiplatformExtension> {
+                targets.withType<KotlinMultiplatformAndroidLibraryTarget>().configureEach {
+                    androidResources.enable = true
+                }
                 sourceSets.getByName("commonMain").dependencies {
                     implementation(project(":core:common"))
                     implementation(project.dependencies.platform(libs.findLibrary("koin-bom").get()))
@@ -47,7 +45,7 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
                     implementation(libs.findLibrary("androidx-material3").get())
                     implementation(libs.findLibrary("androidx-ui-tooling-preview").get())
                 }
-                sourceSets.getByName("androidUnitTest").dependencies {
+                sourceSets.getByName("androidHostTest").dependencies {
                     implementation(libs.findLibrary("junit").get())
                     implementation(libs.findLibrary("mockk").get())
                     implementation(libs.findLibrary("turbine").get())
@@ -56,7 +54,7 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
             }
 
             dependencies {
-                add("debugImplementation", libs.findLibrary("androidx-ui-tooling").get())
+                add("androidRuntimeClasspath", libs.findLibrary("androidx-ui-tooling").get())
             }
         }
     }

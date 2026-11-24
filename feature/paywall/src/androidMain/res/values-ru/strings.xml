@@ -37,19 +37,19 @@
     <string name="paywall_close">Закрыть</string>
     <string name="paywall_no_browser">Не найден браузер, чтобы открыть ссылку.</string>
     <string name="paywall_context_tagline">Часть Offhand Pro. Получайте больше от каждой записи.</string>
-    <string name="paywall_context_styles">Сохранить свой стиль резюме</string>
-    <string name="paywall_context_note_styles">Выбрать другой стиль резюме</string>
+    <string name="paywall_context_styles">Сохранить свой стиль письма</string>
+    <string name="paywall_context_note_styles">Выбрать другой стиль письма</string>
     <string name="paywall_context_export">Поделиться заметкой в PDF или Word</string>
     <string name="paywall_context_suggestions">Найти даты и задачи в заметках</string>
     <string name="paywall_context_import">Превращайте записи и видео в заметки</string>
-    <string name="paywall_context_folder_styles">Задайте этой папке собственный стиль резюме</string>
+    <string name="paywall_context_folder_styles">Задайте этой папке собственный стиль письма</string>
     <string name="paywall_context_folders">Больше двух папок</string>
     <string name="paywall_context_backup_audio">Сохраняйте в резервную копию и записи</string>
     <string name="paywall_pro_styles_hint">Заметки со встречи, Отчёт о визите, Юридическая заметка, ваши стили и новый стиль для любой заметки</string>
     <string name="paywall_pro_export_hint">PDF и Word, готовые для клиентов, почты и печати</string>
     <string name="paywall_pro_suggestions_hint">Даты и задачи сразу в календарь</string>
     <string name="paywall_pro_import_hint">Голосовые заметки, звонки, записи экрана и видеофайлы без ограничений (три можно попробовать бесплатно)</string>
-    <string name="paywall_pro_folders_hint">У каждой свой стиль резюме</string>
+    <string name="paywall_pro_folders_hint">У каждой свой стиль письма</string>
     <string name="paywall_pro_backup_hint">Вместе с аудио, по-прежнему зашифровано</string>
     <string name="paywall_plan_yearly_monthly">Около %1$s в месяц</string>
     <string name="paywall_plan_best_value">Выгоднее всего</string>
@@ -82,4 +82,31 @@
         <item quantity="other">Меньше %d лет годовой подписки</item>
     </plurals>
     <string name="paywall_benefits_body">Всё из колонки Pro уже ваше.</string>
+    <plurals name="paywall_trial_offer_title">
+        <item quantity="one">Offhand Pro бесплатно ваш ещё %d день</item>
+        <item quantity="few">Offhand Pro бесплатно ваш ещё %d дня</item>
+        <item quantity="many">Offhand Pro бесплатно ваш ещё %d дней</item>
+        <item quantity="other">Offhand Pro бесплатно ваш ещё %d дня</item>
+    </plurals>
+    <string name="paywall_trial_intro_tagline">Все возможности Pro уже открыты. Без оплаты и без аккаунта. Когда пробный период закончится, у вас останется бесплатная версия, если вы не перейдёте на Pro.</string>
+    <string name="paywall_trial_offer_continue">Пользоваться Pro бесплатно</string>
+    <string name="paywall_plan_monthly">Месяц</string>
+    <string name="paywall_plan_monthly_price">%1$s / месяц</string>
+    <string name="paywall_plan_monthly_renews">Продлевается каждый месяц</string>
+    <string name="paywall_monthly_disclosure">%1$s в месяц, продлевается автоматически. Отменить можно в любой момент в аккаунте магазина.</string>
+    <string name="paywall_benefits_expand">Все возможности Pro</string>
+    <string name="paywall_benefits_collapse">Свернуть</string>
+    <string name="paywall_trial_ended_title">Пробный период Pro закончился</string>
+    <string name="paywall_trial_ended_body">Ваши 14 дней Offhand Pro истекли. Все заметки, папки и стили остались на месте. Вы можете пользоваться бесплатной версией или перейти на Pro, чтобы сохранить все возможности.</string>
+    <string name="paywall_trial_recap_title">Ваши 14 дней с Offhand Pro</string>
+    <string name="paywall_trial_recap_tagline">Пробный период закончился. Сохраните всё это с Pro.</string>
+    <string name="paywall_usage_custom_styles">Заметки в ваших стилях</string>
+    <string name="paywall_usage_pdf">Отправлено PDF</string>
+    <string name="paywall_usage_word">Отправлено документов Word</string>
+    <string name="paywall_usage_imports">Импортировано записей и видео</string>
+    <string name="paywall_usage_calendar">Событий добавлено в календарь</string>
+    <string name="paywall_usage_folder_styles">Папок со своим стилем</string>
+    <string name="paywall_usage_backups">Резервных копий с записями</string>
+    <string name="paywall_context_widget">Записывайте с главного экрана</string>
+    <string name="paywall_context_skip_silence">Пропускайте тишину при прослушивании</string>
 </resources>

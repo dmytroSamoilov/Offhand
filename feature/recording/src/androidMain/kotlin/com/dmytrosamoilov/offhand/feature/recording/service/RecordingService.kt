@@ -1,5 +1,8 @@
 package com.dmytrosamoilov.offhand.feature.recording.service
 
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -32,6 +35,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.RecordingOrigin
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -39,6 +45,7 @@ class RecordingService : Service(), KoinComponent {
 
     private val sessionManager: RecordingSessionManager by inject()
     private val appForegroundState: AppForegroundState by inject()
+    private val analyticsTracker: AnalyticsTracker by inject()
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var observeJob: Job? = null
@@ -50,11 +57,14 @@ class RecordingService : Service(), KoinComponent {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            ACTION_START -> {
+            ACTION_START -> if (!hasMicrophone()) stopSelf() else {
                 startForeground(
                     recordingNotification(),
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE,
                 )
+                if (intent.getBooleanExtra(EXTRA_FROM_WIDGET, false)) {
+                    analyticsTracker.track(AnalyticsEvents.recordingStarted(RecordingOrigin.WIDGET))
+                }
                 sessionManager.start(intent.folderIdExtra())
                 observeSession()
             }
@@ -73,6 +83,11 @@ class RecordingService : Service(), KoinComponent {
             else -> START_NOT_STICKY
         }
     }
+
+    // A start that comes from the widget may find the permission taken away
+    // since the widget was last drawn; a microphone service must not start then.
+    private fun hasMicrophone(): Boolean =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
 
     private fun Intent.folderIdExtra(): Long? =
         getLongExtra(EXTRA_FOLDER_ID, NO_FOLDER_ID).takeIf { it != NO_FOLDER_ID }
@@ -346,6 +361,9 @@ class RecordingService : Service(), KoinComponent {
     companion object {
         private const val LOG_TAG = "RecordingService"
         const val EXTRA_NOTE_ID = "com.dmytrosamoilov.offhand.extra.NOTE_ID"
+        const val EXTRA_RECORD_REQUEST = "com.dmytrosamoilov.offhand.extra.RECORD_REQUEST"
+        const val EXTRA_RECORD_FOLDER_ID = "com.dmytrosamoilov.offhand.extra.RECORD_FOLDER_ID"
+        const val NO_FOLDER_ID = -1L
 
         private const val CHANNEL_ID = "recording"
         private const val NOTES_CHANNEL_ID = "finished_notes"
@@ -374,19 +392,27 @@ class RecordingService : Service(), KoinComponent {
             "com.dmytrosamoilov.offhand.extra.RETRY_AUDIO_FILE"
         private const val EXTRA_STYLE =
             "com.dmytrosamoilov.offhand.extra.NOTE_STYLE"
+        private const val EXTRA_FROM_WIDGET =
+            "com.dmytrosamoilov.offhand.extra.FROM_WIDGET"
         private const val EXTRA_FOLDER_ID =
             "com.dmytrosamoilov.offhand.extra.FOLDER_ID"
-        private const val NO_FOLDER_ID = -1L
 
         fun start(context: Context, folderId: Long?) {
+            context.startForegroundService(startIntent(context, folderId))
+        }
+
+        fun startIntent(context: Context, folderId: Long?, isFromWidget: Boolean = false): Intent {
             val intent = serviceIntent(context, ACTION_START)
             folderId?.let { intent.putExtra(EXTRA_FOLDER_ID, it) }
-            context.startForegroundService(intent)
+            if (isFromWidget) intent.putExtra(EXTRA_FROM_WIDGET, true)
+            return intent
         }
 
         fun stop(context: Context) {
-            context.startService(serviceIntent(context, ACTION_STOP))
+            context.startService(stopIntent(context))
         }
+
+        fun stopIntent(context: Context): Intent = serviceIntent(context, ACTION_STOP)
 
         fun retryNote(context: Context, noteId: Long, audioFileName: String) {
             context.startForegroundService(

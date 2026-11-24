@@ -11,7 +11,10 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamic
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOverrideUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProStatusUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteFeaturesUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSkipSilenceEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveSmartSuggestionsEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteFeatureEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.RedeemProCodeUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SaveCustomNoteStyleUseCase
@@ -20,7 +23,9 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDeveloperOp
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSkipSilenceEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsSummaryAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.presentation.AboutSupportViewModel
 import com.dmytrosamoilov.offhand.feature.settings.presentation.NoteStyleEditorViewModel
@@ -41,21 +46,54 @@ val featureSettingsModule = module {
     factoryOf(::ObserveCustomNoteStylesUseCase)
     factoryOf(::ObserveDeveloperOptionsUseCase)
     factoryOf(::ObserveDynamicColorUseCase)
+    factoryOf(::ObserveNoteFeaturesUseCase)
     factoryOf(::ObserveNoteStyleUseCase)
     factoryOf(::ObserveProOverrideUseCase)
     factoryOf(::ObserveProStatusUseCase)
     factoryOf(::ObserveSmartSuggestionsEnabledUseCase)
+    factoryOf(::ObserveSkipSilenceEnabledUseCase)
     factoryOf(::ObserveTelemetryConsentUseCase)
     factoryOf(::RedeemProCodeUseCase)
     factoryOf(::SaveCustomNoteStyleUseCase)
     factoryOf(::SetAppLockEnabledUseCase)
     factoryOf(::SetDeveloperOptionsUseCase)
     factoryOf(::SetDynamicColorUseCase)
+    factoryOf(::SetNoteFeatureEnabledUseCase)
     factoryOf(::SetNoteStyleUseCase)
     factoryOf(::SetProOverrideUseCase)
     factoryOf(::SetSmartSuggestionsEnabledUseCase)
+    factoryOf(::SetSkipSilenceEnabledUseCase)
     factoryOf(::SetTelemetryConsentUseCase)
-    viewModelOf(::SettingsViewModel)
+    factoryOf(::IsSummaryAvailableUseCase)
+    viewModel {
+        SettingsViewModel(
+            observeDynamicColor = get(),
+            setDynamicColor = get(),
+            observeNoteStyle = get(),
+            observeCustomNoteStyles = get(),
+            observeAppLockEnabled = get(),
+            setAppLockEnabled = get(),
+            appLockManager = get(),
+            observeTelemetryConsent = get(),
+            setTelemetryConsent = get(),
+            importAudio = get(),
+            isAudioImportAvailable = get(),
+            observeImportAllowance = get(),
+            observeSmartSuggestionsEnabled = get(),
+            setSmartSuggestionsEnabled = get(),
+            observeSkipSilenceEnabled = get(),
+            setSkipSilenceEnabled = get(),
+            observeNoteFeatures = get(),
+            setNoteFeatureEnabled = get(),
+            observeProStatus = get(),
+            observeProOverride = get(),
+            setProOverride = get(),
+            proUpgradeGate = get(),
+            redeemProCode = get(),
+            buildInfo = get(),
+            analyticsTracker = get(),
+        )
+    }
     viewModelOf(::SharedAudioImportViewModel)
     viewModelOf(::AboutSupportViewModel)
     viewModelOf(::NoteStylesViewModel)

@@ -14,6 +14,7 @@ data class Note(
     val status: NoteStatus = NoteStatus.READY,
     val style: NoteStyleRef = NoteStyleRef.DEFAULT,
     val folderId: Long? = null,
+    val transcriptStartsMs: List<Long> = emptyList(),
 )
 
 enum class NoteStatus {

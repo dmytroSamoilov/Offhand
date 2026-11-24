@@ -10,7 +10,7 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: Android
     commands:
       - tapOn: "Settings"
-      - tapOn: "Summary styles"
+      - tapOn: "Writing styles"
       - tapOn: "New"
       - tapOn: "Describe it and let the AI fill the form"
       - tapOn: "For example.*"
@@ -36,12 +36,12 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - tapOn: "Settings"
-      - tapOn: "Summary styles"
+      - tapOn: "Writing style"
       - tapOn: "New"
       - tapOn: "Describe it and let the AI fill the form"
       - tapOn: "For example.*"
       - inputText: "After each sales call I want the customer, their needs and the agreed next steps"
-      - tapOn: "Build the style"
+      - tapOn: "Fill the form"
       - extendedWaitUntil:
           visible: "Sales debrief"
           timeout: 30000
@@ -50,14 +50,11 @@ appId: com.dmytrosamoilov.offhand.uitest
       - scrollUntilVisible:
           element: "Next steps"
       - assertVisible: "each agreed task with who does it and by when"
-      - swipe:
-          start: "1%,50%"
-          end: "70%,50%"
+      - tapOn: "Cancel"
       - assertVisible: "Built in"
       - swipe:
           start: "1%,50%"
           end: "70%,50%"
       - tapOn:
-          text: "Notes"
-          index: 1
+          id: "tab_notes"
       - assertVisible: "Smoke test note"

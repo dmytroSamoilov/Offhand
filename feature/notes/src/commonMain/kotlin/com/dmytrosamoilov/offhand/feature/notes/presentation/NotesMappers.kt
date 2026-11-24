@@ -15,6 +15,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
 import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlaybackState
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.FolderNameError
+import com.dmytrosamoilov.offhand.feature.notes.domain.MatchLocation
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteSearchResult
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteShareBundle
 import com.dmytrosamoilov.offhand.feature.notes.domain.NoteTextCleaner
@@ -34,6 +35,7 @@ private val WHITESPACE_RUNS = Regex("\\s+")
 internal fun List<NoteSearchResult>.toSectionsUi(
     dateLabelFormatter: DateLabelFormatter,
     folderNames: Map<Long, String> = emptyMap(),
+    waveforms: Map<Long, List<Int>> = emptyMap(),
 ): List<NotesSectionUi> {
     val zone = TimeZone.currentSystemDefault()
     val today = Clock.System.now().toLocalDateTime(zone).date
@@ -41,7 +43,7 @@ internal fun List<NoteSearchResult>.toSectionsUi(
         .map { (date, results) ->
             NotesSectionUi(
                 dayLabel = date.toDayLabel(today, dateLabelFormatter),
-                notes = results.map { it.toCardUi(zone, today, dateLabelFormatter, folderNames) },
+                notes = results.map { it.toCardUi(zone, today, dateLabelFormatter, folderNames, waveforms) },
             )
         }
 }
@@ -62,6 +64,7 @@ private fun NoteSearchResult.toCardUi(
     today: LocalDate,
     dateLabelFormatter: DateLabelFormatter,
     folderNames: Map<Long, String>,
+    waveforms: Map<Long, List<Int>>,
 ): NoteCardUi {
     val createdAt = Instant.fromEpochMilliseconds(note.createdAtEpochMs).toLocalDateTime(zone)
     return NoteCardUi(
@@ -69,13 +72,23 @@ private fun NoteSearchResult.toCardUi(
         title = note.title,
         dayLabel = createdAt.date.toDayLabel(today, dateLabelFormatter),
         time = dateLabelFormatter.time(createdAt),
-        preview = snippet ?: NoteTextCleaner.preview(note.body),
+        preview = snippet ?: NoteTextCleaner.preview(note.body.ifBlank { note.transcript }),
         durationText = note.durationMs?.let(::formatClock),
         status = note.status.toUi(),
         titleHighlights = titleMatches.map(TextMatch::toUi),
         previewHighlights = snippetMatches.map(TextMatch::toUi),
         folderName = note.folderId?.let(folderNames::get),
+        matchLocation = location?.toUi(),
+        matchTime = transcriptParagraph?.let { note.toTranscriptPartsUi().getOrNull(it)?.time },
+        matchParagraph = transcriptParagraph,
+        waveform = waveforms[note.id].orEmpty().toWaveformUi(LIST_WAVE_BARS),
     )
+}
+
+private fun MatchLocation.toUi(): MatchLocationUi = when (this) {
+    MatchLocation.TITLE -> MatchLocationUi.TITLE
+    MatchLocation.SUMMARY -> MatchLocationUi.SUMMARY
+    MatchLocation.TRANSCRIPT -> MatchLocationUi.TRANSCRIPT
 }
 
 private fun TextMatch.toUi(): TextRangeUi = TextRangeUi(start = start, end = end)
@@ -108,12 +121,25 @@ internal fun Note.toDetailUi(
     style = style,
     folderId = folderId,
     folderName = folderId?.let(folderNames::get),
+    transcriptParts = toTranscriptPartsUi(),
 )
+
+// Time marks are only shown while there is exactly one per paragraph: an
+// edited transcript or a note from before the marks existed has none.
+internal fun Note.toTranscriptPartsUi(): List<TranscriptPartUi> {
+    val paragraphs = transcript.split(TRANSCRIPT_PARAGRAPH_SEPARATOR).filter { it.isNotBlank() }
+    if (paragraphs.isEmpty() || paragraphs.size != transcriptStartsMs.size) return emptyList()
+    return paragraphs.zip(transcriptStartsMs) { text, startMs ->
+        TranscriptPartUi(startMs = startMs, time = formatClock(startMs), text = text.trim())
+    }
+}
+
+private const val TRANSCRIPT_PARAGRAPH_SEPARATOR = "\n\n"
 
 private fun Note.createdAtLocalDateTime(): LocalDateTime =
     Instant.fromEpochMilliseconds(createdAtEpochMs).toLocalDateTime(TimeZone.currentSystemDefault())
 
-private fun NoteStatus.toUi(): NoteStatusUi = when (this) {
+internal fun NoteStatus.toUi(): NoteStatusUi = when (this) {
     NoteStatus.RECORDING -> NoteStatusUi.PROCESSING
     NoteStatus.PROCESSING -> NoteStatusUi.PROCESSING
     NoteStatus.INTERRUPTED -> NoteStatusUi.INTERRUPTED
@@ -143,6 +169,7 @@ internal fun AudioPlaybackState.toUi(): AudioPlaybackUi = AudioPlaybackUi(
     },
     positionText = formatClock(positionMs),
     durationText = formatClock(durationMs),
+    positionMs = positionMs,
 )
 
 internal fun formatClock(ms: Long): String {

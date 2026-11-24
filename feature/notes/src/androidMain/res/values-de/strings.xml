@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="notes_title">Notizen</string>
-    <string name="notes_empty_state">Noch keine Notizen. Tippe auf das Mikrofon, um deine erste aufzunehmen.</string>
+    <string name="notes_empty_title">Noch keine Notizen</string>
+    <string name="notes_empty_hint">Tippe auf „Aufnehmen“ und sprich. Offhand schreibt das Transkript und eine Zusammenfassung auf deinem Handy.</string>
     <string name="notes_model_banner_title">Deine KI auf dem Gerät wird eingerichtet</string>
     <string name="notes_model_banner_subtitle">Wird im Hintergrund heruntergeladen</string>
     <string name="notes_model_banner_waiting_title">Deine KI auf dem Gerät ist bereit zum Download</string>
@@ -9,32 +10,33 @@
     <string name="notes_model_banner_mobile_data_button">Über mobile Daten laden</string>
     <string name="notes_model_banner_info_description">Über deine KI auf dem Gerät</string>
     <string name="notes_model_banner_info_title">Deine KI auf dem Gerät</string>
-    <string name="notes_model_banner_info_body">Offhand macht aus Aufnahmen Notizen – mit KI, die vollständig auf deinem Handy läuft. Der Download ist einmalig; danach wird nie etwas hochgeladen.</string>
+    <string name="notes_model_banner_info_body">Offhand macht aus Aufnahmen Notizen – mit KI, die vollständig auf deinem Handy läuft. Der Download ist einmalig; danach verlassen deine Notizen nie dein Handy.</string>
     <string name="notes_model_banner_info_dismiss">Verstanden</string>
     <string name="notes_day_today">Heute</string>
     <string name="notes_day_yesterday">Gestern</string>
-    <plurals name="notes_word_count">
-        <item quantity="one">%1$s Wort</item>
-        <item quantity="other">%1$s Wörter</item>
-    </plurals>
-    <string name="notes_record_fab_description">Neue Aufnahme starten</string>
     <string name="notes_select_prompt">Wähle eine Notiz aus, um sie zu lesen</string>
     <string name="notes_back_description">Zurück zu den Notizen</string>
     <string name="notes_play_description">Aufnahme abspielen</string>
     <string name="notes_pause_description">Wiedergabe pausieren</string>
     <string name="notes_processing_title">Wird verarbeitet…</string>
     <string name="notes_processing_preview">Wird auf deinem Handy transkribiert und zusammengefasst. Du kannst die Aufnahme schon abspielen.</string>
-    <string name="notes_processing_transcribing">Das Transkript wird verarbeitet… Es erscheint hier automatisch.</string>
-    <string name="notes_processing_structuring">Die Zusammenfassung wird geschrieben… Das Transkript steht schon unten.</string>
+    <string name="notes_processing_preview_transcript">Wird auf deinem Handy transkribiert. Du kannst die Aufnahme schon abspielen.</string>
+    <string name="notes_processing_transcribing">Deine Aufnahme wird transkribiert… Der Text erscheint hier automatisch.</string>
+    <string name="notes_processing_structuring">Deine Zusammenfassung wird geschrieben…</string>
+    <string name="notes_processing_waiting_preview">Wartet, bis deine KI auf dem Gerät heruntergeladen ist. Du kannst die Aufnahme schon abspielen.</string>
+    <string name="notes_processing_waiting_transcribing">Deine Notiz wird geschrieben, sobald deine KI auf dem Gerät heruntergeladen ist. Sie erscheint hier automatisch.</string>
+    <string name="notes_processing_waiting_structuring">Die Zusammenfassung wird geschrieben, sobald deine KI auf dem Gerät heruntergeladen ist.</string>
     <string name="notes_recording_fallback_title">Aufnahme</string>
     <string name="notes_failed_description">Wir konnten für diese Notiz keine Zusammenfassung und kein Transkript erstellen.</string>
-    <string name="notes_failed_summary_description">Wir konnten für diese Notiz keine Zusammenfassung erstellen. Das Transkript ist unten gespeichert.</string>
+    <string name="notes_failed_summary_description">Wir konnten für diese Notiz keine Zusammenfassung erstellen. Das Transkript ist gespeichert.</string>
     <string name="notes_try_again_button">Erneut versuchen</string>
     <string name="notes_interrupted_description">Diese Notiz wurde angehalten, bevor sie fertig war. Lass Offhand geöffnet, dann macht sie weiter.</string>
     <string name="notes_interrupted_preview">Angehalten. Öffne die Notiz, um fortzufahren.</string>
     <string name="notes_continue_button">Fortsetzen</string>
     <string name="notes_summary_heading">Zusammenfassung</string>
     <string name="notes_transcript_heading">Transkript</string>
+    <string name="notes_summary_ready_description">Zusammenfassung ist fertig</string>
+    <string name="notes_transcript_empty">Diese Notiz hat kein Transkript.</string>
     <string name="notes_edit_description">Notiz bearbeiten</string>
     <string name="notes_share_description">Notiz teilen</string>
     <string name="notes_delete_description">Notiz löschen</string>
@@ -49,10 +51,7 @@
     <string name="notes_retranscribe_description">Neu transkribieren</string>
     <string name="notes_retranscribe_dialog_title">Diese Notiz neu transkribieren?</string>
     <string name="notes_retranscribe_dialog_body">Die Aufnahme wird erneut transkribiert und zusammengefasst; der aktuelle Titel, die Zusammenfassung und das Transkript werden ersetzt. Die Audioaufnahme selbst bleibt erhalten.</string>
-    <string name="notes_badge_encrypted">Verschlüsselt</string>
     <string name="notes_more_actions_description">Weitere Aktionen</string>
-    <string name="notes_share_dialog_title">Was möchtest du teilen?</string>
-    <string name="notes_share_dialog_body">Bedenke, dass geteilte Kopien nicht mehr verschlüsselt sind, sobald sie dein Handy verlassen.</string>
     <string name="notes_share_dialog_confirm">Teilen</string>
     <string name="notes_share_tab_text">Textdatei</string>
     <string name="notes_share_tab_audio">Audiodatei</string>
@@ -60,14 +59,12 @@
     <string name="notes_share_audio_details">Die Aufnahme wird als unkomprimierte WAV-Datei geteilt, 16 kHz mono. Jeder Player und jedes Transkriptionstool öffnet sie.</string>
     <string name="notes_share_download">Herunterladen</string>
     <string name="notes_share_date_label">Datum</string>
-    <string name="notes_share_format_text">Textdatei</string>
-    <string name="notes_share_format_pdf">PDF-Datei</string>
-    <string name="notes_share_format_docx">Word-Datei</string>
+    <string name="notes_share_format_text">Nur Text</string>
     <string name="notes_share_recorded_label">Aufgenommen</string>
     <string name="notes_share_duration_label">Dauer</string>
     <string name="notes_share_created_with">Erstellt mit Offhand</string>
     <string name="notes_share_exported_label">Exportiert</string>
-    <string name="notes_preset_description">Zusammenfassungsstil ändern</string>
+    <string name="notes_preset_description">Schreibstil ändern</string>
     <string name="notes_preset_sheet_body">Die Aufnahme bleibt erhalten. Titel und Zusammenfassung werden aus dem Transkript neu geschrieben — im Stil, den du wählst.</string>
     <string name="notes_copy_summary_description">Zusammenfassung kopieren</string>
     <string name="notes_copy_transcript_description">Transkript kopieren</string>
@@ -81,8 +78,8 @@
     <string name="notes_folder_options_description">Ordneroptionen</string>
     <string name="notes_folder_rename">Ordner umbenennen</string>
     <string name="notes_folder_delete">Ordner löschen</string>
-    <string name="notes_folder_style">Zusammenfassungsstil</string>
-    <string name="notes_folder_style_title">Zusammenfassungsstil für %1$s</string>
+    <string name="notes_folder_style">Schreibstil</string>
+    <string name="notes_folder_style_title">Schreibstil für %1$s</string>
     <string name="notes_folder_style_body">Neue Aufnahmen in diesem Ordner nutzen ihn, und hierher verschobene Notizen werden damit neu geschrieben.</string>
     <string name="notes_folder_style_default">Standard</string>
     <string name="notes_folder_name_label">Ordnername</string>
@@ -91,8 +88,8 @@
     <string name="notes_folder_error_too_long">Höchstens %1$d Zeichen.</string>
     <string name="notes_folder_error_duplicate">Ein Ordner mit diesem Namen existiert bereits.</string>
     <string name="notes_folder_delete_dialog_title">Diesen Ordner löschen?</string>
-    <string name="notes_folder_delete_dialog_body">Die Notizen bleiben erhalten und landen wieder unter „Alle Notizen“.</string>
-    <string name="notes_folder_empty_state">Keine Notizen in diesem Ordner.</string>
+    <string name="notes_folder_delete_dialog_body">Die Notizen bleiben erhalten, nur ohne Ordner.</string>
+    <string name="notes_folder_empty_state">In diesem Ordner sind noch keine Notizen</string>
     <string name="notes_move_to_folder">In Ordner verschieben</string>
     <string name="notes_folder_none">Kein Ordner</string>
     <string name="notes_import_error_title">Diese Datei konnte nicht importiert werden</string>
@@ -111,4 +108,40 @@
     <string name="notes_suggestions_added">Hinzugefügt</string>
     <string name="notes_suggestions_dismiss">Vorschlag ausblenden</string>
     <string name="notes_suggestions_locked">Offhand Pro findet Kalendertermine und Aufgaben in deinen Notizen.</string>
+    <string name="notes_folder_unsorted">Unsortiert</string>
+    <string name="notes_unsorted_empty_title">Keine unsortierten Notizen</string>
+    <string name="notes_unsorted_empty_hint">Notizen ohne Ordner erscheinen hier.</string>
+    <string name="notes_loading_description">Deine Notizen werden geladen</string>
+    <string name="notes_transcript_more_coming">Der Rest wird noch transkribiert…</string>
+    <string name="notes_transcript_time_description">Ab %1$s abspielen</string>
+    <string name="notes_selection_count">%1$d ausgewählt</string>
+    <string name="notes_selection_cancel">Auswahl aufheben</string>
+    <string name="notes_select_action">Auswählen</string>
+    <string name="notes_bulk_delete_title">Ausgewählte Notizen löschen?</string>
+    <string name="notes_bulk_delete_body">Sie werden dauerhaft von deinem Smartphone entfernt. Das lässt sich nicht rückgängig machen.</string>
+    <string name="notes_audio_only">Diese Notiz besteht nur aus der Aufnahme.</string>
+    <string name="notes_search_hint">Die Suche durchsucht Titel, Zusammenfassungen und Transkripte.</string>
+    <string name="notes_seek_description">Wiedergabeposition</string>
+    <string name="notes_processing_summary_hint">Das Transkript ist schon im anderen Tab. Lass Offhand geöffnet, bis deine Notiz fertig ist.</string>
+    <string name="notes_interrupted_title">Deine Notiz ist angehalten</string>
+    <string name="notes_failed_summary_title">Die Zusammenfassung konnte nicht geschrieben werden</string>
+    <string name="notes_failed_title">Die Notiz konnte nicht fertiggestellt werden</string>
+    <string name="notes_move_confirm">Verschieben</string>
+    <string name="notes_share_privacy">Die Datei entsteht auf deinem Handy und geht nur dorthin, wohin du sie schickst.</string>
+    <plurals name="notes_search_count">
+        <item quantity="one">%1$d Notiz</item>
+        <item quantity="other">%1$d Notizen</item>
+    </plurals>
+    <plurals name="notes_move_notes_title">
+        <item quantity="one">%1$d Notiz verschieben</item>
+        <item quantity="other">%1$d Notizen verschieben</item>
+    </plurals>
+    <plurals name="notes_move_rewrite_caption">
+        <item quantity="one">%1$s schreibt Notizen im Stil „%2$s“, deshalb wird diese Notiz neu geschrieben. Dein Transkript bleibt, wie es ist.</item>
+        <item quantity="other">%1$s schreibt Notizen im Stil „%2$s“, deshalb werden diese %3$d Notizen neu geschrieben. Deine Transkripte bleiben, wie sie sind.</item>
+    </plurals>
+    <string name="notes_match_title">Im Titel</string>
+    <string name="notes_match_summary">In der Zusammenfassung</string>
+    <string name="notes_match_transcript">Im Transkript</string>
+    <string name="notes_match_transcript_at">Im Transkript bei %1$s</string>
 </resources>

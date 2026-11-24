@@ -1,6 +1,10 @@
 package com.dmytrosamoilov.offhand.core.data.billing
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
@@ -24,6 +28,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
@@ -36,6 +41,7 @@ import kotlin.coroutines.resume
 internal class PlayProStore(
     context: Context,
     private val activityHolder: ForegroundActivityHolder,
+    private val dataStore: DataStore<Preferences>,
 ) : ProStore, PurchasesUpdatedListener {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -48,6 +54,7 @@ internal class PlayProStore(
     private val mutableStatus = MutableStateFlow<ProStatus?>(null)
     private val details = mutableMapOf<ProPlan, ProductDetails>()
     private var pendingPurchase: CompletableDeferred<PurchaseOutcome>? = null
+    private var pendingPlan: ProPlan? = null
 
     override val status: Flow<ProStatus?> = mutableStatus.asStateFlow()
 
@@ -73,9 +80,12 @@ internal class PlayProStore(
         if (!awaitReady()) return emptyList()
         val subscription = queryDetails(PlayProducts.SUBSCRIPTION_ID, BillingClient.ProductType.SUBS)
         val lifetime = queryDetails(PlayProducts.LIFETIME_ID, BillingClient.ProductType.INAPP)
-        subscription?.let { details[ProPlan.YEARLY] = it }
+        subscription?.let {
+            details[ProPlan.MONTHLY] = it
+            details[ProPlan.YEARLY] = it
+        }
         lifetime?.let { details[ProPlan.LIFETIME] = it }
-        return listOfNotNull(subscription?.toYearlyOffer(), lifetime?.toLifetimeOffer())
+        return listOfNotNull(subscription?.toMonthlyOffer(), subscription?.toYearlyOffer(), lifetime?.toLifetimeOffer())
     }
 
     override suspend fun purchase(plan: ProPlan): PurchaseOutcome {
@@ -83,7 +93,8 @@ internal class PlayProStore(
         val activity = activityHolder.activity ?: return PurchaseOutcome.FAILED
         val outcome = CompletableDeferred<PurchaseOutcome>()
         pendingPurchase = outcome
-        val result = client.launchBillingFlow(activity, billingFlowParams(product))
+        pendingPlan = plan
+        val result = client.launchBillingFlow(activity, billingFlowParams(product, plan))
         if (result.responseCode != BillingClient.BillingResponseCode.OK) {
             pendingPurchase = null
             return PurchaseOutcome.FAILED
@@ -106,6 +117,7 @@ internal class PlayProStore(
         result.responseCode == BillingClient.BillingResponseCode.USER_CANCELED -> PurchaseOutcome.CANCELLED
         result.responseCode != BillingClient.BillingResponseCode.OK -> PurchaseOutcome.FAILED
         purchases.any { it.purchaseState == Purchase.PurchaseState.PURCHASED } -> {
+            rememberSubscriptionPlan()
             publishStatus()
             PurchaseOutcome.PURCHASED
         }
@@ -133,7 +145,7 @@ internal class PlayProStore(
         val oneTime = queryPurchases(BillingClient.ProductType.INAPP) ?: return null
         val owned = (subscriptions + oneTime).filter { it.purchaseState == Purchase.PurchaseState.PURCHASED }
         owned.filterNot { it.isAcknowledged }.forEach { acknowledge(it) }
-        return ProStatus(plan = PlayProducts.planOf(owned.flatMap { it.products }))
+        return ProStatus(plan = PlayProducts.planOf(owned.flatMap { it.products }, rememberedSubscriptionPlan()))
     }
 
     private suspend fun queryPurchases(type: String): List<Purchase>? = suspendCancellableCoroutine { continuation ->
@@ -167,26 +179,40 @@ internal class PlayProStore(
         }
     }
 
-    private fun billingFlowParams(product: ProductDetails): BillingFlowParams {
+    private suspend fun rememberSubscriptionPlan() {
+        val plan = pendingPlan?.takeIf { PlayProducts.basePlanOf(it) != null } ?: return
+        dataStore.edit { it[KEY_SUBSCRIPTION_PLAN] = plan.name }
+    }
+
+    private suspend fun rememberedSubscriptionPlan(): ProPlan? {
+        val name = dataStore.data.first()[KEY_SUBSCRIPTION_PLAN] ?: return null
+        return ProPlan.entries.firstOrNull { it.name == name }
+    }
+
+    private fun billingFlowParams(product: ProductDetails, plan: ProPlan): BillingFlowParams {
         val productParams = BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(product)
-        product.offerToken()?.let { productParams.setOfferToken(it) }
+        product.offerToken(plan)?.let { productParams.setOfferToken(it) }
         return BillingFlowParams.newBuilder().setProductDetailsParamsList(listOf(productParams.build())).build()
     }
 
     private companion object {
         const val CONNECTION_TIMEOUT_MS = 5_000L
+        val KEY_SUBSCRIPTION_PLAN = stringPreferencesKey("pro_subscription_plan")
     }
 }
 
-private fun ProductDetails.offerToken(): String? = when (productType) {
-    BillingClient.ProductType.SUBS -> preferredOffer()?.offerToken
+private fun ProductDetails.offerToken(plan: ProPlan): String? = when (productType) {
+    BillingClient.ProductType.SUBS -> preferredOffer(plan)?.offerToken
     else -> purchaseOption()?.offerToken
 }
 
-// The offer with a free phase is the trial one; a returning subscriber who
-// no longer qualifies only gets the base plan back from Play.
-private fun ProductDetails.preferredOffer(): ProductDetails.SubscriptionOfferDetails? =
-    subscriptionOfferDetails?.maxByOrNull { it.trialDays() }
+// One subscription carries both base plans. Within a base plan the offer
+// with a free phase is the trial one; a returning subscriber who no longer
+// qualifies only gets the base plan back from Play.
+private fun ProductDetails.preferredOffer(plan: ProPlan): ProductDetails.SubscriptionOfferDetails? =
+    subscriptionOfferDetails
+        ?.filter { it.basePlanId == PlayProducts.basePlanOf(plan) }
+        ?.maxByOrNull { it.trialDays() }
 
 // The lifetime product has a single "Buy" purchase option in the console.
 private fun ProductDetails.purchaseOption(): ProductDetails.OneTimePurchaseOfferDetails? =
@@ -197,8 +223,19 @@ private fun ProductDetails.SubscriptionOfferDetails.trialDays(): Int =
         .filter { it.priceAmountMicros == 0L }
         .sumOf { isoPeriodToDays(it.billingPeriod) }
 
+private fun ProductDetails.toMonthlyOffer(): ProOffer? {
+    val offer = preferredOffer(ProPlan.MONTHLY) ?: return null
+    val paidPhase = offer.pricingPhases.pricingPhaseList.lastOrNull { it.priceAmountMicros > 0 } ?: return null
+    return ProOffer(
+        plan = ProPlan.MONTHLY,
+        price = paidPhase.formattedPrice,
+        trialDays = offer.trialDays(),
+        priceMicros = paidPhase.priceAmountMicros,
+    )
+}
+
 private fun ProductDetails.toYearlyOffer(): ProOffer? {
-    val offer = preferredOffer() ?: return null
+    val offer = preferredOffer(ProPlan.YEARLY) ?: return null
     val paidPhase = offer.pricingPhases.pricingPhaseList.lastOrNull { it.priceAmountMicros > 0 } ?: return null
     return ProOffer(
         plan = ProPlan.YEARLY,

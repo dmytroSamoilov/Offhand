@@ -50,6 +50,13 @@ appId: com.dmytrosamoilov.offhand.uitest
 # Copy the summary
 - tapOn: "Copy summary"
 
+# The copy button follows the open tab
+- tapOn: "Transcript"
+- assertNotVisible: "Copy summary"
+- tapOn: "Copy transcript"
+- tapOn: "Summary"
+- assertVisible: "Copy summary"
+
 # Play the recording back and pause it again
 - tapOn: "Play recording"
 - extendedWaitUntil:
@@ -63,8 +70,23 @@ appId: com.dmytrosamoilov.offhand.uitest
 - tapOn: "Re-transcribe"
 - assertVisible: "Re-transcribe this note?"
 - tapOn: "Re-transcribe"
+# The note is written again on the tab that was open
 - extendedWaitUntil:
-    visible: "Summary"
+    visible: "Copy summary"
     timeout: 60000
 - assertVisible: "Smoke test note"
-- assertVisible: "Transcript"
+- tapOn: "Transcript"
+- assertVisible: "Copy transcript"
+
+# The writing-style chips under the summary restyle the note in place: the
+# current style is the first chip, Meeting the second, and the note is
+# written again on its tab
+- tapOn: "Summary"
+- scrollUntilVisible:
+    element:
+      text: "Meeting notes"
+    direction: DOWN
+- tapOn: "Meeting notes"
+- extendedWaitUntil:
+    visible: "Copy summary"
+    timeout: 60000

@@ -8,58 +8,18 @@ appId: com.dmytrosamoilov.offhand.uitest
     permissions:
       all: allow
 
-# Onboarding
-- tapOn: "Continue"
+# Onboarding asks about anonymous usage first, then shows one screen whose
+# Record pill opens the record sheet
+- extendedWaitUntil:
+    visible: "Share with the developer"
+    timeout: 30000
+- tapOn: "Share with the developer"
+- tapOn: "Record your first note"
 - runFlow:
     when:
-      visible: "Continue without a lock"
+      visible: "Start recording"
     commands:
-      - tapOn: "Continue without a lock"
-- runFlow:
-    when:
-      visible: "Lock Offhand?"
-    commands:
-      - runFlow:
-          when:
-            platform: Android
-          commands:
-            - tapOn: "Require unlock to open Offhand"
-      - runFlow:
-          when:
-            platform: iOS
-          commands:
-            - tapOn: "Require unlock to open Offhand"
-      - tapOn: "Continue"
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - tapOn: "Share anonymous reports"
-- runFlow:
-    when:
-      platform: iOS
-    commands:
-      - tapOn: "Share usage & stability reports"
-# Consent is the last page; its Continue ends onboarding
-- tapOn: "Continue"
-- assertVisible: "Notes"
-
-# Record a note through the fake microphone and engines
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - tapOn: "Start a new recording"
-      - runFlow:
-          when:
-            visible: "Start recording"
-          commands:
-            - tapOn: "Start recording"
-- runFlow:
-    when:
-      platform: iOS
-    commands:
-      - tapOn: "Record a note"
+      - tapOn: "Start recording"
 - extendedWaitUntil:
     visible: "00:(0[4-9]|[1-5][0-9])"
     timeout: 15000
@@ -74,11 +34,16 @@ appId: com.dmytrosamoilov.offhand.uitest
           text: "^Allow$"
           optional: true
 
-# Saving opens the new note; wait for processing, then go back to the list
+# Saving opens the new note on its Transcript tab; the Summary tab is marked
+# when the summary is written and is only opened by a tap. A note that was
+# already finished when it opened is on its Summary tab with nothing to mark.
 - extendedWaitUntil:
-    visible: "Summary"
+    visible: "Summary is ready|Copy summary"
     timeout: 30000
+- tapOn: "Summary"
+- assertVisible: "Copy summary"
 - assertVisible: "Smoke test note"
+# Back to the list
 - runFlow:
     when:
       platform: Android
@@ -101,18 +66,19 @@ appId: com.dmytrosamoilov.offhand.uitest
 - assertVisible: "Smoke test note"
 - assertVisible: ".*quarterly budget.*"
 
-# Detail renders both sections (debug builds show a fake in-app review first)
+# A finished note opens on its Summary tab and the Transcript is one tap away
+# (debug builds show a fake in-app review first)
 - tapOn: "Smoke test note"
 - runFlow:
     when:
       visible: "In-app review · dev build"
     commands:
       - tapOn: "COUNT ATTEMPT"
-- assertVisible: "Summary"
-- scrollUntilVisible:
-    element: "Transcript"
-    direction: DOWN
-- assertVisible: "Transcript"
+- assertVisible: "Copy summary"
+- assertNotVisible: "Summary is ready"
+- tapOn: "Transcript"
+- assertVisible: "Copy transcript"
+- assertVisible: ".*quarterly budget.*"
 
 # Going back must not hand focus to the search field (regression: keyboard popped up)
 - runFlow:

@@ -1,14 +1,22 @@
 package com.dmytrosamoilov.offhand.shared
 
+import com.dmytrosamoilov.offhand.core.common.DeviceRegion
+import platform.Foundation.NSLocale
+import platform.Foundation.countryCode
+import platform.Foundation.currentLocale
 import com.dmytrosamoilov.offhand.core.ai.api.AiBackend
 import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
 import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
 import com.dmytrosamoilov.offhand.core.ai.api.di.coreAiApiModule
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
+import com.dmytrosamoilov.offhand.core.data.domain.ProtectedDataState
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsEvents
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsSink
+import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.common.ModelDownloadController
 import com.dmytrosamoilov.offhand.core.common.NetworkMonitor
+import com.dmytrosamoilov.offhand.core.device.DeviceTierProvider
 import com.dmytrosamoilov.offhand.core.data.di.PLATFORM_PRO_STORE
 import com.dmytrosamoilov.offhand.core.data.di.coreDataModule
 import com.dmytrosamoilov.offhand.core.data.domain.ProStore
@@ -31,7 +39,9 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.AudioImportStaging
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioRecorder
 import com.dmytrosamoilov.offhand.feature.recording.domain.DefaultNoteTitleProvider
 import com.dmytrosamoilov.offhand.feature.settings.di.featureSettingsModule
+import com.dmytrosamoilov.offhand.testing.fakes.SmokeDeviceTier
 import com.dmytrosamoilov.offhand.testing.fakes.smokeFakesModule
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -73,6 +83,10 @@ fun startSharedKoin(deps: IosPlatformDeps, useSmokeFakes: Boolean) {
     }
 }
 
+fun requestSmokeDeviceTier(value: String?) {
+    SmokeDeviceTier.requested = value
+}
+
 fun sharedIosModules(deps: IosPlatformDeps): List<Module> = listOf(
     coreAiApiModule,
     coreDeviceModule,
@@ -91,6 +105,7 @@ fun sharedIosModules(deps: IosPlatformDeps): List<Module> = listOf(
 
 private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
     single { BuildInfo(isDeveloperBuild = deps.isDeveloperBuild, appVersion = deps.appVersion, platform = "ios") }
+    single { DeviceRegion { NSLocale.currentLocale.countryCode.orEmpty() } }
     single<BackupCrypto> { IosBackupCrypto(deps.backupCrypto) }
     single<AudioDecoder> { IosAudioDecoder(deps.audioDecoder) }
     single<AudioImportStaging> { IosAudioImportStaging() }
@@ -99,11 +114,13 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
     single<ProStore>(named(PLATFORM_PRO_STORE)) { IosProStore(deps.proStore) }
     single<AnalyticsSink> { IosAnalyticsSink(deps.analytics) }
     single<AppForegroundState>(createdAtStart = true) { IosAppForegroundState() }
+    single<ProtectedDataState>(createdAtStart = true) { IosProtectedDataState() }
     single { deps.gemmaEngine }
     single { deps.whisperEngine }
     single<NetworkMonitor> { IosNetworkMonitor(deps.network) }
     single { IosFileDownloader(get()) }
-    single { IosModelManager(get(), get()) } bind ModelManager::class
+    single { IosModelManager(get(), get(), get()) } bind ModelManager::class
+    single { IosRecordWidgetState(get(), get(), get()) }
     single<AiBackend> { IosAiBackend(get(), get()) }
     single<SpeechToText> { IosWhisperSpeechToText(get(), get(), get()) }
     single<AudioRecorder> { IosAudioRecorder(deps.audioSource) }
@@ -117,10 +134,12 @@ private fun platformDepsModule(deps: IosPlatformDeps): Module = module {
         IosModelDownloadController(
             get(),
             get(),
+            get(),
+            get(),
             CoroutineScope(SupervisorJob() + Dispatchers.Default),
         )
     }
-    factory { IosRootViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { IosRootViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 }
 
 class IosDefaultNoteTitleProvider(
@@ -146,6 +165,8 @@ class IosNoteShareLabelsProvider(
 class IosModelDownloadController(
     private val modelManager: ModelManager,
     private val speechToText: SpeechToText,
+    private val deviceTier: DeviceTierProvider,
+    private val analyticsTracker: AnalyticsTracker,
     private val scope: CoroutineScope,
 ) : ModelDownloadController {
 
@@ -157,8 +178,24 @@ class IosModelDownloadController(
     override fun start() {
         if (run?.isActive == true) return
         run = scope.launch {
-            runCatching { speechToText.prepare() }
-            runCatching { modelManager.ensureModelAvailable() }
+            reportingFailure { speechToText.download() }
+            if (deviceTier.writesSummaries()) reportingFailure { modelManager.ensureModelAvailable() }
         }
+    }
+
+    // A failed part must not stop the other one, and a failure is reported
+    // the way Android's download service reports it.
+    private suspend fun reportingFailure(download: suspend () -> Unit) {
+        try {
+            download()
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (t: Throwable) {
+            analyticsTracker.track(AnalyticsEvents.modelDownloadFailed(t::class.simpleName ?: UNKNOWN_REASON))
+        }
+    }
+
+    private companion object {
+        const val UNKNOWN_REASON = "unknown"
     }
 }

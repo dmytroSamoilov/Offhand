@@ -41,19 +41,19 @@
     <string name="paywall_close">Close</string>
     <string name="paywall_no_browser">No browser found to open the link.</string>
     <string name="paywall_context_tagline">Part of Offhand Pro. Get more out of every recording.</string>
-    <string name="paywall_context_styles">Save your own summary style</string>
-    <string name="paywall_context_note_styles">Choose a different summary style</string>
+    <string name="paywall_context_styles">Save your own writing style</string>
+    <string name="paywall_context_note_styles">Choose a different writing style</string>
     <string name="paywall_context_export">Share this note as PDF or Word</string>
     <string name="paywall_context_suggestions">Find dates and to-dos in your notes</string>
     <string name="paywall_context_import">Turn recordings and videos into notes</string>
-    <string name="paywall_context_folder_styles">Give this folder its own summary style</string>
+    <string name="paywall_context_folder_styles">Give this folder its own writing style</string>
     <string name="paywall_context_folders">Keep more than two folders</string>
     <string name="paywall_context_backup_audio">Back up your recordings too</string>
     <string name="paywall_pro_styles_hint">Meeting notes, Visit report, Legal note, your own styles, and a new style for any note</string>
     <string name="paywall_pro_export_hint">PDF and Word, ready for clients, email and print</string>
     <string name="paywall_pro_suggestions_hint">Dates and to-dos straight into your calendar</string>
     <string name="paywall_pro_import_hint">Voice memos, calls, screen recordings and video files without limit (three are free to try)</string>
-    <string name="paywall_pro_folders_hint">Each with its own summary style</string>
+    <string name="paywall_pro_folders_hint">Each with its own writing style</string>
     <string name="paywall_pro_backup_hint">Audio included, still encrypted</string>
     <string name="paywall_plan_yearly_monthly">About %1$s a month</string>
     <string name="paywall_plan_best_value">Best value</string>
@@ -78,4 +78,29 @@
         <item quantity="other">Less than %d years of yearly</item>
     </plurals>
     <string name="paywall_benefits_body">Everything in the Pro column is yours.</string>
+    <plurals name="paywall_trial_offer_title">
+        <item quantity="one">Offhand Pro is yours free for %d more day</item>
+        <item quantity="other">Offhand Pro is yours free for %d more days</item>
+    </plurals>
+    <string name="paywall_trial_intro_tagline">Everything in Pro is already unlocked. No payment and no account. When the trial ends you keep the free version unless you upgrade.</string>
+    <string name="paywall_trial_offer_continue">Keep using Pro for free</string>
+    <string name="paywall_plan_monthly">Monthly</string>
+    <string name="paywall_plan_monthly_price">%1$s / month</string>
+    <string name="paywall_plan_monthly_renews">Renews every month</string>
+    <string name="paywall_monthly_disclosure">%1$s per month, renews automatically. Cancel anytime in your store account.</string>
+    <string name="paywall_benefits_expand">See everything in Pro</string>
+    <string name="paywall_benefits_collapse">Show less</string>
+    <string name="paywall_trial_ended_title">Your Pro trial has ended</string>
+    <string name="paywall_trial_ended_body">Your 14 days of Offhand Pro are over. Your notes, folders and styles are all still here. You can keep using the free version, or upgrade to keep everything in Pro.</string>
+    <string name="paywall_trial_recap_title">Your 14 days with Offhand Pro</string>
+    <string name="paywall_trial_recap_tagline">Your trial has ended. Keep all of this with Pro.</string>
+    <string name="paywall_usage_custom_styles">Notes in your own styles</string>
+    <string name="paywall_usage_pdf">PDFs shared</string>
+    <string name="paywall_usage_word">Word documents shared</string>
+    <string name="paywall_usage_imports">Recordings and videos imported</string>
+    <string name="paywall_usage_calendar">Events added to your calendar</string>
+    <string name="paywall_usage_folder_styles">Folders with their own style</string>
+    <string name="paywall_usage_backups">Backups with your recordings</string>
+    <string name="paywall_context_widget">Record from your home screen</string>
+    <string name="paywall_context_skip_silence">Skip the silence when you listen</string>
 </resources>

@@ -180,10 +180,10 @@ class StreamingAudioRecorder(
         const val FRAME_BYTES = FRAME_SAMPLES * 2
         // The offline Whisper decoder discards everything past 30 seconds per
         // decode, so a chunk must never reach that cap.
-        const val DEFAULT_MIN_CHUNK_MS = 20_000L
-        const val DEFAULT_MAX_CHUNK_MS = 29_000L
-        const val DEFAULT_SILENCE_GAP_MS = 300L
-        const val DEFAULT_SILENCE_DB = -45f
+        const val DEFAULT_MIN_CHUNK_MS = AudioChunker.LIVE_MIN_CHUNK_MS
+        const val DEFAULT_MAX_CHUNK_MS = AudioChunker.LIVE_MAX_CHUNK_MS
+        const val DEFAULT_SILENCE_GAP_MS = AudioChunker.LIVE_SILENCE_GAP_MS
+        const val DEFAULT_SILENCE_DB = AudioChunker.LIVE_SILENCE_DB
         private const val CHANNEL = AudioFormat.CHANNEL_IN_MONO
         private const val ENCODING = AudioFormat.ENCODING_PCM_16BIT
         private val EXTERNAL_INPUT_PRIORITY = listOf(

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="com.dmytrosamoilov.offhand.feature.recording.widget.RecordWidgetConfigActivity"
+    android:description="@string/record_widget_description"
+    android:initialLayout="@layout/record_widget"
+    android:minWidth="110dp"
+    android:minHeight="40dp"
+    android:previewLayout="@layout/record_widget"
+    android:resizeMode="horizontal"
+    android:targetCellWidth="2"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen"
+    android:widgetFeatures="reconfigurable|configuration_optional" />

@@ -1,0 +1,860 @@
+package com.dmytrosamoilov.offhand.feature.notes.presentation
+
+import io.mockk.verify
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
+import com.dmytrosamoilov.offhand.core.data.domain.NotePreset
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteFeaturesUseCase
+import com.dmytrosamoilov.offhand.core.data.domain.NoteFeatures
+import app.cash.turbine.test
+import com.dmytrosamoilov.offhand.core.ai.api.AiCoreDownloadStatus
+import com.dmytrosamoilov.offhand.core.ai.api.AvailableModel
+import com.dmytrosamoilov.offhand.core.ai.api.ModelManager
+import com.dmytrosamoilov.offhand.core.ai.api.ModelState
+import com.dmytrosamoilov.offhand.core.ai.api.SpeechModelState
+import com.dmytrosamoilov.offhand.core.ai.api.SpeechToText
+import com.dmytrosamoilov.offhand.core.common.BuildInfo
+import com.dmytrosamoilov.offhand.core.common.ModelDownloadPolicy
+import com.dmytrosamoilov.offhand.core.common.NetworkMonitor
+import com.dmytrosamoilov.offhand.core.data.domain.CalendarEventSuggestion
+import com.dmytrosamoilov.offhand.core.data.domain.Note
+import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
+import com.dmytrosamoilov.offhand.core.data.domain.NoteSuggestions
+import com.dmytrosamoilov.offhand.core.data.domain.Folder
+import com.dmytrosamoilov.offhand.core.data.domain.ProFeature
+import com.dmytrosamoilov.offhand.core.data.domain.ProUpgradeGate
+import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
+import com.dmytrosamoilov.offhand.core.data.domain.SuggestedEvent
+import com.dmytrosamoilov.offhand.core.data.domain.SuggestionStatus
+import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlaybackState
+import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
+import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
+import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.DeleteNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.GetNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCalendarSuggestionsAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsCustomNoteStylesAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsDocumentExportAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsFolderStylesAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsUnlimitedFoldersAvailableUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.IsSmartSuggestionsEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MarkReviewAttemptUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.OfferProTrialUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.MoveNoteToFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveCustomNoteStylesUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveDeveloperOptionsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveFoldersUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSuggestionsUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ReorderFoldersUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SetFolderStyleUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
+import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
+import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RequestNoteSuggestionsUseCase
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class NotesViewModelTest {
+
+    private val dispatcher = StandardTestDispatcher()
+
+    private val note = Note(
+        id = 5,
+        title = "Board meeting",
+        body = "# Agenda\n- **Budget** approved\n- Hiring plan",
+        transcript = "We approved the budget and discussed the hiring plan.",
+        createdAtEpochMs = 1_750_000_000_000,
+        transcriptionTimeMs = 12_400,
+        structuringTimeMs = 4_200,
+        hardwareBackend = "CPU",
+    )
+
+    private val observeNotes: ObserveNotesUseCase = mockk()
+    private val transcribingNoteIds = MutableStateFlow<Set<Long>>(emptySet())
+    private val noteFeatures = MutableStateFlow(NoteFeatures())
+    private val observeNoteFeatures: ObserveNoteFeaturesUseCase = mockk {
+        every { this@mockk.invoke() } returns noteFeatures
+    }
+    private val observeFolders: ObserveFoldersUseCase = mockk {
+        every { this@mockk() } returns flowOf(emptyList())
+    }
+    private val createFolder: CreateFolderUseCase = mockk(relaxed = true)
+    private val renameFolder: RenameFolderUseCase = mockk(relaxed = true)
+    private val deleteFolder: DeleteFolderUseCase = mockk(relaxed = true)
+    private val moveNoteToFolder: MoveNoteToFolderUseCase = mockk(relaxed = true)
+    private val setFolderStyle: SetFolderStyleUseCase = mockk(relaxed = true)
+    private val reorderFolders: ReorderFoldersUseCase = mockk(relaxed = true)
+    private val isFolderStylesAvailable: IsFolderStylesAvailableUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
+    private val isUnlimitedFoldersAvailable: IsUnlimitedFoldersAvailableUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
+    private val observeCustomNoteStyles: ObserveCustomNoteStylesUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(emptyList())
+    }
+    private val isCustomNoteStylesAvailable: IsCustomNoteStylesAvailableUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
+    private val storedSuggestions = MutableStateFlow<NoteSuggestions?>(null)
+    private val observeNoteSuggestions: ObserveNoteSuggestionsUseCase = mockk {
+        every { this@mockk.invoke(any()) } returns storedSuggestions
+    }
+    private val requestNoteSuggestions: RequestNoteSuggestionsUseCase = mockk {
+        coEvery { this@mockk.invoke(any()) } returns true
+    }
+    private val updateSuggestionStatus: UpdateSuggestionStatusUseCase = mockk(relaxed = true)
+    private val suggestingNoteIds = MutableStateFlow<Set<Long>>(emptySet())
+    private val isCalendarSuggestionsAvailable: IsCalendarSuggestionsAvailableUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
+    private val observeDeveloperOptions: ObserveDeveloperOptionsUseCase = mockk {
+        every { this@mockk() } returns flowOf(false)
+    }
+    private val getNote: GetNoteUseCase = mockk()
+    private val updateNote: UpdateNoteUseCase = mockk(relaxed = true)
+    private val deleteNote: DeleteNoteUseCase = mockk(relaxed = true)
+    private val prepareNoteShare: PrepareNoteShareUseCase = mockk()
+    private val isDocumentExportAvailable: IsDocumentExportAvailableUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
+    private val isSmartSuggestionsEnabled: IsSmartSuggestionsEnabledUseCase = mockk {
+        every { this@mockk.invoke() } returns flowOf(true)
+    }
+    private val gate: ProUpgradeGate = mockk {
+        coEvery { requirePro(any()) } returns true
+    }
+    private val clearShareCache: ClearShareCacheUseCase = mockk(relaxed = true)
+    private val offerProTrial: OfferProTrialUseCase = mockk(relaxed = true)
+    private val recordingsSavedInApp = MutableSharedFlow<Unit>()
+    private val shouldRequestReview: ShouldRequestReviewUseCase = mockk {
+        coEvery { this@mockk.invoke() } returns false
+    }
+    private val markReviewAttempt: MarkReviewAttemptUseCase = mockk(relaxed = true)
+    private val reviewLauncher: InAppReviewLauncher = mockk()
+    private val audioPlayer: AudioPlayer = mockk(relaxed = true) {
+        every { state } returns MutableStateFlow(AudioPlaybackState())
+    }
+    private val sessionManager: RecordingSessionManager = mockk {
+        every { recordingsSavedInApp } returns this@NotesViewModelTest.recordingsSavedInApp
+        every { noteProgress } returns MutableStateFlow(emptyMap())
+        every { events } returns MutableSharedFlow()
+        every { suggestingNoteIds } returns this@NotesViewModelTest.suggestingNoteIds
+        every { transcribingNoteIds } returns this@NotesViewModelTest.transcribingNoteIds
+    }
+    private val modelState = MutableStateFlow<ModelState>(ModelState.Ready)
+    private val modelManager: ModelManager = mockk {
+        every { this@mockk.modelState } returns this@NotesViewModelTest.modelState
+        every { model } returns mockk<AvailableModel> {
+            every { sizeInBytes } returns 3_000L
+        }
+        every { speechModelSizeInBytes } returns 1_000L
+    }
+    private val speechDownloadState =
+        MutableStateFlow<SpeechModelState>(SpeechModelState.Downloaded)
+    private val speechToText: SpeechToText = mockk {
+        every { downloadState } returns speechDownloadState
+    }
+    private val recordingProcessController: RecordingProcessController = mockk(relaxed = true)
+    private val dateLabelFormatter: DateLabelFormatter = mockk(relaxed = true)
+
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(dispatcher)
+        every { observeNotes() } returns flowOf(listOf(note))
+        coEvery { getNote(5) } returns note
+        every { dateLabelFormatter.dateTime(any()) } returns "Jun 15, 2025 · 15:06"
+        every { dateLabelFormatter.day(any()) } returns "Jun 15, 2025"
+        every { dateLabelFormatter.time(any()) } returns "15:06"
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    private val unmeteredNetwork = object : NetworkMonitor {
+        override val isUnmetered: StateFlow<Boolean> = MutableStateFlow(true)
+    }
+
+    private fun viewModel() = NotesViewModel(
+        recordingProcessController = recordingProcessController,
+        dateLabelFormatter = dateLabelFormatter,
+        observeNotes = observeNotes,
+        observeNoteWaveforms = mockk { every { this@mockk() } returns flowOf(emptyMap()) },
+        observeSkipSilence = mockk { every { this@mockk() } returns flowOf(false) },
+        findSilence = mockk(),
+        observeFolders = observeFolders,
+        searchNotes = SearchNotesUseCase(),
+        createFolder = createFolder,
+        renameFolder = renameFolder,
+        deleteFolder = deleteFolder,
+        moveNoteToFolder = moveNoteToFolder,
+        setFolderStyle = setFolderStyle,
+        reorderFolders = reorderFolders,
+        isFolderStylesAvailable = isFolderStylesAvailable,
+        isUnlimitedFoldersAvailable = isUnlimitedFoldersAvailable,
+        observeDeveloperOptions = observeDeveloperOptions,
+        observeCustomNoteStyles = observeCustomNoteStyles,
+        isCustomNoteStylesAvailable = isCustomNoteStylesAvailable,
+        getNote = getNote,
+        updateNote = updateNote,
+        deleteNote = deleteNote,
+        prepareNoteShare = prepareNoteShare,
+        clearShareCache = clearShareCache,
+        shouldRequestReview = shouldRequestReview,
+        markReviewAttempt = markReviewAttempt,
+        reviewLauncher = reviewLauncher,
+        audioPlayer = audioPlayer,
+        observeNoteSuggestions = observeNoteSuggestions,
+        requestNoteSuggestions = requestNoteSuggestions,
+        updateSuggestionStatus = updateSuggestionStatus,
+        isCalendarSuggestionsAvailable = isCalendarSuggestionsAvailable,
+        isDocumentExportAvailable = isDocumentExportAvailable,
+        isSmartSuggestionsEnabled = isSmartSuggestionsEnabled,
+        observeNoteFeatures = observeNoteFeatures,
+        proUpgradeGate = gate,
+        sessionManager = sessionManager,
+        aiCoreDownloadStatus = AiCoreDownloadStatus(
+            modelManager,
+            speechToText,
+            ModelDownloadPolicy(unmeteredNetwork),
+            mockk { every { writesSummaries() } returns true },
+        ),
+        modelDownloadLauncher = mockk(relaxed = true),
+        clearTranscriptionCheckpoint = mockk(relaxed = true),
+        resumeInterruptedNotes = mockk(relaxed = true),
+        offerProTrial = offerProTrial,
+        buildInfo = BuildInfo(isDeveloperBuild = true),
+        analyticsTracker = mockk(relaxed = true),
+    )
+
+    @Test
+    fun `the third folder opens the paywall while free and the editor once it is passed`() = runTest(dispatcher) {
+        every { observeFolders() } returns flowOf(listOf(Folder(1, "Work", 0), Folder(2, "Home", 0)))
+        every { isUnlimitedFoldersAvailable() } returns flowOf(false)
+        coEvery { gate.requirePro(ProFeature.FOLDERS) } returns false
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isFolderLimitReached)
+        viewModel.onNewFolderRequested()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertNull(viewModel.uiState.value.folderEditor)
+
+        coEvery { gate.requirePro(ProFeature.FOLDERS) } returns true
+        viewModel.onNewFolderRequested()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(FolderEditorUi(folderId = null, name = ""), viewModel.uiState.value.folderEditor)
+    }
+
+    @Test
+    fun `a processing note opens on the transcript and is not switched when the summary arrives`() = runTest(dispatcher) {
+        val processing = note.copy(status = NoteStatus.PROCESSING, body = "")
+        val notes = MutableStateFlow(listOf(processing))
+        every { observeNotes() } returns notes
+        coEvery { getNote(5) } returns processing
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(NoteDetailTabUi.TRANSCRIPT, viewModel.uiState.value.detailTab)
+        assertFalse(viewModel.uiState.value.isSummaryReadyMarked)
+
+        notes.value = listOf(note)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(NoteStatusUi.READY, viewModel.uiState.value.selected?.status)
+        assertEquals(NoteDetailTabUi.TRANSCRIPT, viewModel.uiState.value.detailTab)
+        assertTrue(viewModel.uiState.value.isSummaryReadyMarked)
+
+        viewModel.onDetailTabSelected(NoteDetailTabUi.SUMMARY)
+        assertEquals(NoteDetailTabUi.SUMMARY, viewModel.uiState.value.detailTab)
+        assertFalse(viewModel.uiState.value.isSummaryReadyMarked)
+    }
+
+    @Test
+    fun `a ready note opens on the summary and a restyle keeps the tab the user is on`() = runTest(dispatcher) {
+        val notes = MutableStateFlow(listOf(note))
+        every { observeNotes() } returns notes
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(NoteDetailTabUi.SUMMARY, viewModel.uiState.value.detailTab)
+
+        notes.value = listOf(note.copy(status = NoteStatus.PROCESSING))
+        dispatcher.scheduler.advanceUntilIdle()
+        notes.value = listOf(note.copy(body = "Rewritten"))
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(NoteDetailTabUi.SUMMARY, viewModel.uiState.value.detailTab)
+        assertFalse(viewModel.uiState.value.isSummaryReadyMarked)
+    }
+
+    @Test
+    fun `closing a note forgets its tab so the next note opens by its own status`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+        viewModel.onDetailTabSelected(NoteDetailTabUi.TRANSCRIPT)
+
+        viewModel.onDetailClosed()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(NoteDetailTabUi.SUMMARY, viewModel.uiState.value.detailTab)
+    }
+
+    @Test
+    fun `the library reads as loading until the notes have arrived`() = runTest(dispatcher) {
+        val notes = MutableSharedFlow<List<Note>>()
+        every { observeNotes() } returns notes
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.isNotesLoaded)
+
+        notes.emit(emptyList())
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isNotesLoaded)
+        assertTrue(viewModel.uiState.value.sections.isEmpty())
+    }
+
+    @Test
+    fun `with folders the first chip holds only unsorted notes and a search still covers all`() = runTest(dispatcher) {
+        every { observeFolders() } returns flowOf(listOf(Folder(1, "Work", 0)))
+        every { observeNotes() } returns flowOf(listOf(note, note.copy(id = 6, title = "Filed away", folderId = 1)))
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isUnsortedShown)
+        assertEquals(listOf(5L), viewModel.uiState.value.sections.flatMap { it.notes }.map { it.id })
+
+        viewModel.onSearchQueryChanged("Filed")
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(listOf(6L), viewModel.uiState.value.sections.flatMap { it.notes }.map { it.id })
+
+        viewModel.onSearchQueryChanged("")
+        viewModel.onFolderSelected(1)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(listOf(6L), viewModel.uiState.value.sections.flatMap { it.notes }.map { it.id })
+    }
+
+    @Test
+    fun `an open note says so while the rest of its recording is still being transcribed`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.isTranscribing)
+
+        transcribingNoteIds.value = setOf(5L)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isTranscribing)
+    }
+
+    @Test
+    fun `holding notes selects them and a bulk move files every one and ends the selection`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onNoteSelectionToggled(5)
+        viewModel.onNoteSelectionToggled(6)
+        viewModel.onNoteSelectionToggled(7)
+        viewModel.onNoteSelectionToggled(7)
+        assertEquals(setOf(5L, 6L), viewModel.uiState.value.selectedNoteIds)
+
+        viewModel.onBulkActionRequested(BulkNoteActionUi.MOVE)
+        assertEquals(BulkNoteActionUi.MOVE, viewModel.uiState.value.bulkAction)
+        viewModel.onBulkMoveConfirmed(folderId = 1)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { moveNoteToFolder(5, 1) }
+        coVerify { moveNoteToFolder(6, 1) }
+        assertFalse(viewModel.uiState.value.isSelectingNotes)
+        assertNull(viewModel.uiState.value.bulkAction)
+    }
+
+    @Test
+    fun `a bulk delete removes only the selected notes and a dismissed one removes nothing`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onBulkActionRequested(BulkNoteActionUi.DELETE)
+        assertNull(viewModel.uiState.value.bulkAction)
+
+        viewModel.onNoteSelectionToggled(5)
+        viewModel.onBulkActionRequested(BulkNoteActionUi.DELETE)
+        viewModel.onBulkActionDismissed()
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify(exactly = 0) { deleteNote(any()) }
+        assertEquals(setOf(5L), viewModel.uiState.value.selectedNoteIds)
+
+        viewModel.onBulkActionRequested(BulkNoteActionUi.DELETE)
+        viewModel.onBulkDeleteConfirmed()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { deleteNote(5) }
+        assertFalse(viewModel.uiState.value.isSelectingNotes)
+    }
+
+    @Test
+    fun `a tab is hidden when its feature is off and the note has no such text`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(listOf(NoteDetailTabUi.SUMMARY, NoteDetailTabUi.TRANSCRIPT), viewModel.uiState.value.visibleDetailTabs)
+
+        noteFeatures.value = NoteFeatures(isTranscriptionEnabled = false, isSummaryEnabled = true)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(listOf(NoteDetailTabUi.SUMMARY, NoteDetailTabUi.TRANSCRIPT), viewModel.uiState.value.visibleDetailTabs)
+
+        every { observeNotes() } returns flowOf(listOf(note.copy(body = "", transcript = "")))
+        coEvery { getNote(5) } returns note.copy(body = "", transcript = "")
+        val audioOnly = viewModel()
+        audioOnly.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertTrue(audioOnly.uiState.value.visibleDetailTabs.isEmpty())
+        assertNull(audioOnly.uiState.value.shownDetailTab)
+
+        noteFeatures.value = NoteFeatures(isTranscriptionEnabled = true, isSummaryEnabled = false)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(NoteDetailTabUi.TRANSCRIPT, audioOnly.uiState.value.shownDetailTab)
+    }
+
+    @Test
+    fun `notes map to cards with markdown-free preview`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val section = viewModel.uiState.value.sections.single()
+        val card = section.notes.single()
+        assertEquals(5, card.id)
+        assertEquals("Board meeting", card.title)
+        assertFalse(card.preview.contains("#"))
+        assertFalse(card.preview.contains("**"))
+        assertTrue(card.preview.contains("Budget approved"))
+        assertTrue(card.time.isNotBlank())
+    }
+
+    @Test
+    fun `selecting a note loads detail with metrics`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val detail = viewModel.uiState.value.selected
+        assertEquals("Board meeting", detail?.title)
+        assertEquals(9, detail?.wordCount)
+        assertEquals("12.4 s", detail?.metrics?.transcriptionTime)
+        assertEquals("4.2 s", detail?.metrics?.structuringTime)
+        assertEquals("CPU", detail?.metrics?.hardwareBackend)
+    }
+
+    @Test
+    fun `smart suggestions follow the stored state and hand one event to the calendar`() = runTest(dispatcher) {
+        val suggestion = CalendarEventSuggestion(
+            title = "Sync with Maria",
+            startEpochMs = 1_800_000_000_000L,
+            endEpochMs = 1_800_003_600_000L,
+            isAllDay = false,
+            location = "Berlin",
+            details = "Show the demo.",
+        )
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(SmartSuggestionsUi.NotRun, viewModel.uiState.value.smartSuggestions)
+
+        suggestingNoteIds.value = setOf(5L)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(SmartSuggestionsUi.Loading, viewModel.uiState.value.smartSuggestions)
+
+        suggestingNoteIds.value = emptySet()
+        storedSuggestions.value = NoteSuggestions(5L, listOf(SuggestedEvent(suggestion)))
+        dispatcher.scheduler.advanceUntilIdle()
+        val ready = viewModel.uiState.value.smartSuggestions as SmartSuggestionsUi.Ready
+        assertEquals(listOf("Sync with Maria"), ready.events.map { it.title })
+        assertEquals("Berlin", ready.events.single().location)
+        assertFalse(ready.events.single().isAdded)
+
+        viewModel.onSuggestionAddRequested(0)
+        assertEquals(suggestion, viewModel.uiState.value.pendingCalendarEvent)
+        viewModel.onCalendarEventLaunched(isAdded = true)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertNull(viewModel.uiState.value.pendingCalendarEvent)
+        coVerify { updateSuggestionStatus(5L, 0, SuggestionStatus.ADDED) }
+    }
+
+    @Test
+    fun `dismissed suggestions are hidden and an all-dismissed note reads as empty`() = runTest(dispatcher) {
+        val event = CalendarEventSuggestion("Sync", 1L, 2L, false, "", "")
+        storedSuggestions.value = NoteSuggestions(
+            noteId = 5L,
+            events = listOf(SuggestedEvent(event, SuggestionStatus.DISMISSED), SuggestedEvent(event.copy(title = "Report"))),
+        )
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val ready = viewModel.uiState.value.smartSuggestions as SmartSuggestionsUi.Ready
+        assertEquals(listOf(1), ready.events.map { it.index })
+
+        viewModel.onSuggestionDismissed(1)
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify { updateSuggestionStatus(5L, 1, SuggestionStatus.DISMISSED) }
+
+        storedSuggestions.value = NoteSuggestions(5L, emptyList())
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(SmartSuggestionsUi.Empty, viewModel.uiState.value.smartSuggestions)
+    }
+
+    @Test
+    fun `a free user sees the locked card and a declined paywall asks for nothing`() = runTest(dispatcher) {
+        every { isCalendarSuggestionsAvailable() } returns flowOf(false)
+        coEvery { gate.requirePro(any()) } returns false
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(SmartSuggestionsUi.Locked, viewModel.uiState.value.smartSuggestions)
+
+        viewModel.onSuggestionsRequested()
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify(exactly = 0) { requestNoteSuggestions(any()) }
+    }
+
+    @Test
+    fun `the settings toggle off hides the section for everyone`() = runTest(dispatcher) {
+        every { isSmartSuggestionsEnabled() } returns flowOf(false)
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.smartSuggestions)
+    }
+
+    @Test
+    fun `edit flow saves updated title and transcript`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onEditStarted()
+        viewModel.onEditorTitleChanged("Q3 board meeting")
+        viewModel.onEditorTranscriptChanged("Updated transcript")
+        viewModel.onEditSaved()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify {
+            updateNote(
+                note.copy(title = "Q3 board meeting", transcript = "Updated transcript"),
+            )
+        }
+        val state = viewModel.uiState.value
+        assertNull(state.editor)
+        assertEquals("Q3 board meeting", state.selected?.title)
+    }
+
+    @Test
+    fun `cancel edit discards editor without saving`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onEditStarted()
+        viewModel.onEditorTitleChanged("Discarded")
+        viewModel.onEditCancelled()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { updateNote(any()) }
+        assertNull(viewModel.uiState.value.editor)
+        assertEquals("Board meeting", viewModel.uiState.value.selected?.title)
+    }
+
+    @Test
+    fun `notes wait for the ai while a part of it is not on the phone`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(false, viewModel.uiState.value.isWaitingForAi)
+
+        modelState.value = ModelState.NotDownloaded
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(true, viewModel.uiState.value.isWaitingForAi)
+
+        modelState.value = ModelState.Ready
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(false, viewModel.uiState.value.isWaitingForAi)
+    }
+
+    @Test
+    fun `banner shows total progress across whisper and main model`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.modelPreparation)
+
+        speechDownloadState.value = SpeechModelState.Downloading(
+            bytesDownloaded = 500,
+            bytesTotal = 1_000,
+        )
+        modelState.value = ModelState.NotDownloaded
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(ModelPreparationUi.Downloading(progressPercent = 12), viewModel.uiState.value.modelPreparation)
+
+        speechDownloadState.value = SpeechModelState.Downloaded
+        modelState.value = ModelState.Downloading(
+            progress = 0.5f,
+            bytesDownloaded = 1_500,
+            bytesTotal = 3_000,
+        )
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(ModelPreparationUi.Downloading(progressPercent = 62), viewModel.uiState.value.modelPreparation)
+
+        modelState.value = ModelState.Ready
+        dispatcher.scheduler.advanceUntilIdle()
+        assertNull(viewModel.uiState.value.modelPreparation)
+    }
+
+    @Test
+    fun `a recording stopped in the app emits a review request when the policy allows`() = runTest(dispatcher) {
+        coEvery { shouldRequestReview() } returns true
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.reviewRequests.test {
+            recordingsSavedInApp.emit(Unit)
+            dispatcher.scheduler.advanceUntilIdle()
+            awaitItem()
+        }
+    }
+
+    @Test
+    fun `opening a ready note never asks for a review`() = runTest(dispatcher) {
+        coEvery { shouldRequestReview() } returns true
+        val viewModel = viewModel()
+
+        viewModel.reviewRequests.test {
+            viewModel.onNoteSelected(5)
+            dispatcher.scheduler.advanceUntilIdle()
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `no review request when the policy denies`() = runTest(dispatcher) {
+        coEvery { shouldRequestReview() } returns false
+        val viewModel = viewModel()
+
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.reviewRequests.test {
+            recordingsSavedInApp.emit(Unit)
+            dispatcher.scheduler.advanceUntilIdle()
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `successful review attempt is persisted`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+
+        viewModel.onReviewAttemptSucceeded()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { markReviewAttempt() }
+    }
+
+    @Test
+    fun `a pro format meets the paywall before any export is prepared`() = runTest(dispatcher) {
+        coEvery { gate.requirePro(any()) } returns false
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onShareConfirmed(NoteExportFormat.PDF, includeAudio = false)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { prepareNoteShare(any(), any(), any()) }
+        coVerify { gate.requirePro(any()) }
+    }
+
+    @Test
+    fun `share completion clears the share cache`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+
+        viewModel.onShareCompleted()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { clearShareCache() }
+    }
+
+    @Test
+    fun `confirmed delete removes note and clears selection`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onDeleteRequested(5)
+        assertEquals(5L, viewModel.uiState.value.pendingDeleteNoteId)
+        viewModel.onDeleteConfirmed()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { deleteNote(5) }
+        val state = viewModel.uiState.value
+        assertNull(state.selected)
+        assertNull(state.pendingDeleteNoteId)
+    }
+
+    @Test
+    fun `confirmed delete from the list removes note without selection`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onDeleteRequested(5)
+        assertEquals(5L, viewModel.uiState.value.pendingDeleteNoteId)
+        viewModel.onDeleteConfirmed()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { deleteNote(5) }
+        assertNull(viewModel.uiState.value.pendingDeleteNoteId)
+    }
+
+    @Test
+    fun `deleting an unselected note keeps the current selection`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onDeleteRequested(7)
+        viewModel.onDeleteConfirmed()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { deleteNote(7) }
+        assertEquals(5L, viewModel.uiState.value.selected?.id)
+    }
+
+    @Test
+    fun `dismissed delete keeps the note and hides the confirmation`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onDeleteRequested(5)
+        viewModel.onDeleteDismissed()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { deleteNote(any()) }
+        assertNull(viewModel.uiState.value.pendingDeleteNoteId)
+    }
+
+    @Test
+    fun `the trial is offered once a finished note exists and no note is open`() = runTest(dispatcher) {
+        val notes = MutableStateFlow(listOf(note.copy(status = NoteStatus.PROCESSING)))
+        every { observeNotes() } returns notes
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        notes.value = listOf(note)
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify(exactly = 0) { offerProTrial() }
+
+        viewModel.onDetailClosed()
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify(exactly = 1) { offerProTrial() }
+    }
+
+    @Test
+    fun `no offer while the library has no finished note`() = runTest(dispatcher) {
+        every { observeNotes() } returns flowOf(listOf(note.copy(status = NoteStatus.PROCESSING)))
+        viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { offerProTrial() }
+    }
+
+    @Test
+    fun `a transcripts-only phone never restyles a note`() = runTest(dispatcher) {
+        noteFeatures.value = NoteFeatures(isSummaryAvailable = false)
+        val viewModel = viewModel()
+        viewModel.onNoteSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onStyleSelected(NoteStyleRef.BuiltIn(NotePreset.MEETING))
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isSummaryAvailable)
+        assertTrue(viewModel.uiState.value.styleChips.isEmpty())
+        verify(exactly = 0) { recordingProcessController.restructureNote(any(), any()) }
+    }
+
+    @Test
+    fun `a transcript match from search opens the note on its transcript at that paragraph`() = runTest(dispatcher) {
+        val timed = note.copy(
+            transcript = "We opened the meeting.\n\nThe deposit stays the same.",
+            transcriptStartsMs = listOf(0L, 29_000L),
+        )
+        every { observeNotes() } returns flowOf(listOf(timed))
+        coEvery { getNote(5) } returns timed
+        val viewModel = viewModel()
+        viewModel.onSearchQueryChanged("deposit")
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val card = viewModel.uiState.value.sections.single().notes.single()
+        assertEquals(MatchLocationUi.TRANSCRIPT, card.matchLocation)
+        assertEquals("0:29", card.matchTime)
+
+        viewModel.onSearchResultSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(NoteDetailTabUi.TRANSCRIPT, viewModel.uiState.value.detailTab)
+        assertEquals(1, viewModel.uiState.value.transcriptFocusIndex)
+        verify(exactly = 0) { audioPlayer.play() }
+        viewModel.onTranscriptFocusHandled()
+        assertNull(viewModel.uiState.value.transcriptFocusIndex)
+    }
+
+    @Test
+    fun `a summary match opens the note the usual way`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onSearchQueryChanged("approved")
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onSearchResultSelected(5)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(NoteDetailTabUi.SUMMARY, viewModel.uiState.value.detailTab)
+        assertNull(viewModel.uiState.value.transcriptFocusIndex)
+    }
+
+    @Test
+    fun `a finished import or a transcript-only note counts for the trial offer like a recording`() = runTest(dispatcher) {
+        val imported = note.copy(body = "", title = "interview.m4a", audioFileName = "import-1.pcm")
+        every { observeNotes() } returns flowOf(listOf(imported))
+        noteFeatures.value = NoteFeatures(isSummaryAvailable = false)
+        viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { offerProTrial() }
+    }
+}

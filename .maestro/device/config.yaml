@@ -1,0 +1,8 @@
+# On-device suite: real Whisper and Gemma on a real phone, audio played from the
+# Mac's speakers. Not part of `maestro test .maestro/` (subfolders are skipped);
+# run it with testing/device-suite/run-android.sh, which starts the audio bridge.
+executionOrder:
+  continueOnFailure: false
+  flowsOrder:
+    - 00-setup
+    - 01-acoustic-record

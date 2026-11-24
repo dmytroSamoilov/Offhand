@@ -159,4 +159,36 @@ class NoteSectionMergerTest {
 
         assertEquals("Just a plain paragraph.", merged)
     }
+
+    @Test
+    fun `translated headings land in their section and keep the words the model wrote`() {
+        val headings = listOf("## Discussion", "## Decisions")
+        val merged = NoteSectionMerger.merge(
+            overviews = listOf(
+                "## Diskussion\nWir haben das Budget besprochen.\n## Entscheidungen\n- Marketing bekommt viertausend",
+                "## Beschlüsse\n- Start im Oktober\n## Diskussion\nDanach ging es um die Reisekosten.",
+            ),
+            headings = headings,
+            headingTranslations = BuiltInHeadingTranslations.of(headings),
+        )
+
+        assertEquals(
+            "## Diskussion\nWir haben das Budget besprochen.\nDanach ging es um die Reisekosten.\n\n" +
+                "## Entscheidungen\n- Marketing bekommt viertausend\n- Start im Oktober",
+            merged,
+        )
+    }
+
+    @Test
+    fun `a translated email heading still keeps its paragraphs`() {
+        val headings = listOf("## Subject", "## Email")
+        val merged = NoteSectionMerger.merge(
+            overviews = listOf("## Betreff\nAngebot\n## E-Mail\nHallo Anna,\n\nanbei das Angebot.\n\nViele Grüße"),
+            headings = headings,
+            proseHeadings = listOf("## Email"),
+            headingTranslations = BuiltInHeadingTranslations.of(headings),
+        )
+
+        assertEquals("## Betreff\nAngebot\n\n## E-Mail\nHallo Anna,\n\nanbei das Angebot.\n\nViele Grüße", merged)
+    }
 }

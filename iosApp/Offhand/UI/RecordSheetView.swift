@@ -8,11 +8,13 @@ struct RecordSheetView: View {
     var folderId: Int64?
     var onNoteSaved: (Int64) -> Void = { _ in }
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private let viewModel = AppViewModels.recording
     @State private var state = RecordingUiState(
         phase: .idle,
         isPaused: false,
         elapsedTime: "00:00",
+        elapsedMs: 0,
         waveform: [],
         isSilent: true,
         chunks: [],
@@ -20,83 +22,103 @@ struct RecordSheetView: View {
         savedNoteId: nil,
         isDeveloperMode: false,
         externalMicName: nil,
-        isNotificationPromptRequested: false
+        isNotificationPromptRequested: false,
+        isLiveTranscriptShown: false,
+        liveTranscript: "",
+        folderName: nil
     )
     @State private var isPermissionDenied = false
     @State private var isDiscardConfirmationVisible = false
-    // savedNoteId is only briefly non-nil before the session resets, so latch it
-    // the way the Android sheet does rather than reading it live.
     @State private var hasSavedNote = false
     @State private var wasSessionActive = false
 
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            if !hasSavedNote {
+        content
+            .padding(.horizontal, OffhandSpacing.screen)
+            .padding(.top, OffhandSpacing.card)
+            .padding(.bottom, 28)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .foregroundStyle(OffhandColor.ink)
+            .offhandDialog(isPresented: $isDiscardConfirmationVisible) { discardDialog }
+            .environment(\.colorScheme, .dark)
+            .presentationDetents([.large])
+            .presentationDragIndicator(.hidden)
+            .presentationCornerRadius(OffhandRadius.sheet)
+            .presentationBackground { OffhandColor.ground.environment(\.colorScheme, .dark) }
+            .interactiveDismissDisabled(state.phase == .recording)
+            .onAppear {
+                viewModel.onSheetOpened()
+                if autoStart { requestMicThenStart() }
+            }
+            .onDisappear { viewModel.onSheetClosed() }
+            .onChange(of: state.savedNoteId) {
+                guard wasSessionActive, !hasSavedNote, let noteId = state.savedNoteId?.int64Value else { return }
+                hasSavedNote = true
+                onNoteSaved(noteId)
+                dismiss()
+            }
+            .onChange(of: state.phase) {
                 switch state.phase {
-                case .idle:
-                    idleContent
-                case .recording:
-                    recordingContent
-                case .finishingTranscription:
-                    finishingContent
-                case .failed:
-                    failedContent
+                case .recording, .finishingTranscription:
+                    wasSessionActive = true
+                case .idle where wasSessionActive && !hasSavedNote:
+                    dismiss()
+                default:
+                    break
                 }
             }
-            Spacer()
-        }
-        .padding()
-        .presentationDetents([.medium])
-        .presentationDragIndicator(.visible)
-        .interactiveDismissDisabled(state.phase == .recording)
-        .onAppear {
-            viewModel.onSheetOpened()
-            if autoStart {
-                requestMicThenStart()
+            .task {
+                for await newState in viewModel.uiState {
+                    state = newState
+                }
             }
-        }
-        .onDisappear { viewModel.onSheetClosed() }
-        .onChange(of: state.savedNoteId) {
-            // An id seen before this sheet's own session started belongs to the previous one.
-            guard wasSessionActive, !hasSavedNote, let noteId = state.savedNoteId?.int64Value else { return }
-            hasSavedNote = true
-            onNoteSaved(noteId)
-            dismiss()
-        }
-        .onChange(of: state.phase) {
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if hasSavedNote {
+            Color.clear
+        } else {
             switch state.phase {
-            case .recording, .finishingTranscription:
-                wasSessionActive = true
-            case .idle where wasSessionActive && !hasSavedNote:
-                dismiss()
-            default:
-                break
-            }
-        }
-        .confirmationDialog(
-            String(localized: "Discard this recording?"),
-            isPresented: $isDiscardConfirmationVisible,
-            titleVisibility: .visible
-        ) {
-            Button(String(localized: "Discard"), role: .destructive) {
-                Haptics.warning()
-                viewModel.onDiscardRecording()
-                dismiss()
-            }
-            Button(String(localized: "Keep recording"), role: .cancel) {}
-        } message: {
-            Text(String(localized: "The audio and everything transcribed so far will be deleted."))
-        }
-        .task {
-            for await newState in viewModel.uiState {
-                state = newState
+            case .idle: centered { idleContent }
+            case .recording: recordingContent
+            case .finishingTranscription: centered { finishingContent }
+            case .failed: centered { failedContent }
             }
         }
     }
 
-    // The first finished recording is the moment to ask for notifications; the
-    // sheet is on its way out, so the answer goes straight to the ViewModel.
+    private func centered<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        VStack(spacing: 0) {
+            Spacer()
+            content()
+            Spacer()
+        }
+    }
+
+    private var discardDialog: some View {
+        OffhandDialog(
+            title: String(localized: "Discard this recording?"),
+            message: String(
+                format: String(localized: "%@ of audio and its transcript will be deleted. This cannot be undone."),
+                RecordingDuration.spoken(milliseconds: state.elapsedMs)
+            ),
+            confirmLabel: String(localized: "Keep recording"),
+            onConfirm: { isDiscardConfirmationVisible = false },
+            destructiveLabel: String(localized: "Discard"),
+            onDestructive: discard,
+            onDismiss: { isDiscardConfirmationVisible = false }
+        )
+        .environment(\.colorScheme, .dark)
+    }
+
+    private func discard() {
+        Haptics.warning()
+        isDiscardConfirmationVisible = false
+        viewModel.onDiscardRecording()
+        dismiss()
+    }
+
     private func askForNotificationsIfPending() {
         guard viewModel.isNotificationPromptPending else { return }
         NoteNotifications.shared.requestPermissionIfUndetermined { granted in
@@ -115,76 +137,131 @@ struct RecordSheetView: View {
         } else {
             VStack(spacing: 20) {
                 Text(String(localized: "Record a note"))
-                    .font(.title3.weight(.semibold))
-                Button {
-                    requestMicThenStart()
-                } label: {
-                    Image(systemName: "mic.fill")
-                        .font(.largeTitle)
-                        .foregroundStyle(.white)
-                        .frame(width: 96, height: 96)
-                        .background(Brand.primary, in: Circle())
-                }
-                .buttonStyle(.plain)
-                Text(String(localized: "Everything stays on your iPhone. Nothing is uploaded, ever."))
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .offhandText(.heading)
+                RecordPill(String(localized: "Start recording"), action: requestMicThenStart)
+                privacyLine
             }
         }
     }
 
     private var micPermissionFallback: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "mic.slash.fill")
-                .font(.system(size: 44))
-                .foregroundStyle(.secondary)
+        VStack(spacing: 14) {
+            Image(systemName: "mic.slash")
+                .font(.system(size: 32, weight: .regular))
+                .foregroundStyle(OffhandColor.ink2)
             Text(String(localized: "Offhand needs the microphone"))
-                .font(.title3.weight(.semibold))
-                .multilineTextAlignment(.center)
+                .offhandText(.heading)
             Text(String(localized: "Turn on microphone access to record a note. Audio still never leaves your iPhone."))
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            Button(String(localized: "Open Settings")) {
+                .offhandText(.dialogBody)
+                .foregroundStyle(OffhandColor.ink2)
+            PrimaryButton(String(localized: "Open Settings"), fillsWidth: true) {
                 guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
                 UIApplication.shared.open(url)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .tint(Brand.primary)
+            .padding(.top, 10)
         }
+        .multilineTextAlignment(.center)
     }
 
     private var recordingContent: some View {
         VStack(spacing: 0) {
-            WaveformBar(levels: state.waveform.map { $0.floatValue })
-                .frame(height: 56)
-            Text(state.elapsedTime)
-                .font(.system(size: 44, weight: .semibold))
-                .monospacedDigit()
-                .padding(.top, 24)
-            Text(state.isPaused ? String(localized: "Paused") : String(localized: "Recording…"))
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .padding(.top, 4)
-            chunkPills
-                .padding(.top, 12)
+            header
+            VStack(spacing: 12) {
+                Text(state.elapsedTime)
+                    .offhandText(.timer)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                privacyLine
+            }
+            .padding(.top, 48)
+            RecordingWaveform(levels: state.waveform.map { CGFloat($0.floatValue) })
+                .frame(height: 120)
+                .padding(.top, 40)
+            if state.isLiveTranscriptShown {
+                liveTranscript.padding(.top, 36)
+            }
+            if state.isDeveloperMode && !state.chunks.isEmpty {
+                ChunkPills(chunks: state.chunks).padding(.top, 12)
+            }
             if let mic = state.externalMicName {
                 Label(mic, systemImage: "headphones")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .offhandText(.caption)
+                    .foregroundStyle(OffhandColor.ink2)
                     .padding(.top, 12)
             }
-            HStack(spacing: 16) {
-                pauseResumeButton
-                saveNoteButton
+            Spacer(minLength: 24)
+            footer
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: 12) {
+            HStack(spacing: 10) {
+                Circle()
+                    .fill(state.isPaused ? OffhandColor.ink2 : OffhandColor.record)
+                    .frame(width: 8, height: 8)
+                    .accessibilityHidden(true)
+                Text(state.isPaused ? String(localized: "Paused") : String(localized: "Recording"))
+                    .offhandText(.label)
+                    .foregroundStyle(OffhandColor.ink)
             }
-            .padding(.top, 28)
-            Button(String(localized: "Discard recording"), role: .destructive) {
+            Spacer(minLength: 0)
+            if let folderName = state.folderName {
+                Label(folderName, systemImage: "folder")
+                    .offhandText(.caption, face: .interMedium)
+                    .foregroundStyle(OffhandColor.ink2)
+                    .lineLimit(1)
+            }
+        }
+        .frame(minHeight: OffhandSpacing.touchTarget)
+        .animation(OffhandMotion.state, value: state.isPaused)
+    }
+
+    private var privacyLine: some View {
+        Label(String(localized: "Stays on your iPhone"), systemImage: "lock")
+            .offhandText(.caption)
+            .foregroundStyle(OffhandColor.ink2)
+    }
+
+    private var liveTranscript: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionLabel(String(localized: "Live transcript"))
+            TimelineView(.periodic(from: .now, by: 0.35)) { timeline in
+                liveText(activeDot: activeDot(at: timeline.date))
+                    .offhandText(.body)
+                    .lineLimit(3, reservesSpace: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityLabel(state.liveTranscript)
+            }
+        }
+    }
+
+    private func activeDot(at date: Date) -> Int {
+        reduceMotion ? -1 : Int(date.timeIntervalSinceReferenceDate / 0.35) % 3
+    }
+
+    private func liveText(activeDot: Int) -> Text {
+        let words = Text(state.liveTranscript).foregroundStyle(OffhandColor.ink)
+        guard !state.isPaused else { return words }
+        let gap = Text(state.liveTranscript.isEmpty ? "" : " ")
+        return (0..<3).reduce(words + gap) { text, index in
+            text + Text("\u{2022}").foregroundStyle(index == activeDot ? OffhandColor.ink : OffhandColor.ink3)
+        }
+    }
+
+    private var footer: some View {
+        VStack(spacing: 8) {
+            HStack(alignment: .top, spacing: 16) {
+                pauseResumeButton
+                PrimaryButton(String(localized: "Save note"), systemImage: "checkmark", fillsWidth: true, height: 64) {
+                    Haptics.confirm()
+                    viewModel.onStopRecording()
+                    askForNotificationsIfPending()
+                }
+            }
+            PlainTextButton(String(localized: "Discard recording"), tone: .danger) {
                 isDiscardConfirmationVisible = true
             }
-            .font(.subheadline)
-            .padding(.top, 12)
         }
     }
 
@@ -193,73 +270,47 @@ struct RecordSheetView: View {
             Haptics.tap()
             state.isPaused ? viewModel.onResumeRecording() : viewModel.onPauseRecording()
         } label: {
-            Image(systemName: state.isPaused ? "play.fill" : "pause.fill")
-                .font(.title2)
-                .foregroundStyle(Brand.primary)
-                .frame(width: 64, height: 64)
-                .background(Brand.primaryContainer, in: Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(
-            state.isPaused ? String(localized: "Resume recording") : String(localized: "Pause recording")
-        )
-    }
-
-    // Mirrors Android: the main action is a labelled "Save note" pill, not a
-    // bare stop icon, so it is clear which button keeps the recording.
-    private var saveNoteButton: some View {
-        Button {
-            Haptics.confirm()
-            viewModel.onStopRecording()
-            askForNotificationsIfPending()
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "checkmark")
-                    .font(.title3.weight(.semibold))
-                Text(String(localized: "Save note"))
-                    .font(.headline)
+            VStack(spacing: 6) {
+                Image(systemName: state.isPaused ? "play.fill" : "pause.fill")
+                    .font(.system(size: 22, weight: .regular))
+                    .foregroundStyle(OffhandColor.ink)
+                    .frame(width: 64, height: 64)
+                    .overlay { Circle().strokeBorder(OffhandColor.wave, lineWidth: 1.5) }
+                    .contentShape(Circle())
+                Text(state.isPaused ? String(localized: "Resume") : String(localized: "Pause"))
+                    .offhandText(.caption, face: .interMedium)
+                    .foregroundStyle(OffhandColor.ink2)
             }
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .frame(height: 64)
-            .background(Brand.primary, in: Capsule())
         }
-        .buttonStyle(.plain)
-    }
-
-    @ViewBuilder
-    private var chunkPills: some View {
-        if state.isDeveloperMode && !state.chunks.isEmpty {
-            ChunkPills(chunks: state.chunks)
-        }
+        .buttonStyle(.offhandPress)
+        .accessibilityLabel(state.isPaused ? String(localized: "Resume recording") : String(localized: "Pause recording"))
     }
 
     private var finishingContent: some View {
-        VStack(spacing: 16) {
-            ProgressView()
-                .controlSize(.large)
+        VStack(spacing: 14) {
             Text(String(localized: "Finishing transcription"))
-                .font(.headline)
+                .offhandText(.heading)
+            ProgressLine(progress: nil, thickness: 3)
+                .frame(maxWidth: 200)
             Text(String(localized: "Please keep Offhand open while your note is prepared."))
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            chunkPills
+                .offhandText(.dialogBody)
+                .foregroundStyle(OffhandColor.ink2)
+            if state.isDeveloperMode && !state.chunks.isEmpty {
+                ChunkPills(chunks: state.chunks)
+            }
         }
+        .multilineTextAlignment(.center)
     }
 
     private var failedContent: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.largeTitle)
-                .foregroundStyle(.orange)
+        VStack(spacing: 14) {
             Text(state.failureMessage ?? String(localized: "Recording failed"))
+                .offhandText(.heading)
                 .multilineTextAlignment(.center)
-            Button(String(localized: "Try again")) {
+            PrimaryButton(String(localized: "Try again"), fillsWidth: true) {
                 viewModel.onStartRecording(folderId: folderId.map { KotlinLong(value: $0) })
             }
-            .buttonStyle(.borderedProminent)
-            .tint(Brand.primary)
+            .padding(.top, 10)
         }
     }
 
@@ -267,10 +318,53 @@ struct RecordSheetView: View {
         AVAudioApplication.requestRecordPermission { granted in
             Task { @MainActor in
                 isPermissionDenied = !granted
-                guard granted else { return }
+                guard granted else {
+                    viewModel.onMicrophoneDenied()
+                    return
+                }
                 viewModel.onStartRecording(folderId: folderId.map { KotlinLong(value: $0) })
             }
         }
+    }
+}
+
+private enum RecordingDuration {
+    static func spoken(milliseconds: Int64) -> String {
+        let seconds = Int(milliseconds / 1000)
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = .full
+        formatter.allowedUnits = seconds >= 3600 ? [.hour, .minute, .second] : [.minute, .second]
+        formatter.zeroFormattingBehavior = .dropLeading
+        return formatter.string(from: TimeInterval(seconds)) ?? ""
+    }
+}
+
+private struct RecordingWaveform: View {
+    let levels: [CGFloat]
+
+    private static let step: CGFloat = 8
+    private static let lineWidth: CGFloat = 3
+    private static let minLevel: CGFloat = 0.06
+
+    var body: some View {
+        Canvas { context, size in
+            let count = Int(size.width / Self.step)
+            let shown = Array(levels.suffix(count))
+            let offset = count - shown.count
+            for (index, level) in shown.enumerated() {
+                let x = CGFloat(offset + index) * Self.step + Self.step / 2
+                let height = max(Self.minLevel, min(level, 1)) * size.height
+                var path = Path()
+                path.move(to: CGPoint(x: x, y: (size.height - height) / 2))
+                path.addLine(to: CGPoint(x: x, y: (size.height + height) / 2))
+                context.stroke(
+                    path,
+                    with: .color(OffhandColor.ink2),
+                    style: StrokeStyle(lineWidth: Self.lineWidth, lineCap: .round)
+                )
+            }
+        }
+        .accessibilityHidden(true)
     }
 }
 
@@ -281,8 +375,8 @@ private struct ChunkPills: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
                 ForEach(chunks, id: \.id) { chunk in
-                    Text("#\(chunk.id)")
-                        .font(.caption2.monospacedDigit())
+                    Text(verbatim: "#\(chunk.id)")
+                        .font(.offhandMonoSmall)
                         .padding(.horizontal, 7)
                         .padding(.vertical, 3)
                         .background(background(for: chunk.state), in: Capsule())
@@ -295,35 +389,18 @@ private struct ChunkPills: View {
 
     private func background(for state: ChunkStateUi) -> Color {
         switch state {
-        case .done: return Brand.tealContainer
-        case .failed: return Color(.systemRed).opacity(0.18)
-        case .transcribing: return Brand.primaryContainer
-        default: return Color(.secondarySystemFill)
+        case .done, .transcribing: return OffhandColor.accentSoft
+        case .failed: return OffhandColor.danger.opacity(0.18)
+        default: return OffhandColor.well
         }
     }
 
     private func foreground(for state: ChunkStateUi) -> Color {
         switch state {
-        case .done: return Brand.teal
-        case .failed: return Color(.systemRed)
-        case .transcribing: return Brand.onPrimaryContainer
-        default: return Color.secondary
+        case .done: return OffhandColor.accent
+        case .failed: return OffhandColor.danger
+        case .transcribing: return OffhandColor.ink
+        default: return OffhandColor.ink2
         }
-    }
-}
-
-private struct WaveformBar: View {
-    let levels: [Float]
-
-    var body: some View {
-        HStack(alignment: .center, spacing: 3) {
-            ForEach(Array(levels.suffix(40).enumerated()), id: \.offset) { _, level in
-                Capsule()
-                    .fill(Brand.primary)
-                    .frame(width: 4, height: max(6, CGFloat(level) * 56))
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .animation(.linear(duration: 0.1), value: levels)
     }
 }

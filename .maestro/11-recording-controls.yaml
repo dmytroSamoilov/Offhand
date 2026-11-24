@@ -24,9 +24,9 @@ appId: com.dmytrosamoilov.offhand.uitest
     visible: "00:0[2-9]"
     timeout: 15000
 - tapOn: "Pause recording"
-- assertVisible: "Paused"
+- assertVisible: "(?i)paused"
 - tapOn: "Resume recording"
-- assertVisible: "Recording…"
+- assertVisible: "(?i)recording…?"
 - tapOn: "Discard recording"
 - extendedWaitUntil:
     visible: "Discard this recording?"

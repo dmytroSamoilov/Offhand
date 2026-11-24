@@ -1,0 +1,144 @@
+package com.dmytrosamoilov.offhand.core.ai.api
+
+import com.dmytrosamoilov.offhand.core.device.DeviceTierProvider
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
+import com.dmytrosamoilov.offhand.core.common.ModelDownloadPolicy
+import com.dmytrosamoilov.offhand.core.common.NetworkMonitor
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class AiCoreDownloadStatusTest {
+
+    private val modelState = MutableStateFlow<ModelState>(ModelState.Ready)
+    private val speechState = MutableStateFlow<SpeechModelState>(SpeechModelState.Downloaded)
+
+    private val modelManager: ModelManager = mockk {
+        every { this@mockk.modelState } returns this@AiCoreDownloadStatusTest.modelState
+        every { model } returns mockk<AvailableModel> {
+            every { sizeInBytes } returns 3_000L
+        }
+        every { speechModelSizeInBytes } returns 1_000L
+    }
+    private val speechToText: SpeechToText = mockk {
+        every { downloadState } returns speechState
+    }
+
+    private val isUnmetered = MutableStateFlow(true)
+    private val networkMonitor = object : NetworkMonitor {
+        override val isUnmetered: StateFlow<Boolean> = this@AiCoreDownloadStatusTest.isUnmetered
+    }
+    private val policy = ModelDownloadPolicy(networkMonitor)
+
+    private var writesSummaries = true
+    private val deviceTier: DeviceTierProvider = mockk { every { writesSummaries() } answers { writesSummaries } }
+
+    private val status = AiCoreDownloadStatus(modelManager, speechToText, policy, deviceTier)
+
+    @Test
+    fun `a transcripts-only phone waits for the speech model alone`() = runTest {
+        writesSummaries = false
+        modelState.value = ModelState.NotDownloaded
+        speechState.value = SpeechModelState.NotDownloaded
+        isUnmetered.value = false
+
+        assertEquals(AiCoreDownloadState.WaitingForMobileData(bytesTotal = 1_000L), status.state.first())
+        assertEquals(true, status.isMissing.first())
+
+        speechState.value = SpeechModelState.Downloaded
+
+        assertEquals(AiCoreDownloadState.Idle, status.state.first())
+        assertEquals(false, status.isMissing.first())
+    }
+
+    @Test
+    fun `missing models on mobile data wait until the user allows the download`() = runTest {
+        modelState.value = ModelState.NotDownloaded
+        speechState.value = SpeechModelState.NotDownloaded
+        isUnmetered.value = false
+
+        assertEquals(AiCoreDownloadState.WaitingForMobileData(bytesTotal = 4_000L), status.state.first())
+
+        policy.allowMobileData()
+        assertEquals(AiCoreDownloadState.Idle, status.state.first())
+    }
+
+    @Test
+    fun `speech part stops counting as missing while the rest is still downloading`() = runTest {
+        speechState.value = SpeechModelState.Downloading(bytesDownloaded = 500, bytesTotal = 1_000)
+        modelState.value = ModelState.NotDownloaded
+        assertEquals(true, status.isSpeechMissing.first())
+
+        speechState.value = SpeechModelState.Downloaded
+        modelState.value = ModelState.Downloading(progress = 0.1f, bytesDownloaded = 300, bytesTotal = 3_000)
+        assertEquals(false, status.isSpeechMissing.first())
+        assertEquals(true, status.isMissing.first())
+    }
+
+    @Test
+    fun `ai core counts as missing until both parts are on disk`() = runTest {
+        assertEquals(false, status.isMissing.first())
+
+        speechState.value = SpeechModelState.NotDownloaded
+        assertEquals(true, status.isMissing.first())
+
+        speechState.value = SpeechModelState.Downloaded
+        modelState.value = ModelState.Downloading(progress = 0.5f, bytesDownloaded = 1_500, bytesTotal = 3_000)
+        assertEquals(true, status.isMissing.first())
+
+        modelState.value = ModelState.NotDownloaded
+        assertEquals(true, status.isMissing.first())
+
+        modelState.value = ModelState.Ready
+        assertEquals(false, status.isMissing.first())
+    }
+
+    @Test
+    fun `idle when nothing is downloading`() = runTest {
+        assertEquals(AiCoreDownloadState.Idle, status.state.first())
+    }
+
+    @Test
+    fun `speech download counts against the combined total`() = runTest {
+        modelState.value = ModelState.NotDownloaded
+        speechState.value = SpeechModelState.Downloading(bytesDownloaded = 500, bytesTotal = 1_000)
+
+        assertEquals(AiCoreDownloadState.Downloading(progressPercent = 12), status.state.first())
+    }
+
+    @Test
+    fun `model download continues from completed speech bytes`() = runTest {
+        modelState.value = ModelState.Downloading(
+            progress = 0.5f,
+            bytesDownloaded = 1_500,
+            bytesTotal = 3_000,
+        )
+        speechState.value = SpeechModelState.Downloaded
+
+        assertEquals(AiCoreDownloadState.Downloading(progressPercent = 62), status.state.first())
+    }
+
+    @Test
+    fun `model download alone counts missing speech model as zero`() = runTest {
+        modelState.value = ModelState.Downloading(
+            progress = 1f,
+            bytesDownloaded = 3_000,
+            bytesTotal = 3_000,
+        )
+        speechState.value = SpeechModelState.NotDownloaded
+
+        assertEquals(AiCoreDownloadState.Downloading(progressPercent = 75), status.state.first())
+    }
+
+    @Test
+    fun `engine loading after download is idle`() = runTest {
+        modelState.value = ModelState.Loading
+        speechState.value = SpeechModelState.Downloaded
+
+        assertEquals(AiCoreDownloadState.Idle, status.state.first())
+    }
+}

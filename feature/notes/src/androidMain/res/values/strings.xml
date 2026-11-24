@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="notes_title">Notes</string>
-    <string name="notes_empty_state">No notes yet. Tap the microphone button to record your first one.</string>
+    <string name="notes_empty_title">No notes yet</string>
+    <string name="notes_empty_hint">Tap Record and speak. Offhand writes the transcript and a summary on your phone.</string>
     <string name="notes_model_banner_title">Setting up your on-device AI</string>
     <string name="notes_model_banner_subtitle">Downloading in the background</string>
     <string name="notes_model_banner_waiting_title">Your on-device AI is ready to download</string>
@@ -9,36 +10,35 @@
     <string name="notes_model_banner_mobile_data_button">Download on mobile data</string>
     <string name="notes_model_banner_info_description">About your on-device AI</string>
     <string name="notes_model_banner_info_title">Your on-device AI</string>
-    <string name="notes_model_banner_info_body">Offhand turns recordings into notes with on-device AI that runs entirely on your phone. It is a one-time download; after that, nothing is uploaded, ever.</string>
+    <string name="notes_model_banner_info_body">Offhand turns recordings into notes with on-device AI that runs entirely on your phone. It is a one-time download; after that, your notes never leave your phone.</string>
     <string name="notes_model_banner_info_dismiss">Got it</string>
     <string name="notes_model_banner_percent" translatable="false">%1$d%%</string>
     <string name="notes_day_today">Today</string>
     <string name="notes_day_yesterday">Yesterday</string>
-    <string name="notes_created_at" translatable="false">%1$s, %2$s</string>
     <string name="notes_metadata_separator" translatable="false">·</string>
-    <plurals name="notes_word_count">
-        <item quantity="one">%1$s word</item>
-        <item quantity="other">%1$s words</item>
-    </plurals>
-    <string name="notes_record_fab_description">Start a new recording</string>
     <string name="notes_select_prompt">Select a note to read it</string>
     <string name="notes_back_description">Back to notes</string>
     <string name="notes_play_description">Play recording</string>
     <string name="notes_pause_description">Pause playback</string>
-    <string name="notes_playback_position" translatable="false">%1$s / %2$s</string>
     <string name="notes_processing_title">Processing…</string>
     <string name="notes_processing_preview">Transcribing and summarizing on your phone. You can play the recording already.</string>
-    <string name="notes_processing_transcribing">Processing the transcript… It will appear here automatically.</string>
-    <string name="notes_processing_structuring">Writing the summary… The transcript is already below.</string>
+    <string name="notes_processing_preview_transcript">Transcribing on your phone. You can play the recording already.</string>
+    <string name="notes_processing_transcribing">Transcribing your recording… The text will appear here automatically.</string>
+    <string name="notes_processing_structuring">Writing your summary…</string>
+    <string name="notes_processing_waiting_preview">Waiting for your on-device AI to finish downloading. You can play the recording already.</string>
+    <string name="notes_processing_waiting_transcribing">Your note will be written when your on-device AI finishes downloading. It will appear here automatically.</string>
+    <string name="notes_processing_waiting_structuring">Your summary will be written when your on-device AI finishes downloading.</string>
     <string name="notes_recording_fallback_title">Recording</string>
     <string name="notes_failed_description">We were unable to create a summary and transcript for this note.</string>
-    <string name="notes_failed_summary_description">We were unable to create a summary for this note. The transcript is saved below.</string>
+    <string name="notes_failed_summary_description">We were unable to create a summary for this note. The transcript is saved.</string>
     <string name="notes_try_again_button">Try again</string>
     <string name="notes_interrupted_description">This note was paused before it was finished. Keep Offhand open and it will continue.</string>
     <string name="notes_interrupted_preview">Paused. Open the note to continue.</string>
     <string name="notes_continue_button">Continue</string>
     <string name="notes_summary_heading">Summary</string>
     <string name="notes_transcript_heading">Transcript</string>
+    <string name="notes_summary_ready_description">Summary is ready</string>
+    <string name="notes_transcript_empty">This note has no transcript.</string>
     <string name="notes_edit_description">Edit note</string>
     <string name="notes_share_description">Share note</string>
     <string name="notes_delete_description">Delete note</string>
@@ -54,10 +54,7 @@
     <string name="notes_retranscribe_dialog_title">Re-transcribe this note?</string>
     <string name="notes_retranscribe_dialog_body">The recording will be transcribed and summarized again, replacing the current title, summary and transcript. The audio recording itself is kept.</string>
     <string name="notes_processing_percent" translatable="false">%1$d%%</string>
-    <string name="notes_badge_encrypted">Encrypted</string>
     <string name="notes_more_actions_description">More actions</string>
-    <string name="notes_share_dialog_title">What would you like to share?</string>
-    <string name="notes_share_dialog_body">Please keep in mind that shared copies are no longer encrypted once they leave your phone.</string>
     <string name="notes_share_dialog_confirm">Share</string>
     <string name="notes_share_tab_text">Text file</string>
     <string name="notes_share_tab_audio">Audio file</string>
@@ -69,14 +66,14 @@
     <string name="notes_share_audio_hint" translatable="false">.wav</string>
     <string name="notes_share_download">Download</string>
     <string name="notes_share_date_label">Date</string>
-    <string name="notes_share_format_text">Text file</string>
-    <string name="notes_share_format_pdf">PDF file</string>
-    <string name="notes_share_format_docx">Word file</string>
+    <string name="notes_share_format_text">Plain text</string>
+    <string name="notes_share_format_pdf" translatable="false">PDF</string>
+    <string name="notes_share_format_docx" translatable="false">Word</string>
     <string name="notes_share_recorded_label">Recorded</string>
     <string name="notes_share_duration_label">Duration</string>
     <string name="notes_share_created_with">Created with Offhand</string>
     <string name="notes_share_exported_label">Exported</string>
-    <string name="notes_preset_description">Change summary style</string>
+    <string name="notes_preset_description">Change writing style</string>
     <string name="notes_fake_review_title" translatable="false">In-app review · dev build</string>
     <string name="notes_fake_review_body" translatable="false">Google Play would show its rating dialog here. Rules: %1$d recording(s) · attempt gap %2$d min · burst window %3$d min · cooldown %4$d min. Tapping outside counts the attempt, like the real dialog.</string>
     <string name="notes_fake_review_success" translatable="false">Count attempt</string>
@@ -94,8 +91,8 @@
     <string name="notes_folder_options_description">Folder options</string>
     <string name="notes_folder_rename">Rename folder</string>
     <string name="notes_folder_delete">Delete folder</string>
-    <string name="notes_folder_style">Summary style</string>
-    <string name="notes_folder_style_title">Summary style for %1$s</string>
+    <string name="notes_folder_style">Writing style</string>
+    <string name="notes_folder_style_title">Writing style for %1$s</string>
     <string name="notes_folder_style_body">New recordings in this folder use it, and notes moved here are rewritten in it.</string>
     <string name="notes_folder_style_default">Default</string>
     <string name="notes_folder_name_label">Folder name</string>
@@ -104,8 +101,8 @@
     <string name="notes_folder_error_too_long">Use at most %1$d characters.</string>
     <string name="notes_folder_error_duplicate">A folder with this name already exists.</string>
     <string name="notes_folder_delete_dialog_title">Delete this folder?</string>
-    <string name="notes_folder_delete_dialog_body">Its notes are kept and go back to All notes.</string>
-    <string name="notes_folder_empty_state">No notes in this folder.</string>
+    <string name="notes_folder_delete_dialog_body">Its notes are kept, just without a folder.</string>
+    <string name="notes_folder_empty_state">No notes in this folder yet</string>
     <string name="notes_move_to_folder">Move to folder</string>
     <string name="notes_folder_none">No folder</string>
     <string name="notes_import_error_title">Could not import this file</string>
@@ -124,4 +121,40 @@
     <string name="notes_suggestions_added">Added</string>
     <string name="notes_suggestions_dismiss">Dismiss suggestion</string>
     <string name="notes_suggestions_locked">Offhand Pro finds calendar events and to-dos in your notes.</string>
+    <string name="notes_folder_unsorted">Unsorted</string>
+    <string name="notes_unsorted_empty_title">No unsorted notes</string>
+    <string name="notes_unsorted_empty_hint">Notes outside your folders appear here.</string>
+    <string name="notes_loading_description">Loading your notes</string>
+    <string name="notes_transcript_more_coming">Still transcribing the rest…</string>
+    <string name="notes_transcript_time_description">Play from %1$s</string>
+    <string name="notes_selection_count">%1$d selected</string>
+    <string name="notes_selection_cancel">Cancel selection</string>
+    <string name="notes_select_action">Select</string>
+    <string name="notes_bulk_delete_title">Delete the selected notes?</string>
+    <string name="notes_bulk_delete_body">They will be permanently removed from your phone. This cannot be undone.</string>
+    <string name="notes_audio_only">This note is the recording only.</string>
+    <string name="notes_search_hint">Search looks through titles, summaries and transcripts.</string>
+    <string name="notes_seek_description">Playback position</string>
+    <string name="notes_processing_summary_hint">The transcript is already in the other tab. Keep Offhand open until your note is ready.</string>
+    <string name="notes_interrupted_title">Your note is paused</string>
+    <string name="notes_failed_summary_title">The summary could not be written</string>
+    <string name="notes_failed_title">The note could not be finished</string>
+    <string name="notes_move_confirm">Move</string>
+    <string name="notes_share_privacy">The file is made on your phone and goes only where you send it.</string>
+    <plurals name="notes_search_count">
+        <item quantity="one">%1$d note</item>
+        <item quantity="other">%1$d notes</item>
+    </plurals>
+    <plurals name="notes_move_notes_title">
+        <item quantity="one">Move %1$d note</item>
+        <item quantity="other">Move %1$d notes</item>
+    </plurals>
+    <plurals name="notes_move_rewrite_caption">
+        <item quantity="one">%1$s writes notes in the %2$s style, so this note will be rewritten. Your transcript does not change.</item>
+        <item quantity="other">%1$s writes notes in the %2$s style, so these %3$d notes will be rewritten. Your transcripts do not change.</item>
+    </plurals>
+    <string name="notes_match_title">In title</string>
+    <string name="notes_match_summary">In summary</string>
+    <string name="notes_match_transcript">In transcript</string>
+    <string name="notes_match_transcript_at">In transcript at %1$s</string>
 </resources>

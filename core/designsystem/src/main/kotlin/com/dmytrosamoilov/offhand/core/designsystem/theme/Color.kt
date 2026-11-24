@@ -2,54 +2,48 @@ package com.dmytrosamoilov.offhand.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
-internal val Blue10 = Color(0xFF041E49)
-internal val Blue30 = Color(0xFF0842A0)
-internal val Blue40 = Color(0xFF0B57D0)
-internal val Blue80 = Color(0xFFA8C7FA)
-internal val Blue90 = Color(0xFFD3E3FD)
-internal val BlueOn80 = Color(0xFF062E6F)
+internal val LightQuietInk = OffhandColors(
+    ground = Color(0xFFF7F8FA),
+    surface = Color(0xFFFFFFFF),
+    ink = Color(0xFF0E1116),
+    ink2 = Color(0xFF4A515C),
+    ink3 = Color(0xFF5F6672),
+    hairline = Color(0xFFE3E6EB),
+    border = Color(0xFFCDD2DA),
+    wave = Color(0xFFB9BFC9),
+    well = Color(0xFFEEF0F3),
+    wellSelected = Color(0xFFFFFFFF),
+    accent = Color(0xFF0B57D0),
+    onAccent = Color(0xFFFFFFFF),
+    accentSoft = Color(0xFFD3E3FD),
+    danger = Color(0xFFC22B20),
+    record = Color(0xFFFF5A4D),
+    gold = Color(0xFFE9B44C),
+    onGold = Color(0xFF1A1200),
+    onInk = Color(0xFFFFFFFF),
+    scrim = Color(0x7A0E1116),
+    isDark = false,
+)
 
-internal val BlueGrey10 = Color(0xFF131C2B)
-internal val BlueGrey30 = Color(0xFF3F4759)
-internal val BlueGrey40 = Color(0xFF575E71)
-internal val BlueGrey80 = Color(0xFFBFC6DC)
-internal val BlueGrey90 = Color(0xFFDBE2F9)
-internal val BlueGreyOn80 = Color(0xFF293041)
-
-internal val Yellow10 = Color(0xFF261A00)
-internal val Yellow30 = Color(0xFF5C4300)
-internal val Yellow90 = Color(0xFFFFDF9E)
-
-internal val Teal10 = Color(0xFF00201C)
-internal val Teal30 = Color(0xFF005048)
-internal val Teal40 = Color(0xFF006A60)
-internal val Teal80 = Color(0xFF82D5C8)
-internal val Teal90 = Color(0xFF9EF2E2)
-internal val TealOn80 = Color(0xFF003731)
-
-internal val LightSurface = Color(0xFFF6F8FC)
-internal val LightSurfaceDim = Color(0xFFD7DAE0)
-internal val LightSurfaceContainerLowest = Color(0xFFFFFFFF)
-internal val LightSurfaceContainerLow = Color(0xFFFFFFFF)
-internal val LightSurfaceContainer = Color(0xFFEFF2F9)
-internal val LightSurfaceContainerHigh = Color(0xFFE9EDF6)
-internal val LightSurfaceContainerHighest = Color(0xFFFFFFFF)
-internal val LightSurfaceVariant = Color(0xFFE4E9F2)
-internal val LightOnSurface = Color(0xFF111418)
-internal val LightOnSurfaceVariant = Color(0xFF34383F)
-internal val LightOutline = Color(0xFF5F626A)
-internal val LightOutlineVariant = Color(0xFFAEB1BC)
-
-internal val DarkSurface = Color(0xFF101418)
-internal val DarkSurfaceDim = Color(0xFF101418)
-internal val DarkSurfaceBright = Color(0xFF36393E)
-internal val DarkSurfaceContainerLowest = Color(0xFF0B0E12)
-internal val DarkSurfaceContainerLow = Color(0xFF181C20)
-internal val DarkSurfaceContainer = Color(0xFF1C2024)
-internal val DarkSurfaceContainerHigh = Color(0xFF262A2F)
-internal val DarkSurfaceContainerHighest = Color(0xFF21262C)
-internal val DarkSurfaceVariant = Color(0xFF40454E)
-internal val DarkOnSurface = Color(0xFFECEEF3)
-internal val DarkOnSurfaceVariant = Color(0xFFCED2DB)
-internal val DarkOutline = Color(0xFFA3A7B0)
-internal val DarkOutlineVariant = Color(0xFF4C525B)
+internal val DarkQuietInk = OffhandColors(
+    ground = Color(0xFF0B0E12),
+    surface = Color(0xFF1A1F26),
+    ink = Color(0xFFF2F4F7),
+    ink2 = Color(0xFFA9B0BB),
+    ink3 = Color(0xFF8A919C),
+    hairline = Color(0xFF232830),
+    border = Color(0xFF2A303A),
+    wave = Color(0xFF3A414C),
+    well = Color(0xFF14181D),
+    wellSelected = Color(0xFF2A303A),
+    accent = Color(0xFFA8C7FA),
+    onAccent = Color(0xFF062E6F),
+    accentSoft = Color(0xFF1E3A66),
+    danger = Color(0xFFFF8A80),
+    record = Color(0xFFFF5A4D),
+    gold = Color(0xFFE9B44C),
+    onGold = Color(0xFF1A1200),
+    onInk = Color(0xFF0B0E12),
+    scrim = Color(0xB805070A),
+    isDark = true,
+)

@@ -2,7 +2,9 @@
 <resources>
     <string name="destination_notes">Notas</string>
     <string name="destination_settings">Ajustes</string>
-    <string name="lock_title">Notas bloqueadas</string>
+    <string name="destination_record">Grabar</string>
+    <string name="destination_record_description">Iniciar una grabación nueva</string>
+    <string name="lock_title">Offhand está bloqueado</string>
     <string name="lock_body">Tus notas están cifradas en tu teléfono. Desbloquea para continuar.</string>
     <string name="lock_unlock_button">Desbloquear</string>
     <string name="lock_prompt_title">Desbloquear Offhand</string>
@@ -14,4 +16,8 @@
     <string name="framework_unsupported_title">Offhand no puede funcionar en este teléfono</string>
     <string name="framework_unsupported_body">El software del sistema de este teléfono está modificado e indica una versión de Android más reciente de la que realmente tiene. Offhand necesita un Android 12 o posterior sin modificar.</string>
     <string name="framework_unsupported_close">Cerrar</string>
+    <string name="trial_removed_title">Tu prueba de Pro se ha eliminado</string>
+    <string name="trial_removed_body">La fecha de este teléfono se cambió a antes del inicio de tu prueba, así que la prueba ha terminado. Puedes seguir con la versión gratis o pasar a Offhand Pro.</string>
+    <string name="trial_notice_upgrade">Ver Offhand Pro</string>
+    <string name="trial_notice_keep_free">Seguir con la versión gratis</string>
 </resources>

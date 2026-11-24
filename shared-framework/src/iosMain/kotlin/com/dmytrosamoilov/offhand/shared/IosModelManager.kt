@@ -2,6 +2,7 @@
 
 package com.dmytrosamoilov.offhand.shared
 
+import com.dmytrosamoilov.offhand.core.data.domain.AppForegroundState
 import co.touchlab.kermit.Logger
 import com.dmytrosamoilov.offhand.core.ai.api.AvailableModel
 import com.dmytrosamoilov.offhand.core.ai.api.HardwareBackend
@@ -23,6 +24,7 @@ import platform.Foundation.NSUserDomainMask
 class IosModelManager(
     private val gemmaEngine: IosGemmaEngine,
     private val downloader: IosFileDownloader,
+    private val appForegroundState: AppForegroundState,
 ) : ModelManager {
 
     override val model: AvailableModel = gemmaE2bModel
@@ -41,6 +43,12 @@ class IosModelManager(
 
     private val engineMutex = Mutex()
     private var engineLoaded = false
+    private var engineUsesGpu = false
+
+    // What the loaded engine really runs on, which is the CPU whenever the
+    // app is away, whatever backend is selected.
+    internal val engineBackend: HardwareBackend
+        get() = if (engineUsesGpu) HardwareBackend.GPU else HardwareBackend.CPU
 
     override suspend fun isModelDownloaded(): Boolean = modelFileSize() == model.sizeInBytes
 
@@ -84,8 +92,31 @@ class IosModelManager(
         mutableModelState.value = idleDiskState()
     }
 
+    // iOS refuses GPU work to an app that is not in front, on every iPhone, so
+    // an engine loaded for the GPU is swapped for a CPU one before it is used
+    // in the background, and back again once the app is in front.
     internal suspend fun awaitReadyEngine() {
+        engineMutex.withLock {
+            if (engineLoaded && engineUsesGpu != shouldUseGpu()) unloadEngine()
+        }
         ensureModelAvailable()
+    }
+
+    // A generation that was cut off by the app leaving the foreground is
+    // worth one more try on the CPU; anything else is a real failure.
+    internal suspend fun reloadForBackground(): Boolean = engineMutex.withLock {
+        if (!engineLoaded || !engineUsesGpu || shouldUseGpu()) return@withLock false
+        unloadEngine()
+        true
+    }
+
+    private fun shouldUseGpu(): Boolean =
+        mutableActiveBackend.value == HardwareBackend.GPU && appForegroundState.isInForeground.value
+
+    private fun unloadEngine() {
+        gemmaEngine.unload()
+        engineLoaded = false
+        mutableModelState.value = idleDiskState()
     }
 
     private suspend fun downloadModel() {
@@ -107,16 +138,18 @@ class IosModelManager(
 
     private suspend fun loadEngine() {
         mutableModelState.value = ModelState.Loading
+        val useGpu = shouldUseGpu()
         try {
             gemmaEngine.load(
                 modelPath = modelPath(),
-                useGpu = mutableActiveBackend.value == HardwareBackend.GPU,
+                useGpu = useGpu,
                 maxTokens = model.maxTokens,
                 temperature = model.temperature,
                 topK = model.topK,
                 topP = model.topP,
             )
             engineLoaded = true
+            engineUsesGpu = useGpu
             mutableModelState.value = ModelState.Ready
         } catch (t: Throwable) {
             Logger.withTag(LOG_TAG).e(t) { "Engine load failed" }

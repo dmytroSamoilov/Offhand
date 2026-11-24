@@ -1,22 +1,27 @@
-# Runs after 01-smoke.yaml. Covers the About & support screen: the telemetry
-# switch, developer options with removing and re-downloading the on-device AI
+# Runs after 01-smoke.yaml. Covers the usage-sharing switch in Settings, the
+# About & support screen: developer options with removing and re-downloading the on-device AI
 # (the fake reports it back at once), and on Android the wallpaper-colour
 # switch and the "Redeem a code" hint dialog.
 appId: com.dmytrosamoilov.offhand.uitest
 ---
 - launchApp
-- tapOn: "Settings"
+- tapOn:
+    id: "tab_settings"
 - runFlow:
     when:
       platform: Android
     commands:
       - scrollUntilVisible:
           element:
+            text: "Share anonymous usage"
+          direction: DOWN
+      - tapOn: "Share anonymous usage"
+      - tapOn: "Share anonymous usage"
+      - scrollUntilVisible:
+          element:
             text: "About & support"
           direction: DOWN
       - tapOn: "About & support"
-      - tapOn: "Anonymous usage & stability reports"
-      - tapOn: "Anonymous usage & stability reports"
       - scrollUntilVisible:
           element:
             text: "Developer options"
@@ -58,12 +63,16 @@ appId: com.dmytrosamoilov.offhand.uitest
       platform: iOS
     commands:
       - scrollUntilVisible:
-          element: "About & support"
-      - tapOn: "About & support"
-      - tapOn: "Share usage & stability reports"
+          element: "Share anonymous usage"
+          centerElement: true
+      - tapOn: "Share anonymous usage"
       - waitForAnimationToEnd:
           timeout: 2000
-      - tapOn: "Share usage & stability reports"
+      - tapOn: "Share anonymous usage"
+      - scrollUntilVisible:
+          element: "About & support"
+          centerElement: true
+      - tapOn: "About & support"
       - scrollUntilVisible:
           element: "Developer options"
       - tapOn: "Developer options"

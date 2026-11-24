@@ -43,6 +43,9 @@ class PcmAudioPlayer {
 
     private var feedJob: Job? = null
 
+    @Volatile
+    private var silenceSkips: List<SilenceSkip> = emptyList()
+
     fun load(openChannel: () -> SeekableByteChannel) {
         reset()
         scope.launch {
@@ -96,7 +99,12 @@ class PcmAudioPlayer {
         if (wasPlaying) play()
     }
 
+    fun setSilenceSkips(skips: List<SilenceSkip>) {
+        silenceSkips = skips
+    }
+
     fun reset() {
+        silenceSkips = emptyList()
         feedJob?.cancel()
         feedJob = null
         runCatching { audioTrack?.pause() }
@@ -117,6 +125,7 @@ class PcmAudioPlayer {
         val opened = channel ?: return
         val buffer = ByteBuffer.allocate(CHUNK_BYTES)
         while (currentCoroutineContext().isActive) {
+            jumpOverSilence(opened)
             buffer.clear()
             val read = runCatching { opened.read(buffer) }.getOrDefault(-1)
             if (read <= 0) {
@@ -138,6 +147,12 @@ class PcmAudioPlayer {
             val position = runCatching { opened.position() }.getOrDefault(0)
             mutableState.update { it.copy(positionMs = bytesToMs(position)) }
         }
+    }
+
+    private fun jumpOverSilence(opened: SeekableByteChannel) {
+        val positionMs = bytesToMs(runCatching { opened.position() }.getOrDefault(0))
+        val skip = silenceSkips.firstOrNull { positionMs >= it.startMs && positionMs < it.endMs } ?: return
+        runCatching { opened.position(msToBytes(skip.endMs)) }
     }
 
     private fun completePlayback(track: AudioTrack, opened: SeekableByteChannel) {

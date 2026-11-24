@@ -8,12 +8,18 @@ data class SettingsUiState(
     val customStyles: List<CustomStyleOptionUi> = emptyList(),
     val isDynamicColorEnabled: Boolean = false,
     val isAppLockEnabled: Boolean = false,
+    val isTelemetryEnabled: Boolean = false,
+    val isSummaryAvailable: Boolean = true,
     val isDeviceSecure: Boolean = false,
     val isAudioImportUnlocked: Boolean = false,
     val freeImportsLeft: Int? = null,
     val allowsMultipleImports: Boolean = false,
     val isSmartSuggestionsEnabled: Boolean = false,
+    val isTranscriptionEnabled: Boolean = true,
+    val isSummaryEnabled: Boolean = true,
     val isSmartSuggestionsUnlocked: Boolean = false,
+    val isSkipSilenceEnabled: Boolean = false,
+    val isSkipSilenceUnlocked: Boolean = false,
     val pro: ProStatusUi = ProStatusUi.Free,
     val proOverride: ProOverride? = null,
     val isImportPickerRequested: Boolean = false,
@@ -24,7 +30,10 @@ data class SettingsUiState(
 sealed interface ProStatusUi {
     data object Free : ProStatusUi
     data class Trial(val endsAtMs: Long?) : ProStatusUi
+    // The fourteen free days: elapsed is the share of the trial already used.
+    data class AppTrial(val daysLeft: Int, val elapsed: Float) : ProStatusUi
     data class Yearly(val renewsAtMs: Long?) : ProStatusUi
+    data class Monthly(val renewsAtMs: Long?) : ProStatusUi
     data object Lifetime : ProStatusUi
     data object Included : ProStatusUi
 }

@@ -17,8 +17,8 @@ android {
 
     defaultConfig {
         applicationId = "com.dmytrosamoilov.offhand"
-        versionCode = 22
-        versionName = "1.5"
+        versionCode = 23
+        versionName = "1.5.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -43,6 +43,11 @@ android {
             applicationIdSuffix = ".uitest"
             versionNameSuffix = "-uitest"
         }
+        create("devicetest") {
+            dimension = "environment"
+            applicationIdSuffix = ".devicetest"
+            versionNameSuffix = "-devicetest"
+        }
     }
 
     buildTypes {
@@ -62,16 +67,22 @@ googleServices {
     missingGoogleServicesStrategy = MissingGoogleServicesStrategy.WARN
 }
 
-// Smoke-test builds have no Firebase client; without the generated resources
-// FirebaseReporting stays off, the same as a missing config file.
+// Smoke-test and device-test builds have no Firebase client; without the generated
+// resources FirebaseReporting stays off, the same as a missing config file, and
+// there is no app id to upload a Crashlytics mapping file for.
 tasks.configureEach {
-    if (name.startsWith("processUitest") && name.endsWith("GoogleServices")) {
+    val isTestFlavorGoogleServices = (name.startsWith("processUitest") || name.startsWith("processDevicetest")) &&
+        name.endsWith("GoogleServices")
+    val isTestFlavorMappingUpload = name.startsWith("uploadCrashlyticsMappingFileUitest") ||
+        name.startsWith("uploadCrashlyticsMappingFileDevicetest")
+    if (isTestFlavorGoogleServices || isTestFlavorMappingUpload) {
         enabled = false
     }
 }
 
 androidComponents {
     onVariants(selector().withBuildType("release")) { variant ->
+        if (variant.flavorName == "devicetest") return@onVariants
         val variantName = variant.name.replaceFirstChar(Char::uppercase)
         val versionName = variant.outputs.single().versionName
         val exportMapping = tasks.register<Copy>("export${variantName}Mapping") {
@@ -115,8 +126,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.navigation.compose)
     implementation(libs.koin.androidx.compose)
-    implementation(libs.androidx.material3.adaptive.navigation.suite)
-    implementation(libs.androidx.material.icons.extended)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kermit)
     implementation(libs.timber)
@@ -126,6 +135,7 @@ dependencies {
 
     debugImplementation(libs.leakcanary.android)
     "uitestImplementation"(project(":testing:fakes"))
+    "devicetestImplementation"(project(":testing:fakes"))
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.junit)

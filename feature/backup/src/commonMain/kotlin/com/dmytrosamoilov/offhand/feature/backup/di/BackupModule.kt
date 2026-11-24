@@ -1,6 +1,7 @@
 package com.dmytrosamoilov.offhand.feature.backup.di
 
 import com.dmytrosamoilov.offhand.feature.backup.domain.usecase.CreateBackupUseCase
+import com.dmytrosamoilov.offhand.feature.backup.domain.usecase.EstimateBackupSizeUseCase
 import com.dmytrosamoilov.offhand.feature.backup.domain.usecase.IsBackupAudioAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.backup.domain.usecase.RestoreBackupUseCase
 import com.dmytrosamoilov.offhand.feature.backup.presentation.BackupViewModel
@@ -10,6 +11,7 @@ import org.koin.dsl.module
 
 val featureBackupModule = module {
     factoryOf(::CreateBackupUseCase)
+    factoryOf(::EstimateBackupSizeUseCase)
     factoryOf(::IsBackupAudioAvailableUseCase)
     factoryOf(::RestoreBackupUseCase)
     viewModelOf(::BackupViewModel)

@@ -7,6 +7,7 @@ import UIKit
 // nothing about the purchase ever leaves the App Store's own channel.
 final class StoreKitProStore: IosProStoreBridge {
     private enum ProductId {
+        static let monthly = "offhand_pro_monthly"
         static let yearly = "offhand_pro_yearly"
         static let lifetime = "offhand_pro_lifetime"
     }
@@ -52,9 +53,18 @@ final class StoreKitProStore: IosProStoreBridge {
     }
 
     private func fetchOffers() async -> [ProOffer] {
-        let loaded = (try? await Product.products(for: [ProductId.yearly, ProductId.lifetime])) ?? []
+        let loaded = (try? await Product.products(for: [ProductId.monthly, ProductId.yearly, ProductId.lifetime])) ?? []
         for product in loaded { products[product.id] = product }
         var offers: [ProOffer] = []
+        if let monthly = products[ProductId.monthly] {
+            offers.append(ProOffer(
+                plan: .monthly,
+                price: monthly.displayPrice,
+                trialDays: await trialDays(of: monthly),
+                priceMicros: micros(of: monthly),
+                monthlyPrice: nil
+            ))
+        }
         if let yearly = products[ProductId.yearly] {
             offers.append(ProOffer(
                 plan: .yearly,
@@ -95,7 +105,7 @@ final class StoreKitProStore: IosProStoreBridge {
     }
 
     private func buy(_ plan: ProPlan) async -> PurchaseOutcome {
-        let id = plan == .lifetime ? ProductId.lifetime : ProductId.yearly
+        let id = productId(of: plan)
         guard let product = products[id] else { return .failed }
         do {
             switch try await product.purchase() {
@@ -113,19 +123,30 @@ final class StoreKitProStore: IosProStoreBridge {
         }
     }
 
+    private func productId(of plan: ProPlan) -> String {
+        switch plan {
+        case .lifetime: return ProductId.lifetime
+        case .monthly: return ProductId.monthly
+        default: return ProductId.yearly
+        }
+    }
+
+    // Monthly and yearly sit in one subscription group, so at most one of
+    // them is current.
     private func currentStatus() async -> ProStatus {
-        var yearly: ProStatus?
+        var subscription: ProStatus?
         for await result in Transaction.currentEntitlements {
             guard case .verified(let transaction) = result, transaction.revocationDate == nil else { continue }
             if transaction.productID == ProductId.lifetime { return ProStatus.companion.LIFETIME }
-            if transaction.productID == ProductId.yearly { yearly = yearlyStatus(of: transaction) }
+            if transaction.productID == ProductId.yearly { subscription = status(of: transaction, plan: .yearly) }
+            if transaction.productID == ProductId.monthly { subscription = status(of: transaction, plan: .monthly) }
         }
-        return yearly ?? ProStatus.companion.FREE
+        return subscription ?? ProStatus.companion.FREE
     }
 
-    private func yearlyStatus(of transaction: Transaction) -> ProStatus {
+    private func status(of transaction: Transaction, plan: ProPlan) -> ProStatus {
         let renewsAt = transaction.expirationDate.map { KotlinLong(value: Int64($0.timeIntervalSince1970 * 1000)) }
-        return ProStatus(plan: .yearly, isTrial: transaction.offer?.type == .introductory, renewsAtMs: renewsAt)
+        return ProStatus(plan: plan, isTrial: transaction.offer?.type == .introductory, renewsAtMs: renewsAt)
     }
 }
 

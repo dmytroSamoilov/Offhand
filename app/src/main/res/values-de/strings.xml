@@ -2,7 +2,9 @@
 <resources>
     <string name="destination_notes">Notizen</string>
     <string name="destination_settings">Einstellungen</string>
-    <string name="lock_title">Notizen gesperrt</string>
+    <string name="destination_record">Aufnehmen</string>
+    <string name="destination_record_description">Neue Aufnahme starten</string>
+    <string name="lock_title">Offhand ist gesperrt</string>
     <string name="lock_body">Deine Notizen sind auf deinem Handy verschlüsselt. Entsperre, um fortzufahren.</string>
     <string name="lock_unlock_button">Entsperren</string>
     <string name="lock_prompt_title">Offhand entsperren</string>
@@ -14,4 +16,8 @@
     <string name="framework_unsupported_title">Offhand kann auf diesem Handy nicht laufen</string>
     <string name="framework_unsupported_body">Die Systemsoftware dieses Handys ist verändert und meldet eine neuere Android-Version, als sie tatsächlich ist. Offhand braucht ein unverändertes Android 12 oder neuer.</string>
     <string name="framework_unsupported_close">Schließen</string>
+    <string name="trial_removed_title">Deine Pro-Testphase wurde entfernt</string>
+    <string name="trial_removed_body">Das Datum auf diesem Smartphone wurde vor den Beginn deiner Testphase zurückgestellt, deshalb ist die Testphase beendet. Du kannst die kostenlose Version weiter nutzen oder auf Offhand Pro upgraden.</string>
+    <string name="trial_notice_upgrade">Offhand Pro ansehen</string>
+    <string name="trial_notice_keep_free">Mit der kostenlosen Version weitermachen</string>
 </resources>

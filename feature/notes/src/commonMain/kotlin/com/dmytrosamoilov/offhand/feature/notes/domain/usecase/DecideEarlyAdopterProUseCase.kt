@@ -31,7 +31,7 @@ class DecideEarlyAdopterProUseCase(
             return
         }
         // Read before the grant is stored, while it cannot stand in for the store yet
-        val hasPurchase = proStatusRepository.observeStatus().first().isPro
+        val hasPurchase = proStatusRepository.observeStatus().first().isProForGood
         userPreferences.setEarlyAdopterPro(EarlyAdopterPro.GRANTED)
         if (hasPurchase) userPreferences.setEarlyAdopterThanked()
         analyticsTracker.track(AnalyticsEvents.proGrandfathered(hasPurchase))

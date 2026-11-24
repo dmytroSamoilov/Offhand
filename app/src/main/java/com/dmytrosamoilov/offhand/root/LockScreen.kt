@@ -4,18 +4,19 @@ import android.content.Context
 import android.content.ContextWrapper
 import androidx.biometric.BiometricManager.Authenticators
 import androidx.biometric.BiometricPrompt
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -30,6 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.dmytrosamoilov.offhand.R
+import com.dmytrosamoilov.offhand.core.designsystem.component.OffhandIcons
+import com.dmytrosamoilov.offhand.core.designsystem.component.PrimaryButton
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandDarkContent
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandSpacing
+import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 
 @Composable
 fun LockScreen(
@@ -43,35 +50,57 @@ fun LockScreen(
         context.showUnlockPrompt { currentOnAuthenticated() }
     }
 
+    OffhandDarkContent {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .background(OffhandTheme.colors.ground)
+                .safeDrawingPadding()
+                .padding(start = OffhandSpacing.screen, end = OffhandSpacing.screen, bottom = 28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            LockMessage(modifier = Modifier.weight(1f))
+            PrimaryButton(
+                text = stringResource(R.string.lock_unlock_button),
+                onClick = { context.showUnlockPrompt { currentOnAuthenticated() } },
+                icon = OffhandIcons.Unlock,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun LockMessage(modifier: Modifier = Modifier) {
+    val colors = OffhandTheme.colors
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(32.dp),
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterVertically),
     ) {
-        Icon(
-            imageVector = Icons.Filled.Lock,
-            contentDescription = null,
-            modifier = Modifier.size(48.dp),
-            tint = MaterialTheme.colorScheme.primary,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(72.dp)
+                .clip(CircleShape)
+                .border(1.dp, colors.border, CircleShape),
+        ) {
+            Icon(imageVector = OffhandIcons.Lock, contentDescription = null, tint = colors.ink, modifier = Modifier.size(28.dp))
+        }
         Text(
             text = stringResource(R.string.lock_title),
-            style = MaterialTheme.typography.headlineMedium,
+            style = OffhandTheme.type.title,
+            color = colors.ink,
             textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 14.dp),
         )
-        Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = stringResource(R.string.lock_body),
-            style = MaterialTheme.typography.bodyLarge,
+            style = OffhandTheme.type.dialogBody,
+            color = colors.ink2,
             textAlign = TextAlign.Center,
+            modifier = Modifier.widthIn(max = 280.dp),
         )
-        Spacer(modifier = Modifier.height(32.dp))
-        Button(onClick = { context.showUnlockPrompt { currentOnAuthenticated() } }) {
-            Text(text = stringResource(R.string.lock_unlock_button))
-        }
     }
 }
 

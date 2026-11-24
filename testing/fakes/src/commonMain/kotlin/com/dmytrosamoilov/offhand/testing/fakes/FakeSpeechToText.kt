@@ -15,6 +15,8 @@ class FakeSpeechToText : SpeechToText {
 
     private var chunkIndex = 0
 
+    override suspend fun download() = Unit
+
     override suspend fun prepare() = Unit
 
     override suspend fun transcribe(audioWav: ByteArray): TranscriptionResult {

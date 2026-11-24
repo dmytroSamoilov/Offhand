@@ -10,6 +10,7 @@ import com.dmytrosamoilov.offhand.feature.backup.domain.BackupException
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupFile
 import com.dmytrosamoilov.offhand.feature.backup.domain.BackupFileNames
 import com.dmytrosamoilov.offhand.feature.backup.domain.usecase.CreateBackupUseCase
+import com.dmytrosamoilov.offhand.feature.backup.domain.usecase.EstimateBackupSizeUseCase
 import com.dmytrosamoilov.offhand.feature.backup.domain.usecase.IsBackupAudioAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.backup.domain.usecase.RestoreBackupUseCase
 import kotlinx.coroutines.CancellationException
@@ -23,6 +24,7 @@ class BackupViewModel(
     private val createBackup: CreateBackupUseCase,
     private val restoreBackup: RestoreBackupUseCase,
     isBackupAudioAvailable: IsBackupAudioAvailableUseCase,
+    private val estimateBackupSize: EstimateBackupSizeUseCase,
     private val proUpgradeGate: ProUpgradeGate,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
@@ -32,13 +34,19 @@ class BackupViewModel(
 
     private var pendingRestore: BackupFile? = null
 
-    // Recordings in the file are Pro: the switch starts where the plan allows
-    // and switching it on while free opens the paywall.
     init {
         viewModelScope.launch {
             isBackupAudioAvailable().collect { unlocked ->
                 mutableUiState.update { it.copy(isAudioUnlocked = unlocked, includeAudio = unlocked) }
             }
+        }
+        refreshSizeEstimate()
+    }
+
+    fun refreshSizeEstimate() {
+        launchSafely(showLoading = false) {
+            val estimate = estimateBackupSize()
+            mutableUiState.update { it.copy(textBytes = estimate.textBytes, recordingBytes = estimate.recordingBytes) }
         }
     }
 

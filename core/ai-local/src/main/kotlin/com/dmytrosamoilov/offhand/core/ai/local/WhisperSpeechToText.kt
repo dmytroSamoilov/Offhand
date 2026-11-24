@@ -44,6 +44,10 @@ class WhisperSpeechToText(
         }
     }
 
+    override suspend fun download() {
+        mutex.withLock { downloadMissingFiles(WhisperModels.SMALL, modelDirectory()) }
+    }
+
     override suspend fun prepare() {
         ensureRecognizer()
     }
@@ -85,7 +89,7 @@ class WhisperSpeechToText(
 
     private suspend fun createRecognizer(): OfflineRecognizer {
         val model = WhisperModels.SMALL
-        val directory = File(context.filesDir, WhisperModels.DIRECTORY)
+        val directory = modelDirectory()
         downloadMissingFiles(model, directory)
         GenAiLog.logModelOutput("whisper-load", model.id)
         return withContext(Dispatchers.IO) {
@@ -137,8 +141,10 @@ class WhisperSpeechToText(
         mutableDownloadState.value = SpeechModelState.Downloaded
     }
 
+    private fun modelDirectory(): File = File(context.filesDir, WhisperModels.DIRECTORY)
+
     private fun diskState(): SpeechModelState {
-        val directory = File(context.filesDir, WhisperModels.DIRECTORY)
+        val directory = modelDirectory()
         val isComplete = WhisperModels.SMALL.files.all { file ->
             File(directory, file.fileName).length() == file.sizeInBytes
         }

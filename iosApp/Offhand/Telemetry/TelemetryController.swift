@@ -23,9 +23,18 @@ final class TelemetryController {
     )
 
     private var task: Task<Void, Never>?
+    private var isDeveloperBuild = false
+    private let collecting = OSAllocatedUnfairLock(initialState: false)
 
-    func start() {
+    // Read by the analytics bridge from any thread: an event handed to
+    // Firebase before collection is on would be lost.
+    var isCollectingAnalytics: Bool { collecting.withLock { $0 } }
+
+    // A developer build reports crashes but never analytics, automatic events
+    // included.
+    func start(isDeveloperBuild: Bool) {
         guard task == nil else { return }
+        self.isDeveloperBuild = isDeveloperBuild
         task = Task { @MainActor in
             for await granted in SharedGraph.shared.observeTelemetryConsent().invoke() {
                 apply(isGranted: granted.boolValue)
@@ -36,6 +45,7 @@ final class TelemetryController {
     @MainActor
     private func apply(isGranted: Bool) {
         guard isGranted else {
+            collecting.withLock { $0 = false }
             // If Firebase was never configured there is nothing to turn off, and
             // nothing has been sent.
             if FirebaseApp.app() != nil {
@@ -46,8 +56,9 @@ final class TelemetryController {
             return
         }
         guard configureIfNeeded() else { return }
+        Analytics.setAnalyticsCollectionEnabled(!isDeveloperBuild)
+        collecting.withLock { $0 = !isDeveloperBuild }
         Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
-        Analytics.setAnalyticsCollectionEnabled(true)
     }
 
     // A build without GoogleService-Info.plist is the normal state of a fresh

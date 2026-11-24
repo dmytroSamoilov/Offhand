@@ -5,7 +5,9 @@ import com.dmytrosamoilov.offhand.core.data.domain.Note
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStatus
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.NotesRepository
+import com.dmytrosamoilov.offhand.core.data.domain.ProtectedDataState
 import com.dmytrosamoilov.offhand.core.data.domain.RecordingProcessController
+import com.dmytrosamoilov.offhand.core.data.domain.awaitAvailable
 import com.dmytrosamoilov.offhand.core.security.EncryptedAudioStore
 import com.dmytrosamoilov.offhand.feature.recording.domain.AudioRecorder
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
@@ -18,26 +20,34 @@ class ResumeInterruptedNotesUseCase(
     private val failNote: FailNoteUseCase,
     private val getTranscriptionCheckpoint: GetTranscriptionCheckpointUseCase,
     private val isAiCoreDownloaded: IsAiCoreDownloadedUseCase,
+    private val isSpeechModelDownloaded: IsSpeechModelDownloadedUseCase,
     private val audioStore: EncryptedAudioStore,
+    private val protectedData: ProtectedDataState,
 ) {
 
+    // The notes and their recordings cannot be opened while the device is
+    // locked, so resuming waits for it to be unlocked.
     suspend operator fun invoke() {
-        if (!isAiCoreDownloaded()) return
+        protectedData.awaitAvailable()
+        if (!isSpeechModelDownloaded()) return
+        val canWrite = isAiCoreDownloaded()
         val activeNoteIds = sessionManager.processingNoteIds.value
         val liveRecordingNoteId = sessionManager.activeRecordingNoteId.value
         notesRepository.observeNotes().first()
             .filter { it.status in RESUMABLE_STATUSES }
             .filter { it.id !in activeNoteIds && it.id != liveRecordingNoteId }
             .sortedBy { it.createdAtEpochMs }
-            .forEach { note -> resume(note) }
+            .forEach { note -> resume(note, canWrite) }
     }
 
-    private suspend fun resume(note: Note) {
+    // Transcribing only needs the speech part of the on-device AI, which
+    // arrives first; a note that already has its transcript waits for the rest.
+    private suspend fun resume(note: Note, canWrite: Boolean) {
         val audioFileName = note.audioFileName
         val resumed = backfillDurationIfMissing(note, audioFileName)
         when {
             audioFileName != null && isTranscriptionUnfinished(resumed.id) -> retryViaService(resumed.id, audioFileName)
-            resumed.transcript.isNotBlank() -> restructureViaService(resumed.id, resumed.style)
+            resumed.transcript.isNotBlank() -> if (canWrite) restructureViaService(resumed.id, resumed.style)
             audioFileName != null -> retryViaService(resumed.id, audioFileName)
             resumed.status == NoteStatus.RECORDING -> notesRepository.deleteNote(resumed.id)
             else -> failNote(resumed.id)

@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.core.data.repository
 
+import com.dmytrosamoilov.offhand.core.data.domain.NoteFeature
 import com.dmytrosamoilov.offhand.core.data.domain.EarlyAdopterPro
 import com.dmytrosamoilov.offhand.core.data.domain.NoteStyleRef
 import com.dmytrosamoilov.offhand.core.data.domain.ProOffer
@@ -9,6 +10,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.ProStatus
 import com.dmytrosamoilov.offhand.core.data.domain.ProStore
 import com.dmytrosamoilov.offhand.core.data.domain.PurchaseOutcome
 import com.dmytrosamoilov.offhand.core.data.domain.ReviewPromptState
+import com.dmytrosamoilov.offhand.core.data.domain.TelemetryConsent
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferences
 import com.dmytrosamoilov.offhand.core.data.domain.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
@@ -38,7 +40,7 @@ class DebugOverrideProStoreTest {
         preferences.override.value = ProOverride.FREE
 
         assertEquals(ProStatus.FREE, store.status.first())
-        assertEquals(2, store.loadOffers().size)
+        assertEquals(listOf(ProPlan.MONTHLY, ProPlan.YEARLY, ProPlan.LIFETIME), store.loadOffers().map { it.plan })
         assertEquals(PurchaseOutcome.PURCHASED, store.purchase(ProPlan.LIFETIME))
         assertEquals(ProOverride.PRO, preferences.override.value)
         assertEquals(ProStatus.LIFETIME, store.status.first())
@@ -82,7 +84,7 @@ private class FakePreferences : UserPreferencesRepository {
         UserPreferences(
             onboardingCompleted = true,
             appLockEnabled = false,
-            telemetryConsent = false,
+            telemetryConsent = TelemetryConsent.DECLINED,
             dynamicColor = false,
             developerOptions = false,
             savedRecordingsCount = 0,
@@ -102,6 +104,8 @@ private class FakePreferences : UserPreferencesRepository {
     override suspend fun incrementSavedRecordingsCount() = Unit
     override suspend fun setReviewPromptState(state: ReviewPromptState) = Unit
     override suspend fun setSmartSuggestionsEnabled(enabled: Boolean) = Unit
+    override suspend fun setSkipSilenceEnabled(enabled: Boolean) = Unit
+    override suspend fun setNoteFeatureEnabled(feature: NoteFeature, enabled: Boolean) = Unit
     override suspend fun setNotificationsPrompted() = Unit
 
     override suspend fun setEarlyAdopterPro(decision: EarlyAdopterPro) = Unit

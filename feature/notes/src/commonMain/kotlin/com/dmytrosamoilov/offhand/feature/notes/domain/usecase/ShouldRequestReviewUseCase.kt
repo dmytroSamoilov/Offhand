@@ -13,9 +13,11 @@ class ShouldRequestReviewUseCase(
     private val policy: InAppReviewPolicy,
 ) {
 
+    // A recording saved before the notification question was answered is the
+    // one that asks it, and two system dialogs must not stack.
     suspend operator fun invoke(): Boolean {
         val preferences = userPreferences.preferences.first()
-        return policy.shouldRequestReview(
+        return preferences.notificationsPrompted && policy.shouldRequestReview(
             savedRecordingsCount = preferences.savedRecordingsCount,
             state = preferences.reviewPrompt,
             nowMs = Clock.System.now().toEpochMilliseconds(),

@@ -2,11 +2,11 @@ plugins {
     alias(libs.plugins.offhand.kmp.feature)
 }
 
-android {
-    namespace = "com.dmytrosamoilov.offhand.feature.paywall"
-}
-
 kotlin {
+    android {
+        namespace = "com.dmytrosamoilov.offhand.feature.paywall"
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(project(":core:common"))
@@ -14,7 +14,6 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.androidx.core.ktx)
-            implementation(libs.androidx.material.icons.extended)
         }
     }
 }
