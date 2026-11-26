@@ -14,6 +14,7 @@ struct SettingsView<BottomBarContent: View>: View {
         isTelemetryEnabled: true,
         isSummaryAvailable: true,
         isDeviceSecure: false,
+        isBackgroundWorkRestricted: false,
         isAudioImportUnlocked: false,
         freeImportsLeft: nil,
         allowsMultipleImports: false,
