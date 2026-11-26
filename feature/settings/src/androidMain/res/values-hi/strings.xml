@@ -152,4 +152,10 @@
     <string name="settings_widget_title">होम स्क्रीन विजेट</string>
     <string name="settings_widget_subtitle">एक टैप में रिकॉर्ड करें</string>
     <string name="settings_widget_body">विजेट पर एक टैप से रिकॉर्डिंग शुरू होती है, उस फ़ोल्डर में जो आप उसके लिए चुनते हैं। रोककर सहेजने के लिए फिर से टैप करें।\n\nइसे जोड़ने के लिए होम स्क्रीन को दबाकर रखें, विजेट पर टैप करें और Offhand ढूंढें।</string>
+    <string name="settings_background_title">बैकग्राउंड में रिकॉर्डिंग</string>
+    <string name="settings_background_allowed">इस फ़ोन पर अनुमति है</string>
+    <string name="settings_background_restricted">यह फ़ोन इसे रोक सकता है</string>
+    <string name="settings_background_body_restricted">कुछ फ़ोन स्क्रीन लॉक होने के बाद काम करते रहने वाले ऐप को रोक देते हैं, और उनके साथ रिकॉर्डिंग भी रुक सकती है।\n\nसेटिंग खोलें, बैटरी या बैटरी का इस्तेमाल पर टैप करें और बिना पाबंदी या बैकग्राउंड गतिविधि की अनुमति चुनें।</string>
+    <string name="settings_background_body_allowed">Offhand को स्क्रीन बंद होने पर भी काम करते रहने की अनुमति है, इसलिए आपका फ़ोन लॉक होने पर रिकॉर्डिंग जारी रहती है।\n\nअगर रिकॉर्डिंग फिर भी रुकती है, तो सेटिंग खोलें और देखें कि वहां कुछ और, जैसे बैटरी सेवर, Offhand को सीमित तो नहीं कर रहा।</string>
+    <string name="settings_background_open_settings">सेटिंग खोलें</string>
 </resources>

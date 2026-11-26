@@ -158,4 +158,10 @@
     <string name="settings_widget_title">Home-screen widget</string>
     <string name="settings_widget_subtitle">Record with one tap</string>
     <string name="settings_widget_body">One tap on the widget starts a recording, into the folder you pick for it. Tap it again to stop and save.\n\nTo add it, touch and hold your home screen, tap Widgets and find Offhand.</string>
+    <string name="settings_background_title">Background recording</string>
+    <string name="settings_background_allowed">Allowed on this phone</string>
+    <string name="settings_background_restricted">This phone may stop it</string>
+    <string name="settings_background_body_restricted">Some phones stop apps that keep working after the screen locks, and a recording can end with them.\n\nOpen settings, tap Battery or Battery usage, and choose Unrestricted or Allow background activity.</string>
+    <string name="settings_background_body_allowed">Offhand is allowed to keep working with the screen off, so a recording carries on when your phone is locked.\n\nIf a recording still stops, open settings and check that nothing else limits Offhand there, such as a battery saver.</string>
+    <string name="settings_background_open_settings">Open settings</string>
 </resources>

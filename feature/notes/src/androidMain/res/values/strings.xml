@@ -157,4 +157,17 @@
     <string name="notes_match_summary">In summary</string>
     <string name="notes_match_transcript">In transcript</string>
     <string name="notes_match_transcript_at">In transcript at %1$s</string>
+    <string name="notes_usage_survey_title">What do you mostly record?</string>
+    <string name="notes_usage_survey_body">I build Offhand on my own. Your anonymous answer helps me make it better for you.</string>
+    <string name="notes_usage_survey_answer">Answer</string>
+    <string name="notes_usage_survey_not_now">Not now</string>
+    <string name="notes_usage_survey_meetings">Meetings</string>
+    <string name="notes_usage_survey_thoughts">My own thoughts and ideas</string>
+    <string name="notes_usage_survey_lectures">Lectures and classes</string>
+    <string name="notes_usage_survey_interviews">Interviews and calls</string>
+    <string name="notes_usage_survey_other">Something else</string>
+    <string name="notes_usage_survey_confirm">Confirm</string>
+    <string name="notes_usage_survey_thanks_title">Thanks a lot!</string>
+    <string name="notes_usage_survey_thanks_body">You made my day a bit better. Now I’ll make Offhand better for you.</string>
+    <string name="notes_usage_survey_close">Close</string>
 </resources>

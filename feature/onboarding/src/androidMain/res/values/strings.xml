@@ -52,4 +52,11 @@
     <string name="onboarding_analytics_share">Share with the developer</string>
     <string name="onboarding_analytics_dont_share">Don’t share</string>
     <string name="onboarding_analytics_settings_hint">You can change this any time in Settings.</string>
+    <string name="onboarding_battery_title">Keep recording with the screen off</string>
+    <string name="onboarding_battery_body">Some phones stop apps that keep working after the screen locks. Let Offhand run in the background, so a long recording is never cut short.</string>
+    <string name="onboarding_battery_steps_label">In your phone\'s settings</string>
+    <string name="onboarding_battery_step_open">Open Battery or Battery usage</string>
+    <string name="onboarding_battery_step_allow">Choose Unrestricted or Allow background activity</string>
+    <string name="onboarding_battery_open_settings">Open settings</string>
+    <string name="onboarding_battery_not_now">Not now</string>
 </resources>

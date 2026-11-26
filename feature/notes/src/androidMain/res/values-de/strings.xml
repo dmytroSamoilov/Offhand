@@ -144,4 +144,17 @@
     <string name="notes_match_summary">In der Zusammenfassung</string>
     <string name="notes_match_transcript">Im Transkript</string>
     <string name="notes_match_transcript_at">Im Transkript bei %1$s</string>
+    <string name="notes_usage_survey_title">Was nimmst du meistens auf?</string>
+    <string name="notes_usage_survey_body">Ich entwickle Offhand allein. Deine anonyme Antwort hilft mir, es für dich besser zu machen.</string>
+    <string name="notes_usage_survey_answer">Antworten</string>
+    <string name="notes_usage_survey_not_now">Jetzt nicht</string>
+    <string name="notes_usage_survey_meetings">Meetings</string>
+    <string name="notes_usage_survey_thoughts">Eigene Gedanken und Ideen</string>
+    <string name="notes_usage_survey_lectures">Vorlesungen und Unterricht</string>
+    <string name="notes_usage_survey_interviews">Interviews und Anrufe</string>
+    <string name="notes_usage_survey_other">Etwas anderes</string>
+    <string name="notes_usage_survey_confirm">Bestätigen</string>
+    <string name="notes_usage_survey_thanks_title">Vielen Dank!</string>
+    <string name="notes_usage_survey_thanks_body">Du hast meinen Tag ein bisschen besser gemacht. Jetzt mache ich Offhand besser für dich.</string>
+    <string name="notes_usage_survey_close">Schließen</string>
 </resources>

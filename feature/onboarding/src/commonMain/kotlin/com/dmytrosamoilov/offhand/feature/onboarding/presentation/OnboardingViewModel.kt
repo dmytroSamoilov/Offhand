@@ -11,6 +11,7 @@ import com.dmytrosamoilov.offhand.core.device.tier
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.AnswerTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.CompleteOnboardingUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.GetTelemetryConsentUseCase
+import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.IsBatteryHintNeededUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetAppLockEnabledUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,6 +25,7 @@ class OnboardingViewModel(
     private val completeOnboarding: CompleteOnboardingUseCase,
     private val getTelemetryConsent: GetTelemetryConsentUseCase,
     private val answerTelemetryConsent: AnswerTelemetryConsentUseCase,
+    private val isBatteryHintNeeded: IsBatteryHintNeededUseCase,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
@@ -51,8 +53,25 @@ class OnboardingViewModel(
     fun onContinueWithTranscriptsClicked() {
         if (uiState.value.step != OnboardingStep.TRANSCRIPTS_ONLY) return
         analyticsTracker.track(AnalyticsEvents.onboardingStep(OnboardingChoice.TRANSCRIPTS_ONLY.analyticsName))
+        mutableUiState.update { it.copy(step = stepBeforeRecording()) }
+    }
+
+    fun onBatterySettingsOpened() {
+        leaveBatteryHint(OnboardingChoice.BATTERY_SETTINGS)
+    }
+
+    fun onBatteryHintSkipped() {
+        leaveBatteryHint(OnboardingChoice.BATTERY_SKIPPED)
+    }
+
+    private fun leaveBatteryHint(choice: OnboardingChoice) {
+        if (uiState.value.step != OnboardingStep.BACKGROUND_ACTIVITY) return
+        analyticsTracker.track(AnalyticsEvents.onboardingStep(choice.analyticsName))
         mutableUiState.update { it.copy(step = OnboardingStep.WELCOME) }
     }
+
+    private fun stepBeforeRecording(): OnboardingStep =
+        if (isBatteryHintNeeded()) OnboardingStep.BACKGROUND_ACTIVITY else OnboardingStep.WELCOME
 
     fun onRecordFirstNoteClicked() {
         finish(OnboardingChoice.RECORD_FIRST_NOTE)
@@ -87,7 +106,7 @@ class OnboardingViewModel(
     private fun evaluateDevice() {
         val capability = deviceCapabilityChecker.snapshot()
         when (capability.tier()) {
-            DeviceTier.FULL -> startWith(OnboardingStep.WELCOME, isSummaryAvailable = true)
+            DeviceTier.FULL -> startWith(stepBeforeRecording(), isSummaryAvailable = true)
             DeviceTier.TRANSCRIPTS_ONLY -> {
                 analyticsTracker.track(AnalyticsEvents.deviceTranscriptsOnly(capability.ramGb(), capability.cpuCores))
                 startWith(OnboardingStep.TRANSCRIPTS_ONLY, isSummaryAvailable = false)

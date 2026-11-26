@@ -5,6 +5,12 @@ package com.dmytrosamoilov.offhand.feature.notes.di
 import com.dmytrosamoilov.offhand.core.common.BuildInfo
 import com.dmytrosamoilov.offhand.feature.notes.domain.review.InAppReviewPolicy
 import com.dmytrosamoilov.offhand.feature.notes.domain.review.InAppReviewRules
+import com.dmytrosamoilov.offhand.feature.notes.domain.survey.SurveyPromptPolicy
+import com.dmytrosamoilov.offhand.feature.notes.domain.survey.SurveyRules
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.AnswerUsageSurveyUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveUsageSurveyPromptUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ReportUsageSurveyStepUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SkipUsageSurveyUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearTranscriptionCheckpointUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
@@ -49,6 +55,12 @@ import org.koin.dsl.module
 val featureNotesModule = module {
     singleOf(::InAppReviewPolicy)
     single { InAppReviewRules.of(get<BuildInfo>()) }
+    single { SurveyRules.STANDARD }
+    factoryOf(::SurveyPromptPolicy)
+    factoryOf(::ObserveUsageSurveyPromptUseCase)
+    factoryOf(::AnswerUsageSurveyUseCase)
+    factoryOf(::SkipUsageSurveyUseCase)
+    factoryOf(::ReportUsageSurveyStepUseCase)
     factoryOf(::ClearShareCacheUseCase)
     factoryOf(::ClearTranscriptionCheckpointUseCase)
     factoryOf(::CreateFolderUseCase)
@@ -127,6 +139,10 @@ val featureNotesModule = module {
             clearTranscriptionCheckpoint = get(),
             resumeInterruptedNotes = get(),
             offerProTrial = get(),
+            observeUsageSurveyPrompt = get(),
+            answerUsageSurvey = get(),
+            skipUsageSurvey = get(),
+            reportUsageSurveyStep = get(),
             buildInfo = get(),
             analyticsTracker = get(),
         )

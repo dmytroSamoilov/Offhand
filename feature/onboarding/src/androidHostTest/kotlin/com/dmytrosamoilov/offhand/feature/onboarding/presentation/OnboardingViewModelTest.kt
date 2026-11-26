@@ -10,6 +10,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.TelemetryConsent
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.AnswerTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.CompleteOnboardingUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.GetTelemetryConsentUseCase
+import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.IsBatteryHintNeededUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetAppLockEnabledUseCase
 import io.mockk.coVerify
 import io.mockk.coEvery
@@ -66,6 +67,7 @@ class OnboardingViewModelTest {
     private fun viewModel(
         capability: DeviceCapability,
         consent: TelemetryConsent = TelemetryConsent.SHARED,
+        isBatteryRestricted: Boolean = false,
     ): OnboardingViewModel {
         every { deviceCapabilityChecker.snapshot() } returns capability
         coEvery { getTelemetryConsent() } returns consent
@@ -76,6 +78,7 @@ class OnboardingViewModelTest {
             completeOnboarding = completeOnboarding,
             getTelemetryConsent = getTelemetryConsent,
             answerTelemetryConsent = answerTelemetryConsent,
+            isBatteryHintNeeded = IsBatteryHintNeededUseCase({ isBatteryRestricted }, { "OnePlus" }),
             analyticsTracker = analyticsTracker,
         )
         dispatcher.scheduler.advanceUntilIdle()
@@ -119,6 +122,48 @@ class OnboardingViewModelTest {
             tracked.map { it.name },
         )
         assertEquals(AnalyticsEvents.onboardingStep("transcripts_only"), tracked.last())
+    }
+
+    @Test
+    fun `a phone that restricts background work shows the battery hint before the welcome screen`() = runTest(dispatcher) {
+        val viewModel = viewModel(capableDevice, isBatteryRestricted = true)
+
+        assertEquals(OnboardingStep.BACKGROUND_ACTIVITY, viewModel.uiState.value.step)
+        verify(exactly = 1) { modelDownloadLauncher.startIfAllowed() }
+
+        viewModel.onBatterySettingsOpened()
+
+        assertEquals(OnboardingStep.WELCOME, viewModel.uiState.value.step)
+        assertEquals(listOf(AnalyticsEvents.onboardingStep("battery_settings")), tracked)
+    }
+
+    @Test
+    fun `skipping the battery hint goes on to the welcome screen`() = runTest(dispatcher) {
+        val viewModel = viewModel(capableDevice, isBatteryRestricted = true)
+
+        viewModel.onBatteryHintSkipped()
+
+        assertEquals(OnboardingStep.WELCOME, viewModel.uiState.value.step)
+        assertEquals(listOf(AnalyticsEvents.onboardingStep("battery_skipped")), tracked)
+    }
+
+    @Test
+    fun `a middle-tier phone that restricts background work sees the battery hint after its own step`() = runTest(dispatcher) {
+        val viewModel = viewModel(midDevice, isBatteryRestricted = true)
+
+        viewModel.onContinueWithTranscriptsClicked()
+
+        assertEquals(OnboardingStep.BACKGROUND_ACTIVITY, viewModel.uiState.value.step)
+    }
+
+    @Test
+    fun `the battery hint cannot be left from another step`() = runTest(dispatcher) {
+        val viewModel = viewModel(capableDevice)
+
+        viewModel.onBatteryHintSkipped()
+
+        assertEquals(OnboardingStep.WELCOME, viewModel.uiState.value.step)
+        assertEquals(emptyList<AnalyticsEvent>(), tracked)
     }
 
     @Test

@@ -11,12 +11,15 @@ enum class OnboardingStep {
     ANALYTICS_CONSENT,
     DEVICE_INCOMPATIBLE,
     TRANSCRIPTS_ONLY,
+    BACKGROUND_ACTIVITY,
     WELCOME,
 }
 
 enum class OnboardingChoice(val analyticsName: String) {
     ANALYTICS_SHARED("analytics_shared"),
     TRANSCRIPTS_ONLY("transcripts_only"),
+    BATTERY_SETTINGS("battery_settings"),
+    BATTERY_SKIPPED("battery_skipped"),
     RECORD_FIRST_NOTE("record_first_note"),
     LOOK_AROUND("look_around"),
 }

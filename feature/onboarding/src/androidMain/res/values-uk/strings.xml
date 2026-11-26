@@ -51,4 +51,11 @@
     <string name="onboarding_analytics_share">Ділитися з розробником</string>
     <string name="onboarding_analytics_dont_share">Не ділитися</string>
     <string name="onboarding_analytics_settings_hint">Це можна змінити будь-коли в налаштуваннях.</string>
+    <string name="onboarding_battery_title">Запис триває з вимкненим екраном</string>
+    <string name="onboarding_battery_body">Деякі телефони зупиняють застосунки, які працюють після блокування екрана. Дозвольте Offhand працювати у фоні, щоб довгий запис ніколи не обривався.</string>
+    <string name="onboarding_battery_steps_label">У налаштуваннях телефона</string>
+    <string name="onboarding_battery_step_open">Відкрийте «Акумулятор» або «Використання акумулятора»</string>
+    <string name="onboarding_battery_step_allow">Виберіть «Без обмежень» або «Дозволити роботу у фоні»</string>
+    <string name="onboarding_battery_open_settings">Відкрити налаштування</string>
+    <string name="onboarding_battery_not_now">Не зараз</string>
 </resources>

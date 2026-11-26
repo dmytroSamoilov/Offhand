@@ -115,6 +115,15 @@ private fun NotesList(state: NotesUiState, viewModel: NotesViewModel, row: NoteR
         item(key = MODEL_CARD_KEY, contentType = "model") {
             ModelPreparationCard(state.modelPreparation, viewModel::onDownloadOnMobileDataClicked, Modifier.padding(start = 24.dp, end = 24.dp, top = 16.dp))
         }
+        item(key = USAGE_SURVEY_KEY, contentType = "survey") {
+            UsageSurveyCard(
+                survey = state.shownUsageSurvey.takeIf { !row.isSearching },
+                onAnswer = viewModel::onUsageSurveyOpened,
+                onNotNow = viewModel::onUsageSurveySkipped,
+                onThanksClosed = viewModel::onUsageSurveyThanksClosed,
+                modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 16.dp),
+            )
+        }
         if (row.isSearching) searchResultsLabel(count = state.sections.sumOf { it.notes.size })
         if (state.sections.isEmpty()) {
             item(key = EMPTY_ITEM_KEY, contentType = "empty") {
@@ -222,6 +231,7 @@ internal fun NoteDayLabelUi.text(): String = when (this) {
 }
 
 private const val MODEL_CARD_KEY = "model-card"
+private const val USAGE_SURVEY_KEY = "usage-survey"
 private const val EMPTY_ITEM_KEY = "empty"
 private const val SEARCH_COUNT_KEY = "search-count"
 private const val SEARCH_HINT_KEY = "search-hint"

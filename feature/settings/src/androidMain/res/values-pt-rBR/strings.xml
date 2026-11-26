@@ -154,4 +154,10 @@
     <string name="settings_widget_title">Widget da tela inicial</string>
     <string name="settings_widget_subtitle">Grave com um toque</string>
     <string name="settings_widget_body">Um toque no widget começa a gravar, na pasta que você escolher para ele. Toque de novo para parar e salvar.\n\nPara adicionar, toque e segure a tela inicial, toque em Widgets e procure o Offhand.</string>
+    <string name="settings_background_title">Gravação em segundo plano</string>
+    <string name="settings_background_allowed">Permitida neste celular</string>
+    <string name="settings_background_restricted">Este celular pode interrompê-la</string>
+    <string name="settings_background_body_restricted">Alguns celulares interrompem apps que continuam trabalhando depois que a tela é bloqueada, e uma gravação pode terminar com eles.\n\nAbra as configurações, toque em Bateria ou Uso da bateria e escolha Sem restrições ou Permitir atividade em segundo plano.</string>
+    <string name="settings_background_body_allowed">O Offhand pode continuar trabalhando com a tela desligada, então uma gravação segue quando seu celular está bloqueado.\n\nSe uma gravação parar mesmo assim, abra as configurações e veja se mais nada limita o Offhand ali, como uma economia de bateria.</string>
+    <string name="settings_background_open_settings">Abrir configurações</string>
 </resources>

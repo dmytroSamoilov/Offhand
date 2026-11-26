@@ -147,4 +147,17 @@
     <string name="notes_match_summary">No resumo</string>
     <string name="notes_match_transcript">Na transcrição</string>
     <string name="notes_match_transcript_at">Na transcrição, em %1$s</string>
+    <string name="notes_usage_survey_title">O que você mais grava?</string>
+    <string name="notes_usage_survey_body">Eu desenvolvo o Offhand sozinho. Sua resposta anônima me ajuda a deixá-lo melhor para você.</string>
+    <string name="notes_usage_survey_answer">Responder</string>
+    <string name="notes_usage_survey_not_now">Agora não</string>
+    <string name="notes_usage_survey_meetings">Reuniões</string>
+    <string name="notes_usage_survey_thoughts">Minhas ideias e pensamentos</string>
+    <string name="notes_usage_survey_lectures">Aulas e palestras</string>
+    <string name="notes_usage_survey_interviews">Entrevistas e ligações</string>
+    <string name="notes_usage_survey_other">Outra coisa</string>
+    <string name="notes_usage_survey_confirm">Confirmar</string>
+    <string name="notes_usage_survey_thanks_title">Muito obrigado!</string>
+    <string name="notes_usage_survey_thanks_body">Você deixou meu dia um pouco melhor. Agora vou deixar o Offhand melhor para você.</string>
+    <string name="notes_usage_survey_close">Fechar</string>
 </resources>

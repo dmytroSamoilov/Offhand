@@ -171,6 +171,8 @@ object AnalyticsEvents {
 
     fun redeemCodeClicked(): AnalyticsEvent = event("redeem_code_clicked")
 
+    fun backgroundSettingsOpened(): AnalyticsEvent = event("background_settings_opened")
+
     fun proTrialStarted(): AnalyticsEvent = event("pro_trial_started")
 
     fun proTrialEnded(): AnalyticsEvent = event("pro_trial_ended")
@@ -208,6 +210,18 @@ object AnalyticsEvents {
     fun notesSearched(): AnalyticsEvent = event("notes_searched")
 
     fun reviewRequested(): AnalyticsEvent = event("review_requested")
+
+    fun surveyShown(question: String, attempt: Int): AnalyticsEvent =
+        event("survey_shown", "question" to question, "attempt" to attempt.toLong())
+
+    fun surveyAnswerClicked(question: String, attempt: Int): AnalyticsEvent =
+        event("survey_answer_clicked", "question" to question, "attempt" to attempt.toLong())
+
+    fun surveyAnswered(question: String, answer: String): AnalyticsEvent =
+        event("survey_answered", "question" to question, "answer" to answer)
+
+    fun surveySkipped(question: String, attempt: Int): AnalyticsEvent =
+        event("survey_skipped", "question" to question, "attempt" to attempt.toLong())
 
     private fun event(name: String, vararg params: Pair<String, Any>): AnalyticsEvent = AnalyticsEvent(name, params.toMap())
 

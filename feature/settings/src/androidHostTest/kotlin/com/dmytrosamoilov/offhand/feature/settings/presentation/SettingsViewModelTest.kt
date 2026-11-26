@@ -1,5 +1,6 @@
 package com.dmytrosamoilov.offhand.feature.settings.presentation
 
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsBackgroundWorkRestrictedUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
@@ -123,6 +124,8 @@ class SettingsViewModelTest {
     }
     private val setTelemetryConsent: SetTelemetryConsentUseCase = mockk(relaxed = true)
 
+    private var isBatteryRestricted = false
+
     private fun viewModel() = SettingsViewModel(
         observeDynamicColor = observeDynamicColor,
         setDynamicColor = setDynamicColor,
@@ -147,6 +150,7 @@ class SettingsViewModelTest {
         setProOverride = setProOverride,
         proUpgradeGate = gate,
         redeemProCode = redeemProCode,
+        isBackgroundWorkRestricted = IsBackgroundWorkRestrictedUseCase { isBatteryRestricted },
         buildInfo = BuildInfo(isDeveloperBuild = false, appVersion = "1", platform = "test"),
         analyticsTracker = analyticsTracker,
     )
@@ -255,6 +259,25 @@ class SettingsViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         coVerify { setAppLockEnabled(false) }
+    }
+
+    @Test
+    fun `the background state is read again each time the screen is shown`() = runTest(dispatcher) {
+        isBatteryRestricted = true
+        val viewModel = viewModel()
+        assertEquals(true, viewModel.uiState.value.isBackgroundWorkRestricted)
+
+        isBatteryRestricted = false
+        viewModel.onScreenShown()
+
+        assertEquals(false, viewModel.uiState.value.isBackgroundWorkRestricted)
+    }
+
+    @Test
+    fun `opening the background settings is reported`() = runTest(dispatcher) {
+        viewModel().onBackgroundSettingsOpened()
+
+        verify { analyticsTracker.track(AnalyticsEvents.backgroundSettingsOpened()) }
     }
 
     @Test

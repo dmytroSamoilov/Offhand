@@ -156,4 +156,10 @@
     <string name="settings_widget_title">Виджет на главном экране</string>
     <string name="settings_widget_subtitle">Запись одним касанием</string>
     <string name="settings_widget_body">Одно касание виджета начинает запись в папку, которую вы для него выберете. Коснитесь ещё раз, чтобы остановить и сохранить.\n\nЧтобы добавить его, нажмите и удерживайте главный экран, выберите «Виджеты» и найдите Offhand.</string>
+    <string name="settings_background_title">Запись в фоне</string>
+    <string name="settings_background_allowed">Разрешена на этом телефоне</string>
+    <string name="settings_background_restricted">Этот телефон может её остановить</string>
+    <string name="settings_background_body_restricted">Некоторые телефоны останавливают приложения, которые работают после блокировки экрана, и запись может оборваться вместе с ними.\n\nОткройте настройки, нажмите «Батарея» или «Расход батареи» и выберите «Без ограничений» или «Разрешить работу в фоне».</string>
+    <string name="settings_background_body_allowed">Offhand может работать при выключенном экране, поэтому запись продолжается, когда телефон заблокирован.\n\nЕсли запись всё равно останавливается, откройте настройки и проверьте, что Offhand там больше ничего не ограничивает, например режим энергосбережения.</string>
+    <string name="settings_background_open_settings">Открыть настройки</string>
 </resources>

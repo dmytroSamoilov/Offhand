@@ -156,4 +156,10 @@
     <string name="settings_widget_title">Віджет на головному екрані</string>
     <string name="settings_widget_subtitle">Запис одним дотиком</string>
     <string name="settings_widget_body">Один дотик до віджета починає запис у папку, яку ви для нього виберете. Торкніться ще раз, щоб зупинити й зберегти.\n\nЩоб додати його, натисніть і утримуйте головний екран, виберіть «Віджети» і знайдіть Offhand.</string>
+    <string name="settings_background_title">Запис у фоні</string>
+    <string name="settings_background_allowed">Дозволено на цьому телефоні</string>
+    <string name="settings_background_restricted">Цей телефон може його зупинити</string>
+    <string name="settings_background_body_restricted">Деякі телефони зупиняють застосунки, які працюють після блокування екрана, і запис може обірватися разом із ними.\n\nВідкрийте налаштування, натисніть «Акумулятор» або «Використання акумулятора» й виберіть «Без обмежень» або «Дозволити роботу у фоні».</string>
+    <string name="settings_background_body_allowed">Offhand може працювати з вимкненим екраном, тож запис триває, коли телефон заблоковано.\n\nЯкщо запис усе одно зупиняється, відкрийте налаштування й перевірте, що Offhand там більше нічого не обмежує, наприклад режим заощадження заряду.</string>
+    <string name="settings_background_open_settings">Відкрити налаштування</string>
 </resources>

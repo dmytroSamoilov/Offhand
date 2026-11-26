@@ -46,10 +46,16 @@ data class NotesUiState(
     val isSummaryEnabled: Boolean = true,
     val isSummaryAvailable: Boolean = true,
     val transcriptFocusIndex: Int? = null,
+    val usageSurvey: UsageSurveyUi? = null,
 ) {
     val isSelectingNotes: Boolean get() = selectedNoteIds.isNotEmpty()
 
     val styleChips: List<StyleChipUi> get() = styleChips()
+
+    // The question waits while the list is busy with something else: a
+    // search, a selection, or the on-device AI download card.
+    val shownUsageSurvey: UsageSurveyUi?
+        get() = usageSurvey.takeIf { !isSelectingNotes && searchQuery.isBlank() && modelPreparation == null }
 
     val playingPartIndex: Int? get() = playingPartIndex()
 

@@ -3,6 +3,7 @@ package com.dmytrosamoilov.offhand.feature.onboarding.di
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.AnswerTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.CompleteOnboardingUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.GetTelemetryConsentUseCase
+import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.IsBatteryHintNeededUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.ObserveUserPreferencesUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.domain.usecase.SetAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.onboarding.presentation.OnboardingViewModel
@@ -14,6 +15,7 @@ val featureOnboardingModule = module {
     factoryOf(::AnswerTelemetryConsentUseCase)
     factoryOf(::CompleteOnboardingUseCase)
     factoryOf(::GetTelemetryConsentUseCase)
+    factoryOf(::IsBatteryHintNeededUseCase)
     factoryOf(::ObserveUserPreferencesUseCase)
     factoryOf(::SetAppLockEnabledUseCase)
     viewModelOf(::OnboardingViewModel)

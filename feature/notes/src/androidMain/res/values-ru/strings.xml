@@ -150,4 +150,17 @@
     <string name="notes_match_summary">В резюме</string>
     <string name="notes_match_transcript">В расшифровке</string>
     <string name="notes_match_transcript_at">В расшифровке на %1$s</string>
+    <string name="notes_usage_survey_title">Что вы записываете чаще всего?</string>
+    <string name="notes_usage_survey_body">Я разрабатываю Offhand в одиночку. Ваш анонимный ответ поможет мне сделать его лучше для вас.</string>
+    <string name="notes_usage_survey_answer">Ответить</string>
+    <string name="notes_usage_survey_not_now">Не сейчас</string>
+    <string name="notes_usage_survey_meetings">Встречи</string>
+    <string name="notes_usage_survey_thoughts">Свои мысли и идеи</string>
+    <string name="notes_usage_survey_lectures">Лекции и занятия</string>
+    <string name="notes_usage_survey_interviews">Интервью и звонки</string>
+    <string name="notes_usage_survey_other">Другое</string>
+    <string name="notes_usage_survey_confirm">Подтвердить</string>
+    <string name="notes_usage_survey_thanks_title">Большое спасибо!</string>
+    <string name="notes_usage_survey_thanks_body">Вы сделали мой день чуть лучше. Теперь я сделаю Offhand лучше для вас.</string>
+    <string name="notes_usage_survey_close">Закрыть</string>
 </resources>

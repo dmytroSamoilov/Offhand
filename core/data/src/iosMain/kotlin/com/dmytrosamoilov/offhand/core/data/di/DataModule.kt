@@ -58,8 +58,10 @@ import com.dmytrosamoilov.offhand.core.data.repository.StoreProStatusRepository
 import com.dmytrosamoilov.offhand.core.data.repository.ICloudProTrialRecordStore
 import com.dmytrosamoilov.offhand.core.data.repository.StoredProTrialRepository
 import com.dmytrosamoilov.offhand.core.data.repository.DataStoreProTrialUsageRepository
+import com.dmytrosamoilov.offhand.core.data.repository.DataStoreSurveyRepository
 import com.dmytrosamoilov.offhand.core.data.repository.TrialUsageCountingTracker
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialUsageRepository
+import com.dmytrosamoilov.offhand.core.data.domain.SurveyRepository
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialRecordStore
 import com.dmytrosamoilov.offhand.core.data.domain.ProTrialRepository
 import com.dmytrosamoilov.offhand.core.security.excludeFromBackup
@@ -139,6 +141,7 @@ val coreDataModule = module {
     singleOf(::ModelDownloadPolicy)
     singleOf(::ModelDownloadLauncher)
     single<ProTrialUsageRepository> { DataStoreProTrialUsageRepository(get()) }
+    single<SurveyRepository> { DataStoreSurveyRepository(get()) }
     single<AnalyticsTracker> {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         TrialUsageCountingTracker(ConsentGatedAnalyticsTracker(get(), get(), get(), scope), get(), get(), scope)

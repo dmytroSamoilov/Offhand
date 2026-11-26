@@ -34,6 +34,7 @@ import com.dmytrosamoilov.offhand.core.designsystem.component.SegmentedControl
 import com.dmytrosamoilov.offhand.core.designsystem.component.SwitchRow
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandSpacing
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
+import com.dmytrosamoilov.offhand.core.ui.openBatterySettings
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
 import com.dmytrosamoilov.offhand.core.ui.component.NoteStyleChoice
 import com.dmytrosamoilov.offhand.core.ui.component.label
@@ -212,6 +213,7 @@ private fun PrivacySection(
 @Composable
 private fun AppSection(state: SettingsUiState, viewModel: SettingsViewModel, onAboutClick: () -> Unit) {
     val context = LocalContext.current
+    var isBackgroundHelpVisible by remember { mutableStateOf(false) }
     SettingsSection(label = stringResource(R.string.settings_group_app)) {
         SwitchRow(
             title = stringResource(R.string.settings_dynamic_color_label),
@@ -220,12 +222,44 @@ private fun AppSection(state: SettingsUiState, viewModel: SettingsViewModel, onA
             onCheckedChange = viewModel::onDynamicColorChanged,
         )
         LinkRow(
+            title = stringResource(R.string.settings_background_title),
+            subtitle = stringResource(
+                if (state.isBackgroundWorkRestricted) R.string.settings_background_restricted else R.string.settings_background_allowed,
+            ),
+            onClick = { isBackgroundHelpVisible = true },
+        )
+        LinkRow(
             title = stringResource(R.string.settings_about_support_title),
             subtitle = stringResource(R.string.settings_about_support_subtitle, appVersion(context)),
             onClick = onAboutClick,
             showDivider = false,
         )
     }
+    if (isBackgroundHelpVisible) {
+        BackgroundHelpDialog(
+            isRestricted = state.isBackgroundWorkRestricted,
+            onOpenSettings = {
+                isBackgroundHelpVisible = false
+                viewModel.onBackgroundSettingsOpened()
+                context.openBatterySettings()
+            },
+            onDismiss = { isBackgroundHelpVisible = false },
+        )
+    }
+}
+
+@Composable
+private fun BackgroundHelpDialog(isRestricted: Boolean, onOpenSettings: () -> Unit, onDismiss: () -> Unit) {
+    OffhandDialog(
+        title = stringResource(R.string.settings_background_title),
+        body = stringResource(
+            if (isRestricted) R.string.settings_background_body_restricted else R.string.settings_background_body_allowed,
+        ),
+        onDismissRequest = onDismiss,
+        confirmLabel = stringResource(R.string.settings_background_open_settings),
+        onConfirm = onOpenSettings,
+        dismissLabel = stringResource(R.string.settings_import_dismiss),
+    )
 }
 
 @Composable

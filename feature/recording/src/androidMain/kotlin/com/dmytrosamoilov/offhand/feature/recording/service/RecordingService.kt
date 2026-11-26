@@ -49,9 +49,11 @@ class RecordingService : Service(), KoinComponent {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var observeJob: Job? = null
+    private lateinit var wakeLock: ServiceWakeLock
 
     override fun onCreate() {
         super.onCreate()
+        wakeLock = ServiceWakeLock(applicationContext)
         createNotificationChannels()
     }
 
@@ -140,11 +142,13 @@ class RecordingService : Service(), KoinComponent {
     }
 
     override fun onDestroy() {
+        wakeLock.release()
         serviceScope.cancel()
         super.onDestroy()
     }
 
     private fun observeSession() {
+        wakeLock.holdWhile(serviceScope)
         if (observeJob != null) return
         sessionManager.events
             .onEach { event -> notifyProcessingFinished(event) }

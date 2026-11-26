@@ -154,4 +154,10 @@
     <string name="settings_widget_title">Widget de la pantalla de inicio</string>
     <string name="settings_widget_subtitle">Graba con un toque</string>
     <string name="settings_widget_body">Un toque en el widget empieza a grabar, en la carpeta que elijas para él. Tócalo otra vez para detener y guardar.\n\nPara añadirlo, mantén pulsada la pantalla de inicio, toca Widgets y busca Offhand.</string>
+    <string name="settings_background_title">Grabación en segundo plano</string>
+    <string name="settings_background_allowed">Permitida en este teléfono</string>
+    <string name="settings_background_restricted">Este teléfono puede detenerla</string>
+    <string name="settings_background_body_restricted">Algunos teléfonos detienen las apps que siguen trabajando cuando se bloquea la pantalla, y una grabación puede terminar con ellas.\n\nAbre los ajustes, toca Batería o Uso de batería y elige Sin restricciones o Permitir actividad en segundo plano.</string>
+    <string name="settings_background_body_allowed">Offhand puede seguir trabajando con la pantalla apagada, así que una grabación continúa cuando tu teléfono está bloqueado.\n\nSi una grabación se detiene de todos modos, abre los ajustes y comprueba que nada más limite Offhand allí, como un ahorro de batería.</string>
+    <string name="settings_background_open_settings">Abrir ajustes</string>
 </resources>

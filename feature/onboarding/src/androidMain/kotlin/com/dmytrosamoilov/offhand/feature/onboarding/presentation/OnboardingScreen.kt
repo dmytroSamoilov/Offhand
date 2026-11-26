@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -42,6 +43,7 @@ import com.dmytrosamoilov.offhand.core.designsystem.component.Skeleton
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandSpacing
 import com.dmytrosamoilov.offhand.core.designsystem.theme.OffhandTheme
 import com.dmytrosamoilov.offhand.core.ui.BaseComposeScreen
+import com.dmytrosamoilov.offhand.core.ui.openBatterySettings
 import com.dmytrosamoilov.offhand.feature.onboarding.R
 import org.koin.androidx.compose.koinViewModel
 
@@ -52,6 +54,7 @@ fun OnboardingScreen(
     viewModel: OnboardingViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     BaseComposeScreen(viewModel = viewModel, modifier = modifier) {
         OnboardingContent(
             state = state,
@@ -63,6 +66,11 @@ fun OnboardingScreen(
             onContinueWithTranscripts = viewModel::onContinueWithTranscriptsClicked,
             onShareAnalytics = viewModel::onShareAnalyticsClicked,
             onDontShareAnalytics = viewModel::onDontShareAnalyticsClicked,
+            onOpenBatterySettings = {
+                context.openBatterySettings()
+                viewModel.onBatterySettingsOpened()
+            },
+            onSkipBatteryHint = viewModel::onBatteryHintSkipped,
         )
     }
 }
@@ -75,6 +83,8 @@ private fun OnboardingContent(
     onContinueWithTranscripts: () -> Unit,
     onShareAnalytics: () -> Unit,
     onDontShareAnalytics: () -> Unit,
+    onOpenBatterySettings: () -> Unit,
+    onSkipBatteryHint: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -90,6 +100,7 @@ private fun OnboardingContent(
             OnboardingStep.ANALYTICS_CONSENT -> AnalyticsConsentActions(onShare = onShareAnalytics, onDontShare = onDontShareAnalytics)
             OnboardingStep.DEVICE_INCOMPATIBLE -> DeviceIncompatibleActions()
             OnboardingStep.TRANSCRIPTS_ONLY -> TranscriptsOnlyActions(onContinue = onContinueWithTranscripts)
+            OnboardingStep.BACKGROUND_ACTIVITY -> BackgroundActivityActions(onOpenSettings = onOpenBatterySettings, onSkip = onSkipBatteryHint)
             OnboardingStep.WELCOME -> WelcomeActions(onRecordFirstNote = onRecordFirstNote, onLookAround = onLookAround)
         }
     }
@@ -109,6 +120,7 @@ private fun StepBody(state: OnboardingUiState, modifier: Modifier = Modifier) {
             OnboardingStep.ANALYTICS_CONSENT -> AnalyticsConsent()
             OnboardingStep.DEVICE_INCOMPATIBLE -> DeviceIncompatible(state.deviceSpecs)
             OnboardingStep.TRANSCRIPTS_ONLY -> TranscriptsOnly()
+            OnboardingStep.BACKGROUND_ACTIVITY -> BackgroundActivity()
             OnboardingStep.WELCOME -> Welcome(isSummaryAvailable = state.isSummaryAvailable)
         }
     }
@@ -305,6 +317,41 @@ private fun TranscriptsOnlyActions(onContinue: () -> Unit) {
 }
 
 @Composable
+private fun BackgroundActivity() {
+    Headline(text = stringResource(R.string.onboarding_battery_title))
+    Text(
+        text = stringResource(R.string.onboarding_battery_body),
+        style = OffhandTheme.type.body,
+        color = OffhandTheme.colors.ink2,
+        modifier = Modifier.padding(top = 16.dp),
+    )
+    SectionLabel(
+        text = stringResource(R.string.onboarding_battery_steps_label),
+        modifier = Modifier.padding(top = OffhandSpacing.section, bottom = 4.dp).semantics { heading() },
+    )
+    ConsentRows(
+        stringResource(R.string.onboarding_battery_step_open),
+        stringResource(R.string.onboarding_battery_step_allow),
+    )
+}
+
+@Composable
+private fun BackgroundActivityActions(onOpenSettings: () -> Unit, onSkip: () -> Unit) {
+    StepActions {
+        PrimaryButton(
+            text = stringResource(R.string.onboarding_battery_open_settings),
+            onClick = onOpenSettings,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        PlainTextButton(
+            text = stringResource(R.string.onboarding_battery_not_now),
+            onClick = onSkip,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+        )
+    }
+}
+
+@Composable
 private fun Headline(text: String) {
     Text(
         text = text,
@@ -402,6 +449,8 @@ private fun WelcomePreview() {
             onContinueWithTranscripts = {},
             onShareAnalytics = {},
             onDontShareAnalytics = {},
+            onOpenBatterySettings = {},
+            onSkipBatteryHint = {},
         )
     }
 }
@@ -417,6 +466,25 @@ private fun AnalyticsConsentPreview() {
             onContinueWithTranscripts = {},
             onShareAnalytics = {},
             onDontShareAnalytics = {},
+            onOpenBatterySettings = {},
+            onSkipBatteryHint = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun BackgroundActivityPreview() {
+    OffhandTheme {
+        OnboardingContent(
+            state = OnboardingUiState(step = OnboardingStep.BACKGROUND_ACTIVITY),
+            onRecordFirstNote = {},
+            onLookAround = {},
+            onContinueWithTranscripts = {},
+            onShareAnalytics = {},
+            onDontShareAnalytics = {},
+            onOpenBatterySettings = {},
+            onSkipBatteryHint = {},
         )
     }
 }

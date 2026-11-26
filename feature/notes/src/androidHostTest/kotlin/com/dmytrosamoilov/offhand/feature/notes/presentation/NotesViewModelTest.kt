@@ -50,10 +50,16 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSugges
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.survey.UsageSurveyAnswer
+import com.dmytrosamoilov.offhand.feature.notes.domain.survey.UsageSurveyStep
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.AnswerUsageSurveyUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveUsageSurveyPromptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ReorderFoldersUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SetFolderStyleUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ReportUsageSurveyStepUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SkipUsageSurveyUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManager
@@ -153,6 +159,13 @@ class NotesViewModelTest {
     }
     private val clearShareCache: ClearShareCacheUseCase = mockk(relaxed = true)
     private val offerProTrial: OfferProTrialUseCase = mockk(relaxed = true)
+    private val isUsageSurveyDue = MutableStateFlow(false)
+    private val observeUsageSurveyPrompt: ObserveUsageSurveyPromptUseCase = mockk {
+        every { this@mockk.invoke() } returns isUsageSurveyDue
+    }
+    private val answerUsageSurvey: AnswerUsageSurveyUseCase = mockk(relaxed = true)
+    private val skipUsageSurvey: SkipUsageSurveyUseCase = mockk(relaxed = true)
+    private val reportUsageSurveyStep: ReportUsageSurveyStepUseCase = mockk(relaxed = true)
     private val recordingsSavedInApp = MutableSharedFlow<Unit>()
     private val shouldRequestReview: ShouldRequestReviewUseCase = mockk {
         coEvery { this@mockk.invoke() } returns false
@@ -252,6 +265,10 @@ class NotesViewModelTest {
         clearTranscriptionCheckpoint = mockk(relaxed = true),
         resumeInterruptedNotes = mockk(relaxed = true),
         offerProTrial = offerProTrial,
+        observeUsageSurveyPrompt = observeUsageSurveyPrompt,
+        answerUsageSurvey = answerUsageSurvey,
+        skipUsageSurvey = skipUsageSurvey,
+        reportUsageSurveyStep = reportUsageSurveyStep,
         buildInfo = BuildInfo(isDeveloperBuild = true),
         analyticsTracker = mockk(relaxed = true),
     )
@@ -782,6 +799,116 @@ class NotesViewModelTest {
         viewModel.onDetailClosed()
         dispatcher.scheduler.advanceUntilIdle()
         coVerify(exactly = 1) { offerProTrial() }
+    }
+
+    @Test
+    fun `the usage question shows while it is due and hides in a search or a selection`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertNull(viewModel.uiState.value.shownUsageSurvey)
+
+        isUsageSurveyDue.value = true
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(UsageSurveyStageUi.QUESTION, viewModel.uiState.value.shownUsageSurvey?.stage)
+
+        viewModel.onSearchQueryChanged("plan")
+        assertNull(viewModel.uiState.value.shownUsageSurvey)
+        viewModel.onSearchQueryChanged("")
+        viewModel.onNoteSelectionToggled(5)
+        assertNull(viewModel.uiState.value.shownUsageSurvey)
+    }
+
+    @Test
+    fun `the usage question is reported once when it is on the list and once per open`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify(exactly = 0) { reportUsageSurveyStep(any()) }
+
+        isUsageSurveyDue.value = true
+        dispatcher.scheduler.advanceUntilIdle()
+        viewModel.onSearchQueryChanged("plan")
+        viewModel.onSearchQueryChanged("")
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify(exactly = 1) { reportUsageSurveyStep(UsageSurveyStep.SHOWN) }
+
+        viewModel.onUsageSurveyOpened()
+        viewModel.onUsageSurveyOpened()
+        dispatcher.scheduler.advanceUntilIdle()
+        coVerify(exactly = 1) { reportUsageSurveyStep(UsageSurveyStep.ANSWER_CLICKED) }
+    }
+
+    @Test
+    fun `the usage question is not reported while the download card hides it`() = runTest(dispatcher) {
+        modelState.value = ModelState.Downloading(progress = 0.4f, bytesDownloaded = 1_200L, bytesTotal = 3_000L)
+        isUsageSurveyDue.value = true
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { reportUsageSurveyStep(any()) }
+    }
+
+    @Test
+    fun `the usage question waits while the download card is on the list`() = runTest(dispatcher) {
+        modelState.value = ModelState.Downloading(progress = 0.4f, bytesDownloaded = 1_200L, bytesTotal = 3_000L)
+        isUsageSurveyDue.value = true
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.shownUsageSurvey)
+        assertEquals(UsageSurveyStageUi.QUESTION, viewModel.uiState.value.usageSurvey?.stage)
+    }
+
+    @Test
+    fun `closing the sheet with rows selected stores them and says thanks`() = runTest(dispatcher) {
+        isUsageSurveyDue.value = true
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onUsageSurveyOpened()
+        viewModel.onUsageSurveyAnswerToggled(UsageSurveyAnswerUi.MEETINGS)
+        viewModel.onUsageSurveyAnswerToggled(UsageSurveyAnswerUi.LECTURES)
+        viewModel.onUsageSurveyAnswerToggled(UsageSurveyAnswerUi.OTHER)
+        viewModel.onUsageSurveyAnswerToggled(UsageSurveyAnswerUi.MEETINGS)
+        viewModel.onUsageSurveySheetClosed()
+        isUsageSurveyDue.value = false
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { answerUsageSurvey(setOf(UsageSurveyAnswer.LECTURES, UsageSurveyAnswer.OTHER)) }
+        assertEquals(UsageSurveyUi(stage = UsageSurveyStageUi.THANKS), viewModel.uiState.value.usageSurvey)
+
+        viewModel.onUsageSurveyThanksClosed()
+        assertNull(viewModel.uiState.value.usageSurvey)
+    }
+
+    @Test
+    fun `closing the sheet with nothing selected sends nothing and keeps the question`() = runTest(dispatcher) {
+        isUsageSurveyDue.value = true
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onUsageSurveyOpened()
+        viewModel.onUsageSurveyAnswerToggled(UsageSurveyAnswerUi.THOUGHTS)
+        viewModel.onUsageSurveyAnswerToggled(UsageSurveyAnswerUi.THOUGHTS)
+        viewModel.onUsageSurveySheetClosed()
+        viewModel.onUsageSurveySheetClosed()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 0) { answerUsageSurvey(any()) }
+        assertEquals(UsageSurveyUi(), viewModel.uiState.value.usageSurvey)
+    }
+
+    @Test
+    fun `not now is stored and the question leaves when it is no longer due`() = runTest(dispatcher) {
+        isUsageSurveyDue.value = true
+        val viewModel = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onUsageSurveySkipped()
+        isUsageSurveyDue.value = false
+        dispatcher.scheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { skipUsageSurvey() }
+        assertNull(viewModel.uiState.value.usageSurvey)
     }
 
     @Test

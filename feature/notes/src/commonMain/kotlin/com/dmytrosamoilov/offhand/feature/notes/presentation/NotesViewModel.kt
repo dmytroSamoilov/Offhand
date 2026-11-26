@@ -24,6 +24,8 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.AudioPlayer
 import com.dmytrosamoilov.offhand.feature.notes.domain.DateLabelFormatter
 import com.dmytrosamoilov.offhand.feature.notes.domain.FolderLimits
 import com.dmytrosamoilov.offhand.feature.notes.domain.export.NoteExportFormat
+import com.dmytrosamoilov.offhand.feature.notes.domain.survey.UsageSurveyStep
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.AnswerUsageSurveyUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearShareCacheUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ClearTranscriptionCheckpointUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.CreateFolderUseCase
@@ -48,6 +50,7 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteSugges
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.FindSilenceUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNoteWaveformsUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveSkipSilenceUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveUsageSurveyPromptUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ObserveNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.PrepareNoteShareUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.RenameFolderUseCase
@@ -55,6 +58,8 @@ import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ReorderFoldersUse
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SearchNotesUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SetFolderStyleUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ShouldRequestReviewUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.ReportUsageSurveyStepUseCase
+import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.SkipUsageSurveyUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateNoteUseCase
 import com.dmytrosamoilov.offhand.feature.notes.domain.usecase.UpdateSuggestionStatusUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.ImportRejection
@@ -63,6 +68,7 @@ import com.dmytrosamoilov.offhand.feature.recording.domain.RecordingSessionManag
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.RequestNoteSuggestionsUseCase
 import com.dmytrosamoilov.offhand.feature.recording.domain.usecase.ResumeInterruptedNotesUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -72,6 +78,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -122,6 +129,10 @@ class NotesViewModel(
     private val clearTranscriptionCheckpoint: ClearTranscriptionCheckpointUseCase,
     private val resumeInterruptedNotes: ResumeInterruptedNotesUseCase,
     private val offerProTrial: OfferProTrialUseCase,
+    observeUsageSurveyPrompt: ObserveUsageSurveyPromptUseCase,
+    private val answerUsageSurvey: AnswerUsageSurveyUseCase,
+    private val skipUsageSurvey: SkipUsageSurveyUseCase,
+    private val reportUsageSurveyStep: ReportUsageSurveyStepUseCase,
     buildInfo: BuildInfo,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
@@ -147,6 +158,8 @@ class NotesViewModel(
     private val playbackLoad = MutableStateFlow(PlaybackLoad(audioFileName = null, generation = 0))
     private val silenceByFile = HashMap<String, List<SilenceSkip>>()
     private var isSkippingSilence = false
+    private var isStoringSurveyAnswer = false
+    private var isUsageSurveyShownReported = false
 
     init {
         viewModelScope.launch {
@@ -159,6 +172,8 @@ class NotesViewModel(
             sessionManager.recordingsSavedInApp.collect { requestReviewIfDue() }
         }
         offerProTrialBackOnTheList()
+        askUsageSurveyWhenDue(observeUsageSurveyPrompt)
+        reportUsageSurveyOnceShown()
         viewModelScope.launch {
             observeFolders().collect { latest ->
                 folders.value = latest
@@ -549,6 +564,79 @@ class NotesViewModel(
         }
     }
 
+    private fun askUsageSurveyWhenDue(observeUsageSurveyPrompt: ObserveUsageSurveyPromptUseCase) {
+        viewModelScope.launch {
+            observeUsageSurveyPrompt().collect { isDue ->
+                if (!isStoringSurveyAnswer) mutableUiState.update { it.copy(usageSurvey = it.usageSurvey.onPromptChanged(isDue)) }
+            }
+        }
+    }
+
+    // Once per launch, and only after the question has stayed on the list for
+    // a moment: at start the state is put together piece by piece, and the
+    // download card that hides the question can arrive a beat later.
+    private fun reportUsageSurveyOnceShown() {
+        launchSafely(showLoading = false) {
+            uiState.map { it.shownUsageSurvey?.stage == UsageSurveyStageUi.QUESTION }
+                .distinctUntilChanged()
+                .collectLatest { isShown -> if (isShown) reportUsageSurveyShownOnce() }
+        }
+    }
+
+    private suspend fun reportUsageSurveyShownOnce() {
+        if (isUsageSurveyShownReported) return
+        delay(SURVEY_SHOWN_SETTLE_MS)
+        isUsageSurveyShownReported = true
+        reportUsageSurveyStep(UsageSurveyStep.SHOWN)
+    }
+
+    fun onUsageSurveyOpened() {
+        val survey = mutableUiState.value.usageSurvey?.takeIf { !it.isSheetVisible } ?: return
+        mutableUiState.update { it.copy(usageSurvey = survey.copy(isSheetVisible = true)) }
+        launchSafely(showLoading = false) { reportUsageSurveyStep(UsageSurveyStep.ANSWER_CLICKED) }
+    }
+
+    fun onUsageSurveyAnswerToggled(answer: UsageSurveyAnswerUi) {
+        mutableUiState.update { state ->
+            state.copy(usageSurvey = state.usageSurvey?.let { it.copy(selection = it.selection.toggled(answer)) })
+        }
+    }
+
+    private fun Set<UsageSurveyAnswerUi>.toggled(answer: UsageSurveyAnswerUi): Set<UsageSurveyAnswerUi> =
+        if (answer in this) this - answer else this + answer
+
+    // However the sheet closes, the selected rows are the answer; with nothing
+    // selected the question stays on the list.
+    fun onUsageSurveySheetClosed() {
+        val survey = mutableUiState.value.usageSurvey?.takeIf { it.isSheetVisible } ?: return
+        mutableUiState.update { it.copy(usageSurvey = survey.copy(isSheetVisible = false)) }
+        if (survey.selection.isNotEmpty()) storeUsageSurveyAnswer(survey.selection)
+    }
+
+    // The thank-you only shows once the answer is stored, so leaving the app
+    // while it is up can never bring the question back.
+    private fun storeUsageSurveyAnswer(answers: Set<UsageSurveyAnswerUi>) {
+        isStoringSurveyAnswer = true
+        launchSafely(showLoading = false) {
+            try {
+                answerUsageSurvey(answers.map { it.toDomain() }.toSet())
+                mutableUiState.update { it.copy(usageSurvey = UsageSurveyUi(stage = UsageSurveyStageUi.THANKS)) }
+            } finally {
+                isStoringSurveyAnswer = false
+            }
+        }
+    }
+
+    fun onUsageSurveySkipped() {
+        launchSafely(showLoading = false) {
+            skipUsageSurvey()
+        }
+    }
+
+    fun onUsageSurveyThanksClosed() {
+        mutableUiState.update { it.copy(usageSurvey = null) }
+    }
+
     // The one moment a review is asked for: the user stopped a recording in the
     // app and it was saved.
     private suspend fun requestReviewIfDue() {
@@ -895,6 +983,7 @@ private fun NoteExportFormat?.isProFormat(): Boolean = this != null && this != N
 private fun NoteExportFormat?.analyticsFormat(): String = this?.name?.lowercase() ?: AUDIO_FORMAT
 
 private const val AUDIO_FORMAT = "audio"
+private const val SURVEY_SHOWN_SETTLE_MS = 1_000L
 
 private fun MatchLocationUi.toSearchMatch(): SearchMatch = when (this) {
     MatchLocationUi.TITLE -> SearchMatch.TITLE

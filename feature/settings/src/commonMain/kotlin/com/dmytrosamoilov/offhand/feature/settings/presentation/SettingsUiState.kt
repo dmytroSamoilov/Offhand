@@ -11,6 +11,7 @@ data class SettingsUiState(
     val isTelemetryEnabled: Boolean = false,
     val isSummaryAvailable: Boolean = true,
     val isDeviceSecure: Boolean = false,
+    val isBackgroundWorkRestricted: Boolean = false,
     val isAudioImportUnlocked: Boolean = false,
     val freeImportsLeft: Int? = null,
     val allowsMultipleImports: Boolean = false,

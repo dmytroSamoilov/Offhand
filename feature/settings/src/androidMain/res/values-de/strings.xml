@@ -152,4 +152,10 @@
     <string name="settings_widget_title">Widget für den Startbildschirm</string>
     <string name="settings_widget_subtitle">Mit einem Tipp aufnehmen</string>
     <string name="settings_widget_body">Ein Tipp auf das Widget startet eine Aufnahme, in den Ordner, den du dafür auswählst. Tippe noch einmal, um zu stoppen und zu speichern.\n\nSo fügst du es hinzu: Halte den Startbildschirm gedrückt, tippe auf Widgets und suche Offhand.</string>
+    <string name="settings_background_title">Aufnahme im Hintergrund</string>
+    <string name="settings_background_allowed">Auf diesem Handy erlaubt</string>
+    <string name="settings_background_restricted">Dieses Handy kann sie stoppen</string>
+    <string name="settings_background_body_restricted">Manche Handys stoppen Apps, die nach dem Sperren des Bildschirms weiterarbeiten, und eine Aufnahme kann damit enden.\n\nÖffne die Einstellungen, tippe auf „Akku“ oder „Akkunutzung“ und wähle „Nicht eingeschränkt“ oder „Hintergrundaktivität zulassen“.</string>
+    <string name="settings_background_body_allowed">Offhand darf bei ausgeschaltetem Bildschirm weiterarbeiten, also läuft eine Aufnahme weiter, wenn dein Handy gesperrt ist.\n\nFalls eine Aufnahme trotzdem stoppt, öffne die Einstellungen und prüfe, dass dort nichts anderes Offhand einschränkt, zum Beispiel ein Energiesparmodus.</string>
+    <string name="settings_background_open_settings">Einstellungen öffnen</string>
 </resources>

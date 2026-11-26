@@ -51,4 +51,11 @@
     <string name="onboarding_analytics_share">Делиться с разработчиком</string>
     <string name="onboarding_analytics_dont_share">Не делиться</string>
     <string name="onboarding_analytics_settings_hint">Это можно изменить в любой момент в настройках.</string>
+    <string name="onboarding_battery_title">Запись продолжается при выключенном экране</string>
+    <string name="onboarding_battery_body">Некоторые телефоны останавливают приложения, которые работают после блокировки экрана. Разрешите Offhand работать в фоне, чтобы долгая запись никогда не обрывалась.</string>
+    <string name="onboarding_battery_steps_label">В настройках телефона</string>
+    <string name="onboarding_battery_step_open">Откройте «Батарея» или «Расход батареи»</string>
+    <string name="onboarding_battery_step_allow">Выберите «Без ограничений» или «Разрешить работу в фоне»</string>
+    <string name="onboarding_battery_open_settings">Открыть настройки</string>
+    <string name="onboarding_battery_not_now">Не сейчас</string>
 </resources>

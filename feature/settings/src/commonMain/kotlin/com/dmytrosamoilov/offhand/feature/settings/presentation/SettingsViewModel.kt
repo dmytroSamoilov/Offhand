@@ -17,6 +17,7 @@ import com.dmytrosamoilov.offhand.core.data.domain.analytics.AnalyticsTracker
 import com.dmytrosamoilov.offhand.core.security.AppLockManager
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveAppLockEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveCustomNoteStylesUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsBackgroundWorkRestrictedUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveDynamicColorUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveNoteStyleUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.ObserveProOverrideUseCase
@@ -72,12 +73,16 @@ class SettingsViewModel(
     private val setProOverride: SetProOverrideUseCase,
     private val proUpgradeGate: ProUpgradeGate,
     private val redeemProCode: RedeemProCodeUseCase,
+    private val isBackgroundWorkRestricted: IsBackgroundWorkRestrictedUseCase,
     buildInfo: BuildInfo,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel() {
 
     private val mutableUiState = MutableStateFlow(
-        SettingsUiState(isDeviceSecure = appLockManager.isDeviceSecure),
+        SettingsUiState(
+            isDeviceSecure = appLockManager.isDeviceSecure,
+            isBackgroundWorkRestricted = isBackgroundWorkRestricted(),
+        ),
     )
     val uiState: StateFlow<SettingsUiState> = mutableUiState.asStateFlow()
 
@@ -106,10 +111,19 @@ class SettingsViewModel(
         viewModelScope.launch { flow.collect { value -> mutableUiState.update { it.reduce(value) } } }
     }
 
-    // A passcode can be added or removed in system settings while this screen is
-    // backgrounded, and neither change notifies the app.
+    // A passcode or the battery setting can be changed in system settings
+    // while this screen is backgrounded, and neither change notifies the app.
     fun onScreenShown() {
-        mutableUiState.update { it.copy(isDeviceSecure = appLockManager.isDeviceSecure) }
+        mutableUiState.update {
+            it.copy(
+                isDeviceSecure = appLockManager.isDeviceSecure,
+                isBackgroundWorkRestricted = isBackgroundWorkRestricted(),
+            )
+        }
+    }
+
+    fun onBackgroundSettingsOpened() {
+        analyticsTracker.track(AnalyticsEvents.backgroundSettingsOpened())
     }
 
     fun onDynamicColorChanged(enabled: Boolean) {

@@ -25,6 +25,7 @@ import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetNoteStyleUs
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetProOverrideUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSkipSilenceEnabledUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetSmartSuggestionsEnabledUseCase
+import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsBackgroundWorkRestrictedUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.IsSummaryAvailableUseCase
 import com.dmytrosamoilov.offhand.feature.settings.domain.usecase.SetTelemetryConsentUseCase
 import com.dmytrosamoilov.offhand.feature.settings.presentation.AboutSupportViewModel
@@ -65,6 +66,7 @@ val featureSettingsModule = module {
     factoryOf(::SetSkipSilenceEnabledUseCase)
     factoryOf(::SetTelemetryConsentUseCase)
     factoryOf(::IsSummaryAvailableUseCase)
+    factoryOf(::IsBackgroundWorkRestrictedUseCase)
     viewModel {
         SettingsViewModel(
             observeDynamicColor = get(),
@@ -90,6 +92,7 @@ val featureSettingsModule = module {
             setProOverride = get(),
             proUpgradeGate = get(),
             redeemProCode = get(),
+            isBackgroundWorkRestricted = get(),
             buildInfo = get(),
             analyticsTracker = get(),
         )

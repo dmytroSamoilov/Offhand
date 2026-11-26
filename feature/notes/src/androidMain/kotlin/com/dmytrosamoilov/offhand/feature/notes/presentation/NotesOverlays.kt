@@ -15,6 +15,13 @@ internal fun NotesOverlays(
     NoteDialogs(state = state, viewModel = viewModel)
     FolderOverlays(state = state, viewModel = viewModel, onNewStyle = onNewStyle)
     MoveSheets(state = state, viewModel = viewModel)
+    state.usageSurvey?.takeIf { it.isSheetVisible }?.let { survey ->
+        UsageSurveySheet(
+            selection = survey.selection,
+            onToggled = viewModel::onUsageSurveyAnswerToggled,
+            onClosed = viewModel::onUsageSurveySheetClosed,
+        )
+    }
     if (state.isShareDialogVisible) {
         ShareNoteSheet(
             hasAudio = state.selected?.hasAudio == true,

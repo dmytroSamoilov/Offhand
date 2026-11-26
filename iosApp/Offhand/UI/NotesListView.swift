@@ -48,7 +48,8 @@ struct NotesListView<BottomBarContent: View>: View {
         isTranscriptionEnabled: true,
         isSummaryEnabled: true,
         isSummaryAvailable: true,
-        transcriptFocusIndex: nil
+        transcriptFocusIndex: nil,
+        usageSurvey: nil
     )
     @State private var longPressedNoteId: Int64?
     @State private var recordSheetRequest: RecordSheetRequest?
@@ -89,6 +90,13 @@ struct NotesListView<BottomBarContent: View>: View {
                 )
                 .presentationDetents([.medium, .large])
             }
+        }
+        .sheet(isPresented: usageSurveySheetBinding) {
+            UsageSurveySheet(
+                selection: state.usageSurvey?.selection ?? [],
+                onToggled: { viewModel.onUsageSurveyAnswerToggled(answer: $0) },
+                onClosed: { viewModel.onUsageSurveySheetClosed() }
+            )
         }
         .sheet(isPresented: moveToFolderBinding, onDismiss: requestNewFolderAfterMove) {
             MoveToFolderSheet(
@@ -324,6 +332,15 @@ struct NotesListView<BottomBarContent: View>: View {
                     onDownloadOnMobileData: { viewModel.onDownloadOnMobileDataClicked() }
                 )
                 .notesListRow(top: 20)
+            }
+            if let survey = state.shownUsageSurvey, !isSearching {
+                UsageSurveyCard(
+                    stage: survey.stage,
+                    onAnswer: { viewModel.onUsageSurveyOpened() },
+                    onNotNow: { viewModel.onUsageSurveySkipped() },
+                    onThanksClosed: { viewModel.onUsageSurveyThanksClosed() }
+                )
+                .notesListRow(top: 16)
             }
             if !state.noteProgress.isEmpty {
                 StatusCard(
@@ -595,6 +612,13 @@ struct NotesListView<BottomBarContent: View>: View {
         Binding(
             get: { state.pendingDeleteNoteId != nil },
             set: { isShown in if !isShown { viewModel.onDeleteDismissed() } }
+        )
+    }
+
+    private var usageSurveySheetBinding: Binding<Bool> {
+        Binding(
+            get: { state.usageSurvey?.isSheetVisible == true },
+            set: { isShown in if !isShown { viewModel.onUsageSurveySheetClosed() } }
         )
     }
 
